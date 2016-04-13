@@ -1,27 +1,45 @@
 import haxe.extern.EitherType;
 
+import JsonRpc;
 import Basic;
 
-@:build(ProtocolMacro.build("Protocol.Method"))
+@:build(ProtocolMacro.build())
 class Protocol {
     public function new() {}
+    public function handleMessage(message:Message):Void {
+        if (Reflect.hasField(message, "id"))
+            handleRequest(cast message);
+        else
+            handleNotification(cast message);
+    }
+
+    public function handleRequest(request:RequestMessage):Void;
+    public function handleNotification(notification:NotificationMessage):Void;
 }
 
-@:enum abstract Method<P,R,E>(String) to String {
+abstract Request<P,R,E>(String) to String {}
+abstract Notification<P>(String) to String {}
+
+@:enum abstract Method<P,R,E>(String) to String from Request<P,R,E> from Notification<P> {
     var Initialize : Method<InitializeParams,InitializeResult,InitializeError> = "initialize";
-    var Shutdown : Method<Void,Void,Void> = "shutdown";
-    var Exit : Method<Void,Void,Void> = "exit";
-    var ShowMessage : Method<ShowMessageParams,Void,Void> = "window/showMessage";
-    var LogMessage : Method<LogMessageParams,Void,Void> = "window/logMessage";
-    var DidChangeConfiguration : Method<DidChangeConfigurationParams,Void,Void> = "workspace/didChangeConfiguration";
-    var DidOpenTextDocument : Method<DidOpenTextDocumentParams,Void,Void> = "textDocument/didOpen";
-    var DidChangeTextDocument : Method<DidChangeTextDocumentParams,Void,Void> = "textDocument/didChange";
-    var DidCloseTextDocument : Method<DidCloseTextDocumentParams,Void,Void> = "textDocument/didClose";
-    var DidSaveTextDocument : Method<DidCloseTextDocumentParams,Void,Void> = "textDocument/didSave";
-    var DidChangeWatchedFiles : Method<DidChangeWatchedFilesParams,Void,Void> = "workspace/didChangeWatchedFiles";
-    var PublishDiagnostics : Method<PublishDiagnosticsParams,Void,Void> = "textDocument/publishDiagnostics";
+    var Shutdown : Notification<Void> = "shutdown";
+    var Exit : Notification<Void> = "exit";
+
+    var ShowMessage : Notification<ShowMessageParams> = "window/showMessage";
+    var LogMessage : Notification<LogMessageParams> = "window/logMessage";
+
+    var DidChangeConfiguration : Notification<DidChangeConfigurationParams> = "workspace/didChangeConfiguration";
+    var DidOpenTextDocument : Notification<DidOpenTextDocumentParams> = "textDocument/didOpen";
+    var DidChangeTextDocument : Notification<DidChangeTextDocumentParams> = "textDocument/didChange";
+    var DidCloseTextDocument : Notification<DidCloseTextDocumentParams> = "textDocument/didClose";
+    var DidSaveTextDocument : Notification<DidCloseTextDocumentParams> = "textDocument/didSave";
+    var DidChangeWatchedFiles : Notification<DidChangeWatchedFilesParams> = "workspace/didChangeWatchedFiles";
+
+    var PublishDiagnostics : Notification<PublishDiagnosticsParams> = "textDocument/publishDiagnostics";
+
     var Completion : Method<TextDocumentPositionParams,Array<CompletionItem>,Void> = "textDocument/completion";
     var CompletionItemResolve : Method<CompletionItem,CompletionItem,Void> = "completionItem/resolve";
+
     var Hover : Method<TextDocumentPositionParams,Hover,Void> = "textDocument/hover";
     var SignatureHelp : Method<TextDocumentPositionParams,SignatureHelp,Void> = "textDocument/signatureHelp";
     var GotoDefinition : Method<TextDocumentPositionParams,EitherType<Location,Array<Location>>,Void> = "textDocument/definition";
@@ -30,11 +48,13 @@ class Protocol {
     var DocumentSymbols : Method<DocumentSymbolParams,Array<SymbolInformation>,Void> = "textDocument/documentSymbol";
     var WorkspaceSymbols : Method<WorkspaceSymbolParams,Array<SymbolInformation>,Void> = "workspace/symbol";
     var CodeAction : Method<CodeActionParams,Array<Command>,Void> = "textDocument/codeAction";
+
     var CodeLens : Method<CodeLensParams,Array<CodeLens>,Void> = "textDocument/codeLens";
     var CodeLensResolve : Method<CodeLens,CodeLens,Void> = "codeLens/resolve";
+
     var DocumentFormatting : Method<DocumentFormattingParams,Array<TextEdit>,Void> = "textDocument/formatting";
     var DocumentOnTypeFormatting : Method<DocumentOnTypeFormattingParams,Array<TextEdit>,Void> = "textDocument/onTypeFormatting";
-    var Rename : Method<RenameParams,WorkspaceEdit,Void> = "textDocument/rename";
+    var Rename : Method<RenameParams,WorkspaceEdit,Void> = "textDocument/rename";    
 }
 
 typedef InitializeParams = {
