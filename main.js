@@ -589,7 +589,7 @@ node_MessageWriter.prototype = {
 		var json = JSON.stringify(msg);
 		var contentLength = js_node_buffer_Buffer.byteLength(json,this.encoding);
 		this.writable.write("Content-Length: ","ascii");
-		this.writable.write(contentLength == null?"null":"" + contentLength,"ascii");
+		this.writable.write("" + contentLength,"ascii");
 		this.writable.write("\r\n");
 		this.writable.write("\r\n");
 		this.writable.write(json,this.encoding);

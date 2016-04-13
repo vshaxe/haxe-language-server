@@ -21,7 +21,7 @@ class MessageWriter {
         var json = haxe.Json.stringify(msg);
         var contentLength = Buffer.byteLength(json, encoding);
         writable.write(CONTENT_LENGTH, "ascii");
-        writable.write(Std.string(contentLength), "ascii");
+        writable.write("" + contentLength, "ascii");
         writable.write(CRLF);
         writable.write(CRLF);
         writable.write(json, encoding);
