@@ -1,8 +1,6 @@
 -cp src
 -main Main
--js main.js
+-js ../bin/server.js
 -dce full
 -lib hxnodejs
 -D hxnodejs-no-version-warning
---next
--cmd node main.js
