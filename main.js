@@ -32,7 +32,9 @@ HxOverrides.substr = function(s,pos,len) {
 var Main = function() { };
 Main.__name__ = true;
 Main.main = function() {
-	new jsonrpc_node_MessageWriter(js_node_Fs.createWriteStream("input")).write(jsonrpc_JsonRpc.request(1,"initialize",{ processId : -1, rootPath : null, capabilities : { }}));
+	var writer = new jsonrpc_node_MessageWriter(js_node_Fs.createWriteStream("input"));
+	writer.write(jsonrpc_JsonRpc.request(1,"initialize",{ processId : -1, rootPath : null, capabilities : { }}));
+	writer.write(jsonrpc_JsonRpc.request(1,"textDocument/completion",{ textDocument : { uri : "Main.hx"}, position : { line : 0, character : 0}}));
 	var reader = new jsonrpc_node_MessageReader(js_node_Fs.createReadStream("input"));
 	var proto = new vscode_Protocol(($_=new jsonrpc_node_MessageWriter(process.stdout),$bind($_,$_.write)));
 	proto.onInitialize = function(params,resolve,reject) {
