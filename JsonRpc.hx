@@ -60,6 +60,17 @@ class JsonRpc {
         return error;
     }
 
+    public static function request<D>(id:RequestId, method:String, ?params:D):RequestMessage {
+        var message:RequestMessage = {
+            jsonrpc: PROTOCOL_VERSION,
+            id: id,
+            method: method
+        };
+        if (params == null)
+            message.params = params;
+        return message;
+    }
+
     public static function notification<D>(method:String, ?params:D):NotificationMessage {
         var message:NotificationMessage = {
             jsonrpc: PROTOCOL_VERSION,

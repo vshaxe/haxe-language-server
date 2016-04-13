@@ -1,8 +1,18 @@
 import JsonRpc;
 import Protocol;
+import JsonRpcConnection;
 
 class Main {
     static function main() {
+        new StreamMessageWriter(js.node.Fs.createWriteStream("input")).write(JsonRpc.request(1, Protocol.Method.Initialize, ({
+            processId: -1,
+            rootPath: null,
+            capabilities: {},
+        } : InitializeParams)));
+
+        var reader = new StreamMessageReader(js.node.Fs.createReadStream("input"));
+        var writer = new StreamMessageWriter(js.Node.process.stdout);
+
         var proto = new Protocol();
 
         proto.onInitialize = function(params, resolve, reject) {
@@ -17,9 +27,7 @@ class Main {
         };
 
         proto.onCompletion = function(params, resolve, reject) {
-
             proto.sendShowMessage({type: Info, message: "Hello"});
-
             resolve([{label: "foo"}, {label: "bar"}]);
         };
 
@@ -27,14 +35,7 @@ class Main {
             resolve(item);
         };
 
-        proto.sendMessage = function(message) {
-            trace("OUT MESSAGE: " + message);
-        }
-
-        proto.handleMessage(({
-            jsonrpc: "2.0",
-            method: Protocol.Method.Completion,
-            id: 1,
-        } : RequestMessage));
+        proto.sendMessage = writer.write;
+        reader.listen(proto.handleMessage);
     }
 }

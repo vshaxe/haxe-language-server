@@ -1,5 +1,6 @@
 -main Main
 -js main.js
 -dce full
+-lib hxnodejs
 --next
 -cmd node main.js
