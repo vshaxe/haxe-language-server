@@ -10,6 +10,7 @@ class Main {
         var proto = new vscode.Protocol(writer.write);
 
         proto.onInitialize = function(params, resolve, reject) {
+            proto.sendShowMessage({type: Info, message: "Welcome to Haxe!"});
             resolve({
                 capabilities: {
                     completionProvider: {
@@ -20,7 +21,6 @@ class Main {
         };
 
         proto.onCompletion = function(params, resolve, reject) {
-            proto.sendShowMessage({type: Info, message: "Hello"});
             resolve([{label: "foo"}, {label: "bar"}]);
         };
 
