@@ -12,6 +12,7 @@ Main.main = function() {
 		resolve({ capabilities : { completionProvider : { resolveProvider : true, triggerCharacters : [".","("]}}});
 	});
 	proto.onCompletion(function(params1,cancel,resolve1,reject1) {
+		proto.sendShowMessage({ type : 3, message : "Hello"});
 		resolve1([{ label : "foo"},{ label : "bar"}]);
 	});
 	proto.onCompletionItemResolve(function(item,cancel1,resolve2,reject2) {
@@ -23,25 +24,47 @@ var Protocol = function() {
 Protocol.prototype = {
 	onInitialize: function(callback) {
 	}
+	,sendShutdown: function(params) {
+	}
 	,onShutdown: function(callback) {
+	}
+	,sendExit: function(params) {
 	}
 	,onExit: function(callback) {
 	}
+	,sendShowMessage: function(params) {
+	}
 	,onShowMessage: function(callback) {
+	}
+	,sendLogMessage: function(params) {
 	}
 	,onLogMessage: function(callback) {
 	}
+	,sendDidChangeConfiguration: function(params) {
+	}
 	,onDidChangeConfiguration: function(callback) {
+	}
+	,sendDidOpenTextDocument: function(params) {
 	}
 	,onDidOpenTextDocument: function(callback) {
 	}
+	,sendDidChangeTextDocument: function(params) {
+	}
 	,onDidChangeTextDocument: function(callback) {
+	}
+	,sendDidCloseTextDocument: function(params) {
 	}
 	,onDidCloseTextDocument: function(callback) {
 	}
+	,sendDidSaveTextDocument: function(params) {
+	}
 	,onDidSaveTextDocument: function(callback) {
 	}
+	,sendDidChangeWatchedFiles: function(params) {
+	}
 	,onDidChangeWatchedFiles: function(callback) {
+	}
+	,sendPublishDiagnostics: function(params) {
 	}
 	,onPublishDiagnostics: function(callback) {
 	}

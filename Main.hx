@@ -14,6 +14,9 @@ class Main {
         });
 
         proto.onCompletion(function(params, cancel, resolve, reject) {
+
+            proto.sendShowMessage({type: Info, message: "Hello"});
+
             resolve([{label: "foo"}, {label: "bar"}]);
         });
 

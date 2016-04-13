@@ -16,6 +16,17 @@ class ProtocolMacro {
                             var callbackCT;
                             if (result.toString() == "Void") {
                                 callbackCT = macro : $paramsCT->Void;
+
+                                fields.push({
+                                    pos: method.pos,
+                                    name: "send" + method.name,
+                                    access: [APublic],
+                                    kind: FFun({
+                                        ret: macro : Void,
+                                        args: [{name: "params", type: paramsCT}],
+                                        expr: macro {}
+                                    })
+                                });
                             } else {
                                 var cancelCT = macro : JsonRpc.CancelCallback;
                                 var resultCT = result.toComplexType();
