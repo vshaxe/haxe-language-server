@@ -64,145 +64,12 @@ JsonRpc.error = function(code,message,data) {
 	}
 	return error;
 };
-var js_node_buffer_Buffer = require("buffer").Buffer;
-var MessageBuffer = function(encoding) {
-	if(encoding == null) {
-		encoding = "utf-8";
-	}
-	this.encoding = encoding;
-	this.index = 0;
-	this.buffer = new js_node_buffer_Buffer(8192);
-};
-MessageBuffer.__name__ = true;
-MessageBuffer.prototype = {
-	append: function(chunk) {
-		var toAppend;
-		if(typeof(chunk) == "string") {
-			var str = chunk;
-			toAppend = new js_node_buffer_Buffer(str.length);
-			toAppend.write(str,0,str.length,this.encoding);
-		} else {
-			toAppend = chunk;
-		}
-		if(this.buffer.length - this.index >= toAppend.length) {
-			toAppend.copy(this.buffer,this.index,0,toAppend.length);
-		} else {
-			var newSize = (Math.ceil((this.index + toAppend.length) / 8192) + 1) * 8192;
-			if(this.index == 0) {
-				this.buffer = new js_node_buffer_Buffer(newSize);
-				toAppend.copy(this.buffer,0,0,toAppend.length);
-			} else {
-				this.buffer = js_node_buffer_Buffer.concat([this.buffer.slice(0,this.index),toAppend],newSize);
-			}
-		}
-		this.index += toAppend.length;
-	}
-	,tryReadHeaders: function() {
-		var current = 0;
-		while(current + 3 < this.index && (this.buffer[current] != MessageBuffer.CR || this.buffer[current + 1] != MessageBuffer.LF || this.buffer[current + 2] != MessageBuffer.CR || this.buffer[current + 3] != MessageBuffer.LF)) ++current;
-		if(current + 3 >= this.index) {
-			return null;
-		}
-		var result = new haxe_ds_StringMap();
-		var headers = this.buffer.toString("ascii",0,current).split("\r\n");
-		var _g = 0;
-		while(_g < headers.length) {
-			var header = headers[_g];
-			++_g;
-			var index = header.indexOf(":");
-			if(index == -1) {
-				throw new js__$Boot_HaxeError("Message header must separate key and value using :");
-			}
-			var key = HxOverrides.substr(header,0,index);
-			var value = StringTools.trim(HxOverrides.substr(header,index + 1,null));
-			if(__map_reserved[key] != null) {
-				result.setReserved(key,value);
-			} else {
-				result.h[key] = value;
-			}
-		}
-		var nextStart = current + 4;
-		this.buffer = this.buffer.slice(nextStart);
-		this.index = this.index - nextStart;
-		return result;
-	}
-	,tryReadContent: function(length) {
-		if(this.index < length) {
-			return null;
-		}
-		var result = this.buffer.toString(this.encoding,0,length);
-		this.buffer.copy(this.buffer,0,length);
-		this.index -= length;
-		return result;
-	}
-};
-var StreamMessageReader = function(readable,encoding) {
-	if(encoding == null) {
-		encoding = "utf-8";
-	}
-	this.readable = readable;
-	this.buffer = new MessageBuffer(encoding);
-};
-StreamMessageReader.__name__ = true;
-StreamMessageReader.prototype = {
-	listen: function(cb) {
-		this.nextMessageLength = -1;
-		this.callback = cb;
-		this.readable.on("data",$bind(this,this.onData));
-	}
-	,onData: function(data) {
-		this.buffer.append(data);
-		while(true) {
-			if(this.nextMessageLength == -1) {
-				var headers = this.buffer.tryReadHeaders();
-				if(headers == null) {
-					return;
-				}
-				var contentLength = __map_reserved["Content-Length"] != null?headers.getReserved("Content-Length"):headers.h["Content-Length"];
-				if(contentLength == null) {
-					throw new js__$Boot_HaxeError("Header must provide a Content-Length property.");
-				}
-				var length = Std.parseInt(contentLength);
-				if(length == null) {
-					throw new js__$Boot_HaxeError("Content-Length value must be a number.");
-				}
-				this.nextMessageLength = length;
-			}
-			var msg = this.buffer.tryReadContent(this.nextMessageLength);
-			if(msg == null) {
-				return;
-			}
-			this.nextMessageLength = -1;
-			var json = JSON.parse(msg);
-			this.callback(json);
-		}
-	}
-};
-var StreamMessageWriter = function(writable,encoding) {
-	if(encoding == null) {
-		encoding = "utf8";
-	}
-	this.writable = writable;
-	this.encoding = encoding;
-};
-StreamMessageWriter.__name__ = true;
-StreamMessageWriter.prototype = {
-	write: function(msg) {
-		var json = JSON.stringify(msg);
-		var contentLength = js_node_buffer_Buffer.byteLength(json,this.encoding);
-		this.writable.write("Content-Length: ","ascii");
-		this.writable.write(contentLength == null?"null":"" + contentLength,"ascii");
-		this.writable.write("\r\n");
-		this.writable.write("\r\n");
-		this.writable.write(json,this.encoding);
-	}
-};
 var Main = function() { };
 Main.__name__ = true;
 Main.main = function() {
-	new StreamMessageWriter(js_node_Fs.createWriteStream("input")).write(JsonRpc.request(1,"initialize",{ processId : -1, rootPath : null, capabilities : { }}));
-	var reader = new StreamMessageReader(js_node_Fs.createReadStream("input"));
-	var writer = new StreamMessageWriter(process.stdout);
+	new node_MessageWriter(js_node_Fs.createWriteStream("input")).write(JsonRpc.request(1,"initialize",{ processId : -1, rootPath : null, capabilities : { }}));
+	var reader = new node_MessageReader(js_node_Fs.createReadStream("input"));
+	var writer = new node_MessageWriter(process.stdout);
 	var proto = new Protocol();
 	proto.onInitialize = function(params,resolve,reject) {
 		resolve({ capabilities : { completionProvider : { resolveProvider : true, triggerCharacters : [".","("]}}});
@@ -595,12 +462,145 @@ js_Boot.__string_rec = function(o,s) {
 	}
 };
 var js_node_Fs = require("fs");
+var js_node_buffer_Buffer = require("buffer").Buffer;
+var node_MessageReader = function(readable,encoding) {
+	if(encoding == null) {
+		encoding = "utf-8";
+	}
+	this.readable = readable;
+	this.buffer = new node__$MessageReader_MessageBuffer(encoding);
+};
+node_MessageReader.__name__ = true;
+node_MessageReader.prototype = {
+	listen: function(cb) {
+		this.nextMessageLength = -1;
+		this.callback = cb;
+		this.readable.on("data",$bind(this,this.onData));
+	}
+	,onData: function(data) {
+		this.buffer.append(data);
+		while(true) {
+			if(this.nextMessageLength == -1) {
+				var headers = this.buffer.tryReadHeaders();
+				if(headers == null) {
+					return;
+				}
+				var contentLength = __map_reserved["Content-Length"] != null?headers.getReserved("Content-Length"):headers.h["Content-Length"];
+				if(contentLength == null) {
+					throw new js__$Boot_HaxeError("Header must provide a Content-Length property.");
+				}
+				var length = Std.parseInt(contentLength);
+				if(length == null) {
+					throw new js__$Boot_HaxeError("Content-Length value must be a number.");
+				}
+				this.nextMessageLength = length;
+			}
+			var msg = this.buffer.tryReadContent(this.nextMessageLength);
+			if(msg == null) {
+				return;
+			}
+			this.nextMessageLength = -1;
+			var json = JSON.parse(msg);
+			this.callback(json);
+		}
+	}
+};
+var node__$MessageReader_MessageBuffer = function(encoding) {
+	if(encoding == null) {
+		encoding = "utf-8";
+	}
+	this.encoding = encoding;
+	this.index = 0;
+	this.buffer = new js_node_buffer_Buffer(8192);
+};
+node__$MessageReader_MessageBuffer.__name__ = true;
+node__$MessageReader_MessageBuffer.prototype = {
+	append: function(chunk) {
+		var toAppend;
+		if(typeof(chunk) == "string") {
+			var str = chunk;
+			toAppend = new js_node_buffer_Buffer(str.length);
+			toAppend.write(str,0,str.length,this.encoding);
+		} else {
+			toAppend = chunk;
+		}
+		if(this.buffer.length - this.index >= toAppend.length) {
+			toAppend.copy(this.buffer,this.index,0,toAppend.length);
+		} else {
+			var newSize = (Math.ceil((this.index + toAppend.length) / 8192) + 1) * 8192;
+			if(this.index == 0) {
+				this.buffer = new js_node_buffer_Buffer(newSize);
+				toAppend.copy(this.buffer,0,0,toAppend.length);
+			} else {
+				this.buffer = js_node_buffer_Buffer.concat([this.buffer.slice(0,this.index),toAppend],newSize);
+			}
+		}
+		this.index += toAppend.length;
+	}
+	,tryReadHeaders: function() {
+		var current = 0;
+		while(current + 3 < this.index && (this.buffer[current] != node__$MessageReader_MessageBuffer.CR || this.buffer[current + 1] != node__$MessageReader_MessageBuffer.LF || this.buffer[current + 2] != node__$MessageReader_MessageBuffer.CR || this.buffer[current + 3] != node__$MessageReader_MessageBuffer.LF)) ++current;
+		if(current + 3 >= this.index) {
+			return null;
+		}
+		var result = new haxe_ds_StringMap();
+		var headers = this.buffer.toString("ascii",0,current).split("\r\n");
+		var _g = 0;
+		while(_g < headers.length) {
+			var header = headers[_g];
+			++_g;
+			var index = header.indexOf(":");
+			if(index == -1) {
+				throw new js__$Boot_HaxeError("Message header must separate key and value using :");
+			}
+			var key = HxOverrides.substr(header,0,index);
+			var value = StringTools.trim(HxOverrides.substr(header,index + 1,null));
+			if(__map_reserved[key] != null) {
+				result.setReserved(key,value);
+			} else {
+				result.h[key] = value;
+			}
+		}
+		var nextStart = current + 4;
+		this.buffer = this.buffer.slice(nextStart);
+		this.index = this.index - nextStart;
+		return result;
+	}
+	,tryReadContent: function(length) {
+		if(this.index < length) {
+			return null;
+		}
+		var result = this.buffer.toString(this.encoding,0,length);
+		this.buffer.copy(this.buffer,0,length);
+		this.index -= length;
+		return result;
+	}
+};
+var node_MessageWriter = function(writable,encoding) {
+	if(encoding == null) {
+		encoding = "utf8";
+	}
+	this.writable = writable;
+	this.encoding = encoding;
+};
+node_MessageWriter.__name__ = true;
+node_MessageWriter.prototype = {
+	write: function(msg) {
+		var json = JSON.stringify(msg);
+		var contentLength = js_node_buffer_Buffer.byteLength(json,this.encoding);
+		this.writable.write("Content-Length: ","ascii");
+		this.writable.write(contentLength == null?"null":"" + contentLength,"ascii");
+		this.writable.write("\r\n");
+		this.writable.write("\r\n");
+		this.writable.write(json,this.encoding);
+	}
+};
 var $_, $fid = 0;
 function $bind(o,m) { if( m == null ) return null; if( m.__id__ == null ) m.__id__ = $fid++; var f; if( o.hx__closures__ == null ) o.hx__closures__ = {}; else f = o.hx__closures__[m.__id__]; if( f == null ) { f = function(){ return f.method.apply(f.scope, arguments); }; f.scope = o; f.method = m; o.hx__closures__[m.__id__] = f; } return f; }
 String.__name__ = true;
 Array.__name__ = true;
 var __map_reserved = {}
-MessageBuffer.CR = new js_node_buffer_Buffer("\r","ascii")[0];
-MessageBuffer.LF = new js_node_buffer_Buffer("\n","ascii")[0];
+node__$MessageReader_MessageBuffer.CR = new js_node_buffer_Buffer("\r","ascii")[0];
+node__$MessageReader_MessageBuffer.LF = new js_node_buffer_Buffer("\n","ascii")[0];
 Main.main();
 })();

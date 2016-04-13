@@ -1,12 +1,56 @@
-import js.node.Buffer;
+package node;
+
 import haxe.extern.EitherType;
+
+import js.node.Buffer;
 import js.node.stream.Readable;
-import js.node.stream.Writable.IWritable;
-using StringTools;
 
 import JsonRpc.Message;
 
-class MessageBuffer {
+class MessageReader {
+    var readable:IReadable;
+    var callback:Message->Void;
+    var buffer:MessageBuffer;
+    var nextMessageLength:Int;
+
+    public function new(readable:IReadable, encoding = "utf-8") {
+        this.readable = readable;
+        buffer = new MessageBuffer(encoding);
+    }
+
+    public function listen(cb:Message->Void):Void {
+        nextMessageLength = -1;
+        callback = cb;
+        readable.on(ReadableEvent.Data, onData);
+    }
+
+    function onData(data:EitherType<Buffer,String>):Void {
+        buffer.append(data);
+        while(true) {
+            if (nextMessageLength == -1) {
+                var headers = buffer.tryReadHeaders();
+                if (headers == null)
+                    return;
+                var contentLength = headers['Content-Length'];
+                if (contentLength == null)
+                    throw 'Header must provide a Content-Length property.';
+
+                var length = Std.parseInt(contentLength);
+                if (length == null)
+                    throw 'Content-Length value must be a number.';
+                nextMessageLength = length;
+            }
+            var msg = buffer.tryReadContent(nextMessageLength);
+            if (msg == null)
+                return;
+            nextMessageLength = -1;
+            var json = haxe.Json.parse(msg);
+            callback(json);
+        }
+    }
+}
+
+private class MessageBuffer {
     static inline var DEFAULT_SIZE = 8192;
     static var CR = new Buffer("\r", "ascii")[0];
     static var LF = new Buffer("\n", "ascii")[0];
@@ -59,7 +103,7 @@ class MessageBuffer {
             if (index == -1)
                 throw "Message header must separate key and value using :";
             var key = header.substr(0, index);
-            var value = header.substr(index + 1).trim();
+            var value = StringTools.trim(header.substr(index + 1));
             result[key] = value;
         }
 
@@ -77,72 +121,5 @@ class MessageBuffer {
         buffer.copy(buffer, 0, nextStart);
         index -= nextStart;
         return result;
-    }
-}
-
-class StreamMessageReader {
-
-    var readable:IReadable;
-    var callback:Message->Void;
-    var buffer:MessageBuffer;
-    var nextMessageLength:Int;
-
-    public function new(readable:IReadable, encoding = "utf-8") {
-        this.readable = readable;
-        buffer = new MessageBuffer(encoding);
-    }
-
-    public function listen(cb:Message->Void):Void {
-        nextMessageLength = -1;
-        callback = cb;
-        readable.on(ReadableEvent.Data, onData);
-    }
-
-    private function onData(data:EitherType<Buffer,String>):Void {
-        buffer.append(data);
-        while(true) {
-            if (nextMessageLength == -1) {
-                var headers = buffer.tryReadHeaders();
-                if (headers == null)
-                    return;
-                var contentLength = headers['Content-Length'];
-                if (contentLength == null)
-                    throw 'Header must provide a Content-Length property.';
-
-                var length = Std.parseInt(contentLength);
-                if (length == null)
-                    throw 'Content-Length value must be a number.';
-                nextMessageLength = length;
-            }
-            var msg = buffer.tryReadContent(nextMessageLength);
-            if (msg == null)
-                return;
-            nextMessageLength = -1;
-            var json = haxe.Json.parse(msg);
-            callback(json);
-        }
-    }
-}
-
-class StreamMessageWriter {
-    static inline var CONTENT_LENGTH = "Content-Length: ";
-    static inline var CRLF = '\r\n';
-
-    var writable:IWritable;
-    var encoding:String;
-
-    public function new(writable:IWritable, encoding = "utf8") {
-        this.writable = writable;
-        this.encoding = encoding;
-    }
-
-    public function write(msg:Message):Void {
-        var json = haxe.Json.stringify(msg);
-        var contentLength = Buffer.byteLength(json, encoding);
-        writable.write(CONTENT_LENGTH, "ascii");
-        writable.write(Std.string(contentLength), "ascii");
-        writable.write(CRLF);
-        writable.write(CRLF);
-        writable.write(json, encoding);
     }
 }

@@ -1,17 +1,18 @@
 import JsonRpc;
 import Protocol;
-import JsonRpcConnection;
+import node.MessageReader;
+import node.MessageWriter;
 
 class Main {
     static function main() {
-        new StreamMessageWriter(js.node.Fs.createWriteStream("input")).write(JsonRpc.request(1, Protocol.Method.Initialize, ({
+        new MessageWriter(js.node.Fs.createWriteStream("input")).write(JsonRpc.request(1, Protocol.Method.Initialize, ({
             processId: -1,
             rootPath: null,
             capabilities: {},
         } : InitializeParams)));
 
-        var reader = new StreamMessageReader(js.node.Fs.createReadStream("input"));
-        var writer = new StreamMessageWriter(js.Node.process.stdout);
+        var reader = new MessageReader(js.node.Fs.createReadStream("input"));
+        var writer = new MessageWriter(js.Node.process.stdout);
 
         var proto = new Protocol();
 
