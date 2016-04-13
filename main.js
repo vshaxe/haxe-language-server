@@ -165,24 +165,29 @@ Protocol.prototype = {
 				reject(c10,m10,null);
 			});
 			break;
-		case "textDocument/references":
-			this.onFindReferences(request.params,resolve,function(c11,m11) {
+		case "textDocument/rangeFormatting":
+			this.onDocumentRangeFormatting(request.params,resolve,function(c11,m11) {
 				reject(c11,m11,null);
 			});
 			break;
-		case "textDocument/rename":
-			this.onRename(request.params,resolve,function(c12,m12) {
+		case "textDocument/references":
+			this.onFindReferences(request.params,resolve,function(c12,m12) {
 				reject(c12,m12,null);
 			});
 			break;
-		case "textDocument/signatureHelp":
-			this.onSignatureHelp(request.params,resolve,function(c13,m13) {
+		case "textDocument/rename":
+			this.onRename(request.params,resolve,function(c13,m13) {
 				reject(c13,m13,null);
 			});
 			break;
-		case "workspace/symbol":
-			this.onWorkspaceSymbols(request.params,resolve,function(c14,m14) {
+		case "textDocument/signatureHelp":
+			this.onSignatureHelp(request.params,resolve,function(c14,m14) {
 				reject(c14,m14,null);
+			});
+			break;
+		case "workspace/symbol":
+			this.onWorkspaceSymbols(request.params,resolve,function(c15,m15) {
+				reject(c15,m15,null);
 			});
 			break;
 		default:
@@ -275,6 +280,8 @@ Protocol.prototype = {
 	,onCodeLensResolve: function(params,resolve,reject) {
 	}
 	,onDocumentFormatting: function(params,resolve,reject) {
+	}
+	,onDocumentRangeFormatting: function(params,resolve,reject) {
 	}
 	,onDocumentOnTypeFormatting: function(params,resolve,reject) {
 	}

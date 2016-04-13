@@ -155,10 +155,15 @@ abstract Notification<TParams>(String) to String {}
     /**
         The document range formatting request is sent from the client to the server to format a given range in a document.
     **/
-    var DocumentOnTypeFormatting : Request<DocumentOnTypeFormattingParams,Array<TextEdit>,Void> = "textDocument/onTypeFormatting";
+    var DocumentRangeFormatting : Request<DocumentRangeFormattingParams,Array<TextEdit>,Void> = "textDocument/rangeFormatting";
 
     /**
         The document on type formatting request is sent from the client to the server to format parts of the document during typing.
+    **/
+    var DocumentOnTypeFormatting : Request<DocumentOnTypeFormattingParams,Array<TextEdit>,Void> = "textDocument/onTypeFormatting";
+
+    /**
+        The rename request is sent from the client to the server to do a workspace wide rename of a symbol.
     **/
     var Rename : Request<RenameParams,WorkspaceEdit,Void> = "textDocument/rename";    
 }
@@ -551,25 +556,80 @@ typedef CompletionItem = {
 
 typedef MarkedString = EitherType<String,{language:String, value:String}>;
 
+/**
+    The result of a hove request.
+**/
 typedef Hover = {
+    /**
+        The hover's content.
+    **/
     var contents:EitherType<MarkedString,Array<MarkedString>>;
+
+    /**
+        An optional range.
+    **/
     @:optional var range:Range;
 }
 
+/**
+    Signature help represents the signature of something callable.
+    There can be multiple signature but only one active and only one active parameter.
+**/
 typedef SignatureHelp = {
+    /**
+        One or more signatures.
+    **/
     var signatures:Array<SignatureInformation>;
+
+    /**
+        The active signature.
+    **/
     @:optional var activeSignature:Int;
+
+    /**
+        The active parameter of the active signature.
+    **/
     @:optional var activeParameter:Int;
 }
 
+/**
+    Represents the signature of something callable.
+    A signature can have a label, like a function-name, a doc-comment, and a set of parameters.
+**/
 typedef SignatureInformation = {
+    /**
+        The label of this signature.
+        Will be shown in the UI.
+    **/
     var label:String;
+
+    /**
+        The human-readable doc-comment of this signature.
+        Will be shown in the UI but can be omitted.
+    **/
     @:optional var documentation:String;
+
+    /**
+        The parameters of this signature.
+    **/
     @:optional var parameters:Array<ParameterInformation>;
 }
 
+/**
+    Represents a parameter of a callable-signature.
+    A parameter can have a label and a doc-comment.
+**/
 typedef ParameterInformation = {
+    /**
+        The label of this signature.
+        Will be shown in the UI.
+    **/
     var label:String;
+
+    /**
+        The human-readable doc-comment of this signature.
+        Will be shown in the UI but can be omitted.
+    **/
     @:optional var documentation:String;
 }
 
@@ -579,28 +639,77 @@ typedef ReferenceParams = {
 }
 
 typedef ReferenceContext = {
+    /**
+        Include the declaration of the current symbol.
+    **/
     var includeDeclaration:Bool;
 }
 
+/**
+    A document highlight is a range inside a text document which deserves special attention.
+    Usually a document highlight is visualized by changing the background color of its range.
+**/
 typedef DocumentHighlight = {
+    /**
+        The range this highlight applies to.
+    **/
     var range:Range;
+
+    /**
+        The highlight kind, default is `DocumentHighlightKind.Text`.
+    **/
     @:optional var kind:DocumentHighlightKind;
 }
 
+/**
+    A document highlight kind.
+**/
 @:enum abstract DocumentHighlightKind(Int) to Int {
+    /**
+        A textual occurrance.
+    **/
     var Text = 1;
+
+    /**
+        Read-access of a symbol, like reading a variable.
+    **/
     var Read = 2;
+
+    /**
+        Write-access of a symbol, like writing to a variable.
+    **/
     var Write = 3;
 }
 
 typedef DocumentSymbolParams = {
+    /**
+        The text document.
+    **/
     var textDocument:TextDocumentIdentifier;
 }
 
+/**
+    Represents information about programming constructs like variables, classes, interfaces etc.
+**/
 typedef SymbolInformation = {
+    /**
+        The name of this symbol.
+    **/
     var name:String;
+
+    /**
+        The kind of this symbol.
+    **/
     var kind:SymbolKind;
+
+    /**
+        The location of this symbol.
+    **/
     var location:Location;
+
+    /**
+        The name of the symbol containing this symbol.
+    **/
     @:optional var containerName:String;
 }
 
@@ -625,49 +734,160 @@ typedef SymbolInformation = {
     var Array = 18;
 }
 
+/**
+    The parameters of a Workspace Symbol Request.
+**/
 typedef WorkspaceSymbolParams = {
+    /**
+        A non-empty query string.
+    **/
     var query:String;
 }
 
+/**
+    Params for the CodeActionRequest
+**/
 typedef CodeActionParams = {
+    /**
+        The document in which the command was invoked.
+    **/
     var textDocument:TextDocumentIdentifier;
+
+    /**
+        The range for which the command was invoked.
+    **/
     var range:Range;
+
+    /**
+        Context carrying additional information.
+    **/
     var context:CodeActionContext;
 }
 
+/**
+    Contains additional diagnostic information about the context in which a code action is run.
+**/
 typedef CodeActionContext = {
+    /**
+        An array of diagnostics.
+    **/
     var diagnostics:Array<Diagnostic>;
 }
 
 typedef CodeLensParams = {
+    /**
+        The document to request code lens for.
+    **/
     var textDocument:TextDocumentIdentifier;
 }
 
+/**
+    A code lens represents a command that should be shown along with source text,
+    like the number of references, a way to run tests, etc.
+
+    A code lens is _unresolved_ when no command is associated to it.
+    For performance reasons the creation of a code lens and resolving should be done to two stages.
+**/
 typedef CodeLens = {
+    /**
+        The range in which this code lens is valid.
+        Should only span a single line.
+    **/
     var range:Range;
+
+    /**
+        The command this code lens represents.
+    **/
     @:optional var command:Command;
+
+    /**
+        An data entry field that is preserved on a code lens item between a code lens and a code lens resolve request.
+    **/
     @:optional var data:Dynamic;
 }
 
 typedef DocumentFormattingParams = {
+    /**
+        The document to format.
+    **/
     var textDocument:TextDocumentIdentifier;
+
+    /**
+        The format options.
+    **/
     var options:FormattingOptions;
 }
 
+/**
+    Value-object describing what options formatting should use.
+    This object can contain additional fields of type Bool/Int/Float/String.
+**/
 typedef FormattingOptions = {
+    /**
+        Size of a tab in spaces.
+    **/
     var tabSize:Int;
+
+    /**
+        Prefer spaces over tabs.
+    **/
     var insertSpaces:Bool;
 }
 
-typedef DocumentOnTypeFormattingParams = {
+typedef DocumentRangeFormattingParams = {
+    /**
+        The document to format.
+    **/
     var textDocument:TextDocumentIdentifier;
-    var position:Position;
-    var ch:String;
+
+    /**
+        The range to format.
+    **/
+    var range:Range;
+
+    /**
+        The format options.
+    **/
     var options:FormattingOptions;
 }
 
-typedef RenameParams = {
+typedef DocumentOnTypeFormattingParams = {
+    /**
+        The document to format.
+    **/
     var textDocument:TextDocumentIdentifier;
+
+    /**
+        The position at which this request was send.
+    **/
     var position:Position;
+
+    /**
+        The character that has been typed.
+    **/
+    var ch:String;
+
+    /**
+        The format options.
+    **/
+    var options:FormattingOptions;
+}
+
+
+typedef RenameParams = {
+    /**
+        The document to format.
+    **/
+    var textDocument:TextDocumentIdentifier;
+
+    /**
+        The position at which this request was send.
+    **/
+    var position:Position;
+
+    /**
+        The new name of the symbol.
+        If the given name is not valid the request must return a `ResponseError` with an appropriate message set.
+    **/
     var newName:String;
 }
