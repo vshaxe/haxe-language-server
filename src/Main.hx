@@ -13,6 +13,7 @@ class Main {
             proto.sendShowMessage({type: Info, message: "Welcome to Haxe!"});
             resolve({
                 capabilities: {
+                    textDocumentSync: Full,
                     completionProvider: {
                         triggerCharacters: ["."]
                     }
