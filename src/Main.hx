@@ -1,11 +1,10 @@
-import JsonRpc;
-import Protocol;
+import ProtocolTypes;
 import node.MessageReader;
 import node.MessageWriter;
 
 class Main {
     static function main() {
-        new MessageWriter(js.node.Fs.createWriteStream("input")).write(JsonRpc.request(1, Protocol.Method.Initialize, ({
+        new MessageWriter(js.node.Fs.createWriteStream("input")).write(JsonRpc.request(1, ProtocolTypes.Method.Initialize, ({
             processId: -1,
             rootPath: null,
             capabilities: {},

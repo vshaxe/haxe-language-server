@@ -10,7 +10,7 @@ class ProtocolMacro {
         var requestCases = new Array<Case>();
         var notificationCases = new Array<Case>();
 
-        var ab = switch (Context.getType("Protocol.Method").follow()) {
+        var ab = switch (Context.getType("ProtocolTypes.Method").follow()) {
             case TAbstract(_.get() => ab, _): ab;
             default: throw false;
         }
