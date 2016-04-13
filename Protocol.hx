@@ -25,7 +25,7 @@ class Protocol {
     var Hover : Method<TextDocumentPositionParams,Hover,Void> = "textDocument/hover";
     var SignatureHelp : Method<TextDocumentPositionParams,SignatureHelp,Void> = "textDocument/signatureHelp";
     var GotoDefinition : Method<TextDocumentPositionParams,EitherType<Location,Array<Location>>,Void> = "textDocument/definition";
-    var FindReferences : Method<ReferenceParams,Array<Location>,Void> = "textDocument/references"; // TODO: response?
+    var FindReferences : Method<ReferenceParams,Array<Location>,Void> = "textDocument/references";
     var DocumentHighlights : Method<TextDocumentPositionParams,DocumentHighlight,Void> = "textDocument/documentHighlight";
     var DocumentSymbols : Method<DocumentSymbolParams,Array<SymbolInformation>,Void> = "textDocument/documentSymbol";
     var WorkspaceSymbols : Method<WorkspaceSymbolParams,Array<SymbolInformation>,Void> = "workspace/symbol";
