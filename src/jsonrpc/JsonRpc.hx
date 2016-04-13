@@ -17,7 +17,7 @@ class JsonRpc {
             jsonrpc: PROTOCOL_VERSION,
             method: method
         };
-        if (params == null)
+        if (params != null)
             message.params = params;
         return message;
     }
@@ -31,7 +31,7 @@ class JsonRpc {
             id: id,
             method: method
         };
-        if (params == null)
+        if (params != null)
             message.params = params;
         return message;
     }
