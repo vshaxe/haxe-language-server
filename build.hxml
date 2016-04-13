@@ -3,5 +3,6 @@
 -js main.js
 -dce full
 -lib hxnodejs
+-D hxnodejs-no-version-warning
 --next
 -cmd node main.js
