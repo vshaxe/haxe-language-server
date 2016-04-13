@@ -1,2 +1,5 @@
 -main Main
 -js main.js
+-dce full
+--next
+-cmd node main.js

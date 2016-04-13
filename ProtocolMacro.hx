@@ -29,23 +29,21 @@ class ProtocolMacro {
                         handlerCallArgs.push(macro request.params);
                     }
 
-                    handlerArgDefs.push({name: "cancel", type: macro : JsonRpc.CancelCallback});
-
                     var resultDataCT = resultData.toComplexType();
                     handlerArgDefs.push({name: "resolve", type: macro : $resultDataCT->Void});
+                    handlerCallArgs.push(macro resolve);
 
-                    var errorCT;
+                    var errorCT, rejectExpr;
                     if (errorData.toString() == "Void") {
                         errorCT = macro : Int -> String -> Void;
+                        rejectExpr = macro function(c,m) reject(c,m,null);
                     } else {
                         var errorDataCT = errorData.toComplexType();
                         errorCT = macro : Int -> String -> $errorDataCT -> Void;
+                        rejectExpr = macro reject;
                     }
                     handlerArgDefs.push({name: "reject", type: errorCT});
-
-                    handlerCallArgs.push(macro null);
-                    handlerCallArgs.push(macro null);
-                    handlerCallArgs.push(macro null);
+                    handlerCallArgs.push(rejectExpr);
 
                     requestCases.push({
                         values: [methodNameExpr],
@@ -53,19 +51,25 @@ class ProtocolMacro {
                     });
                 case TAbstract(_.get() => {name: "Notification"}, [params]):
                     var paramsCT = params.toComplexType();
+                    var sendArgDefs = [];
+                    var sendCallArgs = [methodNameExpr];
                     if (params.toString() != "Void") {
+                        sendArgDefs.push({name: "params", type: paramsCT});
+                        sendCallArgs.push(macro params);
                         handlerArgDefs.push({name: "params", type: paramsCT});
                         handlerCallArgs.push(macro notification.params);
+                    } else {
+                        sendCallArgs.push(macro null);
                     }
 
                     fields.push({
                         pos: method.pos,
                         name: "send" + method.name,
-                        access: [APublic],
+                        access: [APublic, AInline],
                         kind: FFun({
                             ret: macro : Void,
-                            args: [{name: "params", type: paramsCT}],
-                            expr: macro {}
+                            args: sendArgDefs,
+                            expr: macro this.sendNotification($a{sendCallArgs})
                         })
                     });
 
@@ -92,12 +96,12 @@ class ProtocolMacro {
             switch [field.name, field.kind] {
                 case ["handleRequest", FFun(fun)]:
                     fun.expr = {
-                        expr: ESwitch(macro request.method, requestCases, macro throw "TODO: dispatch MethodNotFound"),
+                        expr: ESwitch(macro request.method, requestCases, macro reject(JsonRpc.ErrorCodes.MethodNotFound, "Method '" + request.method + "' not found", null)),
                         pos: field.pos
                     }
                 case ["handleNotification", FFun(fun)]:
                     fun.expr = {
-                        expr: ESwitch(macro notification.method, notificationCases, macro throw "TODO: dispatch MethodNotFound"),
+                        expr: ESwitch(macro notification.method, notificationCases, null),
                         pos: field.pos
                     }
                 default:
