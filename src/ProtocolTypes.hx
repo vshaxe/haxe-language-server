@@ -164,65 +164,185 @@ abstract Notification<TParams>(String) to String {}
 }
 
 typedef InitializeParams = {
+    /**
+        The process Id of the parent process that started the server.
+    **/
     var processId:Int;
+
+    /**
+        The rootPath of the workspace.
+        Is `null` if no folder is open.
+    **/
     var rootPath:Null<String>;
+
+    /**
+        The capabilities provided by the client (editor).
+    **/
     var capabilities:ClientCapabilities;
 }
 
 typedef InitializeResult = {
+    /**
+        The capabilities the language server provides.
+    **/
     var capabilities:ServerCapabilities;
 }
 
 typedef InitializeError = {
+    /**
+        Indicates whether the client should retry to send the initilize request
+        after showing the message provided in the `ResponseError`.
+    **/
     var retry:Bool;
 }
 
 typedef ClientCapabilities = {} // unspecified
 
+/**
+    Defines how the host (editor) should sync document changes to the language server.
+**/
 @:enum abstract TextDocumentSyncKind(Int) {
+    /**
+        Documents should not be synced at all.
+    **/
     var None = 0;
+
+    /**
+        Documents are synced by always sending the full content of the document.
+    **/
     var Full = 1;
+
+    /**
+        Documents are synced by sending the full content on open.
+        After that only incremental updates to the document are send.
+    **/
     var Incremental = 2;
 }
 
 typedef CompletionOptions = {
+    /**
+        The server provides support to resolve additional information for a completion item.
+    **/
     @:optional var resolveProvider:Bool;
+
+    /**
+        The characters that trigger completion automatically.
+    **/
     @:optional var triggerCharacters:Array<String>;
 }
 
 typedef SignatureHelpOptions = {
+    /**
+        The characters that trigger signature help automatically.
+    **/
     @:optional var triggerCharacters:Array<String>;
 }
 
 typedef CodeLensOptions = {
+    /**
+        Code lens has a resolve provider as well.
+    **/
     @:optional var resolveProvider:Bool;
 }
 
 typedef DocumentOnTypeFormattingOptions = {
+    /**
+        A character on which formatting should be triggered, like `}`.
+    **/
     var firstTriggerCharacter:String;
+
+    /**
+        More trigger characters.
+    **/
     @:optional var moreTriggerCharacter:Array<String>;
 }
 
 typedef ServerCapabilities = {
+    /**
+        Defines how text documents are synced.
+    **/
     @:optional var textDocumentSync:TextDocumentSyncKind;
+
+    /**
+        The server provides hover support.
+    **/
     @:optional var hoverProvider:Bool;
+
+    /**
+        The server provides completion support.
+    **/
     @:optional var completionProvider:CompletionOptions;
+
+    /**
+        The server provides signature help support.
+    **/
     @:optional var signatureHelpProvider:SignatureHelpOptions;
+
+    /**
+        The server provides goto definition support.
+    **/
     @:optional var definitionProvider:Bool;
+
+    /**
+        The server provides find references support.
+    **/
     @:optional var referencesProvider:Bool;
+
+    /**
+        The server provides document highlight support.
+    **/
     @:optional var documentHighlightProvider:Bool;
+
+    /**
+        The server provides document symbol support.
+    **/
     @:optional var documentSymbolProvider:Bool;
+
+    /**
+        The server provides workspace symbol support.
+    **/
     @:optional var workspaceSymbolProvider:Bool;
+
+    /**
+        The server provides code actions.
+    **/
     @:optional var codeActionProvider:Bool;
+
+    /**
+        The server provides code lens.
+    **/
     @:optional var codeLensProvider:CodeLensOptions;
+
+    /**
+        The server provides document formatting.
+    **/
     @:optional var documentFormattingProvider:Bool;
+
+    /**
+        The server provides document range formatting.
+    **/
     @:optional var documentRangeFormattingProvider:Bool;
+
+    /**
+        The server provides document formatting on typing.
+    **/
     @:optional var documentOnTypeFormattingProvider:DocumentOnTypeFormattingOptions;
+
+    /**
+        The server provides rename support.
+    **/
     @:optional var renameProvider:Bool;
 }
 
 typedef ShowMessageParams = {
+    /**
+        The message type.
+    **/
     var type:MessageType;
+
+    /**
+        The actual message.
+    **/
     var message:String;
 }
 
@@ -234,70 +354,180 @@ typedef ShowMessageParams = {
 }
 
 typedef LogMessageParams = {
+    /**
+        The message type.
+    **/
     var type:MessageType;
+
+    /**
+        The actual message.
+    **/
     var message:String;
 }
 
 typedef DidChangeConfigurationParams = {
+    /**
+        The actual changed settings.
+    **/
     var settings:Dynamic;
 }
 
 typedef DidOpenTextDocumentParams = {
     >TextDocumentIdentifier,
+
+    /**
+        The document that was opened.
+    **/
     var textDocument:TextDocumentItem;
 }
 
 typedef DidChangeTextDocumentParams = {
+    /**
+        The document that did change.
+        The version number points to the version after all provided content changes have been applied.
+    **/
     var textDocument:VersionedTextDocumentIdentifier;
+
+    /**
+        The actual content changes.
+    **/
     var contentChanges:Array<TextDocumentContentChangeEvent>;
 }
 
+/**
+    An event describing a change to a text document.
+    If `range` and `rangeLength` are omitted the new text is considered to be the full content of the document.
+**/
 typedef TextDocumentContentChangeEvent = {
+    /**
+        The range of the document that changed.
+    **/
     @:optional var range:Range;
+
+    /**
+        The length of the range that got replaced.
+    **/
     @:optional var rangeLength:Int;
+
+    /**
+        The new text of the document.
+    **/
     var text:String;
 }
 
 typedef DidCloseTextDocumentParams = {
+    /**
+        The document that was closed.
+    **/
     var textDocument:TextDocumentIdentifier;
 }
 
 typedef DidSaveTextDocumentParams = {
+    /**
+        The document that was saved.
+    **/
     var textDocument:TextDocumentIdentifier;
 }
 
 typedef DidChangeWatchedFilesParams = {
+    /**
+        The actual file events.
+    **/
     var changes:Array<FileEvent>;
 }
 
+/**
+    The file event type.
+**/
 @:enum abstract FileChangeType(Int) to Int {
     var Created = 1;
     var Changed = 2;
     var Deleted = 3;
 }
 
+/**
+    An event describing a file change.
+**/
 typedef FileEvent = {
+    /**
+        The file's uri.
+    **/
     var uri:String;
+
+    /**
+        The change type.
+    **/
     var type:FileChangeType;
 }
 
 typedef PublishDiagnosticsParams = {
+    /**
+        The URI for which diagnostic information is reported.
+    **/
     var uri:String;
+
+    /**
+        An array of diagnostic information items.
+    **/
     var diagnostics:Array<Diagnostic>;
 }
 
 typedef CompletionItem = {
+    /**
+        The label of this completion item.
+        By default also the text that is inserted when selecting this completion.
+    **/
     var label:String;
+
+    /**
+        The kind of this completion item.
+        Based of the kind an icon is chosen by the editor.
+    **/
     @:optional var kind:CompletionItemKind;
+
+    /**
+        A human-readable string with additional information about this item, like type or symbol information.
+    **/
     @:optional var detail:String;
+
+    /**
+        A human-readable string that represents a doc-comment.
+    **/
     @:optional var documentation:String;
+
+    /**
+        A string that shoud be used when comparing this item with other items.
+        When `falsy` the label is used.
+    **/
     @:optional var sortText:String;
+
+    /**
+        A string that should be used when filtering a set of completion items.
+        When `falsy` the label is used.
+    **/
     @:optional var filterText:String;
+
+    /**
+        A string that should be inserted a document when selecting this completion.
+        When `falsy` the label is used.
+    **/
     @:optional var insertText:String;
+
+    /**
+        An edit which is applied to a document when selecting this completion.
+        When an edit is provided the value of `insertText` is ignored.
+    **/
     @:optional var textEdit:TextEdit;
+
+    /**
+        An data entry field that is preserved on a completion item between a completion and a completion resolve request.
+    **/
     @:optional var data:Dynamic;
 }
 
+/**
+    The kind of a completion entry.
+**/
 @:enum abstract CompletionItemKind(Int) to Int {
     var Text = 1;
     var Method = 2;
