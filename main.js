@@ -31,22 +31,15 @@ HxOverrides.substr = function(s,pos,len) {
 };
 var JsonRpc = function() { };
 JsonRpc.__name__ = true;
-JsonRpc.error = function(code,message,data) {
-	var error = { code : code, message : message};
-	if(data != null) {
-		error.data = data;
-	}
-	return error;
-};
-JsonRpc.request = function(id,method,params) {
-	var message = { jsonrpc : "2.0", id : id, method : method};
+JsonRpc.notification = function(method,params) {
+	var message = { jsonrpc : "2.0", method : method};
 	if(params == null) {
 		message.params = params;
 	}
 	return message;
 };
-JsonRpc.notification = function(method,params) {
-	var message = { jsonrpc : "2.0", method : method};
+JsonRpc.request = function(id,method,params) {
+	var message = { jsonrpc : "2.0", id : id, method : method};
 	if(params == null) {
 		message.params = params;
 	}
@@ -63,6 +56,13 @@ JsonRpc.response = function(id,outcome) {
 		break;
 	}
 	return response;
+};
+JsonRpc.error = function(code,message,data) {
+	var error = { code : code, message : message};
+	if(data != null) {
+		error.data = data;
+	}
+	return error;
 };
 var js_node_buffer_Buffer = require("buffer").Buffer;
 var MessageBuffer = function(encoding) {
