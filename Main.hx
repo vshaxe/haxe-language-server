@@ -2,7 +2,7 @@ class Main {
     static function main() {
         var proto = new Protocol();
 
-        proto.onInitialize(function(params, cancel_, resolve, reject) {
+        proto.onInitialize(function(params, cancel, resolve, reject) {
             resolve({
                 capabilities: {
                     completionProvider: {

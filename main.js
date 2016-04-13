@@ -8,14 +8,14 @@ JsonRpc.cancel = function(id) {
 var Main = function() { };
 Main.main = function() {
 	var proto = new Protocol();
-	proto.onInitialize(function(params,cancel_,resolve,reject) {
+	proto.onInitialize(function(params,cancel,resolve,reject) {
 		resolve({ capabilities : { completionProvider : { resolveProvider : true, triggerCharacters : [".","("]}}});
 	});
-	proto.onCompletion(function(params1,cancel,resolve1,reject1) {
+	proto.onCompletion(function(params1,cancel1,resolve1,reject1) {
 		proto.sendShowMessage({ type : 3, message : "Hello"});
 		resolve1([{ label : "foo"},{ label : "bar"}]);
 	});
-	proto.onCompletionItemResolve(function(item,cancel1,resolve2,reject2) {
+	proto.onCompletionItemResolve(function(item,cancel2,resolve2,reject2) {
 		resolve2(item);
 	});
 };
