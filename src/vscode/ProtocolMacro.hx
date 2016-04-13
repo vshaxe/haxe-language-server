@@ -1,3 +1,5 @@
+package vscode;
+
 import haxe.macro.Context;
 import haxe.macro.Expr;
 import haxe.macro.Type;
@@ -92,21 +94,37 @@ class ProtocolMacro {
             });
         }
 
-        for (field in fields) {
-            switch [field.name, field.kind] {
-                case ["handleRequest", FFun(fun)]:
-                    fun.expr = {
-                        expr: ESwitch(macro request.method, requestCases, macro reject(JsonRpc.ErrorCodes.MethodNotFound, "Method '" + request.method + "' not found", null)),
-                        pos: field.pos
-                    }
-                case ["handleNotification", FFun(fun)]:
-                    fun.expr = {
-                        expr: ESwitch(macro notification.method, notificationCases, null),
-                        pos: field.pos
-                    }
-                default:
-            }
-        }
+        var pos = Context.currentPos();
+        fields.push({
+            pos: pos,
+            name: "handleRequest",
+            access: [AOverride],
+            kind: FFun({
+                ret: null,
+                args: [
+                    {name: "request", type: macro : jsonrpc.Types.RequestMessage},
+                    {name: "resolve", type: macro : Dynamic->Void},
+                    {name: "reject", type: macro : Int->String->Dynamic->Void},
+                ],
+                expr: {
+                    expr: ESwitch(macro request.method, requestCases, macro reject(jsonrpc.ErrorCodes.MethodNotFound, "Method '" + request.method + "' not found", null)),
+                    pos: pos
+                }
+            })
+        });
+        fields.push({
+            pos: pos,
+            name: "handleNotification",
+            access: [AOverride],
+            kind: FFun({
+                ret: null,
+                args: [{name: "notification", type: macro : jsonrpc.Types.NotificationMessage}],
+                expr: {
+                    expr: ESwitch(macro notification.method, notificationCases, null),
+                    pos: pos
+                }
+            })
+        });
 
         return fields;
     }

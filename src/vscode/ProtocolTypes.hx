@@ -1,6 +1,8 @@
+package vscode;
+
 import haxe.extern.EitherType;
 
-import BasicTypes;
+import vscode.BasicTypes;
 
 /**
     Helper type for the `MethodName` values.

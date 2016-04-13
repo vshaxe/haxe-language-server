@@ -1,11 +1,11 @@
-package node;
+package jsonrpc.node;
 
 import haxe.extern.EitherType;
 
 import js.node.Buffer;
 import js.node.stream.Readable;
 
-import JsonRpc.Message;
+import jsonrpc.Types;
 
 class MessageReader {
     var readable:IReadable;

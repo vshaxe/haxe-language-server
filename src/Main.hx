@@ -1,6 +1,7 @@
-import ProtocolTypes;
-import node.MessageReader;
-import node.MessageWriter;
+import jsonrpc.JsonRpc;
+import jsonrpc.node.MessageReader;
+import jsonrpc.node.MessageWriter;
+import vscode.ProtocolTypes;
 
 class Main {
     static function main() {
@@ -13,7 +14,7 @@ class Main {
         var reader = new MessageReader(js.node.Fs.createReadStream("input"));
         var writer = new MessageWriter(js.Node.process.stdout);
 
-        var proto = new Protocol();
+        var proto = new vscode.Protocol(writer.write);
 
         proto.onInitialize = function(params, resolve, reject) {
             resolve({
@@ -35,7 +36,6 @@ class Main {
             resolve(item);
         };
 
-        proto.sendMessage = writer.write;
         reader.listen(proto.handleMessage);
     }
 }

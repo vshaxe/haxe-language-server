@@ -1,9 +1,9 @@
-package node;
+package jsonrpc.node;
 
 import js.node.Buffer;
 import js.node.stream.Writable.IWritable;
 
-import JsonRpc.Message;
+import jsonrpc.Types;
 
 class MessageWriter {
     static inline var CONTENT_LENGTH = "Content-Length: ";

@@ -29,270 +29,27 @@ HxOverrides.substr = function(s,pos,len) {
 	}
 	return s.substr(pos,len);
 };
-var JsonRpc = function() { };
-JsonRpc.__name__ = true;
-JsonRpc.notification = function(method,params) {
-	var message = { jsonrpc : "2.0", method : method};
-	if(params == null) {
-		message.params = params;
-	}
-	return message;
-};
-JsonRpc.request = function(id,method,params) {
-	var message = { jsonrpc : "2.0", id : id, method : method};
-	if(params == null) {
-		message.params = params;
-	}
-	return message;
-};
-JsonRpc.response = function(id,outcome) {
-	var response = { jsonrpc : "2.0", id : id};
-	switch(outcome[1]) {
-	case 0:
-		response.error = outcome[2];
-		break;
-	case 1:
-		response.result = outcome[2];
-		break;
-	}
-	return response;
-};
-JsonRpc.error = function(code,message,data) {
-	var error = { code : code, message : message};
-	if(data != null) {
-		error.data = data;
-	}
-	return error;
-};
 var Main = function() { };
 Main.__name__ = true;
 Main.main = function() {
-	new node_MessageWriter(js_node_Fs.createWriteStream("input")).write(JsonRpc.request(1,"initialize",{ processId : -1, rootPath : null, capabilities : { }}));
-	var reader = new node_MessageReader(js_node_Fs.createReadStream("input"));
-	var writer = new node_MessageWriter(process.stdout);
-	var proto = new Protocol();
+	new jsonrpc_node_MessageWriter(js_node_Fs.createWriteStream("input")).write(jsonrpc_JsonRpc.request(1,"initialize",{ processId : -1, rootPath : null, capabilities : { }}));
+	var reader = new jsonrpc_node_MessageReader(js_node_Fs.createReadStream("input"));
+	var proto = new vscode_Protocol(($_=new jsonrpc_node_MessageWriter(process.stdout),$bind($_,$_.write)));
 	proto.onInitialize = function(params,resolve,reject) {
 		resolve({ capabilities : { completionProvider : { resolveProvider : true, triggerCharacters : [".","("]}}});
 	};
 	proto.onCompletion = function(params1,resolve1,reject1) {
-		proto.sendMessage(JsonRpc.notification("window/showMessage",{ type : 3, message : "Hello"}));
+		proto.writeMessage(jsonrpc_JsonRpc.notification("window/showMessage",{ type : 3, message : "Hello"}));
 		resolve1([{ label : "foo"},{ label : "bar"}]);
 	};
 	proto.onCompletionItemResolve = function(item,resolve2,reject2) {
 		resolve2(item);
 	};
-	proto.sendMessage = $bind(writer,writer.write);
 	reader.listen($bind(proto,proto.handleMessage));
 };
 Math.__name__ = true;
-var Protocol = function() {
-};
-Protocol.__name__ = true;
-Protocol.prototype = {
-	handleMessage: function(message) {
-		var _gthis = this;
-		console.log("Handling message: " + Std.string(message));
-		if(Object.prototype.hasOwnProperty.call(message,"id")) {
-			var request = message;
-			this.handleRequest(request,function(result) {
-				_gthis.sendMessage(JsonRpc.response(request.id,haxe_ds_Either.Right(result)));
-			},function(code,message1,data) {
-				_gthis.sendMessage(JsonRpc.response(request.id,haxe_ds_Either.Left(JsonRpc.error(code,message1,data))));
-			});
-		} else {
-			this.handleNotification(message);
-		}
-	}
-	,sendMessage: function(message) {
-	}
-	,handleRequest: function(request,resolve,reject) {
-		switch(request.method) {
-		case "codeLens/resolve":
-			this.onCodeLensResolve(request.params,resolve,function(c,m) {
-				reject(c,m,null);
-			});
-			break;
-		case "completionItem/resolve":
-			this.onCompletionItemResolve(request.params,resolve,function(c1,m1) {
-				reject(c1,m1,null);
-			});
-			break;
-		case "initialize":
-			this.onInitialize(request.params,resolve,reject);
-			break;
-		case "textDocument/codeAction":
-			this.onCodeAction(request.params,resolve,function(c2,m2) {
-				reject(c2,m2,null);
-			});
-			break;
-		case "textDocument/codeLens":
-			this.onCodeLens(request.params,resolve,function(c3,m3) {
-				reject(c3,m3,null);
-			});
-			break;
-		case "textDocument/completion":
-			this.onCompletion(request.params,resolve,function(c4,m4) {
-				reject(c4,m4,null);
-			});
-			break;
-		case "textDocument/definition":
-			this.onGotoDefinition(request.params,resolve,function(c5,m5) {
-				reject(c5,m5,null);
-			});
-			break;
-		case "textDocument/documentHighlight":
-			this.onDocumentHighlights(request.params,resolve,function(c6,m6) {
-				reject(c6,m6,null);
-			});
-			break;
-		case "textDocument/documentSymbol":
-			this.onDocumentSymbols(request.params,resolve,function(c7,m7) {
-				reject(c7,m7,null);
-			});
-			break;
-		case "textDocument/formatting":
-			this.onDocumentFormatting(request.params,resolve,function(c8,m8) {
-				reject(c8,m8,null);
-			});
-			break;
-		case "textDocument/hover":
-			this.onHover(request.params,resolve,function(c9,m9) {
-				reject(c9,m9,null);
-			});
-			break;
-		case "textDocument/onTypeFormatting":
-			this.onDocumentOnTypeFormatting(request.params,resolve,function(c10,m10) {
-				reject(c10,m10,null);
-			});
-			break;
-		case "textDocument/rangeFormatting":
-			this.onDocumentRangeFormatting(request.params,resolve,function(c11,m11) {
-				reject(c11,m11,null);
-			});
-			break;
-		case "textDocument/references":
-			this.onFindReferences(request.params,resolve,function(c12,m12) {
-				reject(c12,m12,null);
-			});
-			break;
-		case "textDocument/rename":
-			this.onRename(request.params,resolve,function(c13,m13) {
-				reject(c13,m13,null);
-			});
-			break;
-		case "textDocument/signatureHelp":
-			this.onSignatureHelp(request.params,resolve,function(c14,m14) {
-				reject(c14,m14,null);
-			});
-			break;
-		case "workspace/symbol":
-			this.onWorkspaceSymbols(request.params,resolve,function(c15,m15) {
-				reject(c15,m15,null);
-			});
-			break;
-		default:
-			reject(-32601,"Method '" + request.method + "' not found",null);
-		}
-	}
-	,handleNotification: function(notification) {
-		switch(notification.method) {
-		case "exit":
-			this.onExit();
-			break;
-		case "shutdown":
-			this.onShutdown();
-			break;
-		case "textDocument/didChange":
-			this.onDidChangeTextDocument(notification.params);
-			break;
-		case "textDocument/didClose":
-			this.onDidCloseTextDocument(notification.params);
-			break;
-		case "textDocument/didOpen":
-			this.onDidOpenTextDocument(notification.params);
-			break;
-		case "textDocument/didSave":
-			this.onDidSaveTextDocument(notification.params);
-			break;
-		case "textDocument/publishDiagnostics":
-			this.onPublishDiagnostics(notification.params);
-			break;
-		case "window/logMessage":
-			this.onLogMessage(notification.params);
-			break;
-		case "window/showMessage":
-			this.onShowMessage(notification.params);
-			break;
-		case "workspace/didChangeConfiguration":
-			this.onDidChangeConfiguration(notification.params);
-			break;
-		case "workspace/didChangeWatchedFiles":
-			this.onDidChangeWatchedFiles(notification.params);
-			break;
-		}
-	}
-	,onInitialize: function(params,resolve,reject) {
-	}
-	,onShutdown: function() {
-	}
-	,onExit: function() {
-	}
-	,onShowMessage: function(params) {
-	}
-	,onLogMessage: function(params) {
-	}
-	,onDidChangeConfiguration: function(params) {
-	}
-	,onDidOpenTextDocument: function(params) {
-	}
-	,onDidChangeTextDocument: function(params) {
-	}
-	,onDidCloseTextDocument: function(params) {
-	}
-	,onDidSaveTextDocument: function(params) {
-	}
-	,onDidChangeWatchedFiles: function(params) {
-	}
-	,onPublishDiagnostics: function(params) {
-	}
-	,onCompletion: function(params,resolve,reject) {
-	}
-	,onCompletionItemResolve: function(params,resolve,reject) {
-	}
-	,onHover: function(params,resolve,reject) {
-	}
-	,onSignatureHelp: function(params,resolve,reject) {
-	}
-	,onGotoDefinition: function(params,resolve,reject) {
-	}
-	,onFindReferences: function(params,resolve,reject) {
-	}
-	,onDocumentHighlights: function(params,resolve,reject) {
-	}
-	,onDocumentSymbols: function(params,resolve,reject) {
-	}
-	,onWorkspaceSymbols: function(params,resolve,reject) {
-	}
-	,onCodeAction: function(params,resolve,reject) {
-	}
-	,onCodeLens: function(params,resolve,reject) {
-	}
-	,onCodeLensResolve: function(params,resolve,reject) {
-	}
-	,onDocumentFormatting: function(params,resolve,reject) {
-	}
-	,onDocumentRangeFormatting: function(params,resolve,reject) {
-	}
-	,onDocumentOnTypeFormatting: function(params,resolve,reject) {
-	}
-	,onRename: function(params,resolve,reject) {
-	}
-};
 var Std = function() { };
 Std.__name__ = true;
-Std.string = function(s) {
-	return js_Boot.__string_rec(s,"");
-};
 Std.parseInt = function(x) {
 	var v = parseInt(x,10);
 	if(v == 0 && (HxOverrides.cca(x,1) == 120 || HxOverrides.cca(x,1) == 88)) {
@@ -470,15 +227,77 @@ js_Boot.__string_rec = function(o,s) {
 };
 var js_node_Fs = require("fs");
 var js_node_buffer_Buffer = require("buffer").Buffer;
-var node_MessageReader = function(readable,encoding) {
+var jsonrpc_JsonRpc = function() { };
+jsonrpc_JsonRpc.__name__ = true;
+jsonrpc_JsonRpc.notification = function(method,params) {
+	var message = { jsonrpc : "2.0", method : method};
+	if(params == null) {
+		message.params = params;
+	}
+	return message;
+};
+jsonrpc_JsonRpc.request = function(id,method,params) {
+	var message = { jsonrpc : "2.0", id : id, method : method};
+	if(params == null) {
+		message.params = params;
+	}
+	return message;
+};
+jsonrpc_JsonRpc.response = function(id,outcome) {
+	var response = { jsonrpc : "2.0", id : id};
+	switch(outcome[1]) {
+	case 0:
+		response.error = outcome[2];
+		break;
+	case 1:
+		response.result = outcome[2];
+		break;
+	}
+	return response;
+};
+jsonrpc_JsonRpc.error = function(code,message,data) {
+	var error = { code : code, message : message};
+	if(data != null) {
+		error.data = data;
+	}
+	return error;
+};
+var jsonrpc_Protocol = function(writeMessage) {
+	this.writeMessage = writeMessage;
+};
+jsonrpc_Protocol.__name__ = true;
+jsonrpc_Protocol.prototype = {
+	handleMessage: function(message) {
+		var _gthis = this;
+		if(!Object.prototype.hasOwnProperty.call(message,"method")) {
+			return;
+		}
+		if(Object.prototype.hasOwnProperty.call(message,"id")) {
+			var request = message;
+			this.handleRequest(request,function(result) {
+				_gthis.writeMessage(jsonrpc_JsonRpc.response(request.id,haxe_ds_Either.Right(result)));
+			},function(code,message1,data) {
+				_gthis.writeMessage(jsonrpc_JsonRpc.response(request.id,haxe_ds_Either.Left(jsonrpc_JsonRpc.error(code,message1,data))));
+			});
+		} else {
+			this.handleNotification(message);
+		}
+	}
+	,handleRequest: function(request,resolve,reject) {
+		reject(-32603,"handleRequest not implemented",null);
+	}
+	,handleNotification: function(notification) {
+	}
+};
+var jsonrpc_node_MessageReader = function(readable,encoding) {
 	if(encoding == null) {
 		encoding = "utf-8";
 	}
 	this.readable = readable;
-	this.buffer = new node__$MessageReader_MessageBuffer(encoding);
+	this.buffer = new jsonrpc_node__$MessageReader_MessageBuffer(encoding);
 };
-node_MessageReader.__name__ = true;
-node_MessageReader.prototype = {
+jsonrpc_node_MessageReader.__name__ = true;
+jsonrpc_node_MessageReader.prototype = {
 	listen: function(cb) {
 		this.nextMessageLength = -1;
 		this.callback = cb;
@@ -512,7 +331,7 @@ node_MessageReader.prototype = {
 		}
 	}
 };
-var node__$MessageReader_MessageBuffer = function(encoding) {
+var jsonrpc_node__$MessageReader_MessageBuffer = function(encoding) {
 	if(encoding == null) {
 		encoding = "utf-8";
 	}
@@ -520,8 +339,8 @@ var node__$MessageReader_MessageBuffer = function(encoding) {
 	this.index = 0;
 	this.buffer = new js_node_buffer_Buffer(8192);
 };
-node__$MessageReader_MessageBuffer.__name__ = true;
-node__$MessageReader_MessageBuffer.prototype = {
+jsonrpc_node__$MessageReader_MessageBuffer.__name__ = true;
+jsonrpc_node__$MessageReader_MessageBuffer.prototype = {
 	append: function(chunk) {
 		var toAppend;
 		if(typeof(chunk) == "string") {
@@ -546,7 +365,7 @@ node__$MessageReader_MessageBuffer.prototype = {
 	}
 	,tryReadHeaders: function() {
 		var current = 0;
-		while(current + 3 < this.index && (this.buffer[current] != node__$MessageReader_MessageBuffer.CR || this.buffer[current + 1] != node__$MessageReader_MessageBuffer.LF || this.buffer[current + 2] != node__$MessageReader_MessageBuffer.CR || this.buffer[current + 3] != node__$MessageReader_MessageBuffer.LF)) ++current;
+		while(current + 3 < this.index && (this.buffer[current] != jsonrpc_node__$MessageReader_MessageBuffer.CR || this.buffer[current + 1] != jsonrpc_node__$MessageReader_MessageBuffer.LF || this.buffer[current + 2] != jsonrpc_node__$MessageReader_MessageBuffer.CR || this.buffer[current + 3] != jsonrpc_node__$MessageReader_MessageBuffer.LF)) ++current;
 		if(current + 3 >= this.index) {
 			return null;
 		}
@@ -583,15 +402,15 @@ node__$MessageReader_MessageBuffer.prototype = {
 		return result;
 	}
 };
-var node_MessageWriter = function(writable,encoding) {
+var jsonrpc_node_MessageWriter = function(writable,encoding) {
 	if(encoding == null) {
 		encoding = "utf8";
 	}
 	this.writable = writable;
 	this.encoding = encoding;
 };
-node_MessageWriter.__name__ = true;
-node_MessageWriter.prototype = {
+jsonrpc_node_MessageWriter.__name__ = true;
+jsonrpc_node_MessageWriter.prototype = {
 	write: function(msg) {
 		var json = JSON.stringify(msg);
 		var contentLength = js_node_buffer_Buffer.byteLength(json,this.encoding);
@@ -602,12 +421,201 @@ node_MessageWriter.prototype = {
 		this.writable.write(json,this.encoding);
 	}
 };
+var vscode_Protocol = function(writeMessage) {
+	jsonrpc_Protocol.call(this,writeMessage);
+};
+vscode_Protocol.__name__ = true;
+vscode_Protocol.__super__ = jsonrpc_Protocol;
+vscode_Protocol.prototype = $extend(jsonrpc_Protocol.prototype,{
+	onInitialize: function(params,resolve,reject) {
+	}
+	,onShutdown: function() {
+	}
+	,onExit: function() {
+	}
+	,onShowMessage: function(params) {
+	}
+	,onLogMessage: function(params) {
+	}
+	,onDidChangeConfiguration: function(params) {
+	}
+	,onDidOpenTextDocument: function(params) {
+	}
+	,onDidChangeTextDocument: function(params) {
+	}
+	,onDidCloseTextDocument: function(params) {
+	}
+	,onDidSaveTextDocument: function(params) {
+	}
+	,onDidChangeWatchedFiles: function(params) {
+	}
+	,onPublishDiagnostics: function(params) {
+	}
+	,onCompletion: function(params,resolve,reject) {
+	}
+	,onCompletionItemResolve: function(params,resolve,reject) {
+	}
+	,onHover: function(params,resolve,reject) {
+	}
+	,onSignatureHelp: function(params,resolve,reject) {
+	}
+	,onGotoDefinition: function(params,resolve,reject) {
+	}
+	,onFindReferences: function(params,resolve,reject) {
+	}
+	,onDocumentHighlights: function(params,resolve,reject) {
+	}
+	,onDocumentSymbols: function(params,resolve,reject) {
+	}
+	,onWorkspaceSymbols: function(params,resolve,reject) {
+	}
+	,onCodeAction: function(params,resolve,reject) {
+	}
+	,onCodeLens: function(params,resolve,reject) {
+	}
+	,onCodeLensResolve: function(params,resolve,reject) {
+	}
+	,onDocumentFormatting: function(params,resolve,reject) {
+	}
+	,onDocumentRangeFormatting: function(params,resolve,reject) {
+	}
+	,onDocumentOnTypeFormatting: function(params,resolve,reject) {
+	}
+	,onRename: function(params,resolve,reject) {
+	}
+	,handleRequest: function(request,resolve,reject) {
+		switch(request.method) {
+		case "codeLens/resolve":
+			this.onCodeLensResolve(request.params,resolve,function(c,m) {
+				reject(c,m,null);
+			});
+			break;
+		case "completionItem/resolve":
+			this.onCompletionItemResolve(request.params,resolve,function(c1,m1) {
+				reject(c1,m1,null);
+			});
+			break;
+		case "initialize":
+			this.onInitialize(request.params,resolve,reject);
+			break;
+		case "textDocument/codeAction":
+			this.onCodeAction(request.params,resolve,function(c2,m2) {
+				reject(c2,m2,null);
+			});
+			break;
+		case "textDocument/codeLens":
+			this.onCodeLens(request.params,resolve,function(c3,m3) {
+				reject(c3,m3,null);
+			});
+			break;
+		case "textDocument/completion":
+			this.onCompletion(request.params,resolve,function(c4,m4) {
+				reject(c4,m4,null);
+			});
+			break;
+		case "textDocument/definition":
+			this.onGotoDefinition(request.params,resolve,function(c5,m5) {
+				reject(c5,m5,null);
+			});
+			break;
+		case "textDocument/documentHighlight":
+			this.onDocumentHighlights(request.params,resolve,function(c6,m6) {
+				reject(c6,m6,null);
+			});
+			break;
+		case "textDocument/documentSymbol":
+			this.onDocumentSymbols(request.params,resolve,function(c7,m7) {
+				reject(c7,m7,null);
+			});
+			break;
+		case "textDocument/formatting":
+			this.onDocumentFormatting(request.params,resolve,function(c8,m8) {
+				reject(c8,m8,null);
+			});
+			break;
+		case "textDocument/hover":
+			this.onHover(request.params,resolve,function(c9,m9) {
+				reject(c9,m9,null);
+			});
+			break;
+		case "textDocument/onTypeFormatting":
+			this.onDocumentOnTypeFormatting(request.params,resolve,function(c10,m10) {
+				reject(c10,m10,null);
+			});
+			break;
+		case "textDocument/rangeFormatting":
+			this.onDocumentRangeFormatting(request.params,resolve,function(c11,m11) {
+				reject(c11,m11,null);
+			});
+			break;
+		case "textDocument/references":
+			this.onFindReferences(request.params,resolve,function(c12,m12) {
+				reject(c12,m12,null);
+			});
+			break;
+		case "textDocument/rename":
+			this.onRename(request.params,resolve,function(c13,m13) {
+				reject(c13,m13,null);
+			});
+			break;
+		case "textDocument/signatureHelp":
+			this.onSignatureHelp(request.params,resolve,function(c14,m14) {
+				reject(c14,m14,null);
+			});
+			break;
+		case "workspace/symbol":
+			this.onWorkspaceSymbols(request.params,resolve,function(c15,m15) {
+				reject(c15,m15,null);
+			});
+			break;
+		default:
+			reject(-32601,"Method '" + request.method + "' not found",null);
+		}
+	}
+	,handleNotification: function(notification) {
+		switch(notification.method) {
+		case "exit":
+			this.onExit();
+			break;
+		case "shutdown":
+			this.onShutdown();
+			break;
+		case "textDocument/didChange":
+			this.onDidChangeTextDocument(notification.params);
+			break;
+		case "textDocument/didClose":
+			this.onDidCloseTextDocument(notification.params);
+			break;
+		case "textDocument/didOpen":
+			this.onDidOpenTextDocument(notification.params);
+			break;
+		case "textDocument/didSave":
+			this.onDidSaveTextDocument(notification.params);
+			break;
+		case "textDocument/publishDiagnostics":
+			this.onPublishDiagnostics(notification.params);
+			break;
+		case "window/logMessage":
+			this.onLogMessage(notification.params);
+			break;
+		case "window/showMessage":
+			this.onShowMessage(notification.params);
+			break;
+		case "workspace/didChangeConfiguration":
+			this.onDidChangeConfiguration(notification.params);
+			break;
+		case "workspace/didChangeWatchedFiles":
+			this.onDidChangeWatchedFiles(notification.params);
+			break;
+		}
+	}
+});
 var $_, $fid = 0;
 function $bind(o,m) { if( m == null ) return null; if( m.__id__ == null ) m.__id__ = $fid++; var f; if( o.hx__closures__ == null ) o.hx__closures__ = {}; else f = o.hx__closures__[m.__id__]; if( f == null ) { f = function(){ return f.method.apply(f.scope, arguments); }; f.scope = o; f.method = m; o.hx__closures__[m.__id__] = f; } return f; }
 String.__name__ = true;
 Array.__name__ = true;
 var __map_reserved = {}
-node__$MessageReader_MessageBuffer.CR = new js_node_buffer_Buffer("\r","ascii")[0];
-node__$MessageReader_MessageBuffer.LF = new js_node_buffer_Buffer("\n","ascii")[0];
+jsonrpc_node__$MessageReader_MessageBuffer.CR = new js_node_buffer_Buffer("\r","ascii")[0];
+jsonrpc_node__$MessageReader_MessageBuffer.LF = new js_node_buffer_Buffer("\n","ascii")[0];
 Main.main();
 })();
