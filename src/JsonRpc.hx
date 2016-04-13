@@ -1,3 +1,7 @@
+/*
+    This module contains basic JSON-RPC types and helper methods.
+*/
+
 /**
     A general message as defined by JSON-RPC.
 **/
