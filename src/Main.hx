@@ -4,7 +4,7 @@ import node.MessageWriter;
 
 class Main {
     static function main() {
-        new MessageWriter(js.node.Fs.createWriteStream("input")).write(JsonRpc.request(1, ProtocolTypes.Method.Initialize, ({
+        new MessageWriter(js.node.Fs.createWriteStream("input")).write(JsonRpc.request(1, MethodName.Initialize, ({
             processId: -1,
             rootPath: null,
             capabilities: {},

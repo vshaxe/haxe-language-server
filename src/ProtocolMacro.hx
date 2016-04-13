@@ -10,7 +10,7 @@ class ProtocolMacro {
         var requestCases = new Array<Case>();
         var notificationCases = new Array<Case>();
 
-        var ab = switch (Context.getType("ProtocolTypes.Method").follow()) {
+        var ab = switch (Context.getType("ProtocolTypes.MethodName").follow()) {
             case TAbstract(_.get() => ab, _): ab;
             default: throw false;
         }
@@ -22,7 +22,7 @@ class ProtocolMacro {
             var handlerArgDefs = [];
             var handlerCallArgs = [];
             switch (method.type) {
-                case TAbstract(_.get() => {name: "Method"}, [params, resultData, errorData]):
+                case TAbstract(_.get() => {name: "Request"}, [params, resultData, errorData]):
                     var paramsCT = params.toComplexType();
                     if (params.toString() != "Void") {
                         handlerArgDefs.push({name: "params", type: paramsCT});
