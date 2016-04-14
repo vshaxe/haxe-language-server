@@ -255,10 +255,56 @@ class Main {
         return result;
     }
 
+    static function parseToplevelCompletion(x:Xml):Array<CompletionItem> {
+        var result = [];
+        for (el in x.elements()) {
+            trace(el);
+            var kind = el.get("k");
+            var type = el.get("t");
+            var name = el.firstChild().nodeValue;
+
+            var item:CompletionItem = {label: name};
+
+            var displayKind = toplevelKindToCompletionItemKind(kind);
+            if (displayKind != null) item.kind = displayKind;
+
+            var fullName = name;
+            if (kind == "global")
+                fullName = el.get("p") + "." + name;
+            else if (kind == "type")
+                fullName = el.get("p");
+
+            if (type != null || fullName != name) {
+                var parts = [];
+                if (fullName != name)
+                    parts.push('($fullName)');
+                if (type != null)
+                    parts.push(type); // todo format functions?
+                item.detail = parts.join(" ");
+            }
+
+            result.push(item);
+        }
+        return result;
+    }
+
     static function formatType(type:String, name:String, kind:CompletionItemKind):String {
         return switch (kind) {
             case Method: name + prepareSignature(type);
             default: type;
+        }
+    }
+
+    static function toplevelKindToCompletionItemKind(kind:String):CompletionItemKind {
+        return switch (kind) {
+            case "local": Variable;
+            case "member": Field;
+            case "static": Class;
+            case "enum": Enum;
+            case "global": Variable;
+            case "type": Class;
+            case "package": Module;
+            default: trace("unknown toplevel item kind: " + kind); null;
         }
     }
 
@@ -267,8 +313,8 @@ class Main {
             case "var": Field;
             case "method": Method;
             case "type": Class;
-            case "package": File;
-            default: null;
+            case "package": Module;
+            default: trace("unknown field item kind: " + kind); null;
         }
     }
 
