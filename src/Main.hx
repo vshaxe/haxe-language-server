@@ -55,6 +55,7 @@ class Main {
                     },
                     definitionProvider: true,
                     hoverProvider: true,
+                    referencesProvider: true,
                 }
             });
         };
@@ -178,11 +179,53 @@ class Main {
                     if (xml == null)
                         return reject(0, "");
                     var type = xml.firstChild().nodeValue;
-                    trace(type);
                     resolve({contents: type});
                 });
             });
         };
+
+        proto.onFindReferences = function(params, resolve, reject) {
+            tempSave(params.textDocument.uri, function(doc, filePath, release) {
+                var bytePos = doc.byteOffsetAt(params.position);
+                var args = getBaseDisplayArgs().concat([
+                    "--display", '$filePath@$bytePos@usage'
+                ]);
+                haxeServer.process(args, function(data) {
+                    var xml = try Xml.parse(data).firstElement() catch (e:Dynamic) null;
+                    if (xml == null) {
+                        release();
+                        return reject(0, "");
+                    }
+
+                    var positions = [for (el in xml.elements()) el.firstChild().nodeValue];
+                    if (positions.length == 0) {
+                        release();
+                        return reject(0, "no info");
+                    }
+
+                    var results = [];
+                    for (p in positions) {
+                        var pos = HaxePosition.parse(p);
+                        if (pos == null) {
+                            trace("Got invalid position: " + p);
+                            continue;
+                        }
+                        trace(pos, pos.toRange());
+                        results.push({
+                            uri: fsPathToUri(pos.file),
+                            range: pos.toRange(),
+                        });
+                    }
+
+                    release();
+
+                    if (results.length == 0)
+                        reject(0, "no info");
+                    else
+                        resolve(results);
+                });
+            });
+        }
 
         reader.listen(proto.handleMessage);
     }
