@@ -1,19 +1,16 @@
 import js.Node.process;
+import js.node.Buffer;
 import js.node.Path;
 import js.node.Url;
+import js.node.ChildProcess;
+import js.node.child_process.ChildProcess.ChildProcessEvent;
+import js.node.stream.Readable.ReadableEvent;
+import jsonrpc.ErrorCodes;
 import jsonrpc.node.MessageReader;
 import jsonrpc.node.MessageWriter;
+import vscode.ProtocolTypes;
 import sys.FileSystem;
 using StringTools;
-
-class HaxeContext {
-    public function new() {
-    }
-
-    public function setup(directory:String, hxmlFile:String) {
-
-    }
-}
 
 class Main {
     static function main() {
@@ -31,10 +28,12 @@ class Main {
             proto.sendLogMessage({type: Log, message: r.join(" ")});
         }
 
-        var context = new HaxeContext();
         var rootPath;
         // var tmpDir;
         var hxmlFile;
+
+        var docs = new TextDocuments();
+        docs.listen(proto);
 
         proto.onInitialize = function(params, resolve, reject) {
             rootPath = params.rootPath;
@@ -53,42 +52,85 @@ class Main {
         };
 
         proto.onDidChangeConfiguration = function(config) {
-            context.setup(rootPath, config.settings.haxe.buildFile);
+            hxmlFile = (config.settings.haxe.buildFile : String);
         };
 
-        // TODO: these files should be in-memory until we need them for completion
-        // TODO: also, we only need to monitor haxe files within current hxml class paths
-        // proto.onDidOpenTextDocument = function(params) {
-        //     var filePath = uriToFsPath(params.textDocument.uri);
-        //     var relativePath = Path.relative(rootPath, filePath);
-        //     if (relativePath.startsWith("..")) return;
-        //     var tmpPath = Path.join(tmpDir, relativePath);
-        //     sys.FileSystem.createDirectory(Path.dirname(tmpPath));
-        //     sys.io.File.saveContent(tmpPath, params.textDocument.text);
-        // };
-
-        // proto.onDidChangeTextDocument = function(params) {
-        //     var filePath = uriToFsPath(params.textDocument.uri);
-        //     var relativePath = Path.relative(rootPath, filePath);
-        //     if (relativePath.startsWith("..")) return;
-        //     var tmpPath = Path.join(tmpDir, relativePath);
-        //     sys.io.File.saveContent(tmpPath, params.contentChanges[0].text);
-        // };
-
-        // proto.onDidCloseTextDocument = function(params) {
-        //     var filePath = uriToFsPath(params.textDocument.uri);
-        //     var relativePath = Path.relative(rootPath, filePath);
-        //     if (relativePath.startsWith("..")) return;
-        //     var tmpPath = Path.join(tmpDir, relativePath);
-        //     if (FileSystem.exists(tmpPath))
-        //         FileSystem.deleteFile(tmpPath);
-        // };
-
         proto.onCompletion = function(params, resolve, reject) {
-            resolve([{label: "foo"}, {label: "bar"}]);
+            var uri = params.textDocument.uri;
+            var doc = docs.get(uri);
+            if (doc == null)
+                return reject(ErrorCodes.InternalError, "no such document: " + uri);
+            var filePath = uriToFsPath(uri);
+
+            // TODO: replace this with tempdir stuff
+            var stats = js.node.Fs.statSync(filePath);
+            var oldContent = sys.io.File.getContent(filePath);
+            sys.io.File.saveContent(filePath, doc.content); 
+            js.node.Fs.utimesSync(filePath, stats.atime, stats.mtime);
+
+            var bytePos = doc.byteOffsetAt(params.position);
+            var args = [
+                hxmlFile, // call completion file
+                // "-cp", tmpDir, // add temp class path
+                "-D", "display-details",
+                "--no-output", // prevent generation
+                "--display", '$filePath@$bytePos'
+            ];
+            trace("Calling haxe with args " + args);
+            var haxe = ChildProcess.spawn("haxe", args, {cwd: rootPath});
+            var data = new StringBuf();
+            haxe.stderr.on(ReadableEvent.Data, function(buf) {
+                data.add((buf : String));
+            });
+            haxe.on(ChildProcessEvent.Exit, function(code, _) {
+                sys.io.File.saveContent(filePath, oldContent); 
+                js.node.Fs.utimesSync(filePath, stats.atime, stats.mtime);
+
+                if (code == 0) {
+                    var output = data.toString();
+                    var xml = try Xml.parse(output) catch (e:Dynamic) return reject(0, "");
+                    resolve(parseFieldCompletion(xml.firstElement()));
+                } else {
+                    reject(0, "");
+                }
+            });
         };
 
         reader.listen(proto.handleMessage);
+    }
+
+    static function parseFieldCompletion(x:Xml):Array<CompletionItem> {
+        var result = [];
+        for (el in x.elements()) {
+            var kind = fieldKindToCompletionItemKind(el.get("k"));
+            var type = null, doc = null;
+            for (child in el.elements()) {
+                switch (child.nodeName) {
+                    case "t": type = child.firstChild().nodeValue;
+                    case "d": doc = child.firstChild().nodeValue;
+                }
+            }
+            var item:CompletionItem = {label: el.get("n")};
+            if (doc != null) item.documentation = doc;
+            if (kind != null) item.kind = kind;
+            if (type != null) item.detail = formatType(type, kind);
+            result.push(item);
+        }
+        return result;
+    }
+
+    static function formatType(type:String, kind:CompletionItemKind):String {
+        return type;
+    }
+
+    static function fieldKindToCompletionItemKind(kind:String):CompletionItemKind {
+        return switch (kind) {
+            case "var": Field;
+            case "method": Method;
+            case "type": Class;
+            case "package": File;
+            default: null;
+        }
     }
 
     static function deleteRec(path:String) {
