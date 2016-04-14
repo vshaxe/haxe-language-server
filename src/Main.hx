@@ -95,17 +95,19 @@ class Main {
         ];
 
         proto.onCompletion = function(params, resolve, reject) {
+            var toplevel = false;
             tempSave(params.textDocument.uri, function(doc, filePath, release) {
                 var bytePos = doc.byteOffsetAt(params.position);
                 var args = getBaseDisplayArgs().concat([
-                    "--display", '$filePath@$bytePos'
+                    "--display", '$filePath@$bytePos' + (if (toplevel) "@toplevel" else "")
                 ]);
                 haxeServer.process(args, function(data) {
                     release();
                     var xml = try Xml.parse(data).firstElement() catch (e:Dynamic) null;
                     if (xml == null)
                         return reject(0, "");
-                    resolve(parseFieldCompletion(xml));
+                    var items = if (toplevel) parseToplevelCompletion(xml) else parseFieldCompletion(xml);
+                    resolve(items);
                 });
             });
         };
