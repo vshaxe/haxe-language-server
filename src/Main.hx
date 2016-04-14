@@ -40,6 +40,7 @@ class Main {
 
         proto.onInitialize = function(params, resolve, reject) {
             rootPath = params.rootPath;
+            proto.sendShowMessage({type: Info, message: "Haxe language server started"});
 
             // tmpDir = Path.join(rootPath, "tmp");
             // deleteRec(tmpDir);
