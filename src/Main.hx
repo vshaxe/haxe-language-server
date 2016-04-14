@@ -46,6 +46,9 @@ class Main {
                     textDocumentSync: Full,
                     completionProvider: {
                         triggerCharacters: ["."]
+                    },
+                    signatureHelpProvider: {
+                        triggerCharacters: ["("]
                     }
                 }
             });
@@ -94,6 +97,14 @@ class Main {
                     reject(0, "");
                 }
             });
+        };
+
+        proto.onSignatureHelp = function(params, resolve, reject) {
+            var uri = params.textDocument.uri;
+            var doc = docs.get(uri);
+            if (doc == null)
+                return reject(ErrorCodes.InternalError, "no such document: " + uri);
+            reject(0, "not implemented");
         };
 
         reader.listen(proto.handleMessage);
