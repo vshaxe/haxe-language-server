@@ -32,13 +32,15 @@ class Main {
         }
 
         var context = new HaxeContext();
-        var rootPath, tmpDir;
+        var rootPath;
+        // var tmpDir;
+        var hxmlFile;
 
         proto.onInitialize = function(params, resolve, reject) {
             rootPath = params.rootPath;
 
-            tmpDir = Path.join(rootPath, "tmp");
-            deleteRec(tmpDir);
+            // tmpDir = Path.join(rootPath, "tmp");
+            // deleteRec(tmpDir);
 
             resolve({
                 capabilities: {
@@ -54,31 +56,33 @@ class Main {
             context.setup(rootPath, config.settings.haxe.buildFile);
         };
 
-        proto.onDidOpenTextDocument = function(params) {
-            var filePath = uriToFsPath(params.textDocument.uri);
-            var relativePath = Path.relative(rootPath, filePath);
-            if (relativePath.startsWith("..")) return;
-            var tmpPath = Path.join(tmpDir, relativePath);
-            sys.FileSystem.createDirectory(Path.dirname(tmpPath));
-            sys.io.File.saveContent(tmpPath, params.textDocument.text);
-        };
+        // TODO: these files should be in-memory until we need them for completion
+        // TODO: also, we only need to monitor haxe files within current hxml class paths
+        // proto.onDidOpenTextDocument = function(params) {
+        //     var filePath = uriToFsPath(params.textDocument.uri);
+        //     var relativePath = Path.relative(rootPath, filePath);
+        //     if (relativePath.startsWith("..")) return;
+        //     var tmpPath = Path.join(tmpDir, relativePath);
+        //     sys.FileSystem.createDirectory(Path.dirname(tmpPath));
+        //     sys.io.File.saveContent(tmpPath, params.textDocument.text);
+        // };
 
-        proto.onDidChangeTextDocument = function(params) {
-            var filePath = uriToFsPath(params.textDocument.uri);
-            var relativePath = Path.relative(rootPath, filePath);
-            if (relativePath.startsWith("..")) return;
-            var tmpPath = Path.join(tmpDir, relativePath);
-            sys.io.File.saveContent(tmpPath, params.contentChanges[0].text);
-        };
+        // proto.onDidChangeTextDocument = function(params) {
+        //     var filePath = uriToFsPath(params.textDocument.uri);
+        //     var relativePath = Path.relative(rootPath, filePath);
+        //     if (relativePath.startsWith("..")) return;
+        //     var tmpPath = Path.join(tmpDir, relativePath);
+        //     sys.io.File.saveContent(tmpPath, params.contentChanges[0].text);
+        // };
 
-        proto.onDidCloseTextDocument = function(params) {
-            var filePath = uriToFsPath(params.textDocument.uri);
-            var relativePath = Path.relative(rootPath, filePath);
-            if (relativePath.startsWith("..")) return;
-            var tmpPath = Path.join(tmpDir, relativePath);
-            if (FileSystem.exists(tmpPath))
-                FileSystem.deleteFile(tmpPath);
-        };
+        // proto.onDidCloseTextDocument = function(params) {
+        //     var filePath = uriToFsPath(params.textDocument.uri);
+        //     var relativePath = Path.relative(rootPath, filePath);
+        //     if (relativePath.startsWith("..")) return;
+        //     var tmpPath = Path.join(tmpDir, relativePath);
+        //     if (FileSystem.exists(tmpPath))
+        //         FileSystem.deleteFile(tmpPath);
+        // };
 
         proto.onCompletion = function(params, resolve, reject) {
             resolve([{label: "foo"}, {label: "bar"}]);
