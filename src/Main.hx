@@ -53,7 +53,8 @@ class Main {
                     signatureHelpProvider: {
                         triggerCharacters: ["("]
                     },
-                    definitionProvider: true
+                    definitionProvider: true,
+                    hoverProvider: true,
                 }
             });
         };
@@ -161,6 +162,24 @@ class Main {
                         case 1: resolve(results[0]);
                         default: resolve(results);
                     }
+                });
+            });
+        };
+
+        proto.onHover = function(params, resolve, reject) {
+            tempSave(params.textDocument.uri, function(doc, filePath, release) {
+                var bytePos = doc.byteOffsetAt(params.position);
+                var args = getBaseDisplayArgs().concat([
+                    "--display", '$filePath@$bytePos@type'
+                ]);
+                haxeServer.process(args, function(data) {
+                    release();
+                    var xml = try Xml.parse(data).firstElement() catch (e:Dynamic) null;
+                    if (xml == null)
+                        return reject(0, "");
+                    var type = xml.firstChild().nodeValue;
+                    trace(type);
+                    resolve({contents: type});
                 });
             });
         };
