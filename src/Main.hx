@@ -76,7 +76,8 @@ class Main {
                     },
                     signatureHelpProvider: {
                         triggerCharacters: ["("]
-                    }
+                    },
+                    definitionProvider: true
                 }
             });
         };
@@ -140,6 +141,46 @@ class Main {
                     if (xml == null)
                         return reject(0, "");
                     resolve({signatures: [{label: xml.firstChild().nodeValue}]});
+                });
+            });
+        };
+
+        proto.onGotoDefinition = function(params, resolve, reject) {
+            tempSave(params.textDocument.uri, function(doc, filePath, release) {
+                trace(doc.content.substr(0, doc.offsetAt(params.position)));
+                var bytePos = doc.byteOffsetAt(params.position) + 1;
+                var args = getBaseDisplayArgs().concat([
+                    "--display", '$filePath@$bytePos@position'
+                ]);
+                haxeServer.process(args, function(data) {
+                    release();
+                    var xml = try Xml.parse(data).firstElement() catch (e:Dynamic) null;
+                    if (xml == null)
+                        return reject(0, "");
+
+                    var positions = [for (el in xml.elements()) el.firstChild().nodeValue];
+                    if (positions.length == 0)
+                        return reject(0, "no info");
+
+                    var results = [];
+                    for (p in positions) {
+                        var pos = parsePosition(p);
+                        if (pos == null) {
+                            trace("Got invalid position: " + p);
+                            continue;
+                        }
+                        trace(pos);
+                        var uri = fsPathToUri(pos.file);
+                        var start = {line: 0, character: 0};
+                        var end = {line: 0, character: 0};
+                        results.push({uri: uri, range: {start: start, end: end}});
+                    }
+
+                    switch (results.length) {
+                        case 0: reject(0, "no info");
+                        case 1: resolve(results[0]);
+                        default: resolve(results);
+                    }
                 });
             });
         };
