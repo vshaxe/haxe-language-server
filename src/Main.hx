@@ -11,6 +11,7 @@ import jsonrpc.node.MessageWriter;
 import vscode.ProtocolTypes;
 import sys.FileSystem;
 using StringTools;
+import Uri.*;
 
 typedef HaxePosition = {
     file:String,
@@ -189,30 +190,4 @@ class Main {
             FileSystem.deleteFile(path);
         }
     }
-
-    // extracted from vscode sources
-    static function uriToFsPath(uri:String):String {
-        if (!uriRe.match(uri))
-            throw 'Invalid uri: $uri';
-
-        inline function m(i) {
-            var m = uriRe.matched(i);
-            return if (m != null) m else "";
-        }
-        var scheme = m(2);
-        var authority = decodeURIComponent(m(4));
-        var path = decodeURIComponent(m(5));
-        var query = decodeURIComponent(m(7));
-        var fragment = decodeURIComponent(m(9));
-
-        if (authority.length > 0 && scheme == 'file')
-            return '//$authority$path';
-        else if (driveLetterPathRe.match(path))
-            return path.charAt(1).toLowerCase() + path.substr(2);
-        else
-            return path;
-    }
-    static var driveLetterPathRe = ~/^\/[a-zA-z]:/;
-    static var uriRe = ~/^(([^:\/?#]+?):)?(\/\/([^\/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?/;
-    @:extern static inline function decodeURIComponent(s:String):String return untyped __js__("decodeURIComponent({0})", s);
 }
