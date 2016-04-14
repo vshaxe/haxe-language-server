@@ -201,20 +201,17 @@ class Main {
         
         // if we have byte offsets within line, we need to convert them to character offsets
         // for that we have to read the file :-/
-        if (pos.startByte != null) {
-            var content = sys.io.File.getContent(pos.file);
-            var lines = content.split("\n");
-
-            var startLineContent = new Buffer(lines[startLine], "utf-8");
-            var startLineTextToStart = startLineContent.toString("utf-8", 0, pos.startByte);
-            startChar = startLineTextToStart.length;
-
-            if (pos.endByte != null) {
-                var endLineContent = new Buffer(lines[endLine], "utf-8");
-                var endLineTextToStart = endLineContent.toString("utf-8", 0, pos.endByte);
-                endChar = endLineTextToStart.length;
-            }
+        var lines = null;
+        inline function getLineChar(line:Int, byteOffset:Int):Int {
+            if (lines == null) lines = sys.io.File.getContent(pos.file).split("\n");
+            var lineContent = new Buffer(lines[line], "utf-8");
+            var lineTextSlice = lineContent.toString("utf-8", 0, byteOffset);
+            return lineTextSlice.length;
         }
+        if (pos.startByte != null && pos.startByte != 0)
+            startChar = getLineChar(startLine, pos.startByte);
+        if (pos.endByte != null && pos.endByte != 0)
+            endChar = getLineChar(endLine, pos.endByte);
 
         return {
             start: {line: startLine, character: startChar},
