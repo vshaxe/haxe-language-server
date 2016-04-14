@@ -171,8 +171,8 @@ class Main {
                         }
                         trace(pos);
                         var uri = fsPathToUri(pos.file);
-                        var start = {line: 0, character: 0};
-                        var end = {line: 0, character: 0};
+                        var start = {line: pos.line - 1, character: 0};
+                        var end = {line: pos.line - 1, character: 0};
                         results.push({uri: uri, range: {start: start, end: end}});
                     }
 
