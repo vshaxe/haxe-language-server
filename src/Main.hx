@@ -9,6 +9,15 @@ class Main {
 
         var proto = new vscode.Protocol(writer.write);
 
+        haxe.Log.trace = function(v, ?i) {
+            var r = [Std.string(v)];
+            if (i != null && i.customParams != null) {
+                for (v in i.customParams)
+                    r.push(Std.string(v));
+            }
+            proto.sendLogMessage({type: Log, message: r.join(" ")});
+        }
+
         proto.onInitialize = function(params, resolve, reject) {
             proto.sendShowMessage({type: Info, message: "Welcome to Haxe!"});
             resolve({
