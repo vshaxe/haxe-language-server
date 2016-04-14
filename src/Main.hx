@@ -64,44 +64,58 @@ class Main {
             haxeServer.start(6000);
         };
 
-        proto.onCompletion = function(params, resolve, reject) {
-            var uri = params.textDocument.uri;
+        // TODO: replace this with tempdir stuff
+        function tempSave(uri:String, cb:TextDocument->String->(Void->Void)->Void) {
             var doc = docs.get(uri);
-            if (doc == null)
-                return reject(ErrorCodes.InternalError, "no such document: " + uri);
             var filePath = uriToFsPath(uri);
-
-            // TODO: replace this with tempdir stuff
             var stats = js.node.Fs.statSync(filePath);
             var oldContent = sys.io.File.getContent(filePath);
             sys.io.File.saveContent(filePath, doc.content); 
             js.node.Fs.utimesSync(filePath, stats.atime, stats.mtime);
-
-            var bytePos = doc.byteOffsetAt(params.position);
-            var args = [
-                "--cwd", rootPath,
-                hxmlFile, // call completion file
-                // "-cp", tmpDir, // add temp class path
-                "-D", "display-details",
-                "--no-output", // prevent generation
-                "--display", '$filePath@$bytePos'
-            ];
-            haxeServer.process(args, function(data) {
+            cb(doc, filePath, function() {
                 sys.io.File.saveContent(filePath, oldContent); 
                 js.node.Fs.utimesSync(filePath, stats.atime, stats.mtime);
-                var xml = try Xml.parse(data).firstElement() catch (e:Dynamic) null;
-                if (xml == null)
-                    return reject(0, "");
-                resolve(parseFieldCompletion(xml));
+            });
+        }
+
+        inline function getBaseDisplayArgs() return [
+            "--cwd", rootPath,
+            hxmlFile, // call completion file
+            // "-cp", tmpDir, // add temp class path
+            "-D", "display-details",
+            "--no-output", // prevent generation
+        ];
+
+        proto.onCompletion = function(params, resolve, reject) {
+            tempSave(params.textDocument.uri, function(doc, filePath, release) {
+                var bytePos = doc.byteOffsetAt(params.position);
+                var args = getBaseDisplayArgs().concat([
+                    "--display", '$filePath@$bytePos'
+                ]);
+                haxeServer.process(args, function(data) {
+                    release();
+                    var xml = try Xml.parse(data).firstElement() catch (e:Dynamic) null;
+                    if (xml == null)
+                        return reject(0, "");
+                    resolve(parseFieldCompletion(xml));
+                });
             });
         };
 
         proto.onSignatureHelp = function(params, resolve, reject) {
-            var uri = params.textDocument.uri;
-            var doc = docs.get(uri);
-            if (doc == null)
-                return reject(ErrorCodes.InternalError, "no such document: " + uri);
-            reject(0, "not implemented");
+            tempSave(params.textDocument.uri, function(doc, filePath, release) {
+                var bytePos = doc.byteOffsetAt(params.position);
+                var args = getBaseDisplayArgs().concat([
+                    "--display", '$filePath@$bytePos'
+                ]);
+                haxeServer.process(args, function(data) {
+                    release();
+                    var xml = try Xml.parse(data).firstElement() catch (e:Dynamic) null;
+                    if (xml == null)
+                        return reject(0, "");
+                    resolve({signatures: [{label: xml.firstChild().nodeValue}]});
+                });
+            });
         };
 
         reader.listen(proto.handleMessage);
