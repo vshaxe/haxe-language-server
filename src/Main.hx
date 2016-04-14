@@ -31,6 +31,7 @@ class Main {
         var rootPath;
         // var tmpDir;
         var hxmlFile;
+        var haxeServer = new HaxeServer();
 
         var docs = new TextDocuments();
         docs.listen(proto);
@@ -54,8 +55,13 @@ class Main {
             });
         };
 
+        proto.onShutdown = function() {
+            haxeServer.stop();
+        }
+
         proto.onDidChangeConfiguration = function(config) {
             hxmlFile = (config.settings.haxe.buildFile : String);
+            haxeServer.start(6000);
         };
 
         proto.onCompletion = function(params, resolve, reject) {
@@ -73,29 +79,20 @@ class Main {
 
             var bytePos = doc.byteOffsetAt(params.position);
             var args = [
+                "--cwd", rootPath,
                 hxmlFile, // call completion file
                 // "-cp", tmpDir, // add temp class path
                 "-D", "display-details",
                 "--no-output", // prevent generation
                 "--display", '$filePath@$bytePos'
             ];
-            trace("Calling haxe with args " + args);
-            var haxe = ChildProcess.spawn("haxe", args, {cwd: rootPath});
-            var data = new StringBuf();
-            haxe.stderr.on(ReadableEvent.Data, function(buf) {
-                data.add((buf : String));
-            });
-            haxe.on(ChildProcessEvent.Exit, function(code, _) {
+            haxeServer.process(args, function(data) {
                 sys.io.File.saveContent(filePath, oldContent); 
                 js.node.Fs.utimesSync(filePath, stats.atime, stats.mtime);
-
-                if (code == 0) {
-                    var output = data.toString();
-                    var xml = try Xml.parse(output) catch (e:Dynamic) return reject(0, "");
-                    resolve(parseFieldCompletion(xml.firstElement()));
-                } else {
-                    reject(0, "");
-                }
+                var xml = try Xml.parse(data).firstElement() catch (e:Dynamic) null;
+                if (xml == null)
+                    return reject(0, "");
+                resolve(parseFieldCompletion(xml));
             });
         };
 
