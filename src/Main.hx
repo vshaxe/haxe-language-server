@@ -13,6 +13,7 @@ import vscode.ProtocolTypes;
 import sys.FileSystem;
 using StringTools;
 import Uri.*;
+import SignatureHelper.prepareSignature;
 
 class Main {
     static function main() {
@@ -77,10 +78,10 @@ class Main {
             var filePath = uriToFsPath(uri);
             var stats = js.node.Fs.statSync(filePath);
             var oldContent = sys.io.File.getContent(filePath);
-            sys.io.File.saveContent(filePath, doc.content); 
+            sys.io.File.saveContent(filePath, doc.content);
             js.node.Fs.utimesSync(filePath, stats.atime, stats.mtime);
             cb(doc, filePath, function() {
-                sys.io.File.saveContent(filePath, oldContent); 
+                sys.io.File.saveContent(filePath, oldContent);
                 js.node.Fs.utimesSync(filePath, stats.atime, stats.mtime);
             });
         }
@@ -244,17 +245,21 @@ class Main {
                     case "d": doc = child.firstChild().nodeValue;
                 }
             }
-            var item:CompletionItem = {label: el.get("n")};
+            var name = el.get("n");
+            var item:CompletionItem = {label: name};
             if (doc != null) item.documentation = doc;
             if (kind != null) item.kind = kind;
-            if (type != null) item.detail = formatType(type, kind);
+            if (type != null) item.detail = formatType(type, name, kind);
             result.push(item);
         }
         return result;
     }
 
-    static function formatType(type:String, kind:CompletionItemKind):String {
-        return type;
+    static function formatType(type:String, name:String, kind:CompletionItemKind):String {
+        return switch (kind) {
+            case Method: name + prepareSignature(type);
+            default: type;
+        }
     }
 
     static function fieldKindToCompletionItemKind(kind:String):CompletionItemKind {
