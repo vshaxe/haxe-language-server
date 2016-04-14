@@ -12,7 +12,32 @@ import vscode.ProtocolTypes;
 import sys.FileSystem;
 using StringTools;
 
+typedef HaxePosition = {
+    file:String,
+    line:Int, // 1-based
+    startLine:Null<Int>, // 1-based
+    endLine:Null<Int>, // 1-based
+    startByte:Null<Int>, // 0-based byte offset
+    endByte:Null<Int>, // 0-based byte offset
+}
+
 class Main {
+    static var positionRe = ~/^(.+):(\d+): (?:lines (\d+)-(\d+)|character(?:s (\d+)-| )(\d+))$/;
+
+    static function parsePosition(pos:String):HaxePosition {
+        return if (positionRe.match(pos))
+            {
+                file: positionRe.matched(1),
+                line: Std.parseInt(positionRe.matched(2)),
+                startLine: Std.parseInt(positionRe.matched(3)),
+                endLine: Std.parseInt(positionRe.matched(4)),
+                startByte: Std.parseInt(positionRe.matched(5)),
+                endByte: Std.parseInt(positionRe.matched(6)),
+            }
+        else
+            null;
+    }
+
     static function main() {
         var reader = new MessageReader(process.stdin);
         var writer = new MessageWriter(process.stdout);
