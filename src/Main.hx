@@ -8,6 +8,7 @@ import js.node.stream.Readable.ReadableEvent;
 import jsonrpc.ErrorCodes;
 import jsonrpc.node.MessageReader;
 import jsonrpc.node.MessageWriter;
+import vscode.BasicTypes;
 import vscode.ProtocolTypes;
 import sys.FileSystem;
 using StringTools;
@@ -153,14 +154,17 @@ class Main {
                     "--display", '$filePath@$bytePos@position'
                 ]);
                 haxeServer.process(args, function(data) {
-                    release();
                     var xml = try Xml.parse(data).firstElement() catch (e:Dynamic) null;
-                    if (xml == null)
+                    if (xml == null) {
+                        release();
                         return reject(0, "");
+                    }
 
                     var positions = [for (el in xml.elements()) el.firstChild().nodeValue];
-                    if (positions.length == 0)
+                    if (positions.length == 0) {
+                        release();
                         return reject(0, "no info");
+                    }
 
                     var results = [];
                     for (p in positions) {
@@ -169,12 +173,13 @@ class Main {
                             trace("Got invalid position: " + p);
                             continue;
                         }
-                        trace(pos);
-                        var uri = fsPathToUri(pos.file);
-                        var start = {line: pos.line - 1, character: 0};
-                        var end = {line: pos.line - 1, character: 0};
-                        results.push({uri: uri, range: {start: start, end: end}});
+                        results.push({
+                            uri: fsPathToUri(pos.file),
+                            range: haxePositionToRange(pos)
+                        });
                     }
+
+                    release();
 
                     switch (results.length) {
                         case 0: reject(0, "no info");
@@ -186,6 +191,35 @@ class Main {
         };
 
         reader.listen(proto.handleMessage);
+    }
+
+    static function haxePositionToRange(pos:HaxePosition):Range {
+        var startLine = if (pos.startLine != null) pos.startLine - 1 else pos.line - 1;
+        var endLine = if (pos.endLine != null) pos.endLine - 1 else pos.line - 1;
+        var startChar = 0;
+        var endChar = 0;
+        
+        // if we have byte offsets within line, we need to convert them to character offsets
+        // for that we have to read the file :-/
+        if (pos.startByte != null) {
+            var content = sys.io.File.getContent(pos.file);
+            var lines = content.split("\n");
+
+            var startLineContent = new Buffer(lines[startLine], "utf-8");
+            var startLineTextToStart = startLineContent.toString("utf-8", 0, pos.startByte);
+            startChar = startLineTextToStart.length;
+
+            if (pos.endByte != null) {
+                var endLineContent = new Buffer(lines[endLine], "utf-8");
+                var endLineTextToStart = endLineContent.toString("utf-8", 0, pos.endByte);
+                endChar = endLineTextToStart.length;
+            }
+        }
+
+        return {
+            start: {line: startLine, character: startChar},
+            end: {line: endLine, character: endChar},
+        };
     }
 
     static function parseFieldCompletion(x:Xml):Array<CompletionItem> {
