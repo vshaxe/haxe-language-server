@@ -2,6 +2,15 @@ import js.Node.process;
 import jsonrpc.node.MessageReader;
 import jsonrpc.node.MessageWriter;
 
+class HaxeContext {
+    public function new() {
+    }
+
+    public function setup(directory:String, hxmlFile:String) {
+
+    }
+}
+
 class Main {
     static function main() {
         var reader = new MessageReader(process.stdin);
@@ -18,8 +27,11 @@ class Main {
             proto.sendLogMessage({type: Log, message: r.join(" ")});
         }
 
+        var context = new HaxeContext();
+        var rootPath;
+
         proto.onInitialize = function(params, resolve, reject) {
-            proto.sendShowMessage({type: Info, message: "Welcome to Haxe!"});
+            rootPath = params.rootPath;
             resolve({
                 capabilities: {
                     textDocumentSync: Full,
@@ -31,7 +43,23 @@ class Main {
         };
 
         proto.onDidChangeConfiguration = function(config) {
-            trace(config.settings);
+            context.setup(rootPath, config.settings.haxe.buildFile);
+        };
+
+        proto.onDidOpenTextDocument = function(params) {
+            trace("open", params.textDocument.uri);
+        };
+
+        proto.onDidChangeTextDocument = function(params) {
+            trace("change", params.textDocument.uri);
+        };
+
+        proto.onDidCloseTextDocument = function(params) {
+            trace("close", params.textDocument.uri);
+        };
+
+        proto.onDidSaveTextDocument = function(params) {
+            trace("save", params.textDocument.uri);
         };
 
         proto.onCompletion = function(params, resolve, reject) {
