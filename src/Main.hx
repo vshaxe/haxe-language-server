@@ -60,8 +60,9 @@ class Main {
             });
         };
 
-        proto.onShutdown = function() {
+        proto.onShutdown = function(resolve, reject) {
             haxeServer.stop();
+            resolve();
         }
 
         proto.onDidChangeConfiguration = function(config) {

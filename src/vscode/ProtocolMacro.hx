@@ -31,9 +31,16 @@ class ProtocolMacro {
                         handlerCallArgs.push(macro request.params);
                     }
 
-                    var resultDataCT = resultData.toComplexType();
+                    var resultDataCT, resolveExpr;
+                    if (resultData.toString() != "Void") {
+                        resultDataCT = resultData.toComplexType();
+                        resolveExpr = macro resolve;
+                    } else {
+                        resultDataCT = macro : Void;
+                        resolveExpr = macro function() resolve(null);
+                    }
                     handlerArgDefs.push({name: "resolve", type: macro : $resultDataCT->Void});
-                    handlerCallArgs.push(macro resolve);
+                    handlerCallArgs.push(resolveExpr);
 
                     var errorCT, rejectExpr;
                     if (errorData.toString() == "Void") {

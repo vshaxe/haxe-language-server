@@ -31,7 +31,7 @@ abstract Notification<TParams>(String) to String {}
         It asks the server to shutdown, but to not exit (otherwise the response might not be delivered correctly to the client).
         There is a separate exit notification that asks the server to exit.
     **/
-    var Shutdown : Notification<Void> = "shutdown";
+    var Shutdown : Request<Void,Void,Void> = "shutdown";
 
     /**
         A notification to ask the server to exit its process.
