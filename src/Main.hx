@@ -21,15 +21,7 @@ class Main {
         var writer = new MessageWriter(process.stdout);
 
         var proto = new vscode.Protocol(writer.write);
-
-        haxe.Log.trace = function(v, ?i) {
-            var r = [Std.string(v)];
-            if (i != null && i.customParams != null) {
-                for (v in i.customParams)
-                    r.push(Std.string(v));
-            }
-            proto.sendLogMessage({type: Log, message: r.join(" ")});
-        }
+        setupTrace(proto);
 
         var rootPath;
         // var tmpDir;
@@ -235,6 +227,16 @@ class Main {
         reader.listen(proto.handleMessage);
     }
 
+    static function setupTrace(protocol:vscode.Protocol) {
+        haxe.Log.trace = function(v, ?i) {
+            var r = [Std.string(v)];
+            if (i != null && i.customParams != null) {
+                for (v in i.customParams)
+                    r.push(Std.string(v));
+            }
+            protocol.sendLogMessage({type: Log, message: r.join(" ")});
+        }
+    }
 
     static function parseFieldCompletion(x:Xml):Array<CompletionItem> {
         var result = [];
