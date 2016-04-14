@@ -41,13 +41,16 @@ class TextDocument {
         return {line: line, character: offset - lineOffsets[line]};
     }
 
-    public function byteOffsetAt(position:Position):Int {
-        var offset = offsetAt(position);
+    public function offsetToByteOffset(offset:Int):Int {
         if (offset == 0)
             return 0;
         if (offset == content.length)
             return Buffer.byteLength(content);
         return Buffer.byteLength(content.substr(0, offset));
+    }
+
+    public function byteOffsetAt(position:Position):Int {
+        return offsetToByteOffset(offsetAt(position));
     }
 
     public function offsetAt(position:Position):Int {
