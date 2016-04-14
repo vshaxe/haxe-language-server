@@ -30,6 +30,10 @@ class Main {
             });
         };
 
+        proto.onDidChangeConfiguration = function(config) {
+            trace(config.settings);
+        };
+
         proto.onCompletion = function(params, resolve, reject) {
             resolve([{label: "foo"}, {label: "bar"}]);
         };
