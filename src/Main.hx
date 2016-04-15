@@ -184,7 +184,7 @@ class Main {
 
         proto.onFindReferences = function(params, resolve, reject) {
             tempSave(params.textDocument.uri, function(doc, filePath, release) {
-                var bytePos = doc.byteOffsetAt(params.position);
+                var bytePos = doc.byteOffsetAt(params.position) + 1;
                 var args = getBaseDisplayArgs().concat([
                     "--display", '$filePath@$bytePos@usage'
                 ]);
