@@ -147,7 +147,6 @@ class Main {
                             trace("Got invalid position: " + p);
                             continue;
                         }
-                        trace(pos, pos.toRange());
                         results.push({
                             uri: fsPathToUri(pos.file),
                             range: pos.toRange(),
@@ -208,7 +207,6 @@ class Main {
                             trace("Got invalid position: " + p);
                             continue;
                         }
-                        trace(pos, pos.toRange());
                         results.push({
                             uri: fsPathToUri(pos.file),
                             range: pos.toRange(),
@@ -263,7 +261,6 @@ class Main {
     static function parseToplevelCompletion(x:Xml):Array<CompletionItem> {
         var result = [];
         for (el in x.elements()) {
-            trace(el);
             var kind = el.get("k");
             var type = el.get("t");
             var name = el.firstChild().nodeValue;
