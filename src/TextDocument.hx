@@ -49,8 +49,18 @@ class TextDocument {
         return Buffer.byteLength(content.substr(0, offset));
     }
 
-    public function byteOffsetAt(position:Position):Int {
+    public inline function byteOffsetAt(position:Position):Int {
         return offsetToByteOffset(offsetAt(position));
+    }
+
+    public function lineAt(line:Int):String {
+        var lineOffsets = getLineOffsets();
+        if (line >= lineOffsets.length)
+            return "";
+        else if (line == lineOffsets.length - 1)
+            return content.substring(lineOffsets[line]);
+        else
+            return content.substring(lineOffsets[line], lineOffsets[line + 1]);
     }
 
     public function offsetAt(position:Position):Int {
