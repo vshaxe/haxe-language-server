@@ -14,6 +14,7 @@ import sys.FileSystem;
 using StringTools;
 import Uri.*;
 import SignatureHelper.prepareSignature;
+import FsUtils.*;
 
 class Main {
     static function main() {
@@ -148,7 +149,7 @@ class Main {
                             continue;
                         }
                         results.push({
-                            uri: fsPathToUri(pos.file),
+                            uri: fsPathToUri(getProperFileNameCase(pos.file)),
                             range: pos.toRange(),
                         });
                     }
@@ -208,7 +209,7 @@ class Main {
                             continue;
                         }
                         results.push({
-                            uri: fsPathToUri(pos.file),
+                            uri: fsPathToUri(getProperFileNameCase(pos.file)),
                             range: pos.toRange(),
                         });
                     }
@@ -317,16 +318,6 @@ class Main {
             case "type": Class;
             case "package": Module;
             default: trace("unknown field item kind: " + kind); null;
-        }
-    }
-
-    static function deleteRec(path:String) {
-        if (FileSystem.isDirectory(path)) {
-            for (file in FileSystem.readDirectory(path))
-                deleteRec(path + "/" + file);
-            FileSystem.deleteDirectory(path);
-        } else {
-            FileSystem.deleteFile(path);
         }
     }
 }
