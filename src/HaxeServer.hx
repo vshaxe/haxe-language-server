@@ -26,12 +26,20 @@ using StringTools;
         }
     }
 
-    public function process(args:Array<String>, cb:String->Void) {
+    public function process(args:Array<String>, ?stdin:String, cb:String->Void) {
+        if (stdin != null) {
+            args.push("-D");
+            args.push("display-stdin");
+        }
         var socket = Net.connect(port);
         socket.on(SocketEvent.Connect, function() {
             for (arg in args)
                 socket.write(arg + "\n");
-            socket.write(zero);
+            if (stdin != null) {
+                socket.write("\x01");
+                socket.write(stdin);
+            }
+            socket.write("\x00");
         });
         var data = new StringBuf();
         socket.on(ReadableEvent.Data, function(buf) {
@@ -52,5 +60,4 @@ using StringTools;
             cb(buf.toString());
         });
     }
-    static var zero = String.fromCharCode(0);
 }

@@ -65,20 +65,6 @@ class Main {
             haxeServer.start(6000);
         };
 
-        // TODO: replace this with tempdir stuff
-        function tempSave(uri:String, cb:TextDocument->String->(Void->Void)->Void) {
-            var doc = docs.get(uri);
-            var filePath = uriToFsPath(uri);
-            var stats = js.node.Fs.statSync(filePath);
-            var oldContent = sys.io.File.getContent(filePath);
-            sys.io.File.saveContent(filePath, doc.content);
-            js.node.Fs.utimesSync(filePath, stats.atime, stats.mtime);
-            cb(doc, filePath, function() {
-                sys.io.File.saveContent(filePath, oldContent);
-                js.node.Fs.utimesSync(filePath, stats.atime, stats.mtime);
-            });
-        }
-
         inline function getBaseDisplayArgs() return [
             "--cwd", rootPath,
             hxmlFile, // call completion file
@@ -88,139 +74,124 @@ class Main {
         ];
 
         proto.onCompletion = function(params, resolve, reject) {
-            tempSave(params.textDocument.uri, function(doc, filePath, release) {
-                var offset = doc.offsetAt(params.position);
-                var toplevel = if (offset == 0) true else doc.content.charCodeAt(offset - 1) != ".".code;
-                var bytePos = doc.byteOffsetAt(params.position);
-                var args = getBaseDisplayArgs().concat([
-                    "--display", '$filePath@$bytePos' + (if (toplevel) "@toplevel" else "")
-                ]);
-                haxeServer.process(args, function(data) {
-                    release();
-                    var xml = try Xml.parse(data).firstElement() catch (e:Dynamic) null;
-                    if (xml == null)
-                        return reject(0, "");
-                    var items = if (toplevel) parseToplevelCompletion(xml) else parseFieldCompletion(xml);
-                    resolve(items);
-                });
+            var doc = docs.get(params.textDocument.uri);
+            var filePath = uriToFsPath(params.textDocument.uri);
+            var offset = doc.offsetAt(params.position);
+            var toplevel = if (offset == 0) true else doc.content.charCodeAt(offset - 1) != ".".code;
+            var bytePos = doc.offsetToByteOffset(offset);
+            var args = getBaseDisplayArgs().concat([
+                "--display", '$filePath@$bytePos' + (if (toplevel) "@toplevel" else "")
+            ]);
+            haxeServer.process(args, doc.content, function(data) {
+                var xml = try Xml.parse(data).firstElement() catch (e:Dynamic) null;
+                if (xml == null)
+                    return reject(0, "");
+                var items = if (toplevel) parseToplevelCompletion(xml) else parseFieldCompletion(xml);
+                resolve(items);
             });
         };
 
         proto.onSignatureHelp = function(params, resolve, reject) {
-            tempSave(params.textDocument.uri, function(doc, filePath, release) {
-                var bytePos = doc.byteOffsetAt(params.position);
-                var args = getBaseDisplayArgs().concat([
-                    "--display", '$filePath@$bytePos'
-                ]);
-                haxeServer.process(args, function(data) {
-                    release();
-                    var xml = try Xml.parse(data).firstElement() catch (e:Dynamic) null;
-                    if (xml == null)
-                        return reject(0, "");
-                    resolve({signatures: [{label: xml.firstChild().nodeValue}]});
-                });
+            var doc = docs.get(params.textDocument.uri);
+            var filePath = uriToFsPath(params.textDocument.uri);
+            var bytePos = doc.byteOffsetAt(params.position);
+            var args = getBaseDisplayArgs().concat([
+                "--display", '$filePath@$bytePos'
+            ]);
+            haxeServer.process(args, doc.content, function(data) {
+                var xml = try Xml.parse(data).firstElement() catch (e:Dynamic) null;
+                if (xml == null)
+                    return reject(0, "");
+                resolve({signatures: [{label: xml.firstChild().nodeValue}]});
             });
         };
 
         proto.onGotoDefinition = function(params, resolve, reject) {
-            tempSave(params.textDocument.uri, function(doc, filePath, release) {
-                var bytePos = doc.byteOffsetAt(params.position);
-                var args = getBaseDisplayArgs().concat([
-                    "--display", '$filePath@$bytePos@position'
-                ]);
-                haxeServer.process(args, function(data) {
-                    var xml = try Xml.parse(data).firstElement() catch (e:Dynamic) null;
-                    if (xml == null) {
-                        release();
-                        return reject(0, "");
-                    }
+            var doc = docs.get(params.textDocument.uri);
+            var filePath = uriToFsPath(params.textDocument.uri);
+            var bytePos = doc.byteOffsetAt(params.position);
+            var args = getBaseDisplayArgs().concat([
+                "--display", '$filePath@$bytePos@position'
+            ]);
+            haxeServer.process(args, doc.content, function(data) {
+                var xml = try Xml.parse(data).firstElement() catch (e:Dynamic) null;
+                if (xml == null)
+                    return reject(0, "");
 
-                    var positions = [for (el in xml.elements()) el.firstChild().nodeValue];
-                    if (positions.length == 0) {
-                        release();
-                        return reject(0, "no info");
-                    }
+                var positions = [for (el in xml.elements()) el.firstChild().nodeValue];
+                if (positions.length == 0)
+                    return reject(0, "no info");
 
-                    var results = [];
-                    for (p in positions) {
-                        var pos = HaxePosition.parse(p);
-                        if (pos == null) {
-                            trace("Got invalid position: " + p);
-                            continue;
-                        }
-                        results.push({
-                            uri: fsPathToUri(getProperFileNameCase(pos.file)),
-                            range: pos.toRange(),
-                        });
+                var results = [];
+                for (p in positions) {
+                    var pos = HaxePosition.parse(p);
+                    if (pos == null) {
+                        trace("Got invalid position: " + p);
+                        continue;
                     }
+                    results.push({
+                        uri: fsPathToUri(getProperFileNameCase(pos.file)),
+                        range: pos.toRange(),
+                    });
+                }
 
-                    release();
-
-                    switch (results.length) {
-                        case 0: reject(0, "no info");
-                        case 1: resolve(results[0]);
-                        default: resolve(results);
-                    }
-                });
+                switch (results.length) {
+                    case 0: reject(0, "no info");
+                    case 1: resolve(results[0]);
+                    default: resolve(results);
+                }
             });
         };
 
         proto.onHover = function(params, resolve, reject) {
-            tempSave(params.textDocument.uri, function(doc, filePath, release) {
-                var bytePos = doc.byteOffsetAt(params.position);
-                var args = getBaseDisplayArgs().concat([
-                    "--display", '$filePath@$bytePos@type'
-                ]);
-                haxeServer.process(args, function(data) {
-                    release();
-                    var xml = try Xml.parse(data).firstElement() catch (e:Dynamic) null;
-                    if (xml == null)
-                        return reject(0, "");
-                    var type = xml.firstChild().nodeValue;
-                    resolve({contents: type});
-                });
+            var doc = docs.get(params.textDocument.uri);
+            var filePath = uriToFsPath(params.textDocument.uri);
+            var bytePos = doc.byteOffsetAt(params.position);
+            var args = getBaseDisplayArgs().concat([
+                "--display", '$filePath@$bytePos@type'
+            ]);
+            haxeServer.process(args, doc.content, function(data) {
+                var xml = try Xml.parse(data).firstElement() catch (e:Dynamic) null;
+                if (xml == null)
+                    return reject(0, "");
+                var type = xml.firstChild().nodeValue;
+                resolve({contents: type});
             });
         };
 
         proto.onFindReferences = function(params, resolve, reject) {
-            tempSave(params.textDocument.uri, function(doc, filePath, release) {
-                var bytePos = doc.byteOffsetAt(params.position);
-                var args = getBaseDisplayArgs().concat([
-                    "--display", '$filePath@$bytePos@usage'
-                ]);
-                haxeServer.process(args, function(data) {
-                    var xml = try Xml.parse(data).firstElement() catch (e:Dynamic) null;
-                    if (xml == null) {
-                        release();
-                        return reject(0, "");
+            var doc = docs.get(params.textDocument.uri);
+            var filePath = uriToFsPath(params.textDocument.uri);
+            var bytePos = doc.byteOffsetAt(params.position);
+            var args = getBaseDisplayArgs().concat([
+                "--display", '$filePath@$bytePos@usage'
+            ]);
+            haxeServer.process(args, doc.content, function(data) {
+                var xml = try Xml.parse(data).firstElement() catch (e:Dynamic) null;
+                if (xml == null)
+                    return reject(0, "");
+
+                var positions = [for (el in xml.elements()) el.firstChild().nodeValue];
+                if (positions.length == 0)
+                    return reject(0, "no info");
+
+                var results = [];
+                for (p in positions) {
+                    var pos = HaxePosition.parse(p);
+                    if (pos == null) {
+                        trace("Got invalid position: " + p);
+                        continue;
                     }
+                    results.push({
+                        uri: fsPathToUri(getProperFileNameCase(pos.file)),
+                        range: pos.toRange(),
+                    });
+                }
 
-                    var positions = [for (el in xml.elements()) el.firstChild().nodeValue];
-                    if (positions.length == 0) {
-                        release();
-                        return reject(0, "no info");
-                    }
-
-                    var results = [];
-                    for (p in positions) {
-                        var pos = HaxePosition.parse(p);
-                        if (pos == null) {
-                            trace("Got invalid position: " + p);
-                            continue;
-                        }
-                        results.push({
-                            uri: fsPathToUri(getProperFileNameCase(pos.file)),
-                            range: pos.toRange(),
-                        });
-                    }
-
-                    release();
-
-                    if (results.length == 0)
-                        reject(0, "no info");
-                    else
-                        resolve(results);
-                });
+                if (results.length == 0)
+                    reject(0, "no info");
+                else
+                    resolve(results);
             });
         }
 
