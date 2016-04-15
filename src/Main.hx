@@ -87,8 +87,9 @@ class Main {
         ];
 
         proto.onCompletion = function(params, resolve, reject) {
-            var toplevel = false;
             tempSave(params.textDocument.uri, function(doc, filePath, release) {
+                var offset = doc.offsetAt(params.position);
+                var toplevel = if (offset == 0) true else doc.content.charCodeAt(offset - 1) != ".".code;
                 var bytePos = doc.byteOffsetAt(params.position);
                 var args = getBaseDisplayArgs().concat([
                     "--display", '$filePath@$bytePos' + (if (toplevel) "@toplevel" else "")
