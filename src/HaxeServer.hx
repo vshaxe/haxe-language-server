@@ -26,13 +26,18 @@ using StringTools;
         }
     }
 
-    public function process(args:Array<String>, ?stdin:String, cb:String->Void) {
+    public function process(args:Array<String>, cancelToken:jsonrpc.Protocol.CancelToken, stdin:String, cb:String->Void) {
         if (stdin != null) {
             args.push("-D");
             args.push("display-stdin");
         }
         var socket = Net.connect(port);
         socket.on(SocketEvent.Connect, function() {
+            if (cancelToken.canceled) {
+                socket.end();
+                return cb(null);
+            }
+
             for (arg in args)
                 socket.write(arg + "\n");
             if (stdin != null) {
@@ -40,24 +45,29 @@ using StringTools;
                 socket.write(stdin);
             }
             socket.write("\x00");
-        });
-        var data = new StringBuf();
-        socket.on(ReadableEvent.Data, function(buf) {
-            data.add((buf : Buffer).toString());
-            socket.end();
-        });
-        socket.on(SocketEvent.End, function() {
-            var buf = new StringBuf();
-            for (line in data.toString().split("\n")) {
-                switch (line.fastCodeAt(0)) {
-                    case 0x01: // print
-                    case 0x02: // error
-                    default:
-                        buf.add(line);
-                        buf.addChar("\n".code);
+
+            var data:Buffer = null;
+            socket.on(ReadableEvent.Data, function(buf) {
+                socket.end();
+                if (cancelToken.canceled)
+                    return cb(null);
+                data = buf;
+            });
+            socket.on(SocketEvent.End, function() {
+                if (cancelToken.canceled)
+                    return cb(null);
+                var buf = new StringBuf();
+                for (line in data.toString().split("\n")) {
+                    switch (line.fastCodeAt(0)) {
+                        case 0x01: // print
+                        case 0x02: // error
+                        default:
+                            buf.add(line);
+                            buf.addChar("\n".code);
+                    }
                 }
-            }
-            cb(buf.toString());
+                cb(buf.toString());
+            });
         });
     }
 }
