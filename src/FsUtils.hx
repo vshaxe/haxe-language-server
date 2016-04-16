@@ -12,16 +12,20 @@ class FsUtils {
                 return cached;
         }
         var result = normalizedPath;
-        var idx = normalizedPath.lastIndexOf("\\");
-        if (idx != -1) {
-            var dir = normalizedPath.substring(0, idx);
-            var file = normalizedPath.substring(idx + 1);
-            for (realFile in sys.FileSystem.readDirectory(dir)) {
-                if (realFile.toLowerCase() == file) {
-                    result = dir + "\\" + realFile;
-                    break;
+        var parts = normalizedPath.split("\\");
+        if (parts.length > 1) {
+            var acc = parts[0];
+            for (i in 1...parts.length) {
+                var part = parts[i];
+                for (realFile in sys.FileSystem.readDirectory(acc)) {
+                    if (realFile.toLowerCase() == part) {
+                        part = realFile;
+                        break;
+                    }
                 }
+                acc = acc + "\\" + part;
             }
+            result = acc;
         }
         return properFileNameCaseCache[normalizedPath] = result;
     }
