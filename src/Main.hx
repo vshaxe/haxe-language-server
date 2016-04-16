@@ -60,6 +60,10 @@ class Main {
             resolve();
         }
 
+        proto.onCancel = function(params) {
+            trace("Got request cancellation " + params + " (not supported yet)");
+        }
+
         proto.onDidChangeConfiguration = function(config) {
             hxmlFile = (config.settings.haxe.buildFile : String);
             haxeServer.start(6000);

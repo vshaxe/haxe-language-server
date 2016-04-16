@@ -22,6 +22,11 @@ abstract Notification<TParams>(String) to String {}
 **/
 @:enum abstract MethodName<TParams,TResponse,TError>(String) to String from Request<TParams,TResponse,TError> from Notification<TParams> {
     /**
+        Cancel request with given id.
+    **/
+    var Cancel : Notification<jsonrpc.Types.CancelParams> = jsonrpc.JsonRpc.CANCEL_METHOD;
+
+    /**
         The initialize request is sent as the first request from the client to the server.
     **/
     var Initialize : Request<InitializeParams,InitializeResult,InitializeError> = "initialize";
@@ -167,7 +172,7 @@ abstract Notification<TParams>(String) to String {}
     /**
         The rename request is sent from the client to the server to do a workspace wide rename of a symbol.
     **/
-    var Rename : Request<RenameParams,WorkspaceEdit,Void> = "textDocument/rename";    
+    var Rename : Request<RenameParams,WorkspaceEdit,Void> = "textDocument/rename";
 }
 
 typedef InitializeParams = {

@@ -7,7 +7,7 @@ import jsonrpc.Types;
 **/
 class JsonRpc {
     static inline var PROTOCOL_VERSION = "2.0";
-    static inline var CANCEL_METHOD = "$/cancelRequest";
+    public static inline var CANCEL_METHOD = "$/cancelRequest";
 
     /**
         Create `NotificationMessage` for given `method` and `params`.

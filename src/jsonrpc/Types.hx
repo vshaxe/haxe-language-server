@@ -97,3 +97,10 @@ typedef NotificationMessage = {
     **/
     @:optional var params:Dynamic;
 }
+
+typedef CancelParams = {
+    /**
+        The request id to cancel.
+    **/
+    var id:RequestId;
+}
