@@ -24,17 +24,11 @@ class Main {
         var proto = new vscode.Protocol(writer.write);
         setupTrace(proto);
 
-        var rootPath;
-        var hxmlFile;
-        var haxeServer = new HaxeServer();
-
-        var docs = new TextDocuments();
-        docs.listen(proto);
+        var context = new Context(proto);
 
         proto.onInitialize = function(params, cancelToken, resolve, reject) {
-            rootPath = params.rootPath;
+            context.workspacePath = params.rootPath;
             proto.sendShowMessage({type: Info, message: "Haxe language server started"});
-
             resolve({
                 capabilities: {
                     textDocumentSync: TextDocuments.syncKind,
@@ -52,32 +46,23 @@ class Main {
         };
 
         proto.onShutdown = function(cancelToken, resolve, reject) {
-            haxeServer.stop();
+            context.shutdown();
             resolve();
         }
 
         proto.onDidChangeConfiguration = function(config) {
-            hxmlFile = (config.settings.haxe.buildFile : String);
-            haxeServer.start(6000);
+            context.setConfig(config.settings.haxe);
         };
 
-        inline function getBaseDisplayArgs() return [
-            "--cwd", rootPath, // change cwd to workspace root
-            hxmlFile, // call completion file
-            "-D", "display-details",
-            "--no-output", // prevent generation
-        ];
-
         proto.onCompletion = function(params, cancelToken, resolve, reject) {
-            var doc = docs.get(params.textDocument.uri);
+            var doc = context.getDocument(params.textDocument.uri);
             var filePath = uriToFsPath(params.textDocument.uri);
             var offset = doc.offsetAt(params.position);
             var toplevel = if (offset == 0) true else doc.content.charCodeAt(offset - 1) != ".".code;
             var bytePos = doc.offsetToByteOffset(offset);
-            var args = getBaseDisplayArgs().concat([
-                "--display", '$filePath@$bytePos' + (if (toplevel) "@toplevel" else "")
-            ]);
-            haxeServer.process(args, cancelToken, if (doc.saved) null else doc.content, function(data) {
+            var args = ["--display", '$filePath@$bytePos' + (if (toplevel) "@toplevel" else "")];
+            var stdin = if (doc.saved) null else doc.content;
+            context.callDisplay(args, stdin, cancelToken, function(data) {
                 if (cancelToken.canceled)
                     return;
 
@@ -90,13 +75,12 @@ class Main {
         };
 
         proto.onSignatureHelp = function(params, cancelToken, resolve, reject) {
-            var doc = docs.get(params.textDocument.uri);
+            var doc = context.getDocument(params.textDocument.uri);
             var filePath = uriToFsPath(params.textDocument.uri);
             var bytePos = doc.byteOffsetAt(params.position);
-            var args = getBaseDisplayArgs().concat([
-                "--display", '$filePath@$bytePos'
-            ]);
-            haxeServer.process(args, cancelToken, if (doc.saved) null else doc.content, function(data) {
+            var args = ["--display", '$filePath@$bytePos'];
+            var stdin = if (doc.saved) null else doc.content;
+            context.callDisplay(args, stdin, cancelToken, function(data) {
                 if (cancelToken.canceled)
                     return;
 
@@ -108,13 +92,12 @@ class Main {
         };
 
         proto.onGotoDefinition = function(params, cancelToken, resolve, reject) {
-            var doc = docs.get(params.textDocument.uri);
+            var doc = context.getDocument(params.textDocument.uri);
             var filePath = uriToFsPath(params.textDocument.uri);
             var bytePos = doc.byteOffsetAt(params.position);
-            var args = getBaseDisplayArgs().concat([
-                "--display", '$filePath@$bytePos@position'
-            ]);
-            haxeServer.process(args, cancelToken, if (doc.saved) null else doc.content, function(data) {
+            var args = ["--display", '$filePath@$bytePos@position'];
+            var stdin = if (doc.saved) null else doc.content;
+            context.callDisplay(args, stdin, cancelToken, function(data) {
                 if (cancelToken.canceled)
                     return;
 
@@ -148,13 +131,12 @@ class Main {
         };
 
         proto.onHover = function(params, cancelToken, resolve, reject) {
-            var doc = docs.get(params.textDocument.uri);
+            var doc = context.getDocument(params.textDocument.uri);
             var filePath = uriToFsPath(params.textDocument.uri);
             var bytePos = doc.byteOffsetAt(params.position);
-            var args = getBaseDisplayArgs().concat([
-                "--display", '$filePath@$bytePos@type'
-            ]);
-            haxeServer.process(args, cancelToken, if (doc.saved) null else doc.content, function(data) {
+            var args = ["--display", '$filePath@$bytePos@type'];
+            var stdin = if (doc.saved) null else doc.content;
+            context.callDisplay(args, stdin, cancelToken, function(data) {
                 if (cancelToken.canceled)
                     return;
 
@@ -167,13 +149,12 @@ class Main {
         };
 
         proto.onFindReferences = function(params, cancelToken, resolve, reject) {
-            var doc = docs.get(params.textDocument.uri);
+            var doc = context.getDocument(params.textDocument.uri);
             var filePath = uriToFsPath(params.textDocument.uri);
             var bytePos = doc.byteOffsetAt(params.position);
-            var args = getBaseDisplayArgs().concat([
-                "--display", '$filePath@$bytePos@usage'
-            ]);
-            haxeServer.process(args, cancelToken, if (doc.saved) null else doc.content, function(data) {
+            var args = ["--display", '$filePath@$bytePos@usage'];
+            var stdin = if (doc.saved) null else doc.content;
+            context.callDisplay(args, stdin, cancelToken, function(data) {
                 if (cancelToken.canceled)
                     return;
 
