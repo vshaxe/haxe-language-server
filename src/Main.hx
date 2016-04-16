@@ -77,7 +77,7 @@ class Main {
             var args = getBaseDisplayArgs().concat([
                 "--display", '$filePath@$bytePos' + (if (toplevel) "@toplevel" else "")
             ]);
-            haxeServer.process(args, cancelToken, doc.content, function(data) {
+            haxeServer.process(args, cancelToken, if (doc.saved) null else doc.content, function(data) {
                 if (cancelToken.canceled)
                     return;
 
@@ -96,7 +96,7 @@ class Main {
             var args = getBaseDisplayArgs().concat([
                 "--display", '$filePath@$bytePos'
             ]);
-            haxeServer.process(args, cancelToken, doc.content, function(data) {
+            haxeServer.process(args, cancelToken, if (doc.saved) null else doc.content, function(data) {
                 if (cancelToken.canceled)
                     return;
 
@@ -114,7 +114,7 @@ class Main {
             var args = getBaseDisplayArgs().concat([
                 "--display", '$filePath@$bytePos@position'
             ]);
-            haxeServer.process(args, cancelToken, doc.content, function(data) {
+            haxeServer.process(args, cancelToken, if (doc.saved) null else doc.content, function(data) {
                 if (cancelToken.canceled)
                     return;
 
@@ -154,7 +154,7 @@ class Main {
             var args = getBaseDisplayArgs().concat([
                 "--display", '$filePath@$bytePos@type'
             ]);
-            haxeServer.process(args, cancelToken, doc.content, function(data) {
+            haxeServer.process(args, cancelToken, if (doc.saved) null else doc.content, function(data) {
                 if (cancelToken.canceled)
                     return;
 
@@ -173,7 +173,7 @@ class Main {
             var args = getBaseDisplayArgs().concat([
                 "--display", '$filePath@$bytePos@usage'
             ]);
-            haxeServer.process(args, cancelToken, doc.content, function(data) {
+            haxeServer.process(args, cancelToken, if (doc.saved) null else doc.content, function(data) {
                 if (cancelToken.canceled)
                     return;
 
