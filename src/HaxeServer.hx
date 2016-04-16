@@ -56,6 +56,8 @@ using StringTools;
             socket.on(SocketEvent.End, function() {
                 if (cancelToken.canceled)
                     return cb(null);
+                if (data == null)
+                    return cb(""); // no data received - can happen
                 var buf = new StringBuf();
                 for (line in data.toString().split("\n")) {
                     switch (line.fastCodeAt(0)) {
