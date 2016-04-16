@@ -1,5 +1,3 @@
-import sys.FileSystem;
-
 class FsUtils {
     static var properFileNameCaseCache:Map<String,String>;
     static var isWindows = Sys.systemName() == "Windows";
@@ -18,7 +16,7 @@ class FsUtils {
         if (idx != -1) {
             var dir = normalizedPath.substring(0, idx);
             var file = normalizedPath.substring(idx + 1);
-            for (realFile in FileSystem.readDirectory(dir)) {
+            for (realFile in sys.FileSystem.readDirectory(dir)) {
                 if (realFile.toLowerCase() == file) {
                     result = dir + "\\" + realFile;
                     break;
@@ -26,15 +24,5 @@ class FsUtils {
             }
         }
         return properFileNameCaseCache[normalizedPath] = result;
-    }
-
-    public static function deleteRec(path:String) {
-        if (FileSystem.isDirectory(path)) {
-            for (file in FileSystem.readDirectory(path))
-                deleteRec(path + "/" + file);
-            FileSystem.deleteDirectory(path);
-        } else {
-            FileSystem.deleteFile(path);
-        }
     }
 }

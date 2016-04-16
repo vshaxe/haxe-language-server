@@ -25,7 +25,6 @@ class Main {
         setupTrace(proto);
 
         var rootPath;
-        // var tmpDir;
         var hxmlFile;
         var haxeServer = new HaxeServer();
 
@@ -35,9 +34,6 @@ class Main {
         proto.onInitialize = function(params, cancelToken, resolve, reject) {
             rootPath = params.rootPath;
             proto.sendShowMessage({type: Info, message: "Haxe language server started"});
-
-            // tmpDir = Path.join(rootPath, "tmp");
-            // deleteRec(tmpDir);
 
             resolve({
                 capabilities: {
@@ -66,9 +62,8 @@ class Main {
         };
 
         inline function getBaseDisplayArgs() return [
-            "--cwd", rootPath,
+            "--cwd", rootPath, // change cwd to workspace root
             hxmlFile, // call completion file
-            // "-cp", tmpDir, // add temp class path
             "-D", "display-details",
             "--no-output", // prevent generation
         ];
