@@ -22,9 +22,15 @@ abstract HaxePosition(HaxePositionData) from HaxePositionData to HaxePositionDat
         var endLine = if (pos.endLine != null) pos.endLine - 1 else pos.line - 1;
         var startChar = 0;
         var endChar = 0;
-        
+
         // if we have byte offsets within line, we need to convert them to character offsets
         // for that we have to read the file :-/
+        #if haxe_languageserver_no_utf8_char_pos
+        if (pos.startByte != null)
+            startChar = pos.startByte;
+        if (pos.endByte != null)
+            endChar = pos.endByte;
+        #else
         var lines = null;
         inline function getLineChar(line:Int, byteOffset:Int):Int {
             if (lines == null) lines = sys.io.File.getContent(pos.file).split("\n");
@@ -36,6 +42,7 @@ abstract HaxePosition(HaxePositionData) from HaxePositionData to HaxePositionDat
             startChar = getLineChar(startLine, pos.startByte);
         if (pos.endByte != null && pos.endByte != 0)
             endChar = getLineChar(endLine, pos.endByte);
+        #end
 
         return {
             start: {line: startLine, character: startChar},
