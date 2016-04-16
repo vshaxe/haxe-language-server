@@ -18,7 +18,7 @@ class TextDocuments {
         protocol.onDidOpenTextDocument = function(event) {
             var td = event.textDocument;
             var document = new TextDocument(td.uri, td.languageId, td.version, td.text);
-            document.saved = true;
+            document.saved = false; // we can't assume the document was unchanged on open
             documents[td.uri] = document;
         };
         protocol.onDidChangeTextDocument = function(event) {
