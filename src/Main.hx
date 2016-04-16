@@ -37,7 +37,7 @@ class Main {
 
             resolve({
                 capabilities: {
-                    textDocumentSync: Full,
+                    textDocumentSync: TextDocuments.syncKind,
                     completionProvider: {
                         triggerCharacters: ["."]
                     },

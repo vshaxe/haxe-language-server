@@ -19,9 +19,18 @@ class TextDocument {
         this.content = content;
     }
 
-    public function update(event:TextDocumentContentChangeEvent, version:Int):Void {
+    public function update(events:Array<TextDocumentContentChangeEvent>, version:Int):Void {
         this.version = version;
-        content = event.text;
+        for (event in events) {
+            if (event.range == null || event.rangeLength == null) {
+                content = event.text;
+            } else {
+                var offset = offsetAt(event.range.start);
+                var before = content.substring(0, offset);
+                var after = content.substring(offset + event.rangeLength);
+                content = before + event.text + after;
+            }
+        }
         lineOffsets = null;
     }
 

@@ -1,7 +1,10 @@
 import vscode.Protocol;
+import vscode.ProtocolTypes;
 
 class TextDocuments {
     var documents:Map<String,TextDocument>;
+
+    public static inline var syncKind = TextDocumentSyncKind.Incremental;
 
     public function new() {
         documents = new Map();
@@ -21,13 +24,12 @@ class TextDocuments {
         protocol.onDidChangeTextDocument = function(event) {
             var td = event.textDocument;
             var changes = event.contentChanges;
-            var last = changes.length > 0 ? changes[changes.length - 1] : null;
-            if (last != null) {
-                var document = documents[td.uri];
-                if (document != null) {
-                    document.update(last, td.version);
-                    document.saved = false;
-                }
+            if (changes.length == 0)
+                return;
+            var document = documents[td.uri];
+            if (document != null) {
+                document.update(changes, td.version);
+                document.saved = false;
             }
         };
         protocol.onDidCloseTextDocument = function(event) {
