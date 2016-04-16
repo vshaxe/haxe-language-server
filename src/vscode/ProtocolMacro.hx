@@ -31,6 +31,9 @@ class ProtocolMacro {
                         handlerCallArgs.push(macro request.params);
                     }
 
+                    handlerArgDefs.push({name: "cancelToken", type: macro : jsonrpc.Protocol.CancelToken});
+                    handlerCallArgs.push(macro cancelToken);
+
                     var resultDataCT, resolveExpr;
                     if (resultData.toString() != "Void") {
                         resultDataCT = resultData.toComplexType();
@@ -110,6 +113,7 @@ class ProtocolMacro {
                 ret: null,
                 args: [
                     {name: "request", type: macro : jsonrpc.Types.RequestMessage},
+                    {name: "cancelToken", type: macro : jsonrpc.Protocol.CancelToken},
                     {name: "resolve", type: macro : Dynamic->Void},
                     {name: "reject", type: macro : Int->String->Dynamic->Void},
                 ],

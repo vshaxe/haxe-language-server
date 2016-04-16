@@ -7,9 +7,11 @@ import jsonrpc.Types;
 **/
 class Protocol {
     var writeMessage:Message->Void;
+    var cancelTokens:Map<String,CancelToken>;
 
     public function new(writeMessage) {
         this.writeMessage = writeMessage;
+        cancelTokens = new Map();
     }
 
     public function handleMessage(message:Message):Void {
@@ -17,11 +19,37 @@ class Protocol {
             return;
         if (Reflect.hasField(message, "id")) {
             var request:RequestMessage = cast message;
-            function resolve(result) sendResponse(JsonRpc.response(request.id, Right(result)));
-            function reject(code, message, data) sendResponse(JsonRpc.response(request.id, Left(JsonRpc.error(code, message, data))));
-            handleRequest(request, resolve, reject);
+            var tokenKey = Std.string(request.id);
+            var token = cancelTokens[tokenKey] = {canceled: false};
+            function resolve(result) {
+                cancelTokens.remove(tokenKey);
+                sendResponse(JsonRpc.response(request.id, Right(result)));
+            }
+            function reject(code, message, data) {
+                cancelTokens.remove(tokenKey);
+                sendResponse(JsonRpc.response(request.id, Left(JsonRpc.error(code, message, data))));
+            }
+            try {
+                handleRequest(request, token, resolve, reject);
+            } catch (e:Dynamic) {
+                cancelTokens.remove(tokenKey);
+                reject(jsonrpc.ErrorCodes.InternalError, 'Request ${request.method} failed with error: ${Std.string(e)}', null);
+            }
         } else {
-            handleNotification(cast message);
+            var notification:NotificationMessage = cast message;
+            if (notification.method == jsonrpc.JsonRpc.CANCEL_METHOD)
+                cancelRequest(notification.params);
+            else
+                handleNotification(notification);
+        }
+    }
+
+    function cancelRequest(params:jsonrpc.Types.CancelParams) {
+        var tokenKey = Std.string(params.id);
+        var token = cancelTokens[tokenKey];
+        if (token != null) {
+            token.canceled = true;
+            cancelTokens.remove(tokenKey);
         }
     }
 
@@ -34,10 +62,14 @@ class Protocol {
     }
 
     // these should be implemented in sub-class
-    function handleRequest(request:RequestMessage, resolve:Dynamic->Void, reject:Int->String->Dynamic->Void):Void {
+    function handleRequest(request:RequestMessage, cancelToken:CancelToken, resolve:Dynamic->Void, reject:Int->String->Dynamic->Void):Void {
         reject(ErrorCodes.InternalError, "handleRequest not implemented", null);
     }
 
     function handleNotification(notification:NotificationMessage):Void {
     }
+}
+
+typedef CancelToken = {
+    var canceled:Bool;
 }

@@ -32,7 +32,7 @@ class Main {
         var docs = new TextDocuments();
         docs.listen(proto);
 
-        proto.onInitialize = function(params, resolve, reject) {
+        proto.onInitialize = function(params, cancelToken, resolve, reject) {
             rootPath = params.rootPath;
             proto.sendShowMessage({type: Info, message: "Haxe language server started"});
 
@@ -55,13 +55,9 @@ class Main {
             });
         };
 
-        proto.onShutdown = function(resolve, reject) {
+        proto.onShutdown = function(cancelToken, resolve, reject) {
             haxeServer.stop();
             resolve();
-        }
-
-        proto.onCancel = function(params) {
-            trace("Got request cancellation " + params + " (not supported yet)");
         }
 
         proto.onDidChangeConfiguration = function(config) {
@@ -77,7 +73,7 @@ class Main {
             "--no-output", // prevent generation
         ];
 
-        proto.onCompletion = function(params, resolve, reject) {
+        proto.onCompletion = function(params, cancelToken, resolve, reject) {
             var doc = docs.get(params.textDocument.uri);
             var filePath = uriToFsPath(params.textDocument.uri);
             var offset = doc.offsetAt(params.position);
@@ -87,6 +83,9 @@ class Main {
                 "--display", '$filePath@$bytePos' + (if (toplevel) "@toplevel" else "")
             ]);
             haxeServer.process(args, doc.content, function(data) {
+                if (cancelToken.canceled)
+                    return;
+
                 var xml = try Xml.parse(data).firstElement() catch (e:Dynamic) null;
                 if (xml == null)
                     return reject(0, "");
@@ -95,7 +94,7 @@ class Main {
             });
         };
 
-        proto.onSignatureHelp = function(params, resolve, reject) {
+        proto.onSignatureHelp = function(params, cancelToken, resolve, reject) {
             var doc = docs.get(params.textDocument.uri);
             var filePath = uriToFsPath(params.textDocument.uri);
             var bytePos = doc.byteOffsetAt(params.position);
@@ -103,6 +102,9 @@ class Main {
                 "--display", '$filePath@$bytePos'
             ]);
             haxeServer.process(args, doc.content, function(data) {
+                if (cancelToken.canceled)
+                    return;
+
                 var xml = try Xml.parse(data).firstElement() catch (e:Dynamic) null;
                 if (xml == null)
                     return reject(0, "");
@@ -110,7 +112,7 @@ class Main {
             });
         };
 
-        proto.onGotoDefinition = function(params, resolve, reject) {
+        proto.onGotoDefinition = function(params, cancelToken, resolve, reject) {
             var doc = docs.get(params.textDocument.uri);
             var filePath = uriToFsPath(params.textDocument.uri);
             var bytePos = doc.byteOffsetAt(params.position);
@@ -118,6 +120,9 @@ class Main {
                 "--display", '$filePath@$bytePos@position'
             ]);
             haxeServer.process(args, doc.content, function(data) {
+                if (cancelToken.canceled)
+                    return;
+
                 var xml = try Xml.parse(data).firstElement() catch (e:Dynamic) null;
                 if (xml == null)
                     return reject(0, "");
@@ -147,7 +152,7 @@ class Main {
             });
         };
 
-        proto.onHover = function(params, resolve, reject) {
+        proto.onHover = function(params, cancelToken, resolve, reject) {
             var doc = docs.get(params.textDocument.uri);
             var filePath = uriToFsPath(params.textDocument.uri);
             var bytePos = doc.byteOffsetAt(params.position);
@@ -155,6 +160,9 @@ class Main {
                 "--display", '$filePath@$bytePos@type'
             ]);
             haxeServer.process(args, doc.content, function(data) {
+                if (cancelToken.canceled)
+                    return;
+
                 var xml = try Xml.parse(data).firstElement() catch (e:Dynamic) null;
                 if (xml == null)
                     return reject(0, "");
@@ -163,7 +171,7 @@ class Main {
             });
         };
 
-        proto.onFindReferences = function(params, resolve, reject) {
+        proto.onFindReferences = function(params, cancelToken, resolve, reject) {
             var doc = docs.get(params.textDocument.uri);
             var filePath = uriToFsPath(params.textDocument.uri);
             var bytePos = doc.byteOffsetAt(params.position);
@@ -171,6 +179,9 @@ class Main {
                 "--display", '$filePath@$bytePos@usage'
             ]);
             haxeServer.process(args, doc.content, function(data) {
+                if (cancelToken.canceled)
+                    return;
+
                 var xml = try Xml.parse(data).firstElement() catch (e:Dynamic) null;
                 if (xml == null)
                     return reject(0, "");
