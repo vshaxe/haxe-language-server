@@ -144,7 +144,7 @@ class Main {
                 if (xml == null)
                     return reject(0, "");
                 var type = xml.firstChild().nodeValue;
-                resolve({contents: type});
+                resolve({contents: {language: "haxe", value: type}});
             });
         };
 
