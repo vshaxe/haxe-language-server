@@ -28,7 +28,6 @@ class Main {
 
         proto.onInitialize = function(params, cancelToken, resolve, reject) {
             context.workspacePath = params.rootPath;
-            proto.sendShowMessage({type: Info, message: "Haxe language server started"});
             resolve({
                 capabilities: {
                     textDocumentSync: TextDocuments.syncKind,
