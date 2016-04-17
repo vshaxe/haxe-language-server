@@ -13,7 +13,7 @@ import vscode.ProtocolTypes;
 import sys.FileSystem;
 using StringTools;
 import Uri.*;
-import SignatureHelper.prepareSignature;
+import SignatureHelper.*;
 import FsUtils.*;
 
 class Main {
@@ -87,7 +87,25 @@ class Main {
                 var xml = try Xml.parse(data).firstElement() catch (e:Dynamic) null;
                 if (xml == null)
                     return reject(0, "");
-                resolve({signatures: [{label: xml.firstChild().nodeValue}]});
+
+                var text = xml.firstChild().nodeValue.trim();
+                var signature:SignatureInformation;
+                switch (parseDisplayType(text)) {
+                    case DTFunction(args, ret):
+                        signature = {
+                            label: printFunctionSignature(args, ret),
+                            parameters: [for (arg in args) {label: printFunctionArgument(arg)}],
+
+                        }
+                    default:
+                        signature = {label: text}; // this should not happen
+                }
+
+                resolve({
+                    signatures: [signature],
+                    activeSignature: 0,
+                    activeParameter: 0,
+                });
             });
         };
 
