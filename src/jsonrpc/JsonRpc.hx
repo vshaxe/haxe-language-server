@@ -55,7 +55,7 @@ class JsonRpc {
         };
         if (error != null)
             response.error = error;
-        else if (result != null)
+        else
             response.result = result;
         return response;
     }
