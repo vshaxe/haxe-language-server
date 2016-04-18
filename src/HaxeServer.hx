@@ -46,18 +46,22 @@ using StringTools;
             }
             socket.write("\x00");
 
-            var data:Buffer = null;
-            socket.on(ReadableEvent.Data, function(buf) {
-                socket.end();
-                if (cancelToken.canceled)
+            var chunks = [];
+            var totalLen = 0;
+            socket.on(ReadableEvent.Data, function(buf:Buffer) {
+                if (cancelToken.canceled) {
+                    socket.end();
                     return cb(null);
-                data = buf;
+                }
+                chunks.push(buf);
+                totalLen += buf.length;
             });
             socket.on(SocketEvent.End, function() {
                 if (cancelToken.canceled)
                     return cb(null);
-                if (data == null)
+                if (totalLen == 0)
                     return cb(""); // no data received - can happen
+                var data = Buffer.concat(chunks, totalLen);
                 var buf = new StringBuf();
                 for (line in data.toString().split("\n")) {
                     switch (line.fastCodeAt(0)) {
