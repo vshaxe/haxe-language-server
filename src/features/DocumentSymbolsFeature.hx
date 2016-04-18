@@ -2,7 +2,7 @@ package features;
 
 import vscode.BasicTypes;
 import vscode.ProtocolTypes;
-import jsonrpc.Protocol.CancelToken;
+import jsonrpc.Protocol;
 import jsonrpc.ErrorCodes;
 
 import Uri.uriToFsPath;
@@ -12,7 +12,7 @@ class DocumentSymbolsFeature extends Feature {
         context.protocol.onDocumentSymbols = onDocumentSymbols;
     }
 
-    function onDocumentSymbols(params:DocumentSymbolParams, cancelToken:CancelToken, resolve:Array<SymbolInformation>->Void, reject:Int->String->Void) {
+    function onDocumentSymbols(params:DocumentSymbolParams, cancelToken:CancelToken, resolve:Array<SymbolInformation>->Void, reject:RejectHandler) {
         var doc = context.getDocument(params.textDocument.uri);
         var filePath = uriToFsPath(params.textDocument.uri);
         var args = [
@@ -27,7 +27,7 @@ class DocumentSymbolsFeature extends Feature {
                 try haxe.Json.parse(data) catch (e:Dynamic) {
                     trace("INVALID document-symbols: " + e);
                     trace("First 4096 symbols:\n" + data.substr(0, 4096));
-                    return reject(ErrorCodes.InternalError, "Error parsing document symbol response: " + e);
+                    return reject(ErrorCodes.internalError("Error parsing document symbol response: " + e));
                 }
 
             var result = new Array<SymbolInformation>();

@@ -45,17 +45,8 @@ class ProtocolMacro {
                     handlerArgDefs.push({name: "resolve", type: macro : $resultDataCT->Void});
                     handlerCallArgs.push(resolveExpr);
 
-                    var errorCT, rejectExpr;
-                    if (errorData.toString() == "Void") {
-                        errorCT = macro : Int -> String -> Void;
-                        rejectExpr = macro function(c,m) reject(c,m,null);
-                    } else {
-                        var errorDataCT = errorData.toComplexType();
-                        errorCT = macro : Int -> String -> $errorDataCT -> Void;
-                        rejectExpr = macro reject;
-                    }
-                    handlerArgDefs.push({name: "reject", type: errorCT});
-                    handlerCallArgs.push(rejectExpr);
+                    handlerArgDefs.push({name: "reject", type: macro : jsonrpc.Types.ResponseError<Dynamic>->Void});
+                    handlerCallArgs.push(macro reject);
 
                     requestCases.push({
                         values: [methodNameExpr],
@@ -114,11 +105,11 @@ class ProtocolMacro {
                 args: [
                     {name: "request", type: macro : jsonrpc.Types.RequestMessage},
                     {name: "cancelToken", type: macro : jsonrpc.Protocol.CancelToken},
-                    {name: "resolve", type: macro : Dynamic->Void},
-                    {name: "reject", type: macro : Int->String->Dynamic->Void},
+                    {name: "resolve", type: macro : jsonrpc.Protocol.ResolveHandler},
+                    {name: "reject", type: macro : jsonrpc.Protocol.RejectHandler},
                 ],
                 expr: {
-                    expr: ESwitch(macro request.method, requestCases, macro reject(jsonrpc.ErrorCodes.MethodNotFound, "Method '" + request.method + "' not found", null)),
+                    expr: ESwitch(macro request.method, requestCases, macro reject(jsonrpc.JsonRpc.error(jsonrpc.ErrorCodes.MethodNotFound, "Method '" + request.method + "' not found"))),
                     pos: pos
                 }
             })

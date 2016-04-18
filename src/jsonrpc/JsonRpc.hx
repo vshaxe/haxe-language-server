@@ -48,17 +48,15 @@ class JsonRpc {
         If `outcome` is `Left` - the error response will be generated for given error data.
         If `outcome` is `Right` - the result response will be generated for given result data.
     **/
-    public static function response<D,E>(id:RequestId, outcome:haxe.ds.Either<ResponseError<E>,D>):ResponseMessage {
+    public static function response<D,E>(id:RequestId, result:D, error:ResponseError<E>):ResponseMessage {
         var response:ResponseMessage = {
             jsonrpc: PROTOCOL_VERSION,
             id: id,
         };
-        switch (outcome) {
-            case Left(var error):
-                response.error = error;
-            case Right(var result):
-                response.result = result;
-        }
+        if (error != null)
+            response.error = error;
+        else if (result != null)
+            response.result = result;
         return response;
     }
 

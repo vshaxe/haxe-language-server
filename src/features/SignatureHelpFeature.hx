@@ -4,7 +4,8 @@ using StringTools;
 
 import vscode.BasicTypes;
 import vscode.ProtocolTypes;
-import jsonrpc.Protocol.CancelToken;
+import jsonrpc.Protocol;
+import jsonrpc.ErrorCodes.internalError;
 
 import Uri.uriToFsPath;
 import SignatureHelper.*;
@@ -14,7 +15,7 @@ class SignatureHelpFeature extends Feature {
         context.protocol.onSignatureHelp = onSignatureHelp;
     }
 
-    function onSignatureHelp(params:TextDocumentPositionParams, cancelToken:CancelToken, resolve:SignatureHelp->Void, reject:Int->String->Void) {
+    function onSignatureHelp(params:TextDocumentPositionParams, cancelToken:CancelToken, resolve:SignatureHelp->Void, reject:RejectHandler) {
         var doc = context.getDocument(params.textDocument.uri);
         var filePath = uriToFsPath(params.textDocument.uri);
         var bytePos = doc.byteOffsetAt(params.position);
@@ -24,9 +25,8 @@ class SignatureHelpFeature extends Feature {
             if (cancelToken.canceled)
                 return;
 
-            var xml = try Xml.parse(data).firstElement() catch (e:Dynamic) null;
-            if (xml == null)
-                return reject(0, "");
+            var xml = try Xml.parse(data).firstElement() catch (_:Dynamic) null;
+            if (xml == null) return reject(internalError("Invalid xml data: " + data));
 
             var text = xml.firstChild().nodeValue.trim();
             var signature:SignatureInformation;

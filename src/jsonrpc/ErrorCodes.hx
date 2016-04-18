@@ -30,4 +30,8 @@ class ErrorCodes {
         Internal JSON-RPC error.
     **/
     static inline var InternalError = -32603;
+
+    static inline function internalError(msg = "") {
+        return JsonRpc.error(InternalError, msg);
+    }
 }

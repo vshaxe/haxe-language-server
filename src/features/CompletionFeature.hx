@@ -2,7 +2,8 @@ package features;
 
 import vscode.BasicTypes;
 import vscode.ProtocolTypes;
-import jsonrpc.Protocol.CancelToken;
+import jsonrpc.Protocol;
+import jsonrpc.ErrorCodes.internalError;
 
 import Uri.uriToFsPath;
 import SignatureHelper.prepareSignature;
@@ -12,7 +13,7 @@ class CompletionFeature extends Feature {
         context.protocol.onCompletion = onCompletion;
     }
 
-    function onCompletion(params:TextDocumentPositionParams, cancelToken:CancelToken, resolve:Array<CompletionItem>->Void, reject:Int->String->Void) {
+    function onCompletion(params:TextDocumentPositionParams, cancelToken:CancelToken, resolve:Array<CompletionItem>->Void, reject:RejectHandler) {
         var doc = context.getDocument(params.textDocument.uri);
         var filePath = uriToFsPath(params.textDocument.uri);
         var offset = doc.offsetAt(params.position);
@@ -24,9 +25,9 @@ class CompletionFeature extends Feature {
             if (cancelToken.canceled)
                 return;
 
-            var xml = try Xml.parse(data).firstElement() catch (e:Dynamic) null;
-            if (xml == null)
-                return reject(0, "");
+            var xml = try Xml.parse(data).firstElement() catch (_:Dynamic) null;
+            if (xml == null) return reject(internalError("Invalid xml data: " + data));
+
             var items = if (toplevel) parseToplevelCompletion(xml) else parseFieldCompletion(xml);
             resolve(items);
         });

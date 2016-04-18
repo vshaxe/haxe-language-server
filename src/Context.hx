@@ -1,4 +1,4 @@
-import jsonrpc.Protocol.CancelToken;
+import jsonrpc.Protocol;
 import vscode.ProtocolTypes;
 
 class Context {
@@ -17,7 +17,7 @@ class Context {
         protocol.onDidChangeConfiguration = onDidChangeConfiguration;
     }
 
-    function onInitialize(params:InitializeParams, cancelToken:CancelToken, resolve:InitializeResult->Void, reject:Int->String->InitializeError->Void) {
+    function onInitialize(params:InitializeParams, cancelToken:CancelToken, resolve:InitializeResult->Void, reject:RejectDataHandler<InitializeError>) {
         workspacePath = params.rootPath;
 
         haxeServer = new HaxeServer();
@@ -50,7 +50,7 @@ class Context {
         });
     }
 
-    function onShutdown(cancelToken:CancelToken, resolve:Void->Void, reject:Int->String->Void) {
+    function onShutdown(cancelToken:CancelToken, resolve:Void->Void, reject:RejectHandler) {
         haxeServer.stop();
         haxeServer = null;
         return resolve();

@@ -2,7 +2,8 @@ package features;
 
 import vscode.BasicTypes;
 import vscode.ProtocolTypes;
-import jsonrpc.Protocol.CancelToken;
+import jsonrpc.Protocol;
+import jsonrpc.ErrorCodes.internalError;
 
 import Uri.*;
 import FsUtils.getProperFileNameCase;
@@ -12,7 +13,7 @@ class FindReferencesFeature extends Feature {
         context.protocol.onFindReferences = onFindReferences;
     }
 
-    function onFindReferences(params:TextDocumentPositionParams, cancelToken:CancelToken, resolve:Array<Location>->Void, reject:Int->String->Void) {
+    function onFindReferences(params:TextDocumentPositionParams, cancelToken:CancelToken, resolve:Array<Location>->Void, reject:RejectHandler) {
         var doc = context.getDocument(params.textDocument.uri);
         var filePath = uriToFsPath(params.textDocument.uri);
         var bytePos = doc.byteOffsetAt(params.position);
@@ -22,13 +23,12 @@ class FindReferencesFeature extends Feature {
             if (cancelToken.canceled)
                 return;
 
-            var xml = try Xml.parse(data).firstElement() catch (e:Dynamic) null;
-            if (xml == null)
-                return reject(0, "");
+            var xml = try Xml.parse(data).firstElement() catch (_:Dynamic) null;
+            if (xml == null) return reject(internalError("Invalid xml data: " + data));
 
             var positions = [for (el in xml.elements()) el.firstChild().nodeValue];
             if (positions.length == 0)
-                return reject(0, "no info");
+                return resolve([]);
 
             var results = [];
             for (p in positions) {
@@ -43,10 +43,7 @@ class FindReferencesFeature extends Feature {
                 });
             }
 
-            if (results.length == 0)
-                reject(0, "no info");
-            else
-                resolve(results);
+            return resolve(results);
         });
     }
 }

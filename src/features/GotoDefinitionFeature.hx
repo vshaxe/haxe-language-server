@@ -5,7 +5,8 @@ using StringTools;
 
 import vscode.BasicTypes;
 import vscode.ProtocolTypes;
-import jsonrpc.Protocol.CancelToken;
+import jsonrpc.Protocol;
+import jsonrpc.ErrorCodes.internalError;
 
 import Uri.*;
 import FsUtils.getProperFileNameCase;
@@ -16,7 +17,7 @@ class GotoDefinitionFeature extends Feature {
         context.protocol.onGotoDefinition = onGotoDefinition;
     }
 
-    function onGotoDefinition(params:TextDocumentPositionParams, cancelToken:CancelToken, resolve:EitherType<Location,Array<Location>>->Void, reject:Int->String->Void) {
+    function onGotoDefinition(params:TextDocumentPositionParams, cancelToken:CancelToken, resolve:EitherType<Location,Array<Location>>->Void, reject:RejectHandler) {
         var doc = context.getDocument(params.textDocument.uri);
         var filePath = uriToFsPath(params.textDocument.uri);
         var bytePos = doc.byteOffsetAt(params.position);
@@ -26,13 +27,12 @@ class GotoDefinitionFeature extends Feature {
             if (cancelToken.canceled)
                 return;
 
-            var xml = try Xml.parse(data).firstElement() catch (e:Dynamic) null;
-            if (xml == null)
-                return reject(0, "");
+            var xml = try Xml.parse(data).firstElement() catch (_:Dynamic) null;
+            if (xml == null) return reject(internalError("Invalid xml data: " + data));
 
             var positions = [for (el in xml.elements()) el.firstChild().nodeValue];
             if (positions.length == 0)
-                return reject(0, "no info");
+                return resolve([]);
 
             var results = [];
             for (p in positions) {
@@ -47,11 +47,7 @@ class GotoDefinitionFeature extends Feature {
                 });
             }
 
-            switch (results.length) {
-                case 0: reject(0, "no info");
-                case 1: resolve(results[0]);
-                default: resolve(results);
-            }
+            return resolve(results);
         });
     }
 }

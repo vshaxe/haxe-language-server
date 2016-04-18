@@ -21,19 +21,19 @@ class Protocol {
             var request:RequestMessage = cast message;
             var tokenKey = Std.string(request.id);
             var token = cancelTokens[tokenKey] = {canceled: false};
-            function resolve(result) {
+            function resolve(result:Dynamic) {
                 cancelTokens.remove(tokenKey);
-                sendResponse(JsonRpc.response(request.id, Right(result)));
+                sendResponse(JsonRpc.response(request.id, result, null));
             }
-            function reject(code, message, data) {
+            function reject<T>(error:ResponseError<T>) {
                 cancelTokens.remove(tokenKey);
-                sendResponse(JsonRpc.response(request.id, Left(JsonRpc.error(code, message, data))));
+                sendResponse(JsonRpc.response(request.id, null, error));
             }
             try {
                 handleRequest(request, token, resolve, reject);
             } catch (e:Dynamic) {
                 cancelTokens.remove(tokenKey);
-                reject(jsonrpc.ErrorCodes.InternalError, 'Request ${request.method} failed with error: ${Std.string(e)}', null);
+                reject(JsonRpc.error(jsonrpc.ErrorCodes.InternalError, 'Request ${request.method} failed with error: ${Std.string(e)}'));
             }
         } else {
             var notification:NotificationMessage = cast message;
@@ -62,13 +62,17 @@ class Protocol {
     }
 
     // these should be implemented in sub-class
-    function handleRequest(request:RequestMessage, cancelToken:CancelToken, resolve:Dynamic->Void, reject:Int->String->Dynamic->Void):Void {
-        reject(ErrorCodes.InternalError, "handleRequest not implemented", null);
+    function handleRequest(request:RequestMessage, cancelToken:CancelToken, resolve:ResolveHandler, reject:RejectHandler):Void {
+        reject(JsonRpc.error(ErrorCodes.InternalError, "handleRequest not implemented"));
     }
 
     function handleNotification(notification:NotificationMessage):Void {
     }
 }
+
+typedef ResolveHandler = Dynamic->Void
+typedef RejectHandler = ResponseError<Void>->Void
+typedef RejectDataHandler<T> = ResponseError<T>->Void
 
 typedef CancelToken = {
     var canceled:Bool;
