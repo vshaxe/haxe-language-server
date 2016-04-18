@@ -23,7 +23,7 @@ class DocumentSymbolsFeature extends Feature {
             if (cancelToken.canceled)
                 return;
 
-            var data:Array<{name:String, kind:Int, location:String, ?containerName:String}> =
+            var data:Array<{name:String, kind:Int, location:HaxeLocation, ?containerName:String}> =
                 try haxe.Json.parse(data) catch (e:Dynamic) {
                     trace("INVALID document-symbols: " + e);
                     trace("First 4096 symbols:\n" + data.substr(0, 4096));
@@ -32,11 +32,11 @@ class DocumentSymbolsFeature extends Feature {
 
             var result = new Array<SymbolInformation>();
             for (v in data) {
-                var pos = HaxePosition.parse(v.location);
-                if (pos == null) {
-                    context.protocol.sendShowMessage({type: Error, message: "Couldn't parse position for " + haxe.Json.stringify(v)});
+                if (v.location == null) {
+                    context.protocol.sendShowMessage({type: Error, message: "Unknown location for " + haxe.Json.stringify(v)});
                     continue;
                 }
+                var pos = locationToHaxePosition(v.location);
                 var item:SymbolInformation = {
                     name: v.name,
                     kind: cast v.kind,
@@ -53,4 +53,21 @@ class DocumentSymbolsFeature extends Feature {
             resolve(result);
         });
     }
+
+    // this is temporary, we're gonna remove HaxePosition after we'll be using JSON display API
+    static function locationToHaxePosition(l:HaxeLocation):HaxePosition {
+        return {
+            file: l.file,
+            line: l.start.line,
+            startLine: l.start.line,
+            endLine: l.end.line,
+            startByte: l.start.character,
+            endByte: l.end.character,
+        };
+    }
+}
+
+private typedef HaxeLocation = {
+    >Range,
+    var file:String;
 }
