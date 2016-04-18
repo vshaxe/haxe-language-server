@@ -73,7 +73,7 @@ abstract Notification<TParams>(String) to String {}
     /**
         The document save notification is sent from the client to the server when the document for saved in the clinet.
     **/
-    var DidSaveTextDocument : Notification<DidCloseTextDocumentParams> = "textDocument/didSave";
+    var DidSaveTextDocument : Notification<DidSaveTextDocumentParams> = "textDocument/didSave";
 
     /**
         The watched files notification is sent from the client to the server when the client detects changes to file watched by the lanaguage client.

@@ -23,8 +23,7 @@ class Context {
         haxeServer = new HaxeServer();
         haxeServer.start(HAXE_SERVER_PORT);
 
-        documents = new TextDocuments();
-        documents.listen(protocol);
+        documents = new TextDocuments(protocol);
 
         new features.CompletionFeature(this);
         new features.HoverFeature(this);
