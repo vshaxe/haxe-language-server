@@ -43,7 +43,7 @@ class GotoDefinitionFeature extends Feature {
                 }
                 results.push({
                     uri: fsPathToUri(getProperFileNameCase(pos.file)),
-                    range: pos.toRange(),
+                    range: pos.toRange(null), // no cache because this right now only returns one position
                 });
             }
 

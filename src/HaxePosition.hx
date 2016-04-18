@@ -16,7 +16,7 @@ abstract HaxePosition(HaxePositionData) from HaxePositionData to HaxePositionDat
             null;
     }
 
-    public function toRange():vscode.BasicTypes.Range {
+    public function toRange(cache:Map<String,Array<String>>):vscode.BasicTypes.Range {
         var pos = this;
         var startLine = if (pos.startLine != null) pos.startLine - 1 else pos.line - 1;
         var endLine = if (pos.endLine != null) pos.endLine - 1 else pos.line - 1;
@@ -33,7 +33,15 @@ abstract HaxePosition(HaxePositionData) from HaxePositionData to HaxePositionDat
         #else
         var lines = null;
         inline function getLineChar(line:Int, byteOffset:Int):Int {
-            if (lines == null) lines = sys.io.File.getContent(pos.file).split("\n");
+            if (lines == null) {
+                if (cache == null) {
+                    lines = sys.io.File.getContent(pos.file).split("\n");
+                } else {
+                    lines = cache[pos.file];
+                    if (lines == null)
+                        lines = cache[pos.file] = sys.io.File.getContent(pos.file).split("\n");
+                }
+            }
             var lineContent = new js.node.Buffer(lines[line], "utf-8");
             var lineTextSlice = lineContent.toString("utf-8", 0, byteOffset);
             return lineTextSlice.length;

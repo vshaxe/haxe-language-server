@@ -31,6 +31,7 @@ class FindReferencesFeature extends Feature {
                 return resolve([]);
 
             var results = [];
+            var haxePosCache = new Map();
             for (p in positions) {
                 var pos = HaxePosition.parse(p);
                 if (pos == null) {
@@ -39,7 +40,7 @@ class FindReferencesFeature extends Feature {
                 }
                 results.push({
                     uri: fsPathToUri(getProperFileNameCase(pos.file)),
-                    range: pos.toRange(),
+                    range: pos.toRange(haxePosCache),
                 });
             }
 

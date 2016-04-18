@@ -31,6 +31,7 @@ class DocumentSymbolsFeature extends Feature {
                 }
 
             var result = new Array<SymbolInformation>();
+            var haxePosCache = new Map();
             for (v in data) {
                 if (v.location == null) {
                     context.protocol.sendShowMessage({type: Error, message: "Unknown location for " + haxe.Json.stringify(v)});
@@ -42,7 +43,7 @@ class DocumentSymbolsFeature extends Feature {
                     kind: cast v.kind,
                     location: {
                         uri: params.textDocument.uri, // should be the same i guess
-                        range: pos.toRange()
+                        range: pos.toRange(haxePosCache)
                     }
                 };
                 if (v.containerName != null)
