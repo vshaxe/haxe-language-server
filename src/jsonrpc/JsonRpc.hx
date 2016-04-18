@@ -45,8 +45,6 @@ class JsonRpc {
 
     /**
         Create `ResponseMessage` for given request `id`.
-        If `outcome` is `Left` - the error response will be generated for given error data.
-        If `outcome` is `Right` - the result response will be generated for given result data.
     **/
     public static function response<D,E>(id:RequestId, result:D, error:ResponseError<E>):ResponseMessage {
         var response:ResponseMessage = {
