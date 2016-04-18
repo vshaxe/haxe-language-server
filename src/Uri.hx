@@ -15,13 +15,13 @@ class Uri {
             path = upperCaseDriveRe.matched(1) + upperCaseDriveRe.matched(2).toLowerCase() + upperCaseDriveRe.matchedRight();
 
         var lastIdx = 0;
-        while(true) {
+        while (true) {
             var idx = path.indexOf("/", lastIdx);
             if (idx == -1) {
-                parts.push(encodeURIComponent2(encodeHashQuestion(path.substring(lastIdx))));
+                parts.push(encodeURIComponent2(path.substring(lastIdx)));
                 break;
             }
-            parts.push(encodeURIComponent2(encodeHashQuestion(path.substring(lastIdx, idx))));
+            parts.push(encodeURIComponent2(path.substring(lastIdx, idx)));
             parts.push("/");
             lastIdx = idx + 1;
         }
@@ -30,28 +30,17 @@ class Uri {
     }
 
     public static function uriToFsPath(uri:String):String {
-        if (!uriRe.match(uri))
+        if (!uriRe.match(uri) || uriRe.matched(2) != "file")
             throw 'Invalid uri: $uri';
 
-        inline function m(i) {
-            var m = uriRe.matched(i);
-            return if (m != null) m else "";
-        }
-        var scheme = m(2);
-        var authority = decodeURIComponent(m(4));
-        var path = decodeURIComponent(m(5));
-        var query = decodeURIComponent(m(7));
-        var fragment = decodeURIComponent(m(9));
-
-        if (authority.length > 0 && scheme == 'file')
-            return '//$authority$path';
-        else if (driveLetterPathRe.match(path))
+        var path = decodeURIComponent(uriRe.matched(5));
+        if (driveLetterPathRe.match(path))
             return path.charAt(1).toLowerCase() + path.substr(2);
         else
             return path;
     }
 
-    static var driveLetterPathRe = ~/^\/[a-zA-z]:/;
+    static var driveLetterPathRe = ~/^\/[a-zA-Z]:/;
     static var upperCaseDriveRe = ~/^(\/)?([A-Z]:)/;
     static var uriRe = ~/^(([^:\/?#]+?):)?(\/\/([^\/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?/;
 
@@ -61,11 +50,7 @@ class Uri {
 
     static function encodeURIComponent2(str:String):String {
         // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent
-        return untyped __js__("encodeURIComponent({0}).replace(/[!'()*]/g, {1})", str, _encode);
-    }
-
-    static inline function encodeHashQuestion(s:String):String {
-        return untyped __js__("{0}.replace(/[#?]/, {1})", s, _encode);
+        return untyped __js__("encodeURIComponent({0}).replace(/[!'()*#?]/g, {1})", str, _encode);
     }
 
     static function _encode(ch:String):String {
