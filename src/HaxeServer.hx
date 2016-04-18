@@ -6,7 +6,7 @@ import js.node.net.Socket;
 import js.node.stream.Readable;
 using StringTools;
 
- class HaxeServer {
+class HaxeServer {
     var proc:ChildProcessObject;
     var port:Int;
 
