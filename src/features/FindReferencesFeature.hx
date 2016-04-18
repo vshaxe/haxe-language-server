@@ -18,7 +18,7 @@ class FindReferencesFeature extends Feature {
         var bytePos = doc.byteOffsetAt(params.position);
         var args = ["--display", '$filePath@$bytePos@usage'];
         var stdin = if (doc.saved) null else doc.content;
-        context.callDisplay(args, stdin, cancelToken, function(data) {
+        callDisplay(args, stdin, cancelToken, function(data) {
             if (cancelToken.canceled)
                 return;
 
