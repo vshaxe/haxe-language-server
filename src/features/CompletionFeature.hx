@@ -15,11 +15,10 @@ class CompletionFeature extends Feature {
 
     function onCompletion(params:TextDocumentPositionParams, cancelToken:CancelToken, resolve:Array<CompletionItem>->Void, reject:RejectHandler) {
         var doc = context.getDocument(params.textDocument.uri);
+        var r = calculateCompletionPosition(doc.content, doc.offsetAt(params.position));
         var filePath = uriToFsPath(params.textDocument.uri);
-        var offset = doc.offsetAt(params.position);
-        var toplevel = if (offset == 0) true else doc.content.charCodeAt(offset - 1) != ".".code;
-        var bytePos = doc.offsetToByteOffset(offset);
-        var args = ["--display", '$filePath@$bytePos' + (if (toplevel) "@toplevel" else "")];
+        var bytePos = doc.offsetToByteOffset(r.pos);
+        var args = ["--display", '$filePath@$bytePos' + (if (r.toplevel) "@toplevel" else "")];
         var stdin = if (doc.saved) null else doc.content;
         callDisplay(args, stdin, cancelToken, function(data) {
             if (cancelToken.canceled)
@@ -28,9 +27,24 @@ class CompletionFeature extends Feature {
             var xml = try Xml.parse(data).firstElement() catch (_:Dynamic) null;
             if (xml == null) return reject(internalError("Invalid xml data: " + data));
 
-            var items = if (toplevel) parseToplevelCompletion(xml) else parseFieldCompletion(xml);
+            var items = if (r.toplevel) parseToplevelCompletion(xml) else parseFieldCompletion(xml);
             resolve(items);
         });
+    }
+
+    static var reFieldPart = ~/\.(\w*)$/;
+    static function calculateCompletionPosition(text:String, index:Int):CompletionPosition {
+        text = text.substring(0, index);
+        if (reFieldPart.match(text))
+            return {
+                pos: index - reFieldPart.matched(1).length,
+                toplevel: false,
+            };
+        else
+            return {
+                pos: index,
+                toplevel: true,
+            };
     }
 
     static function parseToplevelCompletion(x:Xml):Array<CompletionItem> {
@@ -116,4 +130,9 @@ class CompletionFeature extends Feature {
             default: trace("unknown field item kind: " + kind); null;
         }
     }
+}
+
+private typedef CompletionPosition = {
+    var pos:Int;
+    var toplevel:Bool;
 }
