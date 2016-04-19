@@ -30,24 +30,29 @@ class SignatureHelpFeature extends Feature {
             if (token.canceled)
                 return;
 
+            data = '<x>$data</x>';
             var xml = try Xml.parse(data).firstElement() catch (_:Dynamic) null;
             if (xml == null) return reject(internalError("Invalid xml data: " + data));
 
-            var text = xml.firstChild().nodeValue.trim();
-            var signature:SignatureInformation;
-            switch (parseDisplayType(text)) {
-                case DTFunction(args, ret):
-                    signature = {
-                        label: printFunctionSignature(args, ret),
-                        parameters: [for (arg in args) {label: printFunctionArgument(arg)}],
+            var signatures = new Array<SignatureInformation>();
+            for (el in xml.elements()) {
+                var text = el.firstChild().nodeValue.trim();
+                var signature:SignatureInformation;
+                switch (parseDisplayType(text)) {
+                    case DTFunction(args, ret):
+                        signature = {
+                            label: printFunctionSignature(args, ret),
+                            parameters: [for (arg in args) {label: printFunctionArgument(arg)}],
 
-                    }
-                default:
-                    signature = {label: text}; // this should not happen
+                        }
+                    default:
+                        signature = {label: text}; // this should not happen
+                }
+                signatures.push(signature);
             }
 
             resolve({
-                signatures: [signature],
+                signatures: signatures,
                 activeSignature: 0,
                 activeParameter: r.arg,
             });
