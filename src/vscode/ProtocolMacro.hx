@@ -6,7 +6,7 @@ import haxe.macro.Type;
 using haxe.macro.Tools;
 
 class ProtocolMacro {
-    static function build():Array<Field> {
+    macro static function build():Array<Field> {
         var fields = Context.getBuildFields();
 
         var requestCases = new Array<Case>();
