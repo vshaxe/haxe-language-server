@@ -23,7 +23,7 @@ class SignatureHelpFeature extends Feature {
         if (r == null)
             return reject(jsonrpc.JsonRpc.error(0, "Invalid signature position " + params.position));
 
-        var bytePos = doc.offsetToByteOffset(r.start);
+        var bytePos = doc.offsetToByteOffset(r.pos);
         var args = ["--display", '$filePath@$bytePos'];
         var stdin = if (doc.saved) null else doc.content;
         callDisplay(args, stdin, cancelToken, function(data) {
@@ -96,7 +96,7 @@ class SignatureHelpFeature extends Feature {
                                 return null;
                             else
                                 return { // yay, it's a call!
-                                    start: i + 1,
+                                    pos: i + 1,
                                     arg: argIndex
                                 };
                         }
@@ -203,6 +203,6 @@ class SignatureHelpFeature extends Feature {
 }
 
 private typedef SignaturePosition = {
-    var start:Int;
+    var pos:Int;
     var arg:Int;
 }
