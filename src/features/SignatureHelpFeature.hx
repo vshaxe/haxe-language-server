@@ -135,7 +135,7 @@ class SignatureHelpFeature extends Feature {
         var i = 0, len = input.length;
         while (i < len) {
             if (inLineComment) {
-                if (input.charCodeAt(i) == "\n".code) {
+                if (input.fastCodeAt(i) == "\n".code) {
                     inLineComment = false;
                     output += "\n";
                 } else {
@@ -148,7 +148,7 @@ class SignatureHelpFeature extends Feature {
                     output += "  ";
                     i += 2;
                 } else {
-                    if (input.charCodeAt(i) == "\n".code)
+                    if (input.fastCodeAt(i) == "\n".code)
                         output += "\n";
                     else
                         output += " ";
@@ -162,7 +162,7 @@ class SignatureHelpFeature extends Feature {
                 inBlockComment = true;
                 output += "  ";
                 i += 2;
-            } else if (input.charCodeAt(i) == "'".code || input.charCodeAt(i) == "\"".code) {
+            } else if (input.fastCodeAt(i) == "'".code || input.fastCodeAt(i) == "\"".code) {
                 if (reStartsWithString.match(input.substring(i))) {
                     output += "\"";
                     var stringLength = reStartsWithString.matched(0).length;
@@ -177,7 +177,7 @@ class SignatureHelpFeature extends Feature {
                         i++;
                     }
                 }
-            } else if (input.charCodeAt(i) == "~".code) {
+            } else if (input.fastCodeAt(i) == "~".code) {
                 if (reStartsWithRegex.match(input.substring(i))) {
                     output += "~/";
                     var regexLength = reStartsWithRegex.matched(0).length;
