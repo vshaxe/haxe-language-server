@@ -39,7 +39,7 @@ class Context {
                     triggerCharacters: ["."]
                 },
                 signatureHelpProvider: {
-                    triggerCharacters: ["("]
+                    triggerCharacters: ["(", ","]
                 },
                 definitionProvider: true,
                 hoverProvider: true,
