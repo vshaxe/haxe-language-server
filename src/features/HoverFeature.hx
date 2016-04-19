@@ -6,7 +6,7 @@ import jsonrpc.Protocol;
 import jsonrpc.ErrorCodes.internalError;
 
 import Uri.uriToFsPath;
-import SignatureHelper.prepareSignature;
+import SignatureHelper.*;
 
 class HoverFeature extends Feature {
     override function init() {
@@ -26,7 +26,13 @@ class HoverFeature extends Feature {
             var xml = try Xml.parse(data).firstElement() catch (_:Dynamic) null;
             if (xml == null) return reject(internalError("Invalid xml data: " + data));
 
-            var type = xml.firstChild().nodeValue;
+            var s = StringTools.trim(xml.firstChild().nodeValue);
+            var type = switch (parseDisplayType(s)) {
+                case DTFunction(args, ret):
+                    "function" + printFunctionSignature(args, ret);
+                case DTValue(type):
+                    type;
+            };
             resolve({contents: {language: "haxe", value: type}});
         });
     }
