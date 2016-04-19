@@ -17,7 +17,7 @@ class Context {
         protocol.onDidChangeConfiguration = onDidChangeConfiguration;
     }
 
-    function onInitialize(params:InitializeParams, cancelToken:CancelToken, resolve:InitializeResult->Void, reject:RejectDataHandler<InitializeError>) {
+    function onInitialize(params:InitializeParams, token:RequestToken, resolve:InitializeResult->Void, reject:RejectDataHandler<InitializeError>) {
         workspacePath = params.rootPath;
 
         haxeServer = new HaxeServer();
@@ -49,7 +49,7 @@ class Context {
         });
     }
 
-    function onShutdown(cancelToken:CancelToken, resolve:Void->Void, reject:RejectHandler) {
+    function onShutdown(token:RequestToken, resolve:Void->Void, reject:RejectHandler) {
         haxeServer.stop();
         haxeServer = null;
         return resolve();

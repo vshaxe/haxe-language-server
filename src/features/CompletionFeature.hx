@@ -13,15 +13,15 @@ class CompletionFeature extends Feature {
         context.protocol.onCompletion = onCompletion;
     }
 
-    function onCompletion(params:TextDocumentPositionParams, cancelToken:CancelToken, resolve:Array<CompletionItem>->Void, reject:RejectHandler) {
+    function onCompletion(params:TextDocumentPositionParams, token:RequestToken, resolve:Array<CompletionItem>->Void, reject:RejectHandler) {
         var doc = context.getDocument(params.textDocument.uri);
         var r = calculateCompletionPosition(doc.content, doc.offsetAt(params.position));
         var filePath = uriToFsPath(params.textDocument.uri);
         var bytePos = doc.offsetToByteOffset(r.pos);
         var args = ["--display", '$filePath@$bytePos' + (if (r.toplevel) "@toplevel" else "")];
         var stdin = if (doc.saved) null else doc.content;
-        callDisplay(args, stdin, cancelToken, function(data) {
-            if (cancelToken.canceled)
+        callDisplay(args, stdin, token, function(data) {
+            if (token.canceled)
                 return;
 
             var xml = try Xml.parse(data).firstElement() catch (_:Dynamic) null;

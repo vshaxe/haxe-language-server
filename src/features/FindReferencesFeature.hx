@@ -13,14 +13,14 @@ class FindReferencesFeature extends Feature {
         context.protocol.onFindReferences = onFindReferences;
     }
 
-    function onFindReferences(params:TextDocumentPositionParams, cancelToken:CancelToken, resolve:Array<Location>->Void, reject:RejectHandler) {
+    function onFindReferences(params:TextDocumentPositionParams, token:RequestToken, resolve:Array<Location>->Void, reject:RejectHandler) {
         var doc = context.getDocument(params.textDocument.uri);
         var filePath = uriToFsPath(params.textDocument.uri);
         var bytePos = doc.byteOffsetAt(params.position);
         var args = ["--display", '$filePath@$bytePos@usage'];
         var stdin = if (doc.saved) null else doc.content;
-        callDisplay(args, stdin, cancelToken, function(data) {
-            if (cancelToken.canceled)
+        callDisplay(args, stdin, token, function(data) {
+            if (token.canceled)
                 return;
 
             var xml = try Xml.parse(data).firstElement() catch (_:Dynamic) null;

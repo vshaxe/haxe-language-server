@@ -15,7 +15,7 @@ class SignatureHelpFeature extends Feature {
         context.protocol.onSignatureHelp = onSignatureHelp;
     }
 
-    function onSignatureHelp(params:TextDocumentPositionParams, cancelToken:CancelToken, resolve:SignatureHelp->Void, reject:RejectHandler) {
+    function onSignatureHelp(params:TextDocumentPositionParams, token:RequestToken, resolve:SignatureHelp->Void, reject:RejectHandler) {
         var doc = context.getDocument(params.textDocument.uri);
         var filePath = uriToFsPath(params.textDocument.uri);
 
@@ -26,8 +26,8 @@ class SignatureHelpFeature extends Feature {
         var bytePos = doc.offsetToByteOffset(r.pos);
         var args = ["--display", '$filePath@$bytePos'];
         var stdin = if (doc.saved) null else doc.content;
-        callDisplay(args, stdin, cancelToken, function(data) {
-            if (cancelToken.canceled)
+        callDisplay(args, stdin, token, function(data) {
+            if (token.canceled)
                 return;
 
             var xml = try Xml.parse(data).firstElement() catch (_:Dynamic) null;

@@ -12,15 +12,15 @@ class DocumentSymbolsFeature extends Feature {
         context.protocol.onDocumentSymbols = onDocumentSymbols;
     }
 
-    function onDocumentSymbols(params:DocumentSymbolParams, cancelToken:CancelToken, resolve:Array<SymbolInformation>->Void, reject:RejectHandler) {
+    function onDocumentSymbols(params:DocumentSymbolParams, token:RequestToken, resolve:Array<SymbolInformation>->Void, reject:RejectHandler) {
         var doc = context.getDocument(params.textDocument.uri);
         var filePath = uriToFsPath(params.textDocument.uri);
         var args = [
             "--display", '$filePath@0@document-symbols'
         ];
         var stdin = if (doc.saved) null else doc.content;
-        callDisplay(args, stdin, cancelToken, function(data) {
-            if (cancelToken.canceled)
+        callDisplay(args, stdin, token, function(data) {
+            if (token.canceled)
                 return;
 
             var data:Array<{name:String, kind:Int, location:HaxeLocation, ?containerName:String}> =

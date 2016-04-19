@@ -4,6 +4,7 @@ import js.node.ChildProcess;
 import js.node.Net;
 import js.node.net.Socket;
 import js.node.stream.Readable;
+import jsonrpc.Protocol.RequestToken;
 using StringTools;
 
 class HaxeServer {
@@ -26,14 +27,14 @@ class HaxeServer {
         }
     }
 
-    public function process(args:Array<String>, cancelToken:jsonrpc.Protocol.CancelToken, stdin:String, cb:String->Void) {
+    public function process(args:Array<String>, token:RequestToken, stdin:String, cb:String->Void) {
         if (stdin != null) {
             args.push("-D");
             args.push("display-stdin");
         }
         var socket = Net.connect(port);
         socket.on(SocketEvent.Connect, function() {
-            if (cancelToken.canceled) {
+            if (token.canceled) {
                 socket.end();
                 return cb(null);
             }
@@ -49,7 +50,7 @@ class HaxeServer {
             var chunks = [];
             var totalLen = 0;
             socket.on(ReadableEvent.Data, function(buf:Buffer) {
-                if (cancelToken.canceled) {
+                if (token.canceled) {
                     socket.end();
                     return cb(null);
                 }
@@ -57,7 +58,7 @@ class HaxeServer {
                 totalLen += buf.length;
             });
             socket.on(SocketEvent.End, function() {
-                if (cancelToken.canceled)
+                if (token.canceled)
                     return cb(null);
                 if (totalLen == 0)
                     return cb(""); // no data received - can happen
@@ -72,7 +73,12 @@ class HaxeServer {
                             buf.addChar("\n".code);
                     }
                 }
-                cb(buf.toString());
+
+                try {
+                    cb(buf.toString());
+                } catch (e:Dynamic) {
+                    token.error(ErrorUtils.errorToString(e, "Exception while handling haxe completion response: "));
+                }
             });
         });
     }

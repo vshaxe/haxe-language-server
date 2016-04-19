@@ -1,6 +1,6 @@
 package features;
 
-import jsonrpc.Protocol.CancelToken;
+import jsonrpc.Protocol.RequestToken;
 
 class Feature {
     var context:Context;
@@ -12,13 +12,13 @@ class Feature {
 
     function init() {}
 
-    function callDisplay(args:Array<String>, stdin:String, cancelToken:CancelToken, callback:String->Void) {
+    function callDisplay(args:Array<String>, stdin:String, token:RequestToken, callback:String->Void) {
         var args = [
             "--cwd", context.workspacePath, // change cwd to workspace root
             context.hxmlFile, // call completion file
             "-D", "display-details",
             "--no-output", // prevent generation
         ].concat(args);
-        context.haxeServer.process(args, cancelToken, stdin, callback);
+        context.haxeServer.process(args, token, stdin, callback);
     }
 }
