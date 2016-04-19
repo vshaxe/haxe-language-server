@@ -13,12 +13,13 @@ class Feature {
     function init() {}
 
     function callDisplay(args:Array<String>, stdin:String, token:RequestToken, callback:String->Void) {
-        var args = [
-            "--cwd", context.workspacePath, // change cwd to workspace root
-            context.hxmlFile, // call completion file
-            "-D", "display-details",
-            "--no-output", // prevent generation
-        ].concat(args);
-        context.haxeServer.process(args, token, stdin, callback);
+        var actualArgs = ["--cwd", context.workspacePath]; // change cwd to workspace root
+        actualArgs = actualArgs.concat(context.displayArguments); // add arguments from the workspace settings
+        actualArgs = actualArgs.concat([
+            "-D", "display-details", // get more details in completion results,
+            "--no-output", // prevent anygeneration
+        ]);
+        actualArgs = actualArgs.concat(args); // finally, add given query args
+        context.haxeServer.process(actualArgs, token, stdin, callback);
     }
 }

@@ -3,7 +3,7 @@ import vscode.ProtocolTypes;
 
 class Context {
     public var workspacePath(default,null):String;
-    public var hxmlFile(default,null):String;
+    public var displayArguments(default,null):Array<String>;
     public var protocol(default,null):vscode.Protocol;
     public var haxeServer(default,null):HaxeServer;
     var documents:TextDocuments;
@@ -57,7 +57,7 @@ class Context {
 
     function onDidChangeConfiguration(config:DidChangeConfigurationParams) {
         var config:Config = config.settings.haxe;
-        hxmlFile = config.buildFile;
+        displayArguments = config.displayArguments;
     }
 
     public inline function getDocument(uri:String):TextDocument {
@@ -66,5 +66,5 @@ class Context {
 }
 
 private typedef Config = {
-    var buildFile:String;
+    var displayArguments:Array<String>;
 }
