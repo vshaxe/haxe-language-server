@@ -64,14 +64,22 @@ class HaxeServer {
                     return cb(""); // no data received - can happen
                 var data = Buffer.concat(chunks, totalLen);
                 var buf = new StringBuf();
+                var hasError = false;
                 for (line in data.toString().split("\n")) {
                     switch (line.fastCodeAt(0)) {
                         case 0x01: // print
+                            trace("Haxe print:\n" + line.substring(1).replace("\x01", "\n"));
                         case 0x02: // error
+                            hasError = true;
                         default:
                             buf.add(line);
                             buf.addChar("\n".code);
                     }
+                }
+
+                if (hasError) {
+                    token.error("Got error from haxe server (see dev console): " + buf.toString());
+                    return;
                 }
 
                 try {
