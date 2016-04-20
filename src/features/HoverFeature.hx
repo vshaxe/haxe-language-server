@@ -31,7 +31,7 @@ class HoverFeature extends Feature {
                 case DTFunction(args, ret):
                     "function" + printFunctionSignature(args, ret);
                 case DTValue(type):
-                    type;
+                    if (type == null) "unknown" else type;
             };
 
             var result:Hover = {contents: {language: "haxe", value: type}};

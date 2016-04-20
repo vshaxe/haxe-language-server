@@ -22,7 +22,7 @@ class SignatureHelper {
             case DTFunction(args, ret):
                 printFunctionSignature(args, ret);
             case DTValue(type):
-                type;
+                if (type == null) "" else type;
         }
     }
 
