@@ -4,9 +4,11 @@ import jsonrpc.Protocol.RequestToken;
 
 class Feature {
     var context:Context;
+    var showHaxeErrorMessages:Bool;
 
     public function new(context) {
         this.context = context;
+        showHaxeErrorMessages = true;
         init();
     }
 
@@ -21,10 +23,7 @@ class Feature {
         ]);
         actualArgs = actualArgs.concat(args); // finally, add given query args
         context.haxeServer.process(actualArgs, token, stdin, callback, function(error) {
-            var report = (error != NO_COMPLETION_MESSAGE); // don't spam with these
-            token.error("Got error from haxe server (see dev console): " + error, report);
+            token.error("Got error from haxe server (see dev console): " + error, showHaxeErrorMessages);
         });
     }
-
-    static var NO_COMPLETION_MESSAGE = "Error: No completion point was found";
 }
