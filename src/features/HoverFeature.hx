@@ -33,7 +33,13 @@ class HoverFeature extends Feature {
                 case DTValue(type):
                     type;
             };
-            resolve({contents: {language: "haxe", value: type}});
+
+            var result:Hover = {contents: {language: "haxe", value: type}};
+            var p = HaxePosition.parse(xml.get("p"));
+            if (p != null)
+                result.range = p.toRange(null);
+
+            resolve(result);
         });
     }
 }
