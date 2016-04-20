@@ -27,7 +27,7 @@ class HaxeServer {
         }
     }
 
-    public function process(args:Array<String>, token:RequestToken, stdin:String, cb:String->Void) {
+    public function process(args:Array<String>, token:RequestToken, stdin:String, callback:String->Void, errback:String->Void) {
         if (stdin != null) {
             args.push("-D");
             args.push("display-stdin");
@@ -36,7 +36,7 @@ class HaxeServer {
         socket.on(SocketEvent.Connect, function() {
             if (token.canceled) {
                 socket.end();
-                return cb(null);
+                return callback(null);
             }
 
             for (arg in args)
@@ -52,16 +52,17 @@ class HaxeServer {
             socket.on(ReadableEvent.Data, function(buf:Buffer) {
                 if (token.canceled) {
                     socket.end();
-                    return cb(null);
+                    return callback(null);
                 }
                 chunks.push(buf);
                 totalLen += buf.length;
             });
             socket.on(SocketEvent.End, function() {
                 if (token.canceled)
-                    return cb(null);
+                    return callback(null);
                 if (totalLen == 0)
-                    return cb(""); // no data received - can happen
+                    return callback(""); // no data received - can happen
+
                 var data = Buffer.concat(chunks, totalLen);
                 var buf = new StringBuf();
                 var hasError = false;
@@ -78,12 +79,12 @@ class HaxeServer {
                 }
 
                 if (hasError) {
-                    token.error("Got error from haxe server (see dev console): " + buf.toString());
+                    errback(buf.toString().trim());
                     return;
                 }
 
                 try {
-                    cb(buf.toString());
+                    callback(buf.toString());
                 } catch (e:Dynamic) {
                     token.error(ErrorUtils.errorToString(e, "Exception while handling haxe completion response: "));
                 }

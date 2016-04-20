@@ -20,6 +20,11 @@ class Feature {
             "--no-output", // prevent anygeneration
         ]);
         actualArgs = actualArgs.concat(args); // finally, add given query args
-        context.haxeServer.process(actualArgs, token, stdin, callback);
+        context.haxeServer.process(actualArgs, token, stdin, callback, function(error) {
+            var report = (error != NO_COMPLETION_MESSAGE); // don't spam with these
+            token.error("Got error from haxe server (see dev console): " + error, report);
+        });
     }
+
+    static var NO_COMPLETION_MESSAGE = "Error: No completion point was found";
 }

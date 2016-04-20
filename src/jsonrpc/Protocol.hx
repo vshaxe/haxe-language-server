@@ -29,9 +29,10 @@ class Protocol {
                 requestTokens.remove(tokenKey);
                 sendResponse(JsonRpc.response(request.id, null, error));
             }
-            function onError(message:String) {
+            function onError(message:String, report = true) {
                 reject(jsonrpc.JsonRpc.error(jsonrpc.ErrorCodes.InternalError, message));
-                logError(message);
+                if (report)
+                    logError(message);
             }
             var token = requestTokens[tokenKey] = new RequestToken(onError);
             try {
@@ -88,12 +89,12 @@ typedef RejectHandler = ResponseError<Void>->Void
 typedef RejectDataHandler<T> = ResponseError<T>->Void
 
 class RequestToken {
-    public var error(default,null):String->Void;
+    public var error(default,null):String->?Bool->Void;
 
     @:allow(jsonrpc.Protocol.cancelRequest)
     public var canceled(default,null):Bool;
 
-    public function new(onError:String->Void) {
+    public function new(onError:String->?Bool->Void) {
         canceled = false;
         error = onError;
     }
