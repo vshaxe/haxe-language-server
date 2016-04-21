@@ -14,7 +14,7 @@ class HoverFeature extends Feature {
     }
 
     function onHover(params:TextDocumentPositionParams, token:RequestToken, resolve:Hover->Void, reject:RejectHandler) {
-        var doc = context.getDocument(params.textDocument.uri);
+        var doc = context.documents.get(params.textDocument.uri);
         var filePath = uriToFsPath(params.textDocument.uri);
         var bytePos = doc.byteOffsetAt(params.position);
         var args = ["--display", '$filePath@$bytePos@type'];
@@ -37,7 +37,7 @@ class HoverFeature extends Feature {
             var result:Hover = {contents: {language: "haxe", value: type}};
             var p = HaxePosition.parse(xml.get("p"));
             if (p != null)
-                result.range = p.toRange(null);
+                result.range = context.documents.haxePositionToRange(p, null);
 
             resolve(result);
         });

@@ -13,7 +13,7 @@ class DocumentSymbolsFeature extends Feature {
     }
 
     function onDocumentSymbols(params:DocumentSymbolParams, token:RequestToken, resolve:Array<SymbolInformation>->Void, reject:RejectHandler) {
-        var doc = context.getDocument(params.textDocument.uri);
+        var doc = context.documents.get(params.textDocument.uri);
         var filePath = uriToFsPath(params.textDocument.uri);
         var args = [
             "--display", '$filePath@0@document-symbols'
@@ -43,7 +43,7 @@ class DocumentSymbolsFeature extends Feature {
                     kind: cast v.kind,
                     location: {
                         uri: params.textDocument.uri, // should be the same i guess
-                        range: pos.toRange(haxePosCache)
+                        range: context.documents.haxePositionToRange(pos, haxePosCache)
                     }
                 };
                 if (v.containerName != null)

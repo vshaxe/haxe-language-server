@@ -6,7 +6,7 @@ class Context {
     public var displayArguments(default,null):Array<String>;
     public var protocol(default,null):vscode.Protocol;
     public var haxeServer(default,null):HaxeServer;
-    var documents:TextDocuments;
+    public var documents(default,null):TextDocuments;
 
     static inline var HAXE_SERVER_PORT = 6000;
 
@@ -58,10 +58,6 @@ class Context {
     function onDidChangeConfiguration(config:DidChangeConfigurationParams) {
         var config:Config = config.settings.haxe;
         displayArguments = config.displayArguments;
-    }
-
-    public inline function getDocument(uri:String):TextDocument {
-        return documents.get(uri);
     }
 }
 

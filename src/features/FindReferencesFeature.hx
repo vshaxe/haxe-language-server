@@ -14,7 +14,7 @@ class FindReferencesFeature extends Feature {
     }
 
     function onFindReferences(params:TextDocumentPositionParams, token:RequestToken, resolve:Array<Location>->Void, reject:RejectHandler) {
-        var doc = context.getDocument(params.textDocument.uri);
+        var doc = context.documents.get(params.textDocument.uri);
         var filePath = uriToFsPath(params.textDocument.uri);
         var bytePos = doc.byteOffsetAt(params.position);
         var args = ["--display", '$filePath@$bytePos@usage'];
@@ -40,7 +40,7 @@ class FindReferencesFeature extends Feature {
                 }
                 results.push({
                     uri: fsPathToUri(getProperFileNameCase(pos.file)),
-                    range: pos.toRange(haxePosCache),
+                    range: context.documents.haxePositionToRange(pos, haxePosCache),
                 });
             }
 

@@ -15,7 +15,7 @@ class CompletionFeature extends Feature {
     }
 
     function onCompletion(params:TextDocumentPositionParams, token:RequestToken, resolve:Array<CompletionItem>->Void, reject:RejectHandler) {
-        var doc = context.getDocument(params.textDocument.uri);
+        var doc = context.documents.get(params.textDocument.uri);
         var r = calculateCompletionPosition(doc.content, doc.offsetAt(params.position));
         var filePath = uriToFsPath(params.textDocument.uri);
         var bytePos = doc.offsetToByteOffset(r.pos);
