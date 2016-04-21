@@ -40,7 +40,7 @@ class DocumentSymbolsFeature extends Feature {
                     kind: cast v.kind,
                     location: {
                         uri: params.textDocument.uri, // should be the same i guess
-                        range: context.documents.haxePositionToRange(pos, haxePosCache)
+                        range: context.documents.haxePositionToRange(pos, doc, haxePosCache)
                     }
                 };
                 if (v.containerName != null)

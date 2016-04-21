@@ -6,7 +6,6 @@ import jsonrpc.Protocol;
 import jsonrpc.ErrorCodes.internalError;
 
 import Uri.*;
-import FsUtils.getProperFileNameCase;
 
 class FindReferencesFeature extends Feature {
     override function init() {
@@ -38,8 +37,8 @@ class FindReferencesFeature extends Feature {
                     continue;
                 }
                 results.push({
-                    uri: fsPathToUri(getProperFileNameCase(pos.file)),
-                    range: context.documents.haxePositionToRange(pos, haxePosCache),
+                    uri: fsPathToUri(pos.file),
+                    range: context.documents.haxePositionToRange(pos, doc, haxePosCache),
                 });
             }
 

@@ -9,7 +9,6 @@ import jsonrpc.Protocol;
 import jsonrpc.ErrorCodes.internalError;
 
 import Uri.*;
-import FsUtils.getProperFileNameCase;
 import SignatureHelper.*;
 
 class GotoDefinitionFeature extends Feature {
@@ -41,8 +40,8 @@ class GotoDefinitionFeature extends Feature {
                     continue;
                 }
                 results.push({
-                    uri: fsPathToUri(getProperFileNameCase(pos.file)),
-                    range: context.documents.haxePositionToRange(pos, null), // no cache because this right now only returns one position
+                    uri: fsPathToUri(pos.file),
+                    range: context.documents.haxePositionToRange(pos, doc, null), // no cache because this right now only returns one position
                 });
             }
 

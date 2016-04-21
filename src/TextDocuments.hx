@@ -19,7 +19,7 @@ class TextDocuments {
     }
 
     // todo: handle unsaved documents
-    public function haxePositionToRange(pos:HaxePosition, cache:Map<String,Array<String>>):vscode.BasicTypes.Range {
+    public function haxePositionToRange(pos:HaxePosition, stdinDoc:TextDocument, cache:Map<String,Array<String>>):vscode.BasicTypes.Range {
         var startLine = if (pos.startLine != null) pos.startLine - 1 else pos.line - 1;
         var endLine = if (pos.endLine != null) pos.endLine - 1 else pos.line - 1;
         var startChar = 0;
@@ -28,30 +28,53 @@ class TextDocuments {
         // if we have byte offsets within line, we need to convert them to character offsets
         // for that we have to read the file :-/
         #if haxe_languageserver_no_utf8_char_pos
+
         if (pos.startByte != null)
             startChar = pos.startByte;
         if (pos.endByte != null)
             endChar = pos.endByte;
+
         #else
+
         var lines = null;
+        var isStdinDoc = (stdinDoc.fsPath == pos.file);
+
         inline function getLineChar(line:Int, byteOffset:Int):Int {
-            if (lines == null) {
-                if (cache == null) {
-                    lines = sys.io.File.getContent(pos.file).split("\n");
-                } else {
-                    lines = cache[pos.file];
-                    if (lines == null)
-                        lines = cache[pos.file] = sys.io.File.getContent(pos.file).split("\n");
-                }
+
+            inline function byteOffsetToCharacterOffset(line:String):Int {
+                var buffer = new js.node.Buffer(line, "utf-8");
+                var textSlice = buffer.toString("utf-8", 0, byteOffset);
+                return textSlice.length;
             }
-            var lineContent = new js.node.Buffer(lines[line], "utf-8");
-            var lineTextSlice = lineContent.toString("utf-8", 0, byteOffset);
-            return lineTextSlice.length;
+
+            var line =
+                if (isStdinDoc) {
+                    // this is an stdin position - get line from in-memory document
+                    stdinDoc.lineAt(line);
+                } else {
+                    // this is a non-stdin document - get line from on-disk document,
+                    // cache lines so we don't have to get it multiple times
+                    if (lines == null) {
+                        if (cache == null) {
+                            lines = sys.io.File.getContent(pos.file).split("\n");
+                        } else {
+                            lines = cache[pos.file];
+                            if (lines == null)
+                                lines = cache[pos.file] = sys.io.File.getContent(pos.file).split("\n");
+                        }
+                    }
+                    lines[line];
+                }
+
+            return byteOffsetToCharacterOffset(line);
         }
+
         if (pos.startByte != null && pos.startByte != 0)
             startChar = getLineChar(startLine, pos.startByte);
+
         if (pos.endByte != null && pos.endByte != 0)
             endChar = getLineChar(endLine, pos.endByte);
+
         #end
 
         return {

@@ -5,7 +5,7 @@ abstract HaxePosition(HaxePositionData) from HaxePositionData to HaxePositionDat
     public static function parse(pos:String):Null<HaxePosition> {
         return if (positionRe.match(pos))
             {
-                file: positionRe.matched(1),
+                file: FsUtils.getProperFileNameCase(positionRe.matched(1)),
                 line: Std.parseInt(positionRe.matched(2)),
                 startLine: Std.parseInt(positionRe.matched(3)),
                 endLine: Std.parseInt(positionRe.matched(4)),

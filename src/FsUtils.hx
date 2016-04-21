@@ -23,7 +23,7 @@ class FsUtils {
                         break;
                     }
                 }
-                acc = acc + "\\" + part;
+                acc = acc + "/" + part;
             }
             result = acc;
         }
