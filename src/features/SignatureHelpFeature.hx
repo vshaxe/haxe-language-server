@@ -18,14 +18,13 @@ class SignatureHelpFeature extends Feature {
 
     function onSignatureHelp(params:TextDocumentPositionParams, token:RequestToken, resolve:SignatureHelp->Void, reject:RejectHandler) {
         var doc = context.documents.get(params.textDocument.uri);
-        var filePath = uriToFsPath(params.textDocument.uri);
 
         var r = calculateSignaturePosition(doc.content, doc.offsetAt(params.position));
         if (r == null)
             return reject(jsonrpc.JsonRpc.error(0, "Invalid signature position " + params.position));
 
         var bytePos = doc.offsetToByteOffset(r.pos);
-        var args = ["--display", '$filePath@$bytePos'];
+        var args = ["--display", '${doc.fsPath}@$bytePos'];
         var stdin = if (doc.saved) null else doc.content;
         callDisplay(args, stdin, token, function(data) {
             if (token.canceled)

@@ -14,10 +14,7 @@ class DocumentSymbolsFeature extends Feature {
 
     function onDocumentSymbols(params:DocumentSymbolParams, token:RequestToken, resolve:Array<SymbolInformation>->Void, reject:RejectHandler) {
         var doc = context.documents.get(params.textDocument.uri);
-        var filePath = uriToFsPath(params.textDocument.uri);
-        var args = [
-            "--display", '$filePath@0@document-symbols'
-        ];
+        var args = ["--display", '${doc.fsPath}@0@document-symbols'];
         var stdin = if (doc.saved) null else doc.content;
         callDisplay(args, stdin, token, function(data) {
             if (token.canceled)

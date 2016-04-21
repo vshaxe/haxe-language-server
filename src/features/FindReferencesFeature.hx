@@ -15,9 +15,8 @@ class FindReferencesFeature extends Feature {
 
     function onFindReferences(params:TextDocumentPositionParams, token:RequestToken, resolve:Array<Location>->Void, reject:RejectHandler) {
         var doc = context.documents.get(params.textDocument.uri);
-        var filePath = uriToFsPath(params.textDocument.uri);
         var bytePos = doc.byteOffsetAt(params.position);
-        var args = ["--display", '$filePath@$bytePos@usage'];
+        var args = ["--display", '${doc.fsPath}@$bytePos@usage'];
         var stdin = if (doc.saved) null else doc.content;
         callDisplay(args, stdin, token, function(data) {
             if (token.canceled)

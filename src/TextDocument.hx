@@ -4,6 +4,7 @@ import vscode.ProtocolTypes;
 
 class TextDocument {
     public var uri(default,null):String;
+    public var fsPath(default,null):String;
     public var languageId(default,null):String;
     public var version(default,null):Int;
     public var content(default,null):String;
@@ -14,6 +15,7 @@ class TextDocument {
 
     public function new(uri:String, languageId:String, version:Int, content:String) {
         this.uri = uri;
+        this.fsPath = Uri.uriToFsPath(uri);
         this.languageId = languageId;
         this.version = version;
         this.content = content;
