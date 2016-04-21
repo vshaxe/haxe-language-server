@@ -5,7 +5,27 @@ import vscode.ProtocolTypes;
 import jsonrpc.Protocol;
 import jsonrpc.ErrorCodes;
 
-import Uri.uriToFsPath;
+@:enum
+private abstract ModuleSymbolKind(Int) {
+    var MClass = 1;
+    var MInterface = 2;
+    var MEnum = 3;
+    var MTypedef = 4;
+    var MAbstract = 5;
+    var MField = 6;
+    var MProperty = 7;
+    var MMethod = 8;
+    var MConstructor = 9;
+    var MFunction = 10;
+    var MVariable = 11;
+}
+
+private typedef ModuleSymbolEntry = {
+    var name:String;
+    var kind:ModuleSymbolKind;
+    var range:Range;
+    @:optional var containerName:String;
+}
 
 class DocumentSymbolsFeature extends Feature {
     override function init() {
@@ -14,58 +34,60 @@ class DocumentSymbolsFeature extends Feature {
 
     function onDocumentSymbols(params:DocumentSymbolParams, token:RequestToken, resolve:Array<SymbolInformation>->Void, reject:RejectHandler) {
         var doc = context.documents.get(params.textDocument.uri);
-        var args = ["--display", '${doc.fsPath}@0@document-symbols'];
+        var args = ["--display", '${doc.fsPath}@0@module-symbols'];
         var stdin = if (doc.saved) null else doc.content;
         callDisplay(args, stdin, token, function(data) {
             if (token.canceled)
                 return;
 
-            var data:Array<{name:String, kind:Int, location:HaxeLocation, ?containerName:String}> =
-                try haxe.Json.parse(data) catch (e:Dynamic) {
-                    trace("INVALID document-symbols: " + e);
-                    trace("First 4096 symbols:\n" + data.substr(0, 4096));
-                    return reject(ErrorCodes.internalError("Error parsing document symbol response: " + e));
-                }
+            var data:Array<ModuleSymbolEntry> =
+                try haxe.Json.parse(data)
+                catch (e:Dynamic) return reject(ErrorCodes.internalError("Error parsing document symbol response: " + e));
 
-            var result = new Array<SymbolInformation>();
+            var result = [];
             var haxePosCache = new Map();
-            for (v in data) {
-                if (v.location == null) {
-                    context.protocol.sendShowMessage({type: Error, message: "Unknown location for " + haxe.Json.stringify(v)});
+            for (entry in data) {
+                if (entry.range == null) {
+                    context.protocol.sendShowMessage({type: Error, message: "Unknown location for " + haxe.Json.stringify(entry)});
                     continue;
                 }
-                var pos = locationToHaxePosition(v.location);
-                var item:SymbolInformation = {
-                    name: v.name,
-                    kind: cast v.kind,
-                    location: {
-                        uri: params.textDocument.uri, // should be the same i guess
-                        range: context.documents.haxePositionToRange(pos, doc, haxePosCache)
-                    }
-                };
-                if (v.containerName != null)
-                    item.containerName = v.containerName;
-                result.push(item);
+                result.push(moduleSymbolEntryToSymbolInformation(entry, doc, haxePosCache));
             }
-
             resolve(result);
         });
     }
 
-    // this is temporary, we're gonna remove HaxePosition after we'll be using JSON display API
-    static function locationToHaxePosition(l:HaxeLocation):HaxePosition {
-        return {
-            file: l.file,
-            line: l.start.line,
-            startLine: l.start.line,
-            endLine: l.end.line,
-            startByte: l.start.character,
-            endByte: l.end.character,
+    function moduleSymbolEntryToSymbolInformation(entry:ModuleSymbolEntry, document:TextDocument, haxePosCache):SymbolInformation {
+        var result:SymbolInformation = {
+            name: entry.name,
+            kind: switch (entry.kind) {
+                case MClass | MAbstract: SymbolKind.Class;
+                case MInterface | MTypedef: SymbolKind.Interface;
+                case MEnum: SymbolKind.Enum;
+                case MConstructor: SymbolKind.Constructor;
+                case MField: SymbolKind.Field;
+                case MMethod: SymbolKind.Method;
+                case MFunction: SymbolKind.Function;
+                case MProperty: SymbolKind.Property;
+                case MVariable: SymbolKind.Variable;
+            },
+            location: {
+                uri: document.uri,
+                range: context.documents.haxePositionToRange(
+                    {
+                        file: document.fsPath,
+                        line: entry.range.start.line,
+                        startLine: entry.range.start.line,
+                        startByte: entry.range.start.character,
+                        endLine: entry.range.end.line,
+                        endByte: entry.range.end.character
+                    },
+                    document,
+                    haxePosCache)
+            }
         };
+        if (entry.containerName != null)
+            result.containerName = entry.containerName;
+        return result;
     }
-}
-
-private typedef HaxeLocation = {
-    >Range,
-    var file:String;
 }
