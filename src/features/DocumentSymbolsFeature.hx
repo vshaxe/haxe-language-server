@@ -45,19 +45,22 @@ class DocumentSymbolsFeature extends Feature {
                 catch (e:Dynamic) return reject(ErrorCodes.internalError("Error parsing document symbol response: " + e));
 
             var result = [];
-            var haxePosCache = new Map();
             for (entry in data) {
                 if (entry.range == null) {
                     context.protocol.sendShowMessage({type: Error, message: "Unknown location for " + haxe.Json.stringify(entry)});
                     continue;
                 }
-                result.push(moduleSymbolEntryToSymbolInformation(entry, doc, haxePosCache));
+                result.push(moduleSymbolEntryToSymbolInformation(entry, doc));
             }
             resolve(result);
         });
     }
 
-    function moduleSymbolEntryToSymbolInformation(entry:ModuleSymbolEntry, document:TextDocument, haxePosCache):SymbolInformation {
+    function moduleSymbolEntryToSymbolInformation(entry:ModuleSymbolEntry, document:TextDocument):SymbolInformation {
+        inline function bytePosToCharPos(p) {
+            var line = document.lineAt(p.line);
+            return {line: p.line, character: HaxePosition.byteOffsetToCharacterOffset(line, p.character)};
+        }
         var result:SymbolInformation = {
             name: entry.name,
             kind: switch (entry.kind) {
@@ -73,14 +76,10 @@ class DocumentSymbolsFeature extends Feature {
             },
             location: {
                 uri: document.uri,
-                range: ({
-                    file: document.fsPath,
-                    line: entry.range.start.line,
-                    startLine: entry.range.start.line,
-                    startByte: entry.range.start.character,
-                    endLine: entry.range.end.line,
-                    endByte: entry.range.end.character
-                } : HaxePosition).toRange(document, haxePosCache),
+                range: {
+                    start: bytePosToCharPos(entry.range.start),
+                    end: bytePosToCharPos(entry.range.end),
+                }
             }
         };
         if (entry.containerName != null)

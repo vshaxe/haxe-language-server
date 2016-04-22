@@ -34,9 +34,9 @@ class HoverFeature extends Feature {
             };
 
             var result:Hover = {contents: {language: "haxe", value: type}};
-            var p = HaxePosition.parse(xml.get("p"));
+            var p = HaxePosition.parse(xml.get("p"), doc, null);
             if (p != null)
-                result.range = p.toRange(doc, null);
+                result.range = p.range;
 
             resolve(result);
         });

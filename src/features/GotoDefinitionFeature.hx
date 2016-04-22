@@ -1,15 +1,10 @@
 package features;
 
 import haxe.extern.EitherType;
-using StringTools;
-
 import vscode.BasicTypes;
 import vscode.ProtocolTypes;
 import jsonrpc.Protocol;
 import jsonrpc.ErrorCodes.internalError;
-
-import Uri.*;
-import SignatureHelper.*;
 
 class GotoDefinitionFeature extends Feature {
     override function init() {
@@ -33,16 +28,13 @@ class GotoDefinitionFeature extends Feature {
                 return resolve([]);
 
             var results = [];
-            for (p in positions) {
-                var pos = HaxePosition.parse(p);
-                if (pos == null) {
-                    trace("Got invalid position: " + p);
+            for (pos in positions) {
+                var location = HaxePosition.parse(pos, doc, null); // no cache because this right now only returns one position
+                if (location == null) {
+                    trace("Got invalid position: " + pos);
                     continue;
                 }
-                results.push({
-                    uri: fsPathToUri(pos.file),
-                    range: pos.toRange(doc, null), // no cache because this right now only returns one position
-                });
+                results.push(location);
             }
 
             return resolve(results);

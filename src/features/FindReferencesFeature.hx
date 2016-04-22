@@ -5,8 +5,6 @@ import vscode.ProtocolTypes;
 import jsonrpc.Protocol;
 import jsonrpc.ErrorCodes.internalError;
 
-import Uri.*;
-
 class FindReferencesFeature extends Feature {
     override function init() {
         context.protocol.onFindReferences = onFindReferences;
@@ -30,16 +28,13 @@ class FindReferencesFeature extends Feature {
 
             var results = [];
             var haxePosCache = new Map();
-            for (p in positions) {
-                var pos = HaxePosition.parse(p);
-                if (pos == null) {
-                    trace("Got invalid position: " + p);
+            for (pos in positions) {
+                var location = HaxePosition.parse(pos, doc, haxePosCache);
+                if (location == null) {
+                    trace("Got invalid position: " + pos);
                     continue;
                 }
-                results.push({
-                    uri: fsPathToUri(pos.file),
-                    range: pos.toRange(doc, haxePosCache),
-                });
+                results.push(location);
             }
 
             return resolve(results);
