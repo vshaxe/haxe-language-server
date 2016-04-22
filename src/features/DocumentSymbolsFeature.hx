@@ -73,17 +73,14 @@ class DocumentSymbolsFeature extends Feature {
             },
             location: {
                 uri: document.uri,
-                range: context.documents.haxePositionToRange(
-                    {
-                        file: document.fsPath,
-                        line: entry.range.start.line,
-                        startLine: entry.range.start.line,
-                        startByte: entry.range.start.character,
-                        endLine: entry.range.end.line,
-                        endByte: entry.range.end.character
-                    },
-                    document,
-                    haxePosCache)
+                range: ({
+                    file: document.fsPath,
+                    line: entry.range.start.line,
+                    startLine: entry.range.start.line,
+                    startByte: entry.range.start.character,
+                    endLine: entry.range.end.line,
+                    endByte: entry.range.end.character
+                } : HaxePosition).toRange(document, haxePosCache),
             }
         };
         if (entry.containerName != null)

@@ -41,7 +41,7 @@ class GotoDefinitionFeature extends Feature {
                 }
                 results.push({
                     uri: fsPathToUri(pos.file),
-                    range: context.documents.haxePositionToRange(pos, doc, null), // no cache because this right now only returns one position
+                    range: pos.toRange(doc, null), // no cache because this right now only returns one position
                 });
             }
 

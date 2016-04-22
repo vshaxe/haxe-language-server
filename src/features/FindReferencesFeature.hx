@@ -38,7 +38,7 @@ class FindReferencesFeature extends Feature {
                 }
                 results.push({
                     uri: fsPathToUri(pos.file),
-                    range: context.documents.haxePositionToRange(pos, doc, haxePosCache),
+                    range: pos.toRange(doc, haxePosCache),
                 });
             }
 
