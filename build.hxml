@@ -4,5 +4,4 @@
 -dce full
 -lib hxnodejs
 -D hxnodejs-no-version-warning
-# -D haxe_languageserver_no_utf8_char_pos
 -debug
