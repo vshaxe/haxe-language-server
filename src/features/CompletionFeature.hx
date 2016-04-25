@@ -11,7 +11,6 @@ import SignatureHelper.prepareSignature;
 class CompletionFeature extends Feature {
     override function init() {
         context.protocol.onCompletion = onCompletion;
-        showHaxeErrorMessages = false;
     }
 
     function onCompletion(params:TextDocumentPositionParams, token:RequestToken, resolve:Array<CompletionItem>->Void, reject:RejectHandler) {

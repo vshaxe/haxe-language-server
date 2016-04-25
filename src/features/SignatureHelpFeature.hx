@@ -13,7 +13,6 @@ import SignatureHelper.*;
 class SignatureHelpFeature extends Feature {
     override function init() {
         context.protocol.onSignatureHelp = onSignatureHelp;
-        showHaxeErrorMessages = false;
     }
 
     function onSignatureHelp(params:TextDocumentPositionParams, token:RequestToken, resolve:SignatureHelp->Void, reject:RejectHandler) {
