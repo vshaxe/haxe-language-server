@@ -10,14 +10,30 @@ using StringTools;
 class HaxeServer {
     var proc:ChildProcessObject;
     var port:Int;
+    var version:Array<Int>;
+    static var reVersion = ~/^(\d+)\.(\d+)\.(\d+)(?:\s.*)?$/;
 
     public function new() {
     }
 
-    public function start(port:Int) {
+    public function start(port:Int, token:RequestToken, callback:String->Void) {
         this.port = port;
         stop();
         proc = ChildProcess.spawn("haxe", ["--wait", "" + port], {stdio: Ignore});
+        process(["-version"], token, null, function(data) {
+            if (!reVersion.match(data))
+                return callback("Error parsing haxe version " + data);
+
+            var major = Std.parseInt(reVersion.matched(1));
+            var minor = Std.parseInt(reVersion.matched(2));
+            var patch = Std.parseInt(reVersion.matched(3));
+            if (major < 3 || minor < 3) {
+                callback("Unsupported Haxe version! Minimum version required: 3.3.0");
+            } else {
+                version = [major, minor, patch];
+                callback(null);
+            }
+        }, token.error);
     }
 
     public function stop() {
@@ -81,13 +97,13 @@ class HaxeServer {
                     }
                 }
 
-                if (hasError) {
-                    errback(buf.toString().trim());
-                    return;
-                }
+                var data = buf.toString().trim();
+
+                if (hasError)
+                    return errback(data);
 
                 try {
-                    callback(buf.toString());
+                    callback(data);
                 } catch (e:Dynamic) {
                     token.error(ErrorUtils.errorToString(e, "Exception while handling haxe completion response: "));
                 }

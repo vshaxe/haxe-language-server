@@ -21,31 +21,34 @@ class Context {
         workspacePath = params.rootPath;
 
         haxeServer = new HaxeServer();
-        haxeServer.start(HAXE_SERVER_PORT);
+        haxeServer.start(HAXE_SERVER_PORT, token, function(error) {
+            if (error != null)
+                return reject(jsonrpc.JsonRpc.error(0, error, {retry: false}));
 
-        documents = new TextDocuments(protocol);
+            documents = new TextDocuments(protocol);
 
-        new features.CompletionFeature(this);
-        new features.HoverFeature(this);
-        new features.SignatureHelpFeature(this);
-        new features.GotoDefinitionFeature(this);
-        new features.FindReferencesFeature(this);
-        new features.DocumentSymbolsFeature(this);
+            new features.CompletionFeature(this);
+            new features.HoverFeature(this);
+            new features.SignatureHelpFeature(this);
+            new features.GotoDefinitionFeature(this);
+            new features.FindReferencesFeature(this);
+            new features.DocumentSymbolsFeature(this);
 
-        return resolve({
-            capabilities: {
-                textDocumentSync: TextDocuments.syncKind,
-                completionProvider: {
-                    triggerCharacters: ["."]
-                },
-                signatureHelpProvider: {
-                    triggerCharacters: ["(", ","]
-                },
-                definitionProvider: true,
-                hoverProvider: true,
-                referencesProvider: true,
-                documentSymbolProvider: true,
-            }
+            return resolve({
+                capabilities: {
+                    textDocumentSync: TextDocuments.syncKind,
+                    completionProvider: {
+                        triggerCharacters: ["."]
+                    },
+                    signatureHelpProvider: {
+                        triggerCharacters: ["(", ","]
+                    },
+                    definitionProvider: true,
+                    hoverProvider: true,
+                    referencesProvider: true,
+                    documentSymbolProvider: true,
+                }
+            });
         });
     }
 
