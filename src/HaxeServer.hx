@@ -33,6 +33,9 @@ class HaxeServer {
             args.push("display-stdin");
         }
         var socket = Net.connect(port);
+        socket.on(SocketEvent.Error, function(e) {
+            token.error(ErrorUtils.errorToString(e, "Error while communicating haxe server: "));
+        });
         socket.on(SocketEvent.Connect, function() {
             if (token.canceled) {
                 socket.end();
