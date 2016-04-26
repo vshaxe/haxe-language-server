@@ -21,7 +21,7 @@ class Feature {
         ]);
         actualArgs = actualArgs.concat(args); // finally, add given query args
         context.haxeServer.process(actualArgs, token, stdin, callback, function(error) {
-            token.error("Got error from haxe server (see dev console): " + error);
+            token.error("Error from haxe server: " + error);
         });
     }
 }
