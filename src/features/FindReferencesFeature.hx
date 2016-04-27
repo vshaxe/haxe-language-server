@@ -1,7 +1,6 @@
 package features;
 
 import vscode.BasicTypes;
-import vscode.ProtocolTypes;
 import jsonrpc.Protocol;
 import jsonrpc.ErrorCodes.internalError;
 

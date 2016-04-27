@@ -7,7 +7,6 @@ import vscode.ProtocolTypes;
 import jsonrpc.Protocol;
 import jsonrpc.ErrorCodes.internalError;
 
-import Uri.uriToFsPath;
 import SignatureHelper.*;
 
 class SignatureHelpFeature extends Feature {
