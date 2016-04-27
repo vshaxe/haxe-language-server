@@ -8,16 +8,15 @@ class TextDocuments {
 
     public function new(protocol:Protocol) {
         documents = new Map();
-        protocol.onDidOpenTextDocument = onDidOpenTextDocument;
         protocol.onDidChangeTextDocument = onDidChangeTextDocument;
         protocol.onDidCloseTextDocument = onDidCloseTextDocument;
-        protocol.onDidSaveTextDocument = onDidSaveTextDocument;
     }
 
     public inline function get(uri:String):TextDocument {
         return documents[uri];
     }
 
+    @:allow(Context)
     function onDidOpenTextDocument(event:DidOpenTextDocumentParams) {
         var td = event.textDocument;
         var document = new TextDocument(td.uri, td.languageId, td.version, td.text);
@@ -41,6 +40,7 @@ class TextDocuments {
         documents.remove(event.textDocument.uri);
     }
 
+    @:allow(Context)
     function onDidSaveTextDocument(event:DidSaveTextDocumentParams) {
         var document = documents[event.textDocument.uri];
         if (document != null)

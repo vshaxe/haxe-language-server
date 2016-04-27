@@ -7,6 +7,7 @@ class Context {
     public var protocol(default,null):vscode.Protocol;
     public var haxeServer(default,null):HaxeServer;
     public var documents(default,null):TextDocuments;
+    var diagnostics:features.DiagnosticsFeature;
 
     static inline var HAXE_SERVER_PORT = 6000;
 
@@ -15,6 +16,8 @@ class Context {
         protocol.onInitialize = onInitialize;
         protocol.onShutdown = onShutdown;
         protocol.onDidChangeConfiguration = onDidChangeConfiguration;
+        protocol.onDidOpenTextDocument = onDidOpenTextDocument;
+        protocol.onDidSaveTextDocument = onDidSaveTextDocument;
     }
 
     function onInitialize(params:InitializeParams, token:RequestToken, resolve:InitializeResult->Void, reject:RejectDataHandler<InitializeError>) {
@@ -34,6 +37,8 @@ class Context {
             new features.FindReferencesFeature(this);
             new features.DocumentSymbolsFeature(this);
 
+            diagnostics = new features.DiagnosticsFeature(this);
+
             return resolve({
                 capabilities: {
                     textDocumentSync: TextDocuments.syncKind,
@@ -47,6 +52,7 @@ class Context {
                     hoverProvider: true,
                     referencesProvider: true,
                     documentSymbolProvider: true,
+                    codeActionProvider: true
                 }
             });
         });
@@ -61,6 +67,16 @@ class Context {
     function onDidChangeConfiguration(config:DidChangeConfigurationParams) {
         var config:Config = config.settings.haxe;
         displayArguments = config.displayArguments;
+    }
+
+    function onDidOpenTextDocument(event:DidOpenTextDocumentParams) {
+        documents.onDidOpenTextDocument(event);
+        diagnostics.getDiagnostics(event.textDocument.uri);
+    }
+
+    function onDidSaveTextDocument(event:DidSaveTextDocumentParams) {
+        documents.onDidSaveTextDocument(event);
+        diagnostics.getDiagnostics(event.textDocument.uri);
     }
 }
 
