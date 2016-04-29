@@ -25,6 +25,9 @@ class HoverFeature extends Feature {
             if (xml == null) return reject(internalError("Invalid xml data: " + data));
 
             var s = StringTools.trim(xml.firstChild().nodeValue);
+            if (s.length == 0)
+                return reject(jsonrpc.JsonRpc.error(0, "No type information"));
+
             var type = switch (parseDisplayType(s)) {
                 case DTFunction(args, ret):
                     "function" + printFunctionSignature(args, ret);
