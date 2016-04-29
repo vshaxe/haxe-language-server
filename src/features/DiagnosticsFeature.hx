@@ -29,10 +29,6 @@ class DiagnosticsFeature extends Feature {
 
     public function getDiagnostics(uri:String) {
         var doc = context.documents.get(uri);
-        inline function bytePosToCharPos(p) {
-            var line = doc.lineAt(p.line);
-            return {line: p.line, character: HaxePosition.byteOffsetToCharacterOffset(line, p.character)};
-        }
         function processReply(s:String) {
             var data:Array<HaxeDiagnostics> =
                 try haxe.Json.parse(s)
@@ -42,10 +38,7 @@ class DiagnosticsFeature extends Feature {
                 }
 
             var diagnostics:Array<Diagnostic> = data.map(function (diag) return {
-                range: {
-                    start: bytePosToCharPos(diag.range.start),
-                    end: bytePosToCharPos(diag.range.end),
-                },
+                range: doc.byteRangeToRange(diag.range),
                 source: "haxe",
                 code: (diag.kind : Int),
                 severity: Warning,

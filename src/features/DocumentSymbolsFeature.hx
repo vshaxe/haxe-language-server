@@ -57,10 +57,6 @@ class DocumentSymbolsFeature extends Feature {
     }
 
     function moduleSymbolEntryToSymbolInformation(entry:ModuleSymbolEntry, document:TextDocument):SymbolInformation {
-        inline function bytePosToCharPos(p) {
-            var line = document.lineAt(p.line);
-            return {line: p.line, character: HaxePosition.byteOffsetToCharacterOffset(line, p.character)};
-        }
         var result:SymbolInformation = {
             name: entry.name,
             kind: switch (entry.kind) {
@@ -76,10 +72,7 @@ class DocumentSymbolsFeature extends Feature {
             },
             location: {
                 uri: document.uri,
-                range: {
-                    start: bytePosToCharPos(entry.range.start),
-                    end: bytePosToCharPos(entry.range.end),
-                }
+                range: document.byteRangeToRange(entry.range),
             }
         };
         if (entry.containerName != null)

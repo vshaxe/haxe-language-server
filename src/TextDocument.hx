@@ -66,6 +66,21 @@ class TextDocument {
         return offsetToByteOffset(offsetAt(position));
     }
 
+    public inline function byteRangeToRange(byteRange:Range):Range {
+        return {
+            start: bytePositionToPosition(byteRange.start),
+            end: bytePositionToPosition(byteRange.end),
+        };
+    }
+
+    public inline function bytePositionToPosition(bytePosition:Position):Position {
+        var line = lineAt(bytePosition.line);
+        return {
+            line: bytePosition.line,
+            character: HaxePosition.byteOffsetToCharacterOffset(line, bytePosition.character)
+        };
+    }
+
     public function lineAt(line:Int):String {
         var lineOffsets = getLineOffsets();
         if (line >= lineOffsets.length)
