@@ -50,10 +50,10 @@ class DiagnosticsFeature extends Feature {
         function processError(error:String) {
             context.protocol.sendLogMessage({type: Error, message: error});
         }
-        callDisplay(["--display", doc.fsPath + "@0@diagnostics"], null, new jsonrpc.Protocol.RequestToken(), processReply, processError);
+        callDisplay(["--display", doc.fsPath + "@0@diagnostics"], null, new CancellationToken(), processReply, processError);
     }
 
-    function onCodeAction(params:CodeActionParams, token:RequestToken, resolve:Array<Command> -> Void, reject:ResponseError<Dynamic> -> Void) {
+    function onCodeAction(params:CodeActionParams, token:CancellationToken, resolve:Array<Command> -> Void, reject:ResponseError<Dynamic> -> Void) {
         var ret:Array<Command> = [];
         for (d in params.context.diagnostics) {
             switch ((cast d.code : DiagnosticKind)) {

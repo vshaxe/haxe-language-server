@@ -12,7 +12,7 @@ class HoverFeature extends Feature {
         context.protocol.onHover = onHover;
     }
 
-    function onHover(params:TextDocumentPositionParams, token:RequestToken, resolve:Hover->Void, reject:RejectHandler) {
+    function onHover(params:TextDocumentPositionParams, token:CancellationToken, resolve:Hover->Void, reject:RejectHandler) {
         var doc = context.documents.get(params.textDocument.uri);
         var bytePos = doc.byteOffsetAt(params.position);
         var args = ["--display", '${doc.fsPath}@$bytePos@type'];

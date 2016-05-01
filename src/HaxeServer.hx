@@ -3,7 +3,7 @@ import js.node.child_process.ChildProcess.ChildProcessEvent;
 import js.node.Buffer;
 import js.node.ChildProcess;
 import js.node.stream.Readable;
-import jsonrpc.Protocol.RequestToken;
+import jsonrpc.Protocol.CancellationToken;
 using StringTools;
 
 class HaxeServer {
@@ -21,7 +21,7 @@ class HaxeServer {
         this.context = context;
     }
 
-    public function start(token:RequestToken, callback:String->Void) {
+    public function start(token:CancellationToken, callback:String->Void) {
         stop();
         proc = ChildProcess.spawn("haxe", ["--wait", "stdio"]);
         buffer = new MessageBuffer();
@@ -56,7 +56,7 @@ class HaxeServer {
     function onExit(_, _) {
         context.protocol.sendShowMessage({type: Warning, message: "Haxe process was killed, restarting..."});
         proc.removeAllListeners();
-        start(new RequestToken(), function(error) {
+        start(new CancellationToken(), function(error) {
             if (error != null)
                 context.protocol.sendShowMessage({type: Error, message: error});
         });
@@ -84,7 +84,7 @@ class HaxeServer {
     static var lenBuf = new Buffer(4);
     static var stdinSepBuf = new Buffer([1]);
 
-    public function process(args:Array<String>, token:RequestToken, stdin:String, callback:String->Void, errback:String->Void) {
+    public function process(args:Array<String>, token:CancellationToken, stdin:String, callback:String->Void, errback:String->Void) {
         if (stdin != null) {
             args.push("-D");
             args.push("display-stdin");
@@ -111,6 +111,9 @@ class HaxeServer {
         proc.stdin.write(Buffer.concat(chunks, length));
 
         callbacks.push(function(data) {
+            if (token.canceled)
+                return callback(null);
+
             var buf = new StringBuf();
             var hasError = false;
             for (line in data.split("\n")) {

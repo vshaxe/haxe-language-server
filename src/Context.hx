@@ -18,7 +18,7 @@ class Context {
         protocol.onDidSaveTextDocument = onDidSaveTextDocument;
     }
 
-    function onInitialize(params:InitializeParams, token:RequestToken, resolve:InitializeResult->Void, reject:RejectDataHandler<InitializeError>) {
+    function onInitialize(params:InitializeParams, token:CancellationToken, resolve:InitializeResult->Void, reject:RejectDataHandler<InitializeError>) {
         workspacePath = params.rootPath;
 
         haxeServer = new HaxeServer(this);
@@ -56,7 +56,7 @@ class Context {
         });
     }
 
-    function onShutdown(token:RequestToken, resolve:Void->Void, reject:RejectHandler) {
+    function onShutdown(token:CancellationToken, resolve:Void->Void, reject:RejectHandler) {
         haxeServer.stop();
         haxeServer = null;
         return resolve();

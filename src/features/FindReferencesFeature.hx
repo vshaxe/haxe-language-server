@@ -9,7 +9,7 @@ class FindReferencesFeature extends Feature {
         context.protocol.onFindReferences = onFindReferences;
     }
 
-    function onFindReferences(params:TextDocumentPositionParams, token:RequestToken, resolve:Array<Location>->Void, reject:RejectHandler) {
+    function onFindReferences(params:TextDocumentPositionParams, token:CancellationToken, resolve:Array<Location>->Void, reject:RejectHandler) {
         var doc = context.documents.get(params.textDocument.uri);
         var bytePos = doc.byteOffsetAt(params.position);
         var args = ["--display", '${doc.fsPath}@$bytePos@usage'];

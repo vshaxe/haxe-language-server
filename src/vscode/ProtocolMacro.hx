@@ -2,7 +2,6 @@ package vscode;
 
 import haxe.macro.Context;
 import haxe.macro.Expr;
-import haxe.macro.Type;
 using haxe.macro.Tools;
 
 class ProtocolMacro {
@@ -31,7 +30,7 @@ class ProtocolMacro {
                         handlerCallArgs.push(macro request.params);
                     }
 
-                    handlerArgDefs.push({name: "token", type: macro : jsonrpc.Protocol.RequestToken});
+                    handlerArgDefs.push({name: "token", type: macro : jsonrpc.Protocol.CancellationToken});
                     handlerCallArgs.push(macro token);
 
                     var resultDataCT, resolveExpr;
@@ -104,7 +103,7 @@ class ProtocolMacro {
                 ret: null,
                 args: [
                     {name: "request", type: macro : jsonrpc.Types.RequestMessage},
-                    {name: "token", type: macro : jsonrpc.Protocol.RequestToken},
+                    {name: "token", type: macro : jsonrpc.Protocol.CancellationToken},
                     {name: "resolve", type: macro : jsonrpc.Protocol.ResolveHandler},
                     {name: "reject", type: macro : jsonrpc.Protocol.RejectHandler},
                 ],

@@ -1,6 +1,6 @@
 package features;
 
-import jsonrpc.Protocol.RequestToken;
+import jsonrpc.Protocol.CancellationToken;
 
 class Feature {
     var context:Context;
@@ -12,7 +12,7 @@ class Feature {
 
     function init() {}
 
-    function callDisplay(args:Array<String>, stdin:String, token:RequestToken, callback:String->Void, errback:String->Void) {
+    function callDisplay(args:Array<String>, stdin:String, token:CancellationToken, callback:String->Void, errback:String->Void) {
         var actualArgs = ["--cwd", context.workspacePath]; // change cwd to workspace root
         actualArgs = actualArgs.concat(context.displayArguments); // add arguments from the workspace settings
         actualArgs = actualArgs.concat([

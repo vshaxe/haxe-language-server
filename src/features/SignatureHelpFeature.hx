@@ -14,7 +14,7 @@ class SignatureHelpFeature extends Feature {
         context.protocol.onSignatureHelp = onSignatureHelp;
     }
 
-    function onSignatureHelp(params:TextDocumentPositionParams, token:RequestToken, resolve:SignatureHelp->Void, reject:RejectHandler) {
+    function onSignatureHelp(params:TextDocumentPositionParams, token:CancellationToken, resolve:SignatureHelp->Void, reject:RejectHandler) {
         var doc = context.documents.get(params.textDocument.uri);
 
         var r = calculateSignaturePosition(doc.content, doc.offsetAt(params.position));

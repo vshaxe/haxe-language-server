@@ -8,7 +8,7 @@ import ErrorUtils.errorToString;
 **/
 class Protocol {
     var writeMessage:Message->Void;
-    var requestTokens:Map<String,RequestToken>;
+    var requestTokens:Map<String,CancellationToken>;
 
     public function new(writeMessage) {
         this.writeMessage = writeMessage;
@@ -29,7 +29,7 @@ class Protocol {
                 requestTokens.remove(tokenKey);
                 sendResponse(JsonRpc.response(request.id, null, error));
             }
-            var token = requestTokens[tokenKey] = new RequestToken();
+            var token = requestTokens[tokenKey] = new CancellationToken();
             try {
                 handleRequest(request, token, resolve, reject);
             } catch (e:Dynamic) {
@@ -56,7 +56,7 @@ class Protocol {
         var tokenKey = Std.string(params.id);
         var token = requestTokens[tokenKey];
         if (token != null) {
-            token.canceled = true;
+            token.cancel();
             requestTokens.remove(tokenKey);
         }
     }
@@ -70,7 +70,7 @@ class Protocol {
     }
 
     // these should be implemented in sub-class
-    function handleRequest(request:RequestMessage, cancelToken:RequestToken, resolve:ResolveHandler, reject:RejectHandler):Void {
+    function handleRequest(request:RequestMessage, cancelToken:CancellationToken, resolve:ResolveHandler, reject:RejectHandler):Void {
         reject(JsonRpc.error(ErrorCodes.InternalError, "handleRequest not implemented"));
     }
 
@@ -85,11 +85,15 @@ typedef ResolveHandler = Dynamic->Void
 typedef RejectHandler = ResponseError<Void>->Void
 typedef RejectDataHandler<T> = ResponseError<T>->Void
 
-class RequestToken {
-    @:allow(jsonrpc.Protocol.cancelRequest)
+class CancellationToken {
     public var canceled(default,null):Bool;
 
     public function new() {
         canceled = false;
+    }
+
+    @:allow(jsonrpc.Protocol.cancelRequest)
+    inline function cancel() {
+        canceled = true;
     }
 }

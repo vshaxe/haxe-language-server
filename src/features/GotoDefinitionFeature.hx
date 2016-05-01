@@ -10,7 +10,7 @@ class GotoDefinitionFeature extends Feature {
         context.protocol.onGotoDefinition = onGotoDefinition;
     }
 
-    function onGotoDefinition(params:TextDocumentPositionParams, token:RequestToken, resolve:EitherType<Location,Array<Location>>->Void, reject:RejectHandler) {
+    function onGotoDefinition(params:TextDocumentPositionParams, token:CancellationToken, resolve:EitherType<Location,Array<Location>>->Void, reject:RejectHandler) {
         var doc = context.documents.get(params.textDocument.uri);
         var bytePos = doc.byteOffsetAt(params.position);
         var args = ["--display", '${doc.fsPath}@$bytePos@position'];

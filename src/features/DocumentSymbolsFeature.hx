@@ -32,7 +32,7 @@ class DocumentSymbolsFeature extends Feature {
         context.protocol.onDocumentSymbols = onDocumentSymbols;
     }
 
-    function onDocumentSymbols(params:DocumentSymbolParams, token:RequestToken, resolve:Array<SymbolInformation>->Void, reject:RejectHandler) {
+    function onDocumentSymbols(params:DocumentSymbolParams, token:CancellationToken, resolve:Array<SymbolInformation>->Void, reject:RejectHandler) {
         var doc = context.documents.get(params.textDocument.uri);
         var args = ["--display", '${doc.fsPath}@0@module-symbols'];
         var stdin = if (doc.saved) null else doc.content;
