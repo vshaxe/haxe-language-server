@@ -53,7 +53,7 @@ class DocumentSymbolsFeature extends Feature {
                 result.push(moduleSymbolEntryToSymbolInformation(entry, doc));
             }
             resolve(result);
-        });
+        }, function(error) reject(jsonrpc.ErrorCodes.internalError(error)));
     }
 
     function moduleSymbolEntryToSymbolInformation(entry:ModuleSymbolEntry, document:TextDocument):SymbolInformation {

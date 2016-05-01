@@ -42,7 +42,7 @@ class HaxeServer {
                 version = [major, minor, patch];
                 callback(null);
             }
-        }, token.error);
+        }, callback);
     }
 
     public function stop() {
@@ -56,11 +56,10 @@ class HaxeServer {
     function onExit(_, _) {
         context.protocol.sendShowMessage({type: Warning, message: "Haxe process was killed, restarting..."});
         proc.removeAllListeners();
-        function onError(error:String) {
+        start(new RequestToken(), function(error) {
             if (error != null)
                 context.protocol.sendShowMessage({type: Error, message: error});
-        }
-        start(new RequestToken(onError), onError);
+        });
     }
 
     function onData(data:Buffer) {
@@ -134,7 +133,7 @@ class HaxeServer {
             try {
                 callback(data);
             } catch (e:Dynamic) {
-                token.error(ErrorUtils.errorToString(e, "Exception while handling haxe completion response: "));
+                errback(ErrorUtils.errorToString(e, "Exception while handling haxe completion response: "));
             }
         });
     }

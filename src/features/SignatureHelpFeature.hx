@@ -54,7 +54,7 @@ class SignatureHelpFeature extends Feature {
                 activeSignature: 0,
                 activeParameter: r.arg,
             });
-        });
+        }, function(error) reject(jsonrpc.ErrorCodes.internalError(error)));
     }
 
     public static function calculateSignaturePosition(text:String, index:Int):SignaturePosition {

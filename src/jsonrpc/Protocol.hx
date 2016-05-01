@@ -29,16 +29,14 @@ class Protocol {
                 requestTokens.remove(tokenKey);
                 sendResponse(JsonRpc.response(request.id, null, error));
             }
-            function onError(message:String) {
-                reject(jsonrpc.JsonRpc.error(jsonrpc.ErrorCodes.InternalError, message));
-                logError(message);
-            }
-            var token = requestTokens[tokenKey] = new RequestToken(onError);
+            var token = requestTokens[tokenKey] = new RequestToken();
             try {
                 handleRequest(request, token, resolve, reject);
             } catch (e:Dynamic) {
                 requestTokens.remove(tokenKey);
-                onError(errorToString(e, 'Exception while handling request ${request.method}: '));
+                var message = errorToString(e, 'Exception while handling request ${request.method}: ');
+                reject(jsonrpc.JsonRpc.error(jsonrpc.ErrorCodes.InternalError, message));
+                logError(message);
             }
         } else {
             var notification:NotificationMessage = cast message;
@@ -88,13 +86,10 @@ typedef RejectHandler = ResponseError<Void>->Void
 typedef RejectDataHandler<T> = ResponseError<T>->Void
 
 class RequestToken {
-    public var error(default,null):String->Void;
-
     @:allow(jsonrpc.Protocol.cancelRequest)
     public var canceled(default,null):Bool;
 
-    public function new(onError:String->Void) {
+    public function new() {
         canceled = false;
-        error = onError;
     }
 }

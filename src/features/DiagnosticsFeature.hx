@@ -47,7 +47,10 @@ class DiagnosticsFeature extends Feature {
 
             context.protocol.sendPublishDiagnostics({uri: uri, diagnostics: diagnostics});
         }
-        callDisplay(["--display", doc.fsPath + "@0@diagnostics"], null, new jsonrpc.Protocol.RequestToken(function(s) trace(s)), processReply);
+        function processError(error:String) {
+            context.protocol.sendLogMessage({type: Error, message: error});
+        }
+        callDisplay(["--display", doc.fsPath + "@0@diagnostics"], null, new jsonrpc.Protocol.RequestToken(), processReply, processError);
     }
 
     function onCodeAction(params:CodeActionParams, token:RequestToken, resolve:Array<Command> -> Void, reject:ResponseError<Dynamic> -> Void) {

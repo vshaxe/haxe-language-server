@@ -41,6 +41,6 @@ class HoverFeature extends Feature {
                 result.range = p.range;
 
             resolve(result);
-        });
+        }, function(error) reject(jsonrpc.ErrorCodes.internalError(error)));
     }
 }

@@ -27,7 +27,7 @@ class CompletionFeature extends Feature {
 
             var items = if (r.toplevel) parseToplevelCompletion(xml) else parseFieldCompletion(xml);
             resolve(items);
-        });
+        }, function(error) reject(internalError(error)));
     }
 
     static var reFieldPart = ~/\.(\w*)$/;

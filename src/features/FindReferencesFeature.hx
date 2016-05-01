@@ -37,6 +37,6 @@ class FindReferencesFeature extends Feature {
             }
 
             return resolve(results);
-        });
+        }, function(error) reject(jsonrpc.ErrorCodes.internalError(error)));
     }
 }
