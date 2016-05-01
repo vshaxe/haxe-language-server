@@ -1,4 +1,5 @@
 import js.node.child_process.ChildProcess as ChildProcessObject;
+import js.node.child_process.ChildProcess.ChildProcessEvent;
 import js.node.Buffer;
 import js.node.ChildProcess;
 import js.node.stream.Readable;
@@ -27,6 +28,7 @@ class HaxeServer {
         nextMessageLength = -1;
         proc.stdout.on(ReadableEvent.Data, function(buf:Buffer) context.protocol.sendVSHaxeLog(buf.toString()));
         proc.stderr.on(ReadableEvent.Data, onData);
+        proc.on(ChildProcessEvent.Exit, onExit);
         process(["-version"], token, null, function(data) {
             if (!reVersion.match(data))
                 return callback("Error parsing haxe version " + data);
@@ -45,9 +47,20 @@ class HaxeServer {
 
     public function stop() {
         if (proc != null) {
+            proc.removeAllListeners();
             proc.kill();
             proc = null;
         }
+    }
+
+    function onExit(_, _) {
+        context.protocol.sendShowMessage({type: Warning, message: "Haxe process was killed, restarting..."});
+        proc.removeAllListeners();
+        function onError(error:String) {
+            if (error != null)
+                context.protocol.sendShowMessage({type: Error, message: error});
+        }
+        start(new RequestToken(onError), onError);
     }
 
     function onData(data:Buffer) {
