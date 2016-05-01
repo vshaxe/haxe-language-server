@@ -168,6 +168,11 @@ abstract Notification<TParams>(String) to String {}
         The rename request is sent from the client to the server to do a workspace wide rename of a symbol.
     **/
     var Rename : Request<RenameParams,WorkspaceEdit,Void> = "textDocument/rename";
+
+    /**
+        This notification is send from the server to the client to ask the client to log a particular message in the vshaxe output channel.
+    **/
+    var VSHaxeLog : Notification<String> = "vshaxe/log";
 }
 
 typedef InitializeParams = {
