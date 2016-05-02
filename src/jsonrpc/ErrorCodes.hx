@@ -31,7 +31,7 @@ class ErrorCodes {
     **/
     static inline var InternalError = -32603;
 
-    static inline function internalError(msg = "") {
+    static inline function internalError(msg:String) {
         return JsonRpc.error(InternalError, msg);
     }
 }
