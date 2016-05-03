@@ -81,7 +81,6 @@ class HaxeServer {
         }
     }
 
-    static var lenBuf = new Buffer(4);
     static var stdinSepBuf = new Buffer([1]);
 
     public function process(args:Array<String>, token:CancellationToken, stdin:String, callback:String->Void, errback:String->Void) {
@@ -105,6 +104,7 @@ class HaxeServer {
             length += buf.length + stdinSepBuf.length;
         }
 
+        var lenBuf = new Buffer(4);
         lenBuf.writeInt32LE(length, 0);
         proc.stdin.write(lenBuf);
 
