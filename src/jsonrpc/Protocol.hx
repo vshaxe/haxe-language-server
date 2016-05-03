@@ -7,6 +7,9 @@ import ErrorUtils.errorToString;
     A simple JSON-RPC protocol base class.
 **/
 class Protocol {
+    static inline var PROTOCOL_VERSION = "2.0";
+    static inline var CANCEL_METHOD = "$/cancelRequest";
+
     var writeMessage:Message->Void;
     var requestTokens:Map<String,CancellationToken>;
 
@@ -23,11 +26,19 @@ class Protocol {
             var tokenKey = Std.string(request.id);
             function resolve(result:Dynamic) {
                 requestTokens.remove(tokenKey);
-                sendResponse(JsonRpc.response(request.id, result, null));
+                sendResponse({
+                    jsonrpc: PROTOCOL_VERSION,
+                    id: request.id,
+                    result: result
+                });
             }
             function reject<T>(error:ResponseError<T>) {
                 requestTokens.remove(tokenKey);
-                sendResponse(JsonRpc.response(request.id, null, error));
+                sendResponse({
+                    jsonrpc: PROTOCOL_VERSION,
+                    id: request.id,
+                    error: error
+                });
             }
             var token = requestTokens[tokenKey] = new CancellationToken();
             try {
@@ -40,7 +51,7 @@ class Protocol {
             }
         } else {
             var notification:NotificationMessage = cast message;
-            if (notification.method == jsonrpc.JsonRpc.CANCEL_METHOD)
+            if (notification.method == CANCEL_METHOD)
                 cancelRequest(notification.params);
             else {
                 try {
@@ -52,7 +63,7 @@ class Protocol {
         }
     }
 
-    function cancelRequest(params:jsonrpc.Types.CancelParams) {
+    function cancelRequest(params:CancelParams) {
         var tokenKey = Std.string(params.id);
         var token = requestTokens[tokenKey];
         if (token != null) {
@@ -66,7 +77,13 @@ class Protocol {
     }
 
     inline function sendNotification(name:String, params:Dynamic):Void {
-        writeMessage(JsonRpc.notification(name, params));
+        var message:NotificationMessage = {
+            jsonrpc: PROTOCOL_VERSION,
+            method: name
+        };
+        if (params != null)
+            message.params = params;
+        writeMessage(message);
     }
 
     // these should be implemented in sub-class
@@ -96,4 +113,14 @@ class CancellationToken {
     inline function cancel() {
         canceled = true;
     }
+}
+
+/**
+    Parameters for request cancellation notification.
+**/
+typedef CancelParams = {
+    /**
+        The request id to cancel.
+    **/
+    var id:RequestId;
 }
