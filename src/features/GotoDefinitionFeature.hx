@@ -1,7 +1,7 @@
 package features;
 
 import haxe.extern.EitherType;
-import vscode.BasicTypes;
+import vscodeProtocol.BasicTypes;
 import jsonrpc.Protocol;
 import jsonrpc.ErrorCodes.internalError;
 

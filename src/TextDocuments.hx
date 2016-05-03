@@ -1,5 +1,5 @@
-import vscode.Protocol;
-import vscode.ProtocolTypes;
+import vscodeProtocol.Protocol;
+import vscodeProtocol.ProtocolTypes;
 
 class TextDocuments {
     public static inline var syncKind = TextDocumentSyncKind.Incremental;

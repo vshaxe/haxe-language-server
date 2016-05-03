@@ -1,6 +1,6 @@
 import js.node.Buffer;
-import vscode.BasicTypes;
-import vscode.ProtocolTypes;
+import vscodeProtocol.BasicTypes;
+import vscodeProtocol.ProtocolTypes;
 
 class TextDocument {
     public var uri(default,null):String;

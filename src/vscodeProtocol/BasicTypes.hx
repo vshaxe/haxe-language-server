@@ -1,7 +1,7 @@
 /*
     This module contains basic types used when working with VSCode language server protocol.
 */
-package vscode;
+package vscodeProtocol;
 
 /**
     Position in a text document expressed as zero-based line and character offset.

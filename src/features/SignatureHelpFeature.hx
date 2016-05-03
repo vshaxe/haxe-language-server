@@ -2,8 +2,8 @@ package features;
 
 using StringTools;
 
-import vscode.BasicTypes;
-import vscode.ProtocolTypes;
+import vscodeProtocol.BasicTypes;
+import vscodeProtocol.ProtocolTypes;
 import jsonrpc.Protocol;
 import jsonrpc.ErrorCodes.internalError;
 

@@ -1,10 +1,10 @@
 import jsonrpc.Protocol;
-import vscode.ProtocolTypes;
+import vscodeProtocol.ProtocolTypes;
 
 class Context {
     public var workspacePath(default,null):String;
     public var displayArguments(default,null):Array<String>;
-    public var protocol(default,null):vscode.Protocol;
+    public var protocol(default,null):vscodeProtocol.Protocol;
     public var haxeServer(default,null):HaxeServer;
     public var documents(default,null):TextDocuments;
     var diagnostics:features.DiagnosticsFeature;

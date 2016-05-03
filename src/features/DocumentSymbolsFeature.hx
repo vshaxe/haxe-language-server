@@ -1,7 +1,7 @@
 package features;
 
-import vscode.BasicTypes;
-import vscode.ProtocolTypes;
+import vscodeProtocol.BasicTypes;
+import vscodeProtocol.ProtocolTypes;
 import jsonrpc.Protocol;
 import jsonrpc.ErrorCodes;
 
