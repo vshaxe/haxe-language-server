@@ -11,14 +11,14 @@ class ProtocolMacro {
         var requestCases = new Array<Case>();
         var notificationCases = new Array<Case>();
 
-        var ab = switch (Context.getType("ProtocolTypes.MethodName").follow()) {
-            case TAbstract(_.get() => ab, _): ab;
+        var cl = switch (Context.getType("ProtocolTypes.MethodNames").follow()) {
+            case TInst(_.get() => cl, _): cl;
             default: throw false;
         }
-        var abPath = ab.module.split(".");
-        abPath.push(ab.name);
-        for (method in ab.impl.get().statics.get()) {
-            var methodNameExpr = macro $p{abPath.concat([method.name])};
+        var clPath = cl.module.split(".");
+        clPath.push(cl.name);
+        for (method in cl.statics.get()) {
+            var methodNameExpr = macro $p{clPath.concat([method.name])};
             var handlerName = "on" + method.name;
             var handlerArgDefs = [];
             var handlerCallArgs = [];
