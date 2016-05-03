@@ -23,7 +23,7 @@ class ProtocolMacro {
             var handlerArgDefs = [];
             var handlerCallArgs = [];
             switch (method.type) {
-                case TAbstract(_.get() => {name: "Request"}, [params, resultData, errorData]):
+                case TAbstract(_.get() => {name: "RequestMethod"}, [params, resultData, errorData]):
                     var paramsCT = params.toComplexType();
                     if (params.toString() != "Void") {
                         handlerArgDefs.push({name: "params", type: paramsCT});
@@ -51,7 +51,7 @@ class ProtocolMacro {
                         values: [methodNameExpr],
                         expr: macro this.$handlerName($a{handlerCallArgs})
                     });
-                case TAbstract(_.get() => {name: "Notification"}, [params]):
+                case TAbstract(_.get() => {name: "NotificationMethod"}, [params]):
                     var paramsCT = params.toComplexType();
                     var sendArgDefs = [];
                     var sendCallArgs = [methodNameExpr];
