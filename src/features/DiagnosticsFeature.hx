@@ -5,6 +5,8 @@ import vscodeProtocol.BasicTypes;
 import jsonrpc.Protocol;
 import jsonrpc.Types;
 
+using StringTools;
+
 @:enum abstract UnresolvedIdentifierSuggestion(Int) {
     var UISImport = 0;
     var UISTypo = 1;
@@ -128,7 +130,27 @@ class DiagnosticsFeature extends Feature {
                         }
                         ret.push(command);
                     }
-               case DKCompilerError:
+                case DKCompilerError:
+                    var arg = getDiagnosticsArguments(code, d.range);
+                    var sugrex = ~/\(Suggestions?: (.*)\)/;
+                    if (sugrex.match(arg)) {
+                        var suggestions = sugrex.matched(1).split(",");
+                        // Haxe reports the entire expression, not just the field position, so we have to be a bit creative here.
+                        var range = d.range;
+                        var fieldrex = ~/has no field ([^ ]+) /;
+                        if (fieldrex.match(arg)) {
+                            var fieldName = fieldrex.matched(1);
+                            range.start.character += range.end.character - fieldrex.matched(1).length - 2;
+                        }
+                        for (suggestion in suggestions) {
+                            suggestion = suggestion.trim();
+                            ret.push({
+                                title: "Change to " + suggestion,
+                                command: "haxe.applyFixes",
+                                arguments: [params.textDocument.uri, 0, [{range: range, newText: suggestion}]]
+                            });
+                        }
+                    }
             }
         }
         resolve(ret);
