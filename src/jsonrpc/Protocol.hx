@@ -32,7 +32,7 @@ class Protocol {
                     result: result
                 });
             }
-            function reject<T>(error:ResponseError<T>) {
+            function reject(error:ResponseErrorData) {
                 requestTokens.remove(tokenKey);
                 sendResponse({
                     jsonrpc: PROTOCOL_VERSION,
