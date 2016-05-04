@@ -37,6 +37,7 @@ using StringTools;
 typedef HaxeDiagnostics<T> = {
     var kind:DiagnosticsKind<T>;
     var range:Range;
+    var severity:DiagnosticSeverity;
     var args:T;
 }
 
@@ -81,7 +82,7 @@ class DiagnosticsFeature extends Feature {
                     range: doc.byteRangeToRange(hxDiag.range),
                     source: "haxe",
                     code: (hxDiag.kind : Int),
-                    severity: Warning,
+                    severity: hxDiag.severity,
                     message: hxDiag.kind.getMessage(hxDiag.args)
                 }
                 diagnosticsArguments.set({code: diag.code, range: diag.range}, hxDiag.args);
@@ -101,7 +102,6 @@ class DiagnosticsFeature extends Feature {
     }
 
     function onCodeAction<T>(params:CodeActionParams, token:CancellationToken, resolve:Array<Command> -> Void, reject:ResponseError<Void> -> Void) {
-
         var ret:Array<Command> = [];
         for (d in params.context.diagnostics) {
             var code = new DiagnosticsKind<T>(Std.parseInt(d.code));
