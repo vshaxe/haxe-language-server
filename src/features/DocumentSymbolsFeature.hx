@@ -4,6 +4,7 @@ import vscodeProtocol.BasicTypes;
 import vscodeProtocol.ProtocolTypes;
 import jsonrpc.Protocol;
 import jsonrpc.ErrorCodes;
+import jsonrpc.Types;
 
 @:enum
 private abstract ModuleSymbolKind(Int) {
@@ -32,7 +33,7 @@ class DocumentSymbolsFeature extends Feature {
         context.protocol.onDocumentSymbols = onDocumentSymbols;
     }
 
-    function onDocumentSymbols(params:DocumentSymbolParams, token:CancellationToken, resolve:Array<SymbolInformation>->Void, reject:RejectHandler) {
+    function onDocumentSymbols(params:DocumentSymbolParams, token:CancellationToken, resolve:Array<SymbolInformation>->Void, reject:ResponseError<Void>->Void) {
         var doc = context.documents.get(params.textDocument.uri);
         var args = ["--display", '${doc.fsPath}@0@module-symbols'];
         var stdin = if (doc.saved) null else doc.content;
@@ -53,7 +54,7 @@ class DocumentSymbolsFeature extends Feature {
                 result.push(moduleSymbolEntryToSymbolInformation(entry, doc));
             }
             resolve(result);
-        }, function(error) reject(jsonrpc.ErrorCodes.internalError(error)));
+        }, function(error) reject(ErrorCodes.internalError(error)));
     }
 
     function moduleSymbolEntryToSymbolInformation(entry:ModuleSymbolEntry, document:TextDocument):SymbolInformation {

@@ -1,4 +1,5 @@
 import jsonrpc.Protocol;
+import jsonrpc.Types;
 import vscodeProtocol.ProtocolTypes;
 
 class Context {
@@ -18,13 +19,13 @@ class Context {
         protocol.onDidSaveTextDocument = onDidSaveTextDocument;
     }
 
-    function onInitialize(params:InitializeParams, token:CancellationToken, resolve:InitializeResult->Void, reject:RejectDataHandler<InitializeError>) {
+    function onInitialize(params:InitializeParams, token:CancellationToken, resolve:InitializeResult->Void, reject:ResponseError<InitializeError>->Void) {
         workspacePath = params.rootPath;
 
         haxeServer = new HaxeServer(this);
         haxeServer.start(token, function(error) {
             if (error != null)
-                return reject(jsonrpc.JsonRpc.error(0, error, {retry: false}));
+                return reject(new ResponseError(0, error, {retry: false}));
 
             documents = new TextDocuments(protocol);
 
@@ -56,7 +57,7 @@ class Context {
         });
     }
 
-    function onShutdown(token:CancellationToken, resolve:Void->Void, reject:RejectHandler) {
+    function onShutdown(token:CancellationToken, resolve:Void->Void, _) {
         haxeServer.stop();
         haxeServer = null;
         return resolve();

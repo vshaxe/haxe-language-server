@@ -57,13 +57,13 @@ typedef ResponseMessage = {
     /**
         The error object in case a request fails.
     **/
-    @:optional var error:ResponseError<Dynamic>;
+    @:optional var error:ResponseErrorData;
 }
 
 /**
     Error object sent in the `ResponseMessage.error` field.
 **/
-typedef ResponseError<D> = {
+typedef ResponseErrorData = {
     /**
         A number indicating the error type that occured.
     **/
@@ -77,7 +77,15 @@ typedef ResponseError<D> = {
     /**
         A Primitive or Structured value that contains additional information about the error.
     **/
-    @:optional var data:D;
+    @:optional var data:Dynamic;
+}
+
+abstract ResponseError<T>(ResponseErrorData) to ResponseErrorData {
+    public inline function new(code:Int, message:String, ?data:Dynamic) {
+        this = {code: code, message: message};
+        if (data != null)
+            this.data = data;
+    }
 }
 
 /**

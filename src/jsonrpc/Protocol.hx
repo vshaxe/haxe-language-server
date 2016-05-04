@@ -46,7 +46,7 @@ class Protocol {
             } catch (e:Dynamic) {
                 requestTokens.remove(tokenKey);
                 var message = errorToString(e, 'Exception while handling request ${request.method}: ');
-                reject(jsonrpc.JsonRpc.error(jsonrpc.ErrorCodes.InternalError, message));
+                reject(new ResponseError(jsonrpc.ErrorCodes.InternalError, message));
                 logError(message);
             }
         } else {
@@ -87,8 +87,8 @@ class Protocol {
     }
 
     // these should be implemented in sub-class
-    function handleRequest(request:RequestMessage, cancelToken:CancellationToken, resolve:ResolveHandler, reject:RejectHandler):Void {
-        reject(JsonRpc.error(ErrorCodes.InternalError, "handleRequest not implemented"));
+    function handleRequest(request:RequestMessage, cancelToken:CancellationToken, resolve:Dynamic->Void, reject:ResponseError<Dynamic>->Void):Void {
+        reject(new ResponseError(ErrorCodes.InternalError, 'Unhandled method ${request.method}'));
     }
 
     function handleNotification(notification:NotificationMessage):Void {
@@ -97,10 +97,6 @@ class Protocol {
     function logError(message:String):Void {
     }
 }
-
-typedef ResolveHandler = Dynamic->Void
-typedef RejectHandler = ResponseError<Void>->Void
-typedef RejectDataHandler<T> = ResponseError<T>->Void
 
 class CancellationToken {
     public var canceled(default,null):Bool;

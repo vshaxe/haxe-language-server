@@ -5,6 +5,7 @@ using StringTools;
 import vscodeProtocol.BasicTypes;
 import vscodeProtocol.ProtocolTypes;
 import jsonrpc.Protocol;
+import jsonrpc.Types;
 import jsonrpc.ErrorCodes.internalError;
 
 import SignatureHelper.*;
@@ -14,12 +15,12 @@ class SignatureHelpFeature extends Feature {
         context.protocol.onSignatureHelp = onSignatureHelp;
     }
 
-    function onSignatureHelp(params:TextDocumentPositionParams, token:CancellationToken, resolve:SignatureHelp->Void, reject:RejectHandler) {
+    function onSignatureHelp(params:TextDocumentPositionParams, token:CancellationToken, resolve:SignatureHelp->Void, reject:ResponseError<Void>->Void) {
         var doc = context.documents.get(params.textDocument.uri);
 
         var r = calculateSignaturePosition(doc.content, doc.offsetAt(params.position));
         if (r == null)
-            return reject(jsonrpc.JsonRpc.error(0, "Invalid signature position " + params.position));
+            return reject(new ResponseError(0, "Invalid signature position " + params.position));
 
         var bytePos = doc.offsetToByteOffset(r.pos);
         var args = ["--display", '${doc.fsPath}@$bytePos'];

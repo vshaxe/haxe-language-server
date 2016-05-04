@@ -44,7 +44,8 @@ class ProtocolMacro {
                     handlerArgDefs.push({name: "resolve", type: macro : $resultDataCT->Void});
                     handlerCallArgs.push(resolveExpr);
 
-                    handlerArgDefs.push({name: "reject", type: macro : jsonrpc.Types.ResponseError<Dynamic>->Void});
+                    var errorDataCT = errorData.toComplexType();
+                    handlerArgDefs.push({name: "reject", type: macro : jsonrpc.Types.ResponseError<$errorDataCT>->Void});
                     handlerCallArgs.push(macro reject);
 
                     requestCases.push({
@@ -104,11 +105,11 @@ class ProtocolMacro {
                 args: [
                     {name: "request", type: macro : jsonrpc.Types.RequestMessage},
                     {name: "token", type: macro : jsonrpc.Protocol.CancellationToken},
-                    {name: "resolve", type: macro : jsonrpc.Protocol.ResolveHandler},
-                    {name: "reject", type: macro : jsonrpc.Protocol.RejectHandler},
+                    {name: "resolve", type: macro : Dynamic->Void},
+                    {name: "reject", type: macro : jsonrpc.Types.ResponseError<Dynamic>->Void},
                 ],
                 expr: {
-                    expr: ESwitch(macro request.method, requestCases, macro reject(jsonrpc.JsonRpc.error(jsonrpc.ErrorCodes.MethodNotFound, "Method '" + request.method + "' not found"))),
+                    expr: ESwitch(macro request.method, requestCases, macro super.handleRequest(request, token, resolve, reject)),
                     pos: pos
                 }
             })

@@ -3,6 +3,7 @@ package features;
 import haxe.extern.EitherType;
 import vscodeProtocol.BasicTypes;
 import jsonrpc.Protocol;
+import jsonrpc.Types;
 import jsonrpc.ErrorCodes.internalError;
 
 class GotoDefinitionFeature extends Feature {
@@ -10,7 +11,7 @@ class GotoDefinitionFeature extends Feature {
         context.protocol.onGotoDefinition = onGotoDefinition;
     }
 
-    function onGotoDefinition(params:TextDocumentPositionParams, token:CancellationToken, resolve:EitherType<Location,Array<Location>>->Void, reject:RejectHandler) {
+    function onGotoDefinition(params:TextDocumentPositionParams, token:CancellationToken, resolve:EitherType<Location,Array<Location>>->Void, reject:ResponseError<Void>->Void) {
         var doc = context.documents.get(params.textDocument.uri);
         var bytePos = doc.byteOffsetAt(params.position);
         var args = ["--display", '${doc.fsPath}@$bytePos@position'];

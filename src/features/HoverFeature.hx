@@ -3,6 +3,7 @@ package features;
 import vscodeProtocol.BasicTypes;
 import vscodeProtocol.ProtocolTypes;
 import jsonrpc.Protocol;
+import jsonrpc.Types;
 import jsonrpc.ErrorCodes.internalError;
 
 import SignatureHelper.*;
@@ -12,7 +13,7 @@ class HoverFeature extends Feature {
         context.protocol.onHover = onHover;
     }
 
-    function onHover(params:TextDocumentPositionParams, token:CancellationToken, resolve:Hover->Void, reject:RejectHandler) {
+    function onHover(params:TextDocumentPositionParams, token:CancellationToken, resolve:Hover->Void, reject:ResponseError<Void>->Void) {
         var doc = context.documents.get(params.textDocument.uri);
         var bytePos = doc.byteOffsetAt(params.position);
         var args = ["--display", '${doc.fsPath}@$bytePos@type'];
@@ -26,7 +27,7 @@ class HoverFeature extends Feature {
 
             var s = StringTools.trim(xml.firstChild().nodeValue);
             if (s.length == 0)
-                return reject(jsonrpc.JsonRpc.error(0, "No type information"));
+                return reject(new ResponseError(0, "No type information"));
 
             var type = switch (parseDisplayType(s)) {
                 case DTFunction(args, ret):
@@ -41,6 +42,6 @@ class HoverFeature extends Feature {
                 result.range = p.range;
 
             resolve(result);
-        }, function(error) reject(jsonrpc.ErrorCodes.internalError(error)));
+        }, function(error) reject(internalError(error)));
     }
 }

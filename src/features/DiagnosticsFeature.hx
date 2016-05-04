@@ -3,7 +3,6 @@ package features;
 import vscodeProtocol.ProtocolTypes;
 import vscodeProtocol.BasicTypes;
 import jsonrpc.Protocol;
-import jsonrpc.Types;
 
 @:enum abstract DiagnosticKind(Int) from Int to Int {
     var DKUnusedImport = 0;
@@ -53,7 +52,7 @@ class DiagnosticsFeature extends Feature {
         callDisplay(["--display", doc.fsPath + "@0@diagnostics"], null, new CancellationToken(), processReply, processError);
     }
 
-    function onCodeAction(params:CodeActionParams, token:CancellationToken, resolve:Array<Command> -> Void, reject:ResponseError<Dynamic> -> Void) {
+    function onCodeAction(params:CodeActionParams, token:CancellationToken, resolve:Array<Command> -> Void, _) {
         var ret:Array<Command> = [];
         for (d in params.context.diagnostics) {
             switch ((cast d.code : DiagnosticKind)) {

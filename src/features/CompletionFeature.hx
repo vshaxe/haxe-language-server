@@ -3,6 +3,7 @@ package features;
 import vscodeProtocol.BasicTypes;
 import vscodeProtocol.ProtocolTypes;
 import jsonrpc.Protocol;
+import jsonrpc.Types;
 import jsonrpc.ErrorCodes.internalError;
 
 import SignatureHelper.prepareSignature;
@@ -12,7 +13,7 @@ class CompletionFeature extends Feature {
         context.protocol.onCompletion = onCompletion;
     }
 
-    function onCompletion(params:TextDocumentPositionParams, token:CancellationToken, resolve:Array<CompletionItem>->Void, reject:RejectHandler) {
+    function onCompletion(params:TextDocumentPositionParams, token:CancellationToken, resolve:Array<CompletionItem>->Void, reject:ResponseError<Void>->Void) {
         var doc = context.documents.get(params.textDocument.uri);
         var r = calculateCompletionPosition(doc.content, doc.offsetAt(params.position));
         var bytePos = doc.offsetToByteOffset(r.pos);
