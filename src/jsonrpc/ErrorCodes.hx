@@ -30,8 +30,4 @@ class ErrorCodes {
         Internal JSON-RPC error.
     **/
     static inline var InternalError = -32603;
-
-    static inline function internalError(msg:String) {
-        return new jsonrpc.Types.ResponseError(InternalError, msg);
-    }
 }

@@ -6,7 +6,6 @@ import vscodeProtocol.BasicTypes;
 import vscodeProtocol.ProtocolTypes;
 import jsonrpc.Protocol;
 import jsonrpc.Types;
-import jsonrpc.ErrorCodes.internalError;
 
 import SignatureHelper.*;
 
@@ -31,7 +30,7 @@ class SignatureHelpFeature extends Feature {
 
             data = '<x>$data</x>';
             var xml = try Xml.parse(data).firstElement() catch (_:Dynamic) null;
-            if (xml == null) return reject(internalError("Invalid xml data: " + data));
+            if (xml == null) return reject(ResponseError.internalError("Invalid xml data: " + data));
 
             var signatures = new Array<SignatureInformation>();
             for (el in xml.elements()) {
@@ -55,7 +54,7 @@ class SignatureHelpFeature extends Feature {
                 activeSignature: 0,
                 activeParameter: r.arg,
             });
-        }, function(error) reject(jsonrpc.ErrorCodes.internalError(error)));
+        }, function(error) reject(ResponseError.internalError(error)));
     }
 
     public static function calculateSignaturePosition(text:String, index:Int):SignaturePosition {

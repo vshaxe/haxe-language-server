@@ -4,7 +4,6 @@ import vscodeProtocol.BasicTypes;
 import vscodeProtocol.ProtocolTypes;
 import jsonrpc.Protocol;
 import jsonrpc.Types;
-import jsonrpc.ErrorCodes.internalError;
 
 import SignatureHelper.*;
 
@@ -23,7 +22,7 @@ class HoverFeature extends Feature {
                 return;
 
             var xml = try Xml.parse(data).firstElement() catch (_:Dynamic) null;
-            if (xml == null) return reject(internalError("Invalid xml data: " + data));
+            if (xml == null) return reject(ResponseError.internalError("Invalid xml data: " + data));
 
             var s = StringTools.trim(xml.firstChild().nodeValue);
             if (s.length == 0)
@@ -42,6 +41,6 @@ class HoverFeature extends Feature {
                 result.range = p.range;
 
             resolve(result);
-        }, function(error) reject(internalError(error)));
+        }, function(error) reject(ResponseError.internalError(error)));
     }
 }

@@ -4,7 +4,6 @@ import vscodeProtocol.BasicTypes;
 import vscodeProtocol.ProtocolTypes;
 import jsonrpc.Protocol;
 import jsonrpc.Types;
-import jsonrpc.ErrorCodes.internalError;
 
 import SignatureHelper.prepareSignature;
 
@@ -24,11 +23,11 @@ class CompletionFeature extends Feature {
                 return;
 
             var xml = try Xml.parse(data).firstElement() catch (_:Dynamic) null;
-            if (xml == null) return reject(internalError("Invalid xml data: " + data));
+            if (xml == null) return reject(ResponseError.internalError("Invalid xml data: " + data));
 
             var items = if (r.toplevel) parseToplevelCompletion(xml) else parseFieldCompletion(xml);
             resolve(items);
-        }, function(error) reject(internalError(error)));
+        }, function(error) reject(ResponseError.internalError(error)));
     }
 
     static var reFieldPart = ~/\.(\w*)$/;

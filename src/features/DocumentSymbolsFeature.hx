@@ -3,7 +3,6 @@ package features;
 import vscodeProtocol.BasicTypes;
 import vscodeProtocol.ProtocolTypes;
 import jsonrpc.Protocol;
-import jsonrpc.ErrorCodes;
 import jsonrpc.Types;
 
 @:enum
@@ -43,7 +42,7 @@ class DocumentSymbolsFeature extends Feature {
 
             var data:Array<ModuleSymbolEntry> =
                 try haxe.Json.parse(data)
-                catch (e:Dynamic) return reject(ErrorCodes.internalError("Error parsing document symbol response: " + e));
+                catch (e:Dynamic) return reject(ResponseError.internalError("Error parsing document symbol response: " + e));
 
             var result = [];
             for (entry in data) {
@@ -54,7 +53,7 @@ class DocumentSymbolsFeature extends Feature {
                 result.push(moduleSymbolEntryToSymbolInformation(entry, doc));
             }
             resolve(result);
-        }, function(error) reject(ErrorCodes.internalError(error)));
+        }, function(error) reject(ResponseError.internalError(error)));
     }
 
     function moduleSymbolEntryToSymbolInformation(entry:ModuleSymbolEntry, document:TextDocument):SymbolInformation {

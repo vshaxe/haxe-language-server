@@ -4,7 +4,6 @@ import haxe.extern.EitherType;
 import vscodeProtocol.BasicTypes;
 import jsonrpc.Protocol;
 import jsonrpc.Types;
-import jsonrpc.ErrorCodes.internalError;
 
 class GotoDefinitionFeature extends Feature {
     override function init() {
@@ -21,7 +20,7 @@ class GotoDefinitionFeature extends Feature {
                 return;
 
             var xml = try Xml.parse(data).firstElement() catch (_:Dynamic) null;
-            if (xml == null) return reject(internalError("Invalid xml data: " + data));
+            if (xml == null) return reject(ResponseError.internalError("Invalid xml data: " + data));
 
             var positions = [for (el in xml.elements()) el.firstChild().nodeValue];
             if (positions.length == 0)
@@ -38,6 +37,6 @@ class GotoDefinitionFeature extends Feature {
             }
 
             return resolve(results);
-        }, function(error) reject(jsonrpc.ErrorCodes.internalError(error)));
+        }, function(error) reject(ResponseError.internalError(error)));
     }
 }
