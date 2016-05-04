@@ -88,7 +88,7 @@ class Protocol {
 
     // these should be implemented in sub-class
     function handleRequest(request:RequestMessage, cancelToken:CancellationToken, resolve:Dynamic->Void, reject:ResponseError<Dynamic>->Void):Void {
-        reject(new ResponseError(ErrorCodes.InternalError, 'Unhandled method ${request.method}'));
+        reject(new ResponseError(ErrorCodes.MethodNotFound, 'Unhandled method ${request.method}'));
     }
 
     function handleNotification(notification:NotificationMessage):Void {
