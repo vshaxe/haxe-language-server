@@ -164,6 +164,11 @@ class MethodNames {
         This notification is sent from the server to the client to ask the client to log a particular message in the vshaxe output channel.
     **/
     static inline var VSHaxeLog = new NotificationMethod<String>("vshaxe/log");
+
+    /**
+        This notification is sent from the client to the server when display arguments index is changed.
+    **/
+    static inline var VSHaxeDidChangeDisplayConfigurationIndex = new NotificationMethod<{index:Int}>("vshaxe/didChangeDisplayConfigurationIndex");
 }
 
 typedef InitializeParams = {

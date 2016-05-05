@@ -1,3 +1,3 @@
 {
-    "haxe.displayArguments": ["build.hxml"]
+    "haxe.displayConfigurations": [["build.hxml"]]
 }

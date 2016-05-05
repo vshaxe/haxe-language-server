@@ -4,11 +4,16 @@ import vscodeProtocol.ProtocolTypes;
 
 class Context {
     public var workspacePath(default,null):String;
-    public var displayArguments(default,null):Array<String>;
+    public var displayArguments(get,never):Array<String>;
     public var protocol(default,null):vscodeProtocol.Protocol;
     public var haxeServer(default,null):HaxeServer;
     public var documents(default,null):TextDocuments;
     var diagnostics:features.DiagnosticsFeature;
+
+    var displayConfigurations:Array<Array<String>>;
+    var displayConfigurationIndex:Int;
+
+    inline function get_displayArguments() return displayConfigurations[displayConfigurationIndex];
 
     public function new(protocol) {
         this.protocol = protocol;
@@ -17,10 +22,12 @@ class Context {
         protocol.onDidChangeConfiguration = onDidChangeConfiguration;
         protocol.onDidOpenTextDocument = onDidOpenTextDocument;
         protocol.onDidSaveTextDocument = onDidSaveTextDocument;
+        protocol.onVSHaxeDidChangeDisplayConfigurationIndex = onDidChangeDisplayConfigurationIndex;
     }
 
     function onInitialize(params:InitializeParams, token:CancellationToken, resolve:InitializeResult->Void, reject:ResponseError<InitializeError>->Void) {
         workspacePath = params.rootPath;
+        displayConfigurationIndex = (params.initializationOptions : InitOptions).displayConfigurationIndex;
 
         haxeServer = new HaxeServer(this);
         haxeServer.start(token, function(error) {
@@ -57,6 +64,10 @@ class Context {
         });
     }
 
+    function onDidChangeDisplayConfigurationIndex(params:{index:Int}) {
+        displayConfigurationIndex = params.index;
+    }
+
     function onShutdown(token:CancellationToken, resolve:Void->Void, _) {
         haxeServer.stop();
         haxeServer = null;
@@ -65,7 +76,7 @@ class Context {
 
     function onDidChangeConfiguration(config:DidChangeConfigurationParams) {
         var config:Config = config.settings.haxe;
-        displayArguments = config.displayArguments;
+        displayConfigurations = config.displayConfigurations;
     }
 
     function onDidOpenTextDocument(event:DidOpenTextDocumentParams) {
@@ -80,5 +91,9 @@ class Context {
 }
 
 private typedef Config = {
-    var displayArguments:Array<String>;
+    var displayConfigurations:Array<Array<String>>;
+}
+
+private typedef InitOptions = {
+    var displayConfigurationIndex:Int;
 }
