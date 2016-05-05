@@ -196,6 +196,11 @@ typedef InitializeParams = {
         The capabilities provided by the client (editor).
     **/
     var capabilities:ClientCapabilities;
+
+    /**
+        Initialization options passed from the client.
+    **/
+    @:optional var initializationOptions:Dynamic;
 }
 
 typedef InitializeResult = {
