@@ -175,7 +175,7 @@ class MethodNames {
     static inline var Rename = new RequestMethod<RenameParams,WorkspaceEdit,Void>("textDocument/rename");
 
     /**
-        This notification is send from the server to the client to ask the client to log a particular message in the vshaxe output channel.
+        This notification is sent from the server to the client to ask the client to log a particular message in the vshaxe output channel.
     **/
     static inline var VSHaxeLog = new NotificationMethod<String>("vshaxe/log");
 }
