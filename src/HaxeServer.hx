@@ -3,7 +3,7 @@ import js.node.child_process.ChildProcess.ChildProcessEvent;
 import js.node.Buffer;
 import js.node.ChildProcess;
 import js.node.stream.Readable;
-import jsonrpc.Protocol.CancellationToken;
+import jsonrpc.Protocol;
 using StringTools;
 
 class HaxeServer {
@@ -56,7 +56,7 @@ class HaxeServer {
     function onExit(_, _) {
         context.protocol.sendVSHaxeLog("Haxe process was killed, restarting...\n");
         proc.removeAllListeners();
-        start(new CancellationToken(), function(error) {
+        start(new CancellationTokenSource().token, function(error) {
             if (error != null)
                 context.protocol.sendShowMessage({type: Error, message: error});
         });

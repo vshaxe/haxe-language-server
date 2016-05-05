@@ -11,7 +11,7 @@ class Protocol {
     static inline var CANCEL_METHOD = "$/cancelRequest";
 
     var writeMessage:Message->Void;
-    var requestTokens:Map<String,CancellationToken>;
+    var requestTokens:Map<String,CancellationTokenSource>;
 
     public function new(writeMessage) {
         this.writeMessage = writeMessage;
@@ -40,9 +40,9 @@ class Protocol {
                     error: error
                 });
             }
-            var token = requestTokens[tokenKey] = new CancellationToken();
+            var tokenSource = requestTokens[tokenKey] = new CancellationTokenSource();
             try {
-                handleRequest(request, token, resolve, reject);
+                handleRequest(request, tokenSource.token, resolve, reject);
             } catch (e:Dynamic) {
                 requestTokens.remove(tokenKey);
                 var message = errorToString(e, 'Exception while handling request ${request.method}: ');
@@ -65,9 +65,9 @@ class Protocol {
 
     function cancelRequest(params:CancelParams) {
         var tokenKey = Std.string(params.id);
-        var token = requestTokens[tokenKey];
-        if (token != null) {
-            token.cancel();
+        var tokenSource = requestTokens[tokenKey];
+        if (tokenSource != null) {
+            tokenSource.cancel();
             requestTokens.remove(tokenKey);
         }
     }
@@ -98,15 +98,26 @@ class Protocol {
     }
 }
 
-class CancellationToken {
+abstract CancellationToken(CancellationTokenImpl) {
+    public var canceled(get,never):Bool;
+    inline function get_canceled() return this.canceled;
+}
+
+abstract CancellationTokenSource(CancellationTokenImpl) {
+    public var token(get,never):CancellationToken;
+    inline function get_token():CancellationToken return cast this;
+    public inline function new() this = new CancellationTokenImpl();
+    public inline function cancel() this.cancel();
+}
+
+private class CancellationTokenImpl {
     public var canceled(default,null):Bool;
 
-    public function new() {
+    public inline function new() {
         canceled = false;
     }
 
-    @:allow(jsonrpc.Protocol.cancelRequest)
-    inline function cancel() {
+    public inline function cancel() {
         canceled = true;
     }
 }
