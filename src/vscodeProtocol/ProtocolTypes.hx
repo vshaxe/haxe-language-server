@@ -2,23 +2,9 @@ package vscodeProtocol;
 
 import haxe.extern.EitherType;
 
+import jsonrpc.Types;
 import vscodeProtocol.BasicTypes;
 
-/**
-    Helper type for the `MethodName` values.
-    Represents that value of this type is a request.
-**/
-abstract RequestMethod<TParams,TResponse,TError>(String) to String {
-    public inline function new(method:String) this = method;
-}
-
-/**
-    Helper type for the `MethodName` values.
-    Represents that value of this type is a notification.
-**/
-abstract NotificationMethod<TParams>(String) to String {
-    public inline function new(method:String) this = method;
-}
 
 /**
     Method names for the protocol requests and notifications.
