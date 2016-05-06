@@ -5,7 +5,7 @@ import js.node.child_process.ChildProcess.ChildProcessEvent;
 import js.node.Buffer;
 import js.node.ChildProcess;
 import js.node.stream.Readable;
-import jsonrpc.Protocol;
+import jsonrpc.CancellationToken;
 using StringTools;
 
 class HaxeServer {

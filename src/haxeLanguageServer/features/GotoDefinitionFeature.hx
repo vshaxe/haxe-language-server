@@ -2,7 +2,7 @@ package haxeLanguageServer.features;
 
 import haxe.extern.EitherType;
 import haxeLanguageServer.vscodeProtocol.BasicTypes;
-import jsonrpc.Protocol;
+import jsonrpc.CancellationToken;
 import jsonrpc.Types;
 
 class GotoDefinitionFeature extends Feature {

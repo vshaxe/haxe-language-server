@@ -1,6 +1,6 @@
 package haxeLanguageServer.features;
 
-import jsonrpc.Protocol.CancellationToken;
+import jsonrpc.CancellationToken;
 
 class Feature {
     var context:Context;

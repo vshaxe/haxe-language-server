@@ -2,7 +2,7 @@ package haxeLanguageServer.features;
 
 import haxeLanguageServer.vscodeProtocol.BasicTypes;
 import haxeLanguageServer.vscodeProtocol.ProtocolTypes;
-import jsonrpc.Protocol;
+import jsonrpc.CancellationToken;
 import jsonrpc.Types;
 
 @:enum

@@ -1,6 +1,6 @@
 package haxeLanguageServer.features;
 
-import jsonrpc.Protocol;
+import jsonrpc.CancellationToken;
 import jsonrpc.Types;
 import haxeLanguageServer.vscodeProtocol.BasicTypes;
 import haxeLanguageServer.vscodeProtocol.ProtocolTypes;
