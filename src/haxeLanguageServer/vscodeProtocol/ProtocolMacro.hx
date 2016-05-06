@@ -98,7 +98,7 @@ class ProtocolMacro {
         var pos = Context.currentPos();
         fields.push({
             pos: pos,
-            name: "handleRequest",
+            name: "processRequest",
             access: [AOverride],
             kind: FFun({
                 ret: null,
@@ -109,14 +109,14 @@ class ProtocolMacro {
                     {name: "reject", type: macro : jsonrpc.Types.ResponseError<Dynamic>->Void},
                 ],
                 expr: {
-                    expr: ESwitch(macro request.method, requestCases, macro super.handleRequest(request, token, resolve, reject)),
+                    expr: ESwitch(macro request.method, requestCases, macro super.processRequest(request, token, resolve, reject)),
                     pos: pos
                 }
             })
         });
         fields.push({
             pos: pos,
-            name: "handleNotification",
+            name: "processNotification",
             access: [AOverride],
             kind: FFun({
                 ret: null,

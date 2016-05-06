@@ -13,7 +13,7 @@ class Protocol {
     var writeMessage:Message->Void;
     var requestTokens:Map<String,CancellationTokenSource>;
     var nextRequestId:Int;
-    var responseCallbacks:Map<Int, ResponseCallbackEntry>;
+    var responseCallbacks:Map<Int,ResponseCallbackEntry>;
 
     public function new(writeMessage) {
         this.writeMessage = writeMessage;
@@ -24,51 +24,66 @@ class Protocol {
     public function handleMessage(message:Message):Void {
         if ((Reflect.hasField(message, "result") || Reflect.hasField(message, "error")) && Reflect.hasField(message, "id")) {
             handleResponse(cast message);
-            return;
+        } else if (Reflect.hasField(message, "method")) {
+            if (Reflect.hasField(message, "id"))
+                handleRequest(cast message);
+            else
+                handleNotification(cast message);
+        }
+    }
+
+    function handleRequest(request:RequestMessage) {
+        var tokenKey = Std.string(request.id);
+
+        function resolve(result:Dynamic) {
+            requestTokens.remove(tokenKey);
+
+            var response:ResponseMessage = {
+                jsonrpc: PROTOCOL_VERSION,
+                id: request.id,
+                result: result
+            };
+            writeMessage(response);
         }
 
-        if (!Reflect.hasField(message, "method"))
-            return;
-        if (Reflect.hasField(message, "id")) {
-            var request:RequestMessage = cast message;
-            var tokenKey = Std.string(request.id);
-            function resolve(result:Dynamic) {
+        function reject(error:ResponseErrorData) {
+            requestTokens.remove(tokenKey);
+
+            var response:ResponseMessage = {
+                jsonrpc: PROTOCOL_VERSION,
+                id: request.id,
+                error: error
+            };
+            writeMessage(response);
+        }
+
+        var tokenSource = new CancellationTokenSource();
+        requestTokens[tokenKey] = tokenSource;
+
+        try {
+            processRequest(request, tokenSource.token, resolve, reject);
+        } catch (e:Dynamic) {
+            requestTokens.remove(tokenKey);
+
+            var message = errorToString(e, 'Exception while handling request ${request.method}: ');
+            reject(new ResponseError(jsonrpc.ErrorCodes.InternalError, message));
+            logError(message);
+        }
+    }
+
+    function handleNotification(notification:NotificationMessage) {
+        if (notification.method == CANCEL_METHOD) {
+            var tokenKey = Std.string(notification.params.id);
+            var tokenSource = requestTokens[tokenKey];
+            if (tokenSource != null) {
                 requestTokens.remove(tokenKey);
-                var response:ResponseMessage = {
-                    jsonrpc: PROTOCOL_VERSION,
-                    id: request.id,
-                    result: result
-                };
-                writeMessage(response);
-            }
-            function reject(error:ResponseErrorData) {
-                requestTokens.remove(tokenKey);
-                var response:ResponseMessage = {
-                    jsonrpc: PROTOCOL_VERSION,
-                    id: request.id,
-                    error: error
-                };
-                writeMessage(response);
-            }
-            var tokenSource = requestTokens[tokenKey] = new CancellationTokenSource();
-            try {
-                handleRequest(request, tokenSource.token, resolve, reject);
-            } catch (e:Dynamic) {
-                requestTokens.remove(tokenKey);
-                var message = errorToString(e, 'Exception while handling request ${request.method}: ');
-                reject(new ResponseError(jsonrpc.ErrorCodes.InternalError, message));
-                logError(message);
+                tokenSource.cancel();
             }
         } else {
-            var notification:NotificationMessage = cast message;
-            if (notification.method == CANCEL_METHOD)
-                cancelRequest(notification.params);
-            else {
-                try {
-                    handleNotification(notification);
-                } catch (e:Dynamic) {
-                    logError(errorToString(e, 'Exception while handing notification ${notification.method}: '));
-                }
+            try {
+                processNotification(notification);
+            } catch (e:Dynamic) {
+                logError(errorToString(e, 'Exception while processing notification ${notification.method}: '));
             }
         }
     }
@@ -92,15 +107,6 @@ class Protocol {
         }
     }
 
-    function cancelRequest(params:CancelParams) {
-        var tokenKey = Std.string(params.id);
-        var tokenSource = requestTokens[tokenKey];
-        if (tokenSource != null) {
-            tokenSource.cancel();
-            requestTokens.remove(tokenKey);
-        }
-    }
-
     inline function sendNotification<P>(name:NotificationMethod<P>, params:P):Void {
         var message:NotificationMessage = {
             jsonrpc: PROTOCOL_VERSION,
@@ -111,7 +117,7 @@ class Protocol {
         writeMessage(message);
     }
 
-    public function sendRequest<P,R,E>(method:RequestMethod<P,R,E>, params:P, token:Null<CancellationToken>, resolve:P->Void, reject:E->Void):Void {
+    function sendRequest<P,R,E>(method:RequestMethod<P,R,E>, params:P, token:Null<CancellationToken>, resolve:P->Void, reject:E->Void):Void {
         var id = nextRequestId++;
         var request:RequestMessage = {
             jsonrpc: PROTOCOL_VERSION,
@@ -127,11 +133,11 @@ class Protocol {
     }
 
     // these should be implemented in sub-class
-    function handleRequest(request:RequestMessage, cancelToken:CancellationToken, resolve:Dynamic->Void, reject:ResponseError<Dynamic>->Void):Void {
+    function processRequest(request:RequestMessage, cancelToken:CancellationToken, resolve:Dynamic->Void, reject:ResponseError<Dynamic>->Void):Void {
         reject(new ResponseError(ErrorCodes.MethodNotFound, 'Unhandled method ${request.method}'));
     }
 
-    function handleNotification(notification:NotificationMessage):Void {
+    function processNotification(notification:NotificationMessage):Void {
     }
 
     function logError(message:String):Void {
