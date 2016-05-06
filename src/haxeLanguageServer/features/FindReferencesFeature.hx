@@ -1,6 +1,6 @@
-package features;
+package haxeLanguageServer.features;
 
-import vscodeProtocol.BasicTypes;
+import haxeLanguageServer.vscodeProtocol.BasicTypes;
 import jsonrpc.Protocol;
 import jsonrpc.Types;
 

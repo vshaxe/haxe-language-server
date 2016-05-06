@@ -1,5 +1,7 @@
-import vscodeProtocol.Protocol;
-import vscodeProtocol.ProtocolTypes;
+package haxeLanguageServer;
+
+import haxeLanguageServer.vscodeProtocol.Protocol;
+import haxeLanguageServer.vscodeProtocol.ProtocolTypes;
 
 class TextDocuments {
     public static inline var syncKind = TextDocumentSyncKind.Incremental;
@@ -16,7 +18,7 @@ class TextDocuments {
         return documents[uri];
     }
 
-    @:allow(Context)
+    @:allow(haxeLanguageServer.Context)
     function onDidOpenTextDocument(event:DidOpenTextDocumentParams) {
         var td = event.textDocument;
         var document = new TextDocument(td.uri, td.languageId, td.version, td.text);
@@ -40,7 +42,7 @@ class TextDocuments {
         documents.remove(event.textDocument.uri);
     }
 
-    @:allow(Context)
+    @:allow(haxeLanguageServer.Context)
     function onDidSaveTextDocument(event:DidSaveTextDocumentParams) {
         var document = documents[event.textDocument.uri];
         if (document != null)

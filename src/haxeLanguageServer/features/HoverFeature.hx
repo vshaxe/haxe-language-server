@@ -1,11 +1,10 @@
-package features;
+package haxeLanguageServer.features;
 
-import vscodeProtocol.BasicTypes;
-import vscodeProtocol.ProtocolTypes;
 import jsonrpc.Protocol;
 import jsonrpc.Types;
-
-import SignatureHelper.*;
+import haxeLanguageServer.vscodeProtocol.BasicTypes;
+import haxeLanguageServer.vscodeProtocol.ProtocolTypes;
+import haxeLanguageServer.SignatureHelper.*;
 
 class HoverFeature extends Feature {
     override function init() {

@@ -1,3 +1,5 @@
+package jsonrpc;
+
 class ErrorUtils {
     public static function errorToString(error:Dynamic, intro:String):String {
         var result = intro + Std.string(error);

@@ -1,6 +1,8 @@
+package haxeLanguageServer;
+
 import js.node.Buffer;
-import vscodeProtocol.BasicTypes;
-import vscodeProtocol.ProtocolTypes;
+import haxeLanguageServer.vscodeProtocol.BasicTypes;
+import haxeLanguageServer.vscodeProtocol.ProtocolTypes;
 
 class TextDocument {
     public var uri(default,null):String;
@@ -9,7 +11,7 @@ class TextDocument {
     public var version(default,null):Int;
     public var content(default,null):String;
     public var lineCount(get,never):Int;
-    @:allow(TextDocuments)
+    @:allow(haxeLanguageServer.TextDocuments)
     public var saved(default,null):Bool;
     var lineOffsets:Array<Int>;
 

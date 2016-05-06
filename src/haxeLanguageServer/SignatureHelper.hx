@@ -1,3 +1,5 @@
+package haxeLanguageServer;
+
 using StringTools;
 
 class SignatureHelper {

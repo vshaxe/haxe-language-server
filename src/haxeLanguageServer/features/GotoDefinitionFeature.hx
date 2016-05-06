@@ -1,7 +1,7 @@
-package features;
+package haxeLanguageServer.features;
 
 import haxe.extern.EitherType;
-import vscodeProtocol.BasicTypes;
+import haxeLanguageServer.vscodeProtocol.BasicTypes;
 import jsonrpc.Protocol;
 import jsonrpc.Types;
 

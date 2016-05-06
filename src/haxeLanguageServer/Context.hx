@@ -1,14 +1,18 @@
+package haxeLanguageServer;
+
 import jsonrpc.Protocol;
 import jsonrpc.Types;
-import vscodeProtocol.ProtocolTypes;
+import haxeLanguageServer.vscodeProtocol.ProtocolTypes;
+import haxeLanguageServer.vscodeProtocol.Protocol;
+import haxeLanguageServer.features.*;
 
 class Context {
     public var workspacePath(default,null):String;
     public var displayArguments(get,never):Array<String>;
-    public var protocol(default,null):vscodeProtocol.Protocol;
+    public var protocol(default,null):Protocol;
     public var haxeServer(default,null):HaxeServer;
     public var documents(default,null):TextDocuments;
-    var diagnostics:features.DiagnosticsFeature;
+    var diagnostics:DiagnosticsFeature;
 
     var displayConfigurations:Array<Array<String>>;
     var displayConfigurationIndex:Int;
@@ -36,14 +40,14 @@ class Context {
 
             documents = new TextDocuments(protocol);
 
-            new features.CompletionFeature(this);
-            new features.HoverFeature(this);
-            new features.SignatureHelpFeature(this);
-            new features.GotoDefinitionFeature(this);
-            new features.FindReferencesFeature(this);
-            new features.DocumentSymbolsFeature(this);
+            new CompletionFeature(this);
+            new HoverFeature(this);
+            new SignatureHelpFeature(this);
+            new GotoDefinitionFeature(this);
+            new FindReferencesFeature(this);
+            new DocumentSymbolsFeature(this);
 
-            diagnostics = new features.DiagnosticsFeature(this);
+            diagnostics = new DiagnosticsFeature(this);
 
             return resolve({
                 capabilities: {

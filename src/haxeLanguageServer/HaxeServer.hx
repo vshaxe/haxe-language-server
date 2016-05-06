@@ -1,3 +1,5 @@
+package haxeLanguageServer;
+
 import js.node.child_process.ChildProcess as ChildProcessObject;
 import js.node.child_process.ChildProcess.ChildProcessEvent;
 import js.node.Buffer;
@@ -136,7 +138,7 @@ class HaxeServer {
             try {
                 callback(data);
             } catch (e:Dynamic) {
-                errback(ErrorUtils.errorToString(e, "Exception while handling haxe completion response: "));
+                errback(jsonrpc.ErrorUtils.errorToString(e, "Exception while handling haxe completion response: "));
             }
         });
     }

@@ -1,7 +1,7 @@
 package jsonrpc;
 
 import jsonrpc.Types;
-import ErrorUtils.errorToString;
+import jsonrpc.ErrorUtils.errorToString;
 
 /**
     A simple JSON-RPC protocol base class.

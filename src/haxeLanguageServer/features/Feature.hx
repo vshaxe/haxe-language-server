@@ -1,4 +1,4 @@
-package features;
+package haxeLanguageServer.features;
 
 import jsonrpc.Protocol.CancellationToken;
 

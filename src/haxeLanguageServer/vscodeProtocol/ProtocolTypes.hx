@@ -1,9 +1,9 @@
-package vscodeProtocol;
+package haxeLanguageServer.vscodeProtocol;
 
 import haxe.extern.EitherType;
 
 import jsonrpc.Types;
-import vscodeProtocol.BasicTypes;
+import haxeLanguageServer.vscodeProtocol.BasicTypes;
 
 
 /**

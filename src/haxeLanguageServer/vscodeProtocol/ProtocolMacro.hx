@@ -1,4 +1,4 @@
-package vscodeProtocol;
+package haxeLanguageServer.vscodeProtocol;
 
 import haxe.macro.Context;
 import haxe.macro.Expr;

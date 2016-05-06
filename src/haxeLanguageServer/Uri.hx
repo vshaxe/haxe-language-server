@@ -1,3 +1,5 @@
+package haxeLanguageServer;
+
 using StringTools;
 
 // these was ported from VS Code sources
