@@ -34,19 +34,21 @@ class Protocol {
             var tokenKey = Std.string(request.id);
             function resolve(result:Dynamic) {
                 requestTokens.remove(tokenKey);
-                sendResponse({
+                var response:ResponseMessage = {
                     jsonrpc: PROTOCOL_VERSION,
                     id: request.id,
                     result: result
-                });
+                };
+                writeMessage(response);
             }
             function reject(error:ResponseErrorData) {
                 requestTokens.remove(tokenKey);
-                sendResponse({
+                var response:ResponseMessage = {
                     jsonrpc: PROTOCOL_VERSION,
                     id: request.id,
                     error: error
-                });
+                };
+                writeMessage(response);
             }
             var tokenSource = requestTokens[tokenKey] = new CancellationTokenSource();
             try {
@@ -97,10 +99,6 @@ class Protocol {
             tokenSource.cancel();
             requestTokens.remove(tokenKey);
         }
-    }
-
-    inline function sendResponse(response:ResponseMessage):Void {
-        writeMessage(response);
     }
 
     inline function sendNotification<P>(name:NotificationMethod<P>, params:P):Void {
