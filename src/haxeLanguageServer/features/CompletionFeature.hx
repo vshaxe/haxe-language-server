@@ -3,7 +3,7 @@ package haxeLanguageServer.features;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import haxeLanguageServer.vscodeProtocol.Types;
-import haxeLanguageServer.SignatureHelper.prepareSignature;
+import haxeLanguageServer.TypeHelper.prepareSignature;
 
 class CompletionFeature extends Feature {
     override function init() {
