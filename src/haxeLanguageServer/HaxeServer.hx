@@ -133,7 +133,7 @@ class HaxeServer {
             var data = buf.toString().trim();
 
             if (hasError)
-                return errback(data);
+                return errback("Error from haxe server: " + data);
 
             try {
                 callback(data);

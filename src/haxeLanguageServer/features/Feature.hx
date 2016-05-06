@@ -20,6 +20,6 @@ class Feature {
             "--no-output", // prevent anygeneration
         ]);
         actualArgs = actualArgs.concat(args); // finally, add given query args
-        context.haxeServer.process(actualArgs, token, stdin, callback, function(error) errback("Error from haxe server: " + error));
+        context.haxeServer.process(actualArgs, token, stdin, callback, errback);
     }
 }
