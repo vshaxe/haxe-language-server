@@ -1,7 +1,7 @@
 package haxeLanguageServer;
 
 import haxeLanguageServer.vscodeProtocol.Protocol;
-import haxeLanguageServer.vscodeProtocol.ProtocolTypes;
+import haxeLanguageServer.vscodeProtocol.Types;
 
 class TextDocuments {
     public static inline var syncKind = TextDocumentSyncKind.Incremental;

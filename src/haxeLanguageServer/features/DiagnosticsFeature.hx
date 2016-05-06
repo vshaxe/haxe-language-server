@@ -1,9 +1,8 @@
 package haxeLanguageServer.features;
 
 import jsonrpc.CancellationToken;
-import jsonrpc.Types;
-import haxeLanguageServer.vscodeProtocol.ProtocolTypes;
-import haxeLanguageServer.vscodeProtocol.BasicTypes;
+import jsonrpc.ResponseError;
+import haxeLanguageServer.vscodeProtocol.Types;
 
 using StringTools;
 

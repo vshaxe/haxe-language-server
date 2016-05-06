@@ -1,12 +1,11 @@
 package haxeLanguageServer.features;
 
-using StringTools;
-
 import jsonrpc.CancellationToken;
-import jsonrpc.Types;
-import haxeLanguageServer.vscodeProtocol.BasicTypes;
-import haxeLanguageServer.vscodeProtocol.ProtocolTypes;
+import jsonrpc.ResponseError;
+import haxeLanguageServer.vscodeProtocol.Types;
 import haxeLanguageServer.SignatureHelper.*;
+
+using StringTools;
 
 class SignatureHelpFeature extends Feature {
     override function init() {

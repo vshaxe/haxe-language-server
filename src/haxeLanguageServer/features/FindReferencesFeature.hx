@@ -1,8 +1,8 @@
 package haxeLanguageServer.features;
 
-import haxeLanguageServer.vscodeProtocol.BasicTypes;
 import jsonrpc.CancellationToken;
-import jsonrpc.Types;
+import jsonrpc.ResponseError;
+import haxeLanguageServer.vscodeProtocol.Types;
 
 class FindReferencesFeature extends Feature {
     override function init() {

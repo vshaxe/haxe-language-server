@@ -1,9 +1,9 @@
 package haxeLanguageServer.features;
 
 import haxe.extern.EitherType;
-import haxeLanguageServer.vscodeProtocol.BasicTypes;
 import jsonrpc.CancellationToken;
-import jsonrpc.Types;
+import jsonrpc.ResponseError;
+import haxeLanguageServer.vscodeProtocol.Types;
 
 class GotoDefinitionFeature extends Feature {
     override function init() {

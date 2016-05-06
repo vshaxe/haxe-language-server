@@ -1,9 +1,8 @@
 package haxeLanguageServer.features;
 
 import jsonrpc.CancellationToken;
-import jsonrpc.Types;
-import haxeLanguageServer.vscodeProtocol.BasicTypes;
-import haxeLanguageServer.vscodeProtocol.ProtocolTypes;
+import jsonrpc.ResponseError;
+import haxeLanguageServer.vscodeProtocol.Types;
 import haxeLanguageServer.SignatureHelper.prepareSignature;
 
 class CompletionFeature extends Feature {

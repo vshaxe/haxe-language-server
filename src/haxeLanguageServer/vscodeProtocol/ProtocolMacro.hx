@@ -11,7 +11,7 @@ class ProtocolMacro {
         var requestCases = new Array<Case>();
         var notificationCases = new Array<Case>();
 
-        var cl = switch (Context.getType("ProtocolTypes.MethodNames").follow()) {
+        var cl = switch (Context.getType("Types.MethodNames").follow()) {
             case TInst(_.get() => cl, _): cl;
             default: throw false;
         }
@@ -45,7 +45,7 @@ class ProtocolMacro {
                     handlerCallArgs.push(resolveExpr);
 
                     var errorDataCT = errorData.toComplexType();
-                    handlerArgDefs.push({name: "reject", type: macro : jsonrpc.Types.ResponseError<$errorDataCT>->Void});
+                    handlerArgDefs.push({name: "reject", type: macro : jsonrpc.ResponseError<$errorDataCT>->Void});
                     handlerCallArgs.push(macro reject);
 
                     requestCases.push({
@@ -106,7 +106,7 @@ class ProtocolMacro {
                     {name: "request", type: macro : jsonrpc.Types.RequestMessage},
                     {name: "token", type: macro : jsonrpc.CancellationToken},
                     {name: "resolve", type: macro : Dynamic->Void},
-                    {name: "reject", type: macro : jsonrpc.Types.ResponseError<Dynamic>->Void},
+                    {name: "reject", type: macro : jsonrpc.ResponseError<Dynamic>->Void},
                 ],
                 expr: {
                     expr: ESwitch(macro request.method, requestCases, macro super.processRequest(request, token, resolve, reject)),

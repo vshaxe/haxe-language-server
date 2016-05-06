@@ -67,7 +67,7 @@ class Protocol {
             requestTokens.remove(tokenKey);
 
             var message = errorToString(e, 'Exception while handling request ${request.method}: ');
-            reject(new ResponseError(jsonrpc.ErrorCodes.InternalError, message));
+            reject(ResponseError.internalError(message));
             logError(message);
         }
     }
@@ -135,7 +135,7 @@ class Protocol {
 
     // these should be implemented in sub-class
     function processRequest(request:RequestMessage, cancelToken:CancellationToken, resolve:Dynamic->Void, reject:ResponseError<Dynamic>->Void):Void {
-        reject(new ResponseError(ErrorCodes.MethodNotFound, 'Unhandled method ${request.method}'));
+        reject(new ResponseError(ResponseError.MethodNotFound, 'Unhandled method ${request.method}'));
     }
 
     function processNotification(notification:NotificationMessage):Void {

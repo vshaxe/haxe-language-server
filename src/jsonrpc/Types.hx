@@ -80,18 +80,6 @@ typedef ResponseErrorData = {
     @:optional var data:Dynamic;
 }
 
-abstract ResponseError<T>(ResponseErrorData) to ResponseErrorData {
-    public inline function new(code:Int, message:String, ?data:Dynamic) {
-        this = {code: code, message: message};
-        if (data != null)
-            this.data = data;
-    }
-
-    public static inline function internalError(message:String):ResponseError<Void> {
-        return new ResponseError(jsonrpc.ErrorCodes.InternalError, message);
-    }
-}
-
 /**
     A notification message. A processed notification message must not send a response back.
     They work like events.

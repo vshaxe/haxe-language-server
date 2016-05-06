@@ -1,9 +1,9 @@
 package haxeLanguageServer;
 
 import jsonrpc.CancellationToken;
-import jsonrpc.Types;
-import haxeLanguageServer.vscodeProtocol.ProtocolTypes;
+import jsonrpc.ResponseError;
 import haxeLanguageServer.vscodeProtocol.Protocol;
+import haxeLanguageServer.vscodeProtocol.Types;
 import haxeLanguageServer.features.*;
 
 class Context {
