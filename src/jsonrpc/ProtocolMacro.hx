@@ -1,11 +1,12 @@
-package haxeLanguageServer.vscodeProtocol;
+package jsonrpc;
 
+#if macro
 import haxe.macro.Context;
 import haxe.macro.Expr;
 using haxe.macro.Tools;
 
 class ProtocolMacro {
-    macro static function build(methodsClass:String):Array<Field> {
+    static function build(methodsClass:String):Array<Field> {
         var fields = Context.getBuildFields();
 
         var requestCases = new Array<Case>();
@@ -131,3 +132,4 @@ class ProtocolMacro {
         return fields;
     }
 }
+#end
