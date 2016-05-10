@@ -5,13 +5,13 @@ import haxe.macro.Expr;
 using haxe.macro.Tools;
 
 class ProtocolMacro {
-    macro static function build():Array<Field> {
+    macro static function build(methodsClass:String):Array<Field> {
         var fields = Context.getBuildFields();
 
         var requestCases = new Array<Case>();
         var notificationCases = new Array<Case>();
 
-        var cl = switch (Context.getType("Types.MethodNames").follow()) {
+        var cl = switch (Context.getType(methodsClass).follow()) {
             case TInst(_.get() => cl, _): cl;
             default: throw false;
         }
