@@ -79,7 +79,7 @@ class MethodNames {
         If computing complete completion items is expensive servers can additional provide a handler for the resolve completion item request.
         This request is send when a completion item is selected in the user interface.
     **/
-    static inline var Completion = new RequestMethod<TextDocumentPositionParams,Array<CompletionItem>,Void>("textDocument/completion");
+    static inline var Completion = new RequestMethod<TextDocumentPositionParams,EitherType<Array<CompletionItem>,CompletionList>,Void>("textDocument/completion");
 
     /**
         The request is sent from the client to the server to resolve additional information for a given completion item.
@@ -395,7 +395,10 @@ typedef InitializeError = {
     var retry:Bool;
 }
 
-typedef ClientCapabilities = {} // unspecified
+/**
+    Currently empty.
+**/
+typedef ClientCapabilities = {}
 
 /**
     Defines how the host (editor) should sync document changes to the language server.
@@ -722,6 +725,21 @@ typedef CompletionItem = {
         An data entry field that is preserved on a completion item between a completion and a completion resolve request.
     **/
     @:optional var data:Dynamic;
+}
+
+/**
+    Represents a collection of completion items to be presented in the editor.
+**/
+typedef CompletionList = {
+    /**
+        This list it not complete. Further typing should result in recomputing this list.
+    **/
+    var isIncomplete:Bool;
+
+    /**
+        The completion items.
+    **/
+    var items:Array<CompletionItem>;
 }
 
 /**
