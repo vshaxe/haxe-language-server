@@ -3,7 +3,7 @@ package haxeLanguageServer.features;
 import haxe.extern.EitherType;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
-import haxeLanguageServer.vscodeProtocol.Types;
+import vscodeProtocol.Types;
 
 class GotoDefinitionFeature extends Feature {
     override function init() {

@@ -1,7 +1,7 @@
 package haxeLanguageServer;
 
 import js.node.Buffer;
-import haxeLanguageServer.vscodeProtocol.Types;
+import vscodeProtocol.Types;
 
 class TextDocument {
     public var uri(default,null):String;

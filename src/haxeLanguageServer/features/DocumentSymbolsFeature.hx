@@ -2,7 +2,7 @@ package haxeLanguageServer.features;
 
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
-import haxeLanguageServer.vscodeProtocol.Types;
+import vscodeProtocol.Types;
 
 @:enum
 private abstract ModuleSymbolKind(Int) {

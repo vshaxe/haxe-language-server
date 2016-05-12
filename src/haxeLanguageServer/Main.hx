@@ -3,7 +3,7 @@ package haxeLanguageServer;
 import js.Node.process;
 import jsonrpc.node.MessageReader;
 import jsonrpc.node.MessageWriter;
-import haxeLanguageServer.vscodeProtocol.Protocol;
+import vscodeProtocol.Protocol;
 
 class Main {
     static function main() {
