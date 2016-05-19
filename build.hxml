@@ -1,3 +1,4 @@
+-cp protocol/src
 -cp src
 -main haxeLanguageServer.Main
 -js ../bin/server.js
