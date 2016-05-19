@@ -1,11 +1,10 @@
 # Haxe language server
 
-This is a language server implementing [VS Code language server protocol](https://github.com/Microsoft/vscode-languageserver-protocol) for [Haxe](http://haxe.org/) language.
+This is a language server implementing [Visual Studio Code Language Server Protocol](https://github.com/Microsoft/vscode-languageserver-protocol) for the [Haxe](http://haxe.org/) language.
 
-**Status**: very much work in progress. Hacks and experiments everywhere.
+The goal of this project is to encapsulate haxe's completion API with all its quirks behind a solid and easy-to-use protocol that can be used by any editor/IDE.
 
-This only works with latest development version of Haxe (3.3) due to new [`-D display-stdin` feature](https://github.com/HaxeFoundation/haxe/pull/5120)
-and ton of other fixes and additions for IDE support.
+**Status**: Usable but still pretty new, so things may change, check [current issues](https://github.com/vshaxe/haxe-languageserver/issues).
 
-The goal of this project is to encapsulate haxe's completion API with all its quirks behind a solid and easy-to-use
-protocol that can be used by any editor/IDE.
+**IMPORTANT**: This requires latest Haxe development version due to usage of [`-D display-stdin`](https://github.com/HaxeFoundation/haxe/pull/5120),
+[`--wait stdio`](https://github.com/HaxeFoundation/haxe/pull/5188) and ton of other fixes and additions related to IDE support.
