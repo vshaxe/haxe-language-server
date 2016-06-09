@@ -6,6 +6,15 @@ import vscodeProtocol.Protocol;
 import vscodeProtocol.Types;
 import haxeLanguageServer.features.*;
 
+private typedef Config = {
+    var displayConfigurations:Array<Array<String>>;
+    var enableDiagnostics:Bool;
+}
+
+private typedef InitOptions = {
+    var displayConfigurationIndex:Int;
+}
+
 class Context {
     public var workspacePath(default,null):String;
     public var displayArguments(get,never):Array<String>;
@@ -14,10 +23,10 @@ class Context {
     public var documents(default,null):TextDocuments;
     var diagnostics:DiagnosticsFeature;
 
-    var displayConfigurations:Array<Array<String>>;
+    var config:Config;
     var displayConfigurationIndex:Int;
 
-    inline function get_displayArguments() return displayConfigurations[displayConfigurationIndex];
+    inline function get_displayArguments() return config.displayConfigurations[displayConfigurationIndex];
 
     public function new(protocol) {
         this.protocol = protocol;
@@ -78,26 +87,19 @@ class Context {
         return resolve();
     }
 
-    function onDidChangeConfiguration(config:DidChangeConfigurationParams) {
-        var config:Config = config.settings.haxe;
-        displayConfigurations = config.displayConfigurations;
+    function onDidChangeConfiguration(newConfig:DidChangeConfigurationParams) {
+        this.config = newConfig.settings.haxe;
     }
 
     function onDidOpenTextDocument(event:DidOpenTextDocumentParams) {
         documents.onDidOpenTextDocument(event);
-        diagnostics.getDiagnostics(event.textDocument.uri);
+        if (config.enableDiagnostics)
+            diagnostics.getDiagnostics(event.textDocument.uri);
     }
 
     function onDidSaveTextDocument(event:DidSaveTextDocumentParams) {
         documents.onDidSaveTextDocument(event);
-        diagnostics.getDiagnostics(event.textDocument.uri);
+        if (config.enableDiagnostics)
+            diagnostics.getDiagnostics(event.textDocument.uri);
     }
-}
-
-private typedef Config = {
-    var displayConfigurations:Array<Array<String>>;
-}
-
-private typedef InitOptions = {
-    var displayConfigurationIndex:Int;
 }
