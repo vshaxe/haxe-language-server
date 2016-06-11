@@ -67,6 +67,7 @@ class Context {
 
     function onDidChangeDisplayConfigurationIndex(params:{index:Int}) {
         displayConfigurationIndex = params.index;
+        haxeServer.restart("selected configuration was changed");
     }
 
     function onShutdown(token:CancellationToken, resolve:Void->Void, _) {
