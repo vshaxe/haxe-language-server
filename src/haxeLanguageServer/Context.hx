@@ -9,6 +9,7 @@ import haxeLanguageServer.features.*;
 private typedef Config = {
     var displayConfigurations:Array<Array<String>>;
     var enableDiagnostics:Bool;
+    var displayServerArguments:Array<String>;
 }
 
 private typedef InitOptions = {
@@ -23,6 +24,7 @@ class Context {
     public var documents(default,null):TextDocuments;
     var diagnostics:DiagnosticsFeature;
 
+    @:allow(haxeLanguageServer.HaxeServer)
     var config:Config;
     var displayConfigurationIndex:Int;
 
@@ -30,6 +32,9 @@ class Context {
 
     public function new(protocol) {
         this.protocol = protocol;
+
+        haxeServer = new HaxeServer(this);
+
         protocol.onInitialize = onInitialize;
         protocol.onShutdown = onShutdown;
         protocol.onDidChangeConfiguration = onDidChangeConfiguration;
@@ -41,39 +46,22 @@ class Context {
     function onInitialize(params:InitializeParams, token:CancellationToken, resolve:InitializeResult->Void, reject:ResponseError<InitializeError>->Void) {
         workspacePath = params.rootPath;
         displayConfigurationIndex = (params.initializationOptions : InitOptions).displayConfigurationIndex;
-
-        haxeServer = new HaxeServer(this);
-        haxeServer.start(token, function(error) {
-            if (error != null)
-                return reject(new ResponseError(0, error, {retry: false}));
-
-            documents = new TextDocuments(protocol);
-
-            new CompletionFeature(this);
-            new HoverFeature(this);
-            new SignatureHelpFeature(this);
-            new GotoDefinitionFeature(this);
-            new FindReferencesFeature(this);
-            new DocumentSymbolsFeature(this);
-
-            diagnostics = new DiagnosticsFeature(this);
-
-            return resolve({
-                capabilities: {
-                    textDocumentSync: TextDocuments.syncKind,
-                    completionProvider: {
-                        triggerCharacters: ["."]
-                    },
-                    signatureHelpProvider: {
-                        triggerCharacters: ["(", ","]
-                    },
-                    definitionProvider: true,
-                    hoverProvider: true,
-                    referencesProvider: true,
-                    documentSymbolProvider: true,
-                    codeActionProvider: true
-                }
-            });
+        documents = new TextDocuments(protocol);
+        return resolve({
+            capabilities: {
+                textDocumentSync: TextDocuments.syncKind,
+                completionProvider: {
+                    triggerCharacters: ["."]
+                },
+                signatureHelpProvider: {
+                    triggerCharacters: ["(", ","]
+                },
+                definitionProvider: true,
+                hoverProvider: true,
+                referencesProvider: true,
+                documentSymbolProvider: true,
+                codeActionProvider: true
+            }
         });
     }
 
@@ -88,18 +76,39 @@ class Context {
     }
 
     function onDidChangeConfiguration(newConfig:DidChangeConfigurationParams) {
-        this.config = newConfig.settings.haxe;
+        var firstInit = (config == null);
+
+        config = newConfig.settings.haxe;
+
+        if (firstInit) {
+            haxeServer.start(function() {
+                new CompletionFeature(this);
+                new HoverFeature(this);
+                new SignatureHelpFeature(this);
+                new GotoDefinitionFeature(this);
+                new FindReferencesFeature(this);
+                new DocumentSymbolsFeature(this);
+
+                diagnostics = new DiagnosticsFeature(this);
+                if (config.enableDiagnostics) {
+                    for (doc in documents.getAll())
+                        diagnostics.getDiagnostics(doc.uri);
+                }
+            });
+        } else {
+            haxeServer.restart("configuration was changed");
+        }
     }
 
     function onDidOpenTextDocument(event:DidOpenTextDocumentParams) {
         documents.onDidOpenTextDocument(event);
-        if (config.enableDiagnostics)
+        if (diagnostics != null && config.enableDiagnostics)
             diagnostics.getDiagnostics(event.textDocument.uri);
     }
 
     function onDidSaveTextDocument(event:DidSaveTextDocumentParams) {
         documents.onDidSaveTextDocument(event);
-        if (config.enableDiagnostics)
+        if (diagnostics != null && config.enableDiagnostics)
             diagnostics.getDiagnostics(event.textDocument.uri);
     }
 }

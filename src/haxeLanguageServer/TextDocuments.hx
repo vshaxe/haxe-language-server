@@ -14,6 +14,10 @@ class TextDocuments {
         protocol.onDidCloseTextDocument = onDidCloseTextDocument;
     }
 
+    public inline function getAll():Iterator<TextDocument> {
+        return documents.iterator();
+    }
+
     public inline function get(uri:String):TextDocument {
         return documents[uri];
     }
