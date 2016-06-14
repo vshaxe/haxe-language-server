@@ -2,6 +2,7 @@ package haxeLanguageServer;
 
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
+import jsonrpc.Types;
 import vscodeProtocol.Protocol;
 import vscodeProtocol.Types;
 import haxeLanguageServer.features.*;
@@ -70,10 +71,10 @@ class Context {
         haxeServer.restart("selected configuration was changed");
     }
 
-    function onShutdown(token:CancellationToken, resolve:Void->Void, _) {
+    function onShutdown(_, token:CancellationToken, resolve:NoData->Void, _) {
         haxeServer.stop();
         haxeServer = null;
-        return resolve();
+        return resolve(null);
     }
 
     function onDidChangeConfiguration(newConfig:DidChangeConfigurationParams) {

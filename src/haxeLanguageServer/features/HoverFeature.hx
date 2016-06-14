@@ -3,6 +3,7 @@ package haxeLanguageServer.features;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import vscodeProtocol.Types;
+import jsonrpc.Types.NoData;
 import haxeLanguageServer.TypeHelper.*;
 
 class HoverFeature extends Feature {
@@ -10,7 +11,7 @@ class HoverFeature extends Feature {
         context.protocol.onHover = onHover;
     }
 
-    function onHover(params:TextDocumentPositionParams, token:CancellationToken, resolve:Hover->Void, reject:ResponseError<Void>->Void) {
+    function onHover(params:TextDocumentPositionParams, token:CancellationToken, resolve:Hover->Void, reject:ResponseError<NoData>->Void) {
         var doc = context.documents.get(params.textDocument.uri);
         var bytePos = doc.byteOffsetAt(params.position);
         var args = ["--display", '${doc.fsPath}@$bytePos@type'];

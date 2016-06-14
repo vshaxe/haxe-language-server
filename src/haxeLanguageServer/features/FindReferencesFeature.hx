@@ -2,6 +2,7 @@ package haxeLanguageServer.features;
 
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
+import jsonrpc.Types.NoData;
 import vscodeProtocol.Types;
 
 class FindReferencesFeature extends Feature {
@@ -9,7 +10,7 @@ class FindReferencesFeature extends Feature {
         context.protocol.onFindReferences = onFindReferences;
     }
 
-    function onFindReferences(params:TextDocumentPositionParams, token:CancellationToken, resolve:Array<Location>->Void, reject:ResponseError<Void>->Void) {
+    function onFindReferences(params:TextDocumentPositionParams, token:CancellationToken, resolve:Array<Location>->Void, reject:ResponseError<NoData>->Void) {
         var doc = context.documents.get(params.textDocument.uri);
         var bytePos = doc.byteOffsetAt(params.position);
         var args = ["--display", '${doc.fsPath}@$bytePos@usage'];

@@ -2,6 +2,7 @@ package haxeLanguageServer.features;
 
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
+import jsonrpc.Types.NoData;
 import vscodeProtocol.Types;
 
 @:enum
@@ -31,7 +32,7 @@ class DocumentSymbolsFeature extends Feature {
         context.protocol.onDocumentSymbols = onDocumentSymbols;
     }
 
-    function onDocumentSymbols(params:DocumentSymbolParams, token:CancellationToken, resolve:Array<SymbolInformation>->Void, reject:ResponseError<Void>->Void) {
+    function onDocumentSymbols(params:DocumentSymbolParams, token:CancellationToken, resolve:Array<SymbolInformation>->Void, reject:ResponseError<NoData>->Void) {
         var doc = context.documents.get(params.textDocument.uri);
         var args = ["--display", '${doc.fsPath}@0@module-symbols'];
         var stdin = if (doc.saved) null else doc.content;
