@@ -26,8 +26,15 @@ class HaxeServer {
     public function start(callback:Void->Void) {
         stop();
 
-        var args = context.config.displayServerArguments.concat(["--wait", "stdio"]);
-        proc = ChildProcess.spawn("haxe", args);
+        var args = context.displayServerConfig.arguments.concat(["--wait", "stdio"]);
+
+        var env = new haxe.DynamicAccess();
+        for (key in js.Node.process.env.keys())
+            env[key] = js.Node.process.env[key];
+        for (key in context.displayServerConfig.env.keys())
+            env[key] = context.displayServerConfig.env[key];
+
+        proc = ChildProcess.spawn(context.displayServerConfig.haxePath, args, {env: env});
 
         buffer = new MessageBuffer();
         nextMessageLength = -1;

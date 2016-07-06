@@ -7,10 +7,23 @@ import vscodeProtocol.Protocol;
 import vscodeProtocol.Types;
 import haxeLanguageServer.features.*;
 
+private typedef DisplayServerConfigBase = {
+    var haxePath:String;
+    var arguments:Array<String>;
+    var env:haxe.DynamicAccess<String>;
+}
+
+private typedef DisplayServerConfig = {
+    >DisplayServerConfigBase,
+    @:optional var windows:DisplayServerConfigBase;
+    @:optional var linux:DisplayServerConfigBase;
+    @:optional var osx:DisplayServerConfigBase;
+}
+
 private typedef Config = {
     var displayConfigurations:Array<Array<String>>;
     var enableDiagnostics:Bool;
-    var displayServerArguments:Array<String>;
+    var displayServer:DisplayServerConfig;
 }
 
 private typedef InitOptions = {
@@ -18,6 +31,12 @@ private typedef InitOptions = {
 }
 
 class Context {
+    static var systemKey = switch (Sys.systemName()) {
+        case "Windows": "windows";
+        case "Mac": "osx";
+        default: "linux";
+    };
+
     public var workspacePath(default,null):String;
     public var displayArguments(get,never):Array<String>;
     public var protocol(default,null):Protocol;
@@ -25,8 +44,9 @@ class Context {
     public var documents(default,null):TextDocuments;
     var diagnostics:DiagnosticsFeature;
 
-    @:allow(haxeLanguageServer.HaxeServer)
     var config:Config;
+    @:allow(haxeLanguageServer.HaxeServer)
+    var displayServerConfig:DisplayServerConfigBase;
     var displayConfigurationIndex:Int;
 
     inline function get_displayArguments() return config.displayConfigurations[displayConfigurationIndex];
@@ -81,6 +101,7 @@ class Context {
         var firstInit = (config == null);
 
         config = newConfig.settings.haxe;
+        updateDisplayServerConfig();
 
         if (firstInit) {
             haxeServer.start(function() {
@@ -99,6 +120,31 @@ class Context {
             });
         } else {
             haxeServer.restart("configuration was changed");
+        }
+    }
+
+    function updateDisplayServerConfig() {
+        displayServerConfig = {
+            haxePath: "haxe",
+            arguments: [],
+            env: {},
+        };
+
+        function merge(conf:DisplayServerConfigBase) {
+            if (conf.haxePath != null)
+                displayServerConfig.haxePath = conf.haxePath;
+            if (conf.arguments != null)
+                displayServerConfig.arguments = conf.arguments;
+            if (conf.env != null)
+                displayServerConfig.env = conf.env;
+        }
+
+        var conf = config.displayServer;
+        if (conf != null) {
+            merge(conf);
+            var sysConf:DisplayServerConfigBase = Reflect.field(conf, systemKey);
+            if (sysConf != null)
+                merge(sysConf);
         }
     }
 
