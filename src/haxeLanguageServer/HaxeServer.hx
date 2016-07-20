@@ -8,6 +8,85 @@ import js.node.stream.Readable;
 import jsonrpc.CancellationToken;
 using StringTools;
 
+private class DisplayRequest {
+    // these are used for the queue
+    public var prev:DisplayRequest;
+    public var next:DisplayRequest;
+
+    var token:CancellationToken;
+    var args:Array<String>;
+    var stdin:String;
+    var callback:String->Void;
+    var errback:String->Void;
+
+    static var stdinSepBuf = new Buffer([1]);
+
+    public function new(token:CancellationToken, args:Array<String>, stdin:String, callback:String->Void, errback:String->Void) {
+        this.token = token;
+        this.args = args;
+        this.stdin = stdin;
+        this.callback = callback;
+        this.errback = errback;
+    }
+
+    public function prepareBody():Buffer {
+        if (stdin != null) {
+            args.push("-D");
+            args.push("display-stdin");
+        }
+
+        var lenBuf = new Buffer(4);
+        var chunks = [lenBuf];
+        var length = 0;
+        for (arg in args) {
+            var buf = new Buffer(arg + "\n");
+            chunks.push(buf);
+            length += buf.length;
+        }
+
+        if (stdin != null) {
+            chunks.push(stdinSepBuf);
+            var buf = new Buffer(stdin);
+            chunks.push(buf);
+            length += buf.length + stdinSepBuf.length;
+        }
+
+        lenBuf.writeInt32LE(length, 0);
+
+        return Buffer.concat(chunks, length + 4);
+    }
+
+    public function processResult(data:String) {
+        if (data == null || (token != null && token.canceled))
+            return callback(null);
+
+        var buf = new StringBuf();
+        var hasError = false;
+        for (line in data.split("\n")) {
+            switch (line.fastCodeAt(0)) {
+                case 0x01: // print
+                    trace("Haxe print:\n" + line.substring(1).replace("\x01", "\n"));
+                case 0x02: // error
+                    hasError = true;
+                default:
+                    buf.add(line);
+                    buf.addChar("\n".code);
+            }
+        }
+
+        var data = buf.toString().trim();
+
+        if (hasError)
+            return errback("Error from haxe server: " + data);
+
+        try {
+            callback(data);
+        } catch (e:Dynamic) {
+            errback(jsonrpc.ErrorUtils.errorToString(e, "Exception while handling haxe completion response: "));
+        }
+    }
+}
+
 class HaxeServer {
     var proc:ChildProcessObject;
     var version:Array<Int>;
@@ -15,11 +94,13 @@ class HaxeServer {
 
     var buffer:MessageBuffer;
     var nextMessageLength:Int;
-    var callbacks:Array<String->Void>;
     var context:Context;
 
+    var requestsHead:DisplayRequest;
+    var requestsTail:DisplayRequest;
+    var currentRequest:DisplayRequest;
+
     public function new(context:Context) {
-        callbacks = [];
         this.context = context;
     }
 
@@ -45,7 +126,7 @@ class HaxeServer {
 
         inline function error(s) context.protocol.sendShowMessage({type: Error, message: s});
 
-        process(["-version"], new CancellationTokenSource().token, null, function(data) {
+        process(["-version"], null, null, function(data) {
             if (!reVersion.match(data))
                 return error("Error parsing haxe version " + data);
 
@@ -67,9 +148,15 @@ class HaxeServer {
             proc.kill();
             proc = null;
         }
-        for (cb in callbacks) // cancel all callbacks
-            cb(null);
-        callbacks = [];
+
+        // cancel all callbacks
+        var request = requestsHead;
+        while (request != null) {
+            request.processResult(null);
+            request = request.next;
+        }
+
+        requestsHead = requestsTail = currentRequest = null;
     }
 
     public function restart(reason:String) {
@@ -94,73 +181,63 @@ class HaxeServer {
             if (msg == null)
                 return;
             nextMessageLength = -1;
-            var cb = callbacks.shift();
-            if (cb != null)
-                cb(msg);
+            if (currentRequest != null) {
+                var request = currentRequest;
+                currentRequest = null;
+                request.processResult(msg);
+                checkQueue();
+            }
         }
     }
-
-    static var stdinSepBuf = new Buffer([1]);
 
     public function process(args:Array<String>, token:CancellationToken, stdin:String, callback:String->Void, errback:String->Void) {
-        if (stdin != null) {
-            args.push("-D");
-            args.push("display-stdin");
+        // create a request object
+        var request = new DisplayRequest(token, args, stdin, callback, errback);
+
+        // if the request is cancellable, set a cancel callback to remove request from queue
+        if (token != null) {
+            token.setCallback(function() {
+                if (request == currentRequest)
+                    return; // currently processing requests can't be canceled
+
+                // remove from the queue
+                if (request == requestsHead)
+                    requestsHead = request.next;
+                if (request == requestsTail)
+                    requestsTail = request.prev;
+                if (request.prev != null)
+                    request.prev.next = request.next;
+                if (request.next != null)
+                    request.next.prev = request.prev;
+            });
         }
 
-        var chunks = [];
-        var length = 0;
-        for (arg in args) {
-            var buf = new Buffer(arg + "\n");
-            chunks.push(buf);
-            length += buf.length;
+        // add to the queue
+        if (requestsHead == null) {
+            requestsHead = requestsTail = request;
+        } else {
+            requestsTail.next = request;
+            request.prev = requestsTail;
+            requestsTail = request;
         }
 
-        if (stdin != null) {
-            chunks.push(stdinSepBuf);
-            var buf = new Buffer(stdin);
-            chunks.push(buf);
-            length += buf.length + stdinSepBuf.length;
+        // process the queue
+        checkQueue();
+    }
+
+    function checkQueue() {
+        // there's a currently processing request, wait and don't send another one to Haxe
+        if (currentRequest != null)
+            return;
+
+        // pop the first request still in queue, set it as current and send to Haxe
+        if (requestsHead != null) {
+            currentRequest = requestsHead;
+            requestsHead = currentRequest.next;
+            proc.stdin.write(currentRequest.prepareBody());
         }
-
-        var lenBuf = new Buffer(4);
-        lenBuf.writeInt32LE(length, 0);
-        proc.stdin.write(lenBuf);
-
-        proc.stdin.write(Buffer.concat(chunks, length));
-
-        callbacks.push(function(data) {
-            if (data == null || token.canceled)
-                return callback(null);
-
-            var buf = new StringBuf();
-            var hasError = false;
-            for (line in data.split("\n")) {
-                switch (line.fastCodeAt(0)) {
-                    case 0x01: // print
-                        trace("Haxe print:\n" + line.substring(1).replace("\x01", "\n"));
-                    case 0x02: // error
-                        hasError = true;
-                    default:
-                        buf.add(line);
-                        buf.addChar("\n".code);
-                }
-            }
-
-            var data = buf.toString().trim();
-
-            if (hasError)
-                return errback("Error from haxe server: " + data);
-
-            try {
-                callback(data);
-            } catch (e:Dynamic) {
-                errback(jsonrpc.ErrorUtils.errorToString(e, "Exception while handling haxe completion response: "));
-            }
-        });
     }
 }
-
 
 
 private class MessageBuffer {

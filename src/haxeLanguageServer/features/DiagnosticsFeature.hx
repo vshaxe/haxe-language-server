@@ -94,7 +94,7 @@ class DiagnosticsFeature extends Feature {
         function processError(error:String) {
             context.protocol.sendLogMessage({type: Error, message: error});
         }
-        callDisplay(["--display", doc.fsPath + "@0@diagnostics"], null, new CancellationTokenSource().token, processReply, processError);
+        callDisplay(["--display", doc.fsPath + "@0@diagnostics"], null, null, processReply, processError);
     }
 
     function getDiagnosticsArguments<T>(kind:DiagnosticsKind<T>, range:Range):T {
