@@ -77,8 +77,11 @@ class DiagnosticsFeature extends Feature {
                     return;
                 }
 
-            var diagnostics:Array<Diagnostic> = data.map(function (hxDiag) {
-                var diag = {
+            var diagnostics = new Array<Diagnostic>();
+            for (hxDiag in data) {
+                if (hxDiag.range == null)
+                    continue;
+                var diag:Diagnostic = {
                     range: doc.byteRangeToRange(hxDiag.range),
                     source: "haxe",
                     code: (hxDiag.kind : Int),
@@ -86,8 +89,8 @@ class DiagnosticsFeature extends Feature {
                     message: hxDiag.kind.getMessage(hxDiag.args)
                 }
                 diagnosticsArguments.set({code: diag.code, range: diag.range}, hxDiag.args);
-                return diag;
-            });
+                diagnostics.push(diag);
+            }
 
             context.protocol.sendPublishDiagnostics({uri: uri, diagnostics: diagnostics});
         }
@@ -104,7 +107,9 @@ class DiagnosticsFeature extends Feature {
     function onCodeAction<T>(params:CodeActionParams, token:CancellationToken, resolve:Array<Command> -> Void, reject:ResponseError<NoData> -> Void) {
         var ret:Array<Command> = [];
         for (d in params.context.diagnostics) {
-            var code = new DiagnosticsKind<T>(Std.parseInt(d.code));
+            if (!(d.code is Int)) // our codes are int, so we don't handle other stuff
+                continue;
+            var code = new DiagnosticsKind<T>(d.code);
             switch (code) {
                 case DKUnusedImport:
                     ret.push({
@@ -115,7 +120,7 @@ class DiagnosticsFeature extends Feature {
                 case DKUnresolvedIdentifier:
                     var args = getDiagnosticsArguments(code, d.range);
                     for (arg in args) {
-                        var kind = new UnresolvedIdentifierSuggestion(Std.parseInt(d.code));
+                        var kind = new UnresolvedIdentifierSuggestion(d.code);
                         var command:Command = switch (kind) {
                             case UISImport: {
                                 title: "import " + arg.name,
