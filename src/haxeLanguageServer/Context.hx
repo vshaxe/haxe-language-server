@@ -111,6 +111,7 @@ class Context {
                 new GotoDefinitionFeature(this);
                 new FindReferencesFeature(this);
                 new DocumentSymbolsFeature(this);
+                new CalculatePackageFeature(this);
 
                 diagnostics = new DiagnosticsFeature(this);
                 if (config.enableDiagnostics) {
