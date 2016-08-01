@@ -6,8 +6,11 @@ import vscodeProtocol.Types;
 import jsonrpc.Types.NoData;
 import haxeLanguageServer.TypeHelper.*;
 
-class HoverFeature extends Feature {
-    override function init() {
+class HoverFeature {
+    var context:Context;
+
+    public function new(context) {
+        this.context = context;
         context.protocol.onHover = onHover;
     }
 
@@ -16,7 +19,7 @@ class HoverFeature extends Feature {
         var bytePos = doc.byteOffsetAt(params.position);
         var args = ["--display", '${doc.fsPath}@$bytePos@type'];
         var stdin = if (doc.saved) null else doc.content;
-        callDisplay(args, stdin, token, function(data) {
+        context.callDisplay(args, stdin, token, function(data) {
             if (token.canceled)
                 return;
 

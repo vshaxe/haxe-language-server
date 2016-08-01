@@ -8,8 +8,11 @@ import haxeLanguageServer.TypeHelper.*;
 
 using StringTools;
 
-class SignatureHelpFeature extends Feature {
-    override function init() {
+class SignatureHelpFeature {
+    var context:Context;
+
+    public function new(context) {
+        this.context = context;
         context.protocol.onSignatureHelp = onSignatureHelp;
     }
 
@@ -23,7 +26,7 @@ class SignatureHelpFeature extends Feature {
         var bytePos = doc.offsetToByteOffset(r.pos);
         var args = ["--display", '${doc.fsPath}@$bytePos'];
         var stdin = if (doc.saved) null else doc.content;
-        callDisplay(args, stdin, token, function(data) {
+        context.callDisplay(args, stdin, token, function(data) {
             if (token.canceled)
                 return;
 

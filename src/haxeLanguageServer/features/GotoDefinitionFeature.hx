@@ -6,8 +6,11 @@ import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
 import vscodeProtocol.Types;
 
-class GotoDefinitionFeature extends Feature {
-    override function init() {
+class GotoDefinitionFeature {
+    var context:Context;
+
+    public function new(context) {
+        this.context = context;
         context.protocol.onGotoDefinition = onGotoDefinition;
     }
 
@@ -16,7 +19,7 @@ class GotoDefinitionFeature extends Feature {
         var bytePos = doc.byteOffsetAt(params.position);
         var args = ["--display", '${doc.fsPath}@$bytePos@position'];
         var stdin = if (doc.saved) null else doc.content;
-        callDisplay(args, stdin, token, function(data) {
+        context.callDisplay(args, stdin, token, function(data) {
             if (token.canceled)
                 return;
 

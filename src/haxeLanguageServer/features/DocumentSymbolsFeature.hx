@@ -27,8 +27,11 @@ private typedef ModuleSymbolEntry = {
     @:optional var containerName:String;
 }
 
-class DocumentSymbolsFeature extends Feature {
-    override function init() {
+class DocumentSymbolsFeature {
+    var context:Context;
+
+    public function new(context) {
+        this.context = context;
         context.protocol.onDocumentSymbols = onDocumentSymbols;
     }
 
@@ -36,7 +39,7 @@ class DocumentSymbolsFeature extends Feature {
         var doc = context.documents.get(params.textDocument.uri);
         var args = ["--display", '${doc.fsPath}@0@module-symbols'];
         var stdin = if (doc.saved) null else doc.content;
-        callDisplay(args, stdin, token, function(data) {
+        context.callDisplay(args, stdin, token, function(data) {
             if (token.canceled)
                 return;
 

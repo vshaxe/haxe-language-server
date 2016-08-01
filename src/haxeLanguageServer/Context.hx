@@ -160,4 +160,15 @@ class Context {
         if (diagnostics != null && config.enableDiagnostics)
             diagnostics.getDiagnostics(event.textDocument.uri);
     }
+
+    public function callDisplay(args:Array<String>, stdin:String, token:CancellationToken, callback:String->Void, errback:String->Void) {
+        var actualArgs = ["--cwd", workspacePath]; // change cwd to workspace root
+        actualArgs = actualArgs.concat(displayArguments); // add arguments from the workspace settings
+        actualArgs = actualArgs.concat([
+            "-D", "display-details", // get more details in completion results,
+            "--no-output", // prevent anygeneration
+        ]);
+        actualArgs = actualArgs.concat(args); // finally, add given query args
+        haxeServer.process(actualArgs, token, stdin, callback, errback);
+    }
 }

@@ -6,8 +6,11 @@ import jsonrpc.Types.NoData;
 import vscodeProtocol.Types;
 import haxeLanguageServer.TypeHelper.prepareSignature;
 
-class CompletionFeature extends Feature {
-    override function init() {
+class CompletionFeature {
+    var context:Context;
+
+    public function new(context) {
+        this.context = context;
         context.protocol.onCompletion = onCompletion;
     }
 
@@ -17,7 +20,7 @@ class CompletionFeature extends Feature {
         var bytePos = doc.offsetToByteOffset(r.pos);
         var args = ["--display", '${doc.fsPath}@$bytePos' + (if (r.toplevel) "@toplevel" else "")];
         var stdin = if (doc.saved) null else doc.content;
-        callDisplay(args, stdin, token, function(data) {
+        context.callDisplay(args, stdin, token, function(data) {
             if (token.canceled)
                 return;
 

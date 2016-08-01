@@ -56,12 +56,13 @@ class DiagnosticsMap<T> extends haxe.ds.BalancedTree<DiagnosticsMapKey, T> {
     }
 }
 
-class DiagnosticsFeature extends Feature {
+class DiagnosticsFeature {
+    var context:Context;
 
     var diagnosticsArguments:DiagnosticsMap<Dynamic>;
 
     public function new(context:Context) {
-        super(context);
+        this.context = context;
         context.protocol.onCodeAction = onCodeAction;
         diagnosticsArguments = new DiagnosticsMap();
     }
@@ -97,7 +98,7 @@ class DiagnosticsFeature extends Feature {
         function processError(error:String) {
             context.protocol.sendLogMessage({type: Error, message: error});
         }
-        callDisplay(["--display", doc.fsPath + "@0@diagnostics"], null, null, processReply, processError);
+        context.callDisplay(["--display", doc.fsPath + "@0@diagnostics"], null, null, processReply, processError);
     }
 
     function getDiagnosticsArguments<T>(kind:DiagnosticsKind<T>, range:Range):T {
