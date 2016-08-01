@@ -42,7 +42,7 @@ class Context {
     public var protocol(default,null):Protocol;
     public var haxeServer(default,null):HaxeServer;
     public var documents(default,null):TextDocuments;
-    var diagnostics:DiagnosticsFeature;
+    var diagnostics:DiagnosticsManager;
 
     var config:Config;
     @:allow(haxeLanguageServer.HaxeServer)
@@ -113,10 +113,12 @@ class Context {
                 new DocumentSymbolsFeature(this);
                 new CalculatePackageFeature(this);
 
-                diagnostics = new DiagnosticsFeature(this);
+                diagnostics = new DiagnosticsManager(this);
+                new CodeActionFeature(this, diagnostics);
+
                 if (config.enableDiagnostics) {
                     for (doc in documents.getAll())
-                        diagnostics.getDiagnostics(doc.uri);
+                        diagnostics.publishDiagnostics(doc.uri);
                 }
             });
         } else {
@@ -152,13 +154,13 @@ class Context {
     function onDidOpenTextDocument(event:DidOpenTextDocumentParams) {
         documents.onDidOpenTextDocument(event);
         if (diagnostics != null && config.enableDiagnostics)
-            diagnostics.getDiagnostics(event.textDocument.uri);
+            diagnostics.publishDiagnostics(event.textDocument.uri);
     }
 
     function onDidSaveTextDocument(event:DidSaveTextDocumentParams) {
         documents.onDidSaveTextDocument(event);
         if (diagnostics != null && config.enableDiagnostics)
-            diagnostics.getDiagnostics(event.textDocument.uri);
+            diagnostics.publishDiagnostics(event.textDocument.uri);
     }
 
     public function callDisplay(args:Array<String>, stdin:String, token:CancellationToken, callback:String->Void, errback:String->Void) {

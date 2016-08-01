@@ -1,73 +1,18 @@
 package haxeLanguageServer.features;
 
-import jsonrpc.CancellationToken;
-import jsonrpc.ResponseError;
-import jsonrpc.Types.NoData;
 import vscodeProtocol.Types;
-
 using StringTools;
 
-@:enum abstract UnresolvedIdentifierSuggestion(Int) {
-    var UISImport = 0;
-    var UISTypo = 1;
-
-    public inline function new(i:Int) {
-        this = i;
-    }
-}
-
-@:enum abstract DiagnosticsKind<T>(Int) from Int to Int {
-    var DKUnusedImport:DiagnosticsKind<Void> = 0;
-    var DKUnresolvedIdentifier:DiagnosticsKind<Array<{kind: UnresolvedIdentifierSuggestion, name: String}>> = 1;
-    var DKCompilerError:DiagnosticsKind<String> = 2;
-
-    public inline function new(i:Int) {
-        this = i;
-    }
-
-    public function getMessage(args:T) {
-        return switch ((this : DiagnosticsKind<T>)) {
-            case DKUnusedImport: "Unused import";
-            case DKUnresolvedIdentifier: "Unresolved identifier";
-            case DKCompilerError: args;
-        }
-    }
-}
-
-typedef HaxeDiagnostics<T> = {
-    var kind:DiagnosticsKind<T>;
-    var range:Range;
-    var severity:DiagnosticSeverity;
-    var args:T;
-}
-
-typedef DiagnosticsMapKey = {code: Int, range:Range};
-
-class DiagnosticsMap<T> extends haxe.ds.BalancedTree<DiagnosticsMapKey, T> {
-    override function compare(k1:DiagnosticsMapKey, k2:DiagnosticsMapKey) {
-        var start1 = k1.range.start;
-        var start2 = k2.range.start;
-        var end1 = k1.range.end;
-        var end2 = k2.range.end;
-        inline function compare(i1, i2, e) return i1 < i2 ? -1 : i1 > i2 ? 1 : e;
-        return compare(k1.code, k2.code, compare(start1.line, start2.line, compare(start1.character, start2.character,
-            compare(end1.line, end2.line, compare(end1.character, end2.character, 0)
-        ))));
-    }
-}
-
-class DiagnosticsFeature {
+class DiagnosticsManager {
     var context:Context;
-
     var diagnosticsArguments:DiagnosticsMap<Dynamic>;
 
     public function new(context:Context) {
         this.context = context;
-        context.protocol.onCodeAction = onCodeAction;
         diagnosticsArguments = new DiagnosticsMap();
     }
 
-    public function getDiagnostics(uri:String) {
+    public function publishDiagnostics(uri:String) {
         var doc = context.documents.get(uri);
         function processReply(s:String) {
             diagnosticsArguments = new DiagnosticsMap();
@@ -101,19 +46,14 @@ class DiagnosticsFeature {
         context.callDisplay(["--display", doc.fsPath + "@0@diagnostics"], null, null, processReply, processError);
     }
 
-    function getDiagnosticsArguments<T>(kind:DiagnosticsKind<T>, range:Range):T {
-        return diagnosticsArguments.get({code: kind, range: range});
-    }
-
-    function onCodeAction<T>(params:CodeActionParams, token:CancellationToken, resolve:Array<Command> -> Void, reject:ResponseError<NoData> -> Void) {
-        var ret:Array<Command> = [];
+    public function addCodeActions<T>(params:CodeActionParams, actions:Array<Command>) {
         for (d in params.context.diagnostics) {
             if (!(d.code is Int)) // our codes are int, so we don't handle other stuff
                 continue;
             var code = new DiagnosticsKind<T>(d.code);
             switch (code) {
                 case DKUnusedImport:
-                    ret.push({
+                    actions.push({
                         title: "Remove import",
                         command: "haxe.applyFixes",
                         arguments: [params.textDocument.uri, 0 /*TODO*/, [{range: d.range, newText: ""}]]
@@ -134,7 +74,7 @@ class DiagnosticsFeature {
                                 arguments: [params.textDocument.uri, 0, [{range: d.range, newText: arg.name}]]
                             }
                         }
-                        ret.push(command);
+                        actions.push(command);
                     }
                 case DKCompilerError:
                     var arg = getDiagnosticsArguments(code, d.range);
@@ -150,7 +90,7 @@ class DiagnosticsFeature {
                         }
                         for (suggestion in suggestions) {
                             suggestion = suggestion.trim();
-                            ret.push({
+                            actions.push({
                                 title: "Change to " + suggestion,
                                 command: "haxe.applyFixes",
                                 arguments: [params.textDocument.uri, 0, [{range: range, newText: suggestion}]]
@@ -159,6 +99,60 @@ class DiagnosticsFeature {
                     }
             }
         }
-        resolve(ret);
+    }
+
+    inline function getDiagnosticsArguments<T>(kind:DiagnosticsKind<T>, range:Range):T {
+        return diagnosticsArguments.get({code: kind, range: range});
+    }
+}
+
+
+@:enum private abstract UnresolvedIdentifierSuggestion(Int) {
+    var UISImport = 0;
+    var UISTypo = 1;
+
+    public inline function new(i:Int) {
+        this = i;
+    }
+}
+
+
+@:enum private abstract DiagnosticsKind<T>(Int) from Int to Int {
+    var DKUnusedImport:DiagnosticsKind<Void> = 0;
+    var DKUnresolvedIdentifier:DiagnosticsKind<Array<{kind: UnresolvedIdentifierSuggestion, name: String}>> = 1;
+    var DKCompilerError:DiagnosticsKind<String> = 2;
+
+    public inline function new(i:Int) {
+        this = i;
+    }
+
+    public function getMessage(args:T) {
+        return switch ((this : DiagnosticsKind<T>)) {
+            case DKUnusedImport: "Unused import";
+            case DKUnresolvedIdentifier: "Unresolved identifier";
+            case DKCompilerError: args;
+        }
+    }
+}
+
+private typedef HaxeDiagnostics<T> = {
+    var kind:DiagnosticsKind<T>;
+    var range:Range;
+    var severity:DiagnosticSeverity;
+    var args:T;
+}
+
+private typedef DiagnosticsMapKey = {code: Int, range:Range};
+
+private class DiagnosticsMap<T> extends haxe.ds.BalancedTree<DiagnosticsMapKey, T> {
+    override function compare(k1:DiagnosticsMapKey, k2:DiagnosticsMapKey) {
+        var start1 = k1.range.start;
+        var start2 = k2.range.start;
+        var end1 = k1.range.end;
+        var end2 = k2.range.end;
+        inline function compare(i1, i2, e) return i1 < i2 ? -1 : i1 > i2 ? 1 : e;
+        return compare(k1.code, k2.code, compare(start1.line, start2.line, compare(start1.character, start2.character,
+            compare(end1.line, end2.line, compare(end1.character, end2.character, 0)
+        ))));
     }
 }
