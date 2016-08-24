@@ -46,6 +46,9 @@ class DiagnosticsManager {
         context.callDisplay(["--display", doc.fsPath + "@0@diagnostics"], null, null, processReply, processError);
     }
 
+    static var reEndsWithWhitespace = ~/\s*$/;
+    static var reStartsWhitespace = ~/^\s*/;
+
     public function addCodeActions<T>(params:CodeActionParams, actions:Array<Command>) {
         for (d in params.context.diagnostics) {
             if (!(d.code is Int)) // our codes are int, so we don't handle other stuff
@@ -53,10 +56,33 @@ class DiagnosticsManager {
             var code = new DiagnosticsKind<T>(d.code);
             switch (code) {
                 case DKUnusedImport:
+                    var doc = context.documents.get(params.textDocument.uri);
+                    var range = d.range;
+
+                    var startLine = doc.lineAt(range.start.line);
+                    if (reStartsWhitespace.match(startLine.substring(0, range.start.character)))
+                        range = {
+                            start: {
+                                line: range.start.line,
+                                character: 0
+                            },
+                            end: range.end
+                        };
+
+                    var endLine = if (range.start.line == range.end.line) startLine else doc.lineAt(range.end.line);
+                    if (reEndsWithWhitespace.match(endLine.substring(range.end.character)))
+                        range = {
+                            start: range.start,
+                            end: {
+                                line: range.end.line + 1,
+                                character: 0
+                            }
+                        };
+
                     actions.push({
                         title: "Remove import",
                         command: "haxe.applyFixes",
-                        arguments: [params.textDocument.uri, 0 /*TODO*/, [{range: d.range, newText: ""}]]
+                        arguments: [params.textDocument.uri, 0 /*TODO*/, [{range: range, newText: ""}]]
                     });
                 case DKUnresolvedIdentifier:
                     var args = getDiagnosticsArguments(code, d.range);
