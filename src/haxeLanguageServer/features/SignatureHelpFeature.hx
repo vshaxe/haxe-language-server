@@ -31,7 +31,7 @@ class SignatureHelpFeature {
                 return;
 
             data = '<x>$data</x>';
-            var xml = try Xml.parse(data).firstElement() catch (_:Dynamic) null;
+            var xml = try Xml.parse(data).firstElement() catch (_:Any) null;
             if (xml == null) return reject(ResponseError.internalError("Invalid xml data: " + data));
 
             var signatures = new Array<SignatureInformation>();

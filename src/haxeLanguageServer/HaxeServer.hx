@@ -81,7 +81,7 @@ private class DisplayRequest {
 
         try {
             callback(data);
-        } catch (e:Dynamic) {
+        } catch (e:Any) {
             errback(jsonrpc.ErrorUtils.errorToString(e, "Exception while handling haxe completion response: "));
         }
     }

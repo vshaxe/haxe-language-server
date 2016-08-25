@@ -45,7 +45,7 @@ class DocumentSymbolsFeature {
 
             var data:Array<ModuleSymbolEntry> =
                 try haxe.Json.parse(data)
-                catch (e:Dynamic) return reject(ResponseError.internalError("Error parsing document symbol response: " + e));
+                catch (e:Any) return reject(ResponseError.internalError("Error parsing document symbol response: " + Std.string(e)));
 
             var result = [];
             for (entry in data) {

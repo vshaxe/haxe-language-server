@@ -23,7 +23,7 @@ class HoverFeature {
             if (token.canceled)
                 return;
 
-            var xml = try Xml.parse(data).firstElement() catch (_:Dynamic) null;
+            var xml = try Xml.parse(data).firstElement() catch (_:Any) null;
             if (xml == null) return reject(ResponseError.internalError("Invalid xml data: " + data));
 
             var s = StringTools.trim(xml.firstChild().nodeValue);

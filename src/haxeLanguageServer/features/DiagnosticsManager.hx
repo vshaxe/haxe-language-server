@@ -5,7 +5,7 @@ using StringTools;
 
 class DiagnosticsManager {
     var context:Context;
-    var diagnosticsArguments:DiagnosticsMap<Dynamic>;
+    var diagnosticsArguments:DiagnosticsMap<Any>;
 
     public function new(context:Context) {
         this.context = context;
@@ -16,10 +16,10 @@ class DiagnosticsManager {
         var doc = context.documents.get(uri);
         function processReply(s:String) {
             diagnosticsArguments = new DiagnosticsMap();
-            var data:Array<HaxeDiagnostics<Dynamic>> =
+            var data:Array<HaxeDiagnostics<Any>> =
                 try haxe.Json.parse(s)
-                catch (e:Dynamic) {
-                    trace("Error parsing diagnostics response: " + e);
+                catch (e:Any) {
+                    trace("Error parsing diagnostics response: " + Std.string(e));
                     return;
                 }
 
