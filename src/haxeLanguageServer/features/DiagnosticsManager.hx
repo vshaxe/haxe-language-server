@@ -87,20 +87,27 @@ class DiagnosticsManager {
                 case DKUnresolvedIdentifier:
                     var args = getDiagnosticsArguments(code, d.range);
                     for (arg in args) {
-                        var kind = new UnresolvedIdentifierSuggestion(d.code);
-                        var command:Command = switch (kind) {
-                            case UISImport: {
-                                title: "import " + arg.name,
-                                command: "haxe.applyFixes", // TODO
-                                arguments: []
-                            }
-                            case UISTypo: {
-                                title: "Change to " +arg.name,
-                                command: "haxe.applyFixes",
-                                arguments: [params.textDocument.uri, 0, [{range: d.range, newText: arg.name}]]
-                            }
+                        var commands:Array<Command> = switch (arg.kind) {
+                            case UISImport:
+                                [{
+                                    title: "import " + arg.name,
+                                    command: "haxe.applyFixes", // TODO
+                                    arguments: []
+                                }, {
+                                    title: "Change to " + arg.name,
+                                    command: "haxe.applyFixes",
+                                    arguments: [params.textDocument.uri, 0, [{range: d.range, newText: arg.name}]]
+                                }];
+                            case UISTypo:
+                                [{
+                                    title: "Change to " +arg.name,
+                                    command: "haxe.applyFixes",
+                                    arguments: [params.textDocument.uri, 0, [{range: d.range, newText: arg.name}]]
+                                }];
                         }
-                        actions.push(command);
+                        for (command in commands) {
+                            actions.push(command);
+                        }
                     }
                 case DKCompilerError:
                     var arg = getDiagnosticsArguments(code, d.range);
