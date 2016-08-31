@@ -20,14 +20,13 @@ class DiagnosticsManager {
         context.callDisplay(["--display", "diagnostics"], null, null, processDiagnosticsReply, processError);
     }
 
-    function sendDiagnostics(data:HaxeDiagnosticsResponse<Any>) {
-        var uri = Uri.fsPathToUri(data.file);
+    function sendDiagnostics(uri: String, hxDiagnostics:Array<HaxeDiagnostics<Any>>) {
         // var doc = context.documents.get(uri);
         // if (doc == null) {
         //     return;
         // }
         var diagnostics = new Array<Diagnostic>();
-        for (hxDiag in data.diagnostics) {
+        for (hxDiag in hxDiagnostics) {
             if (hxDiag.range == null)
                 continue;
             var diag:Diagnostic = {
@@ -52,8 +51,12 @@ class DiagnosticsManager {
                 trace("Error parsing diagnostics response: " + Std.string(e));
                 return;
             }
+        var workspaceUri = Uri.fsPathToUri(context.workspacePath);
         for (data in data) {
-            sendDiagnostics(data);
+            var uri = Uri.fsPathToUri(data.file);
+            if (uri.startsWith(workspaceUri)) {
+                sendDiagnostics(uri, data.diagnostics);
+            }
         }
     }
 
