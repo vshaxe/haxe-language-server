@@ -22,16 +22,17 @@ class DiagnosticsManager {
 
     function sendDiagnostics(data:HaxeDiagnosticsResponse<Any>) {
         var uri = Uri.fsPathToUri(data.file);
-        var doc = context.documents.get(uri);
-        if (doc == null) {
-            return;
-        }
+        // var doc = context.documents.get(uri);
+        // if (doc == null) {
+        //     return;
+        // }
         var diagnostics = new Array<Diagnostic>();
         for (hxDiag in data.diagnostics) {
             if (hxDiag.range == null)
                 continue;
             var diag:Diagnostic = {
-                range: doc.byteRangeToRange(hxDiag.range),
+                // range: doc.byteRangeToRange(hxDiag.range),
+                range: hxDiag.range,
                 source: "haxe",
                 code: (hxDiag.kind : Int),
                 severity: hxDiag.severity,
