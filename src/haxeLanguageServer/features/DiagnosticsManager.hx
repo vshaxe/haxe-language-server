@@ -128,7 +128,7 @@ class DiagnosticsManager {
                         }
                     }
                 case DKCompilerError:
-                    var arg = getDiagnosticsArguments(code, d.range);
+                    var arg = getDiagnosticsArguments(code, d.range)[0];
                     var sugrex = ~/\(Suggestions?: (.*)\)/;
                     if (sugrex.match(arg)) {
                         var suggestions = sugrex.matched(1).split(",");
@@ -136,7 +136,6 @@ class DiagnosticsManager {
                         var range = d.range;
                         var fieldrex = ~/has no field ([^ ]+) /;
                         if (fieldrex.match(arg)) {
-                            var fieldName = fieldrex.matched(1);
                             range.start.character += range.end.character - fieldrex.matched(1).length - 2;
                         }
                         for (suggestion in suggestions) {
@@ -171,7 +170,7 @@ class DiagnosticsManager {
 @:enum private abstract DiagnosticsKind<T>(Int) from Int to Int {
     var DKUnusedImport:DiagnosticsKind<Void> = 0;
     var DKUnresolvedIdentifier:DiagnosticsKind<Array<{kind: UnresolvedIdentifierSuggestion, name: String}>> = 1;
-    var DKCompilerError:DiagnosticsKind<String> = 2;
+    var DKCompilerError:DiagnosticsKind<Array<String>> = 2;
 
     public inline function new(i:Int) {
         this = i;
@@ -181,7 +180,7 @@ class DiagnosticsManager {
         return switch ((this : DiagnosticsKind<T>)) {
             case DKUnusedImport: "Unused import";
             case DKUnresolvedIdentifier: "Unresolved identifier";
-            case DKCompilerError: args;
+            case DKCompilerError: args[0];
         }
     }
 }
