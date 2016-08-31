@@ -10,40 +10,58 @@ class DiagnosticsManager {
     public function new(context:Context) {
         this.context = context;
         diagnosticsArguments = new DiagnosticsMap();
+        context.protocol.onVSHaxeRunGlobalDiagnostics = onRunGlobalDiagnostics;
     }
 
-    public function publishDiagnostics(uri:String) {
-        var doc = context.documents.get(uri);
-        function processReply(s:String) {
-            diagnosticsArguments = new DiagnosticsMap();
-            var data:Array<HaxeDiagnostics<Any>> =
-                try haxe.Json.parse(s)
-                catch (e:Any) {
-                    trace("Error parsing diagnostics response: " + Std.string(e));
-                    return;
-                }
-
-            var diagnostics = new Array<Diagnostic>();
-            for (hxDiag in data) {
-                if (hxDiag.range == null)
-                    continue;
-                var diag:Diagnostic = {
-                    range: doc.byteRangeToRange(hxDiag.range),
-                    source: "haxe",
-                    code: (hxDiag.kind : Int),
-                    severity: hxDiag.severity,
-                    message: hxDiag.kind.getMessage(hxDiag.args)
-                }
-                diagnosticsArguments.set({code: diag.code, range: diag.range}, hxDiag.args);
-                diagnostics.push(diag);
-            }
-
-            context.protocol.sendPublishDiagnostics({uri: uri, diagnostics: diagnostics});
-        }
+    function onRunGlobalDiagnostics(s:String) {
         function processError(error:String) {
             context.protocol.sendLogMessage({type: Error, message: error});
         }
-        context.callDisplay(["--display", doc.fsPath + "@0@diagnostics"], null, null, processReply, processError);
+        context.callDisplay(["--display", "diagnostics"], null, null, processDiagnosticsReply, processError);
+    }
+
+    function sendDiagnostics(data:HaxeDiagnosticsResponse<Any>) {
+        var uri = Uri.fsPathToUri(data.file);
+        var doc = context.documents.get(uri);
+        if (doc == null) {
+            return;
+        }
+        var diagnostics = new Array<Diagnostic>();
+        for (hxDiag in data.diagnostics) {
+            if (hxDiag.range == null)
+                continue;
+            var diag:Diagnostic = {
+                range: doc.byteRangeToRange(hxDiag.range),
+                source: "haxe",
+                code: (hxDiag.kind : Int),
+                severity: hxDiag.severity,
+                message: hxDiag.kind.getMessage(hxDiag.args)
+            }
+            diagnosticsArguments.set({code: diag.code, range: diag.range}, hxDiag.args);
+            diagnostics.push(diag);
+        }
+        context.protocol.sendPublishDiagnostics({uri: uri, diagnostics: diagnostics});
+    }
+
+    function processDiagnosticsReply(s:String) {
+        diagnosticsArguments = new DiagnosticsMap();
+        var data:Array<HaxeDiagnosticsResponse<Any>> =
+            try haxe.Json.parse(s)
+            catch (e:Any) {
+                trace("Error parsing diagnostics response: " + Std.string(e));
+                return;
+            }
+        for (data in data) {
+            sendDiagnostics(data);
+        }
+    }
+
+    public function publishDiagnostics(uri:String) {
+        function processError(error:String) {
+            context.protocol.sendLogMessage({type: Error, message: error});
+        }
+        var doc = context.documents.get(uri);
+        context.callDisplay(["--display", doc.fsPath + "@0@diagnostics"], null, null, processDiagnosticsReply, processError);
     }
 
     static var reEndsWithWhitespace = ~/\s*$/;
@@ -173,6 +191,11 @@ private typedef HaxeDiagnostics<T> = {
     var range:Range;
     var severity:DiagnosticSeverity;
     var args:T;
+}
+
+private typedef HaxeDiagnosticsResponse<T> = {
+    var file:String;
+    var diagnostics:Array<HaxeDiagnostics<T>>;
 }
 
 private typedef DiagnosticsMapKey = {code: Int, range:Range};
