@@ -9,7 +9,7 @@ class CalculatePackageFeature {
 
     public function new(context) {
         this.context = context;
-        context.protocol.onVSHaxeCalculatePackage = onCalculatePackage;
+        context.protocol.onRequest(VshaxeMethods.CalculatePackage, onCalculatePackage);
     }
 
     function onCalculatePackage(params:{fsPath:String}, token:CancellationToken, resolve:{pack:String}->Void, reject:ResponseError<NoData>->Void) {

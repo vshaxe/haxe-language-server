@@ -119,7 +119,7 @@ class HaxeServer {
 
         buffer = new MessageBuffer();
         nextMessageLength = -1;
-        proc.stdout.on(ReadableEvent.Data, function(buf:Buffer) context.protocol.sendVSHaxeLog(buf.toString()));
+        proc.stdout.on(ReadableEvent.Data, function(buf:Buffer) context.protocol.sendNotification(VshaxeMethods.Log, buf.toString()));
         proc.stderr.on(ReadableEvent.Data, onData);
 
         proc.on(ChildProcessEvent.Exit, onExit);
@@ -160,7 +160,7 @@ class HaxeServer {
     }
 
     public function restart(reason:String) {
-        context.protocol.sendVSHaxeLog('Restarting Haxe completion server: $reason\n');
+        context.protocol.sendNotification(VshaxeMethods.Log, 'Restarting Haxe completion server: $reason\n');
         start(function() {});
     }
 

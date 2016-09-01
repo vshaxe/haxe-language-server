@@ -10,7 +10,7 @@ class DiagnosticsManager {
     public function new(context:Context) {
         this.context = context;
         diagnosticsArguments = new DiagnosticsMap();
-        context.protocol.onVSHaxeRunGlobalDiagnostics = onRunGlobalDiagnostics;
+        context.protocol.onNotification(VshaxeMethods.RunGlobalDiagnostics, onRunGlobalDiagnostics);
     }
 
     function onRunGlobalDiagnostics(s:String) {

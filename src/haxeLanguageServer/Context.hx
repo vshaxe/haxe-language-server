@@ -62,7 +62,7 @@ class Context {
         protocol.onDidChangeConfiguration = onDidChangeConfiguration;
         protocol.onDidOpenTextDocument = onDidOpenTextDocument;
         protocol.onDidSaveTextDocument = onDidSaveTextDocument;
-        protocol.onVSHaxeDidChangeDisplayConfigurationIndex = onDidChangeDisplayConfigurationIndex;
+        protocol.onNotification(VshaxeMethods.DidChangeDisplayConfigurationIndex, onDidChangeDisplayConfigurationIndex);
     }
 
     function onInitialize(params:InitializeParams, token:CancellationToken, resolve:InitializeResult->Void, reject:ResponseError<InitializeError>->Void) {
