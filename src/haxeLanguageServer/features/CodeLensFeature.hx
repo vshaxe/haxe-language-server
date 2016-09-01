@@ -37,7 +37,7 @@ class CodeLensFeature {
             }
         }
         addClassRelation("implementers", fileStatistics.implementer);
-        addClassRelation("sub classes", fileStatistics.subclasses);
+        addClassRelation("subclasses", fileStatistics.subclasses);
         return actions;
     }
 
