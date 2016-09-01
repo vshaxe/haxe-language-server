@@ -23,6 +23,7 @@ private typedef DisplayServerConfig = {
 private typedef Config = {
     var displayConfigurations:Array<Array<String>>;
     var enableDiagnostics:Bool;
+    var enableCodeLens:Bool;
     var displayServer:DisplayServerConfig;
 }
 
@@ -44,7 +45,7 @@ class Context {
     public var documents(default,null):TextDocuments;
     var diagnostics:DiagnosticsManager;
 
-    var config:Config;
+    public var config(default, null):Config;
     @:allow(haxeLanguageServer.HaxeServer)
     var displayServerConfig:DisplayServerConfigBase;
     var displayConfigurationIndex:Int;
@@ -81,7 +82,10 @@ class Context {
                 hoverProvider: true,
                 referencesProvider: true,
                 documentSymbolProvider: true,
-                codeActionProvider: true
+                codeActionProvider: true,
+                codeLensProvider: {
+                    resolveProvider: true
+                }
             }
         });
     }
@@ -115,6 +119,7 @@ class Context {
 
                 diagnostics = new DiagnosticsManager(this);
                 new CodeActionFeature(this, diagnostics);
+                new CodeLensFeature(this);
 
                 if (config.enableDiagnostics) {
                     for (doc in documents.getAll())
