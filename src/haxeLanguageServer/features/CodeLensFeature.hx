@@ -25,10 +25,10 @@ class CodeLensFeature {
                     uri,
                     relation.range.start,
                     relation.classes.map(function(c) {
-						// avoid being positioned at the end of a declaration when navigating to it
-						var range = { start: c.range.start, end: c.range.start };
-						return { range: range, uri: Uri.fsPathToUri(c.file) }
-					})
+                        // avoid being positioned at the end of a declaration when navigating to it
+                        var range = { start: c.range.start, end: c.range.start };
+                        return { range: range, uri: Uri.fsPathToUri(c.file) }
+                    })
                 ];
                 actions.push({
                     command: {
