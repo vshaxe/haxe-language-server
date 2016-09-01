@@ -19,12 +19,12 @@ class CodeLensFeature {
 
     function getCodeLensFromStatistics(uri:String, fileStatistics:FileStatistics) {
         var actions:Array<CodeLens> = [];
-        function addClassRelation(kind:String, relations:Array<ClassRelation>) {
+        function addRelation(kind:String, plural:String, relations:Array<Relation>) {
             for (relation in relations) {
                 var args:Array<Dynamic> = [
                     uri,
                     relation.range.start,
-                    relation.classes.map(function(c) {
+                    relation.relations.map(function(c) {
                         // avoid being positioned at the end of a declaration when navigating to it
                         var range = { start: c.range.start, end: c.range.start };
                         return { range: range, uri: Uri.fsPathToUri(c.file) }
@@ -32,7 +32,7 @@ class CodeLensFeature {
                 ];
                 actions.push({
                     command: {
-                        title: relation.classes.length + " " + kind,
+                        title: relation.relations.length + " " + kind + (relation.relations.length > 1 ? plural : ""),
                         command: "haxe.showReferences",
                         arguments: args
                     },
@@ -40,8 +40,10 @@ class CodeLensFeature {
                 });
             }
         }
-        addClassRelation("implementers", fileStatistics.implementer);
-        addClassRelation("subclasses", fileStatistics.subclasses);
+        addRelation("implementer", "s", fileStatistics.implementer);
+        addRelation("subclass", "es", fileStatistics.subclasses);
+        addRelation("overridde", "s", fileStatistics.overrides);
+        addRelation("reference", "s", fileStatistics.fieldReferences);
         return actions;
     }
 
@@ -71,14 +73,16 @@ class CodeLensFeature {
     }
 }
 
-private typedef ClassRelation = {
+private typedef Relation = {
     var range:Range;
-    var classes:Array<{file:String, range:Range}>;
+    var relations:Array<{file:String, range:Range}>;
 }
 
 private typedef FileStatistics = {
-    var implementer:Array<ClassRelation>;
-    var subclasses:Array<ClassRelation>;
+    var implementer:Array<Relation>;
+    var subclasses:Array<Relation>;
+    var overrides:Array<Relation>;
+    var fieldReferences:Array<Relation>;
 }
 
 private typedef Statistics = {
