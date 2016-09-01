@@ -13,37 +13,61 @@ class CodeLensFeature {
         context.protocol.onCodeLens = onCodeLens;
     }
 
-    public function updateStatistics(doc:TextDocument, f:Void -> Void) {
-
-    }
-
-    function getCodeLensFromStatistics(uri:String, fileStatistics:FileStatistics) {
+    function getCodeLensFromStatistics(uri:String, statistics:Array<StatisticsObject>) {
         var actions:Array<CodeLens> = [];
-        function addRelation(kind:String, plural:String, relations:Array<Relation>) {
-            for (relation in relations) {
+        function addRelation(kind:String, plural:String, range:Range, relations:Null<Array<Relation>>) {
+            if (relations == null) {
+                relations = [];
+            }
+            var title = relations.length + " " + kind + (relations.length == 1 ? "" : plural);
+            var action = if (relations.length == 0) {
+                {
+                    command: {
+                        title: title,
+                        command: "",
+                        arguments: []
+                    },
+                    range: range
+                };
+            } else {
                 var args:Array<Dynamic> = [
                     uri,
-                    relation.range.start,
-                    relation.relations.map(function(c) {
+                    range.start,
+                    relations.map(function(c) {
                         // avoid being positioned at the end of a declaration when navigating to it
                         var range = { start: c.range.start, end: c.range.start };
                         return { range: range, uri: Uri.fsPathToUri(c.file) }
                     })
                 ];
-                actions.push({
+                {
                     command: {
-                        title: relation.relations.length + " " + kind + (relation.relations.length > 1 ? plural : ""),
+                        title: title,
                         command: "haxe.showReferences",
                         arguments: args
                     },
-                    range: relation.range
-                });
+                    range: range
+                };
+            }
+            actions.push(action);
+        }
+        for (statistic in statistics) {
+            if (statistic.kind == null) {
+                continue; // Shouldn't happen, but you never know
+            }
+            switch (statistic.kind) {
+                case ClassType:
+                    addRelation("subclass", "es", statistic.range, statistic.subclasses);
+                case InterfaceType:
+                    addRelation("implementer", "s", statistic.range, statistic.implementer);
+                    addRelation("sub interface", "s", statistic.range, statistic.subclasses);
+                case EnumType:
+                case EnumField:
+                    addRelation("reference", "s", statistic.range, statistic.references);
+                case ClassField:
+                    if (statistic.overrides != null) addRelation("override", "s", statistic.range, statistic.overrides);
+                    addRelation("reference", "s", statistic.range, statistic.references);
             }
         }
-        addRelation("implementer", "s", fileStatistics.implementer);
-        addRelation("subclass", "es", fileStatistics.subclasses);
-        addRelation("overridde", "s", fileStatistics.overrides);
-        addRelation("reference", "s", fileStatistics.fieldReferences);
         return actions;
     }
 
@@ -73,19 +97,29 @@ class CodeLensFeature {
     }
 }
 
-private typedef Relation = {
-    var range:Range;
-    var relations:Array<{file:String, range:Range}>;
+@:enum abstract StatisticObjectKind(String) {
+    var ClassType = "class type";
+    var InterfaceType = "interface type";
+    var EnumType = "enum type";
+    var ClassField = "class field";
+    var EnumField = "enum field";
 }
 
-private typedef FileStatistics = {
-    var implementer:Array<Relation>;
-    var subclasses:Array<Relation>;
-    var overrides:Array<Relation>;
-    var fieldReferences:Array<Relation>;
+private typedef Relation = {
+    var file:String;
+    var range:Range;
+}
+
+private typedef StatisticsObject = {
+    var range:Range;
+    @:optional var kind:StatisticObjectKind;
+    @:optional var implementer:Array<Relation>;
+    @:optional var subclasses:Array<Relation>;
+    @:optional var overrides:Array<Relation>;
+    @:optional var references:Array<Relation>;
 }
 
 private typedef Statistics = {
     var file:String;
-    var statistics:FileStatistics;
+    var statistics:Array<StatisticsObject>;
 }
