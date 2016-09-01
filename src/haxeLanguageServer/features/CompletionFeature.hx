@@ -19,8 +19,7 @@ class CompletionFeature {
         var r = calculateCompletionPosition(doc.content, doc.offsetAt(params.position));
         var bytePos = doc.offsetToByteOffset(r.pos);
         var args = ["--display", '${doc.fsPath}@$bytePos' + (if (r.toplevel) "@toplevel" else "")];
-        var stdin = if (doc.saved) null else doc.content;
-        context.callDisplay(args, stdin, token, function(data) {
+        context.callDisplay(args, doc.content, token, function(data) {
             if (token.canceled)
                 return;
 

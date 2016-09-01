@@ -18,8 +18,7 @@ class GotoDefinitionFeature {
         var doc = context.documents.get(params.textDocument.uri);
         var bytePos = doc.byteOffsetAt(params.position);
         var args = ["--display", '${doc.fsPath}@$bytePos@position'];
-        var stdin = if (doc.saved) null else doc.content;
-        context.callDisplay(args, stdin, token, function(data) {
+        context.callDisplay(args, doc.content, token, function(data) {
             if (token.canceled)
                 return;
 

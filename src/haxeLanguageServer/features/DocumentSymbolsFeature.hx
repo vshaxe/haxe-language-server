@@ -38,8 +38,7 @@ class DocumentSymbolsFeature {
     function onDocumentSymbols(params:DocumentSymbolParams, token:CancellationToken, resolve:Array<SymbolInformation>->Void, reject:ResponseError<NoData>->Void) {
         var doc = context.documents.get(params.textDocument.uri);
         var args = ["--display", '${doc.fsPath}@0@module-symbols'];
-        var stdin = if (doc.saved) null else doc.content;
-        context.callDisplay(args, stdin, token, function(data) {
+        context.callDisplay(args, doc.content, token, function(data) {
             if (token.canceled)
                 return;
 

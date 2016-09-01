@@ -11,7 +11,6 @@ class TextDocument {
     public var content(default,null):String;
     public var lineCount(get,never):Int;
     @:allow(haxeLanguageServer.TextDocuments)
-    public var saved(default,null):Bool;
     var lineOffsets:Array<Int>;
 
     public function new(uri:String, languageId:String, version:Int, content:String) {

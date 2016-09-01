@@ -158,7 +158,6 @@ class Context {
     }
 
     function onDidSaveTextDocument(event:DidSaveTextDocumentParams) {
-        documents.onDidSaveTextDocument(event);
         if (diagnostics != null && config.enableDiagnostics)
             diagnostics.publishDiagnostics(event.textDocument.uri);
     }
