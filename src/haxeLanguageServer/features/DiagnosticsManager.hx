@@ -123,10 +123,13 @@ class DiagnosticsManager {
         for (arg in args) {
             var commands:Array<Command> = switch (arg.kind) {
                 case UISImport:
+                    var doc = context.documents.get(params.textDocument.uri);
+                    var importPos = getImportPosition(doc);
+                    var importRange = { start: importPos, end: importPos };
                     [{
-                        title: "import " + arg.name,
+                        title: "Import " + arg.name,
                         command: "haxe.applyFixes", // TODO
-                        arguments: []
+                        arguments: [params.textDocument.uri, 0, [{range: importRange, newText: 'import ${arg.name};\n'}]]
                     }, {
                         title: "Change to " + arg.name,
                         command: "haxe.applyFixes",
@@ -144,6 +147,26 @@ class DiagnosticsManager {
             }
         }
         return actions;
+    }
+
+    static var rePackageDecl = ~/package\s*( [\w\.]*)?\s*;/;
+
+    /**
+        Gets the first non-empty line (excluding the package declaration if present),
+        which is where we want to insert imports.
+     */
+    function getImportPosition(doc:TextDocument):Position {
+        var importLine = 0;
+        for (i in 0...doc.lineCount) {
+            var line = doc.lineAt(i);
+            var isPackageDecl = rePackageDecl.match(line);
+            var isNotEmpty = line.trim().length > 0;
+            if (!isPackageDecl && isNotEmpty) {
+                importLine = i;
+                break;
+            }
+        }
+        return { line: importLine, character: 0 };
     }
 
     function getCompilerErrorActions(params:CodeActionParams, d:Diagnostic):Array<Command> {
