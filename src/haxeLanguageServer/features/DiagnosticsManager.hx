@@ -122,28 +122,34 @@ class DiagnosticsManager {
         var args = getDiagnosticsArguments(DKUnresolvedIdentifier, d.range);
         for (arg in args) {
             actions = actions.concat(switch (arg.kind) {
-                case UISImport:
-                    var doc = context.documents.get(params.textDocument.uri);
-                    var importPos = getImportPosition(doc);
-                    var importRange = { start: importPos, end: importPos };
-                    [{
-                        title: "Change to " + arg.name,
-                        command: "haxe.applyFixes",
-                        arguments: [params.textDocument.uri, 0, [{range: d.range, newText: arg.name}]]
-                    }, {
-                        title: "Import " + arg.name,
-                        command: "haxe.applyFixes",
-                        arguments: [params.textDocument.uri, 0, [{range: importRange, newText: 'import ${arg.name};\n'}]]
-                    }];
-                case UISTypo:
-                    [{
-                        title: "Change to " + arg.name,
-                        command: "haxe.applyFixes",
-                        arguments: [params.textDocument.uri, 0, [{range: d.range, newText: arg.name}]]
-                    }];
+                case UISImport: getUnresolvedImportActions(params, d, arg);
+                case UISTypo: getTypoActions(params, d, arg);
             });
         }
         return actions;
+    }
+
+    function getUnresolvedImportActions(params:CodeActionParams, d:Diagnostic, arg):Array<Command> {
+        var doc = context.documents.get(params.textDocument.uri);
+        var importPos = getImportPosition(doc);
+        var importRange = { start: importPos, end: importPos };
+        return [{
+            title: "Change to " + arg.name,
+            command: "haxe.applyFixes",
+            arguments: [params.textDocument.uri, 0, [{range: d.range, newText: arg.name}]]
+        }, {
+            title: "Import " + arg.name,
+            command: "haxe.applyFixes",
+            arguments: [params.textDocument.uri, 0, [{range: importRange, newText: 'import ${arg.name};\n'}]]
+        }];
+    }
+
+    function getTypoActions(params:CodeActionParams, d:Diagnostic, arg):Array<Command> {
+        return [{
+            title: "Change to " + arg.name,
+            command: "haxe.applyFixes",
+            arguments: [params.textDocument.uri, 0, [{range: d.range, newText: arg.name}]]
+        }];
     }
 
     static var rePackageDecl = ~/package\s*( [\w\.]*)?\s*;/;
