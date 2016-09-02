@@ -55,18 +55,20 @@ class CodeLensFeature {
             if (statistic.kind == null) {
                 continue; // Shouldn't happen, but you never know
             }
+            var range = statistic.range;
             switch (statistic.kind) {
                 case ClassType:
-                    addRelation("subclass", "es", statistic.range, statistic.subclasses);
+                    addRelation("subclass", "es", range, statistic.subclasses);
                 case InterfaceType:
-                    addRelation("implementer", "s", statistic.range, statistic.implementer);
-                    addRelation("sub interface", "s", statistic.range, statistic.subclasses);
+                    addRelation("implementer", "s", range, statistic.implementer);
+                    addRelation("sub interface", "s", range, statistic.subclasses);
                 case EnumType:
+                    addRelation("reference", "s", range, statistic.references);
                 case EnumField:
-                    addRelation("reference", "s", statistic.range, statistic.references);
+                    addRelation("reference", "s", range, statistic.references);
                 case ClassField:
-                    if (statistic.overrides != null) addRelation("override", "s", statistic.range, statistic.overrides);
-                    addRelation("reference", "s", statistic.range, statistic.references);
+                    if (statistic.overrides != null) addRelation("override", "s", range, statistic.overrides);
+                    addRelation("reference", "s", range, statistic.references);
             }
         }
         return actions;
