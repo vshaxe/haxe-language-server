@@ -64,7 +64,7 @@ class CodeLensFeature {
                     addRelation("subclass", "es", range, statistic.subclasses);
                 case InterfaceType:
                     addRelation("implementer", "s", range, statistic.implementers);
-                    addRelation("sub interface", "s", range, statistic.subclasses);
+                    addRelation("subinterface", "s", range, statistic.subclasses);
                 case EnumType:
                     addRelation("reference", "s", range, statistic.references);
                 case EnumField:
