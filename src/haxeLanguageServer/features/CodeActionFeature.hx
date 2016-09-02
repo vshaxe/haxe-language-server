@@ -16,8 +16,6 @@ class CodeActionFeature {
     }
 
     function onCodeAction(params:CodeActionParams, token:CancellationToken, resolve:Array<Command>->Void, reject:ResponseError<NoData>->Void) {
-        var result:Array<Command> = [];
-        diagnostics.addCodeActions(params, result);
-        resolve(result);
+        resolve(diagnostics.getCodeActions(params));
     }
 }

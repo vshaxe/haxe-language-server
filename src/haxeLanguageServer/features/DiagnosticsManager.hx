@@ -71,88 +71,103 @@ class DiagnosticsManager {
     static var reEndsWithWhitespace = ~/\s*$/;
     static var reStartsWhitespace = ~/^\s*/;
 
-    public function addCodeActions<T>(params:CodeActionParams, actions:Array<Command>) {
+    public function getCodeActions<T>(params:CodeActionParams) {
+        var actions:Array<Command> = [];
         for (d in params.context.diagnostics) {
             if (!(d.code is Int)) // our codes are int, so we don't handle other stuff
                 continue;
             var code = new DiagnosticsKind<T>(d.code);
-            switch (code) {
-                case DKUnusedImport:
-                    var doc = context.documents.get(params.textDocument.uri);
-                    var range = d.range;
+            actions = actions.concat(switch (code) {
+                case DKUnusedImport: getUnusedImportActions(params, d);
+                case DKUnresolvedIdentifier: getUnresolvedIdentifierActions(params, d);
+                case DKCompilerError: getCompilerErrorActions(params, d);
+            });
+        }
+        return actions;
+    }
 
-                    var startLine = doc.lineAt(range.start.line);
-                    if (reStartsWhitespace.match(startLine.substring(0, range.start.character)))
-                        range = {
-                            start: {
-                                line: range.start.line,
-                                character: 0
-                            },
-                            end: range.end
-                        };
+    function getUnusedImportActions(params:CodeActionParams, d:Diagnostic):Array<Command> {
+        var doc = context.documents.get(params.textDocument.uri);
+        var range = d.range;
 
-                    var endLine = if (range.start.line == range.end.line) startLine else doc.lineAt(range.end.line);
-                    if (reEndsWithWhitespace.match(endLine.substring(range.end.character)))
-                        range = {
-                            start: range.start,
-                            end: {
-                                line: range.end.line + 1,
-                                character: 0
-                            }
-                        };
+        var startLine = doc.lineAt(range.start.line);
+        if (reStartsWhitespace.match(startLine.substring(0, range.start.character)))
+            range = {
+                start: {
+                    line: range.start.line,
+                    character: 0
+                },
+                end: range.end
+            };
 
-                    actions.push({
-                        title: "Remove import",
+        var endLine = if (range.start.line == range.end.line) startLine else doc.lineAt(range.end.line);
+        if (reEndsWithWhitespace.match(endLine.substring(range.end.character)))
+            range = {
+                start: range.start,
+                end: {
+                    line: range.end.line + 1,
+                    character: 0
+                }
+            };
+
+        return [{
+            title: "Remove import",
+            command: "haxe.applyFixes",
+            arguments: [params.textDocument.uri, 0 /*TODO*/, [{range: range, newText: ""}]]
+        }];
+    }
+
+    function getUnresolvedIdentifierActions(params:CodeActionParams, d:Diagnostic):Array<Command> {
+        var actions:Array<Command> = [];
+        var args = getDiagnosticsArguments(DKUnresolvedIdentifier, d.range);
+        for (arg in args) {
+            var commands:Array<Command> = switch (arg.kind) {
+                case UISImport:
+                    [{
+                        title: "import " + arg.name,
+                        command: "haxe.applyFixes", // TODO
+                        arguments: []
+                    }, {
+                        title: "Change to " + arg.name,
                         command: "haxe.applyFixes",
-                        arguments: [params.textDocument.uri, 0 /*TODO*/, [{range: range, newText: ""}]]
-                    });
-                case DKUnresolvedIdentifier:
-                    var args = getDiagnosticsArguments(code, d.range);
-                    for (arg in args) {
-                        var commands:Array<Command> = switch (arg.kind) {
-                            case UISImport:
-                                [{
-                                    title: "import " + arg.name,
-                                    command: "haxe.applyFixes", // TODO
-                                    arguments: []
-                                }, {
-                                    title: "Change to " + arg.name,
-                                    command: "haxe.applyFixes",
-                                    arguments: [params.textDocument.uri, 0, [{range: d.range, newText: arg.name}]]
-                                }];
-                            case UISTypo:
-                                [{
-                                    title: "Change to " +arg.name,
-                                    command: "haxe.applyFixes",
-                                    arguments: [params.textDocument.uri, 0, [{range: d.range, newText: arg.name}]]
-                                }];
-                        }
-                        for (command in commands) {
-                            actions.push(command);
-                        }
-                    }
-                case DKCompilerError:
-                    var arg = getDiagnosticsArguments(code, d.range)[0];
-                    var sugrex = ~/\(Suggestions?: (.*)\)/;
-                    if (sugrex.match(arg)) {
-                        var suggestions = sugrex.matched(1).split(",");
-                        // Haxe reports the entire expression, not just the field position, so we have to be a bit creative here.
-                        var range = d.range;
-                        var fieldrex = ~/has no field ([^ ]+) /;
-                        if (fieldrex.match(arg)) {
-                            range.start.character += range.end.character - fieldrex.matched(1).length - 2;
-                        }
-                        for (suggestion in suggestions) {
-                            suggestion = suggestion.trim();
-                            actions.push({
-                                title: "Change to " + suggestion,
-                                command: "haxe.applyFixes",
-                                arguments: [params.textDocument.uri, 0, [{range: range, newText: suggestion}]]
-                            });
-                        }
-                    }
+                        arguments: [params.textDocument.uri, 0, [{range: d.range, newText: arg.name}]]
+                    }];
+                case UISTypo:
+                    [{
+                        title: "Change to " + arg.name,
+                        command: "haxe.applyFixes",
+                        arguments: [params.textDocument.uri, 0, [{range: d.range, newText: arg.name}]]
+                    }];
+            }
+            for (command in commands) {
+                actions.push(command);
             }
         }
+        return actions;
+    }
+
+    function getCompilerErrorActions(params:CodeActionParams, d:Diagnostic):Array<Command> {
+        var actions:Array<Command> = [];
+        var arg = getDiagnosticsArguments(DKCompilerError, d.range)[0];
+        var sugrex = ~/\(Suggestions?: (.*)\)/;
+        if (sugrex.match(arg)) {
+            var suggestions = sugrex.matched(1).split(",");
+            // Haxe reports the entire expression, not just the field position, so we have to be a bit creative here.
+            var range = d.range;
+            var fieldrex = ~/has no field ([^ ]+) /;
+            if (fieldrex.match(arg)) {
+                range.start.character += range.end.character - fieldrex.matched(1).length - 2;
+            }
+            for (suggestion in suggestions) {
+                suggestion = suggestion.trim();
+                actions.push({
+                    title: "Change to " + suggestion,
+                    command: "haxe.applyFixes",
+                    arguments: [params.textDocument.uri, 0, [{range: range, newText: suggestion}]]
+                });
+            }
+        }
+        return actions;
     }
 
     inline function getDiagnosticsArguments<T>(kind:DiagnosticsKind<T>, range:Range):T {
