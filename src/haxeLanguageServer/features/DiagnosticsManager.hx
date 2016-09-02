@@ -121,19 +121,19 @@ class DiagnosticsManager {
         var actions:Array<Command> = [];
         var args = getDiagnosticsArguments(DKUnresolvedIdentifier, d.range);
         for (arg in args) {
-            var commands:Array<Command> = switch (arg.kind) {
+            actions = actions.concat(switch (arg.kind) {
                 case UISImport:
                     var doc = context.documents.get(params.textDocument.uri);
                     var importPos = getImportPosition(doc);
                     var importRange = { start: importPos, end: importPos };
                     [{
-                        title: "Import " + arg.name,
-                        command: "haxe.applyFixes", // TODO
-                        arguments: [params.textDocument.uri, 0, [{range: importRange, newText: 'import ${arg.name};\n'}]]
-                    }, {
                         title: "Change to " + arg.name,
                         command: "haxe.applyFixes",
                         arguments: [params.textDocument.uri, 0, [{range: d.range, newText: arg.name}]]
+                    }, {
+                        title: "Import " + arg.name,
+                        command: "haxe.applyFixes", // TODO
+                        arguments: [params.textDocument.uri, 0, [{range: importRange, newText: 'import ${arg.name};\n'}]]
                     }];
                 case UISTypo:
                     [{
@@ -141,10 +141,7 @@ class DiagnosticsManager {
                         command: "haxe.applyFixes",
                         arguments: [params.textDocument.uri, 0, [{range: d.range, newText: arg.name}]]
                     }];
-            }
-            for (command in commands) {
-                actions.push(command);
-            }
+            });
         }
         return actions;
     }
