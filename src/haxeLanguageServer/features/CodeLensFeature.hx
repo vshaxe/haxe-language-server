@@ -63,7 +63,7 @@ class CodeLensFeature {
                 case ClassType:
                     addRelation("subclass", "es", range, statistic.subclasses);
                 case InterfaceType:
-                    addRelation("implementer", "s", range, statistic.implementer);
+                    addRelation("implementer", "s", range, statistic.implementers);
                     addRelation("sub interface", "s", range, statistic.subclasses);
                 case EnumType:
                     addRelation("reference", "s", range, statistic.references);
@@ -119,7 +119,7 @@ private typedef Relation = {
 private typedef StatisticsObject = {
     var range:Range;
     @:optional var kind:StatisticObjectKind;
-    @:optional var implementer:Array<Relation>;
+    @:optional var implementers:Array<Relation>;
     @:optional var subclasses:Array<Relation>;
     @:optional var overrides:Array<Relation>;
     @:optional var references:Array<Relation>;
