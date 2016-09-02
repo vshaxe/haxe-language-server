@@ -5,11 +5,6 @@ import jsonrpc.Types;
 @:publicFields
 class VshaxeMethods {
     /**
-        This notification is sent from the server to the client to ask the client to log a particular message in the vshaxe output channel.
-    **/
-    static inline var Log = new NotificationMethod<String>("vshaxe/log");
-
-    /**
         This notification is sent from the client to the server when display arguments index is changed.
     **/
     static inline var DidChangeDisplayConfigurationIndex = new NotificationMethod<{index:Int}>("vshaxe/didChangeDisplayConfigurationIndex");
