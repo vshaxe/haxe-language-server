@@ -132,7 +132,7 @@ class DiagnosticsManager {
                         arguments: [params.textDocument.uri, 0, [{range: d.range, newText: arg.name}]]
                     }, {
                         title: "Import " + arg.name,
-                        command: "haxe.applyFixes", // TODO
+                        command: "haxe.applyFixes",
                         arguments: [params.textDocument.uri, 0, [{range: importRange, newText: 'import ${arg.name};\n'}]]
                     }];
                 case UISTypo:
