@@ -131,7 +131,7 @@ class DiagnosticsManager {
 
     function getUnresolvedImportActions(params:CodeActionParams, d:Diagnostic, arg):Array<Command> {
         var doc = context.documents.get(params.textDocument.uri);
-        var importPos = getImportPosition(doc);
+        var importPos = getImportInsertPosition(doc);
         var importRange = { start: importPos, end: importPos };
         return [{
             title: "Change to " + arg.name,
@@ -158,7 +158,7 @@ class DiagnosticsManager {
         Gets the first non-empty line (excluding the package declaration if present),
         which is where we want to insert imports.
      */
-    function getImportPosition(doc:TextDocument):Position {
+    function getImportInsertPosition(doc:TextDocument):Position {
         var importLine = 0;
         for (i in 0...doc.lineCount) {
             var line = doc.lineAt(i);
