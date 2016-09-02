@@ -35,8 +35,11 @@ class CodeLensFeature {
                     range.start,
                     relations.map(function(c) {
                         var cRange = c.range;
-                        if (c.range.start.line != c.range.end.line)
-                            cRange = { start: c.range.start, end: c.range.start};
+                        // multi-line ranges are not useful, VSCode navigates to the end of them
+                        if (c.range.start.line != c.range.end.line) {
+                            var nextLineStart = { character: 0, line: c.range.start.line + 1 };
+                            cRange = { start: c.range.start, end: nextLineStart };
+                        }
                         return { range: cRange, uri: Uri.fsPathToUri(c.file) }
                     })
                 ];
