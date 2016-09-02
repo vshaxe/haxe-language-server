@@ -18,5 +18,5 @@ class VshaxeMethods {
     /**
         This notification is sent from the client to the server to run a global diagnostics check.
     **/
-    static inline var RunGlobalDiagnostics = new NotificationMethod<String>("vshaxe/runGlobalDiagnostics");
+    static inline var RunGlobalDiagnostics = new NotificationMethod<NoData>("vshaxe/runGlobalDiagnostics");
 }

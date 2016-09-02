@@ -13,7 +13,7 @@ class DiagnosticsManager {
         context.protocol.onNotification(VshaxeMethods.RunGlobalDiagnostics, onRunGlobalDiagnostics);
     }
 
-    function onRunGlobalDiagnostics(s:String) {
+    function onRunGlobalDiagnostics(_) {
         function processError(error:String) {
             context.protocol.sendLogMessage({type: Error, message: error});
         }
