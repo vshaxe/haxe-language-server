@@ -2,16 +2,19 @@ package haxeLanguageServer.features;
 
 import vscodeProtocol.Types;
 import haxe.io.Path;
+import js.node.ChildProcess;
 using StringTools;
 
 class DiagnosticsManager {
     var context:Context;
     var diagnosticsArguments:DiagnosticsMap<Any>;
+    var haxelibPath:String;
 
     public function new(context:Context) {
         this.context = context;
         diagnosticsArguments = new DiagnosticsMap();
         context.protocol.onNotification(VshaxeMethods.RunGlobalDiagnostics, onRunGlobalDiagnostics);
+        ChildProcess.exec("haxelib config", function(error, stdout, stderr) haxelibPath = stdout.trim());
     }
 
     function onRunGlobalDiagnostics(_) {
@@ -65,6 +68,11 @@ class DiagnosticsManager {
     function getDiagnosticsPathFilter():EReg {
         var path = context.config.diagnosticsPathFilter;
         path = path.replace("${workspacePath}", context.workspacePath);
+        if (haxelibPath != null) {
+            path = path.replace("${haxelibPath}", haxelibPath);
+        } else {
+            trace("Could not retrieve haxelib repo path for diagnostics filtering");
+        }
         return new EReg(normalize(path), "");
     }
 
