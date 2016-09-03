@@ -23,6 +23,7 @@ private typedef DisplayServerConfig = {
 private typedef Config = {
     var displayConfigurations:Array<Array<String>>;
     var enableDiagnostics:Bool;
+    var diagnosticsPathFilter:String;
     var enableCodeLens:Bool;
     var displayServer:DisplayServerConfig;
 }

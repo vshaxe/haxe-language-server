@@ -1,6 +1,7 @@
 package haxeLanguageServer.features;
 
 import vscodeProtocol.Types;
+import haxe.io.Path;
 using StringTools;
 
 class DiagnosticsManager {
@@ -51,13 +52,32 @@ class DiagnosticsManager {
                 trace("Error parsing diagnostics response: " + Std.string(e));
                 return;
             }
-        var workspaceUri = Uri.fsPathToUri(context.workspacePath);
+       
+        var pathFilter = getDiagnosticsPathFilter();
         for (data in data) {
-            var uri = Uri.fsPathToUri(data.file);
-            if (uri.startsWith(workspaceUri)) {
+            if (pathFilter.match(normalize(data.file))) {
+                var uri = Uri.fsPathToUri(data.file);
                 sendDiagnostics(uri, data.diagnostics);
             }
         }
+    }
+
+    function getDiagnosticsPathFilter():EReg {
+        var path = context.config.diagnosticsPathFilter;
+        path = path.replace("${workspacePath}", context.workspacePath);
+        return new EReg(normalize(path), "");
+    }
+
+    static var reUpperCaseDriveLetter = ~/^([A-Z]:)/;
+
+    function normalize(path:String):String {
+        path = Path.normalize(path);
+        // we need to make sure the case of the drive letter doesn't matter (C: vs c:)
+        if (reUpperCaseDriveLetter.match(path)) {
+            var letter = path.substr(0, 1).toLowerCase();
+            path = letter + path.substring(1);
+        }
+        return path;
     }
 
     public function publishDiagnostics(uri:String) {
