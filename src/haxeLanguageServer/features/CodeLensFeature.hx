@@ -72,6 +72,7 @@ class CodeLensFeature {
                 case ClassField:
                     if (statistic.overrides != null) addRelation("override", "s", range, statistic.overrides);
                     addRelation("reference", "s", range, statistic.references);
+                    if (statistic.implementers != null) addRelation("implementation", "s", range, statistic.implementers);
             }
         }
         return actions;
