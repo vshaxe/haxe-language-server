@@ -73,7 +73,7 @@ class HaxePosition {
         return buf.toString("utf-8", 0, byteOffset).length;
     }
 
-    static function getProperFileNameCase(normalizedPath:String):String {
+    public static function getProperFileNameCase(normalizedPath:String):String {
         if (!isWindows) return normalizedPath;
         if (properFileNameCaseCache == null) {
             properFileNameCaseCache = new Map();

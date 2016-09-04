@@ -51,7 +51,7 @@ class DocumentSymbolsFeature {
 
         var result = [];
         for (file in data) {
-            var uri = Uri.fsPathToUri(file.file);
+            var uri = Uri.fsPathToUri(HaxePosition.getProperFileNameCase(file.file));
             for (symbol in file.symbols) {
                 if (symbol.range == null) {
                     context.sendShowMessage(Error, "Unknown location for " + haxe.Json.stringify(symbol));
