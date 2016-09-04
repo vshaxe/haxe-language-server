@@ -4,7 +4,7 @@ import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
 import vscodeProtocol.Types;
-import haxeLanguageServer.TypeHelper.*;
+import haxeLanguageServer.helper.TypeHelper.*;
 
 using StringTools;
 

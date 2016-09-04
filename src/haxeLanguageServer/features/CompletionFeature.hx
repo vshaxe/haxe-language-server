@@ -4,7 +4,7 @@ import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
 import vscodeProtocol.Types;
-import haxeLanguageServer.TypeHelper.prepareSignature;
+import haxeLanguageServer.helper.TypeHelper.prepareSignature;
 
 class CompletionFeature {
     var context:Context;

@@ -4,7 +4,7 @@ import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import vscodeProtocol.Types;
 import jsonrpc.Types.NoData;
-import haxeLanguageServer.TypeHelper.*;
+import haxeLanguageServer.helper.TypeHelper.*;
 
 class HoverFeature {
     var context:Context;

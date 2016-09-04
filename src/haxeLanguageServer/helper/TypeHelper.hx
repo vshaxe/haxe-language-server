@@ -1,4 +1,4 @@
-package haxeLanguageServer;
+package haxeLanguageServer.helper;
 
 using StringTools;
 
