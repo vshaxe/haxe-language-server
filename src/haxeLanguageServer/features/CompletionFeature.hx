@@ -3,7 +3,7 @@ package haxeLanguageServer.features;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
-import vscodeProtocol.Types;
+import languageServerProtocol.Types;
 import haxeLanguageServer.helper.TypeHelper.prepareSignature;
 
 class CompletionFeature {
@@ -11,7 +11,7 @@ class CompletionFeature {
 
     public function new(context) {
         this.context = context;
-        context.protocol.onRequest(MethodNames.Completion, onCompletion);
+        context.protocol.onRequest(Methods.Completion, onCompletion);
     }
 
     function onCompletion(params:TextDocumentPositionParams, token:CancellationToken, resolve:Array<CompletionItem>->Void, reject:ResponseError<NoData>->Void) {

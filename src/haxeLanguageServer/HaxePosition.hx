@@ -1,6 +1,6 @@
 package haxeLanguageServer;
 
-import vscodeProtocol.Types.Location;
+import languageServerProtocol.Types.Location;
 
 class HaxePosition {
     static var positionRe = ~/^(.+):(\d+): (?:lines (\d+)-(\d+)|character(?:s (\d+)-| )(\d+))$/;

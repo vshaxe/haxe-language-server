@@ -4,7 +4,7 @@ import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types;
 import jsonrpc.Protocol;
-import vscodeProtocol.Types;
+import languageServerProtocol.Types;
 import haxeLanguageServer.features.*;
 
 private typedef DisplayServerConfigBase = {
@@ -58,20 +58,20 @@ class Context {
 
         haxeServer = new HaxeServer(this);
 
-        protocol.onRequest(MethodNames.Initialize, onInitialize);
-        protocol.onRequest(MethodNames.Shutdown, onShutdown);
-        protocol.onNotification(MethodNames.DidChangeConfiguration, onDidChangeConfiguration);
-        protocol.onNotification(MethodNames.DidOpenTextDocument, onDidOpenTextDocument);
-        protocol.onNotification(MethodNames.DidSaveTextDocument, onDidSaveTextDocument);
+        protocol.onRequest(Methods.Initialize, onInitialize);
+        protocol.onRequest(Methods.Shutdown, onShutdown);
+        protocol.onNotification(Methods.DidChangeConfiguration, onDidChangeConfiguration);
+        protocol.onNotification(Methods.DidOpenTextDocument, onDidOpenTextDocument);
+        protocol.onNotification(Methods.DidSaveTextDocument, onDidSaveTextDocument);
         protocol.onNotification(VshaxeMethods.DidChangeDisplayConfigurationIndex, onDidChangeDisplayConfigurationIndex);
     }
 
     public inline function sendShowMessage(type:MessageType, message:String) {
-        protocol.sendNotification(MethodNames.ShowMessage, {type: type, message: message});
+        protocol.sendNotification(Methods.ShowMessage, {type: type, message: message});
     }
 
     public inline function sendLogMessage(type:MessageType, message:String) {
-        protocol.sendNotification(MethodNames.LogMessage, {type: type, message: message});
+        protocol.sendNotification(Methods.LogMessage, {type: type, message: message});
     }
 
     function onInitialize(params:InitializeParams, token:CancellationToken, resolve:InitializeResult->Void, reject:ResponseError<InitializeError>->Void) {

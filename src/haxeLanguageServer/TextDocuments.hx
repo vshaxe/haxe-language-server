@@ -1,6 +1,6 @@
 package haxeLanguageServer;
 
-import vscodeProtocol.Types;
+import languageServerProtocol.Types;
 
 class TextDocuments {
     public static inline var syncKind = TextDocumentSyncKind.Incremental;
@@ -9,8 +9,8 @@ class TextDocuments {
 
     public function new(protocol:jsonrpc.Protocol) {
         documents = new Map();
-        protocol.onNotification(MethodNames.DidChangeTextDocument, onDidChangeTextDocument);
-        protocol.onNotification(MethodNames.DidCloseTextDocument, onDidCloseTextDocument);
+        protocol.onNotification(Methods.DidChangeTextDocument, onDidChangeTextDocument);
+        protocol.onNotification(Methods.DidCloseTextDocument, onDidCloseTextDocument);
     }
 
     public inline function getAll():Iterator<TextDocument> {

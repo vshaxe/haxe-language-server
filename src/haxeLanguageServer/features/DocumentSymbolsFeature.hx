@@ -3,7 +3,7 @@ package haxeLanguageServer.features;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
-import vscodeProtocol.Types;
+import languageServerProtocol.Types;
 
 @:enum
 private abstract ModuleSymbolKind(Int) {
@@ -32,7 +32,7 @@ class DocumentSymbolsFeature {
 
     public function new(context) {
         this.context = context;
-        context.protocol.onRequest(MethodNames.DocumentSymbols, onDocumentSymbols);
+        context.protocol.onRequest(Methods.DocumentSymbols, onDocumentSymbols);
     }
 
     function onDocumentSymbols(params:DocumentSymbolParams, token:CancellationToken, resolve:Array<SymbolInformation>->Void, reject:ResponseError<NoData>->Void) {

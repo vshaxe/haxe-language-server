@@ -2,7 +2,7 @@ package haxeLanguageServer.features;
 
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
-import vscodeProtocol.Types;
+import languageServerProtocol.Types;
 import jsonrpc.Types.NoData;
 import haxeLanguageServer.helper.TypeHelper.*;
 
@@ -11,7 +11,7 @@ class HoverFeature {
 
     public function new(context) {
         this.context = context;
-        context.protocol.onRequest(MethodNames.Hover, onHover);
+        context.protocol.onRequest(Methods.Hover, onHover);
     }
 
     function onHover(params:TextDocumentPositionParams, token:CancellationToken, resolve:Hover->Void, reject:ResponseError<NoData>->Void) {

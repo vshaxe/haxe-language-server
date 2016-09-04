@@ -3,14 +3,14 @@ package haxeLanguageServer.features;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
-import vscodeProtocol.Types;
+import languageServerProtocol.Types;
 
 class FindReferencesFeature {
     var context:Context;
 
     public function new(context) {
         this.context = context;
-        context.protocol.onRequest(MethodNames.FindReferences, onFindReferences);
+        context.protocol.onRequest(Methods.FindReferences, onFindReferences);
     }
 
     function onFindReferences(params:TextDocumentPositionParams, token:CancellationToken, resolve:Array<Location>->Void, reject:ResponseError<NoData>->Void) {

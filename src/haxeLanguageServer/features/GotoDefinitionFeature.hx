@@ -4,14 +4,14 @@ import haxe.extern.EitherType;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
-import vscodeProtocol.Types;
+import languageServerProtocol.Types;
 
 class GotoDefinitionFeature {
     var context:Context;
 
     public function new(context) {
         this.context = context;
-        context.protocol.onRequest(MethodNames.GotoDefinition, onGotoDefinition);
+        context.protocol.onRequest(Methods.GotoDefinition, onGotoDefinition);
     }
 
     function onGotoDefinition(params:TextDocumentPositionParams, token:CancellationToken, resolve:EitherType<Location,Array<Location>>->Void, reject:ResponseError<NoData>->Void) {

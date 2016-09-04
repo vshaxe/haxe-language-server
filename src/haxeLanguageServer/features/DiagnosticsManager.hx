@@ -1,7 +1,7 @@
 package haxeLanguageServer.features;
 
 import haxeLanguageServer.helper.PathHelper;
-import vscodeProtocol.Types;
+import languageServerProtocol.Types;
 import js.node.ChildProcess;
 using StringTools;
 
@@ -44,7 +44,7 @@ class DiagnosticsManager {
             diagnosticsArguments.set({code: diag.code, range: diag.range}, hxDiag.args);
             diagnostics.push(diag);
         }
-        context.protocol.sendNotification(MethodNames.PublishDiagnostics, {uri: uri, diagnostics: diagnostics});
+        context.protocol.sendNotification(Methods.PublishDiagnostics, {uri: uri, diagnostics: diagnostics});
     }
 
     function processDiagnosticsReply(s:String) {

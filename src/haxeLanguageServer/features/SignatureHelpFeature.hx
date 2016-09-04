@@ -3,7 +3,7 @@ package haxeLanguageServer.features;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
-import vscodeProtocol.Types;
+import languageServerProtocol.Types;
 import haxeLanguageServer.helper.TypeHelper.*;
 
 using StringTools;
@@ -13,7 +13,7 @@ class SignatureHelpFeature {
 
     public function new(context) {
         this.context = context;
-        context.protocol.onRequest(MethodNames.SignatureHelp, onSignatureHelp);
+        context.protocol.onRequest(Methods.SignatureHelp, onSignatureHelp);
     }
 
     function onSignatureHelp(params:TextDocumentPositionParams, token:CancellationToken, resolve:SignatureHelp->Void, reject:ResponseError<NoData>->Void) {

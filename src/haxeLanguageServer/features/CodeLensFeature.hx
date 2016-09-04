@@ -3,14 +3,14 @@ package haxeLanguageServer.features;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
-import vscodeProtocol.Types;
+import languageServerProtocol.Types;
 
 class CodeLensFeature {
     var context:Context;
 
     public function new(context:Context) {
         this.context = context;
-        context.protocol.onRequest(MethodNames.CodeLens, onCodeLens);
+        context.protocol.onRequest(Methods.CodeLens, onCodeLens);
     }
 
     function getCodeLensFromStatistics(uri:String, statistics:Array<StatisticsObject>) {
