@@ -11,7 +11,7 @@ class GotoDefinitionFeature {
 
     public function new(context) {
         this.context = context;
-        context.protocol.onGotoDefinition = onGotoDefinition;
+        context.protocol.onRequest(MethodNames.GotoDefinition, onGotoDefinition);
     }
 
     function onGotoDefinition(params:TextDocumentPositionParams, token:CancellationToken, resolve:EitherType<Location,Array<Location>>->Void, reject:ResponseError<NoData>->Void) {

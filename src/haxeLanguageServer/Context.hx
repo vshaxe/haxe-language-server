@@ -58,12 +58,20 @@ class Context {
 
         haxeServer = new HaxeServer(this);
 
-        protocol.onInitialize = onInitialize;
-        protocol.onShutdown = onShutdown;
-        protocol.onDidChangeConfiguration = onDidChangeConfiguration;
-        protocol.onDidOpenTextDocument = onDidOpenTextDocument;
-        protocol.onDidSaveTextDocument = onDidSaveTextDocument;
+        protocol.onRequest(MethodNames.Initialize, onInitialize);
+        protocol.onRequest(MethodNames.Shutdown, onShutdown);
+        protocol.onNotification(MethodNames.DidChangeConfiguration, onDidChangeConfiguration);
+        protocol.onNotification(MethodNames.DidOpenTextDocument, onDidOpenTextDocument);
+        protocol.onNotification(MethodNames.DidSaveTextDocument, onDidSaveTextDocument);
         protocol.onNotification(VshaxeMethods.DidChangeDisplayConfigurationIndex, onDidChangeDisplayConfigurationIndex);
+    }
+
+    public inline function sendShowMessage(type:MessageType, message:String) {
+        protocol.sendNotification(MethodNames.ShowMessage, {type: type, message: message});
+    }
+
+    public inline function sendLogMessage(type:MessageType, message:String) {
+        protocol.sendNotification(MethodNames.LogMessage, {type: type, message: message});
     }
 
     function onInitialize(params:InitializeParams, token:CancellationToken, resolve:InitializeResult->Void, reject:ResponseError<InitializeError>->Void) {

@@ -11,7 +11,7 @@ class CompletionFeature {
 
     public function new(context) {
         this.context = context;
-        context.protocol.onCompletion = onCompletion;
+        context.protocol.onRequest(MethodNames.Completion, onCompletion);
     }
 
     function onCompletion(params:TextDocumentPositionParams, token:CancellationToken, resolve:Array<CompletionItem>->Void, reject:ResponseError<NoData>->Void) {

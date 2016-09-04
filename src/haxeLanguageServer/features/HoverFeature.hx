@@ -11,7 +11,7 @@ class HoverFeature {
 
     public function new(context) {
         this.context = context;
-        context.protocol.onHover = onHover;
+        context.protocol.onRequest(MethodNames.Hover, onHover);
     }
 
     function onHover(params:TextDocumentPositionParams, token:CancellationToken, resolve:Hover->Void, reject:ResponseError<NoData>->Void) {

@@ -10,7 +10,7 @@ class FindReferencesFeature {
 
     public function new(context) {
         this.context = context;
-        context.protocol.onFindReferences = onFindReferences;
+        context.protocol.onRequest(MethodNames.FindReferences, onFindReferences);
     }
 
     function onFindReferences(params:TextDocumentPositionParams, token:CancellationToken, resolve:Array<Location>->Void, reject:ResponseError<NoData>->Void) {

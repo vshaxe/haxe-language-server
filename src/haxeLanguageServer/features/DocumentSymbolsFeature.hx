@@ -32,7 +32,7 @@ class DocumentSymbolsFeature {
 
     public function new(context) {
         this.context = context;
-        context.protocol.onDocumentSymbols = onDocumentSymbols;
+        context.protocol.onRequest(MethodNames.DocumentSymbols, onDocumentSymbols);
     }
 
     function onDocumentSymbols(params:DocumentSymbolParams, token:CancellationToken, resolve:Array<SymbolInformation>->Void, reject:ResponseError<NoData>->Void) {
@@ -49,7 +49,7 @@ class DocumentSymbolsFeature {
             var result = [];
             for (entry in data) {
                 if (entry.range == null) {
-                    context.protocol.sendShowMessage({type: Error, message: "Unknown location for " + haxe.Json.stringify(entry)});
+                    context.sendShowMessage(Error, "Unknown location for " + haxe.Json.stringify(entry));
                     continue;
                 }
                 result.push(moduleSymbolEntryToSymbolInformation(entry, doc));

@@ -19,7 +19,7 @@ class DiagnosticsManager {
 
     function onRunGlobalDiagnostics(_) {
         function processError(error:String) {
-            context.protocol.sendLogMessage({type: Error, message: error});
+            context.sendLogMessage(Error, error);
         }
         context.callDisplay(["--display", "diagnostics"], null, null, processDiagnosticsReply, processError);
     }
@@ -44,7 +44,7 @@ class DiagnosticsManager {
             diagnosticsArguments.set({code: diag.code, range: diag.range}, hxDiag.args);
             diagnostics.push(diag);
         }
-        context.protocol.sendPublishDiagnostics({uri: uri, diagnostics: diagnostics});
+        context.protocol.sendNotification(MethodNames.PublishDiagnostics, {uri: uri, diagnostics: diagnostics});
     }
 
     function processDiagnosticsReply(s:String) {
@@ -90,7 +90,7 @@ class DiagnosticsManager {
 
     public function publishDiagnostics(uri:String) {
         function processError(error:String) {
-            context.protocol.sendLogMessage({type: Error, message: error});
+            context.sendLogMessage(Error, error);
         }
         var doc = context.documents.get(uri);
         context.callDisplay(["--display", doc.fsPath + "@0@diagnostics"], null, null, processDiagnosticsReply, processError);

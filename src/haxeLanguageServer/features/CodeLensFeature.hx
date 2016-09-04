@@ -10,7 +10,7 @@ class CodeLensFeature {
 
     public function new(context:Context) {
         this.context = context;
-        context.protocol.onCodeLens = onCodeLens;
+        context.protocol.onRequest(MethodNames.CodeLens, onCodeLens);
     }
 
     function getCodeLensFromStatistics(uri:String, statistics:Array<StatisticsObject>) {
@@ -84,7 +84,7 @@ class CodeLensFeature {
         }
         var doc = context.documents.get(params.textDocument.uri);
         function processError(error:String) {
-            context.protocol.sendLogMessage({type: Error, message: error});
+            context.sendLogMessage(Error, error);
         }
         function processStatisticsReply(s:String) {
             var data:Array<Statistics> =

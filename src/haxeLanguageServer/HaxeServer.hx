@@ -119,12 +119,12 @@ class HaxeServer {
 
         buffer = new MessageBuffer();
         nextMessageLength = -1;
-        proc.stdout.on(ReadableEvent.Data, function(buf:Buffer) context.protocol.sendLogMessage({type: Log, message: buf.toString()}));
+        proc.stdout.on(ReadableEvent.Data, function(buf:Buffer) context.sendLogMessage(Log, buf.toString()));
         proc.stderr.on(ReadableEvent.Data, onData);
 
         proc.on(ChildProcessEvent.Exit, onExit);
 
-        inline function error(s) context.protocol.sendShowMessage({type: Error, message: s});
+        inline function error(s) context.sendShowMessage(Error, s);
 
         process(["-version"], null, null, function(data) {
             if (!reVersion.match(data))
@@ -160,7 +160,7 @@ class HaxeServer {
     }
 
     public function restart(reason:String) {
-        context.protocol.sendLogMessage({type: Log, message: 'Restarting Haxe completion server: $reason'});
+        context.sendLogMessage(Log, 'Restarting Haxe completion server: $reason');
         start(function() {});
     }
 

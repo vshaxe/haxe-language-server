@@ -10,8 +10,8 @@ class TextDocuments {
 
     public function new(protocol:Protocol) {
         documents = new Map();
-        protocol.onDidChangeTextDocument = onDidChangeTextDocument;
-        protocol.onDidCloseTextDocument = onDidCloseTextDocument;
+        protocol.onNotification(MethodNames.DidChangeTextDocument, onDidChangeTextDocument);
+        protocol.onNotification(MethodNames.DidCloseTextDocument, onDidCloseTextDocument);
     }
 
     public inline function getAll():Iterator<TextDocument> {

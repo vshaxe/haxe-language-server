@@ -12,7 +12,7 @@ class CodeActionFeature {
     public function new(context:Context, diagnostics:DiagnosticsManager) {
         this.context = context;
         this.diagnostics = diagnostics;
-        context.protocol.onCodeAction = onCodeAction;
+        context.protocol.onRequest(MethodNames.CodeAction, onCodeAction);
     }
 
     function onCodeAction(params:CodeActionParams, token:CancellationToken, resolve:Array<Command>->Void, reject:ResponseError<NoData>->Void) {

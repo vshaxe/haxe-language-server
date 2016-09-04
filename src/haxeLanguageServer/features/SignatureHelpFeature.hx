@@ -13,7 +13,7 @@ class SignatureHelpFeature {
 
     public function new(context) {
         this.context = context;
-        context.protocol.onSignatureHelp = onSignatureHelp;
+        context.protocol.onRequest(MethodNames.SignatureHelp, onSignatureHelp);
     }
 
     function onSignatureHelp(params:TextDocumentPositionParams, token:CancellationToken, resolve:SignatureHelp->Void, reject:ResponseError<NoData>->Void) {

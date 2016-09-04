@@ -4,6 +4,7 @@ import js.Node.process;
 import jsonrpc.node.MessageReader;
 import jsonrpc.node.MessageWriter;
 import vscodeProtocol.Protocol;
+import vscodeProtocol.Types;
 
 class Main {
     static function main() {
@@ -22,7 +23,7 @@ class Main {
                 for (v in i.customParams)
                     r.push(Std.string(v));
             }
-            protocol.sendLogMessage({type: Log, message: r.join(" ")});
+            protocol.sendNotification(MethodNames.LogMessage, {type: Log, message: r.join(" ")});
         }
     }
 }
