@@ -1,8 +1,18 @@
 -cp protocol/src
 -cp src
--main haxeLanguageServer.Main
--js ../bin/server.js
 -dce full
 -lib hxnodejs
 -D hxnodejs-no-version-warning
 -debug
+
+--each
+
+-main haxeLanguageServer.Main
+-js ../bin/server.js
+
+--next
+
+-cp test
+-main haxeLanguageServer.TestMain
+-js ../bin/test.js
+-cmd node ../bin/test.js
