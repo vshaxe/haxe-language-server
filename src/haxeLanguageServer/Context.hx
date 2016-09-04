@@ -3,7 +3,7 @@ package haxeLanguageServer;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types;
-import vscodeProtocol.Protocol;
+import jsonrpc.Protocol;
 import vscodeProtocol.Types;
 import haxeLanguageServer.features.*;
 

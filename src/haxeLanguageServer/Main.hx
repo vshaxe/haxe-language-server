@@ -3,7 +3,7 @@ package haxeLanguageServer;
 import js.Node.process;
 import jsonrpc.node.MessageReader;
 import jsonrpc.node.MessageWriter;
-import vscodeProtocol.Protocol;
+import jsonrpc.Protocol;
 import vscodeProtocol.Types;
 
 class Main {
@@ -11,6 +11,7 @@ class Main {
         var reader = new MessageReader(process.stdin);
         var writer = new MessageWriter(process.stdout);
         var protocol = new Protocol(writer.write);
+        protocol.logError = function(message) protocol.sendNotification(MethodNames.LogMessage, {type: Warning, message: message});
         setupTrace(protocol);
         new Context(protocol);
         reader.listen(protocol.handleMessage);

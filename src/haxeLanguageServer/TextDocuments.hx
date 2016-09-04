@@ -1,6 +1,5 @@
 package haxeLanguageServer;
 
-import vscodeProtocol.Protocol;
 import vscodeProtocol.Types;
 
 class TextDocuments {
@@ -8,7 +7,7 @@ class TextDocuments {
 
     var documents:Map<String,TextDocument>;
 
-    public function new(protocol:Protocol) {
+    public function new(protocol:jsonrpc.Protocol) {
         documents = new Map();
         protocol.onNotification(MethodNames.DidChangeTextDocument, onDidChangeTextDocument);
         protocol.onNotification(MethodNames.DidCloseTextDocument, onDidCloseTextDocument);
