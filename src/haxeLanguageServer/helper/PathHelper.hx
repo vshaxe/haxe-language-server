@@ -7,9 +7,10 @@ class PathHelper {
     public static function matches(path:String, pathFilter:String):Bool {
         return new EReg(pathFilter, "").match(PathHelper.normalize(path));
     }
-    public static function preparePathFilter(diagnosticsPathFilter:String, haxelibPath:String, workspacePath:String):String {
+
+    public static function preparePathFilter(diagnosticsPathFilter:String, haxelibPath:String, workspaceRoot:String):String {
         var path = diagnosticsPathFilter;
-        path = path.replace("${workspacePath}", workspacePath);
+        path = path.replace("${workspaceRoot}", workspaceRoot);
         if (haxelibPath != null) {
             path = path.replace("${haxelibPath}", haxelibPath);
         } else {

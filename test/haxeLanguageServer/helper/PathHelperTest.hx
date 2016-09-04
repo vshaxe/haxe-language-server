@@ -41,7 +41,7 @@ class PathHelperTest extends TestCase {
 }
 
 @:enum abstract TestFilter(String) to String {
-    var WorkspaceRoot = "${workspacePath}";
+    var WorkspaceRoot = "${workspaceRoot}";
     var WorkspaceSource = WorkspaceRoot + "/source";
 
     var HaxelibPath = "${haxelibPath}";
