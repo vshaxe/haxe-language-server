@@ -1,6 +1,7 @@
 package haxeLanguageServer.helper;
 
 import haxe.unit.TestCase;
+import haxe.PosInfos;
 
 class PathHelperTest extends TestCase {
     public function testMatches() {
@@ -8,8 +9,8 @@ class PathHelperTest extends TestCase {
             var pathFilter = PathHelper.preparePathFilter(filter, TestPath.HaxelibPath, TestPath.WorkspaceRoot);
             return PathHelper.matches(path, pathFilter);
         }
-        function match(filter:TestFilter, path:TestPath) assertTrue(matches(filter, path));
-        function fail(filter:TestFilter, path:TestPath) assertFalse(matches(filter, path));
+        function match(filter:TestFilter, path:TestPath, ?pos:PosInfos) assertTrue(matches(filter, path), pos);
+        function fail(filter:TestFilter, path:TestPath, ?pos:PosInfos) assertFalse(matches(filter, path), pos);
 
         match(WorkspaceRoot, WorkspaceRoot);
         match(WorkspaceSource, WorkspaceSource);

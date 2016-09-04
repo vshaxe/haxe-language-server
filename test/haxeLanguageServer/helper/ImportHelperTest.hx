@@ -2,11 +2,12 @@ package haxeLanguageServer.helper;
 
 import haxe.unit.TestCase;
 import haxeLanguageServer.TextDocument;
+import haxe.PosInfos;
 using StringTools;
 
 class ImportHelperTest extends TestCase {
     public function testGetImportInsertPosition() {
-        function test(file:TestFile) {
+        function test(file:TestFile, ?pos:PosInfos) {
             var line = -1;
             var lines = (file : String).split("\n");
             for (i in 0...lines.length) {
@@ -22,8 +23,8 @@ class ImportHelperTest extends TestCase {
 
             var doc = new TextDocument("file://dummy", "", 0, file.replace("|", ""));
             var importPos = ImportHelper.getImportInsertPosition(doc);
-            assertEquals(0, importPos.character);
-            assertEquals(line, importPos.line);
+            assertEquals(0, importPos.character, pos);
+            assertEquals(line, importPos.line, pos);
         }
 
         test(EmptyPackage);
