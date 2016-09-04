@@ -1,6 +1,8 @@
 # Haxe language server
 
-This is a language server implementing [Visual Studio Code Language Server Protocol](https://github.com/Microsoft/vscode-languageserver-protocol) for the [Haxe](http://haxe.org/) language.
+[![Build Status](https://travis-ci.org/vshaxe/haxe-languageserver.svg?branch=master)](https://travis-ci.org/vshaxe/haxe-languageserver)
+
+This is a language server implementing [Language Server Protocol](https://github.com/Microsoft/language-server-protocol) for the [Haxe](http://haxe.org/) language.
 
 The goal of this project is to encapsulate haxe's completion API with all its quirks behind a solid and easy-to-use protocol that can be used by any editor/IDE.
 
