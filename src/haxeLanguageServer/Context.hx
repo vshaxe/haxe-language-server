@@ -116,7 +116,7 @@ class Context {
                 new GotoDefinitionFeature(this);
                 new FindReferencesFeature(this);
                 new DocumentSymbolsFeature(this);
-                new CalculatePackageFeature(this);
+                new DeterminePackageFeature(this);
 
                 diagnostics = new DiagnosticsManager(this);
                 new CodeActionFeature(this, diagnostics);
