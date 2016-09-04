@@ -1,6 +1,7 @@
 package haxeLanguageServer.features;
 
 import haxeLanguageServer.helper.PathHelper;
+import haxeLanguageServer.helper.ImportHelper;
 import languageServerProtocol.Types;
 import js.node.ChildProcess;
 using StringTools;
@@ -137,7 +138,7 @@ class DiagnosticsManager {
 
     function getUnresolvedImportActions(params:CodeActionParams, d:Diagnostic, arg):Array<Command> {
         var doc = context.documents.get(params.textDocument.uri);
-        var importPos = getImportInsertPosition(doc);
+        var importPos = ImportHelper.getImportInsertPosition(doc);
         var importRange = { start: importPos, end: importPos };
         return [{
             title: "Change to " + arg.name,
@@ -156,26 +157,6 @@ class DiagnosticsManager {
             command: "haxe.applyFixes",
             arguments: [params.textDocument.uri, 0, [{range: d.range, newText: arg.name}]]
         }];
-    }
-
-    static var rePackageDecl = ~/package\s*( [\w\.]*)?\s*;/;
-
-    /**
-        Gets the first non-empty line (excluding the package declaration if present),
-        which is where we want to insert imports.
-     */
-    function getImportInsertPosition(doc:TextDocument):Position {
-        var importLine = 0;
-        for (i in 0...doc.lineCount) {
-            var line = doc.lineAt(i);
-            var isPackageDecl = rePackageDecl.match(line);
-            var isNotEmpty = line.trim().length > 0;
-            if (!isPackageDecl && isNotEmpty) {
-                importLine = i;
-                break;
-            }
-        }
-        return { line: importLine, character: 0 };
     }
 
     function getCompilerErrorActions(params:CodeActionParams, d:Diagnostic):Array<Command> {
