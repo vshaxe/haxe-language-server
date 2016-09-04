@@ -6,11 +6,16 @@ import haxe.PosInfos;
 class PathHelperTest extends TestCase {
     public function testMatches() {
         function matches(filter:TestFilter, path:TestPath):Bool {
-            var pathFilter = PathHelper.preparePathFilter(filter, TestPath.HaxelibPath, TestPath.WorkspaceRoot);
+            var pathFilter = PathHelper.preparePathFilter(
+                filter, TestPath.HaxelibPath, TestPath.WorkspaceRoot);
             return PathHelper.matches(path, pathFilter);
         }
-        function match(filter:TestFilter, path:TestPath, ?pos:PosInfos) assertTrue(matches(filter, path), pos);
-        function fail(filter:TestFilter, path:TestPath, ?pos:PosInfos) assertFalse(matches(filter, path), pos);
+        function match(filter:TestFilter, path:TestPath, ?pos:PosInfos) {
+            assertTrue(matches(filter, path), pos);
+        }
+        function fail(filter:TestFilter, path:TestPath, ?pos:PosInfos) {
+            assertFalse(matches(filter, path), pos);
+        }
 
         match(WorkspaceRoot, WorkspaceRoot);
         match(WorkspaceSource, WorkspaceSource);
@@ -33,7 +38,9 @@ class PathHelperTest extends TestCase {
     }
 
     public function testNormalize() {
-        function test(expected:String, path:String) assertEquals(expected, PathHelper.normalize(path));
+        function test(expected:String, path:String, ?pos:PosInfos) {
+            assertEquals(expected, PathHelper.normalize(path), pos);
+        }
 
         test("c:/HaxeToolkit/haxe", "C:\\HaxeToolkit\\haxe");
         test("c:/HaxeToolkit/haxe", "c:/HaxeToolkit/haxe");
