@@ -7,7 +7,8 @@ class TestMain {
     public function new() {
         var runner = new TestRunner();
         runner.add(new PathHelperTest());
-        runner.run();
+        var success = runner.run();
+        Sys.exit(if (success) 0 else 1);
     }
 
     static function main() {
