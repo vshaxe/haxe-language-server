@@ -79,20 +79,19 @@ class CodeLensFeature {
     }
 
     function onCodeLens(params:CodeLensParams, token:CancellationToken, resolve:Array<CodeLens> -> Void, reject:ResponseError<NoData>->Void) {
-        if (!context.config.enableCodeLens) {
-            return;
-        }
+        if (!context.config.enableCodeLens)
+            return resolve([]);
+
         var doc = context.documents.get(params.textDocument.uri);
         function processError(error:String) {
             context.sendLogMessage(Error, error);
         }
         function processStatisticsReply(s:String) {
             var data:Array<Statistics> =
-                try haxe.Json.parse(s)
-                catch (e:Any) {
-                    trace("Error parsing stats response: " + Std.string(e));
-                    return;
-                }
+                try
+                    haxe.Json.parse(s)
+                catch (e:Any)
+                    return reject(ResponseError.internalError("Error parsing stats response: " + Std.string(e)));
             for (statistics in data) {
                 var uri = Uri.fsPathToUri(statistics.file);
                 if (uri == params.textDocument.uri) {
