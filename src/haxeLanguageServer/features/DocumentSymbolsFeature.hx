@@ -27,38 +27,63 @@ private typedef ModuleSymbolEntry = {
     @:optional var containerName:String;
 }
 
+private typedef SymbolReply = {
+    var file:String;
+    var symbols:Array<ModuleSymbolEntry>;
+}
+
 class DocumentSymbolsFeature {
     var context:Context;
 
     public function new(context) {
         this.context = context;
         context.protocol.onRequest(Methods.DocumentSymbols, onDocumentSymbols);
+        context.protocol.onRequest(Methods.WorkspaceSymbols, onWorkspaceSymbols);
+    }
+
+    function processSymbolsReply(data:String, reject:ResponseError<NoData> -> Void) {
+        var data:Array<SymbolReply> =
+            try haxe.Json.parse(data)
+            catch (e:Any) {
+                reject(ResponseError.internalError("Error parsing document symbol response: " + Std.string(e)));
+                return [];
+            }
+
+        var result = [];
+        for (file in data) {
+            var uri = Uri.fsPathToUri(file.file);
+            for (symbol in file.symbols) {
+                if (symbol.range == null) {
+                    context.sendShowMessage(Error, "Unknown location for " + haxe.Json.stringify(symbol));
+                    continue;
+                }
+                result.push(moduleSymbolEntryToSymbolInformation(symbol, uri));
+            }
+        }
+        return result;
+    }
+
+    function makeRequest(args:Array<String>, doc:Null<TextDocument>, token:CancellationToken, resolve:Array<SymbolInformation>->Void, reject:ResponseError<NoData>->Void) {
+        context.callDisplay(args, doc == null ? null : doc.content, token, function(data) {
+            if (token.canceled)
+                return;
+            var result = processSymbolsReply(data, reject);
+            resolve(result);
+        }, function(error) reject(ResponseError.internalError(error)));
     }
 
     function onDocumentSymbols(params:DocumentSymbolParams, token:CancellationToken, resolve:Array<SymbolInformation>->Void, reject:ResponseError<NoData>->Void) {
         var doc = context.documents.get(params.textDocument.uri);
         var args = ["--display", '${doc.fsPath}@0@module-symbols'];
-        context.callDisplay(args, doc.content, token, function(data) {
-            if (token.canceled)
-                return;
-
-            var data:Array<ModuleSymbolEntry> =
-                try haxe.Json.parse(data)
-                catch (e:Any) return reject(ResponseError.internalError("Error parsing document symbol response: " + Std.string(e)));
-
-            var result = [];
-            for (entry in data) {
-                if (entry.range == null) {
-                    context.sendShowMessage(Error, "Unknown location for " + haxe.Json.stringify(entry));
-                    continue;
-                }
-                result.push(moduleSymbolEntryToSymbolInformation(entry, doc));
-            }
-            resolve(result);
-        }, function(error) reject(ResponseError.internalError(error)));
+        makeRequest(args, doc, token, resolve, reject);
     }
 
-    function moduleSymbolEntryToSymbolInformation(entry:ModuleSymbolEntry, document:TextDocument):SymbolInformation {
+    function onWorkspaceSymbols(params:WorkspaceSymbolParams, token:CancellationToken, resolve:Array<SymbolInformation>->Void, reject:ResponseError<NoData>->Void) {
+        var args = ["--display ?@0@workspace-symbols@" + params.query];
+        makeRequest(args, null, token, resolve, reject);
+    }
+
+    function moduleSymbolEntryToSymbolInformation(entry:ModuleSymbolEntry, uri:String):SymbolInformation {
         var result:SymbolInformation = {
             name: entry.name,
             kind: switch (entry.kind) {
@@ -73,8 +98,8 @@ class DocumentSymbolsFeature {
                 case MVariable: SymbolKind.Variable;
             },
             location: {
-                uri: document.uri,
-                range: document.byteRangeToRange(entry.range),
+                uri: uri,
+                range: entry.range
             }
         };
         if (entry.containerName != null)

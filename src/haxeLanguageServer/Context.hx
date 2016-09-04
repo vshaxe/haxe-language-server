@@ -91,6 +91,7 @@ class Context {
                 hoverProvider: true,
                 referencesProvider: true,
                 documentSymbolProvider: true,
+                workspaceSymbolProvider: true,
                 codeActionProvider: true,
                 codeLensProvider: {
                     resolveProvider: true
