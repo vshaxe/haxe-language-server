@@ -99,7 +99,8 @@ class CompletionFeature {
     static function parseFieldCompletion(x:Xml):Array<CompletionItem> {
         var result = [];
         for (el in x.elements()) {
-            var kind = fieldKindToCompletionItemKind(el.get("k"));
+            var rawKind = el.get("k");
+            var kind = fieldKindToCompletionItemKind(rawKind);
             var type = null, doc = null;
             for (child in el.elements()) {
                 switch (child.nodeName) {
@@ -108,6 +109,7 @@ class CompletionFeature {
                 }
             }
             var name = el.get("n");
+            if (rawKind == "metadata") name = name.substr(1); // remove @ for metas
             var item:CompletionItem = {label: name};
             if (doc != null) item.documentation = doc;
             if (kind != null) item.kind = kind;
