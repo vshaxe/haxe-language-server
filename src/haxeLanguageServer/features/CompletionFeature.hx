@@ -132,6 +132,7 @@ class CompletionFeature {
             case "method": Method;
             case "type": Class;
             case "package": Module;
+            case "metadata": Function;
             default: trace("unknown field item kind: " + kind); null;
         }
     }
