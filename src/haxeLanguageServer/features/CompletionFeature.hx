@@ -31,12 +31,12 @@ class CompletionFeature {
         }, function(error) reject(ResponseError.internalError(error)));
     }
 
-    static var reFieldPart = ~/\.(\w*)$/;
+    static var reFieldPart = ~/(\.|@)(\w*)$/;
     static function calculateCompletionPosition(text:String, index:Int):CompletionPosition {
         text = text.substring(0, index);
         if (reFieldPart.match(text))
             return {
-                pos: index - reFieldPart.matched(1).length,
+                pos: index - reFieldPart.matched(2).length,
                 toplevel: false,
             };
         else

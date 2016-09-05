@@ -82,7 +82,7 @@ class Context {
             capabilities: {
                 textDocumentSync: TextDocuments.syncKind,
                 completionProvider: {
-                    triggerCharacters: ["."]
+                    triggerCharacters: [".", "@"]
                 },
                 signatureHelpProvider: {
                     triggerCharacters: ["(", ","]
