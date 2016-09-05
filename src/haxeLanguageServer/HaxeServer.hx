@@ -104,7 +104,7 @@ class HaxeServer {
         this.context = context;
     }
 
-    static var reTrailingNewline = ~/(.*)\r?\n$/;
+    static var reTrailingNewline = ~/\r?\n$/;
 
     public function start(callback:Void->Void) {
         stop();
@@ -122,10 +122,7 @@ class HaxeServer {
         buffer = new MessageBuffer();
         nextMessageLength = -1;
         proc.stdout.on(ReadableEvent.Data, function(buf:Buffer) {
-            var s = buf.toString();
-            if (reTrailingNewline.match(s))
-                s = reTrailingNewline.matched(1);
-            context.sendLogMessage(Log, s);
+            context.sendLogMessage(Log, reTrailingNewline.replace(buf.toString(), ""));
         });
         proc.stderr.on(ReadableEvent.Data, onData);
 
