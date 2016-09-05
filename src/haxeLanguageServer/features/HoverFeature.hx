@@ -24,24 +24,30 @@ class HoverFeature {
 
             var xml = try Xml.parse(data).firstElement() catch (_:Any) null;
             if (xml == null) return reject(ResponseError.internalError("Invalid xml data: " + data));
-
             var s = StringTools.trim(xml.firstChild().nodeValue);
-            if (s.length == 0)
-                return reject(new ResponseError(0, "No type information"));
+            switch (xml.nodeName) {
+                case "metadata":
+                    if (s.length == 0)
+                        return reject(new ResponseError(0, "No metadata information"));
+                    resolve({contents: s});
+                case _:
+                    if (s.length == 0)
+                        return reject(new ResponseError(0, "No type information"));
 
-            var type = switch (parseDisplayType(s)) {
-                case DTFunction(args, ret):
-                    "function" + printFunctionSignature(args, ret);
-                case DTValue(type):
-                    if (type == null) "unknown" else type;
-            };
+                    var type = switch (parseDisplayType(s)) {
+                        case DTFunction(args, ret):
+                            "function" + printFunctionSignature(args, ret);
+                        case DTValue(type):
+                            if (type == null) "unknown" else type;
+                    };
 
-            var result:Hover = {contents: {language: "haxe", value: type}};
-            var p = HaxePosition.parse(xml.get("p"), doc, null);
-            if (p != null)
-                result.range = p.range;
+                    var result:Hover = {contents: {language: "haxe", value: type}};
+                    var p = HaxePosition.parse(xml.get("p"), doc, null);
+                    if (p != null)
+                        result.range = p.range;
 
-            resolve(result);
+                    resolve(result);
+            }
         }, function(error) reject(ResponseError.internalError(error)));
     }
 }
