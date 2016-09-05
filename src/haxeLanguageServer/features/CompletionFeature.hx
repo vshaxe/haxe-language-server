@@ -87,7 +87,7 @@ class CompletionFeature {
             case "local": Variable;
             case "member": Field;
             case "static": Class;
-            case "enum": Enum;
+            case "enum" | "enumabstract": Enum;
             case "global": Variable;
             case "type": Class;
             case "package": Module;
