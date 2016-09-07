@@ -6,7 +6,6 @@ import js.node.Buffer;
 import js.node.ChildProcess;
 import js.node.stream.Readable;
 import jsonrpc.CancellationToken;
-using StringTools;
 
 private class DisplayRequest {
     // these are used for the queue

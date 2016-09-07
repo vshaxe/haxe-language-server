@@ -4,7 +4,6 @@ import haxeLanguageServer.helper.PathHelper;
 import haxeLanguageServer.helper.ImportHelper;
 import languageServerProtocol.Types;
 import js.node.ChildProcess;
-using StringTools;
 
 class DiagnosticsManager {
     var context:Context;

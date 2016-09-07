@@ -1,7 +1,5 @@
 package haxeLanguageServer.helper;
 
-using StringTools;
-
 class TypeHelper {
     static var groupRegex = ~/\$(\d)+/g;
     static var parenRegex = ~/^\((.*)\)$/;

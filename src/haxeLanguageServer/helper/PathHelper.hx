@@ -1,7 +1,6 @@
 package haxeLanguageServer.helper;
 
 import haxe.io.Path;
-using StringTools;
 
 class PathHelper {
     public static function matches(path:String, pathFilter:String):Bool {

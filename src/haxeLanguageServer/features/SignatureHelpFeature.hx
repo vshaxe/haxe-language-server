@@ -6,8 +6,6 @@ import jsonrpc.Types.NoData;
 import languageServerProtocol.Types;
 import haxeLanguageServer.helper.TypeHelper.*;
 
-using StringTools;
-
 class SignatureHelpFeature {
     var context:Context;
 

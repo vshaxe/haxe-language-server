@@ -130,7 +130,7 @@ class CompletionFeature {
     }
 
     static inline function isTimerDebugFieldCompletion(name:String):Bool {
-        return StringTools.startsWith(name, "@TIME") || StringTools.startsWith(name, "@TOTAL");
+        return name.startsWith("@TIME") || name.startsWith("@TOTAL");
     }
 
     static function formatType(type:String, name:String, kind:CompletionItemKind):String {

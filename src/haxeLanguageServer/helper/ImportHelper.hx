@@ -2,7 +2,6 @@ package haxeLanguageServer.helper;
 
 import haxeLanguageServer.TextDocument;
 import languageServerProtocol.Types;
-using StringTools;
 
 class ImportHelper {
     static var rePackageDecl = ~/package\s*( [\w\.]*)?\s*;/;
