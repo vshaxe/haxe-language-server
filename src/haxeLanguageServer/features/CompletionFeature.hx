@@ -102,21 +102,35 @@ class CompletionFeature {
             var rawKind = el.get("k");
             var kind = fieldKindToCompletionItemKind(rawKind);
             var type = null, doc = null;
+            inline function getOrNull(s) return if (s == "") null else s;
             for (child in el.elements()) {
                 switch (child.nodeName) {
-                    case "t": type = child.firstChild().nodeValue;
-                    case "d": doc = child.firstChild().nodeValue;
+                    case "t": type = getOrNull(child.firstChild().nodeValue);
+                    case "d": doc = getOrNull(child.firstChild().nodeValue);
                 }
             }
             var name = el.get("n");
-            if (rawKind == "metadata") name = name.substr(1); // remove @ for metas
+            var isTimer = false;
+            if (rawKind == "metadata") {
+                name = name.substr(1); // remove @ for metas
+            } else if (isTimerDebugFieldCompletion(name)) {
+                kind = Value;
+                name = name + " " + type;
+                type = null;
+                isTimer = true;
+            }
             var item:CompletionItem = {label: name};
             if (doc != null) item.documentation = doc;
             if (kind != null) item.kind = kind;
             if (type != null) item.detail = formatType(type, name, kind);
+            if (isTimer) item.insertText = " "; // can't be empty string or VSCode will ignore it, but still better than inserting this garbage 
             result.push(item);
         }
         return result;
+    }
+
+    static inline function isTimerDebugFieldCompletion(name:String):Bool {
+        return StringTools.startsWith(name, "@TIME") || StringTools.startsWith(name, "@TOTAL");
     }
 
     static function formatType(type:String, name:String, kind:CompletionItemKind):String {
