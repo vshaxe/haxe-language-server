@@ -45,13 +45,14 @@ class HoverFeature {
                     var d = xml.get("d");
                     if (d != null) {
                         // maybe we can borrow some code from dox for doc-comment handling...
+                        d = d.trim();
                         d = d.split("\n").map(function(s) {
                             s = s.trim();
                             if (s.startsWith("*")) // javadoc-style comments
-                                s = s.substr(1);
-                            return " " + s;
+                                s = s.substr(1).trim();
+                            return "\t" + s;
                         }).join("\n");
-                        value = '/*$d*/\n $value';
+                        value = '/**\n$d\n**/\n$value';
                     }
 
                     var result:Hover = {contents: {language: "haxe", value: value}};
