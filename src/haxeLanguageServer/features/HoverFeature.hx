@@ -41,7 +41,20 @@ class HoverFeature {
                             if (type == null) "unknown" else type;
                     };
 
-                    var result:Hover = {contents: {language: "haxe", value: type}};
+                    var value = type;
+                    var d = xml.get("d");
+                    if (d != null) {
+                        // maybe we can borrow some code from dox for doc-comment handling...
+                        d = d.split("\n").map(function(s) {
+                            s = s.trim();
+                            if (s.startsWith("*")) // javadoc-style comments
+                                s = s.substr(1);
+                            return " " + s;
+                        }).join("\n");
+                        value = '/*$d*/\n $value';
+                    }
+
+                    var result:Hover = {contents: {language: "haxe", value: value}};
                     var p = HaxePosition.parse(xml.get("p"), doc, null);
                     if (p != null)
                         result.range = p.range;
