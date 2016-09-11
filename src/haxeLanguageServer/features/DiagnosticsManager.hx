@@ -8,6 +8,7 @@ import js.node.ChildProcess;
 class DiagnosticsManager {
     var context:Context;
     var diagnosticsArguments:DiagnosticsMap<Any>;
+    var hxDiagnostics:Array<HaxeDiagnostics<Any>>;
     var haxelibPath:String;
 
     public function new(context:Context) {
@@ -29,6 +30,7 @@ class DiagnosticsManager {
         // if (doc == null) {
         //     return;
         // }
+        this.hxDiagnostics = hxDiagnostics;
         var diagnostics = new Array<Diagnostic>();
         for (hxDiag in hxDiagnostics) {
             if (hxDiag.range == null)
@@ -95,33 +97,44 @@ class DiagnosticsManager {
 
     function getUnusedImportActions(params:CodeActionParams, d:Diagnostic):Array<Command> {
         var doc = context.documents.get(params.textDocument.uri);
-        var range = d.range;
 
-        var startLine = doc.lineAt(range.start.line);
-        if (reStartsWhitespace.match(startLine.substring(0, range.start.character)))
-            range = {
-                start: {
-                    line: range.start.line,
-                    character: 0
-                },
-                end: range.end
-            };
+        function patchRange(range:Range) {
+            var startLine = doc.lineAt(range.start.line);
+            if (reStartsWhitespace.match(startLine.substring(0, range.start.character)))
+                range = {
+                    start: {
+                        line: range.start.line,
+                        character: 0
+                    },
+                    end: range.end
+                };
 
-        var endLine = if (range.start.line == range.end.line) startLine else doc.lineAt(range.end.line);
-        if (reEndsWithWhitespace.match(endLine.substring(range.end.character)))
-            range = {
-                start: range.start,
-                end: {
-                    line: range.end.line + 1,
-                    character: 0
-                }
-            };
+            var endLine = if (range.start.line == range.end.line) startLine else doc.lineAt(range.end.line);
+            if (reEndsWithWhitespace.match(endLine.substring(range.end.character)))
+                range = {
+                    start: range.start,
+                    end: {
+                        line: range.end.line + 1,
+                        character: 0
+                    }
+                };
+            return range;
+        }
 
-        return [{
+        var ret:Array<Command> = [{
             title: "Remove import",
             command: "haxe.applyFixes",
-            arguments: [params.textDocument.uri, 0 /*TODO*/, [{range: range, newText: ""}]]
+            arguments: [params.textDocument.uri, 0 /*TODO*/, [{range: patchRange(d.range), newText: ""}]]
         }];
+        var all = hxDiagnostics.filter(function(hxDiag) return hxDiag.kind == cast DKUnusedImport);
+        if (all.length > 1) {
+            ret.unshift({
+                title: "Remove all import/using statements",
+                command: "haxe.applyFixes",
+                arguments: [params.textDocument.uri, 0, all.map(function(hxDiag) return {range: patchRange(hxDiag.range), newText: ""})]
+            });
+        }
+        return ret;
     }
 
     function getUnresolvedIdentifierActions(params:CodeActionParams, d:Diagnostic):Array<Command> {
