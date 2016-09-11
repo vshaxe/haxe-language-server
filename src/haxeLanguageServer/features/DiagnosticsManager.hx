@@ -55,7 +55,7 @@ class DiagnosticsManager {
                 trace("Error parsing diagnostics response: " + Std.string(e));
                 return;
             }
-       
+
         var pathFilter = PathHelper.preparePathFilter(
             context.config.diagnosticsPathFilter, haxelibPath, context.workspacePath);
         for (data in data) {
@@ -87,6 +87,7 @@ class DiagnosticsManager {
                 case DKUnusedImport: getUnusedImportActions(params, d);
                 case DKUnresolvedIdentifier: getUnresolvedIdentifierActions(params, d);
                 case DKCompilerError: getCompilerErrorActions(params, d);
+                case DKRemovableCode: getRemovableCodeActions(params, d);
             });
         }
         return actions;
@@ -182,6 +183,18 @@ class DiagnosticsManager {
         return actions;
     }
 
+    function getRemovableCodeActions(params:CodeActionParams, d:Diagnostic):Array<Command> {
+        var range = getDiagnosticsArguments(DKRemovableCode, d.range).range;
+        if (range == null) {
+            return [];
+        }
+        return [{
+            title: "Remove",
+            command: "haxe.applyFixes",
+            arguments: [params.textDocument.uri, 0, [{range: range, newText: ""}]]
+        }];
+    }
+
     inline function getDiagnosticsArguments<T>(kind:DiagnosticsKind<T>, range:Range):T {
         return diagnosticsArguments.get({code: kind, range: range});
     }
@@ -202,6 +215,7 @@ class DiagnosticsManager {
     var DKUnusedImport:DiagnosticsKind<Void> = 0;
     var DKUnresolvedIdentifier:DiagnosticsKind<Array<{kind: UnresolvedIdentifierSuggestion, name: String}>> = 1;
     var DKCompilerError:DiagnosticsKind<Array<String>> = 2;
+    var DKRemovableCode:DiagnosticsKind<{description:String, range:Range}> = 3;
 
     public inline function new(i:Int) {
         this = i;
@@ -212,6 +226,7 @@ class DiagnosticsManager {
             case DKUnusedImport: "Unused import";
             case DKUnresolvedIdentifier: "Unresolved identifier";
             case DKCompilerError: args[0];
+            case DKRemovableCode: args.description;
         }
     }
 }
