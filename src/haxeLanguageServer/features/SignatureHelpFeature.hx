@@ -24,8 +24,3 @@ class SignatureHelpFeature {
         }, function(error) reject(ResponseError.internalError(error)));
     }
 }
-
-private typedef SignaturePosition = {
-    var pos:Int;
-    var arg:Int;
-}
