@@ -129,7 +129,7 @@ class DiagnosticsManager {
         var all = hxDiagnostics.filter(function(hxDiag) return hxDiag.kind == cast DKUnusedImport);
         if (all.length > 1) {
             ret.unshift({
-                title: "Remove all import/using statements",
+                title: "Remove all unused imports/usings",
                 command: "haxe.applyFixes",
                 arguments: [params.textDocument.uri, 0, all.map(function(hxDiag) return {range: patchRange(hxDiag.range), newText: ""})]
             });
