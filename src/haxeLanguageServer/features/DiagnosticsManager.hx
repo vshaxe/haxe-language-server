@@ -18,36 +18,14 @@ class DiagnosticsManager {
     }
 
     function onRunGlobalDiagnostics(_) {
-        function processError(error:String) {
-            context.sendLogMessage(Error, error);
-        }
-        context.callDisplay(["--display", "diagnostics"], null, null, processDiagnosticsReply, processError);
+        context.callDisplay(["--display", "diagnostics"], null, null, processDiagnosticsReply.bind(null), processErrorReply);
     }
 
-    function sendDiagnostics(uri: String, argumentsMap:DiagnosticsMap<Any>, hxDiagnostics:Array<HaxeDiagnostics<Any>>) {
-        // var doc = context.documents.get(uri);
-        // if (doc == null) {
-        //     return;
-        // }
-        var diagnostics = new Array<Diagnostic>();
-        for (hxDiag in hxDiagnostics) {
-            if (hxDiag.range == null)
-                continue;
-            var diag:Diagnostic = {
-                // range: doc.byteRangeToRange(hxDiag.range),
-                range: hxDiag.range,
-                source: "haxe",
-                code: (hxDiag.kind : Int),
-                severity: hxDiag.severity,
-                message: hxDiag.kind.getMessage(hxDiag.args)
-            }
-            argumentsMap.set({code: diag.code, range: diag.range}, hxDiag.args);
-            diagnostics.push(diag);
-        }
-        context.protocol.sendNotification(Methods.PublishDiagnostics, {uri: uri, diagnostics: diagnostics});
+    function processErrorReply(error:String) {
+        context.sendLogMessage(Error, error);
     }
 
-    function processDiagnosticsReply(s:String) {
+    function processDiagnosticsReply(uri:Null<String>, s:String) {
         var data:Array<HaxeDiagnosticsResponse<Any>> =
             try haxe.Json.parse(s)
             catch (e:Any) {
@@ -55,23 +33,56 @@ class DiagnosticsManager {
                 return;
             }
 
-        var pathFilter = PathHelper.preparePathFilter(
-            context.config.diagnosticsPathFilter, haxelibPath, context.workspacePath);
+        var pathFilter = PathHelper.preparePathFilter(context.config.diagnosticsPathFilter, haxelibPath, context.workspacePath);
+        var sent = new Map<String,Bool>();
         for (data in data) {
             if (PathHelper.matches(data.file, pathFilter)) {
                 var uri = Uri.fsPathToUri(data.file);
-                var map = diagnosticsArguments[uri] = new DiagnosticsMap();
-                sendDiagnostics(uri, map, data.diagnostics);
+                var argumentsMap = diagnosticsArguments[uri] = new DiagnosticsMap();
+                // var doc = context.documents.get(uri);
+                // if (doc == null) {
+                //     return;
+                // }
+                var diagnostics = new Array<Diagnostic>();
+                for (hxDiag in data.diagnostics) {
+                    if (hxDiag.range == null)
+                        continue;
+                    var diag:Diagnostic = {
+                        // range: doc.byteRangeToRange(hxDiag.range),
+                        range: hxDiag.range,
+                        source: "haxe",
+                        code: (hxDiag.kind : Int),
+                        severity: hxDiag.severity,
+                        message: hxDiag.kind.getMessage(hxDiag.args)
+                    }
+                    argumentsMap.set({code: diag.code, range: diag.range}, hxDiag.args);
+                    diagnostics.push(diag);
+                }
+                context.protocol.sendNotification(Methods.PublishDiagnostics, {uri: uri, diagnostics: diagnostics});
+                sent[uri] = true;
             }
+        }
+
+        inline function removeOldDiagnostsics(uri:String) {
+            if (!sent.exists(uri)) clearDiagnostics(uri);
+        }
+
+        if (uri == null) {
+            for (uri in diagnosticsArguments.keys())
+                removeOldDiagnostsics(uri);
+        } else {
+            removeOldDiagnostsics(uri);
         }
     }
 
+    inline function clearDiagnostics(uri:String) {
+        if (diagnosticsArguments.remove(uri))
+            context.protocol.sendNotification(Methods.PublishDiagnostics, {uri: uri, diagnostics: []});
+    }
+
     public function publishDiagnostics(uri:String) {
-        function processError(error:String) {
-            context.sendLogMessage(Error, error);
-        }
         var doc = context.documents.get(uri);
-        context.callDisplay(["--display", doc.fsPath + "@0@diagnostics"], null, null, processDiagnosticsReply, processError);
+        context.callDisplay(["--display", doc.fsPath + "@0@diagnostics"], null, null, processDiagnosticsReply.bind(uri), processErrorReply);
     }
 
     static var reEndsWithWhitespace = ~/\s*$/;
