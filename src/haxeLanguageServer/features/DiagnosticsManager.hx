@@ -7,13 +7,13 @@ import js.node.ChildProcess;
 
 class DiagnosticsManager {
     var context:Context;
-    var diagnosticsArguments:DiagnosticsMap<Any>;
+    var diagnosticsArguments:Map<String,DiagnosticsMap<Any>>;
     var hxDiagnostics:Array<HaxeDiagnostics<Any>>;
     var haxelibPath:String;
 
     public function new(context:Context) {
         this.context = context;
-        diagnosticsArguments = new DiagnosticsMap();
+        diagnosticsArguments = new Map();
         context.protocol.onNotification(VshaxeMethods.RunGlobalDiagnostics, onRunGlobalDiagnostics);
         ChildProcess.exec("haxelib config", function(error, stdout, stderr) haxelibPath = stdout.trim());
     }
@@ -25,7 +25,7 @@ class DiagnosticsManager {
         context.callDisplay(["--display", "diagnostics"], null, null, processDiagnosticsReply, processError);
     }
 
-    function sendDiagnostics(uri: String, hxDiagnostics:Array<HaxeDiagnostics<Any>>) {
+    function sendDiagnostics(uri: String, argumentsMap:DiagnosticsMap<Any>, hxDiagnostics:Array<HaxeDiagnostics<Any>>) {
         // var doc = context.documents.get(uri);
         // if (doc == null) {
         //     return;
@@ -43,14 +43,13 @@ class DiagnosticsManager {
                 severity: hxDiag.severity,
                 message: hxDiag.kind.getMessage(hxDiag.args)
             }
-            diagnosticsArguments.set({code: diag.code, range: diag.range}, hxDiag.args);
+            argumentsMap.set({code: diag.code, range: diag.range}, hxDiag.args);
             diagnostics.push(diag);
         }
         context.protocol.sendNotification(Methods.PublishDiagnostics, {uri: uri, diagnostics: diagnostics});
     }
 
     function processDiagnosticsReply(s:String) {
-        diagnosticsArguments = new DiagnosticsMap();
         var data:Array<HaxeDiagnosticsResponse<Any>> =
             try haxe.Json.parse(s)
             catch (e:Any) {
@@ -63,7 +62,8 @@ class DiagnosticsManager {
         for (data in data) {
             if (PathHelper.matches(data.file, pathFilter)) {
                 var uri = Uri.fsPathToUri(data.file);
-                sendDiagnostics(uri, data.diagnostics);
+                var map = diagnosticsArguments[uri] = new DiagnosticsMap();
+                sendDiagnostics(uri, map, data.diagnostics);
             }
         }
     }
@@ -139,7 +139,7 @@ class DiagnosticsManager {
 
     function getUnresolvedIdentifierActions(params:CodeActionParams, d:Diagnostic):Array<Command> {
         var actions:Array<Command> = [];
-        var args = getDiagnosticsArguments(DKUnresolvedIdentifier, d.range);
+        var args = getDiagnosticsArguments(params.textDocument.uri, DKUnresolvedIdentifier, d.range);
         for (arg in args) {
             actions = actions.concat(switch (arg.kind) {
                 case UISImport: getUnresolvedImportActions(params, d, arg);
@@ -174,7 +174,7 @@ class DiagnosticsManager {
 
     function getCompilerErrorActions(params:CodeActionParams, d:Diagnostic):Array<Command> {
         var actions:Array<Command> = [];
-        var arg = getDiagnosticsArguments(DKCompilerError, d.range);
+        var arg = getDiagnosticsArguments(params.textDocument.uri, DKCompilerError, d.range);
         var sugrex = ~/\(Suggestions?: (.*)\)/;
         if (sugrex.match(arg)) {
             var suggestions = sugrex.matched(1).split(",");
@@ -197,7 +197,7 @@ class DiagnosticsManager {
     }
 
     function getRemovableCodeActions(params:CodeActionParams, d:Diagnostic):Array<Command> {
-        var range = getDiagnosticsArguments(DKRemovableCode, d.range).range;
+        var range = getDiagnosticsArguments(params.textDocument.uri, DKRemovableCode, d.range).range;
         if (range == null) {
             return [];
         }
@@ -208,8 +208,10 @@ class DiagnosticsManager {
         }];
     }
 
-    inline function getDiagnosticsArguments<T>(kind:DiagnosticsKind<T>, range:Range):T {
-        return diagnosticsArguments.get({code: kind, range: range});
+    inline function getDiagnosticsArguments<T>(uri:String, kind:DiagnosticsKind<T>, range:Range):T {
+        var map = diagnosticsArguments[uri];
+        if (map == null) return null;
+        return map.get({code: kind, range: range});
     }
 }
 
