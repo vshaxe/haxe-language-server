@@ -8,7 +8,6 @@ import js.node.ChildProcess;
 class DiagnosticsManager {
     var context:Context;
     var diagnosticsArguments:Map<String,DiagnosticsMap<Any>>;
-    var hxDiagnostics:Array<HaxeDiagnostics<Any>>;
     var haxelibPath:String;
 
     public function new(context:Context) {
@@ -30,7 +29,6 @@ class DiagnosticsManager {
         // if (doc == null) {
         //     return;
         // }
-        this.hxDiagnostics = hxDiagnostics;
         var diagnostics = new Array<Diagnostic>();
         for (hxDiag in hxDiagnostics) {
             if (hxDiag.range == null)
@@ -126,14 +124,25 @@ class DiagnosticsManager {
             command: "haxe.applyFixes",
             arguments: [params.textDocument.uri, 0 /*TODO*/, [{range: patchRange(d.range), newText: ""}]]
         }];
-        var all = hxDiagnostics.filter(function(hxDiag) return hxDiag.kind == cast DKUnusedImport);
-        if (all.length > 1) {
-            ret.unshift({
-                title: "Remove all unused imports/usings",
-                command: "haxe.applyFixes",
-                arguments: [params.textDocument.uri, 0, all.map(function(hxDiag) return {range: patchRange(hxDiag.range), newText: ""})]
-            });
+
+        var map = diagnosticsArguments[params.textDocument.uri];
+        if (map != null) {
+            var fixes = [
+                for (key in map.keys())
+                    if (key.code == DKUnusedImport)
+                        {range: patchRange(key.range), newText: ""}
+            ];
+
+            if (fixes.length > 1) {
+                ret.unshift({
+                    title: "Remove all unused imports/usings",
+                    command: "haxe.applyFixes",
+                    arguments: [params.textDocument.uri, 0, fixes]
+                });
+            }
+
         }
+
         return ret;
     }
 
