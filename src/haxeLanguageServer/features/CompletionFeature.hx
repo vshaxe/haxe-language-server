@@ -4,6 +4,7 @@ import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
 import languageServerProtocol.Types;
+import haxeLanguageServer.helper.DocHelper;
 import haxeLanguageServer.helper.TypeHelper.prepareSignature;
 
 class CompletionFeature {
@@ -75,7 +76,7 @@ class CompletionFeature {
 
             var doc = el.get("d");
             if (doc != null)
-                item.documentation = doc;
+                item.documentation = DocHelper.extractText(doc);
 
             result.push(item);
         }
@@ -120,7 +121,7 @@ class CompletionFeature {
                 isTimer = true;
             }
             var item:CompletionItem = {label: name};
-            if (doc != null) item.documentation = doc;
+            if (doc != null) item.documentation = DocHelper.extractText(doc);
             if (kind != null) item.kind = kind;
             if (type != null) item.detail = formatType(type, name, kind);
             if (isTimer) item.insertText = " "; // can't be empty string or VSCode will ignore it, but still better than inserting this garbage 

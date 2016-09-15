@@ -4,6 +4,7 @@ import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import languageServerProtocol.Types;
 import jsonrpc.Types.NoData;
+import haxeLanguageServer.helper.DocHelper;
 import haxeLanguageServer.helper.TypeHelper.*;
 
 class HoverFeature {
@@ -43,18 +44,8 @@ class HoverFeature {
 
                     var value = type;
                     var d = xml.get("d");
-                    if (d != null) {
-                        // maybe we can borrow some code from dox for doc-comment handling...
-                        d = d.trim();
-                        d = d.split("\n").map(function(s) {
-                            s = s.trim();
-                            if (s.startsWith("*")) // javadoc-style comments
-                                s = s.substr(1).trim();
-                            return "\t" + s;
-                        }).join("\n");
-                        value = '/**\n$d\n**/\n$value';
-                    }
-
+                    if (d != null)
+                        value = DocHelper.formatText(DocHelper.extractText(d)) + "\n" + value;
                     var result:Hover = {contents: {language: "haxe", value: value}};
                     var p = HaxePosition.parse(xml.get("p"), doc, null);
                     if (p != null)
