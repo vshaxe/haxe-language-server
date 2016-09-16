@@ -115,8 +115,7 @@ class CompletionFeature {
             if (rawKind == "metadata") {
                 name = name.substr(1); // remove @ for metas
             } else if (isTimerDebugFieldCompletion(name)) {
-                kind = Value;
-                name = name + " " + type;
+                name += " " + type;
                 type = null;
                 isTimer = true;
             }
@@ -148,6 +147,7 @@ class CompletionFeature {
             case "type": Class;
             case "package": Module;
             case "metadata": Function;
+            case "timer": Value;
             default: trace("unknown field item kind: " + kind); null;
         }
     }
