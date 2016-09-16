@@ -1,5 +1,6 @@
 package haxeLanguageServer;
 
+import js.node.net.Socket;
 import js.node.child_process.ChildProcess as ChildProcessObject;
 import js.node.child_process.ChildProcess.ChildProcessEvent;
 import js.node.Buffer;
@@ -17,15 +18,17 @@ private class DisplayRequest {
     var stdin:String;
     var callback:String->Void;
     var errback:String->Void;
+    public var socket:Null<Socket>;
 
     static var stdinSepBuf = new Buffer([1]);
 
-    public function new(token:CancellationToken, args:Array<String>, stdin:String, callback:String->Void, errback:String->Void) {
+    public function new(token:CancellationToken, args:Array<String>, stdin:String, callback:String->Void, errback:String->Void, socket) {
         this.token = token;
         this.args = args;
         this.stdin = stdin;
         this.callback = callback;
         this.errback = errback;
+        this.socket = socket;
     }
 
     public function prepareBody():Buffer {
@@ -64,7 +67,12 @@ private class DisplayRequest {
         for (line in data.split("\n")) {
             switch (line.fastCodeAt(0)) {
                 case 0x01: // print
-                    trace("Haxe print:\n" + line.substring(1).replace("\x01", "\n"));
+                    var line = line.substring(1).replace("\x01", "\n");
+                    if (socket != null) {
+                        socket.write(line);
+                    } else {
+                        trace("Haxe print:\n" + line);
+                    }
                 case 0x02: // error
                     hasError = true;
                 default:
@@ -98,6 +106,7 @@ class HaxeServer {
     var requestsHead:DisplayRequest;
     var requestsTail:DisplayRequest;
     var currentRequest:DisplayRequest;
+    var socketListener:js.node.net.Server;
 
     public function new(context:Context) {
         this.context = context;
@@ -143,6 +152,35 @@ class HaxeServer {
                 callback();
             }
         }, function(errorMessage) error(errorMessage));
+        if (context.config.displayPort != null) {
+            startSocketServer(context.config.displayPort);
+        }
+    }
+
+    public function startSocketServer(port:Int) {
+        if (socketListener != null) {
+            socketListener.close();
+        }
+        socketListener = js.node.Net.createServer(function(socket) {
+            trace("Client connected");
+            socket.on('data', function(data:Buffer) {
+                var s = data.toString();
+                var split = s.split("\n");
+                split.pop(); // --connect passes extra \0
+                function send(message:String) {
+                    socket.write(message);
+                    socket.end();
+                    socket.destroy();
+                    trace("Client disconnected");
+                }
+                process(split, null, null, send, send, socket);
+            });
+            socket.on('error', function(err) {
+                 trace("Socket error: " + err);
+            });
+        });
+        socketListener.listen(port);
+        context.sendLogMessage(Log, 'Listening on port $port');
     }
 
     public function stop() {
@@ -150,6 +188,10 @@ class HaxeServer {
             proc.removeAllListeners();
             proc.kill();
             proc = null;
+        }
+
+        if (socketListener != null) {
+            socketListener.close();
         }
 
         // cancel all callbacks
@@ -193,9 +235,9 @@ class HaxeServer {
         }
     }
 
-    public function process(args:Array<String>, token:CancellationToken, stdin:String, callback:String->Void, errback:String->Void) {
+    public function process(args:Array<String>, token:CancellationToken, stdin:String, callback:String->Void, errback:String->Void, socket:Socket = null) {
         // create a request object
-        var request = new DisplayRequest(token, args, stdin, callback, errback);
+        var request = new DisplayRequest(token, args, stdin, callback, errback, socket);
 
         // if the request is cancellable, set a cancel callback to remove request from queue
         if (token != null) {
