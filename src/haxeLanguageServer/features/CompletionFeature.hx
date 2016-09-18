@@ -147,7 +147,7 @@ class CompletionFeature {
         // avert your eyes...
         var timeRegex = ~/([0-9.]*)s(?: \(([0-9]*)%\))?/;
         var seconds = 0.0; 
-        var percentage = "--%";
+        var percentage = "--";
         try {
             timeRegex.match(time);
             seconds = Std.parseFloat(timeRegex.matched(1));
@@ -156,7 +156,7 @@ class CompletionFeature {
         
         var doc = null;
         if (name.startsWith("@TIME")) {
-            name = name.replace("@TIME ", '${percentage.lpad("_", 2)}% ');
+            name = name.replace("@TIME ", '${percentage}% ');
             doc = seconds + "s";
         } else {
             name = "@Total time: " + time;
