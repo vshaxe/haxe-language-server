@@ -6,6 +6,7 @@ import jsonrpc.Types.NoData;
 import languageServerProtocol.Types;
 import haxeLanguageServer.helper.DocHelper;
 import haxeLanguageServer.helper.TypeHelper.prepareSignature;
+import String as Str;
 
 class CompletionFeature {
     var context:Context;
@@ -99,6 +100,7 @@ class CompletionFeature {
 
     static function parseFieldCompletion(x:Xml):Array<CompletionItem> {
         var result = [];
+        var timers = [];
         for (el in x.elements()) {
             var rawKind = el.get("k");
             var kind = fieldKindToCompletionItemKind(rawKind);
@@ -111,22 +113,62 @@ class CompletionFeature {
                 }
             }
             var name = el.get("n");
-            var isTimer = false;
             if (rawKind == "metadata") {
                 name = name.substr(1); // remove @ for metas
             } else if (isTimerDebugFieldCompletion(name)) {
-                name += " " + type;
-                type = null;
-                isTimer = true;
+                timers.push(getTimerCompletionItem(name, type));
+                continue;
             }
             var item:CompletionItem = {label: name};
             if (doc != null) item.documentation = DocHelper.extractText(doc);
             if (kind != null) item.kind = kind;
             if (type != null) item.detail = formatType(type, name, kind);
-            if (isTimer) item.insertText = " "; // can't be empty string or VSCode will ignore it, but still better than inserting this garbage 
             result.push(item);
         }
-        return result;
+        sortTimers(timers);
+        return result.concat(timers);
+    }
+
+    static function sortTimers(items:Array<CompletionItem>) {
+        items.sort(function(a, b) {
+            var time1:Float = cast a.data;
+            var time2:Float = cast b.data;
+            if (time1 < time2) return 1;
+            if (time1 > time2) return -1;
+            return 0;
+        });
+
+        for (i in 0...items.length) {
+            items[i].sortText = "_" + Str.fromCharCode(65 + i);
+        }
+    }
+
+    static function getTimerCompletionItem(name:String, time:String):CompletionItem {
+        // avert your eyes...
+        var timeRegex = ~/([0-9.]*)s(?: \(([0-9]*)%\))?/;
+        var seconds = 0.0; 
+        var percentage = "--%";
+        try {
+            timeRegex.match(time);
+            seconds = Std.parseFloat(timeRegex.matched(1));
+            percentage = timeRegex.matched(2);
+        } catch (e:Dynamic) {}
+        
+        var doc = null;
+        if (name.startsWith("@TIME")) {
+            name = name.replace("@TIME ", '${percentage.lpad("_", 2)}% ');
+            doc = seconds + "s";
+        } else {
+            name = "@Total time: " + time;
+        }
+
+        return {
+            label: name,
+            kind: Value,
+            documentation: doc,
+            insertText: " ", // can't be empty string or VSCode will ignore it, but still better than inserting this garbage
+            data: seconds
+        };
     }
 
     static inline function isTimerDebugFieldCompletion(name:String):Bool {
