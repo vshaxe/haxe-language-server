@@ -26,6 +26,7 @@ private typedef Config = {
     var diagnosticsPathFilter:String;
     var enableCodeLens:Bool;
     var displayServer:DisplayServerConfig;
+    var displayPort:Null<Int>;
 }
 
 private typedef InitOptions = {
