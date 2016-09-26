@@ -84,12 +84,12 @@ private class DisplayRequest {
         var data = buf.toString().trim();
 
         if (hasError)
-            return errback("Error from haxe server: " + data);
+            return errback("Error from Haxe server: " + data);
 
         try {
             callback(data);
         } catch (e:Any) {
-            errback(jsonrpc.ErrorUtils.errorToString(e, "Exception while handling haxe completion response: "));
+            errback(jsonrpc.ErrorUtils.errorToString(e, "Exception while handling Haxe completion response: "));
         }
     }
 }
@@ -140,7 +140,7 @@ class HaxeServer {
 
         process(["-version"], null, null, function(data) {
             if (!reVersion.match(data))
-                return error("Error parsing haxe version " + data);
+                return error("Error parsing Haxe version " + data);
 
             var major = Std.parseInt(reVersion.matched(1));
             var minor = Std.parseInt(reVersion.matched(2));
@@ -152,6 +152,16 @@ class HaxeServer {
                 callback();
             }
         }, function(errorMessage) error(errorMessage));
+
+        if (context.config.buildCompletionCache) {
+            trace("Initializing completion cache...");
+            process(context.displayArguments.concat(["--no-output"]), null, null, function(_) {
+                trace("Done.");
+            }, function(errorMessage) {
+                trace("Failed - try fixing the error(s) and restarting the language server:\n\n" + errorMessage);
+            });
+        }
+        
         if (context.config.displayPort != null) {
             startSocketServer(context.config.displayPort);
         }

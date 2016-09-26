@@ -27,6 +27,7 @@ private typedef Config = {
     var enableCodeLens:Bool;
     var displayServer:DisplayServerConfig;
     var displayPort:Null<Int>;
+    var buildCompletionCache:Bool;
 }
 
 private typedef InitOptions = {
