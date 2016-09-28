@@ -50,6 +50,7 @@ class CompletionFeature {
 
     static function parseToplevelCompletion(x:Xml):Array<CompletionItem> {
         var result = [];
+        var timers = [];
         for (el in x.elements()) {
             var kind = el.get("k");
             var type = el.get("t");
@@ -59,6 +60,12 @@ class CompletionFeature {
 
             var displayKind = toplevelKindToCompletionItemKind(kind);
             if (displayKind != null) item.kind = displayKind;
+
+            if (isTimerDebugFieldCompletion(name)) {
+                var info = name.split(":");
+                timers.push(getTimerCompletionItem(info[0], info[1]));
+                continue;
+            }
 
             var fullName = name;
             if (kind == "global")
@@ -81,7 +88,8 @@ class CompletionFeature {
 
             result.push(item);
         }
-        return result;
+        sortTimers(timers);
+        return result.concat(timers);
     }
 
     static function toplevelKindToCompletionItemKind(kind:String):CompletionItemKind {
@@ -93,6 +101,7 @@ class CompletionFeature {
             case "global": Variable;
             case "type": Class;
             case "package": Module;
+            case "timer": Value;
             default: trace("unknown toplevel item kind: " + kind); null;
         }
     }
