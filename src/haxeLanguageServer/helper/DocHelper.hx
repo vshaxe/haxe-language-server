@@ -8,7 +8,7 @@ class DocHelper {
         return doc.trim().split("\n").map(function(line) {
             line = line.trim();
             if (line.startsWith("*")) // JavaDoc-style comments
-                line = line.substr(1).trim();
+                line = line.substr(1);
             return line;
         }).join("\n");
     }
