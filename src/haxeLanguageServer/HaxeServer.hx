@@ -125,6 +125,9 @@ class HaxeServer {
             env[key] = context.displayServerConfig.env[key];
 
         var checkRun = ChildProcess.spawnSync(context.displayServerConfig.haxePath, ["-version"], {env: env});
+        if (checkRun.error != null)
+            return error('Error starting Haxe server: ${checkRun.error}');
+
         var output = (checkRun.stderr : Buffer).toString().trim();
 
         if (checkRun.status != 0)
