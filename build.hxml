@@ -1,9 +1,4 @@
--cp protocol/src
--cp src
--dce full
--lib hxnodejs
--D hxnodejs-no-version-warning
--debug
+build-each.hxml
 
 --each
 

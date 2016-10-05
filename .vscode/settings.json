@@ -1,3 +1,5 @@
 {
-    "haxe.displayConfigurations": [["build.hxml"]]
+    "haxe.displayConfigurations": [
+        ["build-each.hxml", "-main", "haxeLanguageServer.Main", "-js", "../bin/server.js"]
+    ]
 }
