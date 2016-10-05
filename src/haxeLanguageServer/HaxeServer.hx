@@ -96,7 +96,6 @@ private class DisplayRequest {
 
 class HaxeServer {
     var proc:ChildProcessObject;
-    var version:Array<Int>;
     static var reVersion = ~/^(\d+)\.(\d+)\.(\d+)(?:\s.*)?$/;
 
     var buffer:MessageBuffer;
@@ -117,7 +116,7 @@ class HaxeServer {
     public function start(callback:Void->Void) {
         stop();
 
-        var args = context.displayServerConfig.arguments.concat(["--wait", "stdio"]);
+        inline function error(s) context.sendShowMessage(Error, s);
 
         var env = new haxe.DynamicAccess();
         for (key in js.Node.process.env.keys())
@@ -125,33 +124,32 @@ class HaxeServer {
         for (key in context.displayServerConfig.env.keys())
             env[key] = context.displayServerConfig.env[key];
 
-        proc = ChildProcess.spawn(context.displayServerConfig.haxePath, args, {env: env});
+        var checkRun = ChildProcess.spawnSync(context.displayServerConfig.haxePath, ["-version"], {env: env});
+        var output = (checkRun.stderr : Buffer).toString().trim();
+
+        if (checkRun.status != 0)
+            return error("Haxe version check failed: " + output);
+
+        if (!reVersion.match(output))
+            return error("Error parsing Haxe version " + haxe.Json.stringify(output));
+
+        var major = Std.parseInt(reVersion.matched(1));
+        var minor = Std.parseInt(reVersion.matched(2));
+        var patch = Std.parseInt(reVersion.matched(3));
+        if (major < 3 || minor < 3)
+            return error("Unsupported Haxe version! Minimum version required: 3.3.0");
 
         buffer = new MessageBuffer();
         nextMessageLength = -1;
+
+        proc = ChildProcess.spawn(context.displayServerConfig.haxePath, context.displayServerConfig.arguments.concat(["--wait", "stdio"]), {env: env});
+
         proc.stdout.on(ReadableEvent.Data, function(buf:Buffer) {
             context.sendLogMessage(Log, reTrailingNewline.replace(buf.toString(), ""));
         });
         proc.stderr.on(ReadableEvent.Data, onData);
 
         proc.on(ChildProcessEvent.Exit, onExit);
-
-        inline function error(s) context.sendShowMessage(Error, s);
-
-        process(["-version"], null, null, function(data) {
-            if (!reVersion.match(data))
-                return error("Error parsing Haxe version " + data);
-
-            var major = Std.parseInt(reVersion.matched(1));
-            var minor = Std.parseInt(reVersion.matched(2));
-            var patch = Std.parseInt(reVersion.matched(3));
-            if (major < 3 || minor < 3) {
-                error("Unsupported Haxe version! Minimum version required: 3.3.0");
-            } else {
-                version = [major, minor, patch];
-                callback();
-            }
-        }, function(errorMessage) error(errorMessage));
 
         if (context.config.buildCompletionCache) {
             trace("Initializing completion cache...");
@@ -161,10 +159,11 @@ class HaxeServer {
                 trace("Failed - try fixing the error(s) and restarting the language server:\n\n" + errorMessage);
             });
         }
-        
-        if (context.config.displayPort != null) {
+
+        if (context.config.displayPort != null)
             startSocketServer(context.config.displayPort);
-        }
+
+        callback();
     }
 
     public function startSocketServer(port:Int) {
