@@ -7,7 +7,7 @@ class JavadocHelper {
         // TODO: need to parse this better as haxe source might have this sort of meta
         var ereg = ~/^@(param|default|exception|throws|deprecated|return|returns|since|see)\s+([^@]+)/gm;
 
-        doc = ereg.map(doc, function(e){
+        doc = ereg.map(doc, function(e) {
             var name = e.matched(1);
             var doc = e.matched(2);
             var value = null;
