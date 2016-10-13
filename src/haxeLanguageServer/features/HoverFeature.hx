@@ -1,5 +1,6 @@
 package haxeLanguageServer.features;
 
+import haxeLanguageServer.helper.JavadocHelper;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import languageServerProtocol.Types;
@@ -42,9 +43,12 @@ class HoverFeature {
                             if (type == null) "unknown" else type;
                     };
 
+                    
+
                     var d = xml.get("d");
-                    d = if (d == null) "" else DocHelper.extractText(d);
-                    var result:Hover = {contents: '```haxe\n${type}\n```\n$d' };
+                    d = if (d == null) "" else DocHelper.markdownFormat(d);
+
+                    var result:Hover = {contents: '```haxe\n${type}\n```\n${d}'};
                     var p = HaxePosition.parse(xml.get("p"), doc, null);
                     if (p != null)
                         result.range = p.range;
