@@ -33,8 +33,9 @@ class DocHelper {
             doc = indent.replace(doc, "");
         }
 
+        // TODO: check why this is necessary (dox doesn't seem to need it...)
         if (doc.charAt(0) == '*')
-            doc = doc.substr(1);
+            doc = doc.substr(1).ltrim();
 
         return doc;
     }
