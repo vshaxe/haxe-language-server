@@ -42,9 +42,9 @@ class DocHelper {
     public static function markdownFormat(doc:String):String {
         function tableLine(a, b) return '| $a | $b |\n';
         function tableHeader(a, b) return "\n" + tableLine(a, b) + tableLine("------", "------");
+        function replaceNewlines(s:String, by:String) return s.replace("\n", by).replace("\r", by);
         function mapDocTags(tags) return tags.map(function(p) {
-            var desc = StringTools.replace(p.doc, "\r", " ");
-            desc = StringTools.replace(desc, "\n", " ");
+            var desc = replaceNewlines(p.doc, " ");
             return tableLine("`" + p.value + "`", desc); }
         ).join("");
 
@@ -62,7 +62,7 @@ class DocHelper {
         if (hasParams)
             result += mapDocTags(docInfos.params);
         if (hasReturn)
-            result += tableLine("`return`", docInfos.returns.doc);
+            result += tableLine("`return`", replaceNewlines(docInfos.returns.doc, " "));
 
         if (docInfos.throws.length > 0)
             result += tableHeader("Exception", "Description") + mapDocTags(docInfos.throws);
