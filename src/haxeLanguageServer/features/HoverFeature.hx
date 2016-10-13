@@ -42,11 +42,9 @@ class HoverFeature {
                             if (type == null) "unknown" else type;
                     };
 
-                    var value = type;
                     var d = xml.get("d");
-                    if (d != null)
-                        value = DocHelper.formatText(DocHelper.extractText(d)) + "\n" + value;
-                    var result:Hover = {contents: {language: "haxe", value: value}};
+                    d = if (d == null) "" else DocHelper.extractText(d);
+                    var result:Hover = {contents: '```haxe\n${type}\n```\n$d' };
                     var p = HaxePosition.parse(xml.get("p"), doc, null);
                     if (p != null)
                         result.range = p.range;
