@@ -18,7 +18,8 @@ class CompletionFeature {
 
     function onCompletion(params:TextDocumentPositionParams, token:CancellationToken, resolve:Array<CompletionItem>->Void, reject:ResponseError<NoData>->Void) {
         var doc = context.documents.get(params.textDocument.uri);
-        var r = calculateCompletionPosition(doc.content, doc.offsetAt(params.position));
+        var offset = doc.offsetAt(params.position);
+        var r = calculateCompletionPosition(doc.content, offset);
         var bytePos = doc.offsetToByteOffset(r.pos);
         var args = ["--display", '${doc.fsPath}@$bytePos' + (if (r.toplevel) "@toplevel" else "")];
         context.callDisplay(args, doc.content, token, function(data) {
@@ -27,8 +28,9 @@ class CompletionFeature {
 
             var xml = try Xml.parse(data).firstElement() catch (_:Any) null;
             if (xml == null) return reject(ResponseError.internalError("Invalid xml data: " + data));
-
-            var items = if (r.toplevel) parseToplevelCompletion(xml) else parseFieldCompletion(xml);
+            
+            var char = doc.content.charAt(offset - 1);
+            var items = if (r.toplevel) parseToplevelCompletion(xml) else parseFieldCompletion(xml, char);
             resolve(items);
         }, function(error) reject(ResponseError.internalError(error)));
     }
@@ -106,8 +108,7 @@ class CompletionFeature {
         }
     }
 
-
-    static function parseFieldCompletion(x:Xml):Array<CompletionItem> {
+    static function parseFieldCompletion(x:Xml, char:String):Array<CompletionItem> {
         var result = [];
         var timers = [];
         for (el in x.elements()) {
@@ -122,8 +123,10 @@ class CompletionFeature {
                 }
             }
             var name = el.get("n");
+            var insertText = null;
             if (rawKind == "metadata") {
-                name = name.substr(1); // remove @ for metas
+                name = name.substr(1); // remove the @
+                if (char == ":") insertText = name.substr(1); // don't duplicate the :
             } else if (isTimerDebugFieldCompletion(name)) {
                 timers.push(getTimerCompletionItem(name, type));
                 continue;
@@ -132,6 +135,7 @@ class CompletionFeature {
             if (doc != null) item.documentation = DocHelper.extractText(doc);
             if (kind != null) item.kind = kind;
             if (type != null) item.detail = formatType(type, name, kind);
+            if (insertText != null) item.insertText = insertText;
             result.push(item);
         }
         sortTimers(timers);
