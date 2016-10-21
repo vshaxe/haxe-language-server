@@ -43,7 +43,7 @@ class CompletionFeature {
                 pos: index - reFieldPart.matched(3).length,
                 toplevel: false,
             };
-        else if(reStructPart.match(text))
+        else if (reStructPart.match(text))
             return {
                 pos: index - reStructPart.matched(1).length,
                 toplevel: false,
