@@ -84,7 +84,7 @@ class CodeLensFeature {
 
         var doc = context.documents.get(params.textDocument.uri);
         function processError(error:String) {
-            context.sendLogMessage(Error, error);
+            context.sendLogMessage(Log, error);
         }
         function processStatisticsReply(s:String) {
             var data:Array<Statistics> =

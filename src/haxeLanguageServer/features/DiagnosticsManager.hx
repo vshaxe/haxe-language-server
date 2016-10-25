@@ -22,7 +22,7 @@ class DiagnosticsManager {
     }
 
     function processErrorReply(error:String) {
-        context.sendLogMessage(Error, error);
+        context.sendLogMessage(Log, error);
     }
 
     function processDiagnosticsReply(uri:Null<String>, s:String) {
