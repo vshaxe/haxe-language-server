@@ -174,13 +174,13 @@ class DiagnosticsManager {
         var importPos = ImportHelper.getImportInsertPosition(doc);
         var importRange = { start: importPos, end: importPos };
         return [{
-            title: "Change to " + arg.name,
-            command: "haxe.applyFixes",
-            arguments: [params.textDocument.uri, 0, [{range: d.range, newText: arg.name}]]
-        }, {
             title: "Import " + arg.name,
             command: "haxe.applyFixes",
             arguments: [params.textDocument.uri, 0, [{range: importRange, newText: 'import ${arg.name};\n'}]]
+        }, {
+            title: "Change to " + arg.name,
+            command: "haxe.applyFixes",
+            arguments: [params.textDocument.uri, 0, [{range: d.range, newText: arg.name}]]
         }];
     }
 
