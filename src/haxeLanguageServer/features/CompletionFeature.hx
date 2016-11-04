@@ -108,6 +108,7 @@ class CompletionFeature {
             case "global": Variable;
             case "type": Class;
             case "package": Module;
+            case "literal": Keyword;
             case "timer": Value;
             default: trace("unknown toplevel item kind: " + kind); null;
         }
