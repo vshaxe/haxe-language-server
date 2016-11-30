@@ -176,11 +176,11 @@ class CompletionFeature {
         } catch (e:Dynamic) {}
         
         var doc = null;
-        if (name.startsWith("@TIME")) {
+        if (name.startsWith("@TIME @TOTAL")) {
+            name = "@Total time: " + time;
+        } else {
             name = name.replace("@TIME ", '${percentage}% ');
             doc = seconds + "s";
-        } else {
-            name = "@Total time: " + time;
         }
 
         return {
