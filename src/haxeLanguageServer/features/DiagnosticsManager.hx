@@ -151,7 +151,6 @@ class DiagnosticsManager {
                     arguments: [params.textDocument.uri, 0, fixes]
                 });
             }
-
         }
 
         return ret;

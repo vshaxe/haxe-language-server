@@ -16,15 +16,21 @@ class Uri {
         while (true) {
             var idx = path.indexOf("/", lastIdx);
             if (idx == -1) {
-                parts.push(path.substring(lastIdx).urlEncode());
+                parts.push(urlEncode2(path.substring(lastIdx)));
                 break;
             }
-            parts.push(path.substring(lastIdx, idx).urlEncode());
+            parts.push(urlEncode2(path.substring(lastIdx, idx)));
             parts.push("/");
             lastIdx = idx + 1;
         }
 
         return parts.join("");
+    }
+
+    private static function urlEncode2(s:String):String {
+        return ~/[!'()*]/g.map(s.urlEncode(), function(re) {
+            return "%" + re.matched(0).fastCodeAt(0).hex();
+        });
     }
 
     public static function uriToFsPath(uri:String):String {

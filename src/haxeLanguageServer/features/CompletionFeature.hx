@@ -167,7 +167,7 @@ class CompletionFeature {
     static function getTimerCompletionItem(name:String, time:String):CompletionItem {
         // avert your eyes...
         var timeRegex = ~/([0-9.]*)s(?: \(([0-9]*)%\))?/;
-        var seconds = 0.0; 
+        var seconds = 0.0;
         var percentage = "--";
         try {
             timeRegex.match(time);
