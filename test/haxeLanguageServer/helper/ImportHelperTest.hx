@@ -93,5 +93,5 @@ class ImportHelperTest extends TestCase {
     // Another comment
     ";
 
-    @:op(A + B) static function add(a:TestFile, b:TestFile) : TestFile;
+    @:op(A + B) static function add(a:TestFile, b:TestFile):TestFile;
 }

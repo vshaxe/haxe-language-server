@@ -40,14 +40,12 @@ class ImportHelper {
             if (line.startsWith("/*"))
                 bInComment = true;
 
-            if (bInComment && line.endsWith("*/"))
-            {
+            if (bInComment && line.endsWith("*/")) {
                 bInComment = false;
                 continue;
             }
 
-            if(!bInComment)
-            {
+            if (!bInComment) {
                 retLine = i;
                 break;
             }
