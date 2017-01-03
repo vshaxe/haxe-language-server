@@ -32,6 +32,18 @@ class ImportHelperTest extends TestCase {
         test(NoPackage);
         test(NoImport);
         test(ComplexPackage);
+
+        test(BlockComment + EmptyPackage);
+        test(BlockComment + EmptyPackageWithSpaces);
+        test(BlockComment + NoPackage);
+        test(BlockComment + NoImport);
+        test(BlockComment + ComplexPackage);
+
+        test(LineComment + EmptyPackage);
+        test(LineComment + EmptyPackageWithSpaces);
+        test(LineComment + NoPackage);
+        test(LineComment + NoImport);
+        test(LineComment + ComplexPackage);
     }
 }
 
@@ -66,4 +78,20 @@ class ImportHelperTest extends TestCase {
 
     |import haxe.io.Path;
     ";
+
+    var BlockComment = "
+
+    /*
+     * Comment
+     */
+
+    ";
+
+    var LineComment = "
+
+    // Comment
+    // Another comment
+    ";
+
+    @:op(A + B) static function add(a:TestFile, b:TestFile):TestFile;
 }
