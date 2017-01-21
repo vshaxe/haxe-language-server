@@ -131,7 +131,7 @@ class DiagnosticsManager {
         }
 
         var ret:Array<Command> = [{
-            title: "Remove import",
+            title: "Remove unused import/using",
             command: "haxe.applyFixes",
             arguments: [params.textDocument.uri, 0 /*TODO*/, [{range: patchRange(d.range), newText: ""}]]
         }];
