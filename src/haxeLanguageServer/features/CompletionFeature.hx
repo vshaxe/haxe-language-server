@@ -17,6 +17,8 @@ class CompletionFeature {
     }
 
     function onCompletion(params:TextDocumentPositionParams, token:CancellationToken, resolve:Array<CompletionItem>->Void, reject:ResponseError<NoData>->Void) {
+        context.diagnostics.clearAdditionalDiagnostics();
+        
         var doc = context.documents.get(params.textDocument.uri);
         var offset = doc.offsetAt(params.position);
         var textBefore = doc.content.substring(0, offset);

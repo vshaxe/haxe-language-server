@@ -6,6 +6,7 @@ class TypeHelper {
     static var argNameRegex = ~/^(\??\w+) : /;
     static var monomorphRegex = ~/^Unknown<\d+>$/;
     static var nullRegex = ~/^Null<(\$\d+)>$/;
+    static var typeRegex = ~/\b((_*[a-z]\w*\.)*)(_*[A-Z]\w*)\b/; // from the Haxe grammar
 
     static function getCloseChar(c:String):String {
         return switch (c) {
@@ -25,13 +26,17 @@ class TypeHelper {
         }
     }
 
+    public static function printFunctionDeclaration(args:Array<DisplayFunctionArgument>, ?ret:Null<String>):String {
+        return "function" + printFunctionSignature(args, ret);
+    }
+
     public static function printFunctionSignature(args:Array<DisplayFunctionArgument>, ret:Null<String>):String {
         var result = new StringBuf();
         result.addChar("(".code);
         var first = true;
         for (arg in args) {
             if (first) first = false else result.add(", ");
-            result.add(printFunctionArgument(arg));
+            result.add(printSignatureArgument(arg));
         }
         result.addChar(")".code);
         if (ret != null) {
@@ -41,7 +46,7 @@ class TypeHelper {
         return result.toString();
     }
 
-    public static function printFunctionArgument(arg:DisplayFunctionArgument):String {
+    public static function printSignatureArgument(arg:DisplayFunctionArgument):String {
         var result = arg.name;
         if (arg.opt)
             result = "?" + result;
@@ -50,6 +55,20 @@ class TypeHelper {
             result += arg.type;
         }
         return result;
+    }
+
+    public static function parseFunctionArgumentType(argument:String):DisplayType {
+        if (argument.startsWith("?"))
+            argument = argument.substr(1);
+        
+        var colonIndex = argument.indexOf(":");
+        var argumentType = argument.substr(colonIndex + 1);
+        
+        // urgh...
+        while (argumentType.startsWith("Null<") && argumentType.endsWith(">")) {
+            argumentType = argumentType.substring("Null<".length, argumentType.length - 1);
+        }
+        return parseDisplayType(argumentType);
     }
 
     public static function parseDisplayType(type:String):DisplayType {

@@ -46,7 +46,7 @@ class Context {
     public var protocol(default,null):Protocol;
     public var haxeServer(default,null):HaxeServer;
     public var documents(default,null):TextDocuments;
-    var diagnostics:DiagnosticsManager;
+    public var diagnostics:DiagnosticsManager;
 
     public var config(default, null):Config;
     @:allow(haxeLanguageServer.HaxeServer)
@@ -135,7 +135,7 @@ class Context {
 
                 if (config.enableDiagnostics) {
                     for (doc in documents.getAll())
-                        diagnostics.publishDiagnostics(doc.uri);
+                        diagnostics.refreshDiagnostics(doc.uri);
                 }
             });
         } else {
@@ -171,12 +171,12 @@ class Context {
     function onDidOpenTextDocument(event:DidOpenTextDocumentParams) {
         documents.onDidOpenTextDocument(event);
         if (diagnostics != null && config.enableDiagnostics)
-            diagnostics.publishDiagnostics(event.textDocument.uri);
+            diagnostics.refreshDiagnostics(event.textDocument.uri);
     }
 
     function onDidSaveTextDocument(event:DidSaveTextDocumentParams) {
         if (diagnostics != null && config.enableDiagnostics)
-            diagnostics.publishDiagnostics(event.textDocument.uri);
+            diagnostics.refreshDiagnostics(event.textDocument.uri);
     }
 
     public function callDisplay(args:Array<String>, stdin:String, token:CancellationToken, callback:String->Void, errback:String->Void) {

@@ -102,6 +102,12 @@ class TextDocument {
         return Std.int(Math.max(Math.min(lineOffset + position.character, nextLineOffset), lineOffset));
     }
 
+    public function indentAt(line:Int):String {
+        var re = ~/^\s*/;
+        re.match(lineAt(line));
+        return re.matched(0);
+    }
+
     function getLineOffsets() {
         if (lineOffsets == null) {
             var offsets = [];

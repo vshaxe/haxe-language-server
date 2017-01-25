@@ -1,5 +1,6 @@
 package haxeLanguageServer.features;
 
+import haxeLanguageServer.helper.TypeHelper;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
@@ -20,7 +21,34 @@ class SignatureHelpFeature {
         context.callDisplay(args, doc.content, token, function(data) {
             if (token.canceled)
                 return;
-            resolve(haxe.Json.parse(data));
+
+            var help:SignatureHelp = haxe.Json.parse(data);
+            context.diagnostics.clearAdditionalDiagnostics();
+            provideFunctionGeneration(params, help);
+            resolve(help);
         }, function(error) reject(ResponseError.internalError(error)));
+    }
+
+    function provideFunctionGeneration(params:TextDocumentPositionParams, help:SignatureHelp) {
+        var signature = help.signatures[help.activeSignature].parameters[help.activeParameter].label;
+        var currentType = TypeHelper.parseFunctionArgumentType(signature);
+        switch (currentType) {
+            case DTFunction(args, ret):
+                var generatedCode = TypeHelper.printFunctionDeclaration(args) + " ";
+                var range = { start: params.position, end: params.position};
+                var title = "Generate inline function";
+                context.diagnostics.addAdditionalDiagnostic(params.textDocument.uri, {
+                    code: -1,
+                    range: range,
+                    severity: DiagnosticSeverity.Hint,
+                    source: "haxe",
+                    message: title
+                }, {
+                    title: title,
+                    command: "haxe.applyFixes",
+                    arguments: [params.textDocument.uri, 0, [{range: range, newText: generatedCode}]]
+                });
+            case _:
+        }
     }
 }
