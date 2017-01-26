@@ -31,22 +31,33 @@ class TypeHelperTest extends TestCaseBase {
     }
 
     function testPrintFunctionDeclaration() {
-        var parsed = TypeHelper.parseFunctionArgumentType("?Callback:Null<flixel.FlxObject -> ?String -> Void>");
-        switch (parsed) {
-            case DisplayType.DTFunction(args, ret):
-                var decl = TypeHelper.printFunctionDeclaration(args, ret);
-                assertEquals("function(a:flixel.FlxObject, ?b:String):Void", decl);
-            case _:
-                fail();
-        }
+        assertPrintedEquals(TypeHelper.parseFunctionArgumentType,
+            "function(a:flixel.FlxObject, ?b:String):Void",
+            "?Callback:Null<flixel.FlxObject -> ?String -> Void>",
+            {argumentTypeHints: true, returnTypeHint: Always});
+        
+        assertPrintedEquals(TypeHelper.parseDisplayType,
+            "function(a, b)",
+            "String -> Bool -> Void>",
+            {argumentTypeHints: false, returnTypeHint: Never});
+
+        assertPrintedEquals(TypeHelper.parseDisplayType,
+            "function(a:String, b:Bool)",
+            "String -> Bool -> Void",
+            {argumentTypeHints: true, returnTypeHint: NonVoid});
+
+        assertPrintedEquals(TypeHelper.parseDisplayType,
+            "function():String",
+            "Void -> String",
+            {argumentTypeHints: true, returnTypeHint: NonVoid});
     }
 
-    function testPrintFunctionDeclarationNullReturn() {
-        var parsed = TypeHelper.parseFunctionArgumentType("?Callback:String -> Void");
+    function assertPrintedEquals(parser:String->DisplayType, expected:String, functionType:String, formatting:FunctionFormattingConfig) {
+        var parsed = TypeHelper.parseFunctionArgumentType(functionType);
         switch (parsed) {
             case DisplayType.DTFunction(args, ret):
-                var decl = TypeHelper.printFunctionDeclaration(args);
-                assertEquals("function(a:String)", decl);
+                var decl = TypeHelper.printFunctionDeclaration(args, ret, formatting);
+                assertEquals(expected, decl);
             case _:
                 fail();
         }

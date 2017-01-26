@@ -6,6 +6,7 @@ import jsonrpc.Types;
 import jsonrpc.Protocol;
 import languageServerProtocol.Types;
 import haxeLanguageServer.features.*;
+import haxeLanguageServer.helper.TypeHelper.FunctionFormattingConfig;
 
 private typedef DisplayServerConfigBase = {
     var haxePath:String;
@@ -20,6 +21,14 @@ private typedef DisplayServerConfig = {
     @:optional var osx:DisplayServerConfigBase;
 }
 
+private typedef FunctionGenerationConfig = {
+    @:optional var anonymous:FunctionFormattingConfig;
+}
+
+private typedef CodeGenerationConfig = {
+    @:optional var functions:FunctionGenerationConfig;
+}
+
 private typedef Config = {
     var displayConfigurations:Array<Array<String>>;
     var enableDiagnostics:Bool;
@@ -28,6 +37,7 @@ private typedef Config = {
     var displayServer:DisplayServerConfig;
     var displayPort:Null<Int>;
     var buildCompletionCache:Bool;
+    var codeGeneration:CodeGenerationConfig;
 }
 
 private typedef InitOptions = {
@@ -118,6 +128,7 @@ class Context {
 
         config = newConfig.settings.haxe;
         updateDisplayServerConfig();
+        updateCodeGenerationConfig();
 
         if (firstInit) {
             haxeServer.start(function() {
@@ -140,6 +151,7 @@ class Context {
             });
         } else {
             haxeServer.restart("configuration was changed");
+            diagnostics.clearAdditionalDiagnostics();
         }
     }
 
@@ -166,6 +178,16 @@ class Context {
             if (sysConf != null)
                 merge(sysConf);
         }
+    }
+
+    function updateCodeGenerationConfig() {
+        var codeGen = config.codeGeneration;
+        if (codeGen.functions == null)
+            codeGen.functions = {};
+
+        var functions = codeGen.functions;
+        if (functions.anonymous == null)
+            functions.anonymous = {argumentTypeHints: false, returnTypeHint: Never};
     }
 
     function onDidOpenTextDocument(event:DidOpenTextDocumentParams) {

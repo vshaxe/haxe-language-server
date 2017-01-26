@@ -34,9 +34,9 @@ class SignatureHelpFeature {
         var currentType = TypeHelper.parseFunctionArgumentType(signature);
         switch (currentType) {
             case DTFunction(args, ret):
-                var generatedCode = TypeHelper.printFunctionDeclaration(args) + " ";
+                var generatedCode = TypeHelper.printFunctionDeclaration(args, ret, context.config.codeGeneration.functions.anonymous) + " ";
                 var range = { start: params.position, end: params.position};
-                var title = "Generate inline function";
+                var title = "Generate anonymous function";
                 context.diagnostics.addAdditionalDiagnostic(params.textDocument.uri, {
                     code: -1,
                     range: range,
