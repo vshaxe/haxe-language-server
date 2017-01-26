@@ -30,12 +30,13 @@ class SignatureHelpFeature {
     }
 
     function provideFunctionGeneration(params:TextDocumentPositionParams, help:SignatureHelp) {
-        var signature = help.signatures[help.activeSignature].parameters[help.activeParameter].label;
-        var currentType = TypeHelper.parseFunctionArgumentType(signature);
+        var activeParam = help.signatures[help.activeSignature].parameters[help.activeParameter];
+        if (activeParam == null) return;
+        var currentType = TypeHelper.parseFunctionArgumentType(activeParam.label);
         switch (currentType) {
             case DTFunction(args, ret):
                 var generatedCode = TypeHelper.printFunctionDeclaration(args, ret, context.config.codeGeneration.functions.anonymous) + " ";
-                var range = { start: params.position, end: params.position};
+                var range = {start: params.position, end: params.position};
                 var title = "Generate anonymous function";
                 context.diagnostics.addAdditionalDiagnostic(params.textDocument.uri, {
                     code: -1,
