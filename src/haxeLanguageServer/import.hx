@@ -1,1 +1,2 @@
 using StringTools;
+using haxeLanguageServer.helper.ProtocolTypesHelper;

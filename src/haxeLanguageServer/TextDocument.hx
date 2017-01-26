@@ -108,6 +108,10 @@ class TextDocument {
         return re.matched(0);
     }
 
+    public function getRange(range:Range) {
+        return content.substring(byteOffsetAt(range.start), byteOffsetAt(range.end));
+    }
+
     function getLineOffsets() {
         if (lineOffsets == null) {
             var offsets = [];

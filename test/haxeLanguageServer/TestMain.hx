@@ -9,6 +9,7 @@ class TestMain {
         runner.add(new PathHelperTest());
         runner.add(new ImportHelperTest());
         runner.add(new TypeHelperTest());
+        runner.add(new ProtocolTypesHelperTest());
         var success = runner.run();
         Sys.exit(if (success) 0 else 1);
     }
