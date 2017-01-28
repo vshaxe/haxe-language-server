@@ -57,6 +57,7 @@ class Context {
     public var haxeServer(default,null):HaxeServer;
     public var documents(default,null):TextDocuments;
     public var codeActions(default,null):CodeActionFeature;
+    public var signatureHelp(default,null):SignatureHelpFeature;
     var diagnostics:DiagnosticsManager;
 
     public var config(default, null):Config;
@@ -137,7 +138,7 @@ class Context {
                 
                 new CompletionFeature(this);
                 new HoverFeature(this);
-                new SignatureHelpFeature(this);
+                signatureHelp = new SignatureHelpFeature(this);
                 new GotoDefinitionFeature(this);
                 new FindReferencesFeature(this);
                 new DocumentSymbolsFeature(this);
@@ -145,6 +146,7 @@ class Context {
 
                 diagnostics = new DiagnosticsManager(this);
                 new CodeLensFeature(this);
+                new CodeGenerationFeature(this);
 
                 if (config.enableDiagnostics) {
                     for (doc in documents.getAll())

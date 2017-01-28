@@ -1,18 +1,21 @@
 package haxeLanguageServer.features;
 
-import haxeLanguageServer.helper.TypeHelper;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
 import languageServerProtocol.Types;
 
+typedef CurrentSignature = {
+    var help(default, never):SignatureHelp;
+    var params(default, never):TextDocumentPositionParams; 
+}
+
 class SignatureHelpFeature {
+    public var currentSignature(default, null):CurrentSignature;
     var context:Context;
-    var lastResponse:{help: SignatureHelp, params: TextDocumentPositionParams};
 
     public function new(context:Context) {
         this.context = context;
-        context.codeActions.registerContributor(provideFunctionGeneration);
         context.protocol.onRequest(Methods.SignatureHelp, onSignatureHelp);
     }
 
@@ -26,29 +29,7 @@ class SignatureHelpFeature {
 
             var help:SignatureHelp = haxe.Json.parse(data);
             resolve(help);
-            lastResponse = {help: help, params: params};
+            currentSignature = {help: help, params: params};
         }, function(error) reject(ResponseError.internalError(error)));
-    }
-
-    function provideFunctionGeneration(params:CodeActionParams):Array<Command> {
-        if (lastResponse == null || lastResponse.params.textDocument.uri != params.textDocument.uri) return [];
-
-        var help = lastResponse.help;
-        var activeParam = help.signatures[help.activeSignature].parameters[help.activeParameter];
-        if (activeParam == null) return [];
-        
-        var position = lastResponse.params.position;
-        var currentType = TypeHelper.parseFunctionArgumentType(activeParam.label);
-        switch (currentType) {
-            case DTFunction(args, ret):
-                var generatedCode = TypeHelper.printFunctionDeclaration(args, ret, context.config.codeGeneration.functions.anonymous) + " ";
-                return [{
-                    title: "Generate anonymous function",
-                    command: "haxe.applyFixes",
-                    arguments: [params.textDocument.uri, 0, [{range: position.toRange(), newText: generatedCode}]]
-                }];
-            case _:
-                return [];
-        }
     }
 }
