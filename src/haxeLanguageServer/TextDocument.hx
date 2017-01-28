@@ -108,7 +108,7 @@ class TextDocument {
         return re.matched(0);
     }
 
-    public function getRange(range:Range) {
+    public function getText(range:Range) {
         return content.substring(byteOffsetAt(range.start), byteOffsetAt(range.end));
     }
 

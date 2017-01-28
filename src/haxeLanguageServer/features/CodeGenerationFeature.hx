@@ -42,7 +42,7 @@ class CodeGenerationFeature {
         var range = params.range;
         var startLine = range.start.line;
         var indent = doc.indentAt(startLine);
-        var extraction = doc.getRange(range).replace("$", "\\$");
+        var extraction = doc.getText(range).replace("$", "\\$");
         var variable = '${indent}var $$ = $extraction;\n';
         var insertRange = {line: startLine, character: 0}.toRange();
         
