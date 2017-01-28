@@ -12,6 +12,7 @@ class DiagnosticsManager {
 
     public function new(context:Context) {
         this.context = context;
+        context.codeActions.registerContributor(getCodeActions);
         diagnosticsArguments = new Map();
         context.protocol.onNotification(VshaxeMethods.RunGlobalDiagnostics, onRunGlobalDiagnostics);
         ChildProcess.exec("haxelib config", function(error, stdout, stderr) haxelibPath = stdout.trim());
@@ -88,7 +89,7 @@ class DiagnosticsManager {
     static var reEndsWithWhitespace = ~/\s*$/;
     static var reStartsWhitespace = ~/^\s*/;
 
-    public function getCodeActions<T>(params:CodeActionParams) {
+    function getCodeActions<T>(params:CodeActionParams) {
         var actions:Array<Command> = [];
         for (d in params.context.diagnostics) {
             if (!(d.code is Int)) // our codes are int, so we don't handle other stuff
