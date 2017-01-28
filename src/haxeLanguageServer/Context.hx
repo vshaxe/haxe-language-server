@@ -4,7 +4,6 @@ import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types;
 import jsonrpc.Protocol;
-import languageServerProtocol.Types;
 import haxeLanguageServer.features.*;
 import haxeLanguageServer.helper.TypeHelper.FunctionFormattingConfig;
 

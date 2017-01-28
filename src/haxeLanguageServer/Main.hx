@@ -4,7 +4,6 @@ import js.Node.process;
 import jsonrpc.node.MessageReader;
 import jsonrpc.node.MessageWriter;
 import jsonrpc.Protocol;
-import languageServerProtocol.Types;
 
 class Main {
     static function main() {

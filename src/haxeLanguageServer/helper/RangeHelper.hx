@@ -1,7 +1,5 @@
 package haxeLanguageServer.helper;
 
-import languageServerProtocol.Types;
-
 /** 
  * Extends `languageServerProtocol.Types.Range` with the
  * same utility methods that `vscode.Range` provides

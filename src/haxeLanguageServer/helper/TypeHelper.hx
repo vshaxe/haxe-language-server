@@ -1,5 +1,7 @@
 package haxeLanguageServer.helper;
 
+import String.fromCharCode;
+
 typedef FunctionFormattingConfig = {
     var argumentTypeHints:Bool;
     var returnTypeHint:ReturnTypeHintOption;
@@ -167,7 +169,7 @@ class TypeHelper {
                     }
                     type = argNameRegex.matchedRight();
                 } else {
-                    name = String.fromCharCode(argNameCode + i);
+                    name = fromCharCode(argNameCode + i);
                     type = part;
                     if (type.charCodeAt(0) == "?".code) {
                         type = type.substring(1);

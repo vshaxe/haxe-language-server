@@ -1,7 +1,5 @@
 package haxeLanguageServer;
 
-import languageServerProtocol.Types;
-
 class TextDocuments {
     public static inline var syncKind = TextDocumentSyncKind.Incremental;
 

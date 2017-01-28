@@ -1,7 +1,5 @@
 package haxeLanguageServer;
 
-import languageServerProtocol.Types;
-
 abstract ApplyFixesCommand(Command) to Command {
     public function new(title:String, params:{textDocument:TextDocumentIdentifier}, edits:Array<TextEdit>) {
         this = {

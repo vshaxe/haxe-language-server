@@ -3,10 +3,9 @@ package haxeLanguageServer.features;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
-import languageServerProtocol.Types;
 import haxeLanguageServer.helper.DocHelper;
 import haxeLanguageServer.helper.TypeHelper.prepareSignature;
-import String as Str;
+import String.fromCharCode;
 
 class CompletionFeature {
     var context:Context;
@@ -160,7 +159,7 @@ class CompletionFeature {
         });
 
         for (i in 0...items.length) {
-            items[i].sortText = "_" + Str.fromCharCode(65 + i);
+            items[i].sortText = "_" + fromCharCode(65 + i);
         }
     }
 

@@ -3,7 +3,6 @@ package haxeLanguageServer.features;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
-import languageServerProtocol.Types;
 
 @:enum
 private abstract ModuleSymbolKind(Int) {

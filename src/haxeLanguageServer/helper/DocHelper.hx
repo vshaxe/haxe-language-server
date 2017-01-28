@@ -1,7 +1,5 @@
 package haxeLanguageServer.helper;
 
-using StringTools;
-
 class DocHelper {
     /** Stolen from dox **/
     public static function trim(doc:String) {

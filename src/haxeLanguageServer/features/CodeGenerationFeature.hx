@@ -1,6 +1,5 @@
 package haxeLanguageServer.features;
 
-import languageServerProtocol.Types;
 import haxeLanguageServer.helper.TypeHelper;
 
 class CodeGenerationFeature {

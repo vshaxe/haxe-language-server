@@ -1,7 +1,5 @@
 package haxeLanguageServer.helper;
 
-import languageServerProtocol.Types;
-
 class PositionStatics {
     public static function Min(pos1:Position, pos2:Position) {
         return if (pos1.isBefore(pos2)) pos1 else pos2;

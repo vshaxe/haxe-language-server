@@ -2,7 +2,6 @@ package haxeLanguageServer.features;
 
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
-import languageServerProtocol.Types;
 import jsonrpc.Types.NoData;
 import haxeLanguageServer.helper.DocHelper;
 import haxeLanguageServer.helper.TypeHelper.*;
