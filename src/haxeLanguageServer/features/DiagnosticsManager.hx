@@ -131,11 +131,8 @@ class DiagnosticsManager {
             return range;
         }
 
-        var ret:Array<Command> = [{
-            title: "Remove unused import/using",
-            command: "haxe.applyFixes",
-            arguments: [params.textDocument.uri, 0 /*TODO*/, [{range: patchRange(d.range), newText: ""}]]
-        }];
+        var ret:Array<Command> = new ApplyFixesCommand("Remove unused import/using", params,
+            [{range: patchRange(d.range), newText: ""}]);
 
         var map = diagnosticsArguments[params.textDocument.uri];
         if (map != null) {
@@ -146,11 +143,7 @@ class DiagnosticsManager {
             ];
 
             if (fixes.length > 1) {
-                ret.unshift({
-                    title: "Remove all unused imports/usings",
-                    command: "haxe.applyFixes",
-                    arguments: [params.textDocument.uri, 0, fixes]
-                });
+                ret.unshift(new ApplyFixesCommand("Remove all unused imports/usings", params, fixes));
             }
         }
 
@@ -173,23 +166,19 @@ class DiagnosticsManager {
         var doc = context.documents.get(params.textDocument.uri);
         var importPos = ImportHelper.getImportInsertPosition(doc);
         var importRange = { start: importPos, end: importPos };
-        return [{
-            title: "Import " + arg.name,
-            command: "haxe.applyFixes",
-            arguments: [params.textDocument.uri, 0, [{range: importRange, newText: 'import ${arg.name};\n'}]]
-        }, {
-            title: "Change to " + arg.name,
-            command: "haxe.applyFixes",
-            arguments: [params.textDocument.uri, 0, [{range: d.range, newText: arg.name}]]
-        }];
+        return [
+            new ApplyFixesCommand("Import " + arg.name, params,
+                [{range: importRange, newText: 'import ${arg.name};\n'}]
+            ),
+            new ApplyFixesCommand("Change to " + arg.name, params,
+                [{range: d.range, newText: arg.name}]
+            )
+        ];
     }
 
     function getTypoActions(params:CodeActionParams, d:Diagnostic, arg):Array<Command> {
-        return [{
-            title: "Change to " + arg.name,
-            command: "haxe.applyFixes",
-            arguments: [params.textDocument.uri, 0, [{range: d.range, newText: arg.name}]]
-        }];
+        return new ApplyFixesCommand("Change to " + arg.name, params,
+            [{range: d.range, newText: arg.name}]);
     }
 
     function getCompilerErrorActions(params:CodeActionParams, d:Diagnostic):Array<Command> {
@@ -206,11 +195,8 @@ class DiagnosticsManager {
             }
             for (suggestion in suggestions) {
                 suggestion = suggestion.trim();
-                actions.push({
-                    title: "Change to " + suggestion,
-                    command: "haxe.applyFixes",
-                    arguments: [params.textDocument.uri, 0, [{range: range, newText: suggestion}]]
-                });
+                actions.push(new ApplyFixesCommand("Change to " + suggestion, params,
+                    [{range: range, newText: suggestion}]));
             }
         }
         return actions;
@@ -218,14 +204,8 @@ class DiagnosticsManager {
 
     function getRemovableCodeActions(params:CodeActionParams, d:Diagnostic):Array<Command> {
         var range = getDiagnosticsArguments(params.textDocument.uri, DKRemovableCode, d.range).range;
-        if (range == null) {
-            return [];
-        }
-        return [{
-            title: "Remove",
-            command: "haxe.applyFixes",
-            arguments: [params.textDocument.uri, 0, [{range: range, newText: ""}]]
-        }];
+        if (range == null) return [];
+        return new ApplyFixesCommand("Remove", params, [{range: range, newText: ""}]);
     }
 
     inline function getDiagnosticsArguments<T>(uri:String, kind:DiagnosticsKind<T>, range:Range):T {

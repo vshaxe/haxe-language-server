@@ -25,11 +25,8 @@ class CodeGenerationFeature {
         switch (currentType) {
             case DTFunction(args, ret):
                 var generatedCode = TypeHelper.printFunctionDeclaration(args, ret, context.config.codeGeneration.functions.anonymous) + " ";
-                return [{
-                    title: "Generate anonymous function",
-                    command: "haxe.applyFixes",
-                    arguments: [params.textDocument.uri, 0, [{range: position.toRange(), newText: generatedCode}]]
-                }];
+                return new ApplyFixesCommand("Generate anonymous function", params,
+                        [{range: position.toRange(), newText: generatedCode}]);
             case _:
                 return [];
         }
@@ -46,10 +43,7 @@ class CodeGenerationFeature {
         var variable = '${indent}var $$ = $extraction;\n';
         var insertRange = {line: startLine, character: 0}.toRange();
         
-        return [{
-            title: "Extract variable",
-            arguments: [params.textDocument.uri, 0, [{range: insertRange, newText: variable}, {range: params.range, newText: "$"}]],
-            command: "haxe.applyFixes"
-        }];
+        return new ApplyFixesCommand("Extract variable", params,
+            [{range: insertRange, newText: variable}, {range: params.range, newText: "$"}]);
     }
 }
