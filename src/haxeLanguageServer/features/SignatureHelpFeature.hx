@@ -8,9 +8,11 @@ import languageServerProtocol.Types;
 
 class SignatureHelpFeature {
     var context:Context;
+    var lastResponse:{help: SignatureHelp, params: TextDocumentPositionParams};
 
-    public function new(context) {
+    public function new(context:Context) {
         this.context = context;
+        context.codeActions.registerContributor(provideFunctionGeneration);
         context.protocol.onRequest(Methods.SignatureHelp, onSignatureHelp);
     }
 
@@ -23,33 +25,30 @@ class SignatureHelpFeature {
                 return;
 
             var help:SignatureHelp = haxe.Json.parse(data);
-            context.diagnostics.clearAdditionalDiagnostics();
-            provideFunctionGeneration(params, help);
             resolve(help);
+            lastResponse = {help: help, params: params};
         }, function(error) reject(ResponseError.internalError(error)));
     }
 
-    function provideFunctionGeneration(params:TextDocumentPositionParams, help:SignatureHelp) {
+    function provideFunctionGeneration(params:CodeActionParams):Array<Command> {
+        if (lastResponse == null || lastResponse.params.textDocument.uri != params.textDocument.uri) return [];
+
+        var help = lastResponse.help;
         var activeParam = help.signatures[help.activeSignature].parameters[help.activeParameter];
-        if (activeParam == null) return;
+        if (activeParam == null) return [];
+        
+        var position = lastResponse.params.position;
         var currentType = TypeHelper.parseFunctionArgumentType(activeParam.label);
         switch (currentType) {
             case DTFunction(args, ret):
                 var generatedCode = TypeHelper.printFunctionDeclaration(args, ret, context.config.codeGeneration.functions.anonymous) + " ";
-                var range = {start: params.position, end: params.position};
-                var title = "Generate anonymous function";
-                context.diagnostics.addAdditionalDiagnostic(params.textDocument.uri, {
-                    code: -1,
-                    range: range,
-                    severity: DiagnosticSeverity.Hint,
-                    source: "haxe",
-                    message: title
-                }, {
-                    title: title,
+                return [{
+                    title: "Generate anonymous function",
                     command: "haxe.applyFixes",
-                    arguments: [params.textDocument.uri, 0, [{range: range, newText: generatedCode}]]
-                });
+                    arguments: [params.textDocument.uri, 0, [{range: position.toRange(), newText: generatedCode}]]
+                }];
             case _:
+                return [];
         }
     }
 }

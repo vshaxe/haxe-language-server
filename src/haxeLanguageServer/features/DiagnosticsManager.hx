@@ -7,14 +7,12 @@ import js.node.ChildProcess;
 
 class DiagnosticsManager {
     var context:Context;
-    var diagnosticsArguments:Map<String,DiagnosticsMap>;
-    var additionalDiagnostics:Map<String,DiagnosticsMap>;
+    var diagnosticsArguments:Map<String,DiagnosticsMap<Any>>;
     var haxelibPath:String;
 
     public function new(context:Context) {
         this.context = context;
         diagnosticsArguments = new Map();
-        additionalDiagnostics = new Map();
         context.protocol.onNotification(VshaxeMethods.RunGlobalDiagnostics, onRunGlobalDiagnostics);
         ChildProcess.exec("haxelib config", function(error, stdout, stderr) haxelibPath = stdout.trim());
     }
@@ -45,6 +43,7 @@ class DiagnosticsManager {
                 // if (doc == null) {
                 //     return;
                 // }
+                var diagnostics = new Array<Diagnostic>();
                 for (hxDiag in data.diagnostics) {
                     if (hxDiag.range == null)
                         continue;
@@ -56,9 +55,10 @@ class DiagnosticsManager {
                         severity: hxDiag.severity,
                         message: hxDiag.kind.getMessage(hxDiag.args)
                     }
-                    argumentsMap.set({code: diag.code, range: diag.range}, {args: hxDiag.args, diagnostic: diag});
+                    argumentsMap.set({code: diag.code, range: diag.range}, hxDiag.args);
+                    diagnostics.push(diag);
                 }
-                publishDiagnostics(uri);
+                context.protocol.sendNotification(Methods.PublishDiagnostics, {uri: uri, diagnostics: diagnostics});
                 sent[uri] = true;
             }
         }
@@ -75,34 +75,12 @@ class DiagnosticsManager {
         }
     }
 
-    public function addAdditionalDiagnostic(uri:String, diagnostic:Diagnostic, command:Command) {
-        var map = additionalDiagnostics[uri] = new DiagnosticsMap();
-        map.add(DKCustom, diagnostic, command);
-        publishDiagnostics(uri);
-    }
-
-    public function clearAdditionalDiagnostics() {
-        var uris = [for (uri in additionalDiagnostics.keys()) uri];
-        additionalDiagnostics = new Map();
-        for (uri in uris) publishDiagnostics(uri);
-    }
-
-    function publishDiagnostics(uri:String) {
-        function getDiagnostics(uri, map) {
-            var map = map.get(uri);
-            if (map == null) return [];
-            return map.getDiagnostics();
-        }
-        var diagnostics = getDiagnostics(uri, diagnosticsArguments).concat(getDiagnostics(uri, additionalDiagnostics));
-        context.protocol.sendNotification(Methods.PublishDiagnostics, {uri: uri, diagnostics: diagnostics});
-    }
-
     inline function clearDiagnostics(uri:String) {
         if (diagnosticsArguments.remove(uri))
             context.protocol.sendNotification(Methods.PublishDiagnostics, {uri: uri, diagnostics: []});
     }
 
-    public function refreshDiagnostics(uri:String) {
+    public function publishDiagnostics(uri:String) {
         var doc = context.documents.get(uri);
         context.callDisplay(["--display", doc.fsPath + "@0@diagnostics"], null, null, processDiagnosticsReply.bind(uri), processErrorReply);
     }
@@ -117,7 +95,6 @@ class DiagnosticsManager {
                 continue;
             var code = new DiagnosticsKind<T>(d.code);
             actions = actions.concat(switch (code) {
-                case DKCustom: [getDiagnosticsArguments(additionalDiagnostics, params.textDocument.uri, DKCustom, params.range)];
                 case DKUnusedImport: getUnusedImportActions(params, d);
                 case DKUnresolvedIdentifier: getUnresolvedIdentifierActions(params, d);
                 case DKCompilerError: getCompilerErrorActions(params, d);
@@ -181,7 +158,7 @@ class DiagnosticsManager {
 
     function getUnresolvedIdentifierActions(params:CodeActionParams, d:Diagnostic):Array<Command> {
         var actions:Array<Command> = [];
-        var args = getDiagnosticsArguments(diagnosticsArguments, params.textDocument.uri, DKUnresolvedIdentifier, d.range);
+        var args = getDiagnosticsArguments(params.textDocument.uri, DKUnresolvedIdentifier, d.range);
         for (arg in args) {
             actions = actions.concat(switch (arg.kind) {
                 case UISImport: getUnresolvedImportActions(params, d, arg);
@@ -216,7 +193,7 @@ class DiagnosticsManager {
 
     function getCompilerErrorActions(params:CodeActionParams, d:Diagnostic):Array<Command> {
         var actions:Array<Command> = [];
-        var arg = getDiagnosticsArguments(diagnosticsArguments, params.textDocument.uri, DKCompilerError, d.range);
+        var arg = getDiagnosticsArguments(params.textDocument.uri, DKCompilerError, d.range);
         var sugrex = ~/\(Suggestions?: (.*)\)/;
         if (sugrex.match(arg)) {
             var suggestions = sugrex.matched(1).split(",");
@@ -239,7 +216,7 @@ class DiagnosticsManager {
     }
 
     function getRemovableCodeActions(params:CodeActionParams, d:Diagnostic):Array<Command> {
-        var range = getDiagnosticsArguments(diagnosticsArguments, params.textDocument.uri, DKRemovableCode, d.range).range;
+        var range = getDiagnosticsArguments(params.textDocument.uri, DKRemovableCode, d.range).range;
         if (range == null) {
             return [];
         }
@@ -250,10 +227,10 @@ class DiagnosticsManager {
         }];
     }
 
-    inline function getDiagnosticsArguments<T>(map:Map<String,DiagnosticsMap>, uri:String, kind:DiagnosticsKind<T>, range:Range):T {
-        var map = map[uri];
+    inline function getDiagnosticsArguments<T>(uri:String, kind:DiagnosticsKind<T>, range:Range):T {
+        var map = diagnosticsArguments[uri];
         if (map == null) return null;
-        return map.get({code: kind, range: range}).args;
+        return map.get({code: kind, range: range});
     }
 }
 
@@ -269,7 +246,6 @@ class DiagnosticsManager {
 
 
 @:enum private abstract DiagnosticsKind<T>(Int) from Int to Int {
-    var DKCustom:DiagnosticsKind<Command> = -1; // 
     var DKUnusedImport:DiagnosticsKind<Void> = 0;
     var DKUnresolvedIdentifier:DiagnosticsKind<Array<{kind: UnresolvedIdentifierSuggestion, name: String}>> = 1;
     var DKCompilerError:DiagnosticsKind<String> = 2;
@@ -281,7 +257,6 @@ class DiagnosticsManager {
 
     public function getMessage(args:T) {
         return switch ((this : DiagnosticsKind<T>)) {
-            case DKCustom: args.title;
             case DKUnusedImport: "Unused import";
             case DKUnresolvedIdentifier: "Unresolved identifier";
             case DKCompilerError: args;
@@ -302,11 +277,9 @@ private typedef HaxeDiagnosticsResponse<T> = {
     var diagnostics:Array<HaxeDiagnostics<T>>;
 }
 
-private typedef DiagnosticsMapKey = {code:Int, range:Range};
+private typedef DiagnosticsMapKey = {code: Int, range:Range};
 
-private typedef DiagnosticsMapValue = {args:Any, diagnostic:Diagnostic};
-
-private class DiagnosticsMap extends haxe.ds.BalancedTree<DiagnosticsMapKey, DiagnosticsMapValue> {
+private class DiagnosticsMap<T> extends haxe.ds.BalancedTree<DiagnosticsMapKey, T> {
     override function compare(k1:DiagnosticsMapKey, k2:DiagnosticsMapKey) {
         var start1 = k1.range.start;
         var start2 = k2.range.start;
@@ -316,13 +289,5 @@ private class DiagnosticsMap extends haxe.ds.BalancedTree<DiagnosticsMapKey, Dia
         return compare(k1.code, k2.code, compare(start1.line, start2.line, compare(start1.character, start2.character,
             compare(end1.line, end2.line, compare(end1.character, end2.character, 0)
         ))));
-    }
-
-    public function add(code:Int, diagnostic:Diagnostic, args:Any) {
-        set({code: code, range: diagnostic.range}, {args: args, diagnostic: diagnostic});
-    }
-
-    public function getDiagnostics():Array<Diagnostic> {
-        return [for (value in this) value.diagnostic];
     }
 }

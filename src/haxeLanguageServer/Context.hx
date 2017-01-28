@@ -56,7 +56,8 @@ class Context {
     public var protocol(default,null):Protocol;
     public var haxeServer(default,null):HaxeServer;
     public var documents(default,null):TextDocuments;
-    public var diagnostics:DiagnosticsManager;
+    public var codeActions(default,null):CodeActionFeature;
+    var diagnostics:DiagnosticsManager;
 
     public var config(default, null):Config;
     @:allow(haxeLanguageServer.HaxeServer)
@@ -132,6 +133,8 @@ class Context {
 
         if (firstInit) {
             haxeServer.start(function() {
+                codeActions = new CodeActionFeature(this);
+                
                 new CompletionFeature(this);
                 new HoverFeature(this);
                 new SignatureHelpFeature(this);
@@ -141,17 +144,15 @@ class Context {
                 new DeterminePackageFeature(this);
 
                 diagnostics = new DiagnosticsManager(this);
-                new CodeActionFeature(this, diagnostics);
                 new CodeLensFeature(this);
 
                 if (config.enableDiagnostics) {
                     for (doc in documents.getAll())
-                        diagnostics.refreshDiagnostics(doc.uri);
+                        diagnostics.publishDiagnostics(doc.uri);
                 }
             });
         } else {
             haxeServer.restart("configuration was changed");
-            diagnostics.clearAdditionalDiagnostics();
         }
     }
 
@@ -193,12 +194,12 @@ class Context {
     function onDidOpenTextDocument(event:DidOpenTextDocumentParams) {
         documents.onDidOpenTextDocument(event);
         if (diagnostics != null && config.enableDiagnostics)
-            diagnostics.refreshDiagnostics(event.textDocument.uri);
+            diagnostics.publishDiagnostics(event.textDocument.uri);
     }
 
     function onDidSaveTextDocument(event:DidSaveTextDocumentParams) {
         if (diagnostics != null && config.enableDiagnostics)
-            diagnostics.refreshDiagnostics(event.textDocument.uri);
+            diagnostics.publishDiagnostics(event.textDocument.uri);
     }
 
     public function callDisplay(args:Array<String>, stdin:String, token:CancellationToken, callback:String->Void, errback:String->Void) {

@@ -17,7 +17,6 @@ class TypeHelper {
     static var argNameRegex = ~/^(\??\w+) : /;
     static var monomorphRegex = ~/^Unknown<\d+>$/;
     static var nullRegex = ~/^Null<(\$\d+)>$/;
-    static var typeRegex = ~/\b((_*[a-z]\w*\.)*)(_*[A-Z]\w*)\b/; // from the Haxe grammar
 
     static function getCloseChar(c:String):String {
         return switch (c) {
