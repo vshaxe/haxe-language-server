@@ -84,12 +84,16 @@ class TypeHelper {
         
         var colonIndex = argument.indexOf(":");
         var argumentType = argument.substr(colonIndex + 1);
-        
-        // urgh...
-        while (argumentType.startsWith("Null<") && argumentType.endsWith(">")) {
-            argumentType = argumentType.substring("Null<".length, argumentType.length - 1);
+ 
+        return parseDisplayType(unwrapNullable(argumentType));
+    }
+
+    public static function unwrapNullable(type:String):String {
+        if (type == null) return null;
+        while (type.startsWith("Null<") && type.endsWith(">")) {
+            type = type.substring("Null<".length, type.length - 1);
         }
-        return parseDisplayType(argumentType);
+        return type;
     }
 
     public static function parseDisplayType(type:String):DisplayType {

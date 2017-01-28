@@ -1,5 +1,6 @@
 package haxeLanguageServer.features;
 
+import haxeLanguageServer.helper.ArgumentNameHelper;
 import haxeLanguageServer.helper.TypeHelper;
 
 class CodeGenerationFeature {
@@ -23,6 +24,9 @@ class CodeGenerationFeature {
         var currentType = TypeHelper.parseFunctionArgumentType(activeParam.label);
         switch (currentType) {
             case DTFunction(args, ret):
+                var names = ArgumentNameHelper.guessArgumentNames([for (arg in args) arg.type]);
+                for (i in 0...args.length) args[i].name = names[i];
+
                 var generatedCode = TypeHelper.printFunctionDeclaration(args, ret, context.config.codeGeneration.functions.anonymous) + " ";
                 return new ApplyFixesCommand("Generate anonymous function", params,
                         [{range: position.toRange(), newText: generatedCode}]);

@@ -9,5 +9,6 @@ build-each.hxml
 
 -cp test
 -main haxeLanguageServer.TestMain
+-lib compiletime
 -js ../bin/test.js
 -cmd node ../bin/test.js

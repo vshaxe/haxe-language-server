@@ -5,6 +5,7 @@ haxe:
 
 install:
  - haxelib install hxnodejs
+ - haxelib install compiletime
 
 script:
  - haxe build.hxml

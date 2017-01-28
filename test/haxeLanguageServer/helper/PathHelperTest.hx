@@ -3,7 +3,7 @@ package haxeLanguageServer.helper;
 import haxe.unit.TestCase;
 import haxe.PosInfos;
 
-class PathHelperTest extends TestCase {
+class PathHelperTest extends TestCaseBase {
     public function testMatches() {
         function matches(filter:TestFilter, path:TestPath):Bool {
             var pathFilter = PathHelper.preparePathFilter(

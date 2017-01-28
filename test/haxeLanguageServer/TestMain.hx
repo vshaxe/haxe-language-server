@@ -1,16 +1,15 @@
 package haxeLanguageServer;
 
 import haxe.unit.TestRunner;
-import haxeLanguageServer.helper.*;
 
 class TestMain {
     public function new() {
         var runner = new TestRunner();
-        runner.add(new PathHelperTest());
-        runner.add(new ImportHelperTest());
-        runner.add(new TypeHelperTest());
-        runner.add(new PositionHelperTest());
-        runner.add(new RangeHelperTest());
+
+        CompileTime.importPackage("haxeLanguageServer.helper");
+        var tests = CompileTime.getAllClasses(TestCaseBase);
+        for (testClass in tests) runner.add(Type.createInstance(testClass, []));
+
         var success = runner.run();
         Sys.exit(if (success) 0 else 1);
     }

@@ -5,7 +5,7 @@ import haxeLanguageServer.TextDocument;
 import haxe.PosInfos;
 using StringTools;
 
-class ImportHelperTest extends TestCase {
+class ImportHelperTest extends TestCaseBase {
     public function testGetImportInsertPosition() {
         function test(file:TestFile, ?pos:PosInfos) {
             var line = -1;
