@@ -47,11 +47,12 @@ class CompletionFeature {
                 pos: index - reStructPart.matched(1).length,
                 toplevel: false,
             };
-        else
-            return {
-                pos: index,
-                toplevel: true,
-            };
+        
+        var whitespaceAmount = text.length - text.rtrim().length;
+        return {
+            pos: index - whitespaceAmount,
+            toplevel: true,
+        };
     }
 
     static function parseToplevelCompletion(x:Xml):Array<CompletionItem> {
