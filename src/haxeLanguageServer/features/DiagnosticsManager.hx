@@ -18,10 +18,36 @@ class DiagnosticsManager {
     }
 
     function onRunGlobalDiagnostics(_) {
-        context.callDisplay(["--display", "diagnostics"], null, null, processDiagnosticsReply.bind(null), processErrorReply);
+        context.callDisplay(["--display", "diagnostics"], null, null, processDiagnosticsReply.bind(null), processErrorReply.bind(null));
     }
 
-    function processErrorReply(error:String) {
+    function processErrorReply(uri:Null<String>, error:String) {
+        clearDiagnostics(uri);
+        
+        var problemMatcher = ~/(.+):(\d+): (?:lines \d+-(\d+)|character(?:s (\d+)-| )(\d+)) : (?:(Warning) : )?(.*)/;
+        if (problemMatcher.match(error)) {
+            inline function getInt(i)
+                return Std.parseInt(problemMatcher.matched(i));
+
+            var line = getInt(2);
+            var endLine = getInt(3);
+            var column = getInt(4);
+            var endColumn = getInt(5);
+
+            if (endLine == null) endLine = line;
+            var position = {line: line - 1, character: column + 1};
+            var endPosition = {line: endLine - 1, character: endColumn + 1};
+
+            var argumentsMap = diagnosticsArguments[uri] = new DiagnosticsMap();
+            var diag = {
+                range: {start: position, end: endPosition},
+                source: "haxe",
+                severity: Error,
+                message: problemMatcher.matched(7)
+            };
+            context.protocol.sendNotification(Methods.PublishDiagnostics, {uri: uri, diagnostics: [diag]});
+            argumentsMap.set({code: DKCompilerError, range: diag.range}, error);
+        }
         context.sendLogMessage(Log, error);
     }
 
@@ -82,7 +108,7 @@ class DiagnosticsManager {
 
     public function publishDiagnostics(uri:String) {
         var doc = context.documents.get(uri);
-        context.callDisplay(["--display", doc.fsPath + "@0@diagnostics"], null, null, processDiagnosticsReply.bind(uri), processErrorReply);
+        context.callDisplay(["--display", doc.fsPath + "@0@diagnostics"], null, null, processDiagnosticsReply.bind(uri), processErrorReply.bind(uri));
     }
 
     static var reEndsWithWhitespace = ~/\s*$/;
