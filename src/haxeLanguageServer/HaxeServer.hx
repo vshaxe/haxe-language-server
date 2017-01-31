@@ -60,7 +60,7 @@ private class DisplayRequest {
 
     public function processResult(data:String) {
         if (data == null || (token != null && token.canceled))
-            return callback(null);
+            return errback("Invalid data or canceled request");
 
         var buf = new StringBuf();
         var hasError = false;
@@ -106,6 +106,8 @@ class HaxeServer {
     var requestsTail:DisplayRequest;
     var currentRequest:DisplayRequest;
     var socketListener:js.node.net.Server;
+
+    var crashes:Int = 0;
 
     public function new(context:Context) {
         this.context = context;
@@ -222,6 +224,13 @@ class HaxeServer {
     }
 
     function onExit(_, _) {
+        crashes++;
+        if (crashes >= 3) {
+            trace("\nHaxe process has crashed 3 times, not attempting any more restarts.\n" +
+                "Please verify your display configuration does not contain invalid arguments.\n" +
+                'Current arguments: ${context.displayServerConfig.arguments}');
+            return;
+        }
         restart("Haxe process was killed");
     }
 
