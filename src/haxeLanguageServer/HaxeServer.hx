@@ -154,7 +154,7 @@ class HaxeServer {
 
         proc.on(ChildProcessEvent.Exit, onExit);
 
-        if (context.config.buildCompletionCache) {
+        if (context.config.buildCompletionCache && context.displayArguments != null) {
             trace("Initializing completion cache...");
             process(context.displayArguments.concat(["--no-output"]), null, null, function(_) {
                 trace("Done.");
