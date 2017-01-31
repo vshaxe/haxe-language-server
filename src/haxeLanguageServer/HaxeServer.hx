@@ -60,7 +60,7 @@ private class DisplayRequest {
 
     public function processResult(data:String) {
         if (data == null || (token != null && token.canceled))
-            return errback("Invalid data or canceled request");
+            return; // TODO: properly handle canceled requests
 
         var buf = new StringBuf();
         var hasError = false;
