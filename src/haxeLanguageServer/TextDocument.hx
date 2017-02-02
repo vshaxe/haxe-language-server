@@ -2,6 +2,8 @@ package haxeLanguageServer;
 
 import js.node.Buffer;
 
+typedef OnTextDocumentChangeListener = TextDocument->Array<TextDocumentContentChangeEvent>->Int->Void;
+
 class TextDocument {
     public var uri(default,null):String;
     public var fsPath(default,null):String;
@@ -11,6 +13,7 @@ class TextDocument {
     public var lineCount(get,never):Int;
     @:allow(haxeLanguageServer.TextDocuments)
     var lineOffsets:Array<Int>;
+    var onUpdateListeners:Array<OnTextDocumentChangeListener> = [];
 
     public function new(uri:String, languageId:String, version:Int, content:String) {
         this.uri = uri;
@@ -21,6 +24,9 @@ class TextDocument {
     }
 
     public function update(events:Array<TextDocumentContentChangeEvent>, version:Int):Void {
+        for (listener in onUpdateListeners)
+            listener(this, events, version);
+        
         this.version = version;
         for (event in events) {
             if (event.range == null || event.rangeLength == null) {
@@ -109,6 +115,14 @@ class TextDocument {
 
     public function getText(range:Range) {
         return content.substring(byteOffsetAt(range.start), byteOffsetAt(range.end));
+    }
+
+    public function addUpdateListener(listener:OnTextDocumentChangeListener) {
+        onUpdateListeners.push(listener);
+    }
+
+    public function removeUpdateListener(listener:OnTextDocumentChangeListener) {
+        onUpdateListeners.remove(listener);
     }
 
     function getLineOffsets() {
