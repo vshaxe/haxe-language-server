@@ -35,8 +35,8 @@ class DiagnosticsManager {
             var endColumn = getInt(5);
 
             if (endLine == null) endLine = line;
-            var position = {line: line - 1, character: column + 1};
-            var endPosition = {line: endLine - 1, character: endColumn + 1};
+            var position = {line: line - 1, character: column};
+            var endPosition = {line: endLine - 1, character: endColumn};
 
             var argumentsMap = diagnosticsArguments[uri] = new DiagnosticsMap();
             var diag = {
