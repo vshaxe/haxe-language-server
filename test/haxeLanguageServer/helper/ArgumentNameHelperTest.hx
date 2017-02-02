@@ -13,8 +13,8 @@ class ArgumentNameHelperTest extends TestCaseBase {
     }
 
     function testGuessArgumentName() {
-        function assert(expected, original)
-            assertEquals(expected, ArgumentNameHelper.guessArgumentName(original));
+        function assert(expected, original, ?posInfos)
+            assertEquals(expected, ArgumentNameHelper.guessArgumentName(original), posInfos);
 
         assert("object", "FlxObject");
         assert("f", "F");
@@ -26,5 +26,7 @@ class ArgumentNameHelperTest extends TestCaseBase {
         assert("i", "Null<Null<Int>>");
         assert("s", "String");
         assert("unknown", null);
+        assert("c", "C<Int,String>");
+        assert("unknown", "<Int,String>");
     }
 }

@@ -96,6 +96,14 @@ class TypeHelper {
         return type;
     }
 
+    public static function getTypeWithoutParams(type:String):String {
+        if (type == null) return null;
+        var index = type.indexOf("<");
+        if (index >= 0)
+            return type.substring(0, index);
+        return type;
+    }
+
     public static function parseDisplayType(type:String):DisplayType {
         // replace arrows to ease parsing ">" in type params
         type = type.replace(" -> ", "%");

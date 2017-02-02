@@ -7,8 +7,10 @@ class ArgumentNameHelper {
 
     public static function guessArgumentName(type:String):String {
         type = TypeHelper.unwrapNullable(type);
+        type = TypeHelper.getTypeWithoutParams(type);
+
         return switch (type) {
-            case null: "unknown";
+            case null, "": "unknown";
             case "Int": "i";
             case "Float": "f";
             case "Bool": "b";
