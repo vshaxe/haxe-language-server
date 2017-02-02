@@ -9,7 +9,9 @@ class CodeGenerationFeature {
     public function new(context:Context) {
         this.context = context;
         context.codeActions.registerContributor(generateAnonymousFunction);
+        #if debug
         context.codeActions.registerContributor(extractVariable);
+        #end
     }
 
     function generateAnonymousFunction(params:CodeActionParams):Array<Command> {
