@@ -22,6 +22,8 @@ class DiagnosticsManager {
     }
 
     function processErrorReply(uri:Null<String>, error:String) {
+        if (isPathFiltered(Uri.uriToFsPath(uri)))
+            return;
         clearDiagnostics(uri);
         
         var problemMatcher = ~/(.+):(\d+): (?:lines \d+-(\d+)|character(?:s (\d+)-| )(\d+)) : (?:(Warning) : )?(.*)/;
@@ -59,34 +61,31 @@ class DiagnosticsManager {
                 return;
             }
 
-        var pathFilter = PathHelper.preparePathFilter(context.config.diagnosticsPathFilter, haxelibPath, context.workspacePath);
         var sent = new Map<String,Bool>();
         for (data in data) {
-            if (PathHelper.matches(data.file, pathFilter)) {
-                var uri = Uri.fsPathToUri(data.file);
-                var argumentsMap = diagnosticsArguments[uri] = new DiagnosticsMap();
-                // var doc = context.documents.get(uri);
-                // if (doc == null) {
-                //     return;
-                // }
-                var diagnostics = new Array<Diagnostic>();
-                for (hxDiag in data.diagnostics) {
-                    if (hxDiag.range == null)
-                        continue;
-                    var diag:Diagnostic = {
-                        // range: doc.byteRangeToRange(hxDiag.range),
-                        range: hxDiag.range,
-                        source: "haxe",
-                        code: (hxDiag.kind : Int),
-                        severity: hxDiag.severity,
-                        message: hxDiag.kind.getMessage(hxDiag.args)
-                    }
-                    argumentsMap.set({code: diag.code, range: diag.range}, hxDiag.args);
-                    diagnostics.push(diag);
+            if (isPathFiltered(data.file))
+                continue;
+        
+            var uri = Uri.fsPathToUri(data.file);
+            var argumentsMap = diagnosticsArguments[uri] = new DiagnosticsMap();
+
+            var diagnostics = new Array<Diagnostic>();
+            for (hxDiag in data.diagnostics) {
+                if (hxDiag.range == null)
+                    continue;
+                var diag:Diagnostic = {
+                    // range: doc.byteRangeToRange(hxDiag.range),
+                    range: hxDiag.range,
+                    source: "haxe",
+                    code: (hxDiag.kind : Int),
+                    severity: hxDiag.severity,
+                    message: hxDiag.kind.getMessage(hxDiag.args)
                 }
-                context.protocol.sendNotification(Methods.PublishDiagnostics, {uri: uri, diagnostics: diagnostics});
-                sent[uri] = true;
+                argumentsMap.set({code: diag.code, range: diag.range}, hxDiag.args);
+                diagnostics.push(diag);
             }
+            context.protocol.sendNotification(Methods.PublishDiagnostics, {uri: uri, diagnostics: diagnostics});
+            sent[uri] = true;
         }
 
         inline function removeOldDiagnostics(uri:String) {
@@ -99,6 +98,11 @@ class DiagnosticsManager {
         } else {
             removeOldDiagnostics(uri);
         }
+    }
+
+    function isPathFiltered(path:String):Bool {
+        var pathFilter = PathHelper.preparePathFilter(context.config.diagnosticsPathFilter, haxelibPath, context.workspacePath);
+        return !PathHelper.matches(path, pathFilter);
     }
 
     inline function clearDiagnostics(uri:String) {
