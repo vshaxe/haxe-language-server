@@ -1,12 +1,12 @@
 package haxeLanguageServer.helper;
 
 class ArrayHelper {
-    public static function occurences<T>(a:Array<T>, element:T):Int {
-        var occurences = 0;
+    public static function occurrences<T>(a:Array<T>, element:T):Int {
+        var occurrences = 0;
         for (e in a)
             if (e == element)
-                occurences++;
-        return occurences;
+                occurrences++;
+        return occurrences;
     }
 
     public static function equals<T>(a1:Array<T>, a2:Array<T>):Bool {

@@ -89,15 +89,15 @@ class DiagnosticsManager {
             }
         }
 
-        inline function removeOldDiagnostsics(uri:String) {
+        inline function removeOldDiagnostics(uri:String) {
             if (!sent.exists(uri)) clearDiagnostics(uri);
         }
 
         if (uri == null) {
             for (uri in diagnosticsArguments.keys())
-                removeOldDiagnostsics(uri);
+                removeOldDiagnostics(uri);
         } else {
-            removeOldDiagnostsics(uri);
+            removeOldDiagnostics(uri);
         }
     }
 

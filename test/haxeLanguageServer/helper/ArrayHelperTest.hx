@@ -11,9 +11,9 @@ class ArrayHelperTest extends TestCaseBase {
         assertFalse([1].equals([1, 1]));
     }
 
-    function testOccurences() {
-        assertEquals(0, [].occurences("foo"));
-        assertEquals(1, ["foo"].occurences("foo"));
-        assertEquals(2, ["bar", "foo", "bar", "bar", "foo"].occurences("foo"));
+    function testOccurrences() {
+        assertEquals(0, [].occurrences("foo"));
+        assertEquals(1, ["foo"].occurrences("foo"));
+        assertEquals(2, ["bar", "foo", "bar", "bar", "foo"].occurrences("foo"));
     }
 }

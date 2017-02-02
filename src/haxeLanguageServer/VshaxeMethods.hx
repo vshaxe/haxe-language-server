@@ -10,7 +10,7 @@ class VshaxeMethods {
     static inline var DidChangeDisplayConfigurationIndex = new NotificationMethod<{index:Int}>("vshaxe/didChangeDisplayConfigurationIndex");
 
     /**
-        This reuqest is sent from the client to the server to determine the haxe package for a given file,
+        This request is sent from the client to the server to determine the haxe package for a given file,
         based on class paths configuration.
     **/
     static inline var DeterminePackage = new RequestMethod<{fsPath:String},{pack:String},NoData>("vshaxe/determinePackage");

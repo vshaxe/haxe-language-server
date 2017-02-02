@@ -1,6 +1,5 @@
 package haxeLanguageServer.helper;
 
-import haxe.unit.TestCase;
 import haxe.PosInfos;
 
 class PathHelperTest extends TestCaseBase {

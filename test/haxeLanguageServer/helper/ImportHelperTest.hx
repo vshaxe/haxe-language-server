@@ -1,6 +1,5 @@
 package haxeLanguageServer.helper;
 
-import haxe.unit.TestCase;
 import haxeLanguageServer.TextDocument;
 import haxe.PosInfos;
 using StringTools;

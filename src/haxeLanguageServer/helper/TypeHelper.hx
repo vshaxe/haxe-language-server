@@ -102,7 +102,7 @@ class TypeHelper {
 
         // prepare a simple toplevel signature without nested arrows
         // nested arrow can be in () or <> and we don't need to modify them,
-        // so we store them separately in `groups` map and replace their occurence
+        // so we store them separately in `groups` map and replace their occurrence
         // with a group name in the toplevel string
         var toplevel = new StringBuf();
         var groups = new Map();
@@ -132,7 +132,7 @@ class TypeHelper {
                 groups[groupId].add(char);
         }
 
-        // process a sigle type entry, replacing inner content from groups
+        // process a single type entry, replacing inner content from groups
         // and removing unnecessary parentheses
         function processType(type:String):String {
             type = groupRegex.map(type, function(r) {

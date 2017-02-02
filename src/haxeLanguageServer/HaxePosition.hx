@@ -20,7 +20,7 @@ class HaxePosition {
                 uri: if (file == doc.fsPath) doc.uri else Uri.fsPathToUri(file),
                 range: {
                     start: {line: startLine - 1, character: 0},
-                    end: {line: endLine, character: 0}, // don't -1 the end line, since we're poiting to the start of the next line
+                    end: {line: endLine, character: 0}, // don't -1 the end line, since we're pointing to the start of the next line
                 }
             };
         } else { // char span
