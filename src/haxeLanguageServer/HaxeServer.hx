@@ -234,13 +234,26 @@ class HaxeServer {
 
     function onExit(_, _) {
         crashes++;
-        if (crashes >= 3) {
-            trace("\nHaxe process has crashed 3 times, not attempting any more restarts.\n" +
-                "Please verify your display configuration does not contain invalid arguments.\n" +
-                'Current arguments: ${context.displayServerConfig.arguments}');
+        if (crashes < 3) {
+            restart("Haxe process was killed");
+            return;
+            
+        }
+
+        var haxeResponse = buffer.getContent();
+
+        // invalid compiler argument?
+        var invalidOptionRegex = ~/unknown option `(.*?)'./;
+        if (invalidOptionRegex.match(haxeResponse)) {
+            var option = invalidOptionRegex.matched(1);
+            context.sendShowMessage(Error, 'Invalid compiler argument \'$option\' detected. '
+                + 'Please verify "haxe.displayConfigurations" and "haxe.displayServer.arguments."');
             return;
         }
-        restart("Haxe process was killed");
+
+        context.sendShowMessage(Error, "Haxe process has crashed 3 times, not attempting any more restarts. Please check the output panel for the full error.");
+        trace("\nError message from the compiler:\n");
+        trace(haxeResponse);
     }
 
     function onData(data:Buffer) {
@@ -358,5 +371,9 @@ private class MessageBuffer {
         buffer.copy(buffer, 0, nextStart);
         index -= nextStart;
         return result;
+    }
+
+    public function getContent():String {
+        return buffer.toString("utf-8", 0, index);
     }
 }
