@@ -77,7 +77,7 @@ class CodeLensFeature {
         return actions;
     }
 
-    function onCodeLens(params:CodeLensParams, token:CancellationToken, resolve:Array<CodeLens> -> Void, reject:ResponseError<NoData>->Void) {
+    function onCodeLens(params:CodeLensParams, token:CancellationToken, resolve:Array<CodeLens>->Void, reject:ResponseError<NoData>->Void) {
         if (!context.config.enableCodeLens)
             return resolve([]);
 

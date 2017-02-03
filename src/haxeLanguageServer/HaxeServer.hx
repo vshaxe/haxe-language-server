@@ -1,5 +1,6 @@
 package haxeLanguageServer;
 
+import haxe.io.Path;
 import js.node.net.Socket;
 import js.node.child_process.ChildProcess as ChildProcessObject;
 import js.node.child_process.ChildProcess.ChildProcessEvent;
@@ -126,9 +127,17 @@ class HaxeServer {
         for (key in context.displayServerConfig.env.keys())
             env[key] = context.displayServerConfig.env[key];
 
-        var checkRun = ChildProcess.spawnSync(context.displayServerConfig.haxePath, ["-version"], {env: env});
-        if (checkRun.error != null)
+        var haxePath = context.displayServerConfig.haxePath;
+        var checkRun = ChildProcess.spawnSync(haxePath, ["-version"], {env: env});
+        if (checkRun.error != null) {
+            if (checkRun.error.message.indexOf("ENOENT") >= 0) {
+                if (Path.isAbsolute(haxePath))
+                    return error('Path to Haxe executable is not valid: \'$haxePath\'. Please check your settings.');
+                else if (haxePath == "haxe") // default
+                    return error("Could not find Haxe in PATH. Is it installed?");
+            }
             return error('Error starting Haxe server: ${checkRun.error}');
+        }
 
         var output = (checkRun.stderr : Buffer).toString().trim();
 
