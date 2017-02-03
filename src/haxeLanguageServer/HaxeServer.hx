@@ -237,7 +237,6 @@ class HaxeServer {
         if (crashes < 3) {
             restart("Haxe process was killed");
             return;
-            
         }
 
         var haxeResponse = buffer.getContent();
@@ -247,11 +246,11 @@ class HaxeServer {
         if (invalidOptionRegex.match(haxeResponse)) {
             var option = invalidOptionRegex.matched(1);
             context.sendShowMessage(Error, 'Invalid compiler argument \'$option\' detected. '
-                + 'Please verify "haxe.displayConfigurations" and "haxe.displayServer.arguments."');
+                + 'Please verify "haxe.displayConfigurations" and "haxe.displayServer.arguments".');
             return;
         }
 
-        context.sendShowMessage(Error, "Haxe process has crashed 3 times, not attempting any more restarts. Please check the output panel for the full error.");
+        context.sendShowMessage(Error, "Haxe process has crashed 3 times, not attempting any more restarts. Please check the output channel for the full error.");
         trace("\nError message from the compiler:\n");
         trace(haxeResponse);
     }
