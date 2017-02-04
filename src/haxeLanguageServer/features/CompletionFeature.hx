@@ -5,6 +5,7 @@ import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
 import haxeLanguageServer.helper.DocHelper;
 import haxeLanguageServer.helper.TypeHelper.prepareSignature;
+import haxeLanguageServer.helper.TypeHelper.parseDisplayType;
 import String.fromCharCode;
 
 class CompletionFeature {
@@ -65,7 +66,7 @@ class CompletionFeature {
 
             var item:CompletionItem = {label: name};
 
-            var displayKind = toplevelKindToCompletionItemKind(kind);
+            var displayKind = toplevelKindToCompletionItemKind(kind, type);
             if (displayKind != null) item.kind = displayKind;
 
             if (isTimerDebugFieldCompletion(name)) {
@@ -99,11 +100,10 @@ class CompletionFeature {
         return result.concat(timers);
     }
 
-    static function toplevelKindToCompletionItemKind(kind:String):CompletionItemKind {
+    static function toplevelKindToCompletionItemKind(kind:String, type:String):CompletionItemKind {
+        var isFunction = type != null && parseDisplayType(type).match(DTFunction(_));
         return switch (kind) {
-            case "local": Variable;
-            case "member": Field;
-            case "static": Class;
+            case "local" | "member" | "static": if (isFunction) Method else Field;
             case "enum" | "enumabstract": Enum;
             case "global": Variable;
             case "type": Class;
