@@ -48,7 +48,7 @@ class CompletionFeature {
                 pos: index - reStructPart.matched(1).length,
                 toplevel: false,
             };
-        
+
         var whitespaceAmount = text.length - text.rtrim().length;
         return {
             pos: index - whitespaceAmount,
@@ -101,9 +101,11 @@ class CompletionFeature {
     }
 
     static function toplevelKindToCompletionItemKind(kind:String, type:String):CompletionItemKind {
-        var isFunction = type != null && parseDisplayType(type).match(DTFunction(_));
+        function isFunction()
+            return type != null && parseDisplayType(type).match(DTFunction(_));
+
         return switch (kind) {
-            case "local" | "member" | "static": if (isFunction) Method else Field;
+            case "local" | "member" | "static": if (isFunction()) Method else Field;
             case "enum" | "enumabstract": Enum;
             case "global": Variable;
             case "type": Class;
@@ -174,7 +176,7 @@ class CompletionFeature {
             seconds = Std.parseFloat(timeRegex.matched(1));
             percentage = timeRegex.matched(2);
         } catch (e:Dynamic) {}
-        
+
         var doc = null;
         if (name.startsWith("@TIME @TOTAL")) {
             name = "@Total time: " + time;
