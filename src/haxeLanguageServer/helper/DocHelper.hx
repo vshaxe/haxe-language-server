@@ -52,7 +52,7 @@ class DocHelper {
         var result = docInfos.doc;
         var hasParams = docInfos.params.length > 0;
         var hasReturn = docInfos.returns != null;
-        
+
         if (docInfos.deprecated != null)
             result += "\n**Deprecated:** " + docInfos.deprecated.doc + "\n";
 
@@ -65,7 +65,7 @@ class DocHelper {
 
         if (docInfos.throws.length > 0)
             result += tableHeader("Exception", "Description") + mapDocTags(docInfos.throws);
-        
+
         if (docInfos.sees.length > 0)
             result += "\nSee also:\n" + docInfos.sees.map(function(p) return "* " + p.doc).join("\n") + "\n";
 

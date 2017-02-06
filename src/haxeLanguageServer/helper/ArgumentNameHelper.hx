@@ -27,10 +27,10 @@ class ArgumentNameHelper {
         return [for (name in names) {
             var i = currentOccurrence[name];
             if (i == null) i = 0;
-            
+
             if (names.occurrences(name) > 1) i++;
             currentOccurrence[name] = i;
-            
+
             if (i > 0) name = name + i;
             name;
         }];

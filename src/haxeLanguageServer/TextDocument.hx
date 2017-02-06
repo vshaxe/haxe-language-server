@@ -26,7 +26,7 @@ class TextDocument {
     public function update(events:Array<TextDocumentContentChangeEvent>, version:Int):Void {
         for (listener in onUpdateListeners)
             listener(this, events, version);
-        
+
         this.version = version;
         for (event in events) {
             if (event.range == null || event.rangeLength == null) {

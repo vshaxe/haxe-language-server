@@ -5,7 +5,7 @@ using haxeLanguageServer.helper.ArrayHelper;
 
 class ArgumentNameHelperTest extends TestCaseBase {
     function testAvoidDuplicates() {
-        function check(expected:Array<String>, original:Array<String>) 
+        function check(expected:Array<String>, original:Array<String>)
             assertTrue(expected.equals(ArgumentNameHelper.avoidDuplicates(original)));
 
         check(["a"], ["a"]);

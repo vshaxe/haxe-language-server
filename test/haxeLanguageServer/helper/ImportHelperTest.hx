@@ -71,8 +71,8 @@ class ImportHelperTest extends TestCaseBase {
     ";
 
     var ComplexPackage = "
-    
-    
+
+
     package     test._underscore.____s   ;
 
     |import haxe.io.Path;

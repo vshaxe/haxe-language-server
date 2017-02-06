@@ -24,7 +24,7 @@ class ImportHelper {
     }
 
     /**
-        Finds the first line number in a document that is non-empty and 
+        Finds the first line number in a document that is non-empty and
         not within a comment.
      */
     public static function skipComment(doc:TextDocument):Int {

@@ -21,7 +21,7 @@ class CodeGenerationFeature {
         var help = currentSignature.help;
         var activeParam = help.signatures[help.activeSignature].parameters[help.activeParameter];
         if (activeParam == null) return [];
-        
+
         var position = currentSignature.params.position;
         var currentType = TypeHelper.parseFunctionArgumentType(activeParam.label);
         switch (currentType) {
@@ -39,7 +39,7 @@ class CodeGenerationFeature {
 
     function extractVariable(params:CodeActionParams):Array<Command> {
         if (params.range.isEmpty()) return [];
-        
+
         var doc = context.documents.get(params.textDocument.uri);
         var range = params.range;
         var startLine = range.start.line;
@@ -47,7 +47,7 @@ class CodeGenerationFeature {
         var extraction = doc.getText(range).trim().replace("$", "\\$");
         var variable = '${indent}var $$ = $extraction;\n';
         var insertRange = {line: startLine, character: 0}.toRange();
-        
+
         return new ApplyFixesCommand("Extract variable", params,
             [{range: insertRange, newText: variable}, {range: params.range, newText: "$"}]);
     }

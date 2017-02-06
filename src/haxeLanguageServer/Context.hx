@@ -134,7 +134,7 @@ class Context {
         if (firstInit) {
             haxeServer.start(function() {
                 codeActions = new CodeActionFeature(this);
-                
+
                 new CompletionFeature(this);
                 new HoverFeature(this);
                 signatureHelp = new SignatureHelpFeature(this);

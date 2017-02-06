@@ -6,7 +6,7 @@ import jsonrpc.Types.NoData;
 
 typedef CurrentSignature = {
     var help(default, never):SignatureHelp;
-    var params(default, never):TextDocumentPositionParams; 
+    var params(default, never):TextDocumentPositionParams;
 }
 
 class SignatureHelpFeature {

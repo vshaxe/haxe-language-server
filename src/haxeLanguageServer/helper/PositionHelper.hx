@@ -10,7 +10,7 @@ class PositionStatics {
     }
 }
 
-/** 
+/**
  * Extends `languageServerProtocol.Types.Position` with the
  * same utility methods that `vscode.Position` provides
  * (`vscode\src\vs\workbench\api\node\extHostTypes.ts`).

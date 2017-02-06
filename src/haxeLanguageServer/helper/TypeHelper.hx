@@ -81,10 +81,10 @@ class TypeHelper {
     public static function parseFunctionArgumentType(argument:String):DisplayType {
         if (argument.startsWith("?"))
             argument = argument.substr(1);
-        
+
         var colonIndex = argument.indexOf(":");
         var argumentType = argument.substr(colonIndex + 1);
- 
+
         return parseDisplayType(unwrapNullable(argumentType));
     }
 
