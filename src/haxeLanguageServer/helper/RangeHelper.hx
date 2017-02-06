@@ -102,4 +102,8 @@ class RangeHelper {
         }
         return {start: start, end: end};
     }
+
+    public static function isEqual(range:Range, other:Range):Bool {
+        return range.start.isEqual(other.start) && range.end.isEqual(other.end);
+    }
 }

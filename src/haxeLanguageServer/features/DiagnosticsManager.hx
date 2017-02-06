@@ -12,7 +12,7 @@ class DiagnosticsManager {
 
     public function new(context:Context) {
         this.context = context;
-        context.codeActions.registerContributor(getCodeActions);
+        context.registerCodeActionContributor(getCodeActions);
         diagnosticsArguments = new Map();
         context.protocol.onNotification(VshaxeMethods.RunGlobalDiagnostics, onRunGlobalDiagnostics);
         ChildProcess.exec("haxelib config", function(error, stdout, stderr) haxelibPath = stdout.trim());

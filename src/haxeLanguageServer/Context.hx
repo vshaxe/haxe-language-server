@@ -6,6 +6,7 @@ import jsonrpc.Types;
 import jsonrpc.Protocol;
 import haxeLanguageServer.features.*;
 import haxeLanguageServer.helper.TypeHelper.FunctionFormattingConfig;
+import haxeLanguageServer.features.CodeActionFeature.CodeActionContributor;
 
 private typedef DisplayServerConfigBase = {
     var haxePath:String;
@@ -55,11 +56,11 @@ class Context {
     public var protocol(default,null):Protocol;
     public var haxeServer(default,null):HaxeServer;
     public var documents(default,null):TextDocuments;
-    public var codeActions(default,null):CodeActionFeature;
     public var signatureHelp(default,null):SignatureHelpFeature;
     var diagnostics:DiagnosticsManager;
+    var codeActions:CodeActionFeature;
 
-    public var config(default, null):Config;
+    public var config(default,null):Config;
     @:allow(haxeLanguageServer.HaxeServer)
     var displayServerConfig:DisplayServerConfigBase;
     var displayConfigurationIndex:Int;
@@ -215,5 +216,9 @@ class Context {
         ]);
         actualArgs = actualArgs.concat(args); // finally, add given query args
         haxeServer.process(actualArgs, token, stdin, callback, errback);
+    }
+
+    public function registerCodeActionContributor(contributor:CodeActionContributor) {
+        codeActions.registerContributor(contributor);
     }
 }

@@ -8,7 +8,9 @@ build-each.hxml
 --next
 
 -cp test
--main haxeLanguageServer.TestMain
+-main TestMain
 -lib compiletime
+-lib mockatoo
+--no-inline
 -js ../bin/test.js
 -cmd node ../bin/test.js

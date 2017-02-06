@@ -1,4 +1,4 @@
-package haxeLanguageServer;
+package;
 
 import haxe.unit.TestRunner;
 
@@ -7,6 +7,8 @@ class TestMain {
         var runner = new TestRunner();
 
         CompileTime.importPackage("haxeLanguageServer.helper");
+        CompileTime.importPackage("haxeLanguageServer.features");
+
         var tests = CompileTime.getAllClasses(TestCaseBase);
         for (testClass in tests) runner.add(Type.createInstance(testClass, []));
 

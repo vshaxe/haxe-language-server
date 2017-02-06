@@ -8,9 +8,9 @@ class CodeGenerationFeature {
 
     public function new(context:Context) {
         this.context = context;
-        context.codeActions.registerContributor(generateAnonymousFunction);
+        context.registerCodeActionContributor(generateAnonymousFunction);
         #if debug
-        context.codeActions.registerContributor(extractVariable);
+        context.registerCodeActionContributor(extractVariable);
         #end
     }
 
