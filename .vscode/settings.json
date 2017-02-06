@@ -1,5 +1,7 @@
 {
     "haxe.displayConfigurations": [
         ["build-each.hxml", "-main", "haxeLanguageServer.Main", "-js", "../bin/server.js"]
-    ]
+    ],
+    "editor.insertSpaces": true,
+    "files.trimTrailingWhitespace": true
 }

@@ -1,5 +1,6 @@
 package haxeLanguageServer.features;
 
+import haxe.io.Path;
 import haxeLanguageServer.helper.PathHelper;
 import haxeLanguageServer.helper.ImportHelper;
 import js.node.ChildProcess;
@@ -22,35 +23,49 @@ class DiagnosticsManager {
     }
 
     function processErrorReply(uri:Null<String>, error:String) {
-        if (isPathFiltered(Uri.uriToFsPath(uri)))
-            return;
-        clearDiagnostics(uri);
-        
-        var problemMatcher = ~/(.+):(\d+): (?:lines \d+-(\d+)|character(?:s (\d+)-| )(\d+)) : (?:(Warning) : )?(.*)/;
-        if (problemMatcher.match(error)) {
-            inline function getInt(i)
-                return Std.parseInt(problemMatcher.matched(i));
-
-            var line = getInt(2);
-            var endLine = getInt(3);
-            var column = getInt(4);
-            var endColumn = getInt(5);
-
-            if (endLine == null) endLine = line;
-            var position = {line: line - 1, character: column};
-            var endPosition = {line: endLine - 1, character: endColumn};
-
-            var argumentsMap = diagnosticsArguments[uri] = new DiagnosticsMap();
-            var diag = {
-                range: {start: position, end: endPosition},
-                source: "haxe",
-                severity: Error,
-                message: problemMatcher.matched(7)
-            };
-            context.protocol.sendNotification(Methods.PublishDiagnostics, {uri: uri, diagnostics: [diag]});
-            argumentsMap.set({code: DKCompilerError, range: diag.range}, error);
-        }
+        if (!extractDiagnosticsFromHaxeError(uri, error))
+            clearDiagnostics(uri);
         context.sendLogMessage(Log, error);
+    }
+
+    function extractDiagnosticsFromHaxeError(uri:Null<String>, error:String):Bool {
+        var problemMatcher = ~/(.+):(\d+): (?:lines \d+-(\d+)|character(?:s (\d+)-| )(\d+)) : (?:(Warning) : )?(.*)/;
+        if (!problemMatcher.match(error))
+            return false;
+
+        var file = problemMatcher.matched(1);
+        if (!Path.isAbsolute(file))
+            file = Path.join([Sys.getCwd(), file]);
+
+        var targetUri = Uri.fsPathToUri(file);
+        if (targetUri != uri)
+            return false; // only allow error reply diagnostics in current file for now (clearing becomes annoying otherwise...)
+
+        if (isPathFiltered(Uri.uriToFsPath(targetUri)))
+            return false;
+
+        inline function getInt(i)
+            return Std.parseInt(problemMatcher.matched(i));
+
+        var line = getInt(2);
+        var endLine = getInt(3);
+        var column = getInt(4);
+        var endColumn = getInt(5);
+
+        if (endLine == null) endLine = line;
+        var position = {line: line - 1, character: column};
+        var endPosition = {line: endLine - 1, character: endColumn};
+
+        var argumentsMap = diagnosticsArguments[uri] = new DiagnosticsMap();
+        var diag = {
+            range: {start: position, end: endPosition},
+            source: "haxe",
+            severity: Error,
+            message: problemMatcher.matched(7)
+        };
+        context.protocol.sendNotification(Methods.PublishDiagnostics, {uri: uri, diagnostics: [diag]});
+        argumentsMap.set({code: DKCompilerError, range: diag.range}, error);
+        return true;
     }
 
     function processDiagnosticsReply(uri:Null<String>, s:String) {
@@ -65,7 +80,7 @@ class DiagnosticsManager {
         for (data in data) {
             if (isPathFiltered(data.file))
                 continue;
-        
+
             var uri = Uri.fsPathToUri(data.file);
             var argumentsMap = diagnosticsArguments[uri] = new DiagnosticsMap();
 

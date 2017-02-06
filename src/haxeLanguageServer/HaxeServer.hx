@@ -85,7 +85,7 @@ private class DisplayRequest {
         var data = buf.toString().trim();
 
         if (hasError)
-            return errback("Error from Haxe server: " + data);
+            return errback(data);
 
         try {
             callback(data);
