@@ -6,6 +6,7 @@ haxe:
 install:
  - haxelib install hxnodejs
  - haxelib install compiletime
+ - haxelib install mconsole
  - haxelib git mockatoo https://github.com/misprintt/mockatoo master src
 
 script:
