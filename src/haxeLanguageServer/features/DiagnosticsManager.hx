@@ -228,20 +228,30 @@ class DiagnosticsManager {
     function getCompilerErrorActions(params:CodeActionParams, d:Diagnostic):Array<Command> {
         var actions:Array<Command> = [];
         var arg = getDiagnosticsArguments(params.textDocument.uri, DKCompilerError, d.range);
-        var sugrex = ~/\(Suggestions?: (.*)\)/;
-        if (sugrex.match(arg)) {
-            var suggestions = sugrex.matched(1).split(",");
+        var suggestionsRe = ~/\(Suggestions?: (.*)\)/;
+        if (suggestionsRe.match(arg)) {
+            var suggestions = suggestionsRe.matched(1).split(",");
             // Haxe reports the entire expression, not just the field position, so we have to be a bit creative here.
             var range = d.range;
-            var fieldrex = ~/has no field ([^ ]+) /;
-            if (fieldrex.match(arg)) {
-                range.start.character += range.end.character - fieldrex.matched(1).length - 2;
+            var fieldRe = ~/has no field ([^ ]+) /;
+            if (fieldRe.match(arg)) {
+                range.start.character += range.end.character - fieldRe.matched(1).length - 2;
             }
             for (suggestion in suggestions) {
                 suggestion = suggestion.trim();
                 actions.push(new ApplyFixesCommand("Change to " + suggestion, params,
                     [{range: range, newText: suggestion}]));
             }
+            return actions;
+        }
+
+        var invalidPackageRe = ~/Invalid package : ([\w.]*) should be ([\w.]*)/;
+        if (invalidPackageRe.match(arg)) {
+            var is = invalidPackageRe.matched(1);
+            var shouldBe = invalidPackageRe.matched(2);
+            var text = context.documents.get(params.textDocument.uri).getText(d.range);
+            var replacement = text.replace(is, shouldBe);
+            actions.push(new ApplyFixesCommand("Change to " + replacement, params, [{range: d.range, newText: replacement}]));
         }
         return actions;
     }
