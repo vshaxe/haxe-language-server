@@ -3,6 +3,7 @@ package haxeLanguageServer.features;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
+import haxeLanguageServer.helper.DocHelper;
 
 typedef CurrentSignature = {
     var help(default, never):SignatureHelp;
@@ -27,7 +28,10 @@ class SignatureHelpFeature {
                 return;
 
             var help:SignatureHelp = haxe.Json.parse(data);
+            for (signature in help.signatures)
+                signature.documentation = DocHelper.extractText(signature.documentation);
             resolve(help);
+
             if (currentSignature != null) {
                 var oldDoc = context.documents.get(currentSignature.params.textDocument.uri);
                 oldDoc.removeUpdateListener(onUpdateTextDocument);
