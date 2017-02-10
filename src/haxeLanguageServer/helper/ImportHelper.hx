@@ -8,7 +8,7 @@ class ImportHelper {
     /**
         Gets the first non-empty line (excluding the package declaration if present),
         which is where we want to insert imports.
-     */
+    **/
     public static function getImportInsertPosition(doc:TextDocument):Position {
         var importLine = skipComment(doc);
         for (i in importLine...doc.lineCount) {
@@ -26,7 +26,7 @@ class ImportHelper {
     /**
         Finds the first line number in a document that is non-empty and
         not within a comment.
-     */
+    **/
     public static function skipComment(doc:TextDocument):Int {
         var retLine = 0;
         var bInComment = false;

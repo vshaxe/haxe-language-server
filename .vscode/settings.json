@@ -3,5 +3,13 @@
         ["build-each.hxml", "-main", "haxeLanguageServer.Main", "-js", "../bin/server.js"]
     ],
     "editor.insertSpaces": true,
-    "files.trimTrailingWhitespace": true
+    "files.trimTrailingWhitespace": true,
+    "codedox": {
+        "commentprefix": "    ",
+        "commentdescription": "",
+        "commentend": "**/",
+        "alwaysMultiline": false,
+        "paramFormat": "",
+        "returnFormat": ""
+    }
 }
