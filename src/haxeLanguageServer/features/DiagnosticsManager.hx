@@ -126,6 +126,10 @@ class DiagnosticsManager {
     }
 
     public function publishDiagnostics(uri:String) {
+        if (isPathFiltered(Uri.fsPathToUri(uri))) {
+            clearDiagnostics(uri);
+            return;
+        }
         var doc = context.documents.get(uri);
         context.callDisplay(["--display", doc.fsPath + "@0@diagnostics"], null, null, processDiagnosticsReply.bind(uri), processErrorReply.bind(uri));
     }
