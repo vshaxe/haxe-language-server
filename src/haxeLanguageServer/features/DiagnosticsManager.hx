@@ -292,7 +292,7 @@ class DiagnosticsManager {
 
     public function getMessage(args:T) {
         return switch ((this : DiagnosticsKind<T>)) {
-            case DKUnusedImport: "Unused import";
+            case DKUnusedImport: "Unused import/using";
             case DKUnresolvedIdentifier: "Unresolved identifier";
             case DKCompilerError: args;
             case DKRemovableCode: args.description;
