@@ -59,9 +59,13 @@ private class DisplayRequest {
         return Buffer.concat(chunks, length + 4);
     }
 
+    public function cancel() {
+        // callback(null);
+    }
+
     public function processResult(data:String) {
-        if (data == null || (token != null && token.canceled))
-            return; // TODO: properly handle canceled requests
+        if (token != null && token.canceled)
+            return callback(null);
 
         var buf = new StringBuf();
         var hasError = false;
@@ -220,7 +224,7 @@ class HaxeServer {
         // cancel all callbacks
         var request = requestsHead;
         while (request != null) {
-            request.processResult(null);
+            request.cancel();
             request = request.next;
         }
 
