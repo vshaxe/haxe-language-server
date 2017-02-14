@@ -3,6 +3,7 @@ package haxeLanguageServer.features;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
+import haxeLanguageServer.HaxeServer.DisplayResult;
 
 class CodeLensFeature {
     var context:Context;
@@ -85,20 +86,22 @@ class CodeLensFeature {
         function processError(error:String) {
             reject(jsonrpc.ResponseError.internalError(error));
         }
-        function processStatisticsReply(s:String) {
-            if (token.canceled)
-                return resolve(null);
-
-            var data:Array<Statistics> =
-                try
-                    haxe.Json.parse(s)
-                catch (e:Any)
-                    return reject(ResponseError.internalError("Error parsing stats response: " + Std.string(e)));
-            for (statistics in data) {
-                var uri = Uri.fsPathToUri(statistics.file);
-                if (uri == params.textDocument.uri) {
-                    return resolve(getCodeLensFromStatistics(uri, statistics.statistics));
-                }
+        function processStatisticsReply(r:DisplayResult) {
+            switch (r) {
+                case DCancelled:
+                    resolve(null);
+                case DResult(s):
+                    var data:Array<Statistics> =
+                        try
+                            haxe.Json.parse(s)
+                        catch (e:Any)
+                            return reject(ResponseError.internalError("Error parsing stats response: " + Std.string(e)));
+                    for (statistics in data) {
+                        var uri = Uri.fsPathToUri(statistics.file);
+                        if (uri == params.textDocument.uri) {
+                            return resolve(getCodeLensFromStatistics(uri, statistics.statistics));
+                        }
+                    }
             }
         }
         context.callDisplay(["--display", doc.fsPath + "@0@statistics"], doc.content, token, processStatisticsReply, processError);

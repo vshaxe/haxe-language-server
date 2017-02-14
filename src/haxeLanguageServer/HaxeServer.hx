@@ -9,6 +9,11 @@ import js.node.ChildProcess;
 import js.node.stream.Readable;
 import jsonrpc.CancellationToken;
 
+enum DisplayResult {
+    DCancelled;
+    DResult(msg:String);
+}
+
 private class DisplayRequest {
     // these are used for the queue
     public var prev:DisplayRequest;
@@ -17,13 +22,13 @@ private class DisplayRequest {
     var token:CancellationToken;
     var args:Array<String>;
     var stdin:String;
-    var callback:String->Void;
+    var callback:DisplayResult->Void;
     var errback:String->Void;
     public var socket:Null<Socket>;
 
     static var stdinSepBuf = new Buffer([1]);
 
-    public function new(token:CancellationToken, args:Array<String>, stdin:String, callback:String->Void, errback:String->Void, socket) {
+    public function new(token:CancellationToken, args:Array<String>, stdin:String, callback:DisplayResult->Void, errback:String->Void, socket) {
         this.token = token;
         this.args = args;
         this.stdin = stdin;
@@ -59,13 +64,13 @@ private class DisplayRequest {
         return Buffer.concat(chunks, length + 4);
     }
 
-    public function cancel() {
-        // callback(null);
+    public inline function cancel() {
+        callback(DCancelled);
     }
 
     public function processResult(data:String) {
         if (token != null && token.canceled)
-            return callback(null);
+            return callback(DCancelled);
 
         var buf = new StringBuf();
         var hasError = false;
@@ -92,7 +97,7 @@ private class DisplayRequest {
             return errback(data);
 
         try {
-            callback(data);
+            callback(DResult(data));
         } catch (e:Any) {
             errback(jsonrpc.ErrorUtils.errorToString(e, "Exception while handling Haxe completion response: "));
         }
@@ -200,7 +205,13 @@ class HaxeServer {
                     socket.destroy();
                     trace("Client disconnected");
                 }
-                process(split, null, null, send, send, socket);
+                function processDisplayResult(d:DisplayResult) {
+                    send(switch (d) {
+                        case DResult(r): r;
+                        case DCancelled: "";
+                    });
+                }
+                process(split, null, null, processDisplayResult, send, socket);
             });
             socket.on('error', function(err) {
                  trace("Socket error: " + err);
@@ -281,7 +292,7 @@ class HaxeServer {
         }
     }
 
-    public function process(args:Array<String>, token:CancellationToken, stdin:String, callback:String->Void, errback:String->Void, socket:Socket = null) {
+    public function process(args:Array<String>, token:CancellationToken, stdin:String, callback:DisplayResult->Void, errback:String->Void, socket:Socket = null) {
         // create a request object
         var request = new DisplayRequest(token, args, stdin, callback, errback, socket);
 
@@ -300,6 +311,9 @@ class HaxeServer {
                     request.prev.next = request.next;
                 if (request.next != null)
                     request.next.prev = request.prev;
+
+                // notify about the cancellation
+                request.cancel();
             });
         }
 

@@ -18,37 +18,39 @@ class HoverFeature {
         var doc = context.documents.get(params.textDocument.uri);
         var bytePos = doc.byteOffsetAt(params.position);
         var args = ["--display", '${doc.fsPath}@$bytePos@type'];
-        context.callDisplay(args, doc.content, token, function(data) {
-            if (token.canceled)
-                return resolve(null);
+        context.callDisplay(args, doc.content, token, function(r) {
+            switch (r) {
+                case DCancelled:
+                    resolve(null);
+                case DResult(data):
+                    var xml = try Xml.parse(data).firstElement() catch (_:Any) null;
+                    if (xml == null) return reject(ResponseError.internalError("Invalid xml data: " + data));
+                    var s = StringTools.trim(xml.firstChild().nodeValue);
+                    switch (xml.nodeName) {
+                        case "metadata":
+                            if (s.length == 0)
+                                return reject(new ResponseError(0, "No metadata information"));
+                            resolve({contents: s});
+                        case _:
+                            if (s.length == 0)
+                                return reject(new ResponseError(0, "No type information"));
 
-            var xml = try Xml.parse(data).firstElement() catch (_:Any) null;
-            if (xml == null) return reject(ResponseError.internalError("Invalid xml data: " + data));
-            var s = StringTools.trim(xml.firstChild().nodeValue);
-            switch (xml.nodeName) {
-                case "metadata":
-                    if (s.length == 0)
-                        return reject(new ResponseError(0, "No metadata information"));
-                    resolve({contents: s});
-                case _:
-                    if (s.length == 0)
-                        return reject(new ResponseError(0, "No type information"));
+                            var type = switch (parseDisplayType(s)) {
+                                case DTFunction(args, ret):
+                                    printFunctionDeclaration(args, ret, {argumentTypeHints: true, returnTypeHint: Always});
+                                case DTValue(type):
+                                    if (type == null) "unknown" else type;
+                            };
 
-                    var type = switch (parseDisplayType(s)) {
-                        case DTFunction(args, ret):
-                            printFunctionDeclaration(args, ret, {argumentTypeHints: true, returnTypeHint: Always});
-                        case DTValue(type):
-                            if (type == null) "unknown" else type;
-                    };
+                            var d = xml.get("d");
+                            d = if (d == null) "" else DocHelper.markdownFormat(d);
+                            var result:Hover = {contents: '```haxe\n${type}\n```\n${d}'};
+                            var p = HaxePosition.parse(xml.get("p"), doc, null);
+                            if (p != null)
+                                result.range = p.range;
 
-                    var d = xml.get("d");
-                    d = if (d == null) "" else DocHelper.markdownFormat(d);
-                    var result:Hover = {contents: '```haxe\n${type}\n```\n${d}'};
-                    var p = HaxePosition.parse(xml.get("p"), doc, null);
-                    if (p != null)
-                        result.range = p.range;
-
-                    resolve(result);
+                            resolve(result);
+                    }
             }
         }, function(error) reject(ResponseError.internalError(error)));
     }

@@ -23,21 +23,23 @@ class SignatureHelpFeature {
         var doc = context.documents.get(params.textDocument.uri);
         var bytePos = doc.offsetToByteOffset(doc.offsetAt(params.position));
         var args = ["--display", '${doc.fsPath}@$bytePos@signature'];
-        context.callDisplay(args, doc.content, token, function(data) {
-            if (token.canceled)
-                return resolve(null);
+        context.callDisplay(args, doc.content, token, function(r) {
+            switch (r) {
+                case DCancelled:
+                    resolve(null);
+                case DResult(data):
+                    var help:SignatureHelp = haxe.Json.parse(data);
+                    for (signature in help.signatures)
+                        signature.documentation = DocHelper.extractText(signature.documentation);
+                    resolve(help);
 
-            var help:SignatureHelp = haxe.Json.parse(data);
-            for (signature in help.signatures)
-                signature.documentation = DocHelper.extractText(signature.documentation);
-            resolve(help);
-
-            if (currentSignature != null) {
-                var oldDoc = context.documents.get(currentSignature.params.textDocument.uri);
-                oldDoc.removeUpdateListener(onUpdateTextDocument);
+                    if (currentSignature != null) {
+                        var oldDoc = context.documents.get(currentSignature.params.textDocument.uri);
+                        oldDoc.removeUpdateListener(onUpdateTextDocument);
+                    }
+                    currentSignature = {help: help, params: params};
+                    doc.addUpdateListener(onUpdateTextDocument);
             }
-            currentSignature = {help: help, params: params};
-            doc.addUpdateListener(onUpdateTextDocument);
         }, function(error) reject(ResponseError.internalError(error)));
     }
 

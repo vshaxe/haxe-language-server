@@ -3,6 +3,7 @@ package haxeLanguageServer.features;
 import haxe.io.Path;
 import haxeLanguageServer.helper.PathHelper;
 import haxeLanguageServer.helper.ImportHelper;
+import haxeLanguageServer.HaxeServer.DisplayResult;
 import js.node.ChildProcess;
 
 class DiagnosticsManager {
@@ -68,50 +69,55 @@ class DiagnosticsManager {
         return true;
     }
 
-    function processDiagnosticsReply(uri:Null<String>, s:String) {
-        var data:Array<HaxeDiagnosticsResponse<Any>> =
-            try haxe.Json.parse(s)
-            catch (e:Any) {
-                trace("Error parsing diagnostics response: " + Std.string(e));
-                return;
-            }
+    function processDiagnosticsReply(uri:Null<String>, r:DisplayResult) {
+        switch (r) {
+            case DCancelled:
+                // nothing to do \o/
+            case DResult(s):
+                var data:Array<HaxeDiagnosticsResponse<Any>> =
+                    try haxe.Json.parse(s)
+                    catch (e:Any) {
+                        trace("Error parsing diagnostics response: " + Std.string(e));
+                        return;
+                    }
 
-        var sent = new Map<String,Bool>();
-        for (data in data) {
-            if (isPathFiltered(data.file))
-                continue;
+                var sent = new Map<String,Bool>();
+                for (data in data) {
+                    if (isPathFiltered(data.file))
+                        continue;
 
-            var uri = Uri.fsPathToUri(data.file);
-            var argumentsMap = diagnosticsArguments[uri] = new DiagnosticsMap();
+                    var uri = Uri.fsPathToUri(data.file);
+                    var argumentsMap = diagnosticsArguments[uri] = new DiagnosticsMap();
 
-            var diagnostics = new Array<Diagnostic>();
-            for (hxDiag in data.diagnostics) {
-                if (hxDiag.range == null)
-                    continue;
-                var diag:Diagnostic = {
-                    // range: doc.byteRangeToRange(hxDiag.range),
-                    range: hxDiag.range,
-                    source: "haxe",
-                    code: (hxDiag.kind : Int),
-                    severity: hxDiag.severity,
-                    message: hxDiag.kind.getMessage(hxDiag.args)
+                    var diagnostics = new Array<Diagnostic>();
+                    for (hxDiag in data.diagnostics) {
+                        if (hxDiag.range == null)
+                            continue;
+                        var diag:Diagnostic = {
+                            // range: doc.byteRangeToRange(hxDiag.range),
+                            range: hxDiag.range,
+                            source: "haxe",
+                            code: (hxDiag.kind : Int),
+                            severity: hxDiag.severity,
+                            message: hxDiag.kind.getMessage(hxDiag.args)
+                        }
+                        argumentsMap.set({code: diag.code, range: diag.range}, hxDiag.args);
+                        diagnostics.push(diag);
+                    }
+                    context.protocol.sendNotification(Methods.PublishDiagnostics, {uri: uri, diagnostics: diagnostics});
+                    sent[uri] = true;
                 }
-                argumentsMap.set({code: diag.code, range: diag.range}, hxDiag.args);
-                diagnostics.push(diag);
-            }
-            context.protocol.sendNotification(Methods.PublishDiagnostics, {uri: uri, diagnostics: diagnostics});
-            sent[uri] = true;
-        }
 
-        inline function removeOldDiagnostics(uri:String) {
-            if (!sent.exists(uri)) clearDiagnostics(uri);
-        }
+                inline function removeOldDiagnostics(uri:String) {
+                    if (!sent.exists(uri)) clearDiagnostics(uri);
+                }
 
-        if (uri == null) {
-            for (uri in diagnosticsArguments.keys())
-                removeOldDiagnostics(uri);
-        } else {
-            removeOldDiagnostics(uri);
+                if (uri == null) {
+                    for (uri in diagnosticsArguments.keys())
+                        removeOldDiagnostics(uri);
+                } else {
+                    removeOldDiagnostics(uri);
+                }
         }
     }
 

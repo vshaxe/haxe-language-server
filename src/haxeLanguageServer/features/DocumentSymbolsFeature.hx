@@ -63,11 +63,14 @@ class DocumentSymbolsFeature {
     }
 
     function makeRequest(args:Array<String>, doc:Null<TextDocument>, token:CancellationToken, resolve:Array<SymbolInformation>->Void, reject:ResponseError<NoData>->Void) {
-        context.callDisplay(args, doc == null ? null : doc.content, token, function(data) {
-            if (token.canceled)
-                return resolve(null);
-            var result = processSymbolsReply(data, reject);
-            resolve(result);
+        context.callDisplay(args, doc == null ? null : doc.content, token, function(r) {
+            switch (r) {
+                case DCancelled:
+                    resolve(null);
+                case DResult(data):
+                    var result = processSymbolsReply(data, reject);
+                    resolve(result);
+            }
         }, function(error) reject(ResponseError.internalError(error)));
     }
 

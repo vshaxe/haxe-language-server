@@ -7,6 +7,7 @@ import jsonrpc.Protocol;
 import haxeLanguageServer.features.*;
 import haxeLanguageServer.helper.TypeHelper.FunctionFormattingConfig;
 import haxeLanguageServer.features.CodeActionFeature.CodeActionContributor;
+import haxeLanguageServer.HaxeServer.DisplayResult;
 
 private typedef DisplayServerConfigBase = {
     var haxePath:String;
@@ -204,9 +205,9 @@ class Context {
             diagnostics.publishDiagnostics(event.textDocument.uri);
     }
 
-    public function callDisplay(args:Array<String>, stdin:String, token:CancellationToken, callback:String->Void, errback:String->Void) {
+    public function callDisplay(args:Array<String>, stdin:String, token:CancellationToken, callback:DisplayResult->Void, errback:String->Void) {
         if (displayArguments == null)
-            return;
+            return callback(DCancelled);
 
         var actualArgs = ["--cwd", workspacePath]; // change cwd to workspace root
         actualArgs = actualArgs.concat(displayArguments); // add arguments from the workspace settings

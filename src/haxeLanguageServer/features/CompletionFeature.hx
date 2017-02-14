@@ -23,15 +23,17 @@ class CompletionFeature {
         var r = calculateCompletionPosition(textBefore, offset);
         var bytePos = doc.offsetToByteOffset(r.pos);
         var args = ["--display", '${doc.fsPath}@$bytePos' + (if (r.toplevel) "@toplevel" else "")];
-        context.callDisplay(args, doc.content, token, function(data) {
-            if (token.canceled)
-                return resolve(null);
+        context.callDisplay(args, doc.content, token, function(result) {
+            switch (result) {
+                case DCancelled:
+                    resolve(null);
+                case DResult(data):
+                    var xml = try Xml.parse(data).firstElement() catch (_:Any) null;
+                    if (xml == null) return reject(ResponseError.internalError("Invalid xml data: " + data));
 
-            var xml = try Xml.parse(data).firstElement() catch (_:Any) null;
-            if (xml == null) return reject(ResponseError.internalError("Invalid xml data: " + data));
-
-            var items = if (r.toplevel) parseToplevelCompletion(xml) else parseFieldCompletion(xml, textBefore);
-            resolve(items);
+                    var items = if (r.toplevel) parseToplevelCompletion(xml) else parseFieldCompletion(xml, textBefore);
+                    resolve(items);
+            }
         }, function(error) reject(ResponseError.internalError(error)));
     }
 
