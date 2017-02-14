@@ -25,7 +25,7 @@ class SignatureHelpFeature {
         var args = ["--display", '${doc.fsPath}@$bytePos@signature'];
         context.callDisplay(args, doc.content, token, function(data) {
             if (token.canceled)
-                return;
+                return resolve(null);
 
             var help:SignatureHelp = haxe.Json.parse(data);
             for (signature in help.signatures)

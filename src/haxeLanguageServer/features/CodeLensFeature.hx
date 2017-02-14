@@ -83,9 +83,12 @@ class CodeLensFeature {
 
         var doc = context.documents.get(params.textDocument.uri);
         function processError(error:String) {
-            context.sendLogMessage(Log, error);
+            reject(jsonrpc.ResponseError.internalError(error));
         }
         function processStatisticsReply(s:String) {
+            if (token.canceled)
+                return resolve(null);
+
             var data:Array<Statistics> =
                 try
                     haxe.Json.parse(s)
@@ -94,11 +97,11 @@ class CodeLensFeature {
             for (statistics in data) {
                 var uri = Uri.fsPathToUri(statistics.file);
                 if (uri == params.textDocument.uri) {
-                    resolve(getCodeLensFromStatistics(uri, statistics.statistics));
+                    return resolve(getCodeLensFromStatistics(uri, statistics.statistics));
                 }
             }
         }
-        context.callDisplay(["--display", doc.fsPath + "@0@statistics"], doc.content, null, processStatisticsReply, processError);
+        context.callDisplay(["--display", doc.fsPath + "@0@statistics"], doc.content, token, processStatisticsReply, processError);
     }
 }
 

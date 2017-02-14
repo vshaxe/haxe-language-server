@@ -16,7 +16,7 @@ class DeterminePackageFeature {
         var args = ["--display", '${params.fsPath}@0@package'];
         context.callDisplay(args, null, token, function(data) {
             if (token.canceled)
-                return;
+                return resolve(null);
             resolve({pack: data});
         }, function(error) reject(ResponseError.internalError(error)));
     }

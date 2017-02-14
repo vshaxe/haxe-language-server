@@ -18,7 +18,7 @@ class FindReferencesFeature {
         var args = ["--display", '${doc.fsPath}@$bytePos@usage'];
         context.callDisplay(args, doc.content, token, function(data) {
             if (token.canceled)
-                return;
+                return resolve(null);
 
             var xml = try Xml.parse(data).firstElement() catch (_:Any) null;
             if (xml == null) return reject(ResponseError.internalError("Invalid xml data: " + data));
