@@ -132,7 +132,7 @@ class DiagnosticsManager {
     }
 
     public function publishDiagnostics(uri:String) {
-        if (isPathFiltered(Uri.fsPathToUri(uri))) {
+        if (isPathFiltered(Uri.uriToFsPath(uri))) {
             clearDiagnostics(uri);
             return;
         }
