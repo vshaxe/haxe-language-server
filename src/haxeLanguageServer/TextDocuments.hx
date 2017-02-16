@@ -3,7 +3,7 @@ package haxeLanguageServer;
 class TextDocuments {
     public static inline var syncKind = TextDocumentSyncKind.Incremental;
 
-    var documents:Map<String,TextDocument>;
+    var documents:Map<DocumentUri,TextDocument>;
 
     public function new(protocol:jsonrpc.Protocol) {
         documents = new Map();
@@ -15,9 +15,10 @@ class TextDocuments {
         return documents.iterator();
     }
 
-    public inline function get(uri:String):TextDocument {
+    public inline function get(uri:DocumentUri):TextDocument {
         return documents[uri];
     }
+
 
     @:allow(haxeLanguageServer.Context)
     function onDidOpenTextDocument(event:DidOpenTextDocumentParams) {

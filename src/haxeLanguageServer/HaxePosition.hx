@@ -4,20 +4,20 @@ import languageServerProtocol.Types.Location;
 
 class HaxePosition {
     static var positionRe = ~/^(.+):(\d+): (?:lines (\d+)-(\d+)|character(?:s (\d+)-| )(\d+))$/;
-    static var properFileNameCaseCache:Map<String,String>;
+    static var properFileNameCaseCache:Map<FsPath,FsPath>;
     static var isWindows = (Sys.systemName() == "Windows");
 
-    public static function parse(pos:String, doc:TextDocument, cache:Map<String,Array<String>>):Null<Location> {
+    public static function parse(pos:String, doc:TextDocument, cache:Map<FsPath,Array<String>>):Null<Location> {
         if (!positionRe.match(pos))
             return null;
 
-        var file = getProperFileNameCase(positionRe.matched(1));
+        var file = getProperFileNameCase(new FsPath(positionRe.matched(1)));
         var s = positionRe.matched(3);
         if (s != null) { // line span
             var startLine = Std.parseInt(s);
             var endLine = Std.parseInt(positionRe.matched(4));
             return {
-                uri: if (file == doc.fsPath) doc.uri else Uri.fsPathToUri(file),
+                uri: if (file == doc.fsPath) doc.uri else file.toUri(),
                 range: {
                     start: {line: startLine - 1, character: 0},
                     end: {line: endLine, character: 0}, // don't -1 the end line, since we're pointing to the start of the next line
@@ -36,14 +36,14 @@ class HaxePosition {
                 // we have to read lines from a file on disk (cache if available)
                 var lines;
                 if (cache == null) {
-                    lines = sys.io.File.getContent(file).split("\n");
+                    lines = sys.io.File.getContent(file.toString()).split("\n");
                 } else {
                     lines = cache[file];
                     if (lines == null)
-                        lines = cache[file] = sys.io.File.getContent(file).split("\n");
+                        lines = cache[file] = sys.io.File.getContent(file.toString()).split("\n");
                 }
                 lineContent = lines[line];
-                uri = Uri.fsPathToUri(file);
+                uri = file.toUri();
             }
 
             var endByte = Std.parseInt(positionRe.matched(6));
@@ -73,7 +73,7 @@ class HaxePosition {
         return buf.toString("utf-8", 0, byteOffset).length;
     }
 
-    public static function getProperFileNameCase(normalizedPath:String):String {
+    public static function getProperFileNameCase(normalizedPath:FsPath):FsPath {
         if (!isWindows) return normalizedPath;
         if (properFileNameCaseCache == null) {
             properFileNameCaseCache = new Map();
@@ -83,7 +83,7 @@ class HaxePosition {
                 return cached;
         }
         var result = normalizedPath;
-        var parts = normalizedPath.split("\\");
+        var parts = normalizedPath.toString().split("\\");
         if (parts.length > 1) {
             var acc = parts[0];
             for (i in 1...parts.length) {
@@ -96,7 +96,7 @@ class HaxePosition {
                 }
                 acc = acc + "/" + part;
             }
-            result = acc;
+            result = new FsPath(acc);
         }
         return properFileNameCaseCache[normalizedPath] = result;
     }

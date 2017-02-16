@@ -2,14 +2,13 @@ package haxeLanguageServer.features;
 
 import mockatoo.Mockatoo.*;
 import jsonrpc.Protocol;
-import haxeLanguageServer.Uri;
-import haxeLanguageServer.TextDocuments;
 import haxeLanguageServer.TextDocument;
+import haxeLanguageServer.TextDocuments;
 import languageServerProtocol.Types;
 using mockatoo.Mockatoo;
 
 class DiagnosticsManagerTest extends TestCaseBase {
-    function runTest(errbackMsg:String, expectedFile:String, expectedDiagnostics:Array<Diagnostic>, pathFilter:String, ?c:haxe.PosInfos) {
+    function runTest(errbackMsg:String, expectedFile:FsPath, expectedDiagnostics:Array<Diagnostic>, pathFilter:String, ?c:haxe.PosInfos) {
         var protocol = mock(Protocol);
         var context = mock(Context);
         var documents = mock(TextDocuments);
@@ -27,7 +26,7 @@ class DiagnosticsManagerTest extends TestCaseBase {
         });
 
         var called = false;
-        var expectedUri = Uri.fsPathToUri(expectedFile);
+        var expectedUri = expectedFile.toUri();
         protocol.sendNotification(Methods.PublishDiagnostics, cast any).calls(function(args) {
             called = true;
             var result:PublishDiagnosticsParams = args[1];
@@ -68,7 +67,7 @@ class DiagnosticsManagerTest extends TestCaseBase {
 
 private typedef TestCase = {
     errback:String,
-    file:String,
+    file:FsPath,
     results:Array<Diagnostic>
 }
 
@@ -76,7 +75,7 @@ private typedef TestCase = {
 private class TestCases {
     public static var UnexpectedImport:TestCase = {
         errback: "C:/Lib/File.hx:4: characters 0-6 : Unexpected import",
-        file: "C:/Lib/File.hx",
+        file: new FsPath("C:/Lib/File.hx"),
         results: [{
             range: {start: {character: 0, line: 3}, end: {character: 6, line: 3}},
             message: "Unexpected import"

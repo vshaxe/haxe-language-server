@@ -1,7 +1,5 @@
 package haxeLanguageServer.helper;
 
-using haxeLanguageServer.helper.RangeHelper;
-
 class RangeHelperTest extends TestCaseBase {
     function testRangeIsEmpty() {
         function check(l1, c1, l2, c2)

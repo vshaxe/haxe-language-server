@@ -5,8 +5,8 @@ import js.node.Buffer;
 typedef OnTextDocumentChangeListener = TextDocument->Array<TextDocumentContentChangeEvent>->Int->Void;
 
 class TextDocument {
-    public var uri(default,null):String;
-    public var fsPath(default,null):String;
+    public var uri(default,null):DocumentUri;
+    public var fsPath(default,null):FsPath;
     public var languageId(default,null):String;
     public var version(default,null):Int;
     public var content(default,null):String;
@@ -15,9 +15,9 @@ class TextDocument {
     var lineOffsets:Array<Int>;
     var onUpdateListeners:Array<OnTextDocumentChangeListener> = [];
 
-    public function new(uri:String, languageId:String, version:Int, content:String) {
+    public function new(uri:DocumentUri, languageId:String, version:Int, content:String) {
         this.uri = uri;
-        this.fsPath = Uri.uriToFsPath(uri);
+        this.fsPath = uri.toFsPath();
         this.languageId = languageId;
         this.version = version;
         this.content = content;

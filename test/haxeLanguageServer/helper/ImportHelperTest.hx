@@ -2,7 +2,6 @@ package haxeLanguageServer.helper;
 
 import haxeLanguageServer.TextDocument;
 import haxe.PosInfos;
-using StringTools;
 
 class ImportHelperTest extends TestCaseBase {
     public function testGetImportInsertPosition() {
@@ -20,7 +19,7 @@ class ImportHelperTest extends TestCaseBase {
                 throw "test case is missing caret: " + file;
             }
 
-            var doc = new TextDocument("file://dummy", "", 0, file.replace("|", ""));
+            var doc = new TextDocument(new DocumentUri("file://dummy"), "", 0, file.replace("|", ""));
             var importPos = ImportHelper.getImportInsertPosition(doc);
             assertEquals(0, importPos.character, pos);
             assertEquals(line, importPos.line, pos);

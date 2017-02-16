@@ -1,7 +1,5 @@
 package haxeLanguageServer.helper;
 
-using haxeLanguageServer.helper.ArrayHelper;
-
 class ArrayHelperTest extends TestCaseBase {
     function testEquals() {
         assertTrue([].equals([]));

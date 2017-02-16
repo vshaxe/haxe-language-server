@@ -35,7 +35,7 @@ class TypeHelperTest extends TestCaseBase {
             "function(a:flixel.FlxObject, ?b:String):Void",
             "?Callback:Null<flixel.FlxObject -> ?String -> Void>",
             {argumentTypeHints: true, returnTypeHint: Always});
-        
+
         assertPrintedEquals(TypeHelper.parseDisplayType,
             "function(a, b)",
             "String -> Bool -> Void>",

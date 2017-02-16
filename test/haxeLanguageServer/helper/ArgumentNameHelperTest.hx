@@ -1,8 +1,5 @@
 package haxeLanguageServer.helper;
 
-import haxeLanguageServer.helper.ArgumentNameHelper;
-using haxeLanguageServer.helper.ArrayHelper;
-
 class ArgumentNameHelperTest extends TestCaseBase {
     function testAvoidDuplicates() {
         function check(expected:Array<String>, original:Array<String>)

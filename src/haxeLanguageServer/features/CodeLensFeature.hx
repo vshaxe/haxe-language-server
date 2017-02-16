@@ -13,7 +13,7 @@ class CodeLensFeature {
         context.protocol.onRequest(Methods.CodeLens, onCodeLens);
     }
 
-    function getCodeLensFromStatistics(uri:String, statistics:Array<StatisticsObject>) {
+    function getCodeLensFromStatistics(uri:DocumentUri, statistics:Array<StatisticsObject>) {
         var actions:Array<CodeLens> = [];
         function addRelation(kind:String, plural:String, range:Range, relations:Null<Array<Relation>>) {
             if (relations == null) {
@@ -40,7 +40,7 @@ class CodeLensFeature {
                             var nextLineStart = { character: 0, line: c.range.start.line + 1 };
                             cRange = { start: c.range.start, end: nextLineStart };
                         }
-                        return { range: cRange, uri: Uri.fsPathToUri(c.file) }
+                        return { range: cRange, uri: c.file.toUri() }
                     })
                 ];
                 {
@@ -97,7 +97,7 @@ class CodeLensFeature {
                         catch (e:Any)
                             return reject(ResponseError.internalError("Error parsing stats response: " + Std.string(e)));
                     for (statistics in data) {
-                        var uri = Uri.fsPathToUri(statistics.file);
+                        var uri = statistics.file.toUri();
                         if (uri == params.textDocument.uri) {
                             return resolve(getCodeLensFromStatistics(uri, statistics.statistics));
                         }
@@ -117,7 +117,7 @@ class CodeLensFeature {
 }
 
 private typedef Relation = {
-    var file:String;
+    var file:FsPath;
     var range:Range;
 }
 
@@ -131,6 +131,6 @@ private typedef StatisticsObject = {
 }
 
 private typedef Statistics = {
-    var file:String;
+    var file:FsPath;
     var statistics:Array<StatisticsObject>;
 }

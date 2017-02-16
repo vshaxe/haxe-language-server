@@ -52,7 +52,7 @@ class Context {
         default: "linux";
     };
 
-    public var workspacePath(default,null):String;
+    public var workspacePath(default,null):FsPath;
     public var displayArguments(get,never):Array<String>;
     public var protocol(default,null):Protocol;
     public var haxeServer(default,null):HaxeServer;
@@ -90,7 +90,7 @@ class Context {
     }
 
     function onInitialize(params:InitializeParams, token:CancellationToken, resolve:InitializeResult->Void, reject:ResponseError<InitializeError>->Void) {
-        workspacePath = params.rootPath;
+        workspacePath = new FsPath(params.rootPath);
         displayConfigurationIndex = (params.initializationOptions : InitOptions).displayConfigurationIndex;
         documents = new TextDocuments(protocol);
         return resolve({
@@ -209,7 +209,7 @@ class Context {
         if (displayArguments == null)
             return callback(DCancelled);
 
-        var actualArgs = ["--cwd", workspacePath]; // change cwd to workspace root
+        var actualArgs = ["--cwd", workspacePath.toString()]; // change cwd to workspace root
         actualArgs = actualArgs.concat(displayArguments); // add arguments from the workspace settings
         actualArgs = actualArgs.concat([
             "-D", "display-details", // get more details in completion results,

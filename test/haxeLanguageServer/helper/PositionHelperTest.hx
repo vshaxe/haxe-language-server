@@ -1,7 +1,5 @@
 package haxeLanguageServer.helper;
 
-using haxeLanguageServer.helper.PositionHelper;
-
 class PositionHelperTest extends TestCaseBase {
     function testPositionsEqual() {
         function check(l1, c1, l2, c2)

@@ -8,28 +8,28 @@ import js.node.ChildProcess;
 
 class DiagnosticsManager {
     var context:Context;
-    var diagnosticsArguments:Map<String,DiagnosticsMap<Any>>;
-    var haxelibPath:String;
+    var diagnosticsArguments:Map<DocumentUri,DiagnosticsMap<Any>>;
+    var haxelibPath:FsPath;
 
     public function new(context:Context) {
         this.context = context;
         context.registerCodeActionContributor(getCodeActions);
         diagnosticsArguments = new Map();
         context.protocol.onNotification(VshaxeMethods.RunGlobalDiagnostics, onRunGlobalDiagnostics);
-        ChildProcess.exec("haxelib config", function(error, stdout, stderr) haxelibPath = stdout.trim());
+        ChildProcess.exec("haxelib config", function(error, stdout, stderr) haxelibPath = new FsPath(stdout.trim()));
     }
 
     function onRunGlobalDiagnostics(_) {
         context.callDisplay(["--display", "diagnostics"], null, null, processDiagnosticsReply.bind(null), processErrorReply.bind(null));
     }
 
-    function processErrorReply(uri:Null<String>, error:String) {
+    function processErrorReply(uri:Null<DocumentUri>, error:String) {
         if (!extractDiagnosticsFromHaxeError(uri, error))
             clearDiagnostics(uri);
         context.sendLogMessage(Log, error);
     }
 
-    function extractDiagnosticsFromHaxeError(uri:Null<String>, error:String):Bool {
+    function extractDiagnosticsFromHaxeError(uri:Null<DocumentUri>, error:String):Bool {
         var problemMatcher = ~/(.+):(\d+): (?:lines \d+-(\d+)|character(?:s (\d+)-| )(\d+)) : (?:(Warning) : )?(.*)/;
         if (!problemMatcher.match(error))
             return false;
@@ -38,11 +38,11 @@ class DiagnosticsManager {
         if (!Path.isAbsolute(file))
             file = Path.join([Sys.getCwd(), file]);
 
-        var targetUri = Uri.fsPathToUri(file);
+        var targetUri = new FsPath(file).toUri();
         if (targetUri != uri)
             return false; // only allow error reply diagnostics in current file for now (clearing becomes annoying otherwise...)
 
-        if (isPathFiltered(Uri.uriToFsPath(targetUri)))
+        if (isPathFiltered(targetUri.toFsPath()))
             return false;
 
         inline function getInt(i)
@@ -69,7 +69,7 @@ class DiagnosticsManager {
         return true;
     }
 
-    function processDiagnosticsReply(uri:Null<String>, r:DisplayResult) {
+    function processDiagnosticsReply(uri:Null<DocumentUri>, r:DisplayResult) {
         switch (r) {
             case DCancelled:
                 // nothing to do \o/
@@ -81,12 +81,12 @@ class DiagnosticsManager {
                         return;
                     }
 
-                var sent = new Map<String,Bool>();
+                var sent = new Map<DocumentUri,Bool>();
                 for (data in data) {
                     if (isPathFiltered(data.file))
                         continue;
 
-                    var uri = Uri.fsPathToUri(data.file);
+                    var uri = data.file.toUri();
                     var argumentsMap = diagnosticsArguments[uri] = new DiagnosticsMap();
 
                     var diagnostics = new Array<Diagnostic>();
@@ -108,7 +108,7 @@ class DiagnosticsManager {
                     sent[uri] = true;
                 }
 
-                inline function removeOldDiagnostics(uri:String) {
+                inline function removeOldDiagnostics(uri:DocumentUri) {
                     if (!sent.exists(uri)) clearDiagnostics(uri);
                 }
 
@@ -121,18 +121,18 @@ class DiagnosticsManager {
         }
     }
 
-    function isPathFiltered(path:String):Bool {
+    function isPathFiltered(path:FsPath):Bool {
         var pathFilter = PathHelper.preparePathFilter(context.config.diagnosticsPathFilter, haxelibPath, context.workspacePath);
         return !PathHelper.matches(path, pathFilter);
     }
 
-    inline function clearDiagnostics(uri:String) {
+    inline function clearDiagnostics(uri:DocumentUri) {
         if (diagnosticsArguments.remove(uri))
             context.protocol.sendNotification(Methods.PublishDiagnostics, {uri: uri, diagnostics: []});
     }
 
-    public function publishDiagnostics(uri:String) {
-        if (isPathFiltered(Uri.uriToFsPath(uri))) {
+    public function publishDiagnostics(uri:DocumentUri) {
+        if (isPathFiltered(uri.toFsPath())) {
             clearDiagnostics(uri);
             return;
         }
@@ -272,7 +272,7 @@ class DiagnosticsManager {
         return new ApplyFixesCommand("Remove", params, [{range: range, newText: ""}]);
     }
 
-    inline function getDiagnosticsArguments<T>(uri:String, kind:DiagnosticsKind<T>, range:Range):T {
+    inline function getDiagnosticsArguments<T>(uri:DocumentUri, kind:DiagnosticsKind<T>, range:Range):T {
         var map = diagnosticsArguments[uri];
         if (map == null) return null;
         return map.get({code: kind, range: range});
@@ -318,7 +318,7 @@ private typedef HaxeDiagnostics<T> = {
 }
 
 private typedef HaxeDiagnosticsResponse<T> = {
-    var file:String;
+    var file:FsPath;
     var diagnostics:Array<HaxeDiagnostics<T>>;
 }
 

@@ -27,7 +27,7 @@ private typedef ModuleSymbolEntry = {
 }
 
 private typedef SymbolReply = {
-    var file:String;
+    var file:FsPath;
     var symbols:Array<ModuleSymbolEntry>;
 }
 
@@ -50,7 +50,7 @@ class DocumentSymbolsFeature {
 
         var result = [];
         for (file in data) {
-            var uri = Uri.fsPathToUri(HaxePosition.getProperFileNameCase(file.file));
+            var uri = HaxePosition.getProperFileNameCase(file.file).toUri();
             for (symbol in file.symbols) {
                 if (symbol.range == null) {
                     context.sendShowMessage(Error, "Unknown location for " + haxe.Json.stringify(symbol));
@@ -85,7 +85,7 @@ class DocumentSymbolsFeature {
         makeRequest(args, null, token, resolve, reject);
     }
 
-    function moduleSymbolEntryToSymbolInformation(entry:ModuleSymbolEntry, uri:String):SymbolInformation {
+    function moduleSymbolEntryToSymbolInformation(entry:ModuleSymbolEntry, uri:DocumentUri):SymbolInformation {
         var result:SymbolInformation = {
             name: entry.name,
             kind: switch (entry.kind) {
