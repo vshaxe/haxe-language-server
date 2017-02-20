@@ -1,5 +1,6 @@
 package haxeLanguageServer;
 
+import haxe.Timer;
 import js.node.Buffer;
 
 typedef OnTextDocumentChangeListener = TextDocument->Array<TextDocumentContentChangeEvent>->Int->Void;
@@ -10,6 +11,7 @@ class TextDocument {
     public var languageId(default,null):String;
     public var version(default,null):Int;
     public var content(default,null):String;
+    public var openTimestamp(default,null):Float;
     public var lineCount(get,never):Int;
     @:allow(haxeLanguageServer.TextDocuments)
     var lineOffsets:Array<Int>;
@@ -21,6 +23,7 @@ class TextDocument {
         this.languageId = languageId;
         this.version = version;
         this.content = content;
+        this.openTimestamp = Timer.stamp();
     }
 
     public function update(events:Array<TextDocumentContentChangeEvent>, version:Int):Void {

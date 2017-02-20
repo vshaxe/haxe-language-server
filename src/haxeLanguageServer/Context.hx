@@ -1,5 +1,6 @@
 package haxeLanguageServer;
 
+import haxe.Timer;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types;
@@ -79,6 +80,7 @@ class Context {
         protocol.onNotification(Methods.DidOpenTextDocument, onDidOpenTextDocument);
         protocol.onNotification(Methods.DidSaveTextDocument, onDidSaveTextDocument);
         protocol.onNotification(VshaxeMethods.DidChangeDisplayConfigurationIndex, onDidChangeDisplayConfigurationIndex);
+        protocol.onNotification(VshaxeMethods.DidChangeActiveTextEditor, onDidChangeActiveTextEditor);
     }
 
     public inline function sendShowMessage(type:MessageType, message:String) {
@@ -149,10 +151,8 @@ class Context {
                 new CodeLensFeature(this);
                 new CodeGenerationFeature(this);
 
-                if (config.enableDiagnostics) {
-                    for (doc in documents.getAll())
-                        diagnostics.publishDiagnostics(doc.uri);
-                }
+                for (doc in documents.getAll())
+                    publishDiagnostics(doc.uri);
             });
         } else {
             haxeServer.restart("configuration was changed");
@@ -196,13 +196,26 @@ class Context {
 
     function onDidOpenTextDocument(event:DidOpenTextDocumentParams) {
         documents.onDidOpenTextDocument(event);
-        if (diagnostics != null && config.enableDiagnostics)
-            diagnostics.publishDiagnostics(event.textDocument.uri);
+        publishDiagnostics(event.textDocument.uri);
     }
 
     function onDidSaveTextDocument(event:DidSaveTextDocumentParams) {
+        publishDiagnostics(event.textDocument.uri);
+    }
+
+    function onDidChangeActiveTextEditor(params:{uri:DocumentUri}) {
+        var document = documents.get(params.uri);
+        if (document == null)
+            return;
+        // avoid running diagnostics twice when the document is initially opened (open + activate event)
+        var timeSinceOpened = Timer.stamp() - document.openTimestamp;
+        if (timeSinceOpened > 0.1)
+            publishDiagnostics(params.uri);
+    }
+
+    function publishDiagnostics(uri:DocumentUri) {
         if (diagnostics != null && config.enableDiagnostics)
-            diagnostics.publishDiagnostics(event.textDocument.uri);
+            diagnostics.publishDiagnostics(uri);
     }
 
     public function callDisplay(args:Array<String>, stdin:String, token:CancellationToken, callback:DisplayResult->Void, errback:String->Void) {
