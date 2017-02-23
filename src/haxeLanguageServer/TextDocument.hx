@@ -13,6 +13,10 @@ class TextDocument {
     public var content(default,null):String;
     public var openTimestamp(default,null):Float;
     public var lineCount(get,never):Int;
+    #if debug
+    public var parseTree(get,never):hxParser.Tree;
+    var _parseTree:Null<hxParser.Tree>;
+    #end
     @:allow(haxeLanguageServer.TextDocuments)
     var lineOffsets:Array<Int>;
     var onUpdateListeners:Array<OnTextDocumentChangeListener> = [];
@@ -39,6 +43,11 @@ class TextDocument {
                 var before = content.substring(0, offset);
                 var after = content.substring(offset + event.rangeLength);
                 content = before + event.text + after;
+                #if debug
+                #if debug // let's be extra safe with this
+                updateParseTree(event.range, event.rangeLength, event.text.length);
+                #end
+                #end
             }
         }
         lineOffsets = null;
@@ -153,4 +162,47 @@ class TextDocument {
     }
 
     inline function get_lineCount() return getLineOffsets().length;
+
+    #if debug
+
+    function createParseTree() {
+        switch (hxParser.HxParser.parse(content)) {
+            case Success(tree): return hxParser.JsonParser.parse(tree);
+            case Failure(_): return null;
+        }
+    }
+
+    function get_parseTree() {
+        if (_parseTree == null) {
+            _parseTree = createParseTree();
+        }
+        return _parseTree;
+    }
+
+    function updateParseTree(range:Range, rangeLength:Int, textLength:Int) {
+        var byteOffsetBegin = byteOffsetAt(range.start);
+        var byteOffsetEnd = byteOffsetAt(range.end);
+        if (_parseTree == null) {
+            _parseTree = createParseTree();
+        } else {
+            // TODO: We might want to catch exceptions in this section, else we risk that the parse tree
+            // gets "stuck" if something fails.
+            var node = hxParser.ParseTreeTools.findEnclosingNode(_parseTree, byteOffsetBegin, byteOffsetEnd, ["class_decl", "class_field"]);
+            if (node != null) {
+                var offsetBegin = node.start; // TODO: need text offset, not byte offset!
+                var offsetEnd = node.end - rangeLength + textLength; // TODO: more byte offset!
+                var sectionContent = content.substring(offsetBegin, offsetEnd);
+                switch (hxParser.HxParser.parse(sectionContent, node.name)) {
+                    case Success(tree):
+                        node.callback(hxParser.JsonParser.parse(tree));
+                        hxParser.ParseTreeTools.calculatePositions(_parseTree);
+                    case Failure(s):
+                        _parseTree = null;
+                }
+            } else {
+                _parseTree = null;
+            }
+        }
+    }
+    #end
 }
