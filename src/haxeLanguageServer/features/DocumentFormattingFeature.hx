@@ -1,9 +1,9 @@
 package haxeLanguageServer.features;
 
+import haxeFormatter.Formatter;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
-import haxeFormatter.Formatter;
 
 class DocumentFormattingFeature {
     var context:Context;
@@ -15,7 +15,7 @@ class DocumentFormattingFeature {
 
     function onDocumentFormatting(params:DocumentFormattingParams, token:CancellationToken, resolve:Array<TextEdit>->Void, reject:ResponseError<NoData>->Void) {
         var doc = context.documents.get(params.textDocument.uri);
-        switch (Formatter.format(doc.content, cast params.options)) {
+        switch (Formatter.formatSource(doc.content, cast params.options)) {
             case Success(s):
                 var fullRange = {
                     start: {line: 0, character: 0},
