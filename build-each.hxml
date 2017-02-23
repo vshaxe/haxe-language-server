@@ -1,4 +1,6 @@
 -cp protocol/src
+-cp formatter/src
+-cp formatter/hxparser/src
 -cp src
 -dce full
 -lib hxnodejs

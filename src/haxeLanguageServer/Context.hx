@@ -110,6 +110,9 @@ class Context {
                 documentSymbolProvider: true,
                 workspaceSymbolProvider: true,
                 codeActionProvider: true,
+                #if debug
+                documentFormattingProvider: true,
+                #end
                 codeLensProvider: {
                     resolveProvider: true
                 }
@@ -150,6 +153,10 @@ class Context {
                 diagnostics = new DiagnosticsManager(this);
                 new CodeLensFeature(this);
                 new CodeGenerationFeature(this);
+
+                #if debug
+                new DocumentFormattingFeature(this);
+                #end
 
                 for (doc in documents.getAll())
                     publishDiagnostics(doc.uri);
