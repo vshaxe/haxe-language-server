@@ -40,6 +40,7 @@ private typedef Config = {
     var displayPort:Null<Int>;
     var buildCompletionCache:Bool;
     var codeGeneration:CodeGenerationConfig;
+    var format:haxeFormatter.Config;
 }
 
 private typedef InitOptions = {
