@@ -10,12 +10,8 @@ class PathHelper {
     public static function preparePathFilter(diagnosticsPathFilter:String, haxelibPath:FsPath, workspaceRoot:FsPath):FsPath {
         var path = diagnosticsPathFilter;
         path = path.replace("${workspaceRoot}", workspaceRoot.toString());
-        if (haxelibPath != null) {
+        if (haxelibPath != null)
             path = path.replace("${haxelibPath}", haxelibPath.toString());
-        } else {
-            // This doesn't really belong here...
-            trace("Could not retrieve haxelib repo path for diagnostics filtering");
-        }
         return normalize(new FsPath(path));
     }
 
