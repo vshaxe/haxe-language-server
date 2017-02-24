@@ -15,7 +15,7 @@ class DocumentFormattingFeature {
 
     function onDocumentFormatting(params:DocumentFormattingParams, token:CancellationToken, resolve:Array<TextEdit>->Void, reject:ResponseError<NoData>->Void) {
         var doc = context.documents.get(params.textDocument.uri);
-        switch (Formatter.formatSource(doc.content, cast params.options)) {
+        switch (Formatter.formatSource(doc.content, File, cast params.options)) {
             case Success(s):
                 var fullRange = {
                     start: {line: 0, character: 0},

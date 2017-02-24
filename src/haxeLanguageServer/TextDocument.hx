@@ -2,6 +2,7 @@ package haxeLanguageServer;
 
 import haxe.Timer;
 import js.node.Buffer;
+import hxParser.HxParser.EntryPoint;
 
 typedef OnTextDocumentChangeListener = TextDocument->Array<TextDocumentContentChangeEvent>->Int->Void;
 
@@ -187,12 +188,12 @@ class TextDocument {
         } else {
             // TODO: We might want to catch exceptions in this section, else we risk that the parse tree
             // gets "stuck" if something fails.
-            var node = hxParser.ParseTreeTools.findEnclosingNode(_parseTree, byteOffsetBegin, byteOffsetEnd, ["class_decl", "class_field"]);
+            var node = hxParser.ParseTreeTools.findEnclosingNode(_parseTree, byteOffsetBegin, byteOffsetEnd, [ClassDecl, ClassField]);
             if (node != null) {
                 var offsetBegin = node.start; // TODO: need text offset, not byte offset!
                 var offsetEnd = node.end - rangeLength + textLength; // TODO: more byte offset!
                 var sectionContent = content.substring(offsetBegin, offsetEnd);
-                switch (hxParser.HxParser.parse(sectionContent, node.name)) {
+                switch (hxParser.HxParser.parse(sectionContent, cast node.name)) {
                     case Success(tree):
                         node.callback(hxParser.JsonParser.parse(tree));
                         hxParser.ParseTreeTools.calculatePositions(_parseTree);
