@@ -12,3 +12,4 @@ install:
 
 script:
  - haxe build.hxml
+ - haxe build-debug.hxml
