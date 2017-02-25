@@ -5,6 +5,7 @@ haxe:
 
 install:
  - haxelib install hxnodejs
+ - haxelib install hxargs
  - haxelib install compiletime
  - haxelib install mconsole
  - haxelib git mockatoo https://github.com/grosmar/mockatoo master src
