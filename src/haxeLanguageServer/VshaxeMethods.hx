@@ -24,4 +24,9 @@ class VshaxeMethods {
         This notification is sent from the client to the server when the active text editor has changed.
     **/
     static inline var DidChangeActiveTextEditor = new NotificationMethod<{uri:DocumentUri}>("vshaxe/didChangeActiveTextEditor");
+
+    /**
+        This notification is sent from the server to the client to update the parse tree visualization.
+    **/
+    static inline var UpdateParseTree = new NotificationMethod<{uri:String, parseTree:String}>("vshaxe/updateParseTree");
 }
