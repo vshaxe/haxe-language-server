@@ -188,7 +188,7 @@ class TextDocument {
         } else {
             // TODO: We might want to catch exceptions in this section, else we risk that the parse tree
             // gets "stuck" if something fails.
-            var node = hxParser.ParseTreeTools.findEnclosingNode(_parseTree, byteOffsetBegin, byteOffsetEnd, [ClassDecl, ClassField]);
+            var node = hxParser.ParseTreeTools.findEnclosingNode(_parseTree, byteOffsetBegin, byteOffsetEnd, [ClassDecl, ClassFields]);
             if (node != null) {
                 var offsetBegin = node.start; // TODO: need text offset, not byte offset!
                 var offsetEnd = node.end - rangeLength + textLength; // TODO: more byte offset!
