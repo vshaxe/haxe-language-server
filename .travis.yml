@@ -4,7 +4,7 @@ haxe:
  - development
 
 install:
- - haxelib install hxnodejs
+ - haxelib git hxnodejs https://github.com/HaxeFoundation/hxnodejs
  - haxelib install hxargs
  - haxelib install compiletime
  - haxelib install mconsole

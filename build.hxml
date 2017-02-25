@@ -2,6 +2,12 @@ build-each.hxml
 
 --each
 
+--cwd formatter
+build.hxml
+
+--next
+--cwd ..
+
 -main haxeLanguageServer.Main
 -js ../bin/server.js
 
