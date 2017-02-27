@@ -46,7 +46,7 @@ class TextDocument {
                 content = before + event.text + after;
                 #if debug
                 #if debug // let's be extra safe with this
-                updateParseTree(event.range, event.rangeLength, event.text.length);
+                // updateParseTree(event.range, event.rangeLength, event.text.length);
                 #end
                 #end
             }
