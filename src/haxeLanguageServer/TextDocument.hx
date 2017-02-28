@@ -1,8 +1,8 @@
 package haxeLanguageServer;
 
 import haxe.Timer;
-import js.node.Buffer;
 import hxParser.HxParser.EntryPoint;
+import js.node.Buffer;
 
 typedef OnTextDocumentChangeListener = TextDocument->Array<TextDocumentContentChangeEvent>->Int->Void;
 
@@ -15,8 +15,8 @@ class TextDocument {
     public var openTimestamp(default,null):Float;
     public var lineCount(get,never):Int;
     #if debug
-    public var parseTree(get,never):hxParser.Tree;
-    var _parseTree:Null<hxParser.Tree>;
+    public var parseTree(get,never):hxParser.ParseTree.File;
+    var _parseTree:Null<hxParser.ParseTree.File>;
     #end
     @:allow(haxeLanguageServer.TextDocuments)
     var lineOffsets:Array<Int>;
@@ -168,7 +168,7 @@ class TextDocument {
 
     function createParseTree() {
         switch (hxParser.HxParser.parse(content)) {
-            case Success(tree): return hxParser.JsonParser.parse(tree);
+            case Success(tree): return hxParser.Converter.convertResultToFile(tree);
             case Failure(_): return null;
         }
     }
@@ -188,7 +188,10 @@ class TextDocument {
         } else {
             // TODO: We might want to catch exceptions in this section, else we risk that the parse tree
             // gets "stuck" if something fails.
-            var node = hxParser.ParseTreeTools.findEnclosingNode(_parseTree, byteOffsetBegin, byteOffsetEnd, [ClassDecl, ClassFields]);
+
+            // TODO: implement ParseTreeTools again
+
+            /*var node = hxParser.ParseTreeTools.findEnclosingNode(_parseTree, byteOffsetBegin, byteOffsetEnd, [ClassDecl, ClassFields]);
             if (node != null) {
                 var offsetBegin = node.start; // TODO: need text offset, not byte offset!
                 var offsetEnd = node.end - rangeLength + textLength; // TODO: more byte offset!
@@ -202,7 +205,7 @@ class TextDocument {
                 }
             } else {
                 _parseTree = null;
-            }
+            }*/
         }
     }
     #end
