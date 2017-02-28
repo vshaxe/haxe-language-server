@@ -1,10 +1,15 @@
 package haxeLanguageServer;
 
 import haxe.Timer;
-import hxParser.HxParser.EntryPoint;
+import hxParser.ParsingPointManager;
 import js.node.Buffer;
 
 typedef OnTextDocumentChangeListener = TextDocument->Array<TextDocumentContentChangeEvent>->Int->Void;
+
+typedef DocumentParsingInformation = {
+    tree:hxParser.ParseTree.File,
+    parsingPointManager:ParsingPointManager
+}
 
 class TextDocument {
     public var uri(default,null):DocumentUri;
@@ -15,8 +20,8 @@ class TextDocument {
     public var openTimestamp(default,null):Float;
     public var lineCount(get,never):Int;
     #if debug
-    public var parseTree(get,never):hxParser.ParseTree.File;
-    var _parseTree:Null<hxParser.ParseTree.File>;
+    public var parsingInfo(get,never):DocumentParsingInformation;
+    var _parsingInfo:Null<DocumentParsingInformation>;
     #end
     @:allow(haxeLanguageServer.TextDocuments)
     var lineOffsets:Array<Int>;
@@ -46,7 +51,7 @@ class TextDocument {
                 content = before + event.text + after;
                 #if debug
                 #if debug // let's be extra safe with this
-                // updateParseTree(event.range, event.rangeLength, event.text.length);
+                updateParsingInfo(event.range, event.rangeLength, event.text.length);
                 #end
                 #end
             }
@@ -166,46 +171,48 @@ class TextDocument {
 
     #if debug
 
-    function createParseTree() {
-        switch (hxParser.HxParser.parse(content)) {
-            case Success(tree): return hxParser.Converter.convertResultToFile(tree);
-            case Failure(_): return null;
+    function createParsingInfo() {
+        return switch (hxParser.HxParser.parse(content)) {
+            case Success(tree):
+                var tree = hxParser.Converter.convertResultToFile(tree);
+                var manager = new ParsingPointManager();
+                manager.walkFile(tree, Root);
+                { tree:tree, parsingPointManager:manager };
+            case Failure(_): null;
         }
     }
 
-    function get_parseTree() {
-        if (_parseTree == null) {
-            _parseTree = createParseTree();
+    function get_parsingInfo() {
+        if (_parsingInfo == null) {
+            _parsingInfo = createParsingInfo();
         }
-        return _parseTree;
+        return _parsingInfo;
     }
 
-    function updateParseTree(range:Range, rangeLength:Int, textLength:Int) {
+    function updateParsingInfo(range:Range, rangeLength:Int, textLength:Int) {
         var byteOffsetBegin = byteOffsetAt(range.start);
         var byteOffsetEnd = byteOffsetAt(range.end);
-        if (_parseTree == null) {
-            _parseTree = createParseTree();
+        if (_parsingInfo == null) {
+            _parsingInfo = createParsingInfo();
         } else {
             // TODO: We might want to catch exceptions in this section, else we risk that the parse tree
             // gets "stuck" if something fails.
 
-            // TODO: implement ParseTreeTools again
-
-            /*var node = hxParser.ParseTreeTools.findEnclosingNode(_parseTree, byteOffsetBegin, byteOffsetEnd, [ClassDecl, ClassFields]);
+            var node = parsingInfo.parsingPointManager.findEnclosing(byteOffsetBegin, byteOffsetEnd);
             if (node != null) {
                 var offsetBegin = node.start; // TODO: need text offset, not byte offset!
                 var offsetEnd = node.end - rangeLength + textLength; // TODO: more byte offset!
                 var sectionContent = content.substring(offsetBegin, offsetEnd);
-                switch (hxParser.HxParser.parse(sectionContent, cast node.name)) {
+                switch (hxParser.HxParser.parse(sectionContent, node.name)) {
                     case Success(tree):
-                        node.callback(hxParser.JsonParser.parse(tree));
-                        hxParser.ParseTreeTools.calculatePositions(_parseTree);
+                        node.callback(tree);
+                        new hxParser.PositionManager().walkFile(_parsingInfo.tree);
                     case Failure(s):
-                        _parseTree = null;
+                        _parsingInfo = null;
                 }
             } else {
-                _parseTree = null;
-            }*/
+                _parsingInfo = null;
+            }
         }
     }
     #end
