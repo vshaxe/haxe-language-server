@@ -206,7 +206,8 @@ class TextDocument {
                 switch (hxParser.HxParser.parse(sectionContent, node.name)) {
                     case Success(tree):
                         node.callback(tree);
-                        new hxParser.PositionManager().walkFile(_parsingInfo.tree);
+                        parsingInfo.parsingPointManager.reset();
+                        parsingInfo.parsingPointManager.walkFile(parsingInfo.tree, Root);
                     case Failure(s):
                         _parsingInfo = null;
                 }
