@@ -5,7 +5,7 @@ import haxe.unit.TestRunner;
 class TestMain {
     public function new() {
         var runner = new TestRunner();
-
+        throw "Test";
         CompileTime.importPackage("haxeLanguageServer.helper");
         CompileTime.importPackage("haxeLanguageServer.features");
 
