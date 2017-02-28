@@ -190,18 +190,17 @@ class TextDocument {
     }
 
     function updateParsingInfo(range:Range, rangeLength:Int, textLength:Int) {
-        var byteOffsetBegin = byteOffsetAt(range.start);
-        var byteOffsetEnd = byteOffsetAt(range.end);
         if (_parsingInfo == null) {
             _parsingInfo = createParsingInfo();
         } else {
             // TODO: We might want to catch exceptions in this section, else we risk that the parse tree
             // gets "stuck" if something fails.
-
-            var node = parsingInfo.parsingPointManager.findEnclosing(byteOffsetBegin, byteOffsetEnd);
+            var offsetBegin = offsetAt(range.start);
+            var offsetEnd = offsetAt(range.end);
+            var node = parsingInfo.parsingPointManager.findEnclosing(offsetBegin, offsetEnd);
             if (node != null) {
-                var offsetBegin = node.start; // TODO: need text offset, not byte offset!
-                var offsetEnd = node.end - rangeLength + textLength; // TODO: more byte offset!
+                var offsetBegin = node.start;
+                var offsetEnd = node.end - rangeLength + textLength;
                 var sectionContent = content.substring(offsetBegin, offsetEnd);
                 switch (hxParser.HxParser.parse(sectionContent, node.name)) {
                     case Success(tree):
