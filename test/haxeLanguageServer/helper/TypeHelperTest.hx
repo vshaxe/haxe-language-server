@@ -1,10 +1,11 @@
 package haxeLanguageServer.helper;
 
+import haxeLanguageServer.helper.TypeHelper.*;
 import haxeLanguageServer.helper.TypeHelper;
 
 class TypeHelperTest extends TestCaseBase {
     function testParseFunctionArgumentType() {
-        var parsed = TypeHelper.parseFunctionArgumentType("?Callback:Null<flixel.FlxObject -> ?String -> Void>");
+        var parsed = parseFunctionArgumentType("?Callback:Null<flixel.FlxObject -> ?String -> Void>");
         switch (parsed) {
             case DisplayType.DTFunction(args, ret):
                 assertEquals("flixel.FlxObject", args[0].type);
@@ -19,7 +20,7 @@ class TypeHelperTest extends TestCaseBase {
     }
 
     function testParseFunctionArgumentTypeNestedNulls() {
-        var parsed = TypeHelper.parseFunctionArgumentType("foo:Null<Null<Null<Null<String -> Void>>>>");
+        var parsed = parseFunctionArgumentType("foo:Null<Null<Null<Null<String -> Void>>>>");
         switch (parsed) {
             case DisplayType.DTFunction(args, ret):
                 assertEquals("String", args[0].type);
@@ -31,32 +32,32 @@ class TypeHelperTest extends TestCaseBase {
     }
 
     function testPrintFunctionDeclaration() {
-        assertPrintedEquals(TypeHelper.parseFunctionArgumentType,
+        assertPrintedEquals(parseFunctionArgumentType,
             "function(a:flixel.FlxObject, ?b:String):Void",
             "?Callback:Null<flixel.FlxObject -> ?String -> Void>",
             {argumentTypeHints: true, returnTypeHint: Always});
 
-        assertPrintedEquals(TypeHelper.parseDisplayType,
+        assertPrintedEquals(parseDisplayType,
             "function(a, b)",
             "String -> Bool -> Void>",
             {argumentTypeHints: false, returnTypeHint: Never});
 
-        assertPrintedEquals(TypeHelper.parseDisplayType,
+        assertPrintedEquals(parseDisplayType,
             "function(a:String, b:Bool)",
             "String -> Bool -> Void",
             {argumentTypeHints: true, returnTypeHint: NonVoid});
 
-        assertPrintedEquals(TypeHelper.parseDisplayType,
+        assertPrintedEquals(parseDisplayType,
             "function():String",
             "Void -> String",
             {argumentTypeHints: true, returnTypeHint: NonVoid});
     }
 
     function assertPrintedEquals(parser:String->DisplayType, expected:String, functionType:String, formatting:FunctionFormattingConfig) {
-        var parsed = TypeHelper.parseFunctionArgumentType(functionType);
+        var parsed = parseFunctionArgumentType(functionType);
         switch (parsed) {
             case DisplayType.DTFunction(args, ret):
-                var decl = TypeHelper.printFunctionDeclaration(args, ret, formatting);
+                var decl = printFunctionDeclaration(args, ret, formatting);
                 assertEquals(expected, decl);
             case _:
                 fail();

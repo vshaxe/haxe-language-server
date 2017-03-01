@@ -1,9 +1,11 @@
 package haxeLanguageServer.helper;
 
+import haxeLanguageServer.helper.ArgumentNameHelper.*;
+
 class ArgumentNameHelperTest extends TestCaseBase {
     function testAvoidDuplicates() {
         function check(expected:Array<String>, original:Array<String>)
-            assertTrue(expected.equals(ArgumentNameHelper.avoidDuplicates(original)));
+            assertTrue(expected.equals(avoidDuplicates(original)));
 
         check(["a"], ["a"]);
         check(["b1", "b2"], ["b", "b"]);
@@ -11,7 +13,7 @@ class ArgumentNameHelperTest extends TestCaseBase {
 
     function testGuessArgumentName() {
         function assert(expected, original, ?posInfos)
-            assertEquals(expected, ArgumentNameHelper.guessArgumentName(original), posInfos);
+            assertEquals(expected, guessArgumentName(original), posInfos);
 
         assert("object", "FlxObject");
         assert("f", "F");
@@ -29,7 +31,7 @@ class ArgumentNameHelperTest extends TestCaseBase {
 
     function testAddNamesToSignatureType() {
         function assert(expected, original, ?posInfos)
-            assertEquals(expected, ArgumentNameHelper.addNamesToSignatureType(original), posInfos);
+            assertEquals(expected, addNamesToSignatureType(original), posInfos);
 
         assert("a:Int", ":Int");
         assert("a:Int", "a:Int");
@@ -42,7 +44,7 @@ class ArgumentNameHelperTest extends TestCaseBase {
 
         // hopefully this is never needed...
         var letterOverflow = '(${[for (i in 0...30) ":Int"].join(", ")}):Void';
-        var fixedSignature = ArgumentNameHelper.addNamesToSignatureType(letterOverflow);
+        var fixedSignature = addNamesToSignatureType(letterOverflow);
         assertEquals(-1, fixedSignature.indexOf("{:")); // { comes after z in ascii
         assertEquals(2, fixedSignature.split(" b:").length); // arg names must be unique
     }
