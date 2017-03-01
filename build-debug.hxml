@@ -1,2 +1,4 @@
 -debug
+-D js_unflatten
+
 build.hxml

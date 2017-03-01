@@ -1,9 +1,9 @@
 package haxeLanguageServer.features;
 
+import haxeLanguageServer.helper.DocHelper;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
-import haxeLanguageServer.helper.DocHelper;
 
 typedef CurrentSignature = {
     var help(default, never):SignatureHelp;
@@ -46,7 +46,7 @@ class SignatureHelpFeature {
     function onUpdateTextDocument(doc:TextDocument, events:Array<TextDocumentContentChangeEvent>, version:Int) {
         // if there's any non-whitespace changes, consider us not to be in the signature anymore
         // - otherwise, code actions might generate incorrect code
-        function hasNonWhitespace(s:String)
+        inline function hasNonWhitespace(s:String)
             return s.trim().length > 0;
 
         for (event in events) {
