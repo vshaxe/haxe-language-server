@@ -1,5 +1,7 @@
 package haxeLanguageServer.helper;
 
+import String.fromCharCode;
+
 class ArgumentNameHelper {
     public static function guessArgumentNames(types:Array<String>):Array<String> {
         return avoidDuplicates([for (type in types) guessArgumentName(type)]);
@@ -34,5 +36,37 @@ class ArgumentNameHelper {
             if (i > 0) name = name + i;
             name;
         }];
+    }
+
+    /**
+        Adds argument names to types from signature completion.
+
+        @param  type   a type like `(:Int, :Int):Void` or `:Int`
+        @see https://github.com/HaxeFoundation/haxe/issues/6064
+    **/
+    public static function addNamesToSignatureType(type:String, index:Int = 0):String {
+        inline function getUniqueLetter(index:Int) {
+            var letters = 26;
+            var alphabets = Std.int(index / letters) + 1;
+            var lowerAsciiA = 0x61;
+            return [for (i in 0...alphabets) fromCharCode(lowerAsciiA + (index % letters))].join("");
+        }
+
+        if (type.startsWith(":"))
+             return getUniqueLetter(index) + type;
+        else if (type.startsWith("(")) {
+            var segmentsRe = ~/\((.*?)\)\s*:\s*(\w+)/;
+            if (!segmentsRe.match(type))
+                return type;
+            var args = segmentsRe.matched(1);
+            var returnType = segmentsRe.matched(2);
+            var fixedArgs = [for (arg in ~/\s*,\s*/g.split(args)) {
+                var fixedArg = addNamesToSignatureType(arg, index);
+                index++;
+                fixedArg;
+            }];
+            return '(${fixedArgs.join(", ")}):$returnType';
+        }
+        return type;
     }
 }

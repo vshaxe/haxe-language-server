@@ -1,5 +1,6 @@
 package haxeLanguageServer.features;
 
+import haxeLanguageServer.helper.ArgumentNameHelper.addNamesToSignatureType;
 import haxeLanguageServer.helper.DocHelper;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
@@ -29,8 +30,13 @@ class SignatureHelpFeature {
                     resolve(null);
                 case DResult(data):
                     var help:SignatureHelp = haxe.Json.parse(data);
-                    for (signature in help.signatures)
+                    for (signature in help.signatures) {
                         signature.documentation = DocHelper.extractText(signature.documentation);
+                        var parameters = signature.parameters;
+                        for (i in 0...signature.parameters.length)
+                            parameters[i].label = addNamesToSignatureType(parameters[i].label, i);
+                        signature.label = addNamesToSignatureType(signature.label);
+                    }
                     resolve(help);
 
                     if (currentSignature != null) {
