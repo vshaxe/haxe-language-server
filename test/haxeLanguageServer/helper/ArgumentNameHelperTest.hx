@@ -33,6 +33,10 @@ class ArgumentNameHelperTest extends TestCaseBase {
         function assert(expected, original, ?posInfos)
             assertEquals(expected, addNamesToSignatureType(original), posInfos);
 
+        assert("String", "String");
+        assert("{ i : Int }", "{ i : Int }");
+        assert("{}", "{}");
+
         assert("a:Int", ":Int");
         assert("a:Int", "a:Int");
 
