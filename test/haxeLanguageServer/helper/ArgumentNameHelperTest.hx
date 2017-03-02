@@ -27,6 +27,8 @@ class ArgumentNameHelperTest extends TestCaseBase {
         assert("unknown", null);
         assert("c", "C<Int,String>");
         assert("unknown", "<Int,String>");
+        assert("struct", "{}");
+        assert("struct", "{ i : Int }");
     }
 
     function testAddNamesToSignatureType() {
@@ -37,8 +39,11 @@ class ArgumentNameHelperTest extends TestCaseBase {
             assert(expectedAndOriginal, expectedAndOriginal, posInfos);
 
         assertUnchanged("String");
-        assertUnchanged("{ i : Int }");
-        assertUnchanged("{}");
+
+        assert("a:{ i : Int }", ":{ i : Int }");
+        assert("a:{ i : Int, s : String }", ":{ i : Int, s : String }");
+        assert("a:{}", ":{}");
+        assert("(a:Int, b:{ s : String, i : Int }):Void", "(:Int, :{ s : String, i : Int }):Void");
 
         assert("a:Int", ":Int");
         assertUnchanged("a:Int");

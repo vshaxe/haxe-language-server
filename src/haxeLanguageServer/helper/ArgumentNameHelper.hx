@@ -17,6 +17,7 @@ class ArgumentNameHelper {
             case "Float": "f";
             case "Bool": "b";
             case "String": "s";
+            case type if (type.startsWith("{")): "struct";
             case type:
                 var segments = ~/(?=[A-Z][^A-Z]+$)/.split(type);
                 var result = segments[segments.length - 1];
