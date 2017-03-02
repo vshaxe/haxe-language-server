@@ -1,4 +1,4 @@
-# Haxe language server
+# Haxe Language Server
 
 [![Build Status](https://travis-ci.org/vshaxe/haxe-languageserver.svg?branch=master)](https://travis-ci.org/vshaxe/haxe-languageserver)
 
@@ -8,7 +8,7 @@ The goal of this project is to encapsulate haxe's completion API with all its qu
 
 Used by our new [Haxe Visual Studio Code Extension](https://github.com/vshaxe/vshaxe).
 
-**Status**: Usable but still pretty new, so things may change, check [current issues](https://github.com/vshaxe/haxe-languageserver/issues).
+Note that any issues should be reported to [vshaxe](https://github.com/vshaxe/vshaxe) directly (this is also the reason why the issue tracker is disabled). Pull requests are welcome however!
 
-**IMPORTANT**: This requires latest Haxe development version due to usage of [`-D display-stdin`](https://github.com/HaxeFoundation/haxe/pull/5120),
-[`--wait stdio`](https://github.com/HaxeFoundation/haxe/pull/5188) and ton of other fixes and additions related to IDE support.
+**IMPORTANT**: This requires Haxe 3.4.0 or newer due to usage of [`-D display-stdin`](https://github.com/HaxeFoundation/haxe/pull/5120),
+[`--wait stdio`](https://github.com/HaxeFoundation/haxe/pull/5188) and tons of other fixes and additions related to IDE support.
