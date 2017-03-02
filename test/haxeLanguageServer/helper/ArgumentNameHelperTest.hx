@@ -33,18 +33,21 @@ class ArgumentNameHelperTest extends TestCaseBase {
         function assert(expected, original, ?posInfos)
             assertEquals(expected, addNamesToSignatureType(original), posInfos);
 
-        assert("String", "String");
-        assert("{ i : Int }", "{ i : Int }");
-        assert("{}", "{}");
+        function assertUnchanged(expectedAndOriginal, ?posInfos)
+            assert(expectedAndOriginal, expectedAndOriginal, posInfos);
+
+        assertUnchanged("String");
+        assertUnchanged("{ i : Int }");
+        assertUnchanged("{}");
 
         assert("a:Int", ":Int");
-        assert("a:Int", "a:Int");
+        assertUnchanged("a:Int");
 
         assert("(a:Int, b:Int):Void", "(:Int, :Int):Void");
-        assert("(a:Int, b:Int):Void", "(a:Int, b:Int):Void");
+        assertUnchanged("(a:Int, b:Int):Void");
         assert("(a:Int, b:Int, c:Int):Void", "(:Int, :Int,:Int) : Void");
 
-        assert("(", "(");
+        assertUnchanged("(");
 
         // hopefully this is never needed...
         var letterOverflow = '(${[for (i in 0...30) ":Int"].join(", ")}):Void';
