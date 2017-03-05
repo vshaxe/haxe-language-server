@@ -1,17 +1,11 @@
 language: haxe
 sudo: false
+dist: trusty
 haxe:
  - development
 
 install:
- - haxelib git haxe-hxparser https://github.com/vshaxe/haxe-hxparser
- - haxelib git hxnodejs https://github.com/HaxeFoundation/hxnodejs
- - haxelib install hxargs
- - haxelib install compiletime
- - haxelib install mconsole
- - haxelib git mockatoo https://github.com/grosmar/mockatoo master src
- - haxelib install jstack
+ - haxelib git vshaxe-build https://github.com/vshaxe/vshaxe-build
 
 script:
- - haxe build.hxml
- - haxe build-debug.hxml
+ - haxelib run vshaxe-build -t language-server -t language-server-tests -m both

@@ -1,8 +1,0 @@
--cp protocol/src
--cp formatter/src
--cp src
--dce full
--lib hxnodejs
--lib haxe-hxparser
--lib jstack
--D hxnodejs-no-version-warning
