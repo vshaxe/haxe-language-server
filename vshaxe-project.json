@@ -1,0 +1,70 @@
+{
+    "inherit": "vshaxe-node",
+    "haxelibs": [
+        {
+            "name": "haxe-hxparser",
+            "installArgs": ["git", "haxe-hxparser", "https://github.com/vshaxe/haxe-hxparser"]
+        },
+        {
+            "name": "compiletime",
+            "installArgs": ["install", "compiletime"]
+        },
+        {
+            "name": "mockatoo",
+            "installArgs": ["git", "mockatoo", "https://github.com/grosmar/mockatoo", "master", "src"]
+        },
+        {
+            "name": "mconsole",
+            "installArgs": ["install", "mconsole"]
+        }
+
+    ],
+    "targets": [
+        {
+            "name": "language-server",
+            "args": {
+                "haxelibs": ["haxe-hxparser"],
+                "classPaths": [
+                    "src",
+                    "protocol/src",
+                    "formatter/src"
+                ],
+                "defines": [
+                    "hxnodejs-no-version-warning"
+                ],
+                "output": {
+                    "target": "js",
+                    "path": "../bin/server.js"
+                },
+                "deadCodeElimination": "full",
+                "main": "haxeLanguageServer.Main"
+            }
+        },
+        {
+            "name": "language-server-tests",
+            "args": {
+                "haxelibs": ["haxe-hxparser", "compiletime", "mockatoo", "mconsole"],
+                "classPaths": [
+                    "src",
+                    "test",
+                    "protocol/src",
+                    "formatter/src"
+                ],
+                "defines": [
+                    "hxnodejs-no-version-warning"
+                ],
+                "output": {
+                    "target": "js",
+                    "path": "../bin/test.js"
+                },
+                "deadCodeElimination": "full",
+                "noInline": true,
+                "main": "TestMain",
+                "debug": true
+            },
+            "afterBuildCommands": [
+                ["node", "../bin/test.js"]
+            ]
+        }
+    ]
+}
