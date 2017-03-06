@@ -227,11 +227,9 @@ class Context {
     }
 
     public function callDisplay(args:Array<String>, stdin:String, token:CancellationToken, callback:DisplayResult->Void, errback:String->Void) {
-        if (displayArguments == null)
-            return callback(DCancelled);
-
         var actualArgs = ["--cwd", workspacePath.toString()]; // change cwd to workspace root
-        actualArgs = actualArgs.concat(displayArguments); // add arguments from the workspace settings
+        if (displayArguments != null)
+            actualArgs = actualArgs.concat(displayArguments); // add arguments from the workspace settings
         actualArgs = actualArgs.concat([
             "-D", "display-details", // get more details in completion results,
             "--no-output", // prevent anygeneration
