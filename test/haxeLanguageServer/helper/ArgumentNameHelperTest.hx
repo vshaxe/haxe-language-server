@@ -55,6 +55,8 @@ class ArgumentNameHelperTest extends TestCaseBase {
         assertUnchanged("(");
         assertUnchanged("():haxe.ds.Option");
         assertUnchanged("():haxe.__Int64");
+        assertUnchanged("():Array<Int>");
+        assertUnchanged("():{ a:Int, b:Bool }");
 
         // hopefully this is never needed...
         var letterOverflow = '(${[for (i in 0...30) ":Int"].join(", ")}):Void';
