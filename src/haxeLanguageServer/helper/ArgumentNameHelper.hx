@@ -56,7 +56,7 @@ class ArgumentNameHelper {
         if (type.startsWith(":"))
              return getUniqueLetter(index) + type;
         else if (type.startsWith("(")) {
-            var segmentsRe = ~/\((.*?)\)\s*:\s*(\w+)/;
+            var segmentsRe = ~/\((.*?)\)\s*:\s*([\w.]+)/;
             if (!segmentsRe.match(type))
                 return type;
             var args = segmentsRe.matched(1);
