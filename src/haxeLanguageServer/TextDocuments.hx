@@ -37,7 +37,7 @@ class TextDocuments {
         var document = documents[td.uri];
         if (document != null) {
             document.update(changes, td.version);
-            #if debug
+            #if false
             protocol.sendNotification(VshaxeMethods.UpdateParseTree, {uri: td.uri.toString(), parseTree: haxe.Serializer.run(document.parsingInfo.tree)});
             #end
         }

@@ -19,7 +19,7 @@ class TextDocument {
     public var content(default,null):String;
     public var openTimestamp(default,null):Float;
     public var lineCount(get,never):Int;
-    #if debug
+    #if false
     public var parsingInfo(get,never):DocumentParsingInformation;
     var _parsingInfo:Null<DocumentParsingInformation>;
     #end
@@ -49,8 +49,8 @@ class TextDocument {
                 var before = content.substring(0, offset);
                 var after = content.substring(offset + event.rangeLength);
                 content = before + event.text + after;
-                #if debug
-                #if debug // let's be extra safe with this
+                #if false
+                #if false // let's be extra safe with this
                 updateParsingInfo(event.range, event.rangeLength, event.text.length);
                 #end
                 #end
@@ -169,7 +169,7 @@ class TextDocument {
 
     inline function get_lineCount() return getLineOffsets().length;
 
-    #if debug
+    #if false
 
     function createParsingInfo() {
         return switch (hxParser.HxParser.parse(content)) {
