@@ -174,7 +174,7 @@ class TextDocument {
     function createParsingInfo() {
         return switch (hxParser.HxParser.parse(content)) {
             case Success(tree):
-                var tree = hxParser.Converter.convertResultToFile(tree);
+                var tree = new hxParser.Converter(tree).convertResultToFile();
                 var manager = new ParsingPointManager();
                 manager.walkFile(tree, Root);
                 { tree:tree, parsingPointManager:manager };
