@@ -4,7 +4,8 @@
     "haxelibs": [
         {
             "name": "haxe-hxparser",
-            "installArgs": ["git", "haxe-hxparser", "https://github.com/vshaxe/haxe-hxparser"]
+            "installArgs": ["git", "haxe-hxparser", "https://github.com/vshaxe/haxe-hxparser"],
+            "includeProjectFile": true
         },
         {
             "name": "compiletime",
