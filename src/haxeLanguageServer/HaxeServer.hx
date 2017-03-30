@@ -159,7 +159,8 @@ class HaxeServer {
         var major = Std.parseInt(reVersion.matched(1));
         var minor = Std.parseInt(reVersion.matched(2));
         var patch = Std.parseInt(reVersion.matched(3));
-        if ((major == 3 && minor < 4) || major < 4)
+        var isVersionSupported = (major == 3 && minor >= 4) || major >= 4;
+        if (!isVersionSupported)
             return error("Unsupported Haxe version! Minimum version required: 3.4.0");
 
         buffer = new MessageBuffer();
