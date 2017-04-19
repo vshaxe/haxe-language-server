@@ -38,16 +38,10 @@ class CompletionFeature {
     }
 
     static var reFieldPart = ~/(\.|@(:?))(\w*)$/;
-    static var reStructPart = ~/[(,]\s*{(\s*(\s*\w+\s*:\s*["'\w()\.]+\s*,\s*)*\w*)$/;
     static function calculateCompletionPosition(text:String, index:Int):CompletionPosition {
         if (reFieldPart.match(text))
             return {
                 pos: index - reFieldPart.matched(3).length,
-                toplevel: false,
-            };
-        else if (reStructPart.match(text))
-            return {
-                pos: index - reStructPart.matched(1).length,
                 toplevel: false,
             };
 
