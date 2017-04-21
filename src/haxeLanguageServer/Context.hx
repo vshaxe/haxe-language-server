@@ -235,7 +235,18 @@ class Context {
             "--no-output", // prevent anygeneration
         ]);
         actualArgs = actualArgs.concat(args); // finally, add given query args
-        haxeServer.process(actualArgs, token, stdin, callback, errback);
+        
+        // check for answer, it can be `null`
+        // this can occur when incorrect arguments
+        // e.g.: `config::haxe.displayServer.arguments = ["-ololo"]`
+        function precheck(s:String):Void
+            if(s != null)
+                callback(s);
+            else
+                //TODO: maybe here need to validate all User's preferences & arguments for server?
+                errback(s);
+        
+        haxeServer.process(actualArgs, token, stdin, precheck, errback);
     }
 
     public function registerCodeActionContributor(contributor:CodeActionContributor) {
