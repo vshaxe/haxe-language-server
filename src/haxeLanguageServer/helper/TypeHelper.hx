@@ -5,6 +5,7 @@ import String.fromCharCode;
 typedef FunctionFormattingConfig = {
     var argumentTypeHints:Bool;
     var returnTypeHint:ReturnTypeHintOption;
+    var useArrowSyntax:Bool;
 }
 
 @:enum abstract ReturnTypeHintOption(String) {
@@ -32,26 +33,30 @@ class TypeHelper {
     public static function prepareSignature(type:String):String {
         return switch (parseDisplayType(type)) {
             case DTFunction(args, ret):
-                printFunctionSignature(args, ret, {argumentTypeHints: true, returnTypeHint: Always});
+                printFunctionSignature(args, ret, {argumentTypeHints: true, returnTypeHint: Always, useArrowSyntax: false});
             case DTValue(type):
                 if (type == null) "" else type;
         }
     }
 
     public static function printFunctionDeclaration(args:Array<DisplayFunctionArgument>, ret:Null<String>, formatting:FunctionFormattingConfig):String {
-        return "function" + printFunctionSignature(args, ret, formatting);
+        var signature = printFunctionSignature(args, ret, formatting);
+        if (formatting.useArrowSyntax)
+            return signature + " ->";
+        return "function" + signature;
     }
 
     public static function printFunctionSignature(args:Array<DisplayFunctionArgument>, ret:Null<String>, formatting:FunctionFormattingConfig):String {
+        var parens = !formatting.useArrowSyntax || formatting.argumentTypeHints || args.length != 1;
         var result = new StringBuf();
-        result.addChar("(".code);
+        if (parens) result.addChar("(".code);
         var first = true;
         for (arg in args) {
             if (first) first = false else result.add(", ");
             result.add(printSignatureArgument(arg, formatting.argumentTypeHints));
         }
-        result.addChar(")".code);
-        if (shouldPrintReturnType(ret, formatting.returnTypeHint)) {
+        if (parens) result.addChar(")".code);
+        if (shouldPrintReturnType(ret, formatting.returnTypeHint) && !formatting.useArrowSyntax) {
             result.addChar(":".code);
             result.add(ret);
         }

@@ -35,22 +35,35 @@ class TypeHelperTest extends TestCaseBase {
         assertPrintedEquals(parseFunctionArgumentType,
             "function(a:flixel.FlxObject, ?b:String):Void",
             "?Callback:Null<flixel.FlxObject -> ?String -> Void>",
-            {argumentTypeHints: true, returnTypeHint: Always});
+            {argumentTypeHints: true, returnTypeHint: Always, useArrowSyntax: false});
 
         assertPrintedEquals(parseDisplayType,
             "function(a, b)",
             "String -> Bool -> Void>",
-            {argumentTypeHints: false, returnTypeHint: Never});
+            {argumentTypeHints: false, returnTypeHint: Never, useArrowSyntax: false});
 
         assertPrintedEquals(parseDisplayType,
             "function(a:String, b:Bool)",
             "String -> Bool -> Void",
-            {argumentTypeHints: true, returnTypeHint: NonVoid});
+            {argumentTypeHints: true, returnTypeHint: NonVoid, useArrowSyntax: false});
 
         assertPrintedEquals(parseDisplayType,
             "function():String",
             "Void -> String",
-            {argumentTypeHints: true, returnTypeHint: NonVoid});
+            {argumentTypeHints: true, returnTypeHint: NonVoid, useArrowSyntax: false});
+    }
+
+    function testPrintArrowFunctionDeclaration() {
+        function assert(expected, functionType, argumentTypeHints = false) {
+            assertPrintedEquals(parseDisplayType, expected, functionType,
+                {argumentTypeHints: argumentTypeHints, returnTypeHint: Always, useArrowSyntax: true});
+        }
+
+        assert("() ->", "Void -> Void");
+        assert("() ->", "Void -> String");
+        assert("a ->", "String -> Void");
+        assert("(a:String) ->", "String -> Void", true);
+        assert("(a:String, b:Bool) ->", "String -> Bool -> Void", true);
     }
 
     function assertPrintedEquals(parser:String->DisplayType, expected:String, functionType:String, formatting:FunctionFormattingConfig) {
