@@ -6,8 +6,9 @@ import jsonrpc.ResponseError;
 import jsonrpc.Types;
 import jsonrpc.Protocol;
 import haxeLanguageServer.features.*;
-import haxeLanguageServer.helper.TypeHelper.FunctionFormattingConfig;
 import haxeLanguageServer.features.CodeActionFeature.CodeActionContributor;
+import haxeLanguageServer.helper.SemVer;
+import haxeLanguageServer.helper.TypeHelper.FunctionFormattingConfig;
 import haxeLanguageServer.HaxeServer.DisplayResult;
 
 private typedef DisplayServerConfigBase = {
@@ -165,6 +166,8 @@ class Context {
         } else {
             haxeServer.restart("configuration was changed");
         }
+
+        checkLanguageFeatures();
     }
 
     function updateDisplayServerConfig() {
@@ -200,6 +203,12 @@ class Context {
         var functions = codeGen.functions;
         if (functions.anonymous == null)
             functions.anonymous = {argumentTypeHints: false, returnTypeHint: Never, useArrowSyntax: true};
+    }
+
+    function checkLanguageFeatures() {
+        var hasArrowFunctions = haxeServer.version >= new SemVer(4, 0, 0);
+        if (!hasArrowFunctions)
+            config.codeGeneration.functions.anonymous.useArrowSyntax = false;
     }
 
     function onDidOpenTextDocument(event:DidOpenTextDocumentParams) {
