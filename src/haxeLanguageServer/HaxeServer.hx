@@ -8,6 +8,7 @@ import js.node.Buffer;
 import js.node.ChildProcess;
 import js.node.stream.Readable;
 import jsonrpc.CancellationToken;
+import haxeLanguageServer.helper.SemVer;
 
 enum DisplayResult {
     DCancelled;
@@ -106,7 +107,6 @@ private class DisplayRequest {
 
 class HaxeServer {
     var proc:ChildProcessObject;
-    static var reVersion = ~/^(\d+)\.(\d+)\.(\d+)(?:\s.*)?$/;
 
     var buffer:MessageBuffer;
     var nextMessageLength:Int;
@@ -118,6 +118,8 @@ class HaxeServer {
     var socketListener:js.node.net.Server;
 
     var crashes:Int = 0;
+
+    public var version(default,null):SemVer;
 
     public function new(context:Context) {
         this.context = context;
@@ -153,15 +155,13 @@ class HaxeServer {
         if (checkRun.status != 0)
             return error("Haxe version check failed: " + output);
 
-        if (!reVersion.match(output))
+        version = SemVer.parse(output);
+        if (version == null)
             return error("Error parsing Haxe version " + haxe.Json.stringify(output));
 
-        var major = Std.parseInt(reVersion.matched(1));
-        var minor = Std.parseInt(reVersion.matched(2));
-        var patch = Std.parseInt(reVersion.matched(3));
-        var isVersionSupported = (major == 3 && minor >= 4) || major >= 4;
+        var isVersionSupported = version >= new SemVer(3, 4, 0);
         if (!isVersionSupported)
-            return error("Unsupported Haxe version! Minimum version required: 3.4.0");
+            return error('Unsupported Haxe version! Minimum version required: 3.4.0. Found: $version.');
 
         buffer = new MessageBuffer();
         nextMessageLength = -1;
