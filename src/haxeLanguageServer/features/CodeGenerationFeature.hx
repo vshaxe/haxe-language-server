@@ -2,21 +2,31 @@ package haxeLanguageServer.features;
 
 import haxeLanguageServer.helper.ArgumentNameHelper;
 import haxeLanguageServer.helper.TypeHelper;
+import haxeLanguageServer.features.SignatureHelpFeature.CurrentSignature;
 
 class CodeGenerationFeature {
-    private var context:Context;
+    var context:Context;
+    var currentSignature(get,never):CurrentSignature;
+
+    inline function get_currentSignature() {
+        return context.signatureHelp.currentSignature;
+    }
 
     public function new(context:Context) {
         this.context = context;
         context.registerCodeActionContributor(generateAnonymousFunction);
+        context.registerCodeActionContributor(generateCaptureVariables);
         #if debug
         context.registerCodeActionContributor(extractVariable);
         #end
     }
 
+    function isSignatureValid(params:CodeActionParams):Bool {
+        return currentSignature != null && currentSignature.params.textDocument.uri == params.textDocument.uri;
+    }
+
     function generateAnonymousFunction(params:CodeActionParams):Array<Command> {
-        var currentSignature = context.signatureHelp.currentSignature;
-        if (currentSignature == null || currentSignature.params.textDocument.uri != params.textDocument.uri) return [];
+        if (!isSignatureValid(params)) return [];
 
         var help = currentSignature.help;
         var activeParam = help.signatures[help.activeSignature].parameters[help.activeParameter];
@@ -35,6 +45,24 @@ class CodeGenerationFeature {
             case _:
                 return [];
         }
+    }
+
+    function generateCaptureVariables(params:CodeActionParams):Array<Command> {
+        if (!isSignatureValid(params) || currentSignature.help.activeParameter != 0) return [];
+
+        var doc = context.documents.get(params.textDocument.uri);
+        var position = currentSignature.params.position;
+        var line = doc.lineAt(position.line);
+        var textBefore = line.substring(0, position.character);
+        var textAfter = line.substr(position.character);
+
+        // ensure we're at a valid position (a "case" without any arguments)
+        if (!~/\bcase [a-zA-Z]\w+\s*\($/.match(textBefore) || !textAfter.rtrim().startsWith(")")) return [];
+
+        var activeSignature = currentSignature.help.signatures[currentSignature.help.activeSignature];
+        var argNames = [for (arg in activeSignature.parameters) arg.label.split(":")[0]];
+        return new ApplyFixesCommand("Generate capture variables", params,
+            [{range: position.toRange(), newText: argNames.join(", ")}]);
     }
 
     function extractVariable(params:CodeActionParams):Array<Command> {
