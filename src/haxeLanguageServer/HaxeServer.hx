@@ -176,7 +176,7 @@ class HaxeServer {
         proc.on(ChildProcessEvent.Exit, onExit);
 
         if (context.config.buildCompletionCache && context.displayArguments != null) {
-            var stopProgress = context.startProgress("Initializing Haxe completion...");
+            var stopProgress = context.startProgress("initializing completion");
             trace("Initializing completion cache...");
             process(context.displayArguments.concat(["--no-output"]), null, null, function(_) {
                 stopProgress();

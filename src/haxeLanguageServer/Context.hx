@@ -90,7 +90,7 @@ class Context {
 
     public function startProgress(title:String):Void->Void {
         var id = progressId++;
-        protocol.sendNotification(VshaxeMethods.ProgressStart, {id: id, title: title});
+        protocol.sendNotification(VshaxeMethods.ProgressStart, {id: id, title: 'Haxe: $title...'});
         return function() {
             protocol.sendNotification(VshaxeMethods.ProgressStop, {id: id});
         };
