@@ -176,10 +176,13 @@ class HaxeServer {
         proc.on(ChildProcessEvent.Exit, onExit);
 
         if (context.config.buildCompletionCache && context.displayArguments != null) {
+            var stopProgress = context.startProgress("Initializing completion cache...");
             trace("Initializing completion cache...");
             process(context.displayArguments.concat(["--no-output"]), null, null, function(_) {
+                stopProgress();
                 trace("Done.");
             }, function(errorMessage) {
+                stopProgress();
                 trace("Failed - try fixing the error(s) and restarting the language server:\n\n" + errorMessage);
             });
         }

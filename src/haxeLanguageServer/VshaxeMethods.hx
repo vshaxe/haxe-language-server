@@ -29,4 +29,16 @@ class VshaxeMethods {
         This notification is sent from the server to the client to update the parse tree visualization.
     **/
     static inline var UpdateParseTree = new NotificationMethod<{uri:String, parseTree:String}>("vshaxe/updateParseTree");
+
+    /**
+        This notification is sent from the server to the client when some long-running process is started.
+        Client may display this somehow in the UI. The `id` is used later for sending `ProgressStop` notification.
+    **/
+    static inline var ProgressStart = new NotificationMethod<{id:Int, title:String}>("vshaxe/progressStart");
+
+    /**
+        This notification is sent from the server to the client when some long-running process is stopped.
+        If client used `ProgressStart` to display an UI element, it can now hide it using the given `id`.
+    **/
+    static inline var ProgressStop = new NotificationMethod<{id:Int}>("vshaxe/progressStop");
 }

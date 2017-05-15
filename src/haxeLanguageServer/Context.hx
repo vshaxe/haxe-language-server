@@ -70,6 +70,8 @@ class Context {
     var displayServerConfig:DisplayServerConfigBase;
     var displayConfigurationIndex:Int;
 
+    var progressId = 0;
+
     inline function get_displayArguments() return config.displayConfigurations[displayConfigurationIndex];
 
     public function new(protocol) {
@@ -84,6 +86,14 @@ class Context {
         protocol.onNotification(Methods.DidSaveTextDocument, onDidSaveTextDocument);
         protocol.onNotification(VshaxeMethods.DidChangeDisplayConfigurationIndex, onDidChangeDisplayConfigurationIndex);
         protocol.onNotification(VshaxeMethods.DidChangeActiveTextEditor, onDidChangeActiveTextEditor);
+    }
+
+    public inline function startProgress(title:String):Void->Void {
+        var id = progressId++;
+        protocol.sendNotification(VshaxeMethods.ProgressStart, {id: id, title: title});
+        return function() {
+            protocol.sendNotification(VshaxeMethods.ProgressStop, {id: id});
+        };
     }
 
     public inline function sendShowMessage(type:MessageType, message:String) {
