@@ -77,30 +77,18 @@ class TextDocument {
         return {line: line, character: offset - lineOffsets[line]};
     }
 
-    public function offsetToByteOffset(offset:Int):Int {
-        if (offset == 0)
-            return 0;
-        if (offset == content.length)
-            return Buffer.byteLength(content);
-        return Buffer.byteLength(content.substr(0, offset));
-    }
-
-    public inline function byteOffsetAt(position:Position):Int {
-        return offsetToByteOffset(offsetAt(position));
-    }
-
-    public inline function byteRangeToRange(byteRange:Range):Range {
+    public inline function byteRangeToRange(byteRange:Range, offsetConverter:DisplayOffsetConverter):Range {
         return {
-            start: bytePositionToPosition(byteRange.start),
-            end: bytePositionToPosition(byteRange.end),
+            start: bytePositionToPosition(byteRange.start, offsetConverter),
+            end: bytePositionToPosition(byteRange.end, offsetConverter),
         };
     }
 
-    public inline function bytePositionToPosition(bytePosition:Position):Position {
+    inline function bytePositionToPosition(bytePosition:Position, offsetConverter:DisplayOffsetConverter):Position {
         var line = lineAt(bytePosition.line);
         return {
             line: bytePosition.line,
-            character: HaxePosition.byteOffsetToCharacterOffset(line, bytePosition.character)
+            character: offsetConverter.byteOffsetToCharacterOffset(line, bytePosition.character)
         };
     }
 
@@ -132,7 +120,7 @@ class TextDocument {
     }
 
     public function getText(range:Range) {
-        return content.substring(byteOffsetAt(range.start), byteOffsetAt(range.end));
+        return content.substring(offsetAt(range.start), offsetAt(range.end));
     }
 
     public function addUpdateListener(listener:OnTextDocumentChangeListener) {

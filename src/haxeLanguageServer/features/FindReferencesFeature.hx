@@ -14,7 +14,7 @@ class FindReferencesFeature {
 
     function onFindReferences(params:TextDocumentPositionParams, token:CancellationToken, resolve:Array<Location>->Void, reject:ResponseError<NoData>->Void) {
         var doc = context.documents.get(params.textDocument.uri);
-        var bytePos = doc.byteOffsetAt(params.position);
+        var bytePos = context.displayOffsetConverter.characterOffsetToByteOffset(doc.content, doc.offsetAt(params.position));
         var args = ["--display", '${doc.fsPath}@$bytePos@usage'];
         context.callDisplay(args, doc.content, token, function(r) {
             switch (r) {
@@ -31,7 +31,7 @@ class FindReferencesFeature {
                     var results = [];
                     var haxePosCache = new Map();
                     for (pos in positions) {
-                        var location = HaxePosition.parse(pos, doc, haxePosCache);
+                        var location = HaxePosition.parse(pos, doc, haxePosCache, context.displayOffsetConverter);
                         if (location == null) {
                             trace("Got invalid position: " + pos);
                             continue;

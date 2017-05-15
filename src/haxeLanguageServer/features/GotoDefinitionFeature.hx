@@ -15,7 +15,7 @@ class GotoDefinitionFeature {
 
     function onGotoDefinition(params:TextDocumentPositionParams, token:CancellationToken, resolve:EitherType<Location,Array<Location>>->Void, reject:ResponseError<NoData>->Void) {
         var doc = context.documents.get(params.textDocument.uri);
-        var bytePos = doc.byteOffsetAt(params.position);
+        var bytePos = context.displayOffsetConverter.characterOffsetToByteOffset(doc.content, doc.offsetAt(params.position));
         var args = ["--display", '${doc.fsPath}@$bytePos@position'];
         context.callDisplay(args, doc.content, token, function(r) {
             switch (r) {
@@ -31,7 +31,7 @@ class GotoDefinitionFeature {
 
                     var results = [];
                     for (pos in positions) {
-                        var location = HaxePosition.parse(pos, doc, null); // no cache because this right now only returns one position
+                        var location = HaxePosition.parse(pos, doc, null, context.displayOffsetConverter); // no cache because this right now only returns one position
                         if (location == null) {
                             trace("Got invalid position: " + pos);
                             continue;

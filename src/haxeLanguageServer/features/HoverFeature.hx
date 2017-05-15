@@ -16,7 +16,7 @@ class HoverFeature {
 
     function onHover(params:TextDocumentPositionParams, token:CancellationToken, resolve:Hover->Void, reject:ResponseError<NoData>->Void) {
         var doc = context.documents.get(params.textDocument.uri);
-        var bytePos = doc.byteOffsetAt(params.position);
+        var bytePos = context.displayOffsetConverter.characterOffsetToByteOffset(doc.content, doc.offsetAt(params.position));
         var args = ["--display", '${doc.fsPath}@$bytePos@type'];
         context.callDisplay(args, doc.content, token, function(r) {
             switch (r) {
@@ -45,7 +45,7 @@ class HoverFeature {
                             var d = xml.get("d");
                             d = if (d == null) "" else DocHelper.markdownFormat(d);
                             var result:Hover = {contents: '```haxe\n${type}\n```\n${d}'};
-                            var p = HaxePosition.parse(xml.get("p"), doc, null);
+                            var p = HaxePosition.parse(xml.get("p"), doc, null, context.displayOffsetConverter);
                             if (p != null)
                                 result.range = p.range;
 

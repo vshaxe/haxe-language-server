@@ -21,7 +21,7 @@ class CompletionFeature {
         var offset = doc.offsetAt(params.position);
         var textBefore = doc.content.substring(0, offset);
         var r = calculateCompletionPosition(textBefore, offset);
-        var bytePos = doc.offsetToByteOffset(r.pos);
+        var bytePos = context.displayOffsetConverter.characterOffsetToByteOffset(doc.content, r.pos);
         var args = ["--display", '${doc.fsPath}@$bytePos' + (if (r.toplevel) "@toplevel" else "")];
         context.callDisplay(args, doc.content, token, function(result) {
             switch (result) {

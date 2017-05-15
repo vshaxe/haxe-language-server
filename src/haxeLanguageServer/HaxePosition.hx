@@ -7,7 +7,7 @@ class HaxePosition {
     static var properFileNameCaseCache:Map<FsPath,FsPath>;
     static var isWindows = (Sys.systemName() == "Windows");
 
-    public static function parse(pos:String, doc:TextDocument, cache:Map<FsPath,Array<String>>):Null<Location> {
+    public static function parse(pos:String, doc:TextDocument, cache:Map<FsPath,Array<String>>, offsetConverter:DisplayOffsetConverter):Null<Location> {
         if (!positionRe.match(pos))
             return null;
 
@@ -47,13 +47,13 @@ class HaxePosition {
             }
 
             var endByte = Std.parseInt(positionRe.matched(6));
-            var endChar = byteOffsetToCharacterOffset(lineContent, endByte);
+            var endChar = offsetConverter.byteOffsetToCharacterOffset(lineContent, endByte);
 
             s = positionRe.matched(5);
             var startChar;
             if (s != null) {
                 var startByte = Std.parseInt(s);
-                startChar = byteOffsetToCharacterOffset(lineContent, startByte);
+                startChar = offsetConverter.byteOffsetToCharacterOffset(lineContent, startByte);
             } else {
                 startChar = endChar;
             }
@@ -66,11 +66,6 @@ class HaxePosition {
                 }
             };
         }
-    }
-
-    public static inline function byteOffsetToCharacterOffset(string:String, byteOffset:Int):Int {
-        var buf = new js.node.Buffer(string, "utf-8");
-        return buf.toString("utf-8", 0, byteOffset).length;
     }
 
     public static function getProperFileNameCase(normalizedPath:FsPath):FsPath {

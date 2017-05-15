@@ -61,6 +61,7 @@ class Context {
     public var haxeServer(default,null):HaxeServer;
     public var documents(default,null):TextDocuments;
     public var signatureHelp(default,null):SignatureHelpFeature;
+    public var displayOffsetConverter(default,null):DisplayOffsetConverter;
     var diagnostics:DiagnosticsManager;
     var codeActions:CodeActionFeature;
 
@@ -142,6 +143,7 @@ class Context {
 
         if (firstInit) {
             haxeServer.start(function() {
+                displayOffsetConverter = DisplayOffsetConverter.create(haxeServer.version);
                 codeActions = new CodeActionFeature(this);
 
                 new CompletionFeature(this);
