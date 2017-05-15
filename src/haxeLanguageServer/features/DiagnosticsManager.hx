@@ -20,7 +20,14 @@ class DiagnosticsManager {
     }
 
     function onRunGlobalDiagnostics(_) {
-        context.callDisplay(["--display", "diagnostics"], null, null, processDiagnosticsReply.bind(null), processErrorReply.bind(null));
+        var stopProgress = context.startProgress("Collecting Haxe diagnostics...");
+        context.callDisplay(["--display", "diagnostics"], null, null, function(result) {
+            processDiagnosticsReply(null, result);
+            stopProgress();
+        }, function(error) {
+            processErrorReply(null, error);
+            stopProgress();
+        });
     }
 
     function processErrorReply(uri:Null<DocumentUri>, error:String) {

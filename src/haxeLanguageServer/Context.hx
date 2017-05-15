@@ -88,7 +88,7 @@ class Context {
         protocol.onNotification(VshaxeMethods.DidChangeActiveTextEditor, onDidChangeActiveTextEditor);
     }
 
-    public inline function startProgress(title:String):Void->Void {
+    public function startProgress(title:String):Void->Void {
         var id = progressId++;
         protocol.sendNotification(VshaxeMethods.ProgressStart, {id: id, title: title});
         return function() {
