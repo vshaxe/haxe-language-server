@@ -20,8 +20,12 @@ class DocumentSymbolsResolver extends StackAwareWalker {
     }
 
     override function walkToken(token:Token, stack:WalkStack) {
-        updatePosition(token.leadingTrivia);
+        processTrivia(token.leadingTrivia);
+        if (token.appearsInSource()) processToken(token);
+        processTrivia(token.trailingTrivia);
+    }
 
+    function processToken(token:Token) {
         if (symbols[token] != null) {
             symbols[token].location = {
                 uri: uri,
@@ -33,10 +37,9 @@ class DocumentSymbolsResolver extends StackAwareWalker {
         }
 
         character += token.text.length;
-        updatePosition(token.trailingTrivia);
     }
 
-    function updatePosition(trivias:Array<Trivia>) {
+    function processTrivia(trivias:Array<Trivia>) {
         for (trivia in trivias) {
             var newlines = trivia.text.occurrences("\n");
             if (newlines > 0) {

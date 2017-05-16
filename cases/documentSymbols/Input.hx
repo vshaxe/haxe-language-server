@@ -27,6 +27,11 @@ class Class {
         var f = function() {}
 
         var a, b, c;
+
+        // inserted _ name shouldn't appear
+        var
+        // and also shouldn't affect positions
+        var var maybeIncorrectPos:Int;
     }
 
     function new() {}
