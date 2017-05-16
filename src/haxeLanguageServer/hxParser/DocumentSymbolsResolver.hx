@@ -92,6 +92,16 @@ class DocumentSymbolsResolver extends StackAwareWalker {
         super.walkClassField_Property(annotations, modifiers, varKeyword, name, parenOpen, read, comma, write, parenClose, typeHint, assignment, semicolon, stack);
     }
 
+    override function walkVarDecl(node:VarDecl, stack:WalkStack) {
+        tokenMap[node.name] = SymbolKind.Variable;
+        super.walkVarDecl(node, stack);
+    }
+
+    override function walkBlockElement_InlineFunction(inlineKeyword:Token, functionKeyword:Token, fun:Function, semicolon:Token, stack:WalkStack) {
+        if (fun.name != null) tokenMap[fun.name] = SymbolKind.Function;
+        super.walkBlockElement_InlineFunction(inlineKeyword, functionKeyword, fun, semicolon, stack);
+    }
+
     override function walkExpr_EVar(varKeyword:Token, decl:VarDecl, stack:WalkStack) {
         tokenMap[decl.name] = SymbolKind.Variable;
         super.walkExpr_EVar(varKeyword, decl, stack);
