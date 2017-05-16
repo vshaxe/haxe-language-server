@@ -1,15 +1,10 @@
 package haxeLanguageServer;
 
 import haxe.Timer;
-import hxParser.ParsingPointManager;
+import hxParser.ParseTree;
 import js.node.Buffer;
 
 typedef OnTextDocumentChangeListener = TextDocument->Array<TextDocumentContentChangeEvent>->Int->Void;
-
-typedef DocumentParsingInformation = {
-    tree:hxParser.ParseTree.File,
-    parsingPointManager:ParsingPointManager
-}
 
 class TextDocument {
     public var uri(default,null):DocumentUri;
@@ -19,8 +14,8 @@ class TextDocument {
     public var content(default,null):String;
     public var openTimestamp(default,null):Float;
     public var lineCount(get,never):Int;
-    public var parsingInfo(get,never):DocumentParsingInformation;
-    var _parsingInfo:Null<DocumentParsingInformation>;
+    public var parseTree(get,never):File;
+    var _parseTree:Null<File>;
     @:allow(haxeLanguageServer.TextDocuments)
     var lineOffsets:Array<Int>;
     var onUpdateListeners:Array<OnTextDocumentChangeListener> = [];
@@ -54,7 +49,7 @@ class TextDocument {
                 #end
             }
         }
-        _parsingInfo = null;
+        _parseTree = null;
         lineOffsets = null;
     }
 
@@ -156,13 +151,9 @@ class TextDocument {
 
     inline function get_lineCount() return getLineOffsets().length;
 
-    function createParsingInfo() {
+    function createParseTree() {
         return try switch (hxParser.HxParser.parse(content)) {
-            case Success(tree):
-                var tree = new hxParser.Converter(tree).convertResultToFile();
-                var manager = new ParsingPointManager();
-                manager.walkFile(tree, Root);
-                { tree:tree, parsingPointManager:manager };
+            case Success(tree): new hxParser.Converter(tree).convertResultToFile();
             case Failure(_): null;
         } catch (e:Any) {
             trace('hxparser failed to parse $uri with: \'$e\'');
@@ -170,17 +161,17 @@ class TextDocument {
         }
     }
 
-    function get_parsingInfo() {
-        if (_parsingInfo == null) {
-            _parsingInfo = createParsingInfo();
+    function get_parseTree() {
+        if (_parseTree == null) {
+            _parseTree = createParseTree();
         }
-        return _parsingInfo;
+        return _parseTree;
     }
 
     #if false
     function updateParsingInfo(range:Range, rangeLength:Int, textLength:Int) {
         if (_parsingInfo == null) {
-            _parsingInfo = createParsingInfo();
+            _parsingInfo = createParseTree();
         } else {
             // TODO: We might want to catch exceptions in this section, else we risk that the parse tree
             // gets "stuck" if something fails.

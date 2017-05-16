@@ -78,8 +78,8 @@ class DocumentSymbolsFeature {
     function onDocumentSymbols(params:DocumentSymbolParams, token:CancellationToken, resolve:Array<SymbolInformation>->Void, reject:ResponseError<NoData>->Void) {
         var doc = context.documents.get(params.textDocument.uri);
         var resolver = new DocumentSymbolsResolver(doc.uri);
-        try if (doc.parsingInfo != null) {
-            resolver.walkFile(doc.parsingInfo.tree, Root);
+        try if (doc.parseTree != null) {
+            resolver.walkFile(doc.parseTree, Root);
             return resolve(resolver.results);
         } catch (e:Any) {
             trace('DocumentSymbolsResolver failed with \'$e\'');
