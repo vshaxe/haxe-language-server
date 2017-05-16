@@ -157,4 +157,12 @@ class DocumentSymbolsResolver extends StackAwareWalker {
         addSymbol(node.name, SymbolKind.Variable, stack);
         super.walkAnonymousStructureField(node, stack);
     }
+
+    override function walkLiteral_PLiteralString(s:StringToken, stack:WalkStack) {
+        var string = switch (s) {
+            case DoubleQuote(token) | SingleQuote(token): token.text;
+        }
+        line += string.occurrences("\n");
+        super.walkLiteral_PLiteralString(s, stack);
+    }
 }

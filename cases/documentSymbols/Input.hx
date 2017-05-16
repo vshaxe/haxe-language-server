@@ -5,7 +5,17 @@ class Class {
 
     var property(default,null):Int;
 
+    /**
+
+
+
+    **/
     function foo(param1:Int, param2:Int) {
+        "
+
+
+        ";
+
         function foo2() {
             function foo3() {
                 var foo4:Int;

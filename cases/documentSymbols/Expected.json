@@ -78,11 +78,11 @@
             "uri": "file:///cases/documentSymbols/Input.hx",
             "range": {
                 "start": {
-                    "line": 7,
+                    "line": 12,
                     "character": 13
                 },
                 "end": {
-                    "line": 7,
+                    "line": 12,
                     "character": 16
                 }
             }
@@ -96,11 +96,11 @@
             "uri": "file:///cases/documentSymbols/Input.hx",
             "range": {
                 "start": {
-                    "line": 7,
+                    "line": 12,
                     "character": 17
                 },
                 "end": {
-                    "line": 7,
+                    "line": 12,
                     "character": 23
                 }
             }
@@ -114,11 +114,11 @@
             "uri": "file:///cases/documentSymbols/Input.hx",
             "range": {
                 "start": {
-                    "line": 7,
+                    "line": 12,
                     "character": 29
                 },
                 "end": {
-                    "line": 7,
+                    "line": 12,
                     "character": 35
                 }
             }
@@ -132,11 +132,11 @@
             "uri": "file:///cases/documentSymbols/Input.hx",
             "range": {
                 "start": {
-                    "line": 8,
+                    "line": 18,
                     "character": 17
                 },
                 "end": {
-                    "line": 8,
+                    "line": 18,
                     "character": 21
                 }
             }
@@ -150,11 +150,11 @@
             "uri": "file:///cases/documentSymbols/Input.hx",
             "range": {
                 "start": {
-                    "line": 9,
+                    "line": 19,
                     "character": 21
                 },
                 "end": {
-                    "line": 9,
+                    "line": 19,
                     "character": 25
                 }
             }
@@ -168,11 +168,11 @@
             "uri": "file:///cases/documentSymbols/Input.hx",
             "range": {
                 "start": {
-                    "line": 10,
+                    "line": 20,
                     "character": 20
                 },
                 "end": {
-                    "line": 10,
+                    "line": 20,
                     "character": 24
                 }
             }
@@ -186,11 +186,11 @@
             "uri": "file:///cases/documentSymbols/Input.hx",
             "range": {
                 "start": {
-                    "line": 14,
+                    "line": 24,
                     "character": 24
                 },
                 "end": {
-                    "line": 14,
+                    "line": 24,
                     "character": 27
                 }
             }
@@ -204,11 +204,11 @@
             "uri": "file:///cases/documentSymbols/Input.hx",
             "range": {
                 "start": {
-                    "line": 16,
+                    "line": 26,
                     "character": 12
                 },
                 "end": {
-                    "line": 16,
+                    "line": 26,
                     "character": 13
                 }
             }
@@ -222,11 +222,11 @@
             "uri": "file:///cases/documentSymbols/Input.hx",
             "range": {
                 "start": {
-                    "line": 18,
+                    "line": 28,
                     "character": 12
                 },
                 "end": {
-                    "line": 18,
+                    "line": 28,
                     "character": 13
                 }
             }
@@ -240,11 +240,11 @@
             "uri": "file:///cases/documentSymbols/Input.hx",
             "range": {
                 "start": {
-                    "line": 18,
+                    "line": 28,
                     "character": 15
                 },
                 "end": {
-                    "line": 18,
+                    "line": 28,
                     "character": 16
                 }
             }
@@ -258,11 +258,11 @@
             "uri": "file:///cases/documentSymbols/Input.hx",
             "range": {
                 "start": {
-                    "line": 18,
+                    "line": 28,
                     "character": 18
                 },
                 "end": {
-                    "line": 18,
+                    "line": 28,
                     "character": 19
                 }
             }
@@ -276,11 +276,11 @@
             "uri": "file:///cases/documentSymbols/Input.hx",
             "range": {
                 "start": {
-                    "line": 21,
+                    "line": 31,
                     "character": 13
                 },
                 "end": {
-                    "line": 21,
+                    "line": 31,
                     "character": 16
                 }
             }
@@ -294,11 +294,11 @@
             "uri": "file:///cases/documentSymbols/Input.hx",
             "range": {
                 "start": {
-                    "line": 24,
+                    "line": 34,
                     "character": 10
                 },
                 "end": {
-                    "line": 24,
+                    "line": 34,
                     "character": 19
                 }
             }
@@ -312,11 +312,11 @@
             "uri": "file:///cases/documentSymbols/Input.hx",
             "range": {
                 "start": {
-                    "line": 25,
+                    "line": 35,
                     "character": 8
                 },
                 "end": {
-                    "line": 25,
+                    "line": 35,
                     "character": 16
                 }
             }
@@ -330,11 +330,11 @@
             "uri": "file:///cases/documentSymbols/Input.hx",
             "range": {
                 "start": {
-                    "line": 26,
+                    "line": 36,
                     "character": 13
                 },
                 "end": {
-                    "line": 26,
+                    "line": 36,
                     "character": 16
                 }
             }
@@ -348,11 +348,11 @@
             "uri": "file:///cases/documentSymbols/Input.hx",
             "range": {
                 "start": {
-                    "line": 29,
+                    "line": 39,
                     "character": 9
                 },
                 "end": {
-                    "line": 29,
+                    "line": 39,
                     "character": 17
                 }
             }
@@ -366,11 +366,11 @@
             "uri": "file:///cases/documentSymbols/Input.hx",
             "range": {
                 "start": {
-                    "line": 30,
+                    "line": 40,
                     "character": 22
                 },
                 "end": {
-                    "line": 30,
+                    "line": 40,
                     "character": 30
                 }
             }
@@ -384,11 +384,11 @@
             "uri": "file:///cases/documentSymbols/Input.hx",
             "range": {
                 "start": {
-                    "line": 32,
+                    "line": 42,
                     "character": 20
                 },
                 "end": {
-                    "line": 32,
+                    "line": 42,
                     "character": 23
                 }
             }
@@ -402,11 +402,11 @@
             "uri": "file:///cases/documentSymbols/Input.hx",
             "range": {
                 "start": {
-                    "line": 35,
+                    "line": 45,
                     "character": 16
                 },
                 "end": {
-                    "line": 35,
+                    "line": 45,
                     "character": 28
                 }
             }
@@ -420,11 +420,11 @@
             "uri": "file:///cases/documentSymbols/Input.hx",
             "range": {
                 "start": {
-                    "line": 36,
+                    "line": 46,
                     "character": 8
                 },
                 "end": {
-                    "line": 36,
+                    "line": 46,
                     "character": 14
                 }
             }
@@ -438,11 +438,11 @@
             "uri": "file:///cases/documentSymbols/Input.hx",
             "range": {
                 "start": {
-                    "line": 37,
+                    "line": 47,
                     "character": 8
                 },
                 "end": {
-                    "line": 37,
+                    "line": 47,
                     "character": 14
                 }
             }
@@ -456,11 +456,11 @@
             "uri": "file:///cases/documentSymbols/Input.hx",
             "range": {
                 "start": {
-                    "line": 40,
+                    "line": 50,
                     "character": 5
                 },
                 "end": {
-                    "line": 40,
+                    "line": 50,
                     "character": 9
                 }
             }
@@ -474,11 +474,11 @@
             "uri": "file:///cases/documentSymbols/Input.hx",
             "range": {
                 "start": {
-                    "line": 41,
+                    "line": 51,
                     "character": 4
                 },
                 "end": {
-                    "line": 41,
+                    "line": 51,
                     "character": 10
                 }
             }
@@ -492,11 +492,11 @@
             "uri": "file:///cases/documentSymbols/Input.hx",
             "range": {
                 "start": {
-                    "line": 42,
+                    "line": 52,
                     "character": 4
                 },
                 "end": {
-                    "line": 42,
+                    "line": 52,
                     "character": 11
                 }
             }
@@ -510,11 +510,11 @@
             "uri": "file:///cases/documentSymbols/Input.hx",
             "range": {
                 "start": {
-                    "line": 45,
+                    "line": 55,
                     "character": 8
                 },
                 "end": {
-                    "line": 45,
+                    "line": 55,
                     "character": 17
                 }
             }
@@ -528,11 +528,11 @@
             "uri": "file:///cases/documentSymbols/Input.hx",
             "range": {
                 "start": {
-                    "line": 47,
+                    "line": 57,
                     "character": 8
                 },
                 "end": {
-                    "line": 47,
+                    "line": 57,
                     "character": 26
                 }
             }
@@ -546,11 +546,11 @@
             "uri": "file:///cases/documentSymbols/Input.hx",
             "range": {
                 "start": {
-                    "line": 48,
+                    "line": 58,
                     "character": 5
                 },
                 "end": {
-                    "line": 48,
+                    "line": 58,
                     "character": 6
                 }
             }
@@ -564,11 +564,11 @@
             "uri": "file:///cases/documentSymbols/Input.hx",
             "range": {
                 "start": {
-                    "line": 49,
+                    "line": 59,
                     "character": 4
                 },
                 "end": {
-                    "line": 49,
+                    "line": 59,
                     "character": 5
                 }
             }
@@ -582,11 +582,11 @@
             "uri": "file:///cases/documentSymbols/Input.hx",
             "range": {
                 "start": {
-                    "line": 52,
+                    "line": 62,
                     "character": 8
                 },
                 "end": {
-                    "line": 52,
+                    "line": 62,
                     "character": 28
                 }
             }
@@ -600,11 +600,11 @@
             "uri": "file:///cases/documentSymbols/Input.hx",
             "range": {
                 "start": {
-                    "line": 53,
+                    "line": 63,
                     "character": 19
                 },
                 "end": {
-                    "line": 53,
+                    "line": 63,
                     "character": 20
                 }
             }
@@ -618,11 +618,11 @@
             "uri": "file:///cases/documentSymbols/Input.hx",
             "range": {
                 "start": {
-                    "line": 54,
+                    "line": 64,
                     "character": 8
                 },
                 "end": {
-                    "line": 54,
+                    "line": 64,
                     "character": 9
                 }
             }
