@@ -147,4 +147,9 @@ class DocumentSymbolsResolver extends StackAwareWalker {
         addSymbol(decl.name, SymbolKind.Variable, stack);
         super.walkExpr_EVar(varKeyword, decl, stack);
     }
+
+    override function walkNEnumField(node:NEnumField, stack:WalkStack) {
+        addSymbol(node.name, SymbolKind.Function, stack);
+        super.walkNEnumField(node, stack);
+    }
 }
