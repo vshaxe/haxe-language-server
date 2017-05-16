@@ -68,7 +68,7 @@ class DocumentSymbolsResolver extends StackAwareWalker {
                         case EnumDecl(decl): add(decl.name);
                         case TypedefDecl(decl): add(decl.name);
                         case Function(node): add(node.name);
-                        case ClassField_Function(_,_,_, name, _,_,_,_,_,_):
+                        case ClassField_Function(_, _, _, name, _, _, _, _, _, _):
                             add(name);
                         case _:
                     };
@@ -139,7 +139,7 @@ class DocumentSymbolsResolver extends StackAwareWalker {
     }
 
     override function walkFunction(node:Function, stack:WalkStack) {
-        addSymbol(node.name,  SymbolKind.Function, stack);
+        addSymbol(node.name, SymbolKind.Function, stack);
         super.walkFunction(node, stack);
     }
 

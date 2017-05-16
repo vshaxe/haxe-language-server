@@ -152,10 +152,13 @@ class TextDocument {
 
     function createParseTree() {
         return try switch (hxParser.HxParser.parse(content)) {
-            case Success(tree): new hxParser.Converter(tree).convertResultToFile();
-            case Failure(_): null;
+            case Success(tree):
+                new hxParser.Converter(tree).convertResultToFile();
+            case Failure(error):
+                trace('hxparser failed to parse $uri with: \'$error\'');
+                null;
         } catch (e:Any) {
-            trace('hxparser failed to parse $uri with: \'$e\'');
+            trace('hxParser.Converter failed on $uri with: \'$e\'');
             null;
         }
     }
