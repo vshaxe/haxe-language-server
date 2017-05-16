@@ -78,9 +78,14 @@ class DocumentSymbolsFeature {
     function onDocumentSymbols(params:DocumentSymbolParams, token:CancellationToken, resolve:Array<SymbolInformation>->Void, reject:ResponseError<NoData>->Void) {
         var doc = context.documents.get(params.textDocument.uri);
         var resolver = new DocumentSymbolsResolver(doc.uri);
-        resolver.walkFile(doc.parsingInfo.tree, Root);
-        return resolve(resolver.results);
+        try if (doc.parsingInfo != null) {
+            resolver.walkFile(doc.parsingInfo.tree, Root);
+            return resolve(resolver.results);
+        } catch (e:Any) {
+            trace('DocumentSymbolsResolver failed with \'$e\'');
+        }
 
+        trace('Falling back to Haxe document symbols.');
         var args = ["--display", '${doc.fsPath}@0@module-symbols'];
         makeRequest(args, doc, token, resolve, reject);
     }

@@ -156,13 +156,16 @@ class TextDocument {
     inline function get_lineCount() return getLineOffsets().length;
 
     function createParsingInfo() {
-        return switch (hxParser.HxParser.parse(content)) {
+        return try switch (hxParser.HxParser.parse(content)) {
             case Success(tree):
                 var tree = new hxParser.Converter(tree).convertResultToFile();
                 var manager = new ParsingPointManager();
                 manager.walkFile(tree, Root);
                 { tree:tree, parsingPointManager:manager };
             case Failure(_): null;
+        } catch (e:Any) {
+            trace('hxparser failed to parse $uri with: \'$e\'');
+            null;
         }
     }
 
