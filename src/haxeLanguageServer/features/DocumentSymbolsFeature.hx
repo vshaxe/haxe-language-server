@@ -80,9 +80,10 @@ class DocumentSymbolsFeature {
         var resolver = new DocumentSymbolsResolver(doc.uri);
         try if (doc.parseTree != null) {
             resolver.walkFile(doc.parseTree, Root);
-            return resolve(resolver.results);
+            return resolve(resolver.getSymbols());
         } catch (e:Any) {
             trace('DocumentSymbolsResolver failed with \'$e\'');
+            trace(haxe.CallStack.toString(haxe.CallStack.callStack()));
         }
 
         trace('Falling back to Haxe document symbols.');

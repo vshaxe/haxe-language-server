@@ -2,7 +2,6 @@ package haxeLanguageServer;
 
 import haxe.Timer;
 import hxParser.ParseTree;
-import js.node.Buffer;
 
 typedef OnTextDocumentChangeListener = TextDocument->Array<TextDocumentContentChangeEvent>->Int->Void;
 
