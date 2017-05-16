@@ -28,6 +28,10 @@ class Class {
 
         var a, b, c;
 
+        macro class MacroClass {
+            var macroField:Int;
+        }
+
         // inserted _ name shouldn't appear
         var
         // and also shouldn't affect positions
