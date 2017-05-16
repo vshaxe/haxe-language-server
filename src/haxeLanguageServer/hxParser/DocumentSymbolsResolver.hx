@@ -139,7 +139,7 @@ class DocumentSymbolsResolver extends StackAwareWalker {
     }
 
     override function walkFunction(node:Function, stack:WalkStack) {
-        addSymbol(node.name, SymbolKind.Function, stack);
+        if (node.name != null) addSymbol(node.name, SymbolKind.Function, stack);
         super.walkFunction(node, stack);
     }
 
@@ -151,5 +151,10 @@ class DocumentSymbolsResolver extends StackAwareWalker {
     override function walkNEnumField(node:NEnumField, stack:WalkStack) {
         addSymbol(node.name, SymbolKind.Function, stack);
         super.walkNEnumField(node, stack);
+    }
+
+    override function walkAnonymousStructureField(node:AnonymousStructureField, stack:WalkStack) {
+        addSymbol(node.name, SymbolKind.Variable, stack);
+        super.walkAnonymousStructureField(node, stack);
     }
 }
