@@ -54,6 +54,7 @@ class TextDocument {
                 #end
             }
         }
+        _parsingInfo = null;
         lineOffsets = null;
     }
 
