@@ -19,10 +19,8 @@ class TextDocument {
     public var content(default,null):String;
     public var openTimestamp(default,null):Float;
     public var lineCount(get,never):Int;
-    #if false
     public var parsingInfo(get,never):DocumentParsingInformation;
     var _parsingInfo:Null<DocumentParsingInformation>;
-    #end
     @:allow(haxeLanguageServer.TextDocuments)
     var lineOffsets:Array<Int>;
     var onUpdateListeners:Array<OnTextDocumentChangeListener> = [];
@@ -157,8 +155,6 @@ class TextDocument {
 
     inline function get_lineCount() return getLineOffsets().length;
 
-    #if false
-
     function createParsingInfo() {
         return switch (hxParser.HxParser.parse(content)) {
             case Success(tree):
@@ -177,6 +173,7 @@ class TextDocument {
         return _parsingInfo;
     }
 
+    #if false
     function updateParsingInfo(range:Range, rangeLength:Int, textLength:Int) {
         if (_parsingInfo == null) {
             _parsingInfo = createParsingInfo();

@@ -3,6 +3,7 @@ package haxeLanguageServer.features;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
+import haxeLanguageServer.hxParser.DocumentSymbolsResolver;
 
 @:enum
 private abstract ModuleSymbolKind(Int) {
@@ -76,6 +77,10 @@ class DocumentSymbolsFeature {
 
     function onDocumentSymbols(params:DocumentSymbolParams, token:CancellationToken, resolve:Array<SymbolInformation>->Void, reject:ResponseError<NoData>->Void) {
         var doc = context.documents.get(params.textDocument.uri);
+        var resolver = new DocumentSymbolsResolver(doc.uri);
+        resolver.walkFile(doc.parsingInfo.tree, Root);
+        return resolve(resolver.results);
+
         var args = ["--display", '${doc.fsPath}@0@module-symbols'];
         makeRequest(args, doc, token, resolve, reject);
     }
