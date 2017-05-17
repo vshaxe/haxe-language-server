@@ -28,6 +28,9 @@ class Class {
 
         var a, b, c;
 
+        var array = [];
+        for (element in array) {}
+
         macro class MacroClass {
             var macroField:Int;
         }

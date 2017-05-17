@@ -161,6 +161,15 @@ class DocumentSymbolsResolver extends StackAwareWalker {
         super.walkAnonymousStructureField(node, stack);
     }
 
+    override function walkExpr_EIn(exprLeft:Expr, inKeyword:Token, exprRight:Expr, stack:WalkStack) {
+        switch (exprLeft) {
+            case EConst(PConstIdent(variable)):
+                addSymbol(variable, SymbolKind.Variable, stack);
+            case _:
+        }
+        super.walkExpr_EIn(exprLeft, inKeyword, exprRight, stack);
+    }
+
     override function walkLiteral_PLiteralString(s:StringToken, stack:WalkStack) {
         var string = switch (s) {
             case DoubleQuote(token) | SingleQuote(token): token.text;
