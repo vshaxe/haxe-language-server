@@ -31,7 +31,7 @@ class CompletionFeature {
                     var xml = try Xml.parse(data).firstElement() catch (_:Any) null;
                     if (xml == null) return reject(ResponseError.internalError("Invalid xml data: " + data));
 
-                    var items = if (r.toplevel) parseToplevelCompletion(xml) else parseFieldCompletion(xml, textBefore);
+                    var items = if (r.toplevel) parseToplevelCompletion(xml) else parseFieldCompletion(xml, textBefore, params.position);
                     resolve(items);
             }
         }, function(error) reject(ResponseError.internalError(error)));
@@ -112,7 +112,7 @@ class CompletionFeature {
         }
     }
 
-    static function parseFieldCompletion(x:Xml, textBefore:String):Array<CompletionItem> {
+    static function parseFieldCompletion(x:Xml, textBefore:String, position:Position):Array<CompletionItem> {
         var result = [];
         var timers = [];
         for (el in x.elements()) {
@@ -127,12 +127,14 @@ class CompletionFeature {
                 }
             }
             var name = el.get("n");
-            var insertText = null;
+            var textEdit = null;
             if (rawKind == "metadata") {
                 name = name.substr(1); // remove the @
-                reFieldPart.match(textBefore);
                 // if there's already a colon, don't duplicate it
-                if (reFieldPart.matched(2) == ":") insertText = name.substr(1);
+                reFieldPart.match(textBefore);
+                if (reFieldPart.matched(2) == ":") {
+                    textEdit = {newText: name, range: {start: position.translate(0, -1), end: position}};
+                }
             } else if (isTimerDebugFieldCompletion(name)) {
                 timers.push(getTimerCompletionItem(name, type));
                 continue;
@@ -141,7 +143,7 @@ class CompletionFeature {
             if (doc != null) item.documentation = DocHelper.extractText(doc);
             if (kind != null) item.kind = kind;
             if (type != null) item.detail = formatType(type, name, kind);
-            if (insertText != null) item.insertText = insertText;
+            if (textEdit != null) item.textEdit = textEdit;
             result.push(item);
         }
         sortTimers(timers);
