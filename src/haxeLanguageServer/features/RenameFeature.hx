@@ -27,16 +27,13 @@ class RenameFeature {
                 resolver.walkFile(doc.parseTree, Root);
 
                 var changes = new haxe.DynamicAccess();
-                changes[params.textDocument.uri.toString()] = [{
-                    range: declarationRange,
-                    newText: params.newName
-                }].concat([
+                changes[params.textDocument.uri.toString()] = [
                     for (usage in resolver.usages) {{
                             range: usage,
                             newText: params.newName
                         }
                     }
-                ]);
+                ];
                 resolve({changes: changes});
             },
             function(_) {

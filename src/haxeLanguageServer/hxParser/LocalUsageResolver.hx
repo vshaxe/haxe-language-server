@@ -23,9 +23,10 @@ class LocalUsageResolver extends PositionAwareWalker {
             };
         }
 
-        if (!declarationInScope && declaration.contains(getRange())) {
+        if (!declarationInScope && declaration.isEqual(getRange())) {
             declarationInScope = true;
             declarationIdentifier = token.text;
+            usages.push(declaration);
         }
 
         if (usageTokens.indexOf(token) != -1) {

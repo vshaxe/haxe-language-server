@@ -4,9 +4,8 @@ import haxeLanguageServer.TextDocument;
 
 class LocalUsageResolverTest extends TestCaseBase {
     function check(code:String) {
-        var ranges = findMarkedRanges(code, "%");
-        var declaration = ranges.shift();
-        var expectedUsages = ranges;
+        var expectedUsages = findMarkedRanges(code, "%");
+        var declaration = expectedUsages[0];
 
         code = code.replace("%", "");
 
