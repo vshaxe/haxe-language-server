@@ -17,7 +17,12 @@ class RenameFeature {
         context.gotoDefinition.onGotoDefinition(params, token,
             function(locations:Array<Location>) {
                 var doc = context.documents.get(params.textDocument.uri);
-                var declarationRange = locations[0].range;
+                var declaration = locations[0];
+                if (declaration.uri != params.textDocument.uri) {
+                    return reject(ResponseError.internalError("Can only rename locals"));
+                }
+
+                var declarationRange = declaration.range;
                 var resolver = new LocalUsageResolver(declarationRange);
                 resolver.walkFile(doc.parseTree, Root);
 
