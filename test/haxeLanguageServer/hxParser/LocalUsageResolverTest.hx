@@ -10,11 +10,12 @@ class LocalUsageResolverTest extends TestCaseBase {
         code = code.replace("%", "");
 
         var resolver = new LocalUsageResolver(declaration);
-        resolver.walkFile(new TextDocument(new DocumentUri("file:///c:/"), "haxe", 0, code).parseTree, Root);
+        resolver.walkFile(new TextDocument(new DocumentUri(
+            "file:///c:/"), "haxe", 0, code).parseTree, Root);
         var actualUsages = resolver.usages;
 
         function fail() {
-            throw 'Expected $expectedUsages but was $actualUsages';
+            throw 'Expected $expectedUsages\nbut was\n$actualUsages';
         }
 
         if (expectedUsages.length != actualUsages.length) {
@@ -37,7 +38,10 @@ class LocalUsageResolverTest extends TestCaseBase {
             var startChar = line.indexOf(marker);
             var endChar = line.lastIndexOf(marker);
             if (startChar != -1 && endChar != -1) {
-                ranges.push({start: {line: lineNumber, character: startChar}, end: {line: lineNumber, character: endChar - 1}});
+                ranges.push({
+                    start: {line: lineNumber, character: startChar},
+                    end: {line: lineNumber, character: endChar - 1}
+                });
             }
             lineNumber++;
         }
@@ -53,4 +57,27 @@ class Foo {
     }
 }");
     }
+
+    function testFindParameterUsages() {
+        check("
+class Foo {
+    function foo(%bar%:Int) {
+        %bar%;
+    }
+}");
+    }
+
+    /*function testDifferentScopes() {
+        check("
+class Foo {
+    function f1() {
+        var %bar%;
+        %bar%;
+    }
+
+    function f2() {
+        bar;
+    }
+}");
+    }*/
 }
