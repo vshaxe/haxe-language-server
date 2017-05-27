@@ -1,14 +1,11 @@
 package haxeLanguageServer.hxParser;
 
 import hxParser.ParseTree;
-import hxParser.StackAwareWalker;
 import hxParser.WalkStack;
 using Lambda;
 
-class DocumentSymbolsResolver extends StackAwareWalker {
+class DocumentSymbolsResolver extends PositionAwareWalker {
     var uri:DocumentUri;
-    var line:Int = 0;
-    var character:Int = 0;
     var symbols:Map<Token, SymbolInformation> = new Map();
 
     public function new(uri:DocumentUri) {
@@ -19,13 +16,7 @@ class DocumentSymbolsResolver extends StackAwareWalker {
         return [for (symbol in symbols) if (symbol.location != null) symbol];
     }
 
-    override function walkToken(token:Token, stack:WalkStack) {
-        processTrivia(token.leadingTrivia);
-        if (token.appearsInSource()) processToken(token);
-        processTrivia(token.trailingTrivia);
-    }
-
-    function processToken(token:Token) {
+    override function processToken(token:Token) {
         if (symbols[token] != null) {
             symbols[token].location = {
                 uri: uri,
@@ -36,19 +27,7 @@ class DocumentSymbolsResolver extends StackAwareWalker {
             };
         }
 
-        character += token.text.length;
-    }
-
-    function processTrivia(trivias:Array<Trivia>) {
-        for (trivia in trivias) {
-            var newlines = trivia.text.occurrences("\n");
-            if (newlines > 0) {
-                line += newlines;
-                character = 0;
-            } else {
-                character += trivia.text.length;
-            }
-        }
+        super.processToken(token);
     }
 
     function getScope(stack:WalkStack):String {
@@ -168,13 +147,5 @@ class DocumentSymbolsResolver extends StackAwareWalker {
             case _:
         }
         super.walkExpr_EIn(exprLeft, inKeyword, exprRight, stack);
-    }
-
-    override function walkLiteral_PLiteralString(s:StringToken, stack:WalkStack) {
-        var string = switch (s) {
-            case DoubleQuote(token) | SingleQuote(token): token.text;
-        }
-        line += string.occurrences("\n");
-        super.walkLiteral_PLiteralString(s, stack);
     }
 }
