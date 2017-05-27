@@ -62,6 +62,7 @@ class Context {
     public var documents(default,null):TextDocuments;
     public var signatureHelp(default,null):SignatureHelpFeature;
     public var displayOffsetConverter(default,null):DisplayOffsetConverter;
+    public var gotoDefinition(default,null):GotoDefinitionFeature;
     var diagnostics:DiagnosticsManager;
     var codeActions:CodeActionFeature;
 
@@ -128,7 +129,8 @@ class Context {
                 #end
                 codeLensProvider: {
                     resolveProvider: true
-                }
+                },
+                renameProvider: true
             }
         });
     }
@@ -159,10 +161,11 @@ class Context {
                 new CompletionFeature(this);
                 new HoverFeature(this);
                 signatureHelp = new SignatureHelpFeature(this);
-                new GotoDefinitionFeature(this);
+                gotoDefinition = new GotoDefinitionFeature(this);
                 new FindReferencesFeature(this);
                 new DocumentSymbolsFeature(this);
                 new DeterminePackageFeature(this);
+                new RenameFeature(this);
 
                 diagnostics = new DiagnosticsManager(this);
                 new CodeLensFeature(this);

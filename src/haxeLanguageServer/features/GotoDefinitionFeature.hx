@@ -13,7 +13,7 @@ class GotoDefinitionFeature {
         context.protocol.onRequest(Methods.GotoDefinition, onGotoDefinition);
     }
 
-    function onGotoDefinition(params:TextDocumentPositionParams, token:CancellationToken, resolve:EitherType<Location,Array<Location>>->Void, reject:ResponseError<NoData>->Void) {
+    public function onGotoDefinition(params:TextDocumentPositionParams, token:CancellationToken, resolve:EitherType<Location,Array<Location>>->Void, reject:ResponseError<NoData>->Void) {
         var doc = context.documents.get(params.textDocument.uri);
         var bytePos = context.displayOffsetConverter.characterOffsetToByteOffset(doc.content, doc.offsetAt(params.position));
         var args = ["--display", '${doc.fsPath}@$bytePos@position'];
