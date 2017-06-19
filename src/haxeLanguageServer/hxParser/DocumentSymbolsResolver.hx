@@ -16,7 +16,7 @@ class DocumentSymbolsResolver extends PositionAwareWalker {
         return [for (symbol in symbols) if (symbol.location != null) symbol];
     }
 
-    override function processToken(token:Token, stack:WalkStack) {
+    override function processToken(token:Token) {
         if (symbols[token] != null) {
             symbols[token].location = {
                 uri: uri,
@@ -27,7 +27,7 @@ class DocumentSymbolsResolver extends PositionAwareWalker {
             };
         }
 
-        super.processToken(token, stack);
+        super.processToken(token);
     }
 
     function getScope(stack:WalkStack):String {

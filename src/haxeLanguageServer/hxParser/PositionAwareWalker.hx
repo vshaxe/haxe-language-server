@@ -10,11 +10,11 @@ class PositionAwareWalker extends StackAwareWalker {
 
     override function walkToken(token:Token, stack:WalkStack) {
         processTrivia(token.leadingTrivia);
-        if (token.appearsInSource()) processToken(token, stack);
+        if (token.appearsInSource()) processToken(token);
         processTrivia(token.trailingTrivia);
     }
 
-    function processToken(token:Token, stack:WalkStack) {
+    function processToken(token:Token) {
         character += token.text.length;
     }
 

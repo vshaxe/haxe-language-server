@@ -11,14 +11,13 @@ class LocalUsageResolver extends PositionAwareWalker {
     var usageTokens:Array<Token> = [];
 
     var declarationInScope = false;
-    var declarationStack:WalkStack;
     var declarationIdentifier:String;
 
     public function new(declaration:Range) {
         this.declaration = declaration;
     }
 
-    override function processToken(token:Token, stack:WalkStack) {
+    override function processToken(token:Token) {
         function getRange():Range {
             return {
                 start: {line: line, character: character},
@@ -28,7 +27,6 @@ class LocalUsageResolver extends PositionAwareWalker {
 
         if (!declarationInScope && declaration.isEqual(getRange())) {
             declarationInScope = true;
-            declarationStack = stack;
             declarationIdentifier = token.text;
             usages.push(declaration);
         }
@@ -38,7 +36,7 @@ class LocalUsageResolver extends PositionAwareWalker {
             usageTokens.remove(token);
         }
 
-        super.processToken(token, stack);
+        super.processToken(token);
     }
 
     override function walkNConst_PConstIdent(ident:Token, stack:WalkStack) {
