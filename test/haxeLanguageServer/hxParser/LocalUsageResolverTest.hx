@@ -67,7 +67,7 @@ class Foo {
 }");
     }
 
-    /*function testDifferentScopes() {
+    function testDifferentScopes() {
         check("
 class Foo {
     function f1() {
@@ -79,5 +79,5 @@ class Foo {
         bar;
     }
 }");
-    }*/
+    }
 }

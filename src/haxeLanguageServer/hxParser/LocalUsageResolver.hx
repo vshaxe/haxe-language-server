@@ -2,7 +2,9 @@ package haxeLanguageServer.hxParser;
 
 import hxParser.WalkStack;
 import hxParser.ParseTree;
+import haxeLanguageServer.hxParser.PositionAwareWalker.Scope;
 using hxParser.WalkStackTools;
+using Lambda;
 
 class LocalUsageResolver extends PositionAwareWalker {
     public var usages(default,null):Array<Range> = [];
@@ -10,6 +12,7 @@ class LocalUsageResolver extends PositionAwareWalker {
     var declaration:Range;
     var usageTokens:Array<Token> = [];
 
+    var declarationScope:Scope;
     var declarationInScope = false;
     var declarationIdentifier:String;
 
@@ -25,13 +28,21 @@ class LocalUsageResolver extends PositionAwareWalker {
             };
         }
 
+        // have we found the declaration yet? (assume that usages can only be after the declaration)
         if (!declarationInScope && declaration.isEqual(getRange())) {
             declarationInScope = true;
+            declarationScope = scope.copy();
             declarationIdentifier = token.text;
             usages.push(declaration);
         }
 
-        if (usageTokens.indexOf(token) != -1) {
+        // are we still in the declaration scope?
+        if (declarationInScope && !declarationScope.contains(scope)) {
+            trace('$scope is out of $declarationScope', '');
+            declarationInScope = false;
+        }
+
+        if (usageTokens.has(token)) {
             usages.push(getRange());
             usageTokens.remove(token);
         }
