@@ -4,30 +4,36 @@ import haxeLanguageServer.TextDocument;
 
 class RenameResolverTest extends TestCaseBase {
     function check(code:String) {
-        var expectedUsages = findMarkedRanges(code, "%");
-        var declaration = expectedUsages[0];
+        var markedUsages = findMarkedRanges(code, "%");
+        var declaration = markedUsages[0];
 
         code = code.replace("%", "");
 
-        var resolver = new RenameResolver(declaration, "");
+        var expectedEdits = [for (usage in markedUsages) {
+            range: usage,
+            newText: "new"
+        }];
+
+        var resolver = new RenameResolver(declaration, "new");
         resolver.walkFile(new TextDocument(new DocumentUri(
             "file:///c:/"), "haxe", 0, code).parseTree, Root);
-        var actualUsages = resolver.edits;
 
-        function fail() {
-            throw 'Expected ${expectedUsages.length} renames but was ${actualUsages.length}';
-        }
+        assertEquals(applyEdits(code, expectedEdits), applyEdits(code, resolver.edits));
+    }
 
-        if (expectedUsages.length != actualUsages.length) {
-            fail();
-        } else {
-            for (i in 0...expectedUsages.length) {
-                if (!expectedUsages[i].isEqual(actualUsages[i].range)) {
-                    fail();
-                }
+    function applyEdits(document:String, edits:Array<TextEdit>):String {
+        edits = edits.copy();
+        var lines = ~/\n\r?/g.split(document);
+        for (i in 0...lines.length) {
+            var line = lines[i];
+            var relevantEdits = edits.filter(edit -> edit.range.start.line == i);
+            for (edit in relevantEdits) {
+                var range = edit.range;
+                lines[i] = line.substr(0, range.start.character) + edit.newText + line.substring(range.end.character);
+                edits.remove(edit);
             }
         }
-        currentTest.done = true;
+        return lines.join("\n");
     }
 
     function findMarkedRanges(code:String, marker:String):Array<Range> {
