@@ -31,15 +31,8 @@ class LocalUsageResolver extends PositionAwareWalker {
         }
 
         // are we still in the declaration scope?
-        if (declarationInScope) {
-            if (!declarationScope.contains(scope)) {
-                declarationInScope = false;
-            }
-
-            // shadowing?
-            if (declarationIdentifier == token.text && stack.match(Edge(_, Node(VarDecl(_), _)))) {
-                shadowingDecls.push(scope.copy());
-            }
+        if (declarationInScope && !declarationScope.contains(scope)) {
+            declarationInScope = false;
         }
 
         // have we found the declaration yet? (assume that usages can only be after the declaration)
@@ -56,6 +49,12 @@ class LocalUsageResolver extends PositionAwareWalker {
         }
 
         super.processToken(token, stack);
+    }
+
+    function checkShadowing(token:Token) {
+        if (declarationInScope && declarationIdentifier == token.text) {
+            shadowingDecls.push(scope.copy());
+        }
     }
 
     override function closeScope() {
@@ -75,5 +74,24 @@ class LocalUsageResolver extends PositionAwareWalker {
             usageTokens.push(ident);
         }
         super.walkNConst_PConstIdent(ident, stack);
+    }
+
+    override function walkExpr_EVar(varKeyword:Token, decl:VarDecl, stack:WalkStack) {
+        checkShadowing(decl.name);
+        super.walkExpr_EVar(varKeyword, decl, stack);
+    }
+
+    override function walkVarDecl(node:VarDecl, stack:WalkStack) {
+        checkShadowing(node.name);
+        super.walkVarDecl(node, stack);
+    }
+
+    override function walkExpr_EIn(exprLeft:Expr, inKeyword:Token, exprRight:Expr, stack:WalkStack) {
+        switch (exprLeft) {
+            case EConst(PConstIdent(variable)):
+                checkShadowing(variable);
+            case _:
+        }
+        super.walkExpr_EIn(exprLeft, inKeyword, exprRight, stack);
     }
 }

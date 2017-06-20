@@ -110,6 +110,12 @@ class PositionAwareWalker extends StackAwareWalker {
         closeScope();
     }
 
+    override function walkExpr_EFor(forKeyword:Token, parenOpen:Token, exprIter:Expr, parenClose:Token, exprBody:Expr, stack:WalkStack) {
+        scope.push(forKeyword);
+        super.walkExpr_EFor(forKeyword, parenOpen, exprIter, parenClose, exprBody, stack);
+        closeScope();
+    }
+
     function closeScope() {
         scope.pop();
     }

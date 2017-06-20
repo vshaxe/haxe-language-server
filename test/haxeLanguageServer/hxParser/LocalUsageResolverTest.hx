@@ -15,7 +15,7 @@ class LocalUsageResolverTest extends TestCaseBase {
         var actualUsages = resolver.usages;
 
         function fail() {
-            throw 'Expected $expectedUsages\nbut was\n$actualUsages';
+            throw 'Expected ${expectedUsages.length} renames but was ${actualUsages.length}';
         }
 
         if (expectedUsages.length != actualUsages.length) {
@@ -126,6 +126,20 @@ class Foo {
             var bar;
             bar;
         }
+
+        %bar%;
+    }
+}");
+    }
+
+    function testForLoopShadowing() {
+        check("
+class Foo {
+    function foo() {
+        var %bar%;
+        %bar%;
+
+        for (bar in a) {}
 
         %bar%;
     }
