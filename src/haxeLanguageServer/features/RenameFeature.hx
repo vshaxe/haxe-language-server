@@ -1,6 +1,6 @@
 package haxeLanguageServer.features;
 
-import haxeLanguageServer.hxParser.LocalUsageResolver;
+import haxeLanguageServer.hxParser.RenameResolver;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
@@ -26,21 +26,14 @@ class RenameFeature {
                     noneMatching();
                 }
 
-                var declarationRange = declaration.range;
-                var resolver = new LocalUsageResolver(declarationRange);
+                var resolver = new RenameResolver(declaration.range, params.newName);
                 resolver.walkFile(doc.parseTree, Root);
-                if (resolver.usages.length == 0) {
+                if (resolver.edits.length == 0) {
                     noneMatching();
                 }
 
                 var changes = new haxe.DynamicAccess();
-                changes[params.textDocument.uri.toString()] = [
-                    for (usage in resolver.usages) {{
-                            range: usage,
-                            newText: params.newName
-                        }
-                    }
-                ];
+                changes[params.textDocument.uri.toString()] = resolver.edits;
                 resolve({changes: changes});
             },
             function(_) {

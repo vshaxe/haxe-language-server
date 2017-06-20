@@ -2,17 +2,17 @@ package haxeLanguageServer.hxParser;
 
 import haxeLanguageServer.TextDocument;
 
-class LocalUsageResolverTest extends TestCaseBase {
+class RenameResolverTest extends TestCaseBase {
     function check(code:String) {
         var expectedUsages = findMarkedRanges(code, "%");
         var declaration = expectedUsages[0];
 
         code = code.replace("%", "");
 
-        var resolver = new LocalUsageResolver(declaration);
+        var resolver = new RenameResolver(declaration, "");
         resolver.walkFile(new TextDocument(new DocumentUri(
             "file:///c:/"), "haxe", 0, code).parseTree, Root);
-        var actualUsages = resolver.usages;
+        var actualUsages = resolver.edits;
 
         function fail() {
             throw 'Expected ${expectedUsages.length} renames but was ${actualUsages.length}';
@@ -22,7 +22,7 @@ class LocalUsageResolverTest extends TestCaseBase {
             fail();
         } else {
             for (i in 0...expectedUsages.length) {
-                if (!expectedUsages[i].isEqual(actualUsages[i])) {
+                if (!expectedUsages[i].isEqual(actualUsages[i].range)) {
                     fail();
                 }
             }

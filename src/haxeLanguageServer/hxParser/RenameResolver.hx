@@ -6,10 +6,12 @@ import haxeLanguageServer.hxParser.PositionAwareWalker.Scope;
 using hxParser.WalkStackTools;
 using Lambda;
 
-class LocalUsageResolver extends PositionAwareWalker {
-    public var usages(default,null):Array<Range> = [];
+class RenameResolver extends PositionAwareWalker {
+    public var edits(default,null):Array<TextEdit> = [];
 
     var declaration:Range;
+    var newName:String;
+
     var usageTokens:Array<Token> = [];
 
     var declarationScope:Scope;
@@ -18,8 +20,9 @@ class LocalUsageResolver extends PositionAwareWalker {
 
     var shadowingDecls:Array<Scope> = [];
 
-    public function new(declaration:Range) {
+    public function new(declaration:Range, newName:String) {
         this.declaration = declaration;
+        this.newName = newName;
     }
 
     override function processToken(token:Token, stack:WalkStack) {
@@ -40,7 +43,10 @@ class LocalUsageResolver extends PositionAwareWalker {
             declarationInScope = true;
             declarationScope = scope.copy();
             declarationIdentifier = token.text;
-            usages.push(declaration);
+            edits.push({
+                range: declaration,
+                newText: newName
+            });
         }
 
         if (usageTokens.has(token)) {
@@ -48,7 +54,10 @@ class LocalUsageResolver extends PositionAwareWalker {
             if (token.text.startsWith("$")) { // meh
                 range.start = range.start.translate(0, 1);
             }
-            usages.push(range);
+            edits.push({
+                range: range,
+                newText: newName
+            });
             usageTokens.remove(token);
         }
 
