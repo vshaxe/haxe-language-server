@@ -14,17 +14,24 @@ class RenameFeature {
     }
 
     function onRename(params:RenameParams, token:CancellationToken, resolve:WorkspaceEdit->Void, reject:ResponseError<NoData>->Void) {
+        function noneMatching() {
+            reject(ResponseError.internalError("No matching local variable declaration found."));
+        }
+
         context.gotoDefinition.onGotoDefinition(params, token,
             function(locations:Array<Location>) {
                 var doc = context.documents.get(params.textDocument.uri);
                 var declaration = locations[0];
                 if (declaration.uri != params.textDocument.uri) {
-                    return reject(ResponseError.internalError("Can only rename locals"));
+                    noneMatching();
                 }
 
                 var declarationRange = declaration.range;
                 var resolver = new LocalUsageResolver(declarationRange);
                 resolver.walkFile(doc.parseTree, Root);
+                if (resolver.usages.length == 0) {
+                    noneMatching();
+                }
 
                 var changes = new haxe.DynamicAccess();
                 changes[params.textDocument.uri.toString()] = [
@@ -37,8 +44,7 @@ class RenameFeature {
                 resolve({changes: changes});
             },
             function(_) {
-                // TODO
-                reject(ResponseError.internalError("You cannot rename this element"));
+                noneMatching();
             }
         );
     }

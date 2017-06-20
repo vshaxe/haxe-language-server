@@ -38,7 +38,6 @@ class LocalUsageResolver extends PositionAwareWalker {
 
         // are we still in the declaration scope?
         if (declarationInScope && !declarationScope.contains(scope)) {
-            trace('$scope is out of $declarationScope', '');
             declarationInScope = false;
         }
 
