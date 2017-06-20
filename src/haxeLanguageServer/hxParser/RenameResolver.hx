@@ -6,6 +6,11 @@ import haxeLanguageServer.hxParser.PositionAwareWalker.Scope;
 using hxParser.WalkStackTools;
 using Lambda;
 
+private typedef DeclInfo = {
+    var scope:Scope;
+    var isCaptureVariable:Bool;
+}
+
 class RenameResolver extends PositionAwareWalker {
     public var edits(default,null):Array<TextEdit> = [];
 
@@ -14,15 +19,15 @@ class RenameResolver extends PositionAwareWalker {
 
     var rangeConsumers = new Map<Token, Range->Void>();
 
-    var declarationScope:Scope;
+    var declarationInfo:DeclInfo;
     var declarationInScope = false;
     var declarationIdentifier:String;
 
     var inStaticFunction:Bool = false;
     var typeName:String;
 
-    var shadowingDecls:Array<Scope> = [];
-    var newIdentShadowingDecls:Array<Scope> = [];
+    var shadowingDecls:Array<DeclInfo> = [];
+    var newIdentShadowingDecls:Array<DeclInfo> = [];
 
     public function new(declaration:Range, newName:String) {
         this.declaration = declaration;
@@ -38,14 +43,17 @@ class RenameResolver extends PositionAwareWalker {
         }
 
         // are we still in the declaration scope?
-        if (declarationInScope && !declarationScope.contains(scope)) {
+        if (declarationInScope && !declarationInfo.scope.contains(scope)) {
             declarationInScope = false;
         }
 
         // have we found the declaration yet? (assume that usages can only be after the declaration)
         if (!declarationInScope && declaration.isEqual(getRange())) {
             declarationInScope = true;
-            declarationScope = scope.copy();
+            declarationInfo = {
+                scope: scope.copy(),
+                isCaptureVariable: isCaptureVariable(stack)
+            };
             declarationIdentifier = token.text;
             edits.push({
                 range: declaration,
@@ -61,15 +69,28 @@ class RenameResolver extends PositionAwareWalker {
         super.processToken(token, stack);
     }
 
-    function checkShadowing(token:Token) {
+    function checkShadowing(token:Token, isCaptureVariable:Bool = false) {
         if (!declarationInScope) {
             return;
         }
 
+        function addShadowingDecl(decls:Array<DeclInfo>) {
+            var last = decls[decls.length - 1];
+            if (decls.length > 0 && isCaptureVariable && isCaptureVariableInSameScope(last, scope)) {
+                // capture vars can't shadow other capture vars on same scope
+                return;
+            }
+
+            decls.push({
+                scope: scope.copy(),
+                isCaptureVariable: isCaptureVariable
+            });
+        }
+
         if (declarationIdentifier == token.text) {
-            shadowingDecls.push(scope.copy());
+            addShadowingDecl(shadowingDecls);
         } else if (newName == token.text) {
-            newIdentShadowingDecls.push(scope.copy());
+            addShadowingDecl(newIdentShadowingDecls);
         }
     }
 
@@ -79,10 +100,10 @@ class RenameResolver extends PositionAwareWalker {
         updateShadowingDecls(newIdentShadowingDecls);
     }
 
-    function updateShadowingDecls(decls:Array<Scope>) {
+    function updateShadowingDecls(decls:Array<DeclInfo>) {
         var i = decls.length;
         while (i-- > 0) {
-            if (!decls[i].contains(scope)) {
+            if (!decls[i].scope.contains(scope)) {
                 decls.pop();
             } else {
                 break;
@@ -100,11 +121,20 @@ class RenameResolver extends PositionAwareWalker {
         super.walkExpr_EDollarIdent(ident, stack);
     }
 
+    function isCaptureVariable(stack:WalkStack) {
+        return stack.find(stack -> stack.match(Edge("patterns", Node(Case_Case(_, _, _, _, _), _))));
+    }
+
+    function isCaptureVariableInSameScope(decl:DeclInfo, scope:Scope) {
+        return decl.isCaptureVariable && decl.scope.equals(scope);
+    }
+
     function handleIdent(identText:String, ident:Token, stack:WalkStack) {
         // assume that lowercase idents in `case` are capture vars
         var firstChar = identText.charAt(0);
-        if (firstChar == firstChar.toLowerCase() && stack.find(stack -> stack.match(Edge("patterns", Node(Case_Case(_, _, _, _, _), _))))) {
-            checkShadowing(ident);
+        if (firstChar == firstChar.toLowerCase() && isCaptureVariable(stack)
+                && (declarationInfo == null || !isCaptureVariableInSameScope(declarationInfo, scope))) {
+            checkShadowing(ident, true);
         } else if (declarationInScope) {
             if (declarationIdentifier == identText && shadowingDecls.length == 0) {
                 rangeConsumers[ident] = function(range) {

@@ -295,4 +295,18 @@ class Foo {
     }
 }");
     }
+
+    function testDuplicatedCaptureVariable() {
+        check("
+class Foo {
+    function foo() {
+        switch (foo) {
+            case Foo(%bar%) |
+                 Bar(%bar%) |
+                 FooBar(%bar%):
+                %bar%;
+        }
+    }
+}");
+    }
 }
