@@ -198,4 +198,14 @@ class Foo {
     }
 }");
     }
+
+    function testDollarIdent() {
+        check("
+class Foo {
+    function foo() {
+        var %bar%;
+        macro $%bar%;
+    }
+}");
+    }
 }

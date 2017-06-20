@@ -44,7 +44,11 @@ class LocalUsageResolver extends PositionAwareWalker {
         }
 
         if (usageTokens.has(token)) {
-            usages.push(getRange());
+            var range = getRange();
+            if (token.text.startsWith("$")) { // meh
+                range.start = range.start.translate(0, 1);
+            }
+            usages.push(range);
             usageTokens.remove(token);
         }
 
@@ -70,14 +74,23 @@ class LocalUsageResolver extends PositionAwareWalker {
     }
 
     override function walkNConst_PConstIdent(ident:Token, stack:WalkStack) {
+        handleIdent(ident.text, ident, stack);
+        super.walkNConst_PConstIdent(ident, stack);
+    }
+
+    override function walkExpr_EDollarIdent(ident:Token, stack:WalkStack) {
+        handleIdent(ident.text.substr(1), ident, stack);
+        super.walkExpr_EDollarIdent(ident, stack);
+    }
+
+    function handleIdent(identText:String, ident:Token, stack:WalkStack) {
         // assume that lowercase idents in `case` are capture vars
-        var firstChar = ident.text.charAt(0);
+        var firstChar = identText.charAt(0);
         if (firstChar == firstChar.toLowerCase() && stack.find(stack -> stack.match(Node(Case_Case(_, _, _, _, _), _)))) {
             checkShadowing(ident);
-        } else if (declarationInScope && declarationIdentifier == ident.text && shadowingDecls.length == 0) {
+        } else if (declarationInScope && declarationIdentifier == identText && shadowingDecls.length == 0) {
             usageTokens.push(ident);
         }
-        super.walkNConst_PConstIdent(ident, stack);
     }
 
     override function walkExpr_EVar(varKeyword:Token, decl:VarDecl, stack:WalkStack) {
