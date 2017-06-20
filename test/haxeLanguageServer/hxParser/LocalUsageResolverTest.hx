@@ -208,4 +208,19 @@ class Foo {
     }
 }");
     }
+
+    function testRenameWithSwitch() {
+        check("
+class Foo {
+    function foo() {
+        var %bar%;
+        %bar%;
+
+        switch (foo) {
+            case _:
+                %bar%;
+        }
+    }
+}");
+    }
 }

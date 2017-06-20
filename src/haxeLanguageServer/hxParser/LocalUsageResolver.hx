@@ -86,7 +86,7 @@ class LocalUsageResolver extends PositionAwareWalker {
     function handleIdent(identText:String, ident:Token, stack:WalkStack) {
         // assume that lowercase idents in `case` are capture vars
         var firstChar = identText.charAt(0);
-        if (firstChar == firstChar.toLowerCase() && stack.find(stack -> stack.match(Node(Case_Case(_, _, _, _, _), _)))) {
+        if (firstChar == firstChar.toLowerCase() && stack.find(stack -> stack.match(Edge("patterns", Node(Case_Case(_, _, _, _, _), _))))) {
             checkShadowing(ident);
         } else if (declarationInScope && declarationIdentifier == identText && shadowingDecls.length == 0) {
             usageTokens.push(ident);
