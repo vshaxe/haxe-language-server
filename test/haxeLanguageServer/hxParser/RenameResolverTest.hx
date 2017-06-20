@@ -269,4 +269,30 @@ class Foo {
 }"
 );
     }
+
+    function testDontAvoidConflict() {
+        check("
+class Foo {
+    function foo() {
+        var %bar%;
+        {
+            var newName;
+            newName;
+        }
+        %bar%;
+        newName;
+    }
+}","
+class Foo {
+    function foo() {
+        var newName;
+        {
+            var newName;
+            newName;
+        }
+        newName;
+        this.newName;
+    }
+}");
+    }
 }

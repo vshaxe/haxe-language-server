@@ -22,6 +22,7 @@ class RenameResolver extends PositionAwareWalker {
     var typeName:String;
 
     var shadowingDecls:Array<Scope> = [];
+    var newIdentShadowingDecls:Array<Scope> = [];
 
     public function new(declaration:Range, newName:String) {
         this.declaration = declaration;
@@ -61,17 +62,28 @@ class RenameResolver extends PositionAwareWalker {
     }
 
     function checkShadowing(token:Token) {
-        if (declarationInScope && declarationIdentifier == token.text) {
+        if (!declarationInScope) {
+            return;
+        }
+
+        if (declarationIdentifier == token.text) {
             shadowingDecls.push(scope.copy());
+        } else if (newName == token.text) {
+            newIdentShadowingDecls.push(scope.copy());
         }
     }
 
     override function closeScope() {
         super.closeScope();
-        var i = shadowingDecls.length;
+        updateShadowingDecls(shadowingDecls);
+        updateShadowingDecls(newIdentShadowingDecls);
+    }
+
+    function updateShadowingDecls(decls:Array<Scope>) {
+        var i = decls.length;
         while (i-- > 0) {
-            if (!shadowingDecls[i].contains(scope)) {
-                shadowingDecls.pop();
+            if (!decls[i].contains(scope)) {
+                decls.pop();
             } else {
                 break;
             }
@@ -93,21 +105,23 @@ class RenameResolver extends PositionAwareWalker {
         var firstChar = identText.charAt(0);
         if (firstChar == firstChar.toLowerCase() && stack.find(stack -> stack.match(Edge("patterns", Node(Case_Case(_, _, _, _, _), _))))) {
             checkShadowing(ident);
-        } else if (declarationInScope && declarationIdentifier == identText && shadowingDecls.length == 0) {
-            rangeConsumers[ident] = function(range) {
-                edits.push({
-                    range: range,
-                    newText: ident.text.replace(identText, newName)
-                });
-            }
-        } else if (identText == newName) {
-            // avoid conflicts
-            rangeConsumers[ident] = function(range) {
-                var prefix = if (inStaticFunction) typeName else "this";
-                edits.push({
-                    range: range,
-                    newText: '$prefix.$newName'
-                });
+        } else if (declarationInScope) {
+            if (declarationIdentifier == identText && shadowingDecls.length == 0) {
+                rangeConsumers[ident] = function(range) {
+                    edits.push({
+                        range: range,
+                        newText: ident.text.replace(identText, newName)
+                    });
+                }
+            } else if (identText == newName && newIdentShadowingDecls.length == 0) {
+                // avoid conflicts
+                rangeConsumers[ident] = function(range) {
+                    var prefix = if (inStaticFunction) typeName else "this";
+                    edits.push({
+                        range: range,
+                        newText: '$prefix.$newName'
+                    });
+                }
             }
         }
     }
