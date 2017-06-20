@@ -12,7 +12,7 @@ class RenameResolver extends PositionAwareWalker {
     var declaration:Range;
     var newName:String;
 
-    var usageTokens:Array<Token> = [];
+    var rangeConsumers = new Map<Token, Range->Void>();
 
     var declarationScope:Scope;
     var declarationInScope = false;
@@ -49,16 +49,9 @@ class RenameResolver extends PositionAwareWalker {
             });
         }
 
-        if (usageTokens.has(token)) {
-            var range = getRange();
-            if (token.text.startsWith("$")) { // meh
-                range.start = range.start.translate(0, 1);
-            }
-            edits.push({
-                range: range,
-                newText: newName
-            });
-            usageTokens.remove(token);
+        if (rangeConsumers[token] != null) {
+            rangeConsumers[token](getRange());
+            rangeConsumers[token] = null;
         }
 
         super.processToken(token, stack);
@@ -98,7 +91,12 @@ class RenameResolver extends PositionAwareWalker {
         if (firstChar == firstChar.toLowerCase() && stack.find(stack -> stack.match(Edge("patterns", Node(Case_Case(_, _, _, _, _), _))))) {
             checkShadowing(ident);
         } else if (declarationInScope && declarationIdentifier == identText && shadowingDecls.length == 0) {
-            usageTokens.push(ident);
+            rangeConsumers[ident] = function(range) {
+                edits.push({
+                    range: range,
+                    newText: ident.text.replace(identText, newName)
+                });
+            }
         }
     }
 
