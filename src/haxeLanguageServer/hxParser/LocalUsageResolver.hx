@@ -94,4 +94,9 @@ class LocalUsageResolver extends PositionAwareWalker {
         }
         super.walkExpr_EIn(exprLeft, inKeyword, exprRight, stack);
     }
+
+    override function walkFunctionArgument(node:FunctionArgument, stack:WalkStack) {
+        checkShadowing(node.name);
+        super.walkFunctionArgument(node, stack);
+    }
 }

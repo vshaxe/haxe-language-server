@@ -145,4 +145,20 @@ class Foo {
     }
 }");
     }
+
+    function testParameterShadowing() {
+        check("
+class Foo {
+    function foo() {
+        var %bar%;
+        %bar%;
+
+        function foo2(bar) {
+            bar;
+        }
+
+        %bar%
+    }
+}");
+    }
 }
