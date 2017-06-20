@@ -116,6 +116,18 @@ class PositionAwareWalker extends StackAwareWalker {
         closeScope();
     }
 
+    override function walkCase_Case(caseKeyword:Token, patterns:CommaSeparated<Expr>, guard:Null<Guard>, colon:Token, body:Array<BlockElement>, stack:WalkStack) {
+        scope.push(caseKeyword);
+        super.walkCase_Case(caseKeyword, patterns, guard, colon, body, stack);
+        closeScope();
+    }
+
+    override function walkCase_Default(defaultKeyword:Token, colon:Token, body:Array<BlockElement>, stack:WalkStack) {
+        scope.push(defaultKeyword);
+        super.walkCase_Default(defaultKeyword, colon, body, stack);
+        closeScope();
+    }
+
     function closeScope() {
         scope.pop();
     }

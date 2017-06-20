@@ -70,7 +70,11 @@ class LocalUsageResolver extends PositionAwareWalker {
     }
 
     override function walkNConst_PConstIdent(ident:Token, stack:WalkStack) {
-        if (declarationInScope && declarationIdentifier == ident.text && shadowingDecls.length == 0) {
+        // assume that lowercase idents in `case` are capture vars
+        var firstChar = ident.text.charAt(0);
+        if (firstChar == firstChar.toLowerCase() && stack.find(stack -> stack.match(Node(Case_Case(_, _, _, _, _), _)))) {
+            checkShadowing(ident);
+        } else if (declarationInScope && declarationIdentifier == ident.text && shadowingDecls.length == 0) {
             usageTokens.push(ident);
         }
         super.walkNConst_PConstIdent(ident, stack);

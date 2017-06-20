@@ -161,4 +161,41 @@ class Foo {
     }
 }");
     }
+
+    function testCaseShadowing() {
+        check("
+class Foo {
+    function foo() {
+        var %bar%;
+        %bar%;
+
+        switch (foo) {
+            case _:
+                var bar;
+                bar;
+        }
+
+        %bar%
+    }
+}");
+    }
+
+    function testCaptureVariableShadowing() {
+        check("
+class Foo {
+    function foo() {
+        var %bar%;
+        %bar%;
+
+        switch (foo) {
+            case bar:
+                bar;
+            case Foo(_.toLowerCase() => bar):
+                bar;
+        }
+
+        %bar%
+    }
+}");
+    }
 }
