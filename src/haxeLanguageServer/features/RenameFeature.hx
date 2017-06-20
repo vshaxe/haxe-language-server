@@ -15,7 +15,7 @@ class RenameFeature {
 
     function onRename(params:RenameParams, token:CancellationToken, resolve:WorkspaceEdit->Void, reject:ResponseError<NoData>->Void) {
         function noneMatching() {
-            reject(ResponseError.internalError("No matching local variable declaration found."));
+            reject(ResponseError.internalError("No matching local variable or parameter declaration found."));
         }
 
         context.gotoDefinition.onGotoDefinition(params, token,
