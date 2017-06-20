@@ -80,4 +80,17 @@ class Foo {
     }
 }");
     }
+
+    function testParameterScope() {
+        check("
+class Foo {
+    function foo(%bar%:Int) {
+        %bar%;
+    }
+
+    function f2() {
+        bar;
+    }
+}");
+    }
 }
