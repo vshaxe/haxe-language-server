@@ -93,4 +93,17 @@ class Foo {
     }
 }");
     }
+
+    function testShadowing() {
+        check("
+class Foo {
+    function foo() {
+        var %bar%;
+        %bar%;
+
+        var bar;
+        bar;
+    }
+}");
+    }
 }

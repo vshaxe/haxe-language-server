@@ -20,12 +20,24 @@ class LocalUsageResolver extends PositionAwareWalker {
         this.declaration = declaration;
     }
 
-    override function processToken(token:Token) {
+    override function processToken(token:Token, stack:WalkStack) {
         function getRange():Range {
             return {
                 start: {line: line, character: character},
                 end: {line: line, character: character + token.text.length}
             };
+        }
+
+        // are we still in the declaration scope?
+        if (declarationInScope) {
+            if (!declarationScope.contains(scope)) {
+                declarationInScope = false;
+            }
+
+            // shadowing?
+            if (declarationIdentifier == token.text && stack.match(Edge(_, Node(VarDecl(_), _)))) {
+                declarationInScope = false;
+            }
         }
 
         // have we found the declaration yet? (assume that usages can only be after the declaration)
@@ -36,17 +48,12 @@ class LocalUsageResolver extends PositionAwareWalker {
             usages.push(declaration);
         }
 
-        // are we still in the declaration scope?
-        if (declarationInScope && !declarationScope.contains(scope)) {
-            declarationInScope = false;
-        }
-
         if (usageTokens.has(token)) {
             usages.push(getRange());
             usageTokens.remove(token);
         }
 
-        super.processToken(token);
+        super.processToken(token, stack);
     }
 
     override function walkNConst_PConstIdent(ident:Token, stack:WalkStack) {
