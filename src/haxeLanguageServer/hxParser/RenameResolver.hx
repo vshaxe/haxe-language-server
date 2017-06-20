@@ -18,6 +18,9 @@ class RenameResolver extends PositionAwareWalker {
     var declarationInScope = false;
     var declarationIdentifier:String;
 
+    var inStaticFunction:Bool = false;
+    var typeName:String;
+
     var shadowingDecls:Array<Scope> = [];
 
     public function new(declaration:Range, newName:String) {
@@ -97,6 +100,15 @@ class RenameResolver extends PositionAwareWalker {
                     newText: ident.text.replace(identText, newName)
                 });
             }
+        } else if (identText == newName) {
+            // avoid conflicts
+            rangeConsumers[ident] = function(range) {
+                var prefix = if (inStaticFunction) typeName else "this";
+                edits.push({
+                    range: range,
+                    newText: '$prefix.$newName'
+                });
+            }
         }
     }
 
@@ -110,6 +122,11 @@ class RenameResolver extends PositionAwareWalker {
         super.walkVarDecl(node, stack);
     }
 
+    override function walkFunctionArgument(node:FunctionArgument, stack:WalkStack) {
+        checkShadowing(node.name);
+        super.walkFunctionArgument(node, stack);
+    }
+
     override function walkExpr_EIn(exprLeft:Expr, inKeyword:Token, exprRight:Expr, stack:WalkStack) {
         switch (exprLeft) {
             case EConst(PConstIdent(variable)):
@@ -119,8 +136,28 @@ class RenameResolver extends PositionAwareWalker {
         super.walkExpr_EIn(exprLeft, inKeyword, exprRight, stack);
     }
 
-    override function walkFunctionArgument(node:FunctionArgument, stack:WalkStack) {
-        checkShadowing(node.name);
-        super.walkFunctionArgument(node, stack);
+    override function walkClassField_Function(annotations:NAnnotations, modifiers:Array<FieldModifier>, functionKeyword:Token, name:Token, params:Null<TypeDeclParameters>, parenOpen:Token, args:Null<CommaSeparated<FunctionArgument>>, parenClose:Token, typeHint:Null<TypeHint>, expr:MethodExpr, stack:WalkStack) {
+        inStaticFunction = modifiers.find(modifier -> modifier.match(Static(_))) != null;
+        super.walkClassField_Function(annotations, modifiers, functionKeyword, name, params, parenOpen, args, parenClose, typeHint, expr, stack);
+    }
+
+    override function walkEnumDecl(node:EnumDecl, stack:WalkStack) {
+        typeName = node.name.text;
+        super.walkEnumDecl(node, stack);
+    }
+
+    override function walkAbstractDecl(node:AbstractDecl, stack:WalkStack) {
+        typeName = node.name.text;
+        super.walkAbstractDecl(node, stack);
+    }
+
+    override function walkClassDecl(node:ClassDecl, stack:WalkStack) {
+        typeName = node.name.text;
+        super.walkClassDecl(node, stack);
+    }
+
+    override function walkTypedefDecl(node:TypedefDecl, stack:WalkStack) {
+        typeName = node.name.text;
+        super.walkTypedefDecl(node, stack);
     }
 }

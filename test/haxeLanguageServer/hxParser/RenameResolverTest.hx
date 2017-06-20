@@ -3,22 +3,28 @@ package haxeLanguageServer.hxParser;
 import haxeLanguageServer.TextDocument;
 
 class RenameResolverTest extends TestCaseBase {
-    function check(code:String) {
+    function check(code:String, ?expected:String) {
         var markedUsages = findMarkedRanges(code, "%");
         var declaration = markedUsages[0];
-
+        if (declaration == null) {
+            throw "missing declaration markers";
+        }
         code = code.replace("%", "");
 
-        var expectedEdits = [for (usage in markedUsages) {
-            range: usage,
-            newText: "new"
-        }];
+        var newName = "newName";
+        var resolver = new RenameResolver(declaration, newName);
+        var parseTree = new TextDocument(new DocumentUri("file:///c:/"), "haxe", 0, code).parseTree;
+        resolver.walkFile(parseTree, Root);
 
-        var resolver = new RenameResolver(declaration, "new");
-        resolver.walkFile(new TextDocument(new DocumentUri(
-            "file:///c:/"), "haxe", 0, code).parseTree, Root);
+        if (expected == null) {
+            var expectedEdits = [for (usage in markedUsages) {
+                range: usage,
+                newText: newName
+            }];
+            expected = applyEdits(code, expectedEdits);
+        }
 
-        assertEquals(applyEdits(code, expectedEdits), applyEdits(code, resolver.edits));
+        assertEquals(expected, applyEdits(code, resolver.edits));
     }
 
     function applyEdits(document:String, edits:Array<TextEdit>):String {
@@ -228,5 +234,39 @@ class Foo {
         }
     }
 }");
+    }
+
+    function testAvoidConflict() {
+        check("
+class Foo {
+    function foo() {
+        var %bar%;
+        newName;
+    }
+}", "
+class Foo {
+    function foo() {
+        var newName;
+        this.newName;
+    }
+}"
+);
+    }
+
+    function testAvoidConflictStatic() {
+        check("
+class Foo {
+    static function foo() {
+        var %bar%;
+        newName;
+    }
+}", "
+class Foo {
+    static function foo() {
+        var newName;
+        Foo.newName;
+    }
+}"
+);
     }
 }
