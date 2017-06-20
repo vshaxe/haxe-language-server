@@ -106,4 +106,29 @@ class Foo {
     }
 }");
     }
+
+    function testNestedShadowing() {
+        check("
+class Foo {
+    function foo() {
+        var %bar%;
+        %bar%;
+
+        {
+            var bar;
+            bar;
+
+            {
+                var bar;
+                bar;
+            }
+
+            var bar;
+            bar;
+        }
+
+        %bar%;
+    }
+}");
+    }
 }

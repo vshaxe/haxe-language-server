@@ -16,6 +16,8 @@ class LocalUsageResolver extends PositionAwareWalker {
     var declarationInScope = false;
     var declarationIdentifier:String;
 
+    var shadowingDecls:Array<Scope> = [];
+
     public function new(declaration:Range) {
         this.declaration = declaration;
     }
@@ -36,7 +38,7 @@ class LocalUsageResolver extends PositionAwareWalker {
 
             // shadowing?
             if (declarationIdentifier == token.text && stack.match(Edge(_, Node(VarDecl(_), _)))) {
-                declarationInScope = false;
+                shadowingDecls.push(scope.copy());
             }
         }
 
@@ -56,8 +58,20 @@ class LocalUsageResolver extends PositionAwareWalker {
         super.processToken(token, stack);
     }
 
+    override function closeScope() {
+        super.closeScope();
+        var i = shadowingDecls.length;
+        while (i-- > 0) {
+            if (!shadowingDecls[i].contains(scope)) {
+                shadowingDecls.pop();
+            } else {
+                break;
+            }
+        }
+    }
+
     override function walkNConst_PConstIdent(ident:Token, stack:WalkStack) {
-        if (declarationInScope && declarationIdentifier == ident.text) {
+        if (declarationInScope && declarationIdentifier == ident.text && shadowingDecls.length == 0) {
             usageTokens.push(ident);
         }
         super.walkNConst_PConstIdent(ident, stack);

@@ -71,42 +71,46 @@ class PositionAwareWalker extends StackAwareWalker {
     override function walkEnumDecl(node:EnumDecl, stack:WalkStack) {
         scope.push(node.name);
         super.walkEnumDecl(node, stack);
-        scope.pop();
+        closeScope();
     }
 
     override function walkAbstractDecl(node:AbstractDecl, stack:WalkStack) {
         scope.push(node.name);
         super.walkAbstractDecl(node, stack);
-        scope.pop();
+        closeScope();
     }
 
     override function walkClassDecl(node:ClassDecl, stack:WalkStack) {
         scope.push(node.name);
         super.walkClassDecl(node, stack);
-        scope.pop();
+        closeScope();
     }
 
     override function walkTypedefDecl(node:TypedefDecl, stack:WalkStack) {
         scope.push(node.name);
         super.walkTypedefDecl(node, stack);
-        scope.pop();
+        closeScope();
     }
 
     override function walkFunction(node:Function, stack:WalkStack) {
         scope.push(node.name);
         super.walkFunction(node, stack);
-        scope.pop();
+        closeScope();
     }
 
     override function walkClassField_Function(annotations:NAnnotations, modifiers:Array<FieldModifier>, functionKeyword:Token, name:Token, params:Null<TypeDeclParameters>, parenOpen:Token, args:Null<CommaSeparated<FunctionArgument>>, parenClose:Token, typeHint:Null<TypeHint>, expr:MethodExpr, stack:WalkStack) {
         scope.push(name);
         super.walkClassField_Function(annotations, modifiers, functionKeyword, name, params, parenOpen, args, parenClose, typeHint, expr, stack);
-        scope.pop();
+        closeScope();
     }
 
     override function walkExpr_EBlock(braceOpen:Token, elems:Array<BlockElement>, braceClose:Token, stack:WalkStack) {
         scope.push(braceOpen);
         super.walkExpr_EBlock(braceOpen, elems, braceClose, stack);
+        closeScope();
+    }
+
+    function closeScope() {
         scope.pop();
     }
 }
