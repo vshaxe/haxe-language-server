@@ -31,6 +31,9 @@ class Class {
         var array = [];
         for (element in array) {}
 
+        try {}
+        catch (exception:Any) {}
+
         macro class MacroClass {
             var macroField:Int;
         }

@@ -148,4 +148,9 @@ class DocumentSymbolsResolver extends PositionAwareWalker {
         }
         super.walkExpr_EIn(exprLeft, inKeyword, exprRight, stack);
     }
+
+    override function walkCatch(node:Catch, stack:WalkStack) {
+        addSymbol(node.ident, SymbolKind.Variable, stack);
+        super.walkCatch(node, stack);
+    }
 }
