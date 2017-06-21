@@ -309,4 +309,20 @@ class Foo {
     }
 }");
     }
+
+    function testDuplicatedCaptureVariableDifferentScopes() {
+        check("
+class Foo {
+    function foo() {
+        switch (foo) {
+            case Foo(%bar%):
+                switch (foo) {
+                    case Foo(bar):
+                        bar;
+            }
+            %bar%;
+        }
+    }
+}");
+    }
 }
