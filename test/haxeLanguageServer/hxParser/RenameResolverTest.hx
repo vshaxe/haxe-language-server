@@ -151,7 +151,26 @@ class Foo {
         var %bar%;
         %bar%;
 
-        for (bar in a) {}
+        for (bar in a) {
+            bar;
+        }
+
+        %bar%;
+    }
+}");
+    }
+
+    function testCatchVariableShadowing() {
+        check("
+class Foo {
+    function foo() {
+        var %bar%;
+        %bar%;
+
+        try {}
+        catch (bar:Any) {
+            bar;
+        }
 
         %bar%;
     }

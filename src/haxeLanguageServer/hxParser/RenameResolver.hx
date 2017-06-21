@@ -180,6 +180,13 @@ class RenameResolver extends PositionAwareWalker {
         super.walkExpr_EIn(exprLeft, inKeyword, exprRight, stack);
     }
 
+    override function walkCatch(node:Catch, stack:WalkStack) {
+        scope.push(node.catchKeyword);
+        checkShadowing(node.ident);
+        super.walkCatch(node, stack);
+        closeScope();
+    }
+
     override function walkClassField_Function(annotations:NAnnotations, modifiers:Array<FieldModifier>, functionKeyword:Token, name:Token, params:Null<TypeDeclParameters>, parenOpen:Token, args:Null<CommaSeparated<FunctionArgument>>, parenClose:Token, typeHint:Null<TypeHint>, expr:MethodExpr, stack:WalkStack) {
         inStaticFunction = modifiers.find(modifier -> modifier.match(Static(_))) != null;
         super.walkClassField_Function(annotations, modifiers, functionKeyword, name, params, parenOpen, args, parenClose, typeHint, expr, stack);
