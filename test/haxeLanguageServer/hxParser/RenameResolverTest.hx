@@ -280,6 +280,30 @@ class Foo {
 }");
     }
 
+    function testDollarFunctionName() {
+        check("
+class Foo {
+    function foo() {
+        var %name%;
+        macro {
+            function $%name%() {}
+            inline function $%name%() {}
+        }
+    }
+}");
+    }
+
+    function testRegularFunctionName() {
+        check("
+class Foo {
+    function foo() {
+        var %name%;
+        function name() {}
+        inline function name() {}
+    }
+}");
+    }
+
     function testRenameWithSwitch() {
         check("
 class Foo {
