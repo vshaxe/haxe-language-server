@@ -250,6 +250,36 @@ class Foo {
 }");
     }
 
+    function testRegularDotIdent() {
+        check("
+class Foo {
+    function foo() {
+        var %field%;
+        struct.field;
+    }
+}");
+    }
+
+    function testDollarObjectField() {
+        check("
+class Foo {
+    function foo() {
+        var %name%;
+        macro { $%name%: 1 }
+    }
+}");
+    }
+
+    function testRegularObjectField() {
+        check("
+class Foo {
+    function foo() {
+        var %name%;
+        { name: 1 }
+    }
+}");
+    }
+
     function testRenameWithSwitch() {
         check("
 class Foo {
