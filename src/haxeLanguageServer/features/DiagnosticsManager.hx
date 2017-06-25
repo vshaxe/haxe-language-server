@@ -60,9 +60,16 @@ class DiagnosticsManager {
         var column = getInt(4);
         var endColumn = getInt(5);
 
+        function makePosition(line:Int, character:Int) {
+            return {
+                line: line - 1,
+                character: context.displayOffsetConverter.positionCharToZeroBasedColumn(character)
+            }
+        }
+
         if (endLine == null) endLine = line;
-        var position = {line: line - 1, character: column};
-        var endPosition = {line: endLine - 1, character: endColumn};
+        var position = makePosition(line, column);
+        var endPosition = makePosition(endLine, endColumn);
 
         var argumentsMap = diagnosticsArguments[uri] = new DiagnosticsMap();
         var diag = {
