@@ -12,17 +12,22 @@ import js.node.Buffer;
 class DisplayOffsetConverter {
     public static function create(haxeVersion:SemVer):DisplayOffsetConverter {
         if (haxeVersion >= {major: 4, minor: 0, patch: 0})
-            return new NoopOffsetConverter();
+            return new Haxe4DisplayOffsetConverter();
         else
             return new Haxe3DisplayOffsetConverter();
     }
 
+    public function positionCharToZeroBasedColumn(char:Int):Int throw "abstract method";
     public function byteOffsetToCharacterOffset(string:String, byteOffset:Int):Int throw "abstract method";
     public function characterOffsetToByteOffset(string:String, offset:Int):Int throw "abstract method";
 }
 
 class Haxe3DisplayOffsetConverter extends DisplayOffsetConverter {
     public function new() {}
+
+    override function positionCharToZeroBasedColumn(char:Int):Int {
+        return char;
+    }
 
     override function byteOffsetToCharacterOffset(string:String, byteOffset:Int):Int {
         var buf = new js.node.Buffer(string, "utf-8");
@@ -39,8 +44,12 @@ class Haxe3DisplayOffsetConverter extends DisplayOffsetConverter {
     }
 }
 
-class NoopOffsetConverter extends DisplayOffsetConverter {
+class Haxe4DisplayOffsetConverter extends DisplayOffsetConverter {
     public function new() {}
+
+    override function positionCharToZeroBasedColumn(char:Int):Int {
+        return char - 1;
+    }
 
     override function byteOffsetToCharacterOffset(_, offset:Int):Int {
         return offset;

@@ -46,13 +46,13 @@ class HaxePosition {
                 uri = file.toUri();
             }
 
-            var endByte = Std.parseInt(positionRe.matched(6));
+            var endByte = offsetConverter.positionCharToZeroBasedColumn(Std.parseInt(positionRe.matched(6)));
             var endChar = offsetConverter.byteOffsetToCharacterOffset(lineContent, endByte);
 
             s = positionRe.matched(5);
             var startChar;
             if (s != null) {
-                var startByte = Std.parseInt(s);
+                var startByte = offsetConverter.positionCharToZeroBasedColumn(Std.parseInt(s));
                 startChar = offsetConverter.byteOffsetToCharacterOffset(lineContent, startByte);
             } else {
                 startChar = endChar;
