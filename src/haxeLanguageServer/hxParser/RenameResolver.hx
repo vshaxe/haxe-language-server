@@ -129,17 +129,12 @@ class RenameResolver extends PositionAwareWalker {
     }
 
     override function walkObjectFieldName_NIdent(ident:Token, stack:WalkStack) {
-        if (ident.text.startsWith("$")) {
-            handleIdent(ident.text.substr(1), ident, stack);
-        }
+        handleDollarIdent(ident, stack);
         super.walkObjectFieldName_NIdent(ident, stack);
     }
 
     override function walkFunction(node:Function, stack:WalkStack) {
-        var ident = node.name;
-        if (ident.text.startsWith("$")) {
-            handleIdent(ident.text.substr(1), ident, stack);
-        }
+        handleDollarIdent(node.name, stack);
         super.walkFunction(node, stack);
     }
 
@@ -178,13 +173,18 @@ class RenameResolver extends PositionAwareWalker {
         }
     }
 
-    override function walkExpr_EVar(varKeyword:Token, decl:VarDecl, stack:WalkStack) {
-        checkShadowing(decl.name);
-        super.walkExpr_EVar(varKeyword, decl, stack);
+    function handleDollarIdent(ident:Token, stack:WalkStack):Bool {
+        if (ident.text.startsWith("$")) {
+            handleIdent(ident.text.substr(1), ident, stack);
+            return true;
+        }
+        return false;
     }
 
     override function walkVarDecl(node:VarDecl, stack:WalkStack) {
-        checkShadowing(node.name);
+        if (!handleDollarIdent(node.name, stack)) {
+            checkShadowing(node.name);
+        }
         super.walkVarDecl(node, stack);
     }
 

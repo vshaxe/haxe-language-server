@@ -304,6 +304,28 @@ class Foo {
 }");
     }
 
+    function testDollarVariableName() {
+        check("
+class Foo {
+    function foo() {
+        var %name%;
+        macro {
+            var $%name%;
+        }
+    }
+}");
+    }
+
+    function testRegularVariableName() {
+        check("
+class Foo {
+    function foo() {
+        var %name%;
+        var name;
+    }
+}");
+    }
+
     function testRenameWithSwitch() {
         check("
 class Foo {
