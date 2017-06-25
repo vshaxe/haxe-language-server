@@ -121,6 +121,13 @@ class RenameResolver extends PositionAwareWalker {
         super.walkExpr_EDollarIdent(ident, stack);
     }
 
+    override function walkNDotIdent_PDotIdent(name:Token, stack:WalkStack) {
+        if (name.text.startsWith(".$")) {
+            handleIdent(name.text.substr(2), name, stack);
+        }
+        super.walkNDotIdent_PDotIdent(name, stack);
+    }
+
     function isCaptureVariable(stack:WalkStack) {
         return stack.find(stack -> stack.match(Edge("patterns", Node(Case_Case(_, _, _, _, _), _))));
     }

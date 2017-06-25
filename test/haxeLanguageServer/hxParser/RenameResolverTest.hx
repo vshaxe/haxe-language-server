@@ -240,6 +240,16 @@ class Foo {
 }");
     }
 
+    function testDollarDotIdent() {
+        check("
+class Foo {
+    function foo() {
+        var %field%;
+        macro { $struct.$%field%; }
+    }
+}");
+    }
+
     function testRenameWithSwitch() {
         check("
 class Foo {
