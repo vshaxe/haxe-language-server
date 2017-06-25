@@ -4,6 +4,7 @@ import mockatoo.Mockatoo.*;
 import jsonrpc.Protocol;
 import haxeLanguageServer.TextDocument;
 import haxeLanguageServer.TextDocuments;
+import haxeLanguageServer.helper.DisplayOffsetConverter;
 import languageServerProtocol.Types;
 using mockatoo.Mockatoo;
 
@@ -24,6 +25,7 @@ class DiagnosticsManagerTest extends TestCaseBase {
             var errback:String->Void = args[4];
             errback(errbackMsg);
         });
+        context.displayOffsetConverter.returns(new Haxe4DisplayOffsetConverter());
 
         var called = false;
         var expectedUri = expectedFile.toUri();
@@ -74,7 +76,7 @@ private typedef TestCase = {
 
 private class TestCases {
     public static var UnexpectedImport:TestCase = {
-        errback: "C:/Lib/File.hx:4: characters 0-6 : Unexpected import",
+        errback: "C:/Lib/File.hx:4: characters 1-7 : Unexpected import",
         file: new FsPath("C:/Lib/File.hx"),
         results: [{
             range: {start: {character: 0, line: 3}, end: {character: 6, line: 3}},
