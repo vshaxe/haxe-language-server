@@ -326,6 +326,27 @@ class Foo {
 }");
     }
 
+    function testDollarDollarDollar() {
+        check("
+class Foo {
+    function foo() {
+        var %name%;
+        macro {
+            try {} catch ($%name%:Any) {}
+
+            switch ($%name%) {
+                case $%name%;
+                case _:
+            }
+
+            for ($%name% in []) {}
+
+            function foo($%name%) {}
+        }
+    }
+}");
+    }
+
     function testRenameWithSwitch() {
         check("
 class Foo {

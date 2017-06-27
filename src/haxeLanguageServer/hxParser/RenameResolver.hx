@@ -69,7 +69,12 @@ class RenameResolver extends PositionAwareWalker {
         super.processToken(token, stack);
     }
 
-    function checkShadowing(token:Token, isCaptureVariable:Bool = false) {
+    function checkShadowing(token:Token, stack:WalkStack, isCaptureVariable:Bool = false) {
+        if (handleDollarIdent(token, stack)) {
+            // in this case it's a usage and can't shadow
+            return;
+        }
+
         if (!declarationInScope) {
             return;
         }
@@ -149,9 +154,9 @@ class RenameResolver extends PositionAwareWalker {
     function handleIdent(identText:String, ident:Token, stack:WalkStack) {
         // assume that lowercase idents in `case` are capture vars
         var firstChar = identText.charAt(0);
-        if (firstChar == firstChar.toLowerCase() && isCaptureVariable(stack)
+        if (ident.text.charAt(0) != "$" && firstChar == firstChar.toLowerCase() && isCaptureVariable(stack)
                 && (declarationInfo == null || !isCaptureVariableInSameScope(declarationInfo, scope))) {
-            checkShadowing(ident, true);
+            checkShadowing(ident, stack, true);
         } else if (declarationInScope) {
             if (declarationIdentifier == identText && shadowingDecls.length == 0) {
                 rangeConsumers[ident] = function(range) {
@@ -182,21 +187,19 @@ class RenameResolver extends PositionAwareWalker {
     }
 
     override function walkVarDecl(node:VarDecl, stack:WalkStack) {
-        if (!handleDollarIdent(node.name, stack)) {
-            checkShadowing(node.name);
-        }
+        checkShadowing(node.name, stack);
         super.walkVarDecl(node, stack);
     }
 
     override function walkFunctionArgument(node:FunctionArgument, stack:WalkStack) {
-        checkShadowing(node.name);
+        checkShadowing(node.name, stack);
         super.walkFunctionArgument(node, stack);
     }
 
     override function walkExpr_EIn(exprLeft:Expr, inKeyword:Token, exprRight:Expr, stack:WalkStack) {
         switch (exprLeft) {
             case EConst(PConstIdent(variable)):
-                checkShadowing(variable);
+                checkShadowing(variable, stack);
             case _:
         }
         super.walkExpr_EIn(exprLeft, inKeyword, exprRight, stack);
@@ -204,7 +207,7 @@ class RenameResolver extends PositionAwareWalker {
 
     override function walkCatch(node:Catch, stack:WalkStack) {
         scope.push(node.catchKeyword);
-        checkShadowing(node.ident);
+        checkShadowing(node.ident, stack);
         super.walkCatch(node, stack);
         closeScope();
     }
