@@ -14,6 +14,10 @@ class RenameFeature {
     }
 
     function onRename(params:RenameParams, token:CancellationToken, resolve:WorkspaceEdit->Void, reject:ResponseError<NoData>->Void) {
+        if (!~/[_A-Za-z]\w*/.match(params.newName)) {
+            return reject(ResponseError.internalError("'" + params.newName + "' is not a valid identifier name."));
+        }
+
         function noneMatching() {
             reject(ResponseError.internalError("No matching local variable or parameter declaration found."));
         }
@@ -23,13 +27,13 @@ class RenameFeature {
                 var doc = context.documents.get(params.textDocument.uri);
                 var declaration = locations[0];
                 if (declaration.uri != params.textDocument.uri) {
-                    noneMatching();
+                    return noneMatching();
                 }
 
                 var resolver = new RenameResolver(declaration.range, params.newName);
                 resolver.walkFile(doc.parseTree, Root);
                 if (resolver.edits.length == 0) {
-                    noneMatching();
+                    return noneMatching();
                 }
 
                 var changes = new haxe.DynamicAccess();
