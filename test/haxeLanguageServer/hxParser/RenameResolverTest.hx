@@ -451,4 +451,13 @@ class Foo {
     }
 }");
     }
+
+    function testNamelessFunction() {
+        check("
+class Foo {
+    function foo(%name%) {
+        var f = function() {};
+    }
+}");
+    }
 }

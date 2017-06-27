@@ -139,7 +139,9 @@ class RenameResolver extends PositionAwareWalker {
     }
 
     override function walkFunction(node:Function, stack:WalkStack) {
-        handleDollarIdent(node.name, stack);
+        if (node.name != null) {
+            handleDollarIdent(node.name, stack);
+        }
         super.walkFunction(node, stack);
     }
 
