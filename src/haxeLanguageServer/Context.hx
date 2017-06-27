@@ -85,6 +85,7 @@ class Context {
         protocol.onNotification(Methods.DidChangeConfiguration, onDidChangeConfiguration);
         protocol.onNotification(Methods.DidOpenTextDocument, onDidOpenTextDocument);
         protocol.onNotification(Methods.DidSaveTextDocument, onDidSaveTextDocument);
+        protocol.onNotification(Methods.DidChangeWatchedFiles, onDidChangeWatchedFiles);
         protocol.onNotification(VshaxeMethods.DidChangeDisplayConfigurationIndex, onDidChangeDisplayConfigurationIndex);
         protocol.onNotification(VshaxeMethods.DidChangeActiveTextEditor, onDidChangeActiveTextEditor);
     }
@@ -233,6 +234,14 @@ class Context {
 
     function onDidSaveTextDocument(event:DidSaveTextDocumentParams) {
         publishDiagnostics(event.textDocument.uri);
+    }
+
+    function onDidChangeWatchedFiles(event:DidChangeWatchedFilesParams) {
+        for (change in event.changes) {
+            if (change.type == Deleted) {
+                diagnostics.clearDiagnostics(change.uri);
+            }
+        }
     }
 
     function onDidChangeActiveTextEditor(params:{uri:DocumentUri}) {

@@ -140,7 +140,7 @@ class DiagnosticsManager {
         return !PathHelper.matches(path, pathFilter);
     }
 
-    inline function clearDiagnostics(uri:DocumentUri) {
+    public function clearDiagnostics(uri:DocumentUri) {
         if (diagnosticsArguments.remove(uri))
             context.protocol.sendNotification(Methods.PublishDiagnostics, {uri: uri, diagnostics: []});
     }
