@@ -180,7 +180,9 @@ class Context {
                     publishDiagnostics(doc.uri);
             });
         } else {
-            haxeServer.restart("configuration was changed");
+            haxeServer.restart("configuration was changed", function() {
+                displayOffsetConverter = DisplayOffsetConverter.create(haxeServer.version);
+            });
         }
 
         checkLanguageFeatures();

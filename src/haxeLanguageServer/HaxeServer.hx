@@ -127,7 +127,7 @@ class HaxeServer {
 
     static var reTrailingNewline = ~/\r?\n$/;
 
-    public function start(callback:Void->Void) {
+    public function start(?callback:Void->Void) {
         stop();
 
         inline function error(s) context.sendShowMessage(Error, s);
@@ -190,7 +190,8 @@ class HaxeServer {
         if (context.config.displayPort != null)
             startSocketServer(context.config.displayPort);
 
-        callback();
+        if (callback != null)
+            callback();
     }
 
     public function startSocketServer(port:Int) {
@@ -246,9 +247,9 @@ class HaxeServer {
         requestsHead = requestsTail = currentRequest = null;
     }
 
-    public function restart(reason:String) {
+    public function restart(reason:String, ?callback:Void->Void) {
         context.sendLogMessage(Log, 'Restarting Haxe completion server: $reason');
-        start(function() {});
+        start(callback);
     }
 
     function onExit(_, _) {
