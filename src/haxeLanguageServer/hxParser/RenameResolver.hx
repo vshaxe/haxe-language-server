@@ -1,10 +1,10 @@
 package haxeLanguageServer.hxParser;
 
-import hxParser.WalkStack;
-import hxParser.ParseTree;
 import haxeLanguageServer.hxParser.PositionAwareWalker.Scope;
-using hxParser.WalkStackTools;
+import hxParser.ParseTree;
+import hxParser.WalkStack;
 using Lambda;
+using hxParser.WalkStackTools;
 
 private typedef DeclInfo = {
     var scope:Scope;
@@ -48,17 +48,22 @@ class RenameResolver extends PositionAwareWalker {
         }
 
         // have we found the declaration yet? (assume that usages can only be after the declaration)
-        if (!declarationInScope && declaration.isEqual(getRange())) {
-            declarationInScope = true;
-            declarationInfo = {
-                scope: scope.copy(),
-                isCaptureVariable: isCaptureVariable(stack)
-            };
-            declarationIdentifier = token.text;
-            edits.push({
-                range: declaration,
-                newText: newName
-            });
+        if (!declarationInScope) {
+            var range = getRange();
+            if (declaration.isEqual(range)) {
+                declarationInScope = true;
+                declarationInfo = {
+                    scope: scope.copy(),
+                    isCaptureVariable: isCaptureVariable(stack)
+                };
+                declarationIdentifier = getRawIdentifier(token.text);
+
+                range.start = range.start.translate(0, getIdentifierOffset(token.text));
+                edits.push({
+                    range: range,
+                    newText: newName
+                });
+            }
         }
 
         if (rangeConsumers[token] != null) {
@@ -158,7 +163,7 @@ class RenameResolver extends PositionAwareWalker {
         // assume that lowercase idents in `case` are capture vars
         var firstChar = identText.charAt(0);
         if (ident.text.charAt(0) != "$" && firstChar == firstChar.toLowerCase() && isCaptureVariable(stack)
-                && (declarationInfo == null || !isCaptureVariableInSameScope(declarationInfo, scope))) {
+            && (declarationInfo == null || !isCaptureVariableInSameScope(declarationInfo, scope))) {
             checkShadowing(ident, stack, true);
         } else if (declarationInScope) {
             if (declarationIdentifier == identText && shadowingDecls.length == 0) {
@@ -181,14 +186,18 @@ class RenameResolver extends PositionAwareWalker {
         }
     }
 
-    function getRawIdentifier(ident:String) {
+    function getIdentifierOffset(ident:String):Int {
         return if (ident.startsWith("$")) {
-            ident.substr(1);
+            1;
         } else if (ident.startsWith(".$")) {
-            ident.substr(2);
+            2;
         } else {
-            ident;
+            0;
         }
+    }
+
+    inline function getRawIdentifier(ident:String) {
+        return ident.substr(getIdentifierOffset(ident));
     }
 
     function handleDollarIdent(ident:Token, stack:WalkStack):Bool {
