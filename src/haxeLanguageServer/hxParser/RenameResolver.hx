@@ -117,18 +117,18 @@ class RenameResolver extends PositionAwareWalker {
     }
 
     override function walkNConst_PConstIdent(ident:Token, stack:WalkStack) {
-        handleIdent(ident.text, ident, stack);
+        handleIdent(ident, stack);
         super.walkNConst_PConstIdent(ident, stack);
     }
 
     override function walkExpr_EDollarIdent(ident:Token, stack:WalkStack) {
-        handleIdent(ident.text.substr(1), ident, stack);
+        handleIdent(ident, stack);
         super.walkExpr_EDollarIdent(ident, stack);
     }
 
     override function walkNDotIdent_PDotIdent(name:Token, stack:WalkStack) {
         if (name.text.startsWith(".$")) {
-            handleIdent(name.text.substr(2), name, stack);
+            handleIdent(name, stack);
         }
         super.walkNDotIdent_PDotIdent(name, stack);
     }
@@ -153,7 +153,8 @@ class RenameResolver extends PositionAwareWalker {
         return decl.isCaptureVariable && decl.scope.equals(scope);
     }
 
-    function handleIdent(identText:String, ident:Token, stack:WalkStack) {
+    function handleIdent(ident:Token, stack:WalkStack) {
+        var identText = getRawIdentifier(ident.text);
         // assume that lowercase idents in `case` are capture vars
         var firstChar = identText.charAt(0);
         if (ident.text.charAt(0) != "$" && firstChar == firstChar.toLowerCase() && isCaptureVariable(stack)
@@ -180,9 +181,19 @@ class RenameResolver extends PositionAwareWalker {
         }
     }
 
+    function getRawIdentifier(ident:String) {
+        return if (ident.startsWith("$")) {
+            ident.substr(1);
+        } else if (ident.startsWith(".$")) {
+            ident.substr(2);
+        } else {
+            ident;
+        }
+    }
+
     function handleDollarIdent(ident:Token, stack:WalkStack):Bool {
         if (ident.text.startsWith("$")) {
-            handleIdent(ident.text.substr(1), ident, stack);
+            handleIdent(ident, stack);
             return true;
         }
         return false;
