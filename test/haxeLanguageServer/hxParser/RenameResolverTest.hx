@@ -480,4 +480,18 @@ class Foo {
     }
 }");
     }
+
+    function testDollarVarInCaseShadowing() {
+        check("
+class Foo {
+    macro function foo(e) {
+        var %name%;
+        switch (e) {
+            case macro $name:
+                name;
+        }
+        %name%;
+    }
+}");
+    }
 }

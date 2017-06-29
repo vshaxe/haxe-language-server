@@ -75,8 +75,8 @@ class RenameResolver extends PositionAwareWalker {
     }
 
     function checkShadowing(token:Token, stack:WalkStack, isCaptureVariable:Bool = false) {
-        if (handleDollarIdent(token, stack)) {
-            // in this case it's a usage and can't shadow
+        if (!isCaptureVariable && handleDollarIdent(token, stack)) {
+            // in this case it's a usage and can't shadow (unless it's a capture var)
             return;
         }
 
@@ -97,7 +97,7 @@ class RenameResolver extends PositionAwareWalker {
             });
         }
 
-        if (declarationIdentifier == token.text) {
+        if (declarationIdentifier == getRawIdentifier(token.text)) {
             addShadowingDecl(shadowingDecls);
         } else if (newName == token.text) {
             addShadowingDecl(newIdentShadowingDecls);
@@ -127,7 +127,7 @@ class RenameResolver extends PositionAwareWalker {
     }
 
     override function walkExpr_EDollarIdent(ident:Token, stack:WalkStack) {
-        handleIdent(ident, stack);
+        checkShadowing(ident, stack, isMacroCaptureVariable(stack));
         super.walkExpr_EDollarIdent(ident, stack);
     }
 
@@ -150,8 +150,16 @@ class RenameResolver extends PositionAwareWalker {
         super.walkFunction(node, stack);
     }
 
-    function isCaptureVariable(stack:WalkStack) {
-        return stack.find(stack -> stack.match(Edge("patterns", Node(Case_Case(_, _, _, _, _), _))));
+    function isCaptureVariable(stack:WalkStack):Bool {
+        return stack.find(stack -> stack.match(Edge("patterns", Node(Case_Case(_, _, _, _, _), _)))) != null;
+    }
+
+    function isMacroCaptureVariable(stack:WalkStack):Bool {
+        var macroStack = stack.find(stack -> stack.match(Node(Expr_EMacro(_, _), _)));
+        if (macroStack != null) {
+            return isCaptureVariable(macroStack);
+        }
+        return false;
     }
 
     function isCaptureVariableInSameScope(decl:DeclInfo, scope:Scope) {
