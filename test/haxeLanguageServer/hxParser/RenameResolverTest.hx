@@ -461,6 +461,7 @@ class Foo {
 }");
     }
 
+    // #141
     function testDollarVarInCase() {
         check("
 class Foo {
@@ -494,4 +495,27 @@ class Foo {
     }
 }");
     }
+
+    // #136
+    /*function testForLoopConflict() {
+        check("
+class Foo {
+    function foo(name) {
+        for (%name% in name)
+            %name%;
+        name;
+    }
+}");
+    }
+
+    function testForLoopConflict2() {
+        check("
+class Foo {
+    function foo(%name%) {
+        for (name in %name%)
+            name;
+        %name%;
+    }
+}");
+    }*/
 }
