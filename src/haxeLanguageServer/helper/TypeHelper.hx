@@ -47,13 +47,13 @@ class TypeHelper {
     }
 
     public static function printFunctionSignature(args:Array<DisplayFunctionArgument>, ret:Null<String>, formatting:FunctionFormattingConfig):String {
+        var argNameCode = "a".code;
         var parens = !formatting.useArrowSyntax || formatting.argumentTypeHints || args.length != 1;
         var result = new StringBuf();
         if (parens) result.addChar("(".code);
-        var first = true;
-        for (arg in args) {
-            if (first) first = false else result.add(", ");
-            result.add(printSignatureArgument(arg, formatting.argumentTypeHints));
+        for (i in 0...args.length) {
+            if (i > 0) result.add(", ");
+            result.add(printSignatureArgument(i, args[i], formatting.argumentTypeHints));
         }
         if (parens) result.addChar(")".code);
         if (shouldPrintReturnType(ret, formatting.returnTypeHint) && !formatting.useArrowSyntax) {
@@ -72,8 +72,8 @@ class TypeHelper {
         }
     }
 
-    public static function printSignatureArgument(arg:DisplayFunctionArgument, typeHints:Bool):String {
-        var result = arg.name;
+    public static function printSignatureArgument(index:Int, arg:DisplayFunctionArgument, typeHints:Bool):String {
+        var result = if (arg.name != null) arg.name else std.String.fromCharCode("a".code + index);
         if (arg.opt)
             result = "?" + result;
         if (arg.type != null && typeHints) {
@@ -171,7 +171,6 @@ class TypeHelper {
         if (parts.length > 0) {
             // format function arguments
             var args = new Array<DisplayFunctionArgument>();
-            var argNameCode = "a".code;
             for (i in 0...parts.length) {
                 var part = parts[i];
 
@@ -186,7 +185,7 @@ class TypeHelper {
                     }
                     type = argNameRegex.matchedRight();
                 } else {
-                    name = fromCharCode(argNameCode + i);
+                    name = null;
                     type = part;
                     if (type.charCodeAt(0) == "?".code) {
                         type = type.substring(1);
@@ -219,7 +218,7 @@ class TypeHelper {
     }
 }
 
-typedef DisplayFunctionArgument = {name:String, ?opt:Bool, ?type:String}
+typedef DisplayFunctionArgument = {name:Null<String>, ?opt:Bool, ?type:String}
 
 enum DisplayType {
     DTValue(type:Null<String>); // null if monomorph

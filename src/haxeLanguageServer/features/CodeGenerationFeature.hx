@@ -36,7 +36,7 @@ class CodeGenerationFeature {
         var currentType = TypeHelper.parseFunctionArgumentType(activeParam.label);
         switch (currentType) {
             case DTFunction(args, ret):
-                var names = ArgumentNameHelper.guessArgumentNames([for (arg in args) arg.type]);
+                var names = ArgumentNameHelper.guessArgumentNames(args);
                 for (i in 0...args.length) args[i].name = names[i];
 
                 var generatedCode = TypeHelper.printFunctionDeclaration(args, ret, context.config.codeGeneration.functions.anonymous) + " ";

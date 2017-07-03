@@ -1,10 +1,11 @@
 package haxeLanguageServer.helper;
 
 import String.fromCharCode;
+import haxeLanguageServer.helper.TypeHelper.DisplayFunctionArgument;
 
 class ArgumentNameHelper {
-    public static function guessArgumentNames(types:Array<String>):Array<String> {
-        return avoidDuplicates([for (type in types) guessArgumentName(type)]);
+    public static function guessArgumentNames(args:Array<DisplayFunctionArgument>):Array<String> {
+        return avoidDuplicates([for (arg in args) if (arg.name != null) arg.name else guessArgumentName(arg.type)]);
     }
 
     public static function guessArgumentName(type:String):String {
