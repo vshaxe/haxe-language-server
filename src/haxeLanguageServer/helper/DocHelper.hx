@@ -66,6 +66,9 @@ class DocHelper {
         if (docInfos.throws.length > 0)
             result += tableHeader("Exception", "Description") + mapDocTags(docInfos.throws);
 
+        if (docInfos.events.length > 0)
+            result += tableHeader("Event", "Description") + mapDocTags(docInfos.events);
+
         if (docInfos.sees.length > 0)
             result += "\nSee also:\n" + docInfos.sees.map(function(p) return "* " + p.doc).join("\n") + "\n";
 

@@ -5,7 +5,7 @@ class JavadocHelper {
     public static function parse(doc:String):DocInfos {
         var tags = [];
         // TODO: need to parse this better as haxe source might have this sort of meta
-        var ereg = ~/^@(param|default|exception|throws|deprecated|return|returns|since|see)\s+([^@]+)/gm;
+        var ereg = ~/^@(param|default|exception|throws|deprecated|return|returns|since|see|event)\s+([^@]+)/gm;
 
         doc = ereg.map(doc, function(e) {
             var name = e.matched(1);
@@ -13,7 +13,7 @@ class JavadocHelper {
             var value = null;
 
             switch (name) {
-                case 'param', 'exception', 'throws':
+                case 'param', 'exception', 'throws', 'event':
                     var ereg = ~/([^\s]+)\s+([\s\S]*)/g;
                     if (ereg.match(doc)) {
                         value = ereg.matched(1);
@@ -26,7 +26,7 @@ class JavadocHelper {
             return '';
         });
 
-        var infos:DocInfos = {doc: doc, throws:[], params:[], sees:[], tags:tags};
+        var infos:DocInfos = {doc: doc, throws:[], params:[], sees:[], events:[], tags:tags};
         for (tag in tags) switch (tag.name) {
             case 'param': infos.params.push(tag);
             case 'exception', 'throws': infos.throws.push(tag);
@@ -35,6 +35,7 @@ class JavadocHelper {
             case 'since': infos.since = tag;
             case 'default': infos.defaultValue = tag;
             case 'see': infos.sees.push(tag);
+            case 'event': infos.events.push(tag);
             default:
         }
         return infos;
@@ -59,6 +60,7 @@ typedef DocInfos = {
     sees:Array<DocTag>,
     params:Array<DocTag>,
     throws:Array<DocTag>,
+    events:Array<DocTag>,
     tags:Array<DocTag>
 }
 
