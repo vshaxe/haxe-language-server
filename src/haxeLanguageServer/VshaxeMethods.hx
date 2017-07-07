@@ -5,9 +5,9 @@ import jsonrpc.Types;
 @:publicFields
 class VshaxeMethods {
     /**
-        This notification is sent from the client to the server when display arguments index is changed.
+        This notification is sent from the client to the server when display arguments have changed.
     **/
-    static inline var DidChangeDisplayConfigurationIndex = new NotificationMethod<{index:Int}>("vshaxe/didChangeDisplayConfigurationIndex");
+    static inline var DidChangeDisplayArguments = new NotificationMethod<{arguments:Array<String>}>("vshaxe/didChangeDisplayArguments");
 
     /**
         This request is sent from the client to the server to determine the haxe package for a given file,

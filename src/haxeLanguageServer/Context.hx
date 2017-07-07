@@ -45,7 +45,7 @@ private typedef Config = {
 }
 
 private typedef InitOptions = {
-    var displayConfigurationIndex:Int;
+    var displayArguments:Array<String>;
 }
 
 class Context {
@@ -56,7 +56,7 @@ class Context {
     };
 
     public var workspacePath(default,null):FsPath;
-    public var displayArguments(get,never):Array<String>;
+    public var displayArguments(default,null):Array<String>;
     public var protocol(default,null):Protocol;
     public var haxeServer(default,null):HaxeServer;
     public var documents(default,null):TextDocuments;
@@ -73,8 +73,6 @@ class Context {
 
     var progressId = 0;
 
-    inline function get_displayArguments() return config.displayConfigurations[displayConfigurationIndex];
-
     public function new(protocol) {
         this.protocol = protocol;
 
@@ -86,7 +84,7 @@ class Context {
         protocol.onNotification(Methods.DidOpenTextDocument, onDidOpenTextDocument);
         protocol.onNotification(Methods.DidSaveTextDocument, onDidSaveTextDocument);
         protocol.onNotification(Methods.DidChangeWatchedFiles, onDidChangeWatchedFiles);
-        protocol.onNotification(VshaxeMethods.DidChangeDisplayConfigurationIndex, onDidChangeDisplayConfigurationIndex);
+        protocol.onNotification(VshaxeMethods.DidChangeDisplayArguments, onDidChangeDisplayArguments);
         protocol.onNotification(VshaxeMethods.DidChangeActiveTextEditor, onDidChangeActiveTextEditor);
     }
 
@@ -108,7 +106,7 @@ class Context {
 
     function onInitialize(params:InitializeParams, token:CancellationToken, resolve:InitializeResult->Void, reject:ResponseError<InitializeError>->Void) {
         workspacePath = new FsPath(params.rootPath);
-        displayConfigurationIndex = (params.initializationOptions : InitOptions).displayConfigurationIndex;
+        displayArguments = (params.initializationOptions : InitOptions).displayArguments;
         documents = new TextDocuments(protocol);
         return resolve({
             capabilities: {
@@ -136,9 +134,9 @@ class Context {
         });
     }
 
-    function onDidChangeDisplayConfigurationIndex(params:{index:Int}) {
-        displayConfigurationIndex = params.index;
-        haxeServer.restart("selected configuration was changed");
+    function onDidChangeDisplayArguments(params:{arguments:Array<String>}) {
+        displayArguments = params.arguments;
+        haxeServer.restart("display arguments changed");
     }
 
     function onShutdown(_, token:CancellationToken, resolve:NoData->Void, _) {
