@@ -142,10 +142,10 @@ class HaxeServer {
         var checkRun = ChildProcess.spawnSync(haxePath, ["-version"], {env: env});
         if (checkRun.error != null) {
             if (checkRun.error.message.indexOf("ENOENT") >= 0) {
-                if (Path.isAbsolute(haxePath))
-                    return error('Path to Haxe executable is not valid: \'$haxePath\'. Please check your settings.');
-                else if (haxePath == "haxe") // default
+                if (haxePath == "haxe") // default
                     return error("Could not find Haxe in PATH. Is it installed?");
+                else
+                    return error('Path to Haxe executable is not valid: \'$haxePath\'. Please check your settings.');
             }
             return error('Error starting Haxe server: ${checkRun.error}');
         }
