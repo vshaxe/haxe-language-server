@@ -54,8 +54,14 @@ class ArgumentNameHelper {
             return [for (i in 0...alphabets) fromCharCode(lowerAsciiA + (index % letters))].join("");
         }
 
+        var isOptional = false;
+        if (type.startsWith("?")) {
+            isOptional = true;
+            type = type.substr(1);
+        }
+
         if (type.startsWith(":"))
-             return getUniqueLetter(index) + type;
+             return (if (isOptional) "?" else "") + getUniqueLetter(index) + type;
         else if (type.startsWith("(")) {
             var segmentsRe = ~/\((.*?)\)\s*:\s*(.*)/;
             if (!segmentsRe.match(type))

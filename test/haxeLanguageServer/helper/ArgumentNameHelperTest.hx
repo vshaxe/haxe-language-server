@@ -49,6 +49,7 @@ class ArgumentNameHelperTest extends TestCaseBase {
         assertUnchanged("a:Int");
 
         assert("(a:Int, b:Int):Void", "(:Int, :Int):Void");
+        assert("(?a:Int, ?b:Int):Void", "(?:Int, ?:Int):Void");
         assertUnchanged("(a:Int, b:Int):Void");
         assert("(a:Int, b:Int, c:Int):Void", "(:Int, :Int,:Int) : Void");
 
