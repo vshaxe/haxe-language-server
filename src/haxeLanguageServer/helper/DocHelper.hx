@@ -89,7 +89,7 @@ class DocHelper {
                 line = line.substr(1);
 
             if (line == "") result += "\n\n";
-            else result += line;
+            else result += line + " ";
         }
         return result;
     }
