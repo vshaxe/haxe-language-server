@@ -1,6 +1,7 @@
 package haxeLanguageServer;
 
 import haxe.Timer;
+import haxe.Json;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types;
@@ -67,6 +68,7 @@ class Context {
     var codeActions:CodeActionFeature;
 
     public var config(default,null):Config;
+    var unmodifiedConfig:Config;
     @:allow(haxeLanguageServer.HaxeServer)
     var displayServerConfig:DisplayServerConfigBase;
     var displayConfigurationIndex:Int;
@@ -146,9 +148,16 @@ class Context {
     }
 
     function onDidChangeConfiguration(newConfig:DidChangeConfigurationParams) {
+        var newConfigJson = Json.stringify(newConfig.settings.haxe);
+        var configUnchanged = Json.stringify(unmodifiedConfig) == newConfigJson;
+        if (configUnchanged) {
+            return;
+        }
+
         var firstInit = (config == null);
 
         config = newConfig.settings.haxe;
+        unmodifiedConfig = Json.parse(newConfigJson);
         updateDisplayServerConfig();
         updateCodeGenerationConfig();
 
