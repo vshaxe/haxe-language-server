@@ -152,11 +152,16 @@ class Context {
         updateDisplayServerConfig();
         updateCodeGenerationConfig();
 
+        function onServerStarted() {
+            displayOffsetConverter = DisplayOffsetConverter.create(haxeServer.version);
+            checkLanguageFeatures();
+        }
+
         if (firstInit) {
             haxeServer.start(function() {
-                displayOffsetConverter = DisplayOffsetConverter.create(haxeServer.version);
-                codeActions = new CodeActionFeature(this);
+                onServerStarted();
 
+                codeActions = new CodeActionFeature(this);
                 new CompletionFeature(this);
                 new HoverFeature(this);
                 signatureHelp = new SignatureHelpFeature(this);
@@ -165,7 +170,6 @@ class Context {
                 new DocumentSymbolsFeature(this);
                 new DeterminePackageFeature(this);
                 new RenameFeature(this);
-
                 diagnostics = new DiagnosticsManager(this);
                 new CodeLensFeature(this);
                 new CodeGenerationFeature(this);
@@ -178,12 +182,8 @@ class Context {
                     publishDiagnostics(doc.uri);
             });
         } else {
-            haxeServer.restart("configuration was changed", function() {
-                displayOffsetConverter = DisplayOffsetConverter.create(haxeServer.version);
-            });
+            haxeServer.restart("configuration was changed", onServerStarted);
         }
-
-        checkLanguageFeatures();
     }
 
     function updateDisplayServerConfig() {
