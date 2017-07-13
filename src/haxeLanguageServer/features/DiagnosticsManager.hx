@@ -20,7 +20,7 @@ class DiagnosticsManager {
     }
 
     function onRunGlobalDiagnostics(_) {
-        var stopProgress = context.startProgress("collecting diagnostics");
+        var stopProgress = context.startProgress("Collecting Diagnostics");
         context.callDisplay(["--display", "diagnostics"], null, null, function(result) {
             processDiagnosticsReply(null, result);
             stopProgress();
