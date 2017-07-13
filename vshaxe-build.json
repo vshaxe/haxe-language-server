@@ -28,6 +28,7 @@
                 "haxelibs": ["haxe-hxparser"],
                 "classPaths": [
                     "src",
+                    "common",
                     "protocol/src",
                     "formatter/src"
                 ],

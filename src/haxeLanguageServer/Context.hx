@@ -9,6 +9,7 @@ import jsonrpc.Protocol;
 import haxeLanguageServer.features.*;
 import haxeLanguageServer.features.CodeActionFeature.CodeActionContributor;
 import haxeLanguageServer.helper.SemVer;
+import vshaxe.helper.HaxeExecutable;
 import haxeLanguageServer.helper.TypeHelper.FunctionFormattingConfig;
 import haxeLanguageServer.HaxeServer.DisplayResult;
 
@@ -34,11 +35,11 @@ private typedef CodeGenerationConfig = {
 }
 
 private typedef Config = {
-    var displayConfigurations:Array<Array<String>>;
     var enableDiagnostics:Bool;
     var diagnosticsPathFilter:String;
     var enableCodeLens:Bool;
     var displayServer:DisplayServerConfig;
+    var executable:HaxeExecutablePathOrConfig;
     var displayPort:Null<Int>;
     var buildCompletionCache:Bool;
     var codeGeneration:CodeGenerationConfig;
@@ -50,12 +51,6 @@ private typedef InitOptions = {
 }
 
 class Context {
-    static var systemKey = switch (Sys.systemName()) {
-        case "Windows": "windows";
-        case "Mac": "osx";
-        default: "linux";
-    };
-
     public var workspacePath(default,null):FsPath;
     public var displayArguments(default,null):Array<String>;
     public var protocol(default,null):Protocol;
@@ -71,6 +66,7 @@ class Context {
     var unmodifiedConfig:Config;
     @:allow(haxeLanguageServer.HaxeServer)
     var displayServerConfig:DisplayServerConfigBase;
+    var haxeExecutable:HaxeExecutable;
     var displayConfigurationIndex:Int;
 
     var progressId = 0;
@@ -78,6 +74,7 @@ class Context {
     public function new(protocol) {
         this.protocol = protocol;
 
+        haxeExecutable = new HaxeExecutable();
         haxeServer = new HaxeServer(this);
 
         protocol.onRequest(Methods.Initialize, onInitialize);
@@ -196,10 +193,12 @@ class Context {
     }
 
     function updateDisplayServerConfig() {
+        haxeExecutable.updateConfig(config.executable);
+
         displayServerConfig = {
-            haxePath: "haxe",
+            haxePath: haxeExecutable.config.path,
+            env: haxeExecutable.config.env,
             arguments: [],
-            env: {},
         };
 
         function merge(conf:DisplayServerConfigBase) {
@@ -214,7 +213,7 @@ class Context {
         var conf = config.displayServer;
         if (conf != null) {
             merge(conf);
-            var sysConf:DisplayServerConfigBase = Reflect.field(conf, systemKey);
+            var sysConf:DisplayServerConfigBase = Reflect.field(conf, HaxeExecutable.SYSTEM_KEY);
             if (sysConf != null)
                 merge(sysConf);
         }
