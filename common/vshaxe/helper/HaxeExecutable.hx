@@ -28,8 +28,8 @@ class HaxeExecutable {
 
     public var config(default,null):HaxeExecutableConfigBase;
 
-    public function new() {
-        updateConfig(null);
+    public function new(?input) {
+        updateConfig(input);
     }
 
     public function updateConfig(input:Null<HaxeExecutablePathOrConfig>) {
