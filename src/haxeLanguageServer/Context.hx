@@ -9,22 +9,8 @@ import jsonrpc.Protocol;
 import haxeLanguageServer.features.*;
 import haxeLanguageServer.features.CodeActionFeature.CodeActionContributor;
 import haxeLanguageServer.helper.SemVer;
-import vshaxe.helper.HaxeExecutable;
 import haxeLanguageServer.helper.TypeHelper.FunctionFormattingConfig;
 import haxeLanguageServer.HaxeServer.DisplayResult;
-
-private typedef DisplayServerConfigBase = {
-    var haxePath:String;
-    var arguments:Array<String>;
-    var env:haxe.DynamicAccess<String>;
-}
-
-private typedef DisplayServerConfig = {
-    >DisplayServerConfigBase,
-    @:optional var windows:DisplayServerConfigBase;
-    @:optional var linux:DisplayServerConfigBase;
-    @:optional var osx:DisplayServerConfigBase;
-}
 
 private typedef FunctionGenerationConfig = {
     @:optional var anonymous:FunctionFormattingConfig;
@@ -38,8 +24,6 @@ private typedef Config = {
     var enableDiagnostics:Bool;
     var diagnosticsPathFilter:String;
     var enableCodeLens:Bool;
-    var displayServer:DisplayServerConfig;
-    var executable:HaxeExecutablePathOrConfig;
     var displayPort:Null<Int>;
     var buildCompletionCache:Bool;
     var codeGeneration:CodeGenerationConfig;
@@ -47,6 +31,7 @@ private typedef Config = {
 }
 
 private typedef InitOptions = {
+    var displayServerConfig:DisplayServerConfig;
     var displayArguments:Array<String>;
 }
 
@@ -65,16 +50,13 @@ class Context {
     public var config(default,null):Config;
     var unmodifiedConfig:Config;
     @:allow(haxeLanguageServer.HaxeServer)
-    var displayServerConfig:DisplayServerConfigBase;
-    var haxeExecutable:HaxeExecutable;
-    var displayConfigurationIndex:Int;
+    var displayServerConfig:DisplayServerConfig;
 
     var progressId = 0;
 
     public function new(protocol) {
         this.protocol = protocol;
 
-        haxeExecutable = new HaxeExecutable();
         haxeServer = new HaxeServer(this);
 
         protocol.onRequest(Methods.Initialize, onInitialize);
@@ -84,6 +66,7 @@ class Context {
         protocol.onNotification(Methods.DidSaveTextDocument, onDidSaveTextDocument);
         protocol.onNotification(Methods.DidChangeWatchedFiles, onDidChangeWatchedFiles);
         protocol.onNotification(VshaxeMethods.DidChangeDisplayArguments, onDidChangeDisplayArguments);
+        protocol.onNotification(VshaxeMethods.DidChangeDisplayServerConfig, onDidChangeDisplayServerConfig);
         protocol.onNotification(VshaxeMethods.DidChangeActiveTextEditor, onDidChangeActiveTextEditor);
     }
 
@@ -105,7 +88,9 @@ class Context {
 
     function onInitialize(params:InitializeParams, token:CancellationToken, resolve:InitializeResult->Void, reject:ResponseError<InitializeError>->Void) {
         workspacePath = new FsPath(params.rootPath);
-        displayArguments = (params.initializationOptions : InitOptions).displayArguments;
+        var options = (params.initializationOptions : InitOptions);
+        displayServerConfig = options.displayServerConfig;
+        displayArguments = options.displayArguments;
         documents = new TextDocuments(protocol);
         return resolve({
             capabilities: {
@@ -138,6 +123,11 @@ class Context {
         haxeServer.restart("display arguments changed");
     }
 
+    function onDidChangeDisplayServerConfig(config:DisplayServerConfig) {
+        displayServerConfig = config;
+        haxeServer.restart("display server configuration changed");
+    }
+
     function onShutdown(_, token:CancellationToken, resolve:NoData->Void, _) {
         haxeServer.stop();
         haxeServer = null;
@@ -145,6 +135,14 @@ class Context {
     }
 
     function onDidChangeConfiguration(newConfig:DidChangeConfigurationParams) {
+        if (newConfig.settings.haxe != null) {
+            // this is a hacky way to completely ignore uninteresting config sections
+            // to do this properly, we need to make language server not watch the whole haxe.* section,
+            // but only what's interesting for us
+            Reflect.deleteField(newConfig.settings.haxe, "displayServer");
+            Reflect.deleteField(newConfig.settings.haxe, "displayConfigurations");
+            Reflect.deleteField(newConfig.settings.haxe, "executable");
+        }
         var newConfigJson = Json.stringify(newConfig.settings.haxe);
         var configUnchanged = Json.stringify(unmodifiedConfig) == newConfigJson;
         if (configUnchanged) {
@@ -155,7 +153,6 @@ class Context {
 
         config = newConfig.settings.haxe;
         unmodifiedConfig = Json.parse(newConfigJson);
-        updateDisplayServerConfig();
         updateCodeGenerationConfig();
 
         function onServerStarted() {
@@ -189,33 +186,6 @@ class Context {
             });
         } else {
             haxeServer.restart("configuration was changed", onServerStarted);
-        }
-    }
-
-    function updateDisplayServerConfig() {
-        haxeExecutable.updateConfig(config.executable);
-
-        displayServerConfig = {
-            haxePath: haxeExecutable.config.path,
-            env: haxeExecutable.config.env,
-            arguments: [],
-        };
-
-        function merge(conf:DisplayServerConfigBase) {
-            if (conf.haxePath != null)
-                displayServerConfig.haxePath = conf.haxePath;
-            if (conf.arguments != null)
-                displayServerConfig.arguments = conf.arguments;
-            if (conf.env != null)
-                displayServerConfig.env = conf.env;
-        }
-
-        var conf = config.displayServer;
-        if (conf != null) {
-            merge(conf);
-            var sysConf:DisplayServerConfigBase = Reflect.field(conf, HaxeExecutable.SYSTEM_KEY);
-            if (sysConf != null)
-                merge(sysConf);
         }
     }
 

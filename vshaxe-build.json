@@ -28,7 +28,6 @@
                 "haxelibs": ["haxe-hxparser"],
                 "classPaths": [
                     "src",
-                    "common",
                     "protocol/src",
                     "formatter/src"
                 ],
@@ -50,7 +49,6 @@
                 "haxelibs": ["haxe-hxparser", "compiletime", "mockatoo", "mconsole"],
                 "classPaths": [
                     "src",
-                    "common",
                     "test",
                     "protocol/src",
                     "formatter/src"

@@ -138,7 +138,7 @@ class HaxeServer {
         for (key in context.displayServerConfig.env.keys())
             env[key] = context.displayServerConfig.env[key];
 
-        var haxePath = context.displayServerConfig.haxePath;
+        var haxePath = context.displayServerConfig.path;
         var checkRun = ChildProcess.spawnSync(haxePath, ["-version"], {env: env});
         if (checkRun.error != null) {
             if (checkRun.error.message.indexOf("ENOENT") >= 0) {
@@ -166,7 +166,7 @@ class HaxeServer {
         buffer = new MessageBuffer();
         nextMessageLength = -1;
 
-        proc = ChildProcess.spawn(context.displayServerConfig.haxePath, context.displayServerConfig.arguments.concat(["--wait", "stdio"]), {env: env});
+        proc = ChildProcess.spawn(context.displayServerConfig.path, context.displayServerConfig.arguments.concat(["--wait", "stdio"]), {env: env});
 
         proc.stdout.on(ReadableEvent.Data, function(buf:Buffer) {
             context.sendLogMessage(Log, reTrailingNewline.replace(buf.toString(), ""));

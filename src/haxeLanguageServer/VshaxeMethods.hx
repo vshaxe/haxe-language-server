@@ -10,6 +10,11 @@ class VshaxeMethods {
     static inline var DidChangeDisplayArguments = new NotificationMethod<{arguments:Array<String>}>("vshaxe/didChangeDisplayArguments");
 
     /**
+        This notification is sent from the client to the server when display arguments have changed.
+    **/
+    static inline var DidChangeDisplayServerConfig = new NotificationMethod<DisplayServerConfig>("vshaxe/didChangeDisplayServerConfig");
+
+    /**
         This request is sent from the client to the server to determine the haxe package for a given file,
         based on class paths configuration.
     **/
