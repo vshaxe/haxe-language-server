@@ -151,7 +151,9 @@ class DiagnosticsManager {
             return;
         }
         var doc = context.documents.get(uri);
-        context.callDisplay(["--display", doc.fsPath + "@0@diagnostics"], null, null, processDiagnosticsReply.bind(uri), processErrorReply.bind(uri));
+        if (doc != null) {
+            context.callDisplay(["--display", doc.fsPath + "@0@diagnostics"], null, null, processDiagnosticsReply.bind(uri), processErrorReply.bind(uri));
+        }
     }
 
     static var reEndsWithWhitespace = ~/\s*$/;

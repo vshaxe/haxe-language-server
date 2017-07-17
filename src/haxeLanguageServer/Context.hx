@@ -46,6 +46,7 @@ class Context {
     public var gotoDefinition(default,null):GotoDefinitionFeature;
     var diagnostics:DiagnosticsManager;
     var codeActions:CodeActionFeature;
+    var activeEditor:DocumentUri;
 
     public var config(default,null):Config;
     var unmodifiedConfig:Config;
@@ -120,7 +121,11 @@ class Context {
 
     function onDidChangeDisplayArguments(params:{arguments:Array<String>}) {
         displayArguments = params.arguments;
-        haxeServer.restart("display arguments changed");
+        haxeServer.restart("display arguments changed", () -> {
+            if (activeEditor != null) {
+                publishDiagnostics(activeEditor);
+            }
+        });
     }
 
     function onDidChangeDisplayServerConfig(config:DisplayServerConfig) {
@@ -206,6 +211,7 @@ class Context {
     }
 
     function onDidOpenTextDocument(event:DidOpenTextDocumentParams) {
+        activeEditor = event.textDocument.uri;
         documents.onDidOpenTextDocument(event);
         publishDiagnostics(event.textDocument.uri);
     }
@@ -223,6 +229,7 @@ class Context {
     }
 
     function onDidChangeActiveTextEditor(params:{uri:DocumentUri}) {
+        activeEditor = params.uri;
         var document = documents.get(params.uri);
         if (document == null)
             return;
