@@ -116,6 +116,7 @@ class HaxeServer {
     var requestsTail:DisplayRequest;
     var currentRequest:DisplayRequest;
     var socketListener:js.node.net.Server;
+    var stopProgressCallback:Void->Void;
 
     var crashes:Int = 0;
 
@@ -176,7 +177,7 @@ class HaxeServer {
         proc.on(ChildProcessEvent.Exit, onExit);
 
         if (context.config.buildCompletionCache && context.displayArguments != null) {
-            var stopProgress = context.startProgress("Initializing Completion");
+            stopProgressCallback = context.startProgress("Initializing Completion");
             trace("Initializing completion cache...");
             process(context.displayArguments.concat(["--no-output"]), null, null, function(_) {
                 stopProgress();
@@ -237,6 +238,8 @@ class HaxeServer {
             socketListener.close();
         }
 
+        stopProgress();
+
         // cancel all callbacks
         var request = requestsHead;
         while (request != null) {
@@ -245,6 +248,13 @@ class HaxeServer {
         }
 
         requestsHead = requestsTail = currentRequest = null;
+    }
+
+    function stopProgress() {
+        if (stopProgressCallback != null) {
+            stopProgressCallback();
+        }
+        stopProgressCallback = null;
     }
 
     public function restart(reason:String, ?callback:Void->Void) {
