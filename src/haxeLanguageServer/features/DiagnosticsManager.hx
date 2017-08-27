@@ -261,7 +261,7 @@ class DiagnosticsManager {
             var range = d.range;
             var fieldRe = ~/has no field ([^ ]+) /;
             if (fieldRe.match(arg)) {
-                range.start.character += range.end.character - fieldRe.matched(1).length - 2;
+                range.start.character = range.end.character - fieldRe.matched(1).length;
             }
             for (suggestion in suggestions) {
                 suggestion = suggestion.trim();
