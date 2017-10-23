@@ -18,8 +18,11 @@
         {
             "name": "mconsole",
             "installArgs": ["install", "mconsole"]
+        },
+        {
+            "name": "hx3compat",
+            "installArgs": ["install", "hx3compat"]
         }
-
     ],
     "targets": [
         {
@@ -46,7 +49,7 @@
         {
             "name": "language-server-tests",
             "args": {
-                "haxelibs": ["haxe-hxparser", "compiletime", "mockatoo", "mconsole"],
+                "haxelibs": ["haxe-hxparser", "compiletime", "mockatoo", "mconsole", "hx3compat"],
                 "classPaths": [
                     "src",
                     "test",
