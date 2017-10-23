@@ -13,7 +13,7 @@
         },
         {
             "name": "mockatoo",
-            "installArgs": ["git", "mockatoo", "https://github.com/grosmar/mockatoo", "master", "src"]
+            "installArgs": ["git", "mockatoo", "https://github.com/vshaxe/mockatoo", "master", "src"]
         },
         {
             "name": "mconsole",
