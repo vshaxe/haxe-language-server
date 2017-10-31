@@ -152,6 +152,8 @@ class HaxeServer {
         }
 
         var output = (checkRun.stderr : Buffer).toString().trim();
+        if (output == "")
+            output = (checkRun.stdout : Buffer).toString().trim(); // haxe 4.0 prints -version output to stdout instead
 
         if (checkRun.status != 0)
             return error("Haxe version check failed: " + output);
