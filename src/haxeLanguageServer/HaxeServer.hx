@@ -1,7 +1,9 @@
 package haxeLanguageServer;
 
-import haxe.io.Path;
+import js.Promise;
+import js.node.Net;
 import js.node.net.Socket;
+import js.node.net.Server;
 import js.node.child_process.ChildProcess as ChildProcessObject;
 import js.node.child_process.ChildProcess.ChildProcessEvent;
 import js.node.Buffer;
@@ -190,18 +192,38 @@ class HaxeServer {
             });
         }
 
-        if (context.config.displayPort != null)
-            startSocketServer(context.config.displayPort);
+        var displayPort = context.config.displayPort;
+        if (displayPort != null) {
+            if (displayPort == "auto") {
+                getAvailablePort(6000).then(startSocketServer);
+            } else {
+                startSocketServer(displayPort);
+            }
+        }
 
         if (callback != null)
             callback();
+    }
+
+    // https://gist.github.com/mikeal/1840641#gistcomment-2337132
+    function getAvailablePort(startingAt:Int):Promise<Int> {
+        function getNextAvailablePort(currentPort:Int, cb:Int->Void) {
+            var server = Net.createServer();
+            server.listen(currentPort, () -> {
+                server.once(ServerEvent.Close, cb.bind(currentPort));
+                server.close();
+            });
+            server.on(ServerEvent.Error, _ -> getNextAvailablePort(currentPort + 1, cb));
+        }
+
+        return new Promise((resolve, reject) -> getNextAvailablePort(startingAt, resolve));
     }
 
     public function startSocketServer(port:Int) {
         if (socketListener != null) {
             socketListener.close();
         }
-        socketListener = js.node.Net.createServer(function(socket) {
+        socketListener = Net.createServer(function(socket) {
             trace("Client connected");
             socket.on('data', function(data:Buffer) {
                 var s = data.toString();
@@ -222,7 +244,7 @@ class HaxeServer {
                 process(split, null, null, processDisplayResult, send, socket);
             });
             socket.on('error', function(err) {
-                 trace("Socket error: " + err);
+                trace("Socket error: " + err);
             });
         });
         socketListener.listen(port);

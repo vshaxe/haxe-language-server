@@ -2,6 +2,7 @@ package haxeLanguageServer;
 
 import haxe.Timer;
 import haxe.Json;
+import haxe.extern.EitherType;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types;
@@ -24,7 +25,7 @@ private typedef Config = {
     var enableDiagnostics:Bool;
     var diagnosticsPathFilter:String;
     var enableCodeLens:Bool;
-    var displayPort:Null<Int>;
+    var displayPort:Null<EitherType<Int, String>>;
     var buildCompletionCache:Bool;
     var codeGeneration:CodeGenerationConfig;
     var format:haxeFormatter.Config;
