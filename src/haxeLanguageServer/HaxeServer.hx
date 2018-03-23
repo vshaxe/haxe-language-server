@@ -225,7 +225,7 @@ class HaxeServer {
         }
         socketListener = Net.createServer(function(socket) {
             trace("Client connected");
-            socket.on('data', function(data:Buffer) {
+            socket.on(SocketEvent.Data, function(data:Buffer) {
                 var s = data.toString();
                 var split = s.split("\n");
                 split.pop(); // --connect passes extra \0
@@ -243,12 +243,13 @@ class HaxeServer {
                 }
                 process(split, null, null, processDisplayResult, send, socket);
             });
-            socket.on('error', function(err) {
+            socket.on(SocketEvent.Error, function(err) {
                 trace("Socket error: " + err);
             });
         });
         socketListener.listen(port);
         context.sendLogMessage(Log, 'Listening on port $port');
+        context.protocol.sendNotification(VshaxeMethods.DidChangeDisplayPort, {port: port});
     }
 
     public function stop() {

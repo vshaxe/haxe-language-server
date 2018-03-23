@@ -46,4 +46,9 @@ class VshaxeMethods {
         If client used `ProgressStart` to display an UI element, it can now hide it using the given `id`.
     **/
     static inline var ProgressStop = new NotificationMethod<{id:Int}>("vshaxe/progressStop");
+
+    /**
+        This notification is sent from the server to the client when the display port has changed.
+    **/
+    static inline var DidChangeDisplayPort = new NotificationMethod<{port:Int}>("vshaxe/didChangeDisplayPort");
 }
