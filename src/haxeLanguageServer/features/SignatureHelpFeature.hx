@@ -31,7 +31,10 @@ class SignatureHelpFeature {
                 case DResult(data):
                     var help:SignatureHelp = haxe.Json.parse(data);
                     for (signature in help.signatures) {
-                        signature.documentation = DocHelper.extractText(signature.documentation);
+                        signature.documentation = {
+                            kind: MarkupKind.MarkDown,
+                            value: DocHelper.extractText(signature.documentation)
+                        };
                         var parameters = signature.parameters;
                         for (i in 0...signature.parameters.length)
                             parameters[i].label = addNamesToSignatureType(parameters[i].label, i);
