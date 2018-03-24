@@ -26,6 +26,11 @@ class VshaxeMethods {
     static inline var RunGlobalDiagnostics = new NotificationMethod<NoData,NoData>("vshaxe/runGlobalDiagnostics");
 
     /**
+        This notification is sent from the server to the client when a global diagnostics check was finished successfully.
+    **/
+    static inline var DidRunRunGlobalDiagnostics = new NotificationMethod<NoData,NoData>("vshaxe/didRunGlobalDiagnostics");
+
+    /**
         This notification is sent from the client to the server when the active text editor has changed.
     **/
     static inline var DidChangeActiveTextEditor = new NotificationMethod<{uri:DocumentUri},NoData>("vshaxe/didChangeActiveTextEditor");

@@ -4,6 +4,7 @@ import haxe.io.Path;
 import haxeLanguageServer.helper.PathHelper;
 import haxeLanguageServer.helper.ImportHelper;
 import haxeLanguageServer.HaxeServer.DisplayResult;
+import haxeLanguageServer.VshaxeMethods;
 import js.node.ChildProcess;
 
 class DiagnosticsManager {
@@ -23,6 +24,7 @@ class DiagnosticsManager {
         var stopProgress = context.startProgress("Collecting Diagnostics");
         context.callDisplay(["--display", "diagnostics"], null, null, function(result) {
             processDiagnosticsReply(null, result);
+            context.protocol.sendNotification(VshaxeMethods.DidRunRunGlobalDiagnostics);
             stopProgress();
         }, function(error) {
             processErrorReply(null, error);
