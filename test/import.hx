@@ -1,5 +1,5 @@
 import languageServerProtocol.Types;
-import languageServerProtocol.Protocol;
+import languageServerProtocol.protocol.Protocol;
 import haxeLanguageServer.helper.FsPath;
 
 using StringTools;
