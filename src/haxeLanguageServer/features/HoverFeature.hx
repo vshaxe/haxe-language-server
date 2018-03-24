@@ -44,7 +44,12 @@ class HoverFeature {
 
                             var d = xml.get("d");
                             d = if (d == null) "" else DocHelper.markdownFormat(d);
-                            var result:Hover = {contents: '```haxe\n${type}\n```\n${d}'};
+                            var result:Hover = {
+                                contents: {
+                                    kind: MarkupKind.MarkDown,
+                                    value: '```haxe\n${type}\n```\n${d}'
+                                }
+                            };
                             var p = HaxePosition.parse(xml.get("p"), doc, null, context.displayOffsetConverter);
                             if (p != null)
                                 result.range = p.range;

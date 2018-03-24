@@ -31,7 +31,7 @@ class CompletionFeature {
                     var xml = try Xml.parse(data).firstElement() catch (_:Any) null;
                     if (xml == null) return reject(ResponseError.internalError("Invalid xml data: " + data));
 
-                    var items = if (r.toplevel) parseToplevelCompletion(xml) else parseFieldCompletion(xml, textBefore, params.position);
+                    var items = if (r.toplevel) parseToplevelCompletion(xml, params.position) else parseFieldCompletion(xml, textBefore, params.position);
                     resolve(items);
             }
         }, function(error) reject(ResponseError.internalError(error)));
@@ -52,7 +52,7 @@ class CompletionFeature {
         };
     }
 
-    static function parseToplevelCompletion(x:Xml):Array<CompletionItem> {
+    static function parseToplevelCompletion(x:Xml, position:Position):Array<CompletionItem> {
         var result = [];
         var timers = [];
         for (el in x.elements()) {
@@ -67,7 +67,7 @@ class CompletionFeature {
 
             if (isTimerDebugFieldCompletion(name)) {
                 var info = name.split(":");
-                timers.push(getTimerCompletionItem(info[0], info[1]));
+                timers.push(getTimerCompletionItem(info[0], info[1], position));
                 continue;
             }
 
@@ -87,8 +87,12 @@ class CompletionFeature {
             }
 
             var doc = el.get("d");
-            if (doc != null)
-                item.documentation = DocHelper.extractText(doc);
+            if (doc != null) {
+                item.documentation = {
+                    kind: MarkupKind.MarkDown,
+                    value: DocHelper.extractText(doc)
+                };
+            }
 
             result.push(item);
         }
@@ -136,11 +140,16 @@ class CompletionFeature {
                     textEdit = {newText: name, range: {start: position.translate(0, -1), end: position}};
                 }
             } else if (isTimerDebugFieldCompletion(name)) {
-                timers.push(getTimerCompletionItem(name, type));
+                timers.push(getTimerCompletionItem(name, type, position));
                 continue;
             }
             var item:CompletionItem = {label: name};
-            if (doc != null) item.documentation = DocHelper.extractText(doc);
+            if (doc != null) {
+                item.documentation = {
+                    kind: MarkupKind.MarkDown,
+                    value: DocHelper.extractText(doc)
+                };
+            }
             if (kind != null) item.kind = kind;
             if (type != null) item.detail = formatType(type, name, kind);
             if (textEdit != null) item.textEdit = textEdit;
@@ -164,7 +173,7 @@ class CompletionFeature {
         }
     }
 
-    static function getTimerCompletionItem(name:String, time:String):CompletionItem {
+    static function getTimerCompletionItem(name:String, time:String, position:Position):CompletionItem {
         // avert your eyes...
         var timeRegex = ~/([0-9.]*)s(?: \(([0-9]*)%\))?/;
         var seconds = 0.0;
@@ -186,8 +195,14 @@ class CompletionFeature {
         return {
             label: name,
             kind: Value,
-            documentation: doc,
-            insertText: " ", // can't be empty string or VSCode will ignore it, but still better than inserting this garbage
+            documentation: {
+                kind: MarkupKind.PlainText,
+                value: doc
+            },
+            textEdit: {
+                range: {start: position, end: position},
+                newText: ""
+            },
             data: seconds
         };
     }
