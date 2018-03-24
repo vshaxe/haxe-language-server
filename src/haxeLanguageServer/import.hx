@@ -1,4 +1,5 @@
 import languageServerProtocol.Types;
+import languageServerProtocol.Protocol;
 import haxeLanguageServer.helper.FsPath;
 import haxeLanguageServer.helper.DisplayOffsetConverter;
 

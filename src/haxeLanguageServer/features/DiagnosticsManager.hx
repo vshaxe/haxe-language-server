@@ -77,7 +77,7 @@ class DiagnosticsManager {
         var diag = {
             range: {start: position, end: endPosition},
             source: "haxe",
-            severity: Error,
+            severity: DiagnosticSeverity.Error,
             message: problemMatcher.matched(7)
         };
         context.protocol.sendNotification(Methods.PublishDiagnostics, {uri: uri, diagnostics: [diag]});
