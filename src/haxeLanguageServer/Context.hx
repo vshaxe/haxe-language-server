@@ -89,7 +89,7 @@ class Context {
     }
 
     function onInitialize(params:InitializeParams, token:CancellationToken, resolve:InitializeResult->Void, reject:ResponseError<InitializeError>->Void) {
-        workspacePath = new FsPath(params.rootPath);
+        workspacePath = params.workspaceFolders[0].uri.toFsPath();
         var options = (params.initializationOptions : InitOptions);
         displayServerConfig = options.displayServerConfig;
         displayArguments = options.displayArguments;
