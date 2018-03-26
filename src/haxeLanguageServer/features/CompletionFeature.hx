@@ -90,7 +90,7 @@ class CompletionFeature {
             if (doc != null) {
                 item.documentation = {
                     kind: MarkupKind.MarkDown,
-                    value: DocHelper.extractText(doc)
+                    value: DocHelper.markdownFormat(doc)
                 };
             }
 
@@ -147,7 +147,7 @@ class CompletionFeature {
             if (doc != null) {
                 item.documentation = {
                     kind: MarkupKind.MarkDown,
-                    value: DocHelper.extractText(doc)
+                    value: DocHelper.markdownFormat(doc)
                 };
             }
             if (kind != null) item.kind = kind;

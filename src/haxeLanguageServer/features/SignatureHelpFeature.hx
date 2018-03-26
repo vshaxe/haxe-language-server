@@ -33,7 +33,7 @@ class SignatureHelpFeature {
                     for (signature in help.signatures) {
                         signature.documentation = {
                             kind: MarkupKind.MarkDown,
-                            value: DocHelper.extractText(signature.documentation)
+                            value: DocHelper.markdownFormat(signature.documentation)
                         };
                         var parameters = signature.parameters;
                         for (i in 0...signature.parameters.length)
