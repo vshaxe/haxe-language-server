@@ -119,9 +119,17 @@ class CompletionFeature {
     static function parseFieldCompletion(x:Xml, textBefore:String, position:Position):Array<CompletionItem> {
         var result = [];
         var timers = [];
+        var methods = new Map<String, {item:CompletionItem, overloads:Int}>();
         for (el in x.elements()) {
             var rawKind = el.get("k");
             var kind = fieldKindToCompletionItemKind(rawKind);
+            var name = el.get("n");
+            if (kind == Method && methods[name] != null) {
+                // only show an overloaded method once
+                methods[name].overloads++;
+                continue;
+            }
+
             var type = null, doc = null;
             inline function getOrNull(s) return if (s == "") null else s;
             for (child in el.elements()) {
@@ -130,7 +138,6 @@ class CompletionFeature {
                     case "d": doc = getOrNull(child.firstChild().nodeValue);
                 }
             }
-            var name = el.get("n");
             var textEdit = null;
             if (rawKind == "metadata") {
                 name = name.substr(1); // remove the @
@@ -153,8 +160,21 @@ class CompletionFeature {
             if (kind != null) item.kind = kind;
             if (type != null) item.detail = formatType(type, name, kind);
             if (textEdit != null) item.textEdit = textEdit;
+
+            if (kind == Method) {
+                methods[name] = {item: item, overloads: 0};
+            }
+
             result.push(item);
         }
+
+        for (method in methods) {
+            var overloads = method.overloads;
+            if (overloads > 0) {
+                method.item.detail += ' (+$overloads overloads)';
+            }
+        }
+
         sortTimers(timers);
         return result.concat(timers);
     }
