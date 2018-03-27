@@ -2,7 +2,6 @@ package haxeLanguageServer.hxParser;
 
 import hxParser.ParseTree;
 import hxParser.WalkStack;
-using hxParser.WalkStackTools;
 
 class DocumentSymbolsResolver extends PositionAwareWalker {
     var uri:DocumentUri;
@@ -165,5 +164,10 @@ class DocumentSymbolsResolver extends PositionAwareWalker {
     override function walkCatch(node:Catch, stack:WalkStack) {
         addSymbol(node.ident, SymbolKind.Variable, stack);
         super.walkCatch(node, stack);
+    }
+
+    override function walkTypeDeclParameter(node:TypeDeclParameter, stack:WalkStack) {
+        addSymbol(node.name, SymbolKind.TypeParameter, stack);
+        super.walkTypeDeclParameter(node, stack);
     }
 }

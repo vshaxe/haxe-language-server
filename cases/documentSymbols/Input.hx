@@ -1,4 +1,4 @@
-class Class {
+class Class<TClass1, TClass2> {
     inline static var CONSTANT = 5;
 
     var variable:Int;
@@ -10,13 +10,13 @@ class Class {
 
 
     **/
-    function foo(param1:Int, param2:Int) {
+    function foo<TClassField>(param1:Int, param2:Int) {
         "
 
 
         ";
 
-        function foo2() {
+        function foo2<TLocalFunction>() {
             function foo3() {
                 var foo4:Int;
             }
@@ -52,12 +52,12 @@ class Class {
     function new() {}
 }
 
-interface Interface {
+interface Interface<TInterface> {
     var variable:Int;
-    function foo():Void;
+    function foo<TInterfaceField>():Void;
 }
 
-abstract Abstract(Int) {
+abstract Abstract<TAbstract>(Int) {
     inline static var CONSTANT = 5;
 
     @:op(A * B)
@@ -73,11 +73,13 @@ abstract Abstract(Int) {
     }
 
     @:resolve
-	function resolve(name:String) {
+    function resolve(name:String) {
         return null;
     }
 
     public function new() {}
+
+    function foo<TAbstractField>() {}
 }
 
 @:enum abstract EnumAbstract(Int) {
@@ -87,12 +89,12 @@ abstract Abstract(Int) {
     var Value2 = 1;
 }
 
-enum Enum {
+enum Enum<TEnum> {
     Simple;
-    Complex(i:Int, b:Bool);
+    Complex<TEnumField>(i:Int, b:Bool);
 }
 
-typedef TypeAlias = Int;
+typedef TypeAlias<TTypedef> = Int;
 
 typedef TypedefShortFields = {
     ?a:Int,
