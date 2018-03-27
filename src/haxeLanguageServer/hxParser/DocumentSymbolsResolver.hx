@@ -2,7 +2,7 @@ package haxeLanguageServer.hxParser;
 
 import hxParser.ParseTree;
 import hxParser.WalkStack;
-using Lambda;
+using hxParser.WalkStackTools;
 
 class DocumentSymbolsResolver extends PositionAwareWalker {
     var uri:DocumentUri;
@@ -72,7 +72,12 @@ class DocumentSymbolsResolver extends PositionAwareWalker {
     }
 
     override function walkTypedefDecl(node:TypedefDecl, stack:WalkStack) {
-        addSymbol(node.name, SymbolKind.Interface, stack);
+        var kind = switch (node.type) {
+            case AnonymousStructure(_, _, _): SymbolKind.Struct;
+            case StructuralExtension(_, _, _): SymbolKind.Struct;
+            case _: SymbolKind.Interface;
+        }
+        addSymbol(node.name, kind, stack);
         super.walkTypedefDecl(node, stack);
     }
 
@@ -88,12 +93,17 @@ class DocumentSymbolsResolver extends PositionAwareWalker {
     }
 
     override function walkAbstractDecl(node:AbstractDecl, stack:WalkStack) {
-        addSymbol(node.name, SymbolKind.Class, stack);
+        var kind = if (Helper.isInAbstractEnum(stack)) SymbolKind.Enum else SymbolKind.Class;
+        addSymbol(node.name, kind, stack);
         super.walkAbstractDecl(node, stack);
     }
 
     override function walkClassField_Function(annotations:NAnnotations, modifiers:Array<FieldModifier>, functionKeyword:Token, name:Token, params:Null<TypeDeclParameters>, parenOpen:Token, args:Null<CommaSeparated<FunctionArgument>>, parenClose:Token, typeHint:Null<TypeHint>, expr:MethodExpr, stack:WalkStack) {
-        var kind = if (name.text == "new") SymbolKind.Constructor else SymbolKind.Function;
+        var kind =
+            if (Helper.isOperator(stack, annotations.metadata)) SymbolKind.Operator
+            else if (name.text == "new") SymbolKind.Constructor
+            else SymbolKind.Function;
+
         addSymbol(name, kind, stack);
         super.walkClassField_Function(annotations, modifiers, functionKeyword, name, params, parenOpen, args, parenClose, typeHint, expr, stack);
     }
@@ -104,8 +114,11 @@ class DocumentSymbolsResolver extends PositionAwareWalker {
     }
 
     override function walkClassField_Variable(annotations:NAnnotations, modifiers:Array<FieldModifier>, varKeyword:Token, name:Token, typeHint:Null<TypeHint>, assignment:Null<Assignment>, semicolon:Token, stack:WalkStack) {
-        var isInline = modifiers.exists(function(modifier) return modifier.match(FieldModifier.Inline(_)));
-        var kind = if (isInline) SymbolKind.Constant else SymbolKind.Field;
+        var kind =
+            if (Helper.isAbstractEnumValue(stack, modifiers)) SymbolKind.EnumMember
+            else if (Helper.isInline(modifiers)) SymbolKind.Constant
+            else SymbolKind.Field;
+
         addSymbol(name, kind, stack);
         super.walkClassField_Variable(annotations, modifiers, varKeyword, name, typeHint, assignment, semicolon, stack);
     }
@@ -131,7 +144,7 @@ class DocumentSymbolsResolver extends PositionAwareWalker {
     }
 
     override function walkNEnumField(node:NEnumField, stack:WalkStack) {
-        addSymbol(node.name, SymbolKind.Function, stack);
+        addSymbol(node.name, SymbolKind.EnumMember, stack);
         super.walkNEnumField(node, stack);
     }
 

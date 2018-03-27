@@ -378,17 +378,53 @@
         "containerName": "Class.foo"
     },
     {
+        "name": "fakeAdd",
+        "kind": 12,
+        "location": {
+            "uri": "file:///cases/documentSymbols/Input.hx",
+            "range": {
+                "start": {
+                    "line": 47,
+                    "character": 20
+                },
+                "end": {
+                    "line": 47,
+                    "character": 27
+                }
+            }
+        },
+        "containerName": "Class"
+    },
+    {
+        "name": "rhs",
+        "kind": 13,
+        "location": {
+            "uri": "file:///cases/documentSymbols/Input.hx",
+            "range": {
+                "start": {
+                    "line": 47,
+                    "character": 28
+                },
+                "end": {
+                    "line": 47,
+                    "character": 31
+                }
+            }
+        },
+        "containerName": "Class.fakeAdd"
+    },
+    {
         "name": "new",
         "kind": 9,
         "location": {
             "uri": "file:///cases/documentSymbols/Input.hx",
             "range": {
                 "start": {
-                    "line": 46,
+                    "line": 51,
                     "character": 13
                 },
                 "end": {
-                    "line": 46,
+                    "line": 51,
                     "character": 16
                 }
             }
@@ -402,11 +438,11 @@
             "uri": "file:///cases/documentSymbols/Input.hx",
             "range": {
                 "start": {
-                    "line": 49,
+                    "line": 54,
                     "character": 10
                 },
                 "end": {
-                    "line": 49,
+                    "line": 54,
                     "character": 19
                 }
             }
@@ -420,11 +456,11 @@
             "uri": "file:///cases/documentSymbols/Input.hx",
             "range": {
                 "start": {
-                    "line": 50,
+                    "line": 55,
                     "character": 8
                 },
                 "end": {
-                    "line": 50,
+                    "line": 55,
                     "character": 16
                 }
             }
@@ -438,11 +474,11 @@
             "uri": "file:///cases/documentSymbols/Input.hx",
             "range": {
                 "start": {
-                    "line": 51,
+                    "line": 56,
                     "character": 13
                 },
                 "end": {
-                    "line": 51,
+                    "line": 56,
                     "character": 16
                 }
             }
@@ -456,11 +492,11 @@
             "uri": "file:///cases/documentSymbols/Input.hx",
             "range": {
                 "start": {
-                    "line": 54,
+                    "line": 59,
                     "character": 9
                 },
                 "end": {
-                    "line": 54,
+                    "line": 59,
                     "character": 17
                 }
             }
@@ -474,16 +510,160 @@
             "uri": "file:///cases/documentSymbols/Input.hx",
             "range": {
                 "start": {
-                    "line": 55,
+                    "line": 60,
                     "character": 22
                 },
                 "end": {
-                    "line": 55,
+                    "line": 60,
                     "character": 30
                 }
             }
         },
         "containerName": "Abstract"
+    },
+    {
+        "name": "repeat",
+        "kind": 25,
+        "location": {
+            "uri": "file:///cases/documentSymbols/Input.hx",
+            "range": {
+                "start": {
+                    "line": 63,
+                    "character": 20
+                },
+                "end": {
+                    "line": 63,
+                    "character": 26
+                }
+            }
+        },
+        "containerName": "Abstract"
+    },
+    {
+        "name": "rhs",
+        "kind": 13,
+        "location": {
+            "uri": "file:///cases/documentSymbols/Input.hx",
+            "range": {
+                "start": {
+                    "line": 63,
+                    "character": 27
+                },
+                "end": {
+                    "line": 63,
+                    "character": 30
+                }
+            }
+        },
+        "containerName": "Abstract.repeat"
+    },
+    {
+        "name": "add",
+        "kind": 25,
+        "location": {
+            "uri": "file:///cases/documentSymbols/Input.hx",
+            "range": {
+                "start": {
+                    "line": 67,
+                    "character": 25
+                },
+                "end": {
+                    "line": 67,
+                    "character": 28
+                }
+            }
+        },
+        "containerName": "Abstract"
+    },
+    {
+        "name": "rhs",
+        "kind": 13,
+        "location": {
+            "uri": "file:///cases/documentSymbols/Input.hx",
+            "range": {
+                "start": {
+                    "line": 67,
+                    "character": 29
+                },
+                "end": {
+                    "line": 67,
+                    "character": 32
+                }
+            }
+        },
+        "containerName": "Abstract.add"
+    },
+    {
+        "name": "get",
+        "kind": 25,
+        "location": {
+            "uri": "file:///cases/documentSymbols/Input.hx",
+            "range": {
+                "start": {
+                    "line": 70,
+                    "character": 27
+                },
+                "end": {
+                    "line": 70,
+                    "character": 30
+                }
+            }
+        },
+        "containerName": "Abstract"
+    },
+    {
+        "name": "key",
+        "kind": 13,
+        "location": {
+            "uri": "file:///cases/documentSymbols/Input.hx",
+            "range": {
+                "start": {
+                    "line": 70,
+                    "character": 31
+                },
+                "end": {
+                    "line": 70,
+                    "character": 34
+                }
+            }
+        },
+        "containerName": "Abstract.get"
+    },
+    {
+        "name": "resolve",
+        "kind": 25,
+        "location": {
+            "uri": "file:///cases/documentSymbols/Input.hx",
+            "range": {
+                "start": {
+                    "line": 75,
+                    "character": 10
+                },
+                "end": {
+                    "line": 75,
+                    "character": 17
+                }
+            }
+        },
+        "containerName": "Abstract"
+    },
+    {
+        "name": "name",
+        "kind": 13,
+        "location": {
+            "uri": "file:///cases/documentSymbols/Input.hx",
+            "range": {
+                "start": {
+                    "line": 75,
+                    "character": 18
+                },
+                "end": {
+                    "line": 75,
+                    "character": 22
+                }
+            }
+        },
+        "containerName": "Abstract.resolve"
     },
     {
         "name": "new",
@@ -492,11 +672,11 @@
             "uri": "file:///cases/documentSymbols/Input.hx",
             "range": {
                 "start": {
-                    "line": 57,
+                    "line": 79,
                     "character": 20
                 },
                 "end": {
-                    "line": 57,
+                    "line": 79,
                     "character": 23
                 }
             }
@@ -505,16 +685,16 @@
     },
     {
         "name": "EnumAbstract",
-        "kind": 5,
+        "kind": 10,
         "location": {
             "uri": "file:///cases/documentSymbols/Input.hx",
             "range": {
                 "start": {
-                    "line": 60,
+                    "line": 82,
                     "character": 16
                 },
                 "end": {
-                    "line": 60,
+                    "line": 82,
                     "character": 28
                 }
             }
@@ -522,17 +702,35 @@
         "containerName": ""
     },
     {
-        "name": "Value1",
-        "kind": 8,
+        "name": "CONSTANT",
+        "kind": 14,
         "location": {
             "uri": "file:///cases/documentSymbols/Input.hx",
             "range": {
                 "start": {
-                    "line": 61,
+                    "line": 83,
+                    "character": 22
+                },
+                "end": {
+                    "line": 83,
+                    "character": 30
+                }
+            }
+        },
+        "containerName": "EnumAbstract"
+    },
+    {
+        "name": "Value1",
+        "kind": 22,
+        "location": {
+            "uri": "file:///cases/documentSymbols/Input.hx",
+            "range": {
+                "start": {
+                    "line": 85,
                     "character": 8
                 },
                 "end": {
-                    "line": 61,
+                    "line": 85,
                     "character": 14
                 }
             }
@@ -541,16 +739,16 @@
     },
     {
         "name": "Value2",
-        "kind": 8,
+        "kind": 22,
         "location": {
             "uri": "file:///cases/documentSymbols/Input.hx",
             "range": {
                 "start": {
-                    "line": 62,
+                    "line": 86,
                     "character": 8
                 },
                 "end": {
-                    "line": 62,
+                    "line": 86,
                     "character": 14
                 }
             }
@@ -564,11 +762,11 @@
             "uri": "file:///cases/documentSymbols/Input.hx",
             "range": {
                 "start": {
-                    "line": 65,
+                    "line": 89,
                     "character": 5
                 },
                 "end": {
-                    "line": 65,
+                    "line": 89,
                     "character": 9
                 }
             }
@@ -577,16 +775,16 @@
     },
     {
         "name": "Simple",
-        "kind": 12,
+        "kind": 22,
         "location": {
             "uri": "file:///cases/documentSymbols/Input.hx",
             "range": {
                 "start": {
-                    "line": 66,
+                    "line": 90,
                     "character": 4
                 },
                 "end": {
-                    "line": 66,
+                    "line": 90,
                     "character": 10
                 }
             }
@@ -595,16 +793,16 @@
     },
     {
         "name": "Complex",
-        "kind": 12,
+        "kind": 22,
         "location": {
             "uri": "file:///cases/documentSymbols/Input.hx",
             "range": {
                 "start": {
-                    "line": 67,
+                    "line": 91,
                     "character": 4
                 },
                 "end": {
-                    "line": 67,
+                    "line": 91,
                     "character": 11
                 }
             }
@@ -618,11 +816,11 @@
             "uri": "file:///cases/documentSymbols/Input.hx",
             "range": {
                 "start": {
-                    "line": 70,
+                    "line": 94,
                     "character": 8
                 },
                 "end": {
-                    "line": 70,
+                    "line": 94,
                     "character": 17
                 }
             }
@@ -631,16 +829,16 @@
     },
     {
         "name": "TypedefShortFields",
-        "kind": 11,
+        "kind": 23,
         "location": {
             "uri": "file:///cases/documentSymbols/Input.hx",
             "range": {
                 "start": {
-                    "line": 72,
+                    "line": 96,
                     "character": 8
                 },
                 "end": {
-                    "line": 72,
+                    "line": 96,
                     "character": 26
                 }
             }
@@ -654,11 +852,11 @@
             "uri": "file:///cases/documentSymbols/Input.hx",
             "range": {
                 "start": {
-                    "line": 73,
+                    "line": 97,
                     "character": 5
                 },
                 "end": {
-                    "line": 73,
+                    "line": 97,
                     "character": 6
                 }
             }
@@ -672,11 +870,11 @@
             "uri": "file:///cases/documentSymbols/Input.hx",
             "range": {
                 "start": {
-                    "line": 74,
+                    "line": 98,
                     "character": 4
                 },
                 "end": {
-                    "line": 74,
+                    "line": 98,
                     "character": 5
                 }
             }
@@ -685,16 +883,16 @@
     },
     {
         "name": "TypedefComplexFields",
-        "kind": 11,
+        "kind": 23,
         "location": {
             "uri": "file:///cases/documentSymbols/Input.hx",
             "range": {
                 "start": {
-                    "line": 77,
+                    "line": 101,
                     "character": 8
                 },
                 "end": {
-                    "line": 77,
+                    "line": 101,
                     "character": 28
                 }
             }
@@ -708,11 +906,11 @@
             "uri": "file:///cases/documentSymbols/Input.hx",
             "range": {
                 "start": {
-                    "line": 78,
+                    "line": 102,
                     "character": 19
                 },
                 "end": {
-                    "line": 78,
+                    "line": 102,
                     "character": 20
                 }
             }
@@ -726,15 +924,69 @@
             "uri": "file:///cases/documentSymbols/Input.hx",
             "range": {
                 "start": {
-                    "line": 79,
+                    "line": 103,
                     "character": 8
                 },
                 "end": {
-                    "line": 79,
+                    "line": 103,
                     "character": 9
                 }
             }
         },
         "containerName": "TypedefComplexFields"
+    },
+    {
+        "name": "TypedefExtension",
+        "kind": 23,
+        "location": {
+            "uri": "file:///cases/documentSymbols/Input.hx",
+            "range": {
+                "start": {
+                    "line": 106,
+                    "character": 8
+                },
+                "end": {
+                    "line": 106,
+                    "character": 24
+                }
+            }
+        },
+        "containerName": ""
+    },
+    {
+        "name": "a",
+        "kind": 13,
+        "location": {
+            "uri": "file:///cases/documentSymbols/Input.hx",
+            "range": {
+                "start": {
+                    "line": 108,
+                    "character": 5
+                },
+                "end": {
+                    "line": 108,
+                    "character": 6
+                }
+            }
+        },
+        "containerName": "TypedefExtension"
+    },
+    {
+        "name": "b",
+        "kind": 13,
+        "location": {
+            "uri": "file:///cases/documentSymbols/Input.hx",
+            "range": {
+                "start": {
+                    "line": 109,
+                    "character": 4
+                },
+                "end": {
+                    "line": 109,
+                    "character": 5
+                }
+            }
+        },
+        "containerName": "TypedefExtension"
     }
 ]
