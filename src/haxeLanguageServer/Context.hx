@@ -122,16 +122,12 @@ class Context {
 
     function onDidChangeDisplayArguments(params:{arguments:Array<String>}) {
         displayArguments = params.arguments;
-        haxeServer.restart("display arguments changed", () -> {
-            if (activeEditor != null) {
-                publishDiagnostics(activeEditor);
-            }
-        });
+        restartServer("display arguments changed");
     }
 
     function onDidChangeDisplayServerConfig(config:DisplayServerConfig) {
         displayServerConfig = config;
-        haxeServer.restart("display server configuration changed");
+        restartServer("display server configuration changed");
     }
 
     function onShutdown(_, token:CancellationToken, resolve:NoData->Void, _) {
@@ -161,11 +157,6 @@ class Context {
         unmodifiedConfig = Json.parse(newConfigJson);
         updateCodeGenerationConfig();
 
-        function onServerStarted() {
-            displayOffsetConverter = DisplayOffsetConverter.create(haxeServer.version);
-            checkLanguageFeatures();
-        }
-
         if (firstInit) {
             haxeServer.start(function() {
                 onServerStarted();
@@ -191,8 +182,25 @@ class Context {
                     publishDiagnostics(doc.uri);
             });
         } else {
-            haxeServer.restart("configuration was changed", onServerStarted);
+            restartServer("configuration was changed");
         }
+    }
+
+    function onServerStarted() {
+        displayOffsetConverter = DisplayOffsetConverter.create(haxeServer.version);
+
+        var hasArrowFunctions = haxeServer.version >= new SemVer(4, 0, 0);
+        if (!hasArrowFunctions)
+            config.codeGeneration.functions.anonymous.useArrowSyntax = false;
+    }
+
+    function restartServer(reason:String) {
+        haxeServer.restart(reason, function() {
+            onServerStarted();
+            if (activeEditor != null) {
+                publishDiagnostics(activeEditor);
+            }
+        });
     }
 
     function updateCodeGenerationConfig() {
@@ -203,12 +211,6 @@ class Context {
         var functions = codeGen.functions;
         if (functions.anonymous == null)
             functions.anonymous = {argumentTypeHints: false, returnTypeHint: Never, useArrowSyntax: true};
-    }
-
-    function checkLanguageFeatures() {
-        var hasArrowFunctions = haxeServer.version >= new SemVer(4, 0, 0);
-        if (!hasArrowFunctions)
-            config.codeGeneration.functions.anonymous.useArrowSyntax = false;
     }
 
     function onDidOpenTextDocument(event:DidOpenTextDocumentParams) {
