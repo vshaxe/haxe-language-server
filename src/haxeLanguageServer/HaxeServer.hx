@@ -17,6 +17,20 @@ enum DisplayResult {
     DResult(msg:String);
 }
 
+enum ResultHandler {
+    /**
+        Data is passed on as-is, with 0x01 / 0x02 chars from Haxe.
+        Used for socket communication to ensure exit codes etc are correct.
+    **/
+    Raw(callback:(result:DisplayResult)->Void);
+
+    /**
+        Data is processed into Strings and separated
+        into successful results (`callback`) and errors (`errback`).
+    **/
+    Processed(callback:(result:DisplayResult)->Void, errback:(error:String)->Void);
+}
+
 private class DisplayRequest {
     // these are used for the queue
     public var prev:DisplayRequest;
@@ -25,17 +39,15 @@ private class DisplayRequest {
     var token:CancellationToken;
     var args:Array<String>;
     var stdin:String;
-    var callback:DisplayResult->Void;
-    var errback:String->Void;
+    var handler:ResultHandler;
 
     static var stdinSepBuf = new Buffer([1]);
 
-    public function new(token:CancellationToken, args:Array<String>, stdin:String, callback:DisplayResult->Void, errback:String->Void) {
+    public function new(token:CancellationToken, args:Array<String>, stdin:String, handler:ResultHandler) {
         this.token = token;
         this.args = args;
         this.stdin = stdin;
-        this.callback = callback;
-        this.errback = errback;
+        this.handler = handler;
     }
 
     public function prepareBody():Buffer {
@@ -66,13 +78,25 @@ private class DisplayRequest {
     }
 
     public inline function cancel() {
-        callback(DCancelled);
+        switch (handler) {
+            case Raw(callback) | Processed(callback, _):
+                callback(DCancelled);
+        }
     }
 
-    public function processResult(data:String) {
+    public function onData(data:String) {
         if (token != null && token.canceled)
-            return callback(DCancelled);
+            return cancel();
 
+        switch (handler) {
+            case Raw(callback):
+                callback(DResult(data));
+            case Processed(callback, errback):
+                processResult(data, callback, errback);
+        }
+    }
+
+    function processResult(data:String, callback:DisplayResult->Void, errback:String->Void) {
         var buf = new StringBuf();
         var hasError = false;
         for (line in data.split("\n")) {
@@ -176,13 +200,13 @@ class HaxeServer {
         if (context.config.buildCompletionCache && context.displayArguments != null) {
             stopProgressCallback = context.startProgress("Initializing Completion");
             trace("Initializing completion cache...");
-            process(context.displayArguments.concat(["--no-output"]), null, null, function(_) {
+            process(context.displayArguments.concat(["--no-output"]), null, null, Processed(function(_) {
                 stopProgress();
                 trace("Done.");
             }, function(errorMessage) {
                 stopProgress();
                 trace("Failed - try fixing the error(s) and restarting the language server:\n\n" + errorMessage);
-            });
+            }));
         }
 
         var displayPort = context.config.displayPort;
@@ -222,19 +246,17 @@ class HaxeServer {
                 var s = data.toString();
                 var split = s.split("\n");
                 split.pop(); // --connect passes extra \0
-                function send(message:String) {
-                    socket.write(message);
+                function callback(result:DisplayResult) {
+                    switch (result) {
+                        case DResult(data):
+                            socket.write(data);
+                        case DCancelled:
+                    }
                     socket.end();
                     socket.destroy();
                     trace("Client disconnected");
                 }
-                function processDisplayResult(d:DisplayResult) {
-                    send(switch (d) {
-                        case DResult(r): r;
-                        case DCancelled: "";
-                    });
-                }
-                process(split, null, null, processDisplayResult, send);
+                process(split, null, null, Raw(callback));
             });
             socket.on(SocketEvent.Error, function(err) {
                 trace("Socket error: " + err);
@@ -319,15 +341,15 @@ class HaxeServer {
             if (currentRequest != null) {
                 var request = currentRequest;
                 currentRequest = null;
-                request.processResult(msg);
+                request.onData(msg);
                 checkQueue();
             }
         }
     }
 
-    public function process(args:Array<String>, token:CancellationToken, stdin:String, callback:DisplayResult->Void, errback:String->Void) {
+    public function process(args:Array<String>, token:CancellationToken, stdin:String, handler:ResultHandler) {
         // create a request object
-        var request = new DisplayRequest(token, args, stdin, callback, errback);
+        var request = new DisplayRequest(token, args, stdin, handler);
 
         // if the request is cancellable, set a cancel callback to remove request from queue
         if (token != null) {
