@@ -27,17 +27,15 @@ private class DisplayRequest {
     var stdin:String;
     var callback:DisplayResult->Void;
     var errback:String->Void;
-    public var socket:Null<Socket>;
 
     static var stdinSepBuf = new Buffer([1]);
 
-    public function new(token:CancellationToken, args:Array<String>, stdin:String, callback:DisplayResult->Void, errback:String->Void, socket) {
+    public function new(token:CancellationToken, args:Array<String>, stdin:String, callback:DisplayResult->Void, errback:String->Void) {
         this.token = token;
         this.args = args;
         this.stdin = stdin;
         this.callback = callback;
         this.errback = errback;
-        this.socket = socket;
     }
 
     public function prepareBody():Buffer {
@@ -80,12 +78,7 @@ private class DisplayRequest {
         for (line in data.split("\n")) {
             switch (line.fastCodeAt(0)) {
                 case 0x01: // print
-                    var line = line.substring(1).replace("\x01", "\n");
-                    if (socket != null) {
-                        socket.write(line);
-                    } else {
-                        trace("Haxe print:\n" + line);
-                    }
+                    trace("Haxe print:\n" + line.substring(1).replace("\x01", "\n"));
                 case 0x02: // error
                     hasError = true;
                 default:
@@ -241,7 +234,7 @@ class HaxeServer {
                         case DCancelled: "";
                     });
                 }
-                process(split, null, null, processDisplayResult, send, socket);
+                process(split, null, null, processDisplayResult, send);
             });
             socket.on(SocketEvent.Error, function(err) {
                 trace("Socket error: " + err);
@@ -332,9 +325,9 @@ class HaxeServer {
         }
     }
 
-    public function process(args:Array<String>, token:CancellationToken, stdin:String, callback:DisplayResult->Void, errback:String->Void, socket:Socket = null) {
+    public function process(args:Array<String>, token:CancellationToken, stdin:String, callback:DisplayResult->Void, errback:String->Void) {
         // create a request object
-        var request = new DisplayRequest(token, args, stdin, callback, errback, socket);
+        var request = new DisplayRequest(token, args, stdin, callback, errback);
 
         // if the request is cancellable, set a cancel callback to remove request from queue
         if (token != null) {
