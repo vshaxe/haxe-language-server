@@ -210,7 +210,7 @@ class HaxeServer {
         }
 
         var displayPort = context.config.displayPort;
-        if (displayPort != null) {
+        if (socketListener == null && displayPort != null) {
             if (displayPort == "auto") {
                 getAvailablePort(6000).then(startSocketServer);
             } else {
@@ -272,10 +272,6 @@ class HaxeServer {
             proc.removeAllListeners();
             proc.kill();
             proc = null;
-        }
-
-        if (socketListener != null) {
-            socketListener.close();
         }
 
         stopProgress();
