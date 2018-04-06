@@ -256,7 +256,7 @@ class Context {
             "--no-output", // prevent anygeneration
         ]);
         actualArgs = actualArgs.concat(args); // finally, add given query args
-        haxeServer.process(actualArgs, token, stdin, Processed(callback, errback));
+        haxeServer.process(actualArgs, token, true, stdin, Processed(callback, errback));
     }
 
     public function registerCodeActionContributor(contributor:CodeActionContributor) {

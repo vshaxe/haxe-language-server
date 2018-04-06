@@ -32,20 +32,23 @@ enum ResultHandler {
 }
 
 private class DisplayRequest {
+    public final cancellable:Bool;
+
     // these are used for the queue
     public var prev:DisplayRequest;
     public var next:DisplayRequest;
 
-    var token:CancellationToken;
     var args:Array<String>;
+    var token:CancellationToken;
     var stdin:String;
     var handler:ResultHandler;
 
     static var stdinSepBuf = new Buffer([1]);
 
-    public function new(token:CancellationToken, args:Array<String>, stdin:String, handler:ResultHandler) {
-        this.token = token;
+    public function new(args:Array<String>, token:CancellationToken, cancellable:Bool, stdin:String, handler:ResultHandler) {
         this.args = args;
+        this.token = token;
+        this.cancellable = cancellable;
         this.stdin = stdin;
         this.handler = handler;
     }
@@ -136,6 +139,7 @@ class HaxeServer {
     var currentRequest:DisplayRequest;
     var socketListener:js.node.net.Server;
     var stopProgressCallback:Void->Void;
+    var startRequest:Void->Void;
 
     var crashes:Int = 0;
 
@@ -148,6 +152,13 @@ class HaxeServer {
     static var reTrailingNewline = ~/\r?\n$/;
 
     public function start(?callback:Void->Void) {
+        // we still have requests in our queue that are not cancelable, such as a build - try again later
+        if (hasNonCancellableRequests()) {
+            startRequest = callback;
+            return;
+        }
+
+        startRequest = null;
         stop();
 
         inline function error(s) context.sendShowMessage(Error, s);
@@ -200,7 +211,7 @@ class HaxeServer {
         if (context.config.buildCompletionCache && context.displayArguments != null) {
             stopProgressCallback = context.startProgress("Initializing Completion");
             trace("Initializing completion cache...");
-            process(context.displayArguments.concat(["--no-output"]), null, null, Processed(function(_) {
+            process(context.displayArguments.concat(["--no-output"]), null, true, null, Processed(function(_) {
                 stopProgress();
                 trace("Done.");
             }, function(errorMessage) {
@@ -220,6 +231,21 @@ class HaxeServer {
 
         if (callback != null)
             callback();
+    }
+
+    function hasNonCancellableRequests():Bool {
+        if (currentRequest != null && !currentRequest.cancellable)
+            return true;
+
+        var request = requestsHead;
+        while (request != null) {
+            if (!request.cancellable) {
+                return true;
+            }
+            request = request.next;
+        }
+
+        return false;
     }
 
     // https://gist.github.com/mikeal/1840641#gistcomment-2337132
@@ -256,7 +282,7 @@ class HaxeServer {
                     socket.destroy();
                     trace("Client disconnected");
                 }
-                process(split, null, null, Raw(callback));
+                process(split, null, false, null, Raw(callback));
             });
             socket.on(SocketEvent.Error, function(err) {
                 trace("Socket error: " + err);
@@ -294,8 +320,11 @@ class HaxeServer {
     }
 
     public function restart(reason:String, ?callback:Void->Void) {
-        context.sendLogMessage(Log, 'Restarting Haxe completion server: $reason');
-        start(callback);
+        context.sendLogMessage(Log, 'Haxe server restart requested: $reason');
+        start(function() {
+            context.sendLogMessage(Log, 'Restarted Haxe server: $reason');
+            callback();
+        });
     }
 
     function onExit(_, _) {
@@ -343,9 +372,9 @@ class HaxeServer {
         }
     }
 
-    public function process(args:Array<String>, token:CancellationToken, stdin:String, handler:ResultHandler) {
+    public function process(args:Array<String>, token:CancellationToken, cancellable:Bool, stdin:String, handler:ResultHandler) {
         // create a request object
-        var request = new DisplayRequest(token, args, stdin, handler);
+        var request = new DisplayRequest(args, token, cancellable, stdin, handler);
 
         // if the request is cancellable, set a cancel callback to remove request from queue
         if (token != null) {
@@ -382,6 +411,12 @@ class HaxeServer {
     }
 
     function checkQueue() {
+        // a restart has been requested
+        if (startRequest != null) {
+            start(startRequest);
+            return;
+        }
+
         // there's a currently processing request, wait and don't send another one to Haxe
         if (currentRequest != null)
             return;
