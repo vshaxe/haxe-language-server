@@ -11,7 +11,8 @@ import haxeLanguageServer.features.*;
 import haxeLanguageServer.features.CodeActionFeature.CodeActionContributor;
 import haxeLanguageServer.helper.SemVer;
 import haxeLanguageServer.helper.TypeHelper.FunctionFormattingConfig;
-import haxeLanguageServer.HaxeServer.DisplayResult;
+import haxeLanguageServer.server.DisplayResult;
+import haxeLanguageServer.server.HaxeServer;
 
 private typedef FunctionGenerationConfig = {
     @:optional var anonymous:FunctionFormattingConfig;
@@ -51,7 +52,7 @@ class Context {
 
     public var config(default,null):Config;
     var unmodifiedConfig:Config;
-    @:allow(haxeLanguageServer.HaxeServer)
+    @:allow(haxeLanguageServer.server.HaxeServer)
     var displayServerConfig:DisplayServerConfig;
 
     var progressId = 0;

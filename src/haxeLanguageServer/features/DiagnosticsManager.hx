@@ -3,7 +3,7 @@ package haxeLanguageServer.features;
 import haxe.io.Path;
 import haxeLanguageServer.helper.PathHelper;
 import haxeLanguageServer.helper.ImportHelper;
-import haxeLanguageServer.HaxeServer.DisplayResult;
+import haxeLanguageServer.server.DisplayResult;
 import haxeLanguageServer.VshaxeMethods;
 import js.node.ChildProcess;
 

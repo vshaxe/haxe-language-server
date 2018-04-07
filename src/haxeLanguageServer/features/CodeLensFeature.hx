@@ -3,7 +3,7 @@ package haxeLanguageServer.features;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
-import haxeLanguageServer.HaxeServer.DisplayResult;
+import haxeLanguageServer.server.DisplayResult;
 
 class CodeLensFeature {
     var context:Context;
