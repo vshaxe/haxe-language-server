@@ -76,7 +76,7 @@ class DiagnosticsManager {
         var argumentsMap = diagnosticsArguments[uri] = new DiagnosticsMap();
         var diag = {
             range: {start: position, end: endPosition},
-            source: "haxe",
+            source: "diagnostics",
             severity: DiagnosticSeverity.Error,
             message: problemMatcher.matched(7)
         };
@@ -112,7 +112,7 @@ class DiagnosticsManager {
                         var diag:Diagnostic = {
                             // range: doc.byteRangeToRange(hxDiag.range),
                             range: hxDiag.range,
-                            source: "haxe",
+                            source: "diagnostics",
                             code: (hxDiag.kind : Int),
                             severity: hxDiag.severity,
                             message: hxDiag.kind.getMessage(hxDiag.args)
