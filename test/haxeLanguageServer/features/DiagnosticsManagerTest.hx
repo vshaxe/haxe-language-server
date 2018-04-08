@@ -39,7 +39,7 @@ class DiagnosticsManagerTest extends TestCaseBase {
                 var actual = result.diagnostics[i];
                 assertTrue(expected.range.isEqual(actual.range), c);
                 assertEquals(expected.message, actual.message, c);
-                assertEquals("haxe", actual.source, c);
+                assertEquals("diagnostics", actual.source, c);
             }
         });
 
