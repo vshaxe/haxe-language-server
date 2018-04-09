@@ -20,6 +20,10 @@ class CompletionFeature {
         var doc = context.documents.get(params.textDocument.uri);
         var offset = doc.offsetAt(params.position);
         var textBefore = doc.content.substring(0, offset);
+        if (!isValidCompletionPosition(params.context, textBefore)) {
+            resolve([]);
+            return;
+        }
         var r = calculateCompletionPosition(textBefore, offset);
         var bytePos = context.displayOffsetConverter.characterOffsetToByteOffset(doc.content, r.pos);
         var args = ["--display", '${doc.fsPath}@$bytePos' + (if (r.toplevel) "@toplevel" else "")];
@@ -35,6 +39,11 @@ class CompletionFeature {
                     resolve(items);
             }
         }, function(error) reject(ResponseError.internalError(error)));
+    }
+
+    static var reCaseOrDefault = ~/\b(case|default)\b[^:]*:$/;
+    static function isValidCompletionPosition(context:CompletionContext, text:String):Bool {
+        return context.triggerCharacter != ":" || !reCaseOrDefault.match(text);
     }
 
     static var reFieldPart = ~/(\.|@(:?))(\w*)$/;
