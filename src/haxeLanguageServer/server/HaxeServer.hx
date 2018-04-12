@@ -79,7 +79,7 @@ class HaxeServer {
 
         var isVersionSupported = version >= new SemVer(3, 4, 0);
         if (!isVersionSupported)
-            return error('Unsupported Haxe version! Minimum version required: 3.4.0. Found: $version.');
+            return error('Unsupported Haxe version! Minimum required: 3.4.0. Found: $version.');
 
         buffer = new MessageBuffer();
         nextMessageLength = -1;
