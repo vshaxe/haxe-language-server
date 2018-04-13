@@ -137,7 +137,7 @@ class HaxeServer {
     function getAvailablePort(startingAt:Int):Promise<Int> {
         function getNextAvailablePort(currentPort:Int, cb:Int->Void) {
             var server = Net.createServer();
-            server.listen(currentPort, () -> {
+            server.listen(currentPort, "localhost", () -> {
                 server.once(ServerEvent.Close, cb.bind(currentPort));
                 server.close();
             });
@@ -173,7 +173,7 @@ class HaxeServer {
                 trace("Socket error: " + err);
             });
         });
-        socketListener.listen(port);
+        socketListener.listen(port, "localhost");
         context.sendLogMessage(Log, 'Listening on port $port');
         context.protocol.sendNotification(VshaxeMethods.DidChangeDisplayPort, {port: port});
     }
