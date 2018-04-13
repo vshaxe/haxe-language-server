@@ -40,7 +40,7 @@
                 ],
                 "output": {
                     "target": "js",
-                    "path": "../bin/server.js"
+                    "path": "bin/server.js"
                 },
                 "deadCodeElimination": "full",
                 "main": "haxeLanguageServer.Main"
@@ -61,7 +61,7 @@
                 ],
                 "output": {
                     "target": "js",
-                    "path": "../bin/test.js"
+                    "path": "bin/test.js"
                 },
                 "deadCodeElimination": "full",
                 "noInline": true,
@@ -69,7 +69,7 @@
                 "debug": true
             },
             "afterBuildCommands": [
-                ["node", "../bin/test.js"]
+                ["node", "bin/test.js"]
             ]
         }
     ]

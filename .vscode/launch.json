@@ -8,17 +8,17 @@
             "port": 6004,
             "sourceMaps": true,
             "outFiles": [
-                "${workspaceRoot}/../bin/server.js"
+                "${workspaceRoot}/bin/*.js"
             ]
         },
         {
             "type": "node",
             "request": "launch",
             "name": "Tests",
-            "program": "${workspaceRoot}/../bin/test.js",
+            "program": "${workspaceRoot}/bin/test.js",
             "sourceMaps": true,
             "outFiles": [
-                "${workspaceRoot}/../bin/*.js"
+                "${workspaceRoot}/bin/*.js"
             ]
         }
     ]
