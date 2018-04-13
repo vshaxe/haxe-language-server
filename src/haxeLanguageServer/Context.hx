@@ -90,10 +90,19 @@ class Context {
     }
 
     function onInitialize(params:InitializeParams, token:CancellationToken, resolve:InitializeResult->Void, reject:ResponseError<InitializeError>->Void) {
-        workspacePath = params.workspaceFolders[0].uri.toFsPath();
+        workspacePath = params.rootUri.toFsPath();
         var options = (params.initializationOptions : InitOptions);
-        displayServerConfig = options.displayServerConfig;
-        displayArguments = options.displayArguments;
+        if (options == null) {
+            displayServerConfig = {
+                path: "haxe",
+                env: new haxe.DynamicAccess(),
+                arguments: []
+            };
+            displayArguments = [];
+        } else {
+            displayServerConfig = options.displayServerConfig;
+            displayArguments = options.displayArguments;
+        }
         documents = new TextDocuments(protocol);
         return resolve({
             capabilities: {
