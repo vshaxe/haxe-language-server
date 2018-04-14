@@ -52,6 +52,7 @@ class Context {
 
     public var config(default,null):Config;
     var unmodifiedConfig:Config;
+    final defaultConfig:Config;
     @:allow(haxeLanguageServer.server.HaxeServer)
     var displayServerConfig:DisplayServerConfig;
 
@@ -59,8 +60,16 @@ class Context {
 
     public function new(protocol) {
         this.protocol = protocol;
-
         haxeServer = new HaxeServer(this);
+        defaultConfig = {
+            enableDiagnostics: true,
+            diagnosticsPathFilter: "${workspaceRoot}",
+            enableCodeLens: false,
+            displayPort: "auto",
+            buildCompletionCache: true,
+            codeGeneration: {},
+            format: {}
+        };
 
         protocol.onRequest(Methods.Initialize, onInitialize);
         protocol.onRequest(Methods.Shutdown, onShutdown);
@@ -147,24 +156,20 @@ class Context {
     }
 
     function onDidChangeConfiguration(newConfig:DidChangeConfigurationParams) {
-        if (newConfig.settings.haxe != null) {
-            // this is a hacky way to completely ignore uninteresting config sections
-            // to do this properly, we need to make language server not watch the whole haxe.* section,
-            // but only what's interesting for us
-            Reflect.deleteField(newConfig.settings.haxe, "displayServer");
-            Reflect.deleteField(newConfig.settings.haxe, "displayConfigurations");
-            Reflect.deleteField(newConfig.settings.haxe, "executable");
+        var firstInit = (config == null);
+        var newHaxeConfig = newConfig.settings.haxe;
+        if (newHaxeConfig == null) {
+            newHaxeConfig = {};
         }
-        var newConfigJson = Json.stringify(newConfig.settings.haxe);
+
+        var newConfigJson = Json.stringify(newHaxeConfig);
         var configUnchanged = Json.stringify(unmodifiedConfig) == newConfigJson;
-        if (configUnchanged) {
+        if (!firstInit && configUnchanged) {
             return;
         }
-
-        var firstInit = (config == null);
-
-        config = newConfig.settings.haxe;
         unmodifiedConfig = Json.parse(newConfigJson);
+
+        processSettings(newHaxeConfig);
         updateCodeGenerationConfig();
 
         if (firstInit) {
@@ -196,6 +201,43 @@ class Context {
         }
     }
 
+    function processSettings(newConfig:Dynamic) {
+        // this is a hacky way to completely ignore uninteresting config sections
+        // to do this properly, we need to make language server not watch the whole haxe.* section,
+        // but only what's interesting for us
+        Reflect.deleteField(newConfig, "displayServer");
+        Reflect.deleteField(newConfig, "displayConfigurations");
+        Reflect.deleteField(newConfig, "executable");
+
+        config = newConfig;
+
+        // apply defaults
+        if (config.enableDiagnostics == null)
+            config.enableDiagnostics = defaultConfig.enableDiagnostics;
+        if (config.diagnosticsPathFilter == null)
+            config.diagnosticsPathFilter = defaultConfig.diagnosticsPathFilter;
+        if (config.enableCodeLens == null)
+            config.enableCodeLens = defaultConfig.enableCodeLens;
+        if (config.displayPort == null)
+            config.displayPort = defaultConfig.displayPort;
+        if (config.buildCompletionCache == null)
+            config.buildCompletionCache = defaultConfig.buildCompletionCache;
+        if (config.codeGeneration == null)
+            config.codeGeneration = defaultConfig.codeGeneration;
+        if (config.format == null)
+            config.format = defaultConfig.format;
+    }
+
+    function updateCodeGenerationConfig() {
+        var codeGen = config.codeGeneration;
+        if (codeGen.functions == null)
+            codeGen.functions = {};
+
+        var functions = codeGen.functions;
+        if (functions.anonymous == null)
+            functions.anonymous = {argumentTypeHints: false, returnTypeHint: Never, useArrowSyntax: true, prefixPackages: true};
+    }
+
     function onServerStarted() {
         displayOffsetConverter = DisplayOffsetConverter.create(haxeServer.version);
 
@@ -211,16 +253,6 @@ class Context {
                 publishDiagnostics(activeEditor);
             }
         });
-    }
-
-    function updateCodeGenerationConfig() {
-        var codeGen = config.codeGeneration;
-        if (codeGen.functions == null)
-            codeGen.functions = {};
-
-        var functions = codeGen.functions;
-        if (functions.anonymous == null)
-            functions.anonymous = {argumentTypeHints: false, returnTypeHint: Never, useArrowSyntax: true, prefixPackages: true};
     }
 
     function onDidOpenTextDocument(event:DidOpenTextDocumentParams) {
