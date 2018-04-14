@@ -39,6 +39,7 @@ private typedef InitOptions = {
 
 class Context {
     public var workspacePath(default,null):FsPath;
+    public var capabilities(default,null):ClientCapabilities;
     public var displayArguments(default,null):Array<String>;
     public var protocol(default,null):Protocol;
     public var haxeServer(default,null):HaxeServer;
@@ -100,6 +101,7 @@ class Context {
 
     function onInitialize(params:InitializeParams, token:CancellationToken, resolve:InitializeResult->Void, reject:ResponseError<InitializeError>->Void) {
         workspacePath = params.rootUri.toFsPath();
+        capabilities = params.capabilities;
         var options = (params.initializationOptions : InitOptions);
         if (options == null) {
             displayServerConfig = {
