@@ -1,11 +1,10 @@
 package haxeLanguageServer.helper;
 
-import String.fromCharCode;
-
 typedef FunctionFormattingConfig = {
     var argumentTypeHints:Bool;
     var returnTypeHint:ReturnTypeHintOption;
     var useArrowSyntax:Bool;
+    var prefixPackages:Bool; // NOT part of the user settings
 }
 
 @:enum abstract ReturnTypeHintOption(String) {
@@ -20,6 +19,7 @@ class TypeHelper {
     static var argNameRegex = ~/^(\??\w+) : /;
     static var monomorphRegex = ~/^Unknown<\d+>$/;
     static var nullRegex = ~/^Null<(\$\d+)>$/;
+    static var packagePathsRegex = ~/((?:_*[a-z]\w*\.)*)(?=_*[A-Z])/g;
 
     static function getCloseChar(c:String):String {
         return switch (c) {
@@ -33,7 +33,7 @@ class TypeHelper {
     public static function prepareSignature(type:String):String {
         return switch (parseDisplayType(type)) {
             case DTFunction(args, ret):
-                printFunctionSignature(args, ret, {argumentTypeHints: true, returnTypeHint: Always, useArrowSyntax: false});
+                printFunctionSignature(args, ret, {argumentTypeHints: true, returnTypeHint: Always, useArrowSyntax: false, prefixPackages: true});
             case DTValue(type):
                 if (type == null) "" else type;
         }
@@ -47,18 +47,17 @@ class TypeHelper {
     }
 
     public static function printFunctionSignature(args:Array<DisplayFunctionArgument>, ret:Null<String>, formatting:FunctionFormattingConfig):String {
-        var argNameCode = "a".code;
         var parens = !formatting.useArrowSyntax || formatting.argumentTypeHints || args.length != 1;
         var result = new StringBuf();
         if (parens) result.addChar("(".code);
         for (i in 0...args.length) {
             if (i > 0) result.add(", ");
-            result.add(printSignatureArgument(i, args[i], formatting.argumentTypeHints));
+            result.add(printSignatureArgument(i, args[i], formatting.argumentTypeHints, formatting.prefixPackages));
         }
         if (parens) result.addChar(")".code);
         if (shouldPrintReturnType(ret, formatting.returnTypeHint) && !formatting.useArrowSyntax) {
             result.addChar(":".code);
-            result.add(ret);
+            result.add(if (formatting.prefixPackages) ret else getTypeWithoutPackage(ret));
         }
         return result.toString();
     }
@@ -72,13 +71,15 @@ class TypeHelper {
         }
     }
 
-    public static function printSignatureArgument(index:Int, arg:DisplayFunctionArgument, typeHints:Bool):String {
+    public static function printSignatureArgument(index:Int, arg:DisplayFunctionArgument, typeHints:Bool, prefixPackages:Bool):String {
         var result = if (arg.name != null) arg.name else std.String.fromCharCode("a".code + index);
         if (arg.opt)
             result = "?" + result;
         if (arg.type != null && typeHints) {
             result += ":";
-            result += arg.type;
+            var type = arg.type;
+            if (!prefixPackages) type = getTypeWithoutPackage(type);
+            result += type;
         }
         return result;
     }
@@ -107,6 +108,10 @@ class TypeHelper {
         if (index >= 0)
             return type.substring(0, index);
         return type;
+    }
+
+    public static inline function getTypeWithoutPackage(type:String):String {
+        return packagePathsRegex.replace(type, "");
     }
 
     public static function parseDisplayType(type:String):DisplayType {

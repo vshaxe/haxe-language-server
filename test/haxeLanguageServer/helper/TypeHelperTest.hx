@@ -35,28 +35,33 @@ class TypeHelperTest extends TestCaseBase {
         assertPrintedEquals(parseFunctionArgumentType,
             "function(a:flixel.FlxObject, ?b:String):Void",
             "?Callback:Null<flixel.FlxObject -> ?String -> Void>",
-            {argumentTypeHints: true, returnTypeHint: Always, useArrowSyntax: false});
+            {argumentTypeHints: true, returnTypeHint: Always, useArrowSyntax: false, prefixPackages: true});
 
         assertPrintedEquals(parseDisplayType,
             "function(a, b)",
             "String -> Bool -> Void>",
-            {argumentTypeHints: false, returnTypeHint: Never, useArrowSyntax: false});
+            {argumentTypeHints: false, returnTypeHint: Never, useArrowSyntax: false, prefixPackages: true});
 
         assertPrintedEquals(parseDisplayType,
             "function(a:String, b:Bool)",
             "String -> Bool -> Void",
-            {argumentTypeHints: true, returnTypeHint: NonVoid, useArrowSyntax: false});
+            {argumentTypeHints: true, returnTypeHint: NonVoid, useArrowSyntax: false, prefixPackages: true});
 
         assertPrintedEquals(parseDisplayType,
             "function():String",
             "Void -> String",
-            {argumentTypeHints: true, returnTypeHint: NonVoid, useArrowSyntax: false});
+            {argumentTypeHints: true, returnTypeHint: NonVoid, useArrowSyntax: false, prefixPackages: true});
+
+        assertPrintedEquals(parseDisplayType,
+            "function(a:List<EitherType<FunctionFormattingConfig, NoData>>):Type",
+            "haxe.ds.List<haxe.extern.EitherType<haxeLanguageServer.helper.FunctionFormattingConfig, jsonRpc.NoData>> -> foo.bar.Type",
+            {argumentTypeHints: true, returnTypeHint: NonVoid, useArrowSyntax: false, prefixPackages: false});
     }
 
     function testPrintArrowFunctionDeclaration() {
         function assert(expected, functionType, argumentTypeHints = false) {
             assertPrintedEquals(parseDisplayType, expected, functionType,
-                {argumentTypeHints: argumentTypeHints, returnTypeHint: Always, useArrowSyntax: true});
+                {argumentTypeHints: argumentTypeHints, returnTypeHint: Always, useArrowSyntax: true, prefixPackages: true});
         }
 
         assert("() ->", "Void -> Void");

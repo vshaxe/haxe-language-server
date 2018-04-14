@@ -220,7 +220,7 @@ class Context {
 
         var functions = codeGen.functions;
         if (functions.anonymous == null)
-            functions.anonymous = {argumentTypeHints: false, returnTypeHint: Never, useArrowSyntax: true};
+            functions.anonymous = {argumentTypeHints: false, returnTypeHint: Never, useArrowSyntax: true, prefixPackages: true};
     }
 
     function onDidOpenTextDocument(event:DidOpenTextDocumentParams) {
