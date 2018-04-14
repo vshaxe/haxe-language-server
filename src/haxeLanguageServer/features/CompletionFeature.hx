@@ -36,7 +36,7 @@ class CompletionFeature {
         var documentationFormat = completionItem.documentationFormat;
         if (documentationFormat == null) return;
 
-        markdownSupport = documentationFormat.indexOf(MarkDown) != 0;
+        markdownSupport = documentationFormat.indexOf(MarkDown) != -1;
     }
 
     function onCompletion(params:CompletionParams, token:CancellationToken, resolve:Array<CompletionItem>->Void, reject:ResponseError<NoData>->Void) {
