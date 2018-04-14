@@ -220,8 +220,6 @@ class Context {
             config.diagnosticsPathFilter = defaultConfig.diagnosticsPathFilter;
         if (config.enableCodeLens == null)
             config.enableCodeLens = defaultConfig.enableCodeLens;
-        if (config.displayPort == null)
-            config.displayPort = defaultConfig.displayPort;
         if (config.buildCompletionCache == null)
             config.buildCompletionCache = defaultConfig.buildCompletionCache;
         if (config.codeGeneration == null)
