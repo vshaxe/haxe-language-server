@@ -6,26 +6,44 @@ import jsonrpc.Types.NoData;
 import haxeLanguageServer.helper.DocHelper;
 import haxeLanguageServer.helper.TypeHelper.prepareSignature;
 import haxeLanguageServer.helper.TypeHelper.parseDisplayType;
+import haxe.extern.EitherType;
 import String.fromCharCode;
 
 class CompletionFeature {
     var context:Context;
+    var contextSupport:Bool;
+    var markdownSupport:Bool;
 
     public function new(context) {
         this.context = context;
+        checkCapabilities();
         context.protocol.onRequest(Methods.Completion, onCompletion);
     }
 
-    function hasContextSupport():Bool {
+    function checkCapabilities() {
+        contextSupport = false;
+        markdownSupport = false;
+
         var textDocument = context.capabilities.textDocument;
-        return textDocument != null && textDocument.completion != null && textDocument.completion.contextSupport;
+        if (textDocument == null) return;
+        var completion = textDocument.completion;
+        if (completion == null) return;
+
+        contextSupport = completion.contextSupport == true;
+
+        var completionItem = completion.completionItem;
+        if (completionItem == null) return;
+        var documentationFormat = completionItem.documentationFormat;
+        if (documentationFormat == null) return;
+
+        markdownSupport = documentationFormat.indexOf(MarkDown) != 0;
     }
 
     function onCompletion(params:CompletionParams, token:CancellationToken, resolve:Array<CompletionItem>->Void, reject:ResponseError<NoData>->Void) {
         var doc = context.documents.get(params.textDocument.uri);
         var offset = doc.offsetAt(params.position);
         var textBefore = doc.content.substring(0, offset);
-        if (hasContextSupport() && !isValidCompletionPosition(params.context, textBefore)) {
+        if (contextSupport && !isValidCompletionPosition(params.context, textBefore)) {
             resolve([]);
             return;
         }
@@ -66,7 +84,17 @@ class CompletionFeature {
         };
     }
 
-    static function parseToplevelCompletion(x:Xml, position:Position):Array<CompletionItem> {
+    function formatDocumentation(doc:String):EitherType<String, MarkupContent> {
+        if (markdownSupport) {
+            return {
+                kind: MarkupKind.MarkDown,
+                value: DocHelper.markdownFormat(doc)
+            };
+        }
+        return DocHelper.extractText(doc);
+    }
+
+    function parseToplevelCompletion(x:Xml, position:Position):Array<CompletionItem> {
         var result = [];
         var timers = [];
         for (el in x.elements()) {
@@ -101,12 +129,8 @@ class CompletionFeature {
             }
 
             var doc = el.get("d");
-            if (doc != null) {
-                item.documentation = {
-                    kind: MarkupKind.MarkDown,
-                    value: DocHelper.markdownFormat(doc)
-                };
-            }
+            if (doc != null)
+                item.documentation = formatDocumentation(doc);
 
             result.push(item);
         }
@@ -130,7 +154,7 @@ class CompletionFeature {
         }
     }
 
-    static function parseFieldCompletion(x:Xml, textBefore:String, position:Position):Array<CompletionItem> {
+    function parseFieldCompletion(x:Xml, textBefore:String, position:Position):Array<CompletionItem> {
         var result = [];
         var timers = [];
         var methods = new Map<String, {item:CompletionItem, overloads:Int}>();
@@ -165,12 +189,7 @@ class CompletionFeature {
                 continue;
             }
             var item:CompletionItem = {label: name};
-            if (doc != null) {
-                item.documentation = {
-                    kind: MarkupKind.MarkDown,
-                    value: DocHelper.markdownFormat(doc)
-                };
-            }
+            if (doc != null) item.documentation = formatDocumentation(doc);
             if (kind != null) item.kind = kind;
             if (type != null) item.detail = formatType(type, name, kind);
             if (textEdit != null) item.textEdit = textEdit;
