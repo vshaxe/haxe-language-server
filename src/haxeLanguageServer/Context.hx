@@ -66,7 +66,7 @@ class Context {
             enableDiagnostics: true,
             diagnosticsPathFilter: "${workspaceRoot}",
             enableCodeLens: false,
-            displayPort: "auto",
+            displayPort: null,
             buildCompletionCache: true,
             codeGeneration: {},
             format: {}
