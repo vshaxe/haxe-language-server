@@ -8,16 +8,20 @@ import haxeLanguageServer.VshaxeMethods;
 import js.node.ChildProcess;
 
 class DiagnosticsManager {
+    static inline var DiagnosticsSource = "diagnostics";
+
     var context:Context;
     var diagnosticsArguments:Map<DocumentUri,DiagnosticsMap<Any>>;
     var haxelibPath:FsPath;
+    var errorUri:DocumentUri;
 
     public function new(context:Context) {
         this.context = context;
         context.registerCodeActionContributor(getCodeActions);
         diagnosticsArguments = new Map();
+        errorUri = new FsPath(Path.join([context.workspacePath.toString(), "Error"])).toUri();
         context.protocol.onNotification(VshaxeMethods.RunGlobalDiagnostics, onRunGlobalDiagnostics);
-        ChildProcess.exec("haxelib config", function(error, stdout, stderr) haxelibPath = new FsPath(stdout.trim()));
+        ChildProcess.exec("haxelib config", (error, stdout, stderr) -> haxelibPath = new FsPath(stdout.trim()));
     }
 
     function onRunGlobalDiagnostics(_) {
@@ -33,8 +37,10 @@ class DiagnosticsManager {
     }
 
     function processErrorReply(uri:Null<DocumentUri>, error:String) {
-        if (!extractDiagnosticsFromHaxeError(uri, error))
+        if (!extractDiagnosticsFromHaxeError(uri, error) && !extractDiagnosticsFromHaxeError2(error)) {
             clearDiagnostics(uri);
+            clearDiagnostics(errorUri);
+        }
         context.sendLogMessage(Log, error);
     }
 
@@ -73,19 +79,40 @@ class DiagnosticsManager {
         var position = makePosition(line, column);
         var endPosition = makePosition(endLine, endColumn);
 
-        var argumentsMap = diagnosticsArguments[uri] = new DiagnosticsMap();
         var diag = {
             range: {start: position, end: endPosition},
-            source: "diagnostics",
+            source: DiagnosticsSource,
             severity: DiagnosticSeverity.Error,
             message: problemMatcher.matched(7)
         };
-        context.protocol.sendNotification(Methods.PublishDiagnostics, {uri: uri, diagnostics: [diag]});
-        argumentsMap.set({code: DKCompilerError, range: diag.range}, error);
+        publishDiagnostic(uri, diag, error);
         return true;
     }
 
+    function extractDiagnosticsFromHaxeError2(error:String):Bool {
+        var problemMatcher = ~/^(Error): (.*)$/;
+        if (!problemMatcher.match(error)) {
+            return false;
+        }
+
+        var diag = {
+            range: {start: {line: 0, character: 0}, end: {line: 0, character: 0}},
+            source: DiagnosticsSource,
+            severity: DiagnosticSeverity.Error,
+            message: problemMatcher.matched(2)
+        };
+        publishDiagnostic(errorUri, diag, error);
+        return true;
+    }
+
+    function publishDiagnostic(uri:DocumentUri, diag:Diagnostic, error:String) {
+        context.protocol.sendNotification(Methods.PublishDiagnostics, {uri: uri, diagnostics: [diag]});
+        var argumentsMap = diagnosticsArguments[uri] = new DiagnosticsMap();
+        argumentsMap.set({code: DKCompilerError, range: diag.range}, error);
+    }
+
     function processDiagnosticsReply(uri:Null<DocumentUri>, r:DisplayResult) {
+        clearDiagnostics(errorUri);
         switch (r) {
             case DCancelled:
                 // nothing to do \o/
@@ -112,7 +139,7 @@ class DiagnosticsManager {
                         var diag:Diagnostic = {
                             // range: doc.byteRangeToRange(hxDiag.range),
                             range: hxDiag.range,
-                            source: "diagnostics",
+                            source: DiagnosticsSource,
                             code: (hxDiag.kind : Int),
                             severity: hxDiag.severity,
                             message: hxDiag.kind.getMessage(hxDiag.args)
