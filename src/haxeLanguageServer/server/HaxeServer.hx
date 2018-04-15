@@ -175,7 +175,7 @@ class HaxeServer {
         });
         socketListener.listen(port, "localhost");
         context.sendLogMessage(Log, 'Listening on port $port');
-        context.protocol.sendNotification(VshaxeMethods.DidChangeDisplayPort, {port: port});
+        context.protocol.sendNotification(HaxeMethods.DidChangeDisplayPort, {port: port});
     }
 
     public function stop() {

@@ -78,9 +78,9 @@ class Context {
         protocol.onNotification(Methods.DidOpenTextDocument, onDidOpenTextDocument);
         protocol.onNotification(Methods.DidSaveTextDocument, onDidSaveTextDocument);
         protocol.onNotification(Methods.DidChangeWatchedFiles, onDidChangeWatchedFiles);
-        protocol.onNotification(VshaxeMethods.DidChangeDisplayArguments, onDidChangeDisplayArguments);
-        protocol.onNotification(VshaxeMethods.DidChangeDisplayServerConfig, onDidChangeDisplayServerConfig);
-        protocol.onNotification(VshaxeMethods.DidChangeActiveTextEditor, onDidChangeActiveTextEditor);
+        protocol.onNotification(HaxeMethods.DidChangeDisplayArguments, onDidChangeDisplayArguments);
+        protocol.onNotification(HaxeMethods.DidChangeDisplayServerConfig, onDidChangeDisplayServerConfig);
+        protocol.onNotification(HaxeMethods.DidChangeActiveTextEditor, onDidChangeActiveTextEditor);
     }
 
     inline function isInitialized():Bool {
@@ -89,9 +89,9 @@ class Context {
 
     public function startProgress(title:String):Void->Void {
         var id = progressId++;
-        protocol.sendNotification(VshaxeMethods.ProgressStart, {id: id, title: 'Haxe: $title...'});
+        protocol.sendNotification(HaxeMethods.ProgressStart, {id: id, title: 'Haxe: $title...'});
         return function() {
-            protocol.sendNotification(VshaxeMethods.ProgressStop, {id: id});
+            protocol.sendNotification(HaxeMethods.ProgressStop, {id: id});
         };
     }
 
