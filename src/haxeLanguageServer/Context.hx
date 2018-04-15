@@ -83,6 +83,10 @@ class Context {
         protocol.onNotification(VshaxeMethods.DidChangeActiveTextEditor, onDidChangeActiveTextEditor);
     }
 
+    inline function isInitialized():Bool {
+        return config != null;
+    }
+
     public function startProgress(title:String):Void->Void {
         var id = progressId++;
         protocol.sendNotification(VshaxeMethods.ProgressStart, {id: id, title: 'Haxe: $title...'});
@@ -158,7 +162,7 @@ class Context {
     }
 
     function onDidChangeConfiguration(newConfig:DidChangeConfigurationParams) {
-        var firstInit = (config == null);
+        var initialized = isInitialized();
         var newHaxeConfig = newConfig.settings.haxe;
         if (newHaxeConfig == null) {
             newHaxeConfig = {};
@@ -166,7 +170,7 @@ class Context {
 
         var newConfigJson = Json.stringify(newHaxeConfig);
         var configUnchanged = Json.stringify(unmodifiedConfig) == newConfigJson;
-        if (!firstInit && configUnchanged) {
+        if (initialized && configUnchanged) {
             return;
         }
         unmodifiedConfig = Json.parse(newConfigJson);
@@ -174,7 +178,7 @@ class Context {
         processSettings(newHaxeConfig);
         updateCodeGenerationConfig();
 
-        if (firstInit) {
+        if (!initialized) {
             haxeServer.start(function() {
                 onServerStarted();
 
@@ -247,6 +251,9 @@ class Context {
     }
 
     function restartServer(reason:String) {
+        if (!isInitialized()) {
+            return;
+        }
         haxeServer.restart(reason, function() {
             onServerStarted();
             if (activeEditor != null) {
