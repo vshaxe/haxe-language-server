@@ -30,7 +30,8 @@ class ArgumentNameHelperTest extends TestCaseBase {
         assert("unknown", "<Int,String>");
         assert("struct", "{}");
         assert("struct", "{ i : Int }");
-        assert("a", "method.T");
+        assert("t", "method.T");
+        assert("event", "foo.bar.SomeEvent");
     }
 
     function testAddNamesToSignatureType() {

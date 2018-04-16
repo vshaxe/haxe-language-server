@@ -20,9 +20,8 @@ class ArgumentNameHelper {
             case "String": "s";
             case "Dynamic": "d";
             case type if (type.startsWith("{")): "struct";
-            case type if (type.indexOf(".") != -1): "a";
             case type:
-                var segments = ~/(?=[A-Z][^A-Z]+$)/.split(type);
+                var segments = ~/(?=[A-Z][^A-Z]*$)/.split(type);
                 var result = segments[segments.length - 1];
                 result.substring(0, 1).toLowerCase() + result.substr(1);
         }
