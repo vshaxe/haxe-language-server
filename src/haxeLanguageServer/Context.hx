@@ -3,6 +3,7 @@ package haxeLanguageServer;
 import haxe.Timer;
 import haxe.Json;
 import haxe.extern.EitherType;
+import js.Node.process;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types;
@@ -74,6 +75,7 @@ class Context {
 
         protocol.onRequest(Methods.Initialize, onInitialize);
         protocol.onRequest(Methods.Shutdown, onShutdown);
+        protocol.onNotification(Methods.Exit, onExit);
         protocol.onNotification(Methods.DidChangeConfiguration, onDidChangeConfiguration);
         protocol.onNotification(Methods.DidOpenTextDocument, onDidOpenTextDocument);
         protocol.onNotification(Methods.DidSaveTextDocument, onDidSaveTextDocument);
@@ -159,6 +161,16 @@ class Context {
         haxeServer.stop();
         haxeServer = null;
         return resolve(null);
+    }
+
+    function onExit(_) {
+        if (haxeServer != null) {
+            haxeServer.stop();
+            haxeServer = null;
+            process.exit(1);
+        } else {
+            process.exit(0);
+        }
     }
 
     function onDidChangeConfiguration(newConfig:DidChangeConfigurationParams) {
