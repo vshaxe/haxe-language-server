@@ -208,7 +208,8 @@ class HaxeServer {
         context.sendLogMessage(Log, 'Haxe server restart requested: $reason');
         start(function() {
             context.sendLogMessage(Log, 'Restarted Haxe server: $reason');
-            callback();
+            if (callback != null)
+                callback();
         });
     }
 
