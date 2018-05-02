@@ -35,7 +35,6 @@
                     "formatter/src"
                 ],
                 "defines": [
-                    "hxnodejs-no-version-warning",
                     "JSTACK_FORMAT=vscode"
                 ],
                 "output": {
@@ -55,9 +54,6 @@
                     "test",
                     "protocol/src",
                     "formatter/src"
-                ],
-                "defines": [
-                    "hxnodejs-no-version-warning"
                 ],
                 "output": {
                     "target": "js",
