@@ -162,7 +162,6 @@ class CompletionFeature {
                 // only show fully qualified paths for unimported types
                 item.label = unqalifiedName;
             }
-            item.filterText = unqalifiedName;
 
             result.push(item);
         }
