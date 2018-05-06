@@ -139,16 +139,11 @@ class CompletionFeature {
                 item.documentation = formatDocumentation(doc);
 
             var imp = el.get("import");
-            if (imp != null) {
-                var split = imp.split(".");
-                var insert = if (split.pop() == name) {
-                    imp;
-                } else {
-                    imp + "." + name;
-                }
-                item.textEdit = {
-                    range: { start: position, end: position },
-                    newText: insert
+            if (imp == null) {
+                // only show fully qualified paths for unimported types
+                var dotIndex = item.label.lastIndexOf(".");
+                if (dotIndex != -1) {
+                    item.label = item.label.substr(dotIndex);
                 }
             }
             result.push(item);
