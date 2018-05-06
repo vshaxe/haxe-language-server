@@ -4,6 +4,7 @@ import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
 import haxeLanguageServer.helper.DocHelper;
+import haxeLanguageServer.helper.ImportHelper;
 import haxeLanguageServer.helper.TypeHelper.prepareSignature;
 import haxeLanguageServer.helper.TypeHelper.parseDisplayType;
 import haxe.extern.EitherType;
@@ -58,7 +59,7 @@ class CompletionFeature {
                     var xml = try Xml.parse(data).firstElement() catch (_:Any) null;
                     if (xml == null) return reject(ResponseError.internalError("Invalid xml data: " + data));
 
-                    var items = if (r.toplevel) parseToplevelCompletion(xml, params.position) else parseFieldCompletion(xml, textBefore, params.position);
+                    var items = if (r.toplevel) parseToplevelCompletion(xml, params.position, doc) else parseFieldCompletion(xml, textBefore, params.position);
                     resolve(items);
             }
         }, function(error) reject(ResponseError.internalError(error)));
@@ -100,7 +101,7 @@ class CompletionFeature {
         return DocHelper.extractText(doc);
     }
 
-    function parseToplevelCompletion(x:Xml, position:Position):Array<CompletionItem> {
+    function parseToplevelCompletion(x:Xml, position:Position, doc:TextDocument):Array<CompletionItem> {
         var result = [];
         var timers = [];
         for (el in x.elements()) {
@@ -134,18 +135,35 @@ class CompletionFeature {
                 item.detail = parts.join(" ");
             }
 
-            var doc = el.get("d");
-            if (doc != null)
-                item.documentation = formatDocumentation(doc);
+            var documentation = el.get("d");
+            if (documentation != null)
+                item.documentation = formatDocumentation(documentation);
+
+            var unqalifiedName = item.label;
+            var dotIndex = item.label.lastIndexOf(".");
+            if (dotIndex != -1) {
+                unqalifiedName = item.label.substr(dotIndex + 1);
+            }
 
             var imp = el.get("import");
-            if (imp == null) {
+            if (imp != null) {
+                var importPos = ImportHelper.getImportInsertPosition(doc);
+                item.additionalTextEdits = [
+                    {
+                        range: {start: importPos, end: importPos},
+                        newText: 'import ${item.label};\n'
+                    }
+                ];
+                item.textEdit = {
+                    range: {start: position, end: position},
+                    newText: unqalifiedName
+                };
+            } else {
                 // only show fully qualified paths for unimported types
-                var dotIndex = item.label.lastIndexOf(".");
-                if (dotIndex != -1) {
-                    item.label = item.label.substr(dotIndex);
-                }
+                item.label = unqalifiedName;
             }
+            item.filterText = unqalifiedName;
+
             result.push(item);
         }
         sortTimers(timers);
