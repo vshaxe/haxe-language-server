@@ -138,6 +138,19 @@ class CompletionFeature {
             if (doc != null)
                 item.documentation = formatDocumentation(doc);
 
+            var imp = el.get("import");
+            if (imp != null) {
+                var split = imp.split(".");
+                var insert = if (split.pop() == name) {
+                    imp;
+                } else {
+                    imp + "." + name;
+                }
+                item.textEdit = {
+                    range: { start: position, end: position },
+                    newText: insert
+                }
+            }
             result.push(item);
         }
         sortTimers(timers);

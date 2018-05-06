@@ -96,7 +96,12 @@ class HaxeServer {
         if (context.config.buildCompletionCache && context.displayArguments != null) {
             stopProgressCallback = context.startProgress("Initializing Completion");
             trace("Initializing completion cache...");
-            process(context.displayArguments.concat(["--no-output"]), null, true, null, Processed(function(_) {
+            context.displayArguments.push("--no-output");
+            // if (version >= new SemVer(4, 0, 0)) {
+            //     context.displayArguments.push("--display");
+            //     context.displayArguments.push("update-cache");
+            // }
+            process(context.displayArguments, null, true, null, Processed(function(_) {
                 stopProgress();
                 trace("Done.");
             }, function(errorMessage) {
