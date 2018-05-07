@@ -20,7 +20,7 @@ class ImportHelperTest extends TestCaseBase {
             }
 
             var doc = new TextDocument(new DocumentUri("file://dummy"), "", 0, file.replace("|", ""));
-            var importPos = ImportHelper.getImportInsertPosition(doc);
+            var importPos = ImportHelper.createImport(doc, "").range.start;
             assertEquals(0, importPos.character, pos);
             assertEquals(line, importPos.line, pos);
         }

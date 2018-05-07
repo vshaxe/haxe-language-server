@@ -263,11 +263,9 @@ class DiagnosticsManager {
 
     function getUnresolvedImportActions(params:CodeActionParams, d:Diagnostic, arg):Array<Command> {
         var doc = context.documents.get(params.textDocument.uri);
-        var importPos = ImportHelper.getImportInsertPosition(doc);
-        var importRange = { start: importPos, end: importPos };
         return [
             new ApplyFixesCommand("Import " + arg.name, params,
-                [{range: importRange, newText: 'import ${arg.name};\n'}]
+                [ImportHelper.createImport(doc, arg.name)]
             ),
             new ApplyFixesCommand("Change to " + arg.name, params,
                 [{range: d.range, newText: arg.name}]

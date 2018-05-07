@@ -164,13 +164,8 @@ class CompletionFeature {
                     item.label = unqalifiedName;
                     item.detail += " (imported)";
                 } else if (autoImport) {
-                    var importPos = ImportHelper.getImportInsertPosition(doc);
-                    item.additionalTextEdits = [
-                        {
-                            range: {start: importPos, end: importPos},
-                            newText: 'import ${if (importConfig.style == Module) module else qualifiedName};\n'
-                        }
-                    ];
+                    var type = if (importConfig.style == Module) module else qualifiedName;
+                    item.additionalTextEdits = [ImportHelper.createImport(doc, type)];
                     item.detail = "Auto-import from " + containerName;
                 }
             }

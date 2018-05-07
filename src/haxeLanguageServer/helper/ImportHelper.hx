@@ -4,23 +4,37 @@ import haxeLanguageServer.TextDocument;
 
 class ImportHelper {
     static var rePackageDecl = ~/package\s*( [\w\.]*)?\s*;/;
+    static var reTypeDecl = ~/^\s*(class|interface|enum|abstract|typedef)/;
 
     /**
-        Gets the first non-empty line (excluding the package declaration if present),
+        Creates an import on the first non-empty line (excluding the package declaration if present),
         which is where we want to insert imports.
     **/
-    public static function getImportInsertPosition(doc:TextDocument):Position {
+    public static function createImport(doc:TextDocument, type:String):TextEdit {
         var importLine = skipComment(doc);
         for (i in importLine...doc.lineCount) {
             var line = doc.lineAt(i);
             var isPackageDecl = rePackageDecl.match(line);
             var isNotEmpty = line.trim().length > 0;
+            trace(isPackageDecl, isNotEmpty);
             if (!isPackageDecl && isNotEmpty) {
                 importLine = i;
                 break;
             }
         }
-        return { line: importLine, character: 0 };
+
+        var importData = {
+            range: {line: importLine, character: 0}.toRange(),
+            newText: 'import $type;\n'
+        };
+
+        var nextLine = doc.lineAt(importLine);
+        var followedByTypeDecl = nextLine != null && reTypeDecl.match(nextLine);
+        if (followedByTypeDecl) {
+            importData.newText += "\n";
+        }
+
+        return importData;
     }
 
     /**
