@@ -12,16 +12,12 @@ import haxeLanguageServer.features.*;
 import haxeLanguageServer.features.CodeActionFeature.CodeActionContributor;
 import haxeLanguageServer.helper.SemVer;
 import haxeLanguageServer.helper.TypeHelper.FunctionFormattingConfig;
+import haxeLanguageServer.helper.ImportHelper;
 import haxeLanguageServer.server.DisplayResult;
 import haxeLanguageServer.server.HaxeServer;
 
 private typedef FunctionGenerationConfig = {
     @:optional var anonymous:FunctionFormattingConfig;
-}
-
-@:enum private abstract ImportStyle(String) {
-    var Module = "module";
-    var Type = "type";
 }
 
 private typedef ImportGenerationConfig = {

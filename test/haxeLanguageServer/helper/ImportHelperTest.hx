@@ -4,7 +4,7 @@ import haxeLanguageServer.TextDocument;
 import haxe.PosInfos;
 
 class ImportHelperTest extends TestCaseBase {
-    public function testGetImportInsertPosition() {
+    function testGetImportInsertPosition() {
         function test(file:TestFile, ?pos:PosInfos) {
             var line = -1;
             var lines = (file : String).split("\n");
@@ -20,7 +20,7 @@ class ImportHelperTest extends TestCaseBase {
             }
 
             var doc = new TextDocument(new DocumentUri("file://dummy"), "", 0, file.replace("|", ""));
-            var importPos = ImportHelper.createImport(doc, "").range.start;
+            var importPos = ImportHelper.getImportPosition(doc);
             assertEquals(0, importPos.character, pos);
             assertEquals(line, importPos.line, pos);
         }

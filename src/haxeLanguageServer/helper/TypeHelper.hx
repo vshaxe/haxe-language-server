@@ -20,6 +20,7 @@ class TypeHelper {
     static var monomorphRegex = ~/^Unknown<\d+>$/;
     static var nullRegex = ~/^Null<(\$\d+)>$/;
     static var packagePathsRegex = ~/((?:_*[a-z]\w*\.)*)(?=_*[A-Z])/g;
+    static var subtypePackageRegex = ~/\b[A-Z]\w*\.[A-Z]/;
 
     static function getCloseChar(c:String):String {
         return switch (c) {
@@ -112,6 +113,13 @@ class TypeHelper {
 
     public static inline function getTypeWithoutPackage(type:String):String {
         return packagePathsRegex.replace(type, "");
+    }
+
+    public static function getModule(packagePath:String):String {
+        if (subtypePackageRegex.match(packagePath)) {
+            return packagePath.untilLastDot();
+        }
+        return packagePath;
     }
 
     public static function parseDisplayType(type:String):DisplayType {

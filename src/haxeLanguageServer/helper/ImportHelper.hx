@@ -2,11 +2,19 @@ package haxeLanguageServer.helper;
 
 import haxeLanguageServer.TextDocument;
 
+@:enum abstract ImportStyle(String) {
+    var Module = "module";
+    var Type = "type";
+}
+
 class ImportHelper {
     static var rePackageDecl = ~/package\s*( [\w\.]*)?\s*;/;
     static var reTypeDecl = ~/^\s*(class|interface|enum|abstract|typedef)/;
 
-    public static function createImportEdit(doc:TextDocument, position:Position, path:String):TextEdit {
+    public static function createImportEdit(doc:TextDocument, position:Position, path:String, style:ImportStyle):TextEdit {
+        if (style == Module) {
+            path = TypeHelper.getModule(path);
+        }
         var importData = {
             range: position.toRange(),
             newText: 'import $path;\n'

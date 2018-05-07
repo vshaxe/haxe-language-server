@@ -81,4 +81,12 @@ class TypeHelperTest extends TestCaseBase {
                 fail();
         }
     }
+
+    function testGetModule() {
+        assertEquals("Module", getModule("Module"));
+        assertEquals("Module", getModule("Module.Type"));
+
+        assertEquals("foo.bar.Module", getModule("foo.bar.Module"));
+        assertEquals("foo.bar.Module", getModule("foo.bar.Module.Type"));
+    }
 }
