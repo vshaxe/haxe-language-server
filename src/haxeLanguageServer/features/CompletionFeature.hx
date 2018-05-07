@@ -103,6 +103,7 @@ class CompletionFeature {
 
     static var reWord = ~/\b(\w*)$/;
     function parseToplevelCompletion(x:Xml, position:Position, textBefore:String, doc:TextDocument):Array<CompletionItem> {
+        var importPosition = ImportHelper.getImportPosition(doc);
         var wordLength = 0;
         if (reWord.match(textBefore)) {
             wordLength = reWord.matched(1).length;
@@ -165,7 +166,7 @@ class CompletionFeature {
                     item.detail += " (imported)";
                 } else if (autoImport) {
                     var type = if (importConfig.style == Module) module else qualifiedName;
-                    item.additionalTextEdits = [ImportHelper.createImport(doc, type)];
+                    item.additionalTextEdits = [ImportHelper.createImportEdit(doc, importPosition, type)];
                     item.detail = "Auto-import from " + containerName;
                 }
             }

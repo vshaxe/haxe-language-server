@@ -265,7 +265,7 @@ class DiagnosticsManager {
         var doc = context.documents.get(params.textDocument.uri);
         return [
             new ApplyFixesCommand("Import " + arg.name, params,
-                [ImportHelper.createImport(doc, arg.name)]
+                [ImportHelper.createImportEdit(doc, ImportHelper.getImportPosition(doc), arg.name)]
             ),
             new ApplyFixesCommand("Change to " + arg.name, params,
                 [{range: d.range, newText: arg.name}]

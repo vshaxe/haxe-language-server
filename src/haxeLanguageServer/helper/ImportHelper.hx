@@ -6,35 +6,37 @@ class ImportHelper {
     static var rePackageDecl = ~/package\s*( [\w\.]*)?\s*;/;
     static var reTypeDecl = ~/^\s*(class|interface|enum|abstract|typedef)/;
 
-    /**
-        Creates an import on the first non-empty line (excluding the package declaration if present),
-        which is where we want to insert imports.
-    **/
-    public static function createImport(doc:TextDocument, type:String):TextEdit {
-        var importLine = skipComment(doc);
-        for (i in importLine...doc.lineCount) {
-            var line = doc.lineAt(i);
-            var isPackageDecl = rePackageDecl.match(line);
-            var isNotEmpty = line.trim().length > 0;
-            trace(isPackageDecl, isNotEmpty);
-            if (!isPackageDecl && isNotEmpty) {
-                importLine = i;
-                break;
-            }
-        }
-
+    public static function createImportEdit(doc:TextDocument, position:Position, path:String):TextEdit {
         var importData = {
-            range: {line: importLine, character: 0}.toRange(),
-            newText: 'import $type;\n'
+            range: position.toRange(),
+            newText: 'import $path;\n'
         };
 
-        var nextLine = doc.lineAt(importLine);
+        var nextLine = doc.lineAt(position.line);
         var followedByTypeDecl = nextLine != null && reTypeDecl.match(nextLine);
         if (followedByTypeDecl) {
             importData.newText += "\n";
         }
 
         return importData;
+    }
+
+    /**
+        Finds the the first non-empty line (excluding the package declaration if present),
+        which is where we want to insert imports.
+    **/
+    public static function getImportPosition(doc:TextDocument):Position {
+        var importLine = skipComment(doc);
+        for (i in importLine...doc.lineCount) {
+            var line = doc.lineAt(i);
+            var isPackageDecl = rePackageDecl.match(line);
+            var isNotEmpty = line.trim().length > 0;
+            if (!isPackageDecl && isNotEmpty) {
+                importLine = i;
+                break;
+            }
+        }
+        return {line: importLine, character: 0};
     }
 
     /**
