@@ -134,8 +134,6 @@ class CompletionFeature {
 
             if (type != null || fullName != name) {
                 var parts = [];
-                if (fullName != name)
-                    parts.push(fullName);
                 if (type != null)
                     parts.push(type); // todo format functions?
                 item.detail = parts.join(" ");
@@ -150,16 +148,18 @@ class CompletionFeature {
                 var unqalifiedName = qualifiedName.afterLastDot(); // Foo | SubType
                 var containerName = qualifiedName.untilLastDot(); // pack | pack.Foo
 
-                var imported = el.get("import") == null;
-                item.label = unqalifiedName;
+                var autoImport = context.config.codeGeneration.imports.enableAutoImports;
+                item.label = qualifiedName;
                 item.textEdit = {
                     range: {start: position.translate(0, -wordLength), end: position},
-                    newText: unqalifiedName
+                    newText: if (autoImport) unqalifiedName else qualifiedName
                 };
 
+                var imported = el.get("import") == null;
                 if (imported) {
+                    item.label = unqalifiedName;
                     item.detail += " (imported)";
-                } else {
+                } else if (autoImport) {
                     var importPos = ImportHelper.getImportInsertPosition(doc);
                     item.additionalTextEdits = [
                         {
@@ -167,7 +167,6 @@ class CompletionFeature {
                             newText: 'import $qualifiedName;\n'
                         }
                     ];
-                    item.label = qualifiedName;
                     item.detail = "Auto-import from " + containerName;
                 }
             }
