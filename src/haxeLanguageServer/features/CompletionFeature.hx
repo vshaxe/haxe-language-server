@@ -59,7 +59,7 @@ class CompletionFeature {
                     var xml = try Xml.parse(data).firstElement() catch (_:Any) null;
                     if (xml == null) return reject(ResponseError.internalError("Invalid xml data: " + data));
 
-                    var items = if (r.toplevel) parseToplevelCompletion(xml, params.position, doc) else parseFieldCompletion(xml, textBefore, params.position);
+                    var items = if (r.toplevel) parseToplevelCompletion(xml, params.position, textBefore, doc) else parseFieldCompletion(xml, textBefore, params.position);
                     resolve(items);
             }
         }, function(error) reject(ResponseError.internalError(error)));
@@ -101,7 +101,13 @@ class CompletionFeature {
         return DocHelper.extractText(doc);
     }
 
-    function parseToplevelCompletion(x:Xml, position:Position, doc:TextDocument):Array<CompletionItem> {
+    static var reWord = ~/\b(\w*)$/;
+    function parseToplevelCompletion(x:Xml, position:Position, textBefore:String, doc:TextDocument):Array<CompletionItem> {
+        var wordLength = 0;
+        if (reWord.match(textBefore)) {
+            wordLength = reWord.matched(1).length;
+        }
+
         var result = [];
         var timers = [];
         for (el in x.elements()) {
@@ -140,24 +146,14 @@ class CompletionFeature {
                 item.documentation = formatDocumentation(documentation);
 
             if (kind == "type") {
-                inline function untilLastDot(s:String) {
-                    var dotIndex = s.lastIndexOf(".");
-                    if (dotIndex == -1) return s;
-                    return s.substring(0, dotIndex);
-                }
-                inline function afterLastDot(s:String) {
-                    var dotIndex = s.lastIndexOf(".");
-                    if (dotIndex == -1) return s;
-                    return s.substr(dotIndex + 1);
-                }
                 var qualifiedName = name; // pack.Foo | pack.Foo.SubType
-                var unqalifiedName = afterLastDot(qualifiedName); // Foo | SubType
-                var containerName = untilLastDot(qualifiedName); // pack | pack.Foo
+                var unqalifiedName = qualifiedName.afterLastDot(); // Foo | SubType
+                var containerName = qualifiedName.untilLastDot(); // pack | pack.Foo
 
                 var imported = el.get("import") == null;
                 item.label = unqalifiedName;
                 item.textEdit = {
-                    range: {start: position, end: position},
+                    range: {start: position.translate(0, -wordLength), end: position},
                     newText: unqalifiedName
                 };
 
