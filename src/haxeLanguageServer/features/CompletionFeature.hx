@@ -109,7 +109,7 @@ class CompletionFeature {
             var type = el.get("t");
             var name = el.firstChild().nodeValue;
 
-            var item:CompletionItem = {label: name};
+            var item:CompletionItem = {label: name, detail: ""};
 
             var displayKind = toplevelKindToCompletionItemKind(kind, type);
             if (displayKind != null) item.kind = displayKind;
@@ -129,7 +129,7 @@ class CompletionFeature {
             if (type != null || fullName != name) {
                 var parts = [];
                 if (fullName != name)
-                    parts.push('($fullName)');
+                    parts.push(fullName);
                 if (type != null)
                     parts.push(type); // todo format functions?
                 item.detail = parts.join(" ");
@@ -139,28 +139,40 @@ class CompletionFeature {
             if (documentation != null)
                 item.documentation = formatDocumentation(documentation);
 
-            var unqalifiedName = item.label;
-            var dotIndex = item.label.lastIndexOf(".");
-            if (dotIndex != -1) {
-                unqalifiedName = item.label.substr(dotIndex + 1);
-            }
+            if (kind == "type") {
+                inline function untilLastDot(s:String) {
+                    var dotIndex = s.lastIndexOf(".");
+                    if (dotIndex == -1) return s;
+                    return s.substring(0, dotIndex);
+                }
+                inline function afterLastDot(s:String) {
+                    var dotIndex = s.lastIndexOf(".");
+                    if (dotIndex == -1) return s;
+                    return s.substr(dotIndex + 1);
+                }
+                var qualifiedName = name; // pack.Foo | pack.Foo.SubType
+                var unqalifiedName = afterLastDot(qualifiedName); // Foo | SubType
+                var containerName = untilLastDot(qualifiedName); // pack | pack.Foo
 
-            var imp = el.get("import");
-            if (imp != null) {
-                var importPos = ImportHelper.getImportInsertPosition(doc);
-                item.additionalTextEdits = [
-                    {
-                        range: {start: importPos, end: importPos},
-                        newText: 'import ${item.label};\n'
-                    }
-                ];
+                var imported = el.get("import") == null;
+                item.label = unqalifiedName;
                 item.textEdit = {
                     range: {start: position, end: position},
                     newText: unqalifiedName
                 };
-            } else {
-                // only show fully qualified paths for unimported types
-                item.label = unqalifiedName;
+
+                if (imported) {
+                    item.detail += " (imported)";
+                } else {
+                    var importPos = ImportHelper.getImportInsertPosition(doc);
+                    item.additionalTextEdits = [
+                        {
+                            range: {start: importPos, end: importPos},
+                            newText: 'import $qualifiedName;\n'
+                        }
+                    ];
+                    item.detail = "Auto-import from " + containerName;
+                }
             }
 
             result.push(item);
