@@ -167,6 +167,7 @@ class CompletionFeature {
                             newText: 'import $qualifiedName;\n'
                         }
                     ];
+                    item.label = qualifiedName;
                     item.detail = "Auto-import from " + containerName;
                 }
             }
