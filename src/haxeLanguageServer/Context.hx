@@ -19,8 +19,14 @@ private typedef FunctionGenerationConfig = {
     @:optional var anonymous:FunctionFormattingConfig;
 }
 
+@:enum private abstract ImportStyle(String) {
+    var Module = "module";
+    var Type = "type";
+}
+
 private typedef ImportGenerationConfig = {
     var enableAutoImports:Bool;
+    var style:ImportStyle;
 }
 
 private typedef CodeGenerationConfig = {
@@ -259,7 +265,13 @@ class Context {
             functions.anonymous = {argumentTypeHints: false, returnTypeHint: Never, useArrowSyntax: true, prefixPackages: true};
 
         if (codeGen.imports == null)
-            codeGen.imports = {enableAutoImports: true};
+            codeGen.imports = {enableAutoImports: true, style: Type};
+
+        var imports = codeGen.imports;
+        if (imports.enableAutoImports == null)
+            imports.enableAutoImports = true;
+        if (imports.style == null)
+            imports.style = Type;
     }
 
     function onServerStarted() {

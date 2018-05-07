@@ -150,14 +150,16 @@ class CompletionFeature {
                 var unqalifiedName = qualifiedName.afterLastDot(); // Foo | SubType
                 var containerName = qualifiedName.untilLastDot(); // pack | pack.Foo
 
-                var autoImport = context.config.codeGeneration.imports.enableAutoImports;
+                var importConfig = context.config.codeGeneration.imports;
+                var autoImport = importConfig.enableAutoImports;
                 item.label = qualifiedName;
                 item.textEdit = {
                     range: {start: position.translate(0, -wordLength), end: position},
                     newText: if (autoImport) unqalifiedName else qualifiedName
                 };
 
-                var imported = el.get("import") == null;
+                var module = el.get("import");
+                var imported = module == null;
                 if (imported) {
                     item.label = unqalifiedName;
                     item.detail += " (imported)";
@@ -166,7 +168,7 @@ class CompletionFeature {
                     item.additionalTextEdits = [
                         {
                             range: {start: importPos, end: importPos},
-                            newText: 'import $qualifiedName;\n'
+                            newText: 'import ${if (importConfig.style == Module) module else qualifiedName};\n'
                         }
                     ];
                     item.detail = "Auto-import from " + containerName;
