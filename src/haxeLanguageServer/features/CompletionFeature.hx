@@ -134,6 +134,8 @@ class CompletionFeature {
 
             if (type != null || fullName != name) {
                 var parts = [];
+                if (fullName != name)
+                    parts.push(fullName);
                 if (type != null)
                     parts.push(type); // todo format functions?
                 item.detail = parts.join(" ");
