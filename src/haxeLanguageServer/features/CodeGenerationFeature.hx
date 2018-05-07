@@ -16,7 +16,7 @@ class CodeGenerationFeature {
         this.context = context;
         context.registerCodeActionContributor(generateAnonymousFunction);
         context.registerCodeActionContributor(generateCaptureVariables);
-        #if debug
+        #if false
         context.registerCodeActionContributor(extractVariable);
         #end
     }
