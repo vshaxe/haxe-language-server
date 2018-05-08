@@ -220,7 +220,7 @@ class HaxeServer {
 
     function onExit(_, _) {
         crashes++;
-        if (crashes < 3) {
+        if (crashes <3) {
             restart("Haxe process was killed");
             return;
         }
