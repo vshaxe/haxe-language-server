@@ -2,14 +2,17 @@ package haxeLanguageServer.server;
 
 import jsonrpc.Types;
 
+// TODO: use URIs instead of fs paths?
+
 /**
     Methods of the JSON-RPC-based `--display` protocol in Haxe 4.
 **/
-class Protocol {
+@:publicFields
+class Methods {
     /**
         The goto definition request is sent from the client to Haxe to resolve the definition location(s) of a symbol at a given text document position.
     **/
-    static inline var GotoDefinition = new RequestMethod<PositionParams,Array<Location>,NoData,NoData>("definition");
+    static inline var GotoDefinition = new HaxeRequestMethod<PositionParams,Array<Location>>("definition"); // TODO: scope this.. "textDocument/definition" like vscode?
 }
 
 typedef PositionParams = {
@@ -25,3 +28,6 @@ typedef Location = {
     var file:FsPath;
     var range:Range;
 }
+
+typedef HaxeRequestMethod<TParams,TResponse> = RequestMethod<TParams,TResponse,NoData,NoData>;
+typedef HaxeNotificationMethod<TParams> = NotificationMethod<TParams,NoData>;
