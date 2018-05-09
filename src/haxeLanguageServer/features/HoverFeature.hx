@@ -18,7 +18,8 @@ class HoverFeature {
     function onHover(params:TextDocumentPositionParams, token:CancellationToken, resolve:Hover->Void, reject:ResponseError<NoData>->Void) {
         var doc = context.documents.get(params.textDocument.uri);
         var bytePos = context.displayOffsetConverter.characterOffsetToByteOffset(doc.content, doc.offsetAt(params.position));
-        if (context.haxeServer.supportsJsonRpc && context.haxeServer.capabilities.hoverProvider) {
+        var useJsonRpc = context.haxeServer.capabilities.hoverProvider;
+        if (useJsonRpc) {
             var args = [context.haxeServer.createRequest(HaxeMethods.Hover, {file: doc.fsPath, offset: bytePos})];
             context.callDisplay(args, doc.content, token, function(result) {
                 var hover:HoverResult = switch (result) {

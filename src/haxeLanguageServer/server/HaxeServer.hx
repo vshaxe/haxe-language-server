@@ -33,8 +33,7 @@ class HaxeServer {
     var nextRequestId:Int = 0;
 
     public var version(default,null):SemVer;
-    public var supportsJsonRpc(default,null):Bool = true; // TODO: don't lie
-    public var capabilities:HaxeCapabilities;
+    public var capabilities(default,null):HaxeCapabilities;
 
     public function new(context:Context) {
         this.context = context;
@@ -96,40 +95,25 @@ class HaxeServer {
             context.sendLogMessage(Log, reTrailingNewline.replace(buf.toString(), ""));
         });
         proc.stderr.on(ReadableEvent.Data, onData);
-
         proc.on(ChildProcessEvent.Exit, onExit);
-        if (context.displayArguments != null) {
-            function buildCompletionCache() {
-                if (!context.config.buildCompletionCache) {
-                    return;
-                }
-                stopProgressCallback = context.startProgress("Initializing Completion");
-                trace("Initializing completion cache...");
-                process(context.displayArguments.concat(["--no-output"]), null, true, null, Processed(function(_) {
-                    stopProgress();
-                    trace("Done.");
-                }, function(errorMessage) {
-                    stopProgress();
-                    trace("Failed - try fixing the error(s) and restarting the language server:\n\n" + errorMessage);
-                }));
-            }
 
-            if (supportsJsonRpc) {
-                stopProgressCallback = context.startProgress("Initializing Haxe/json-rpc protocol");
-                process(context.displayArguments.concat(["--display", context.haxeServer.createRequest(HaxeMethods.Initialize, {})]), null, true, null, Processed(function(result) {
-                    stopProgress();
-                    switch (result) {
-                        case DResult(capabilities): this.capabilities = Json.parse(capabilities).result.capabilities;
-                        case DCancelled:
-                    }
-                    buildCompletionCache();
-                }, function(errorMessage) {
-                    stopProgress();
-                }));
-            } else {
-                buildCompletionCache();
+        capabilities = {
+            definitionProvider: false,
+            hoverProvider: false
+        };
+
+        stopProgressCallback = context.startProgress("Initializing Haxe/JSON-RPC protocol");
+        process(["--display", createRequest(HaxeMethods.Initialize)], null, true, null, Processed(function(result) {
+            stopProgress();
+            switch (result) {
+                case DResult(capabilities):
+                    this.capabilities = Json.parse(capabilities).result.capabilities;
+                case DCancelled:
             }
-        }
+            buildCompletionCache();
+        }, function(errorMessage) {
+            stopProgress();
+        }));
 
         var displayPort = context.config.displayPort;
         if (socketListener == null && displayPort != null) {
@@ -142,6 +126,21 @@ class HaxeServer {
 
         if (callback != null)
             callback();
+    }
+
+    function buildCompletionCache() {
+        if (!context.config.buildCompletionCache || context.displayArguments == null) {
+            return;
+        }
+        stopProgressCallback = context.startProgress("Initializing Completion");
+        trace("Initializing completion cache...");
+        process(context.displayArguments.concat(["--no-output"]), null, true, null, Processed(function(_) {
+            stopProgress();
+            trace("Done.");
+        }, function(errorMessage) {
+            stopProgress();
+            trace("Failed - try fixing the error(s) and restarting the language server:\n\n" + errorMessage);
+        }));
     }
 
     function hasNonCancellableRequests():Bool {
@@ -341,7 +340,7 @@ class HaxeServer {
         }
     }
 
-     public function createRequest<P,R>(method:HaxeRequestMethod<P,R>, params:P):String {
+     public function createRequest<P,R>(method:HaxeRequestMethod<P,R>, ?params:P):String {
         // TODO: avoid duplicating jsonrpc.Protocol logic
         var id = nextRequestId++;
         var request:RequestMessage = {

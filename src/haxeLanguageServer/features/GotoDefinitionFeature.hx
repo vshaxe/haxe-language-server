@@ -18,8 +18,9 @@ class GotoDefinitionFeature {
         var doc = context.documents.get(params.textDocument.uri);
         var bytePos = context.displayOffsetConverter.characterOffsetToByteOffset(doc.content, doc.offsetAt(params.position));
 
+        var useJsonRpc = context.haxeServer.capabilities.definitionProvider;
         var args =
-            if (context.haxeServer.supportsJsonRpc && context.haxeServer.capabilities.definitionProvider)
+            if (useJsonRpc)
                 [context.haxeServer.createRequest(HaxeMethods.GotoDefinition, {file: doc.fsPath, offset: bytePos})]
             else
                 ['${doc.fsPath}@$bytePos@position'];
@@ -29,7 +30,7 @@ class GotoDefinitionFeature {
                 case DCancelled:
                     resolve(null);
                 case DResult(data):
-                    if (context.haxeServer.supportsJsonRpc)
+                    if (useJsonRpc)
                         handleJson(data, resolve);
                     else
                         handleXml(data, doc, resolve, reject);
