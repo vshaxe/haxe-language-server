@@ -325,7 +325,7 @@ class Context {
             diagnostics.publishDiagnostics(uri);
     }
 
-    public function callHaxeMethod<P,R>(method:HaxeRequestMethod<P,R>, ?params:P, token:CancellationToken, callback:R->Void, errback:String->Void) {
+    public function callHaxeMethod<P,R>(method:HaxeRequestMethod<P,R>, ?params:P, stdin:String, token:CancellationToken, callback:R->Void, errback:String->Void) {
         callDisplay([haxeServer.createRequest(method, params)], null, token, result -> {
             switch (result) {
                 case DResult(data):
