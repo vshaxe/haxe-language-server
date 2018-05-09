@@ -19,7 +19,7 @@ class GotoDefinitionFeature {
         var bytePos = context.displayOffsetConverter.characterOffsetToByteOffset(doc.content, doc.offsetAt(params.position));
 
         var args =
-            if (context.haxeServer.supportsJsonRpc)
+            if (context.haxeServer.supportsJsonRpc && context.haxeServer.capabilities.definitionProvider)
                 [context.haxeServer.createRequest(HaxeMethods.GotoDefinition, {file: doc.fsPath, offset: bytePos})]
             else
                 ['${doc.fsPath}@$bytePos@position'];

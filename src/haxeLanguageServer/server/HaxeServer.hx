@@ -119,7 +119,7 @@ class HaxeServer {
                 process(context.displayArguments.concat(["--display", context.haxeServer.createRequest(HaxeMethods.Initialize, {})]), null, true, null, Processed(function(result) {
                     stopProgress();
                     switch (result) {
-                        case DResult(capabilities): this.capabilities = Json.parse(capabilities).result;
+                        case DResult(capabilities): this.capabilities = Json.parse(capabilities).result.capabilities;
                         case DCancelled:
                     }
                     buildCompletionCache();
