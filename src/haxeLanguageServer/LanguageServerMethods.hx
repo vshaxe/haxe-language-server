@@ -6,7 +6,7 @@ import jsonrpc.Types;
     Custom, Haxe-Language-Server-specific methods that are not part of the Language Server Protocol.
 **/
 @:publicFields
-class HaxeMethods {
+class LanguageServerMethods {
     /**
         This notification is sent from the client to the server when display arguments have changed.
     **/

@@ -38,7 +38,7 @@ class TextDocuments {
         if (document != null) {
             document.update(changes, td.version);
             #if false
-            protocol.sendNotification(HaxeMethods.UpdateParseTree, {uri: td.uri.toString(), parseTree: haxe.Serializer.run(document.parsingInfo.tree)});
+            protocol.sendNotification(LanguageServerMethods.UpdateParseTree, {uri: td.uri.toString(), parseTree: haxe.Serializer.run(document.parsingInfo.tree)});
             #end
         }
     }

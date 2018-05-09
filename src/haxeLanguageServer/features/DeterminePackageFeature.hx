@@ -9,7 +9,7 @@ class DeterminePackageFeature {
 
     public function new(context) {
         this.context = context;
-        context.protocol.onRequest(HaxeMethods.DeterminePackage, onDeterminePackage);
+        context.protocol.onRequest(LanguageServerMethods.DeterminePackage, onDeterminePackage);
     }
 
     function onDeterminePackage(params:{fsPath:String}, token:CancellationToken, resolve:{pack:String}->Void, reject:ResponseError<NoData>->Void) {

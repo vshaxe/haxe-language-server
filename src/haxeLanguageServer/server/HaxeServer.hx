@@ -1,5 +1,7 @@
 package haxeLanguageServer.server;
 
+import jsonrpc.Types.RequestMessage;
+import haxe.Json;
 import js.Promise;
 import js.node.Net;
 import js.node.net.Socket;
@@ -11,6 +13,7 @@ import js.node.ChildProcess;
 import js.node.stream.Readable;
 import jsonrpc.CancellationToken;
 import haxeLanguageServer.helper.SemVer;
+import haxeLanguageServer.server.Protocol.HaxeRequestMethod;
 
 class HaxeServer {
     var proc:ChildProcessObject;
@@ -27,8 +30,10 @@ class HaxeServer {
     var startRequest:Void->Void;
 
     var crashes:Int = 0;
+    var nextRequestId:Int = 0;
 
     public var version(default,null):SemVer;
+    public var supportsJsonRpc(default,null):Bool = true; // TODO: don't lie
 
     public function new(context:Context) {
         this.context = context;
@@ -97,10 +102,6 @@ class HaxeServer {
             stopProgressCallback = context.startProgress("Initializing Completion");
             trace("Initializing completion cache...");
             context.displayArguments.push("--no-output");
-            // if (version >= new SemVer(4, 0, 0)) {
-            //     context.displayArguments.push("--display");
-            //     context.displayArguments.push("update-cache");
-            // }
             process(context.displayArguments, null, true, null, Processed(function(_) {
                 stopProgress();
                 trace("Done.");
@@ -180,7 +181,7 @@ class HaxeServer {
         });
         socketListener.listen(port, "localhost");
         context.sendLogMessage(Log, 'Listening on port $port');
-        context.protocol.sendNotification(HaxeMethods.DidChangeDisplayPort, {port: port});
+        context.protocol.sendNotification(LanguageServerMethods.DidChangeDisplayPort, {port: port});
     }
 
     public function stop() {
@@ -318,5 +319,18 @@ class HaxeServer {
             requestsHead = currentRequest.next;
             proc.stdin.write(currentRequest.prepareBody());
         }
+    }
+
+     public function createRequest<P,R>(method:HaxeRequestMethod<P,R>, params:P):String {
+        // TODO: avoid duplicating jsonrpc.Protocol logic
+        var id = nextRequestId++;
+        var request:RequestMessage = {
+            jsonrpc: @:privateAccess jsonrpc.Protocol.PROTOCOL_VERSION,
+            id: id,
+            method: method
+        };
+        if (params != null)
+            request.params = params;
+        return Json.stringify(request);
     }
 }

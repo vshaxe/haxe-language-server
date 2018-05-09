@@ -4,7 +4,7 @@ import haxe.io.Path;
 import haxeLanguageServer.helper.PathHelper;
 import haxeLanguageServer.helper.ImportHelper;
 import haxeLanguageServer.server.DisplayResult;
-import haxeLanguageServer.HaxeMethods;
+import haxeLanguageServer.LanguageServerMethods;
 import js.node.ChildProcess;
 
 class DiagnosticsManager {
@@ -20,7 +20,7 @@ class DiagnosticsManager {
         context.registerCodeActionContributor(getCodeActions);
         diagnosticsArguments = new Map();
         errorUri = new FsPath(Path.join([context.workspacePath.toString(), "Error"])).toUri();
-        context.protocol.onNotification(HaxeMethods.RunGlobalDiagnostics, onRunGlobalDiagnostics);
+        context.protocol.onNotification(LanguageServerMethods.RunGlobalDiagnostics, onRunGlobalDiagnostics);
         ChildProcess.exec("haxelib config", (error, stdout, stderr) -> haxelibPath = new FsPath(stdout.trim()));
     }
 
@@ -28,7 +28,7 @@ class DiagnosticsManager {
         var stopProgress = context.startProgress("Collecting Diagnostics");
         context.callDisplay(["--display", "diagnostics"], null, null, function(result) {
             processDiagnosticsReply(null, result);
-            context.protocol.sendNotification(HaxeMethods.DidRunRunGlobalDiagnostics);
+            context.protocol.sendNotification(LanguageServerMethods.DidRunRunGlobalDiagnostics);
             stopProgress();
         }, function(error) {
             processErrorReply(null, error);

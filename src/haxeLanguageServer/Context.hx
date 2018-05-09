@@ -87,9 +87,9 @@ class Context {
         protocol.onNotification(Methods.DidOpenTextDocument, onDidOpenTextDocument);
         protocol.onNotification(Methods.DidSaveTextDocument, onDidSaveTextDocument);
         protocol.onNotification(Methods.DidChangeWatchedFiles, onDidChangeWatchedFiles);
-        protocol.onNotification(HaxeMethods.DidChangeDisplayArguments, onDidChangeDisplayArguments);
-        protocol.onNotification(HaxeMethods.DidChangeDisplayServerConfig, onDidChangeDisplayServerConfig);
-        protocol.onNotification(HaxeMethods.DidChangeActiveTextEditor, onDidChangeActiveTextEditor);
+        protocol.onNotification(LanguageServerMethods.DidChangeDisplayArguments, onDidChangeDisplayArguments);
+        protocol.onNotification(LanguageServerMethods.DidChangeDisplayServerConfig, onDidChangeDisplayServerConfig);
+        protocol.onNotification(LanguageServerMethods.DidChangeActiveTextEditor, onDidChangeActiveTextEditor);
     }
 
     inline function isInitialized():Bool {
@@ -98,9 +98,9 @@ class Context {
 
     public function startProgress(title:String):Void->Void {
         var id = progressId++;
-        protocol.sendNotification(HaxeMethods.ProgressStart, {id: id, title: 'Haxe: $title...'});
+        protocol.sendNotification(LanguageServerMethods.ProgressStart, {id: id, title: 'Haxe: $title...'});
         return function() {
-            protocol.sendNotification(HaxeMethods.ProgressStop, {id: id});
+            protocol.sendNotification(LanguageServerMethods.ProgressStop, {id: id});
         };
     }
 
@@ -330,7 +330,7 @@ class Context {
             actualArgs = actualArgs.concat(displayArguments); // add arguments from the workspace settings
         actualArgs = actualArgs.concat([
             "-D", "display-details", // get more details in completion results,
-            "--no-output", // prevent anygeneration
+            "--no-output", // prevent any generation
         ]);
         actualArgs = actualArgs.concat(args); // finally, add given query args
         haxeServer.process(actualArgs, token, true, stdin, Processed(callback, errback));
