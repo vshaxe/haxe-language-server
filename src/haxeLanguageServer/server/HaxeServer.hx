@@ -104,15 +104,16 @@ class HaxeServer {
 
         stopProgressCallback = context.startProgress("Initializing Haxe/JSON-RPC protocol");
         process(["--display", createRequest(HaxeMethods.Initialize)], null, true, null, Processed(function(result) {
-            stopProgress();
             switch (result) {
                 case DResult(capabilities):
                     this.capabilities = Json.parse(capabilities).result.capabilities;
                 case DCancelled:
             }
+            stopProgress();
             buildCompletionCache();
         }, function(errorMessage) {
             stopProgress();
+            buildCompletionCache();
         }));
 
         var displayPort = context.config.displayPort;
