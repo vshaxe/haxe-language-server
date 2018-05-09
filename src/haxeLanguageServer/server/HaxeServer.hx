@@ -1,6 +1,5 @@
 package haxeLanguageServer.server;
 
-import jsonrpc.Types.RequestMessage;
 import haxe.Json;
 import js.Promise;
 import js.node.Net;
@@ -107,6 +106,12 @@ class HaxeServer {
             stopProgress();
             buildCompletionCache();
         }, error -> {
+            // the "invalid format" error is expected for Haxe versions <= 4.0.0-preview.3
+            if (error.startsWith("Error: Invalid format")) {
+                trace("Haxe does not support JSON-RPC, using legacy --display API.");
+            } else {
+                trace(error);
+            }
             stopProgress();
             buildCompletionCache();
         });

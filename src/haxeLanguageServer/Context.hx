@@ -341,7 +341,11 @@ class Context {
         callDisplay([requestJson], null, token, result -> {
             switch (result) {
                 case DResult(data):
-                    var response:ResponseMessage = Json.parse(data);
+                    var response:ResponseMessage = try {
+                        Json.parse(data);
+                    } catch (e:Any) {
+                        return errback(Std.string(e));
+                    }
                     if (Reflect.hasField(response, "error"))
                         errback(response.error.message);
                     else
