@@ -18,16 +18,11 @@ class HaxeMethods {
         The goto definition request is sent from the client to Haxe to resolve the definition location(s) of a symbol at a given text document position.
     **/
     static inline var GotoDefinition = new HaxeRequestMethod<PositionParams,Array<Location>>("textDocument/definition");
+
+    static inline var Hover = new HaxeRequestMethod<PositionParams,Null<HoverResult>>("textDocument/hover");
 }
 
-typedef PositionParams = {
-    var file:FsPath;
-
-    /**
-        Unicode character offset in the file.
-    **/
-    var offset:Int;
-}
+/* Initialize */
 
 typedef InitializeParams = {
 
@@ -41,9 +36,29 @@ typedef InitializeResult = {
     var capabilities:HaxeCapabilities;
 }
 
+/* Definition */
+
+typedef PositionParams = {
+    var file:FsPath;
+
+    /**
+        Unicode character offset in the file.
+    **/
+    var offset:Int;
+}
+
 typedef Location = {
     var file:FsPath;
     var range:Range;
+}
+
+/* Hover */
+
+typedef HoverResult = {
+    var documentation:Null<String>;
+    var range:Range;
+    var type:Null<haxe.rtti.JsonModuleTypes.JsonType<Dynamic>>;
+    var metadata:Null<String>;
 }
 
 typedef HaxeRequestMethod<TParams,TResponse> = RequestMethod<TParams,TResponse,NoData,NoData>;
