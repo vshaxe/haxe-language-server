@@ -67,6 +67,7 @@ class Context {
     var displayServerConfig:DisplayServerConfig;
 
     var progressId = 0;
+    var nextRequestId:Int = 0;
 
     public function new(protocol) {
         this.protocol = protocol;
@@ -325,8 +326,19 @@ class Context {
             diagnostics.publishDiagnostics(uri);
     }
 
-    public function callHaxeMethod<P,R>(method:HaxeRequestMethod<P,R>, ?params:P, stdin:String, token:CancellationToken, callback:R->Void, errback:String->Void) {
-        callDisplay([haxeServer.createRequest(method, params)], null, token, result -> {
+    public function callHaxeMethod<P,R>(method:HaxeRequestMethod<P,R>, ?params:P, stdin:String, token:CancellationToken, callback:R->Void, errback:(error:String)->Void) {
+        // TODO: avoid duplicating jsonrpc.Protocol logic
+        var id = nextRequestId++;
+        var request:RequestMessage = {
+            jsonrpc: @:privateAccess jsonrpc.Protocol.PROTOCOL_VERSION,
+            id: id,
+            method: method
+        };
+        if (params != null)
+            request.params = params;
+        var requestJson = Json.stringify(request);
+
+        callDisplay([requestJson], null, token, result -> {
             switch (result) {
                 case DResult(data):
                     var response:ResponseMessage = Json.parse(data);
@@ -337,13 +349,12 @@ class Context {
                 case DCancelled:
             }
         }, error -> {
-            // this should never happen
-            trace("JSON-RPC call failed with ", error);
+            // this should never happen (if on a Haxe version that supports JSON-RPC)
             errback(error);
         });
     }
 
-    public function callDisplay(args:Array<String>, stdin:String, token:CancellationToken, callback:DisplayResult->Void, errback:String->Void) {
+    public function callDisplay(args:Array<String>, stdin:String, token:CancellationToken, callback:DisplayResult->Void, errback:(error:String)->Void) {
         var actualArgs = ["--cwd", workspacePath.toString()]; // change cwd to workspace root
         if (displayArguments != null)
             actualArgs = actualArgs.concat(displayArguments); // add arguments from the workspace settings

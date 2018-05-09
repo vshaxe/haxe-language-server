@@ -30,7 +30,6 @@ class HaxeServer {
     var startRequest:Void->Void;
 
     var crashes:Int = 0;
-    var nextRequestId:Int = 0;
 
     public var version(default,null):SemVer;
     public var capabilities(default,null):HaxeCapabilities;
@@ -103,18 +102,14 @@ class HaxeServer {
         };
 
         stopProgressCallback = context.startProgress("Initializing Haxe/JSON-RPC protocol");
-        process(["--display", createRequest(HaxeMethods.Initialize)], null, true, null, Processed(function(result) {
-            switch (result) {
-                case DResult(capabilities):
-                    this.capabilities = Json.parse(capabilities).result.capabilities;
-                case DCancelled:
-            }
+        context.callHaxeMethod(HaxeMethods.Initialize, null, null, null, result -> {
+            capabilities = result.capabilities;
             stopProgress();
             buildCompletionCache();
-        }, function(errorMessage) {
+        }, error -> {
             stopProgress();
             buildCompletionCache();
-        }));
+        });
 
         var displayPort = context.config.displayPort;
         if (socketListener == null && displayPort != null) {
@@ -339,18 +334,5 @@ class HaxeServer {
             requestsHead = currentRequest.next;
             proc.stdin.write(currentRequest.prepareBody());
         }
-    }
-
-    public function createRequest<P,R>(method:HaxeRequestMethod<P,R>, ?params:P):String {
-        // TODO: avoid duplicating jsonrpc.Protocol logic
-        var id = nextRequestId++;
-        var request:RequestMessage = {
-            jsonrpc: @:privateAccess jsonrpc.Protocol.PROTOCOL_VERSION,
-            id: id,
-            method: method
-        };
-        if (params != null)
-            request.params = params;
-        return Json.stringify(request);
     }
 }

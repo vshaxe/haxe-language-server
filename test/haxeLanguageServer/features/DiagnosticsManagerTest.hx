@@ -22,7 +22,7 @@ class DiagnosticsManagerTest extends TestCaseBase {
         });
         context.workspacePath.returns("");
         context.callDisplay(cast any, cast any, cast any, cast any, cast any).calls(function(args) {
-            var errback:String->Void = args[4];
+            var errback:(error:String)->Void = args[4];
             errback(errbackMsg);
         });
         context.displayOffsetConverter.returns(new Haxe4DisplayOffsetConverter());

@@ -71,7 +71,7 @@ class DisplayRequest {
         }
     }
 
-    function processResult(data:String, callback:DisplayResult->Void, errback:String->Void) {
+    function processResult(data:String, callback:DisplayResult->Void, errback:(error:String)->Void) {
         var buf = new StringBuf();
         var hasError = false;
         for (line in data.split("\n")) {
