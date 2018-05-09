@@ -42,7 +42,7 @@ class GotoDefinitionFeature {
         resolve(locations.map(location -> {
             {
                 uri: location.file.toUri(),
-                range: {start: (cast location).start, end: (cast location).end} // TODO: get Simn to send an actual range object
+                range: location.range
             }
         }));
     }

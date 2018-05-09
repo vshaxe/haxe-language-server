@@ -10,9 +10,14 @@ import jsonrpc.Types;
 @:publicFields
 class HaxeMethods {
     /**
+        The initialize request is sent from the client to Haxe to determine the capabilities.
+    **/
+    static inline var Initialize = new HaxeRequestMethod<InitializeParams,InitializeResult>("initialize");
+
+    /**
         The goto definition request is sent from the client to Haxe to resolve the definition location(s) of a symbol at a given text document position.
     **/
-    static inline var GotoDefinition = new HaxeRequestMethod<PositionParams,Array<Location>>("definition"); // TODO: scope this.. "textDocument/definition" like vscode?
+    static inline var GotoDefinition = new HaxeRequestMethod<PositionParams,Array<Location>>("textDocument/definition");
 }
 
 typedef PositionParams = {
@@ -22,6 +27,18 @@ typedef PositionParams = {
         Unicode character offset in the file.
     **/
     var offset:Int;
+}
+
+typedef InitializeParams = {
+
+}
+
+typedef HaxeCapabilities = {
+    > ServerCapabilities,
+}
+
+typedef InitializeResult = {
+    var capabilities:HaxeCapabilities;
 }
 
 typedef Location = {

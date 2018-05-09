@@ -13,7 +13,7 @@ import js.node.ChildProcess;
 import js.node.stream.Readable;
 import jsonrpc.CancellationToken;
 import haxeLanguageServer.helper.SemVer;
-import haxeLanguageServer.server.Protocol.HaxeRequestMethod;
+import haxeLanguageServer.server.Protocol;
 
 class HaxeServer {
     var proc:ChildProcessObject;
@@ -34,6 +34,7 @@ class HaxeServer {
 
     public var version(default,null):SemVer;
     public var supportsJsonRpc(default,null):Bool = true; // TODO: don't lie
+    public var capabilities:HaxeCapabilities;
 
     public function new(context:Context) {
         this.context = context;
@@ -97,18 +98,37 @@ class HaxeServer {
         proc.stderr.on(ReadableEvent.Data, onData);
 
         proc.on(ChildProcessEvent.Exit, onExit);
+        if (context.displayArguments != null) {
+            function buildCompletionCache() {
+                if (!context.config.buildCompletionCache) {
+                    return;
+                }
+                stopProgressCallback = context.startProgress("Initializing Completion");
+                trace("Initializing completion cache...");
+                process(context.displayArguments.concat(["--no-output"]), null, true, null, Processed(function(_) {
+                    stopProgress();
+                    trace("Done.");
+                }, function(errorMessage) {
+                    stopProgress();
+                    trace("Failed - try fixing the error(s) and restarting the language server:\n\n" + errorMessage);
+                }));
+            }
 
-        if (context.config.buildCompletionCache && context.displayArguments != null) {
-            stopProgressCallback = context.startProgress("Initializing Completion");
-            trace("Initializing completion cache...");
-            context.displayArguments.push("--no-output");
-            process(context.displayArguments, null, true, null, Processed(function(_) {
-                stopProgress();
-                trace("Done.");
-            }, function(errorMessage) {
-                stopProgress();
-                trace("Failed - try fixing the error(s) and restarting the language server:\n\n" + errorMessage);
-            }));
+            if (supportsJsonRpc) {
+                stopProgressCallback = context.startProgress("Initializing Haxe/json-rpc protocol");
+                process(context.displayArguments.concat(["--display", context.haxeServer.createRequest(HaxeMethods.Initialize, {})]), null, true, null, Processed(function(result) {
+                    stopProgress();
+                    switch (result) {
+                        case DResult(capabilities): this.capabilities = Json.parse(capabilities);
+                        case DCancelled:
+                    }
+                    buildCompletionCache();
+                }, function(errorMessage) {
+                    stopProgress();
+                }));
+            } else {
+                buildCompletionCache();
+            }
         }
 
         var displayPort = context.config.displayPort;
