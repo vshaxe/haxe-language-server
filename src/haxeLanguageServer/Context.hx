@@ -15,6 +15,7 @@ import haxeLanguageServer.helper.TypeHelper.FunctionFormattingConfig;
 import haxeLanguageServer.helper.ImportHelper;
 import haxeLanguageServer.server.DisplayResult;
 import haxeLanguageServer.server.HaxeServer;
+import haxeLanguageServer.server.Protocol.HaxeRequestMethod;
 
 private typedef FunctionGenerationConfig = {
     @:optional var anonymous:FunctionFormattingConfig;
@@ -322,6 +323,24 @@ class Context {
     function publishDiagnostics(uri:DocumentUri) {
         if (diagnostics != null && config.enableDiagnostics)
             diagnostics.publishDiagnostics(uri);
+    }
+
+    public function callHaxeMethod<P,R>(method:HaxeRequestMethod<P,R>, ?params:P, token:CancellationToken, callback:R->Void, errback:String->Void) {
+        callDisplay([haxeServer.createRequest(method, params)], null, token, result -> {
+            switch (result) {
+                case DResult(data):
+                    var response:ResponseMessage = Json.parse(data);
+                    if (Reflect.hasField(response, "error"))
+                        errback(response.error.message);
+                    else
+                        callback(response.result);
+                case DCancelled:
+            }
+        }, error -> {
+            // this should never happen
+            trace("JSON-RPC call failed with ", error);
+            errback(error);
+        });
     }
 
     public function callDisplay(args:Array<String>, stdin:String, token:CancellationToken, callback:DisplayResult->Void, errback:String->Void) {

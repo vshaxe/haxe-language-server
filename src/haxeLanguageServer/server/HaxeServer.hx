@@ -340,7 +340,7 @@ class HaxeServer {
         }
     }
 
-     public function createRequest<P,R>(method:HaxeRequestMethod<P,R>, ?params:P):String {
+    public function createRequest<P,R>(method:HaxeRequestMethod<P,R>, ?params:P):String {
         // TODO: avoid duplicating jsonrpc.Protocol logic
         var id = nextRequestId++;
         var request:RequestMessage = {
