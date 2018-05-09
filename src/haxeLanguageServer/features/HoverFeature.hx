@@ -28,9 +28,7 @@ class HoverFeature {
                     case DResult(data):
                         haxe.Json.parse(data).result;
                 }
-                var content = if (hover.metadata != null) {
-                    hover.metadata;
-                } else if (hover.type != null) {
+                var content = if (hover.type != null) {
                     var printer = new haxe.rtti.JsonModuleTypesPrinter();
                     printer.printType(hover.type);
                 } else {

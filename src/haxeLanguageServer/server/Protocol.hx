@@ -58,7 +58,6 @@ typedef HoverResult = {
     var documentation:Null<String>;
     var range:Range;
     var type:Null<haxe.rtti.JsonModuleTypes.JsonType<Dynamic>>;
-    var metadata:Null<String>;
 }
 
 typedef HaxeRequestMethod<TParams,TResponse> = RequestMethod<TParams,TResponse,NoData,NoData>;
