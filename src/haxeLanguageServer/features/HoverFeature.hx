@@ -17,7 +17,7 @@ class HoverFeature {
     function onHover(params:TextDocumentPositionParams, token:CancellationToken, resolve:Hover->Void, reject:ResponseError<NoData>->Void) {
         var doc = context.documents.get(params.textDocument.uri);
         var bytePos = context.displayOffsetConverter.characterOffsetToByteOffset(doc.content, doc.offsetAt(params.position));
-        var args = ["--display", '${doc.fsPath}@$bytePos@type'];
+        var args = ['${doc.fsPath}@$bytePos@type'];
         context.callDisplay(args, doc.content, token, function(r) {
             switch (r) {
                 case DCancelled:

@@ -87,12 +87,12 @@ class DocumentSymbolsFeature {
         }
 
         trace('Falling back to Haxe document symbols.');
-        var args = ["--display", '${doc.fsPath}@0@module-symbols'];
+        var args = ['${doc.fsPath}@0@module-symbols'];
         makeRequest(args, doc, token, resolve, reject);
     }
 
     function onWorkspaceSymbols(params:WorkspaceSymbolParams, token:CancellationToken, resolve:Array<SymbolInformation>->Void, reject:ResponseError<NoData>->Void) {
-        var args = ["--display ?@0@workspace-symbols@" + params.query];
+        var args = ["?@0@workspace-symbols@" + params.query];
         makeRequest(args, null, token, resolve, reject);
     }
 

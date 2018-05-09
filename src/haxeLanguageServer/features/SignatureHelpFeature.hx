@@ -23,7 +23,7 @@ class SignatureHelpFeature {
     function onSignatureHelp(params:TextDocumentPositionParams, token:CancellationToken, resolve:SignatureHelp->Void, reject:ResponseError<NoData>->Void) {
         var doc = context.documents.get(params.textDocument.uri);
         var bytePos = context.displayOffsetConverter.characterOffsetToByteOffset(doc.content, doc.offsetAt(params.position));
-        var args = ["--display", '${doc.fsPath}@$bytePos@signature'];
+        var args = ['${doc.fsPath}@$bytePos@signature'];
         context.callDisplay(args, doc.content, token, function(r) {
             switch (r) {
                 case DCancelled:

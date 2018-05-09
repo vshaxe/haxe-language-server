@@ -15,7 +15,7 @@ class FindReferencesFeature {
     function onFindReferences(params:TextDocumentPositionParams, token:CancellationToken, resolve:Array<Location>->Void, reject:ResponseError<NoData>->Void) {
         var doc = context.documents.get(params.textDocument.uri);
         var bytePos = context.displayOffsetConverter.characterOffsetToByteOffset(doc.content, doc.offsetAt(params.position));
-        var args = ["--display", '${doc.fsPath}@$bytePos@usage'];
+        var args = ['${doc.fsPath}@$bytePos@usage'];
         context.callDisplay(args, doc.content, token, function(r) {
             switch (r) {
                 case DCancelled:

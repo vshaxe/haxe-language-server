@@ -20,9 +20,9 @@ class GotoDefinitionFeature {
 
         var args =
             if (context.haxeServer.supportsJsonRpc)
-                ["--display", context.haxeServer.createRequest(HaxeMethods.GotoDefinition, {file: doc.fsPath, offset: bytePos})]
+                [context.haxeServer.createRequest(HaxeMethods.GotoDefinition, {file: doc.fsPath, offset: bytePos})]
             else
-                ["--display", '${doc.fsPath}@$bytePos@position'];
+                ['${doc.fsPath}@$bytePos@position'];
 
         context.callDisplay(args, doc.content, token, function(r) {
             switch (r) {
@@ -38,7 +38,7 @@ class GotoDefinitionFeature {
     }
 
     function handleJson(data, resolve) {
-        var locations:Array<Location> = Json.parse(data).result;
+        var locations:Array<Location> = Json.parse(data).result; // TODO: error handling
         resolve(locations.map(location -> {
             {
                 uri: location.file.toUri(),

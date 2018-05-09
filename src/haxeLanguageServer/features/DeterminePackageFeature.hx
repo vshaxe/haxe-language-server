@@ -13,7 +13,7 @@ class DeterminePackageFeature {
     }
 
     function onDeterminePackage(params:{fsPath:String}, token:CancellationToken, resolve:{pack:String}->Void, reject:ResponseError<NoData>->Void) {
-        var args = ["--display", '${params.fsPath}@0@package'];
+        var args = ['${params.fsPath}@0@package'];
         context.callDisplay(args, null, token, function(r) {
             switch (r) {
                 case DCancelled:

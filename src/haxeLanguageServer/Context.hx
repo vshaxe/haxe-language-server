@@ -332,6 +332,7 @@ class Context {
             "-D", "display-details", // get more details in completion results,
             "--no-output", // prevent any generation
         ]);
+        actualArgs.push("--display");
         actualArgs = actualArgs.concat(args); // finally, add given query args
         haxeServer.process(actualArgs, token, true, stdin, Processed(callback, errback));
     }

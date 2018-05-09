@@ -50,7 +50,7 @@ class CompletionFeature {
         }
         var r = calculateCompletionPosition(textBefore, offset);
         var bytePos = context.displayOffsetConverter.characterOffsetToByteOffset(doc.content, r.pos);
-        var args = ["--display", '${doc.fsPath}@$bytePos' + (if (r.toplevel) "@toplevel" else "")];
+        var args = ['${doc.fsPath}@$bytePos' + (if (r.toplevel) "@toplevel" else "")];
         context.callDisplay(args, doc.content, token, function(result) {
             switch (result) {
                 case DCancelled:
