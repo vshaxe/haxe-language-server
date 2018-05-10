@@ -34,6 +34,18 @@ class HaxeMethods {
         This request is sent from the client to Haxe to determine the package for a given file, based on class paths configuration.
     **/
     static inline var DeterminePackage = new HaxeRequestMethod<FileParams,Array<String>>("textDocument/package");
+
+    /*
+        TODO:
+
+        - finish completion
+        - diagnostics
+        - signature
+        - codeLens
+        - references
+        - workspaceSymbols ("project/symbol"?)
+        - documentSymbols ("textDocument/documentSymbol"?)
+    */
 }
 
 /* Initialize */
