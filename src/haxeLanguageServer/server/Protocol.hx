@@ -29,6 +29,11 @@ class HaxeMethods {
         The hover request is sent from the client to Haxe to request hover information at a given text document position.
     **/
     static inline var Hover = new HaxeRequestMethod<PositionParams,Null<HoverResult>>("textDocument/hover");
+
+    /**
+        This request is sent from the client to Haxe to determine the package for a given file, based on class paths configuration.
+    **/
+    static inline var DeterminePackage = new HaxeRequestMethod<FileParams,Array<String>>("textDocument/package");
 }
 
 /* Initialize */
@@ -48,26 +53,11 @@ typedef HaxeCapabilities = {
     @:optional var hoverProvider:Bool;
     @:optional var definitionProvider:Bool;
     @:optional var completionProvider:Bool;
+    @:optional var packageProvider:Bool;
 }
 
 typedef InitializeResult = {
     var capabilities:HaxeCapabilities;
-}
-
-/* Definition */
-
-typedef PositionParams = {
-    var file:FsPath;
-
-    /**
-        Unicode character offset in the file.
-    **/
-    var offset:Int;
-}
-
-typedef Location = {
-    var file:FsPath;
-    var range:Range;
 }
 
 /* Hover */
@@ -89,7 +79,27 @@ typedef HaxeTODO = Dynamic;
 
 typedef HaxeCompletionItem = HaxeTODO;
 
-typedef HaxeRequestMethod<TParams,TResponse> = RequestMethod<TParams,TResponse,NoData,NoData>;
-typedef HaxeNotificationMethod<TParams> = NotificationMethod<TParams,NoData>;
+/* General types */
+
+typedef FileParams = {
+    var file:FsPath;
+}
+
+typedef PositionParams = {
+    > FileParams,
+
+    /**
+        Unicode character offset in the file.
+    **/
+    var offset:Int;
+}
+
+typedef Location = {
+    var file:FsPath;
+    var range:Range;
+}
+
 typedef Range = languageServerProtocol.Types.Range;
 typedef Position = languageServerProtocol.Types.Position;
+typedef HaxeRequestMethod<TParams,TResponse> = RequestMethod<TParams,TResponse,NoData,NoData>;
+typedef HaxeNotificationMethod<TParams> = NotificationMethod<TParams,NoData>;
