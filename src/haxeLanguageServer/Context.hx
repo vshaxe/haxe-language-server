@@ -338,7 +338,7 @@ class Context {
             request.params = params;
         var requestJson = Json.stringify(request);
 
-        callDisplay([requestJson], null, token, result -> {
+        callDisplay([requestJson], stdin, token, result -> {
             switch (result) {
                 case DResult(data):
                     var response:ResponseMessage = try {
