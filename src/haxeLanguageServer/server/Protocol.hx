@@ -16,6 +16,11 @@ class HaxeMethods {
     static inline var Initialize = new HaxeRequestMethod<NoData,InitializeResult>("initialize");
 
     /**
+       Completion.
+    **/
+    static inline var Completion = new HaxeRequestMethod<HaxeCompletionParams,Array<CompletionItem>>("textDocument/completion");
+
+    /**
         The goto definition request is sent from the client to Haxe to resolve the definition location(s) of a symbol at a given text document position.
     **/
     static inline var GotoDefinition = new HaxeRequestMethod<PositionParams,Array<Location>>("textDocument/definition");
@@ -31,6 +36,7 @@ class HaxeMethods {
 typedef HaxeCapabilities = {
     @:optional var hoverProvider:Bool;
     @:optional var definitionProvider:Bool;
+    @:optional var completionProvider:Bool;
 }
 
 typedef InitializeResult = {
@@ -60,6 +66,17 @@ typedef HoverResult = {
     @:optional var documentation:String;
     @:optional var type:JsonType<Dynamic>;
 }
+
+/* Completion */
+
+typedef HaxeCompletionParams = {
+    > PositionParams,
+    var wasAutoTriggered:Bool;
+}
+
+typedef HaxeTODO = Dynamic;
+
+typedef HaxeCompletionItem = HaxeTODO;
 
 typedef HaxeRequestMethod<TParams,TResponse> = RequestMethod<TParams,TResponse,NoData,NoData>;
 typedef HaxeNotificationMethod<TParams> = NotificationMethod<TParams,NoData>;

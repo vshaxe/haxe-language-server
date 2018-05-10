@@ -1,5 +1,6 @@
 package haxeLanguageServer.features;
 
+import haxeLanguageServer.server.Protocol;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
@@ -50,6 +51,19 @@ class CompletionFeature {
         }
         var r = calculateCompletionPosition(textBefore, offset);
         var bytePos = context.displayOffsetConverter.characterOffsetToByteOffset(doc.content, r.pos);
+        var handle = if (false && context.haxeServer.capabilities.completionProvider) handleJsonRpc else handleLegacy;
+        handle(params, token, resolve, reject, textBefore, r, doc, bytePos);
+
+    }
+
+    function handleJsonRpc(params:CompletionParams, token:CancellationToken, resolve:Array<CompletionItem>->Void, reject:ResponseError<NoData>->Void, textBefore:String, r:CompletionPosition, doc:TextDocument, bytePos:Int) {
+        var wasAutoTriggered = params.context == null ? true : params.context.triggerKind == TriggerCharacter;
+        context.callHaxeMethod(HaxeMethods.Completion, {file: doc.fsPath, offset: bytePos, wasAutoTriggered: wasAutoTriggered}, doc.content, token, result -> {
+            resolve(result);
+        }, error -> reject(ResponseError.internalError(error)));
+    }
+
+    function handleLegacy(params:CompletionParams, token:CancellationToken, resolve:Array<CompletionItem>->Void, reject:ResponseError<NoData>->Void, textBefore:String, r:CompletionPosition, doc:TextDocument, bytePos:Int) {
         var args = ['${doc.fsPath}@$bytePos' + (if (r.toplevel) "@toplevel" else "")];
         context.callDisplay(args, doc.content, token, function(result) {
             switch (result) {
