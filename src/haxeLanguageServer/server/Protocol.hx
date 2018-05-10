@@ -13,7 +13,7 @@ class HaxeMethods {
     /**
         The initialize request is sent from the client to Haxe to determine the capabilities.
     **/
-    static inline var Initialize = new HaxeRequestMethod<NoData,InitializeResult>("initialize");
+    static inline var Initialize = new HaxeRequestMethod<InitializeParams,InitializeResult>("initialize");
 
     /**
        Completion.
@@ -32,6 +32,17 @@ class HaxeMethods {
 }
 
 /* Initialize */
+
+typedef InitializeParams = {
+    @:optional var logging:LoggingOptions;
+}
+
+typedef LoggingOptions = {
+    @:optional var arguments:Bool;
+    @:optional var cacheSignature:Bool;
+    @:optional var cacheInvalidation:Bool;
+    @:optional var completionResponse:Bool;
+}
 
 typedef HaxeCapabilities = {
     @:optional var hoverProvider:Bool;
