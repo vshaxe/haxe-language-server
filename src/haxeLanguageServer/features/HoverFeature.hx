@@ -30,15 +30,7 @@ class HoverFeature {
             } else {
                 return resolve(null);
             }
-            var documentation = hover.documentation == null ? "" : hover.documentation;
-            var result:Hover = {
-                contents: {
-                    kind: MarkupKind.MarkDown,
-                    value: '```haxe\n${content}\n```\n${documentation}'
-                }
-            };
-            result.range = hover.range;
-            resolve(result);
+            resolve(createHover(content, hover.documentation, hover.range));
         }, error -> reject(ResponseError.internalError(error)));
     }
 
@@ -66,20 +58,27 @@ class HoverFeature {
                                 case DTValue(type):
                                     if (type == null) "unknown" else type;
                             };
-                            var d = xml.get("d");
-                            d = if (d == null) "" else DocHelper.markdownFormat(d);
-                            var result:Hover = {
-                                contents: {
-                                    kind: MarkupKind.MarkDown,
-                                    value: '```haxe\n${type}\n```\n${d}'
-                                }
-                            };
+                            var documentation = xml.get("d");
                             var p = HaxePosition.parse(xml.get("p"), doc, null, context.displayOffsetConverter);
+                            var range:Range = null;
                             if (p != null)
-                                result.range = p.range;
-                            resolve(result);
+                                range = p.range;
+                            resolve(createHover(type, documentation, range));
                     }
             }
         }, function(error) reject(ResponseError.internalError(error)));
+    }
+
+    function createHover(content:String, documentation:String, range:Range):Hover {
+        documentation = if (documentation == null) "" else "\n" + DocHelper.markdownFormat(documentation);
+        var hover:Hover = {
+            contents: {
+                kind: MarkupKind.MarkDown,
+                value: '```haxe\n${content}\n```\n${documentation}'
+            }
+        };
+        if (range != null)
+            hover.range = range;
+        return hover;
     }
 }
