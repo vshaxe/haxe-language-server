@@ -15,7 +15,7 @@ class PathHelper {
         return normalize(new FsPath(path));
     }
 
-    static var reUpperCaseDriveLetter = ~/^([A-Z]:)/;
+    static final reUpperCaseDriveLetter = ~/^([A-Z]:)/;
 
     public static function normalize(path:FsPath):FsPath {
         var strPath = Path.normalize(path.toString());

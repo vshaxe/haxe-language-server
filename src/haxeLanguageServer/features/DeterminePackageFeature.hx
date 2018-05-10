@@ -6,7 +6,7 @@ import jsonrpc.Types.NoData;
 import haxeLanguageServer.server.Protocol;
 
 class DeterminePackageFeature {
-    var context:Context;
+    final context:Context;
 
     public function new(context) {
         this.context = context;

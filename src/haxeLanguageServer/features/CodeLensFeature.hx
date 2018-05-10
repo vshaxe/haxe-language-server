@@ -6,7 +6,7 @@ import jsonrpc.Types.NoData;
 import haxeLanguageServer.server.DisplayResult;
 
 class CodeLensFeature {
-    var context:Context;
+    final context:Context;
 
     public function new(context:Context) {
         this.context = context;
@@ -108,7 +108,7 @@ class CodeLensFeature {
     }
 }
 
-@:enum abstract StatisticObjectKind(String) {
+enum abstract StatisticObjectKind(String) {
     var ClassType = "class type";
     var InterfaceType = "interface type";
     var EnumType = "enum type";

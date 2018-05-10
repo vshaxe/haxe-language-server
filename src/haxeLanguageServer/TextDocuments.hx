@@ -5,8 +5,8 @@ import jsonrpc.Protocol;
 class TextDocuments {
     public static inline var syncKind = TextDocumentSyncKind.Incremental;
 
-    var protocol:Protocol;
-    var documents:Map<DocumentUri,TextDocument>;
+    final protocol:Protocol;
+    final documents:Map<DocumentUri,TextDocument>;
 
     public function new(protocol:Protocol) {
         this.protocol = protocol;

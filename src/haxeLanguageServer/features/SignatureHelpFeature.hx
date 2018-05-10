@@ -13,7 +13,7 @@ typedef CurrentSignature = {
 
 class SignatureHelpFeature {
     public var currentSignature(default, null):CurrentSignature;
-    var context:Context;
+    final context:Context;
 
     public function new(context:Context) {
         this.context = context;

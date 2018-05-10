@@ -7,20 +7,20 @@ typedef FunctionFormattingConfig = {
     var prefixPackages:Bool; // NOT part of the user settings
 }
 
-@:enum abstract ReturnTypeHintOption(String) {
+enum abstract ReturnTypeHintOption(String) {
     var Always = "always";
     var Never = "never";
     var NonVoid = "non-void";
 }
 
 class TypeHelper {
-    static var groupRegex = ~/\$(\d+)/g;
-    static var parenRegex = ~/^\((.*)\)$/;
-    static var argNameRegex = ~/^(\??\w+) : /;
-    static var monomorphRegex = ~/^Unknown<\d+>$/;
-    static var nullRegex = ~/^Null<(\$\d+)>$/;
-    static var packagePathsRegex = ~/((?:_*[a-z]\w*\.)*)(?=_*[A-Z])/g;
-    static var subtypePackageRegex = ~/\b[A-Z]\w*\.[A-Z]/;
+    static final groupRegex = ~/\$(\d+)/g;
+    static final parenRegex = ~/^\((.*)\)$/;
+    static final argNameRegex = ~/^(\??\w+) : /;
+    static final monomorphRegex = ~/^Unknown<\d+>$/;
+    static final nullRegex = ~/^Null<(\$\d+)>$/;
+    static final packagePathsRegex = ~/((?:_*[a-z]\w*\.)*)(?=_*[A-Z])/g;
+    static final subtypePackageRegex = ~/\b[A-Z]\w*\.[A-Z]/;
 
     static function getCloseChar(c:String):String {
         return switch (c) {

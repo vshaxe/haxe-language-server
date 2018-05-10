@@ -41,7 +41,7 @@ class PositionAwareWalker extends StackAwareWalker {
     var line:Int = 0;
     var character:Int = 0;
 
-    var scope = new Scope();
+    final scope = new Scope();
 
     override function walkToken(token:Token, stack:WalkStack) {
         processTrivia(token.leadingTrivia);

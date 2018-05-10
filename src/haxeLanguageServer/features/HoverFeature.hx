@@ -8,7 +8,7 @@ import haxeLanguageServer.helper.TypeHelper.*;
 import haxeLanguageServer.server.Protocol;
 
 class HoverFeature {
-    var context:Context;
+    final context:Context;
 
     public function new(context) {
         this.context = context;

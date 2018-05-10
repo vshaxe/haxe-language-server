@@ -6,7 +6,7 @@ import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
 
 class RenameFeature {
-    var context:Context;
+    final context:Context;
 
     public function new(context:Context) {
         this.context = context;

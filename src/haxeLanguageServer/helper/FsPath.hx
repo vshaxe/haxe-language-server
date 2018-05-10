@@ -1,7 +1,7 @@
 package haxeLanguageServer.helper;
 
 abstract FsPath(String) {
-    static var upperCaseDriveRe = ~/^(\/)?([A-Z]:)/;
+    static final upperCaseDriveRe = ~/^(\/)?([A-Z]:)/;
 
     public inline function new(path:String) {
         this = path;

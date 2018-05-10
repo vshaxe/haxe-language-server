@@ -5,8 +5,7 @@ import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
 import haxeLanguageServer.hxParser.DocumentSymbolsResolver;
 
-@:enum
-private abstract ModuleSymbolKind(Int) {
+private enum abstract ModuleSymbolKind(Int) {
     var MClass = 1;
     var MInterface = 2;
     var MEnum = 3;
@@ -33,7 +32,7 @@ private typedef SymbolReply = {
 }
 
 class DocumentSymbolsFeature {
-    var context:Context;
+    final context:Context;
 
     public function new(context) {
         this.context = context;

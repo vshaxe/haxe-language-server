@@ -5,7 +5,7 @@ import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
 
 class FindReferencesFeature {
-    var context:Context;
+    final context:Context;
 
     public function new(context) {
         this.context = context;

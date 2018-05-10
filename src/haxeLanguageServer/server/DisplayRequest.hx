@@ -10,12 +10,12 @@ class DisplayRequest {
     public var prev:DisplayRequest;
     public var next:DisplayRequest;
 
-    var args:Array<String>;
-    var token:CancellationToken;
-    var stdin:String;
-    var handler:ResultHandler;
+    final args:Array<String>;
+    final token:CancellationToken;
+    final stdin:String;
+    final handler:ResultHandler;
 
-    static var stdinSepBuf = new Buffer([1]);
+    static final stdinSepBuf = new Buffer([1]);
 
     public function new(args:Array<String>, token:CancellationToken, cancellable:Bool, stdin:String, handler:ResultHandler) {
         this.args = args;

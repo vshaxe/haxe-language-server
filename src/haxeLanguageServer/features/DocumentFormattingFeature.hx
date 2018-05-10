@@ -6,7 +6,7 @@ import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
 
 class DocumentFormattingFeature {
-    var context:Context;
+    final context:Context;
 
     public function new(context) {
         this.context = context;

@@ -12,12 +12,12 @@ private typedef DeclInfo = {
 }
 
 class RenameResolver extends PositionAwareWalker {
-    public var edits(default,null):Array<TextEdit> = [];
+    public final edits:Array<TextEdit> = [];
 
-    var declaration:Range;
-    var newName:String;
+    final declaration:Range;
+    final newName:String;
 
-    var rangeConsumers = new Map<Token, Range->Void>();
+    final rangeConsumers = new Map<Token, Range->Void>();
 
     var declarationInfo:DeclInfo;
     var declarationInScope = false;
@@ -26,8 +26,8 @@ class RenameResolver extends PositionAwareWalker {
     var inStaticFunction:Bool = false;
     var typeName:String;
 
-    var shadowingDecls:Array<DeclInfo> = [];
-    var newIdentShadowingDecls:Array<DeclInfo> = [];
+    final shadowingDecls:Array<DeclInfo> = [];
+    final newIdentShadowingDecls:Array<DeclInfo> = [];
 
     public function new(declaration:Range, newName:String) {
         this.declaration = declaration;

@@ -1,8 +1,8 @@
 package haxeLanguageServer.helper;
 
 class DocumentUriHelper {
-    static var driveLetterPathRe = ~/^\/[a-zA-Z]:/;
-    static var uriRe = ~/^(([^:\/?#]+?):)?(\/\/([^\/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?/;
+    static final driveLetterPathRe = ~/^\/[a-zA-Z]:/;
+    static final uriRe = ~/^(([^:\/?#]+?):)?(\/\/([^\/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?/;
 
     /** ported from VSCode sources **/
     public static function toFsPath(uri:DocumentUri):FsPath {

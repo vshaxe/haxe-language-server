@@ -47,11 +47,11 @@ private typedef InitOptions = {
 }
 
 class Context {
+    public final protocol:Protocol;
+    public var haxeServer(default,null):HaxeServer;
     public var workspacePath(default,null):FsPath;
     public var capabilities(default,null):ClientCapabilities;
     public var displayArguments(default,null):Array<String>;
-    public var protocol(default,null):Protocol;
-    public var haxeServer(default,null):HaxeServer;
     public var documents(default,null):TextDocuments;
     public var signatureHelp(default,null):SignatureHelpFeature;
     public var displayOffsetConverter(default,null):DisplayOffsetConverter;

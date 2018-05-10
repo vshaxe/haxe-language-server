@@ -6,7 +6,7 @@ import jsonrpc.Types.NoData;
 import haxeLanguageServer.server.Protocol;
 
 class GotoDefinitionFeature {
-    var context:Context;
+    final context:Context;
 
     public function new(context) {
         this.context = context;

@@ -4,8 +4,8 @@ import hxParser.ParseTree;
 import hxParser.WalkStack;
 
 class DocumentSymbolsResolver extends PositionAwareWalker {
-    var uri:DocumentUri;
-    var symbols:Map<Token, SymbolInformation> = new Map();
+    final uri:DocumentUri;
+    final symbols:Map<Token, SymbolInformation> = new Map();
 
     public function new(uri:DocumentUri) {
         this.uri = uri;

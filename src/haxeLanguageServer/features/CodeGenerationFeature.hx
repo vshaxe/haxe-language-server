@@ -5,7 +5,7 @@ import haxeLanguageServer.helper.TypeHelper;
 import haxeLanguageServer.features.SignatureHelpFeature.CurrentSignature;
 
 class CodeGenerationFeature {
-    var context:Context;
+    final context:Context;
     var currentSignature(get,never):CurrentSignature;
 
     inline function get_currentSignature() {

@@ -7,8 +7,8 @@ import jsonrpc.Types.NoData;
 typedef CodeActionContributor = CodeActionParams->Array<Command>;
 
 class CodeActionFeature {
-    var context:Context;
-    var contributors:Array<CodeActionContributor> = [];
+    final context:Context;
+    final contributors:Array<CodeActionContributor> = [];
 
     public function new(context:Context) {
         this.context = context;

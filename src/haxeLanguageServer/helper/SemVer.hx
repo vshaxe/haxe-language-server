@@ -1,13 +1,13 @@
 package haxeLanguageServer.helper;
 
 private typedef Version = {
-    var major(default,null):Int;
-    var minor(default,null):Int;
-    var patch(default,null):Int;
+    final major:Int;
+    final minor:Int;
+    final patch:Int;
 }
 
 abstract SemVer(Version) from Version {
-    static var reVersion = ~/^(\d+)\.(\d+)\.(\d+)(?:\s.*)?$/;
+    static final reVersion = ~/^(\d+)\.(\d+)\.(\d+)(?:\s.*)?$/;
 
     var major(get,never):Int;
     inline function get_major() return this.major;

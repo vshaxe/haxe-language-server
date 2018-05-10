@@ -6,12 +6,12 @@ import hxParser.ParseTree;
 typedef OnTextDocumentChangeListener = TextDocument->Array<TextDocumentContentChangeEvent>->Int->Void;
 
 class TextDocument {
-    public var uri(default,null):DocumentUri;
-    public var fsPath(default,null):FsPath;
-    public var languageId(default,null):String;
-    public var version(default,null):Int;
-    public var content(default,null):String;
-    public var openTimestamp(default,null):Float;
+    public final uri:DocumentUri;
+    public final fsPath:FsPath;
+    public final languageId:String;
+    public final openTimestamp:Float;
+    public var version:Int;
+    public var content:String;
     public var lineCount(get,never):Int;
     public var parseTree(get,never):File;
     var _parseTree:Null<File>;
@@ -23,9 +23,9 @@ class TextDocument {
         this.uri = uri;
         this.fsPath = uri.toFsPath();
         this.languageId = languageId;
+        this.openTimestamp = Timer.stamp();
         this.version = version;
         this.content = content;
-        this.openTimestamp = Timer.stamp();
     }
 
     public function update(events:Array<TextDocumentContentChangeEvent>, version:Int):Void {

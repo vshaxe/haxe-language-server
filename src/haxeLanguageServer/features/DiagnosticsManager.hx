@@ -10,10 +10,10 @@ import js.node.ChildProcess;
 class DiagnosticsManager {
     static inline var DiagnosticsSource = "diagnostics";
 
-    var context:Context;
-    var diagnosticsArguments:Map<DocumentUri,DiagnosticsMap<Any>>;
+    final context:Context;
+    final diagnosticsArguments:Map<DocumentUri,DiagnosticsMap<Any>>;
+    final errorUri:DocumentUri;
     var haxelibPath:FsPath;
-    var errorUri:DocumentUri;
 
     public function new(context:Context) {
         this.context = context;
@@ -185,8 +185,8 @@ class DiagnosticsManager {
         }
     }
 
-    static var reEndsWithWhitespace = ~/\s*$/;
-    static var reStartsWhitespace = ~/^\s*/;
+    static final reEndsWithWhitespace = ~/\s*$/;
+    static final reStartsWhitespace = ~/^\s*/;
 
     function getCodeActions<T>(params:CodeActionParams) {
         var actions:Array<Command> = [];
@@ -324,7 +324,7 @@ class DiagnosticsManager {
 }
 
 
-@:enum private abstract UnresolvedIdentifierSuggestion(Int) {
+private enum abstract UnresolvedIdentifierSuggestion(Int) {
     var UISImport = 0;
     var UISTypo = 1;
 
@@ -334,7 +334,7 @@ class DiagnosticsManager {
 }
 
 
-@:enum private abstract DiagnosticsKind<T>(Int) from Int to Int {
+private enum abstract DiagnosticsKind<T>(Int) from Int to Int {
     var DKUnusedImport:DiagnosticsKind<Void> = 0;
     var DKUnresolvedIdentifier:DiagnosticsKind<Array<{kind: UnresolvedIdentifierSuggestion, name: String}>> = 1;
     var DKCompilerError:DiagnosticsKind<String> = 2;

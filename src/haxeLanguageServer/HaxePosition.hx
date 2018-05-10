@@ -3,9 +3,9 @@ package haxeLanguageServer;
 import languageServerProtocol.Types.Location;
 
 class HaxePosition {
-    static var positionRe = ~/^(.+):(\d+): (?:lines (\d+)-(\d+)|character(?:s (\d+)-| )(\d+))$/;
-    static var properFileNameCaseCache:Map<FsPath,FsPath>;
-    static var isWindows = (Sys.systemName() == "Windows");
+    static final positionRe = ~/^(.+):(\d+): (?:lines (\d+)-(\d+)|character(?:s (\d+)-| )(\d+))$/;
+    static final properFileNameCaseCache = new Map<FsPath,FsPath>();
+    static final isWindows = (Sys.systemName() == "Windows");
 
     public static function parse(pos:String, doc:TextDocument, cache:Map<FsPath,Array<String>>, offsetConverter:DisplayOffsetConverter):Null<Location> {
         if (!positionRe.match(pos))
@@ -70,9 +70,7 @@ class HaxePosition {
 
     public static function getProperFileNameCase(normalizedPath:FsPath):FsPath {
         if (!isWindows) return normalizedPath;
-        if (properFileNameCaseCache == null) {
-            properFileNameCaseCache = new Map();
-        } else {
+        if (properFileNameCaseCache != null) {
             var cached = properFileNameCaseCache[normalizedPath];
             if (cached != null)
                 return cached;

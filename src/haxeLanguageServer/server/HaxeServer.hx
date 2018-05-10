@@ -15,11 +15,11 @@ import haxeLanguageServer.helper.SemVer;
 import haxeLanguageServer.server.Protocol;
 
 class HaxeServer {
-    var proc:ChildProcessObject;
+    final context:Context;
 
+    var proc:ChildProcessObject;
     var buffer:MessageBuffer;
     var nextMessageLength:Int;
-    var context:Context;
 
     var requestsHead:DisplayRequest;
     var requestsTail:DisplayRequest;
@@ -37,7 +37,7 @@ class HaxeServer {
         this.context = context;
     }
 
-    static var reTrailingNewline = ~/\r?\n$/;
+    static final reTrailingNewline = ~/\r?\n$/;
 
     public function start(?callback:Void->Void) {
         // we still have requests in our queue that are not cancelable, such as a build - try again later

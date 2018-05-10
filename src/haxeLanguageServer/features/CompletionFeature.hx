@@ -12,7 +12,7 @@ import haxe.extern.EitherType;
 import String.fromCharCode;
 
 class CompletionFeature {
-    var context:Context;
+    final context:Context;
     var contextSupport:Bool;
     var markdownSupport:Bool;
 
@@ -79,13 +79,13 @@ class CompletionFeature {
         }, function(error) reject(ResponseError.internalError(error)));
     }
 
-    static var reCaseOrDefault = ~/\b(case|default)\b[^:]*:$/;
+    static final reCaseOrDefault = ~/\b(case|default)\b[^:]*:$/;
     static function isValidCompletionPosition(context:CompletionContext, text:String):Bool {
         return context.triggerCharacter != ":" || !reCaseOrDefault.match(text);
     }
 
-    static var reFieldPart = ~/(\.|@(:?))(\w*)$/;
-    static var reStructPart = ~/[(,]\s*{(\s*(\s*\w+\s*:\s*["'\w()\.]+\s*,\s*)*\w*)$/;
+    static final reFieldPart = ~/(\.|@(:?))(\w*)$/;
+    static final reStructPart = ~/[(,]\s*{(\s*(\s*\w+\s*:\s*["'\w()\.]+\s*,\s*)*\w*)$/;
     static function calculateCompletionPosition(text:String, index:Int):CompletionPosition {
         if (reFieldPart.match(text))
             return {
@@ -115,7 +115,7 @@ class CompletionFeature {
         return DocHelper.extractText(doc);
     }
 
-    static var reWord = ~/\b(\w*)$/;
+    static final reWord = ~/\b(\w*)$/;
     function parseToplevelCompletion(x:Xml, position:Position, textBefore:String, doc:TextDocument):Array<CompletionItem> {
         var importPosition = ImportHelper.getImportPosition(doc);
         var wordLength = 0;
