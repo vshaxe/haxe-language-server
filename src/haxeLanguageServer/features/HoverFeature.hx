@@ -74,7 +74,7 @@ class HoverFeature {
         var hover:Hover = {
             contents: {
                 kind: MarkupKind.MarkDown,
-                value: '```haxe\n${content}\n```\n${documentation}'
+                value: '```haxe.hover\n${content}\n```\n${documentation}'
             }
         };
         if (range != null)
