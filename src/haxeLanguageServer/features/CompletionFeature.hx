@@ -43,6 +43,19 @@ class CompletionFeature {
 
     function onCompletion(params:CompletionParams, token:CancellationToken, resolve:Array<CompletionItem>->Void, reject:ResponseError<NoData>->Void) {
         var doc = context.documents.get(params.textDocument.uri);
+        var handle = if (false && context.haxeServer.capabilities.completionProvider) handleJsonRpc else handleLegacy;
+        handle(params, token, resolve, reject, doc);
+    }
+
+    function handleJsonRpc(params:CompletionParams, token:CancellationToken, resolve:Array<CompletionItem>->Void, reject:ResponseError<NoData>->Void, doc:TextDocument) {
+        var bytePos = context.displayOffsetConverter.characterOffsetToByteOffset(doc.content, doc.offsetAt(params.position));
+        var wasAutoTriggered = params.context == null ? true : params.context.triggerKind == TriggerCharacter;
+        context.callHaxeMethod(HaxeMethods.Completion, {file: doc.fsPath, offset: bytePos, wasAutoTriggered: wasAutoTriggered}, doc.content, token, result -> {
+            resolve(result);
+        }, error -> reject(ResponseError.internalError(error)));
+    }
+
+    function handleLegacy(params:CompletionParams, token:CancellationToken, resolve:Array<CompletionItem>->Void, reject:ResponseError<NoData>->Void, doc:TextDocument) {
         var offset = doc.offsetAt(params.position);
         var textBefore = doc.content.substring(0, offset);
         if (contextSupport && !isValidCompletionPosition(params.context, textBefore)) {
@@ -51,19 +64,6 @@ class CompletionFeature {
         }
         var r = calculateCompletionPosition(textBefore, offset);
         var bytePos = context.displayOffsetConverter.characterOffsetToByteOffset(doc.content, r.pos);
-        var handle = if (false && context.haxeServer.capabilities.completionProvider) handleJsonRpc else handleLegacy;
-        handle(params, token, resolve, reject, textBefore, r, doc, bytePos);
-
-    }
-
-    function handleJsonRpc(params:CompletionParams, token:CancellationToken, resolve:Array<CompletionItem>->Void, reject:ResponseError<NoData>->Void, textBefore:String, r:CompletionPosition, doc:TextDocument, bytePos:Int) {
-        var wasAutoTriggered = params.context == null ? true : params.context.triggerKind == TriggerCharacter;
-        context.callHaxeMethod(HaxeMethods.Completion, {file: doc.fsPath, offset: bytePos, wasAutoTriggered: wasAutoTriggered}, doc.content, token, result -> {
-            resolve(result);
-        }, error -> reject(ResponseError.internalError(error)));
-    }
-
-    function handleLegacy(params:CompletionParams, token:CancellationToken, resolve:Array<CompletionItem>->Void, reject:ResponseError<NoData>->Void, textBefore:String, r:CompletionPosition, doc:TextDocument, bytePos:Int) {
         var args = ['${doc.fsPath}@$bytePos' + (if (r.toplevel) "@toplevel" else "")];
         context.callDisplay(args, doc.content, token, function(result) {
             switch (result) {
