@@ -18,7 +18,7 @@ class HaxeMethods {
     /**
        Completion.
     **/
-    static inline var Completion = new HaxeRequestMethod<HaxeCompletionParams,Array<CompletionItem>>("textDocument/completion");
+    static inline var Completion = new HaxeRequestMethod<CompletionParams,Array<CompletionItem<Dynamic>>>("textDocument/completion");
 
     /**
         The goto definition request is sent from the client to Haxe to resolve the definition location(s) of a symbol at a given text document position.
@@ -82,14 +82,44 @@ typedef HoverResult = {
 
 /* Completion */
 
-typedef HaxeCompletionParams = {
+typedef CompletionParams = {
     > PositionParams,
     var wasAutoTriggered:Bool;
 }
 
 typedef HaxeTODO = Dynamic;
 
-typedef HaxeCompletionItem = HaxeTODO;
+typedef Timer = {
+    var name:String;
+    var value:String;
+}
+
+enum abstract Literal(String) {
+    var LNull = "null";
+    var LTrue = "true";
+    var LFalse = "false";
+    var LThis = "this";
+}
+
+enum abstract CompletionItemKind<T>(String) {
+    var CILocal = "Local";
+    var CIMember:CompletionItemKind<JsonFieldKind<Dynamic>> = "Member";
+    var CIStatic:CompletionItemKind<JsonFieldKind<Dynamic>> = "Static";
+    var CIEnumField:CompletionItemKind<JsonEnumField> = "EnumField";
+    var CIEnumAbstractField:CompletionItemKind<JsonFieldKind<Dynamic>> = "EnumAbstractField";
+    var CIGlobal = "Global";
+    var CIType:CompletionItemKind<JsonType<Dynamic>> = "Type";
+    var CIPackage:CompletionItemKind<String> = "Package";
+    var CIModule:CompletionItemKind<String> = "Module";
+    var CILiteral:CompletionItemKind<Literal> = "Literal";
+    var CITimer:CompletionItemKind<Timer> = "Timer";
+    var CIMetadata:CompletionItemKind<JsonMetadataEntry> = "Metadata";
+}
+
+typedef CompletionItem<T> = {
+    var kind:CompletionItemKind<T>;
+    var args:T;
+}
 
 /* General types */
 

@@ -1,6 +1,5 @@
 package haxeLanguageServer.features;
 
-import haxeLanguageServer.server.Protocol;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
@@ -8,7 +7,12 @@ import haxeLanguageServer.helper.DocHelper;
 import haxeLanguageServer.helper.ImportHelper;
 import haxeLanguageServer.helper.TypeHelper.prepareSignature;
 import haxeLanguageServer.helper.TypeHelper.parseDisplayType;
+import haxeLanguageServer.server.Protocol;
+import languageServerProtocol.protocol.Protocol.CompletionParams;
+import languageServerProtocol.Types.CompletionItem;
+import languageServerProtocol.Types.CompletionItemKind;
 import haxe.extern.EitherType;
+import haxe.rtti.JsonModuleTypes;
 import String.fromCharCode;
 
 class CompletionFeature {
@@ -51,7 +55,27 @@ class CompletionFeature {
         var bytePos = context.displayOffsetConverter.characterOffsetToByteOffset(doc.content, doc.offsetAt(params.position));
         var wasAutoTriggered = params.context == null ? true : params.context.triggerKind == TriggerCharacter;
         context.callHaxeMethod(HaxeMethods.Completion, {file: doc.fsPath, offset: bytePos, wasAutoTriggered: wasAutoTriggered}, doc.content, token, result -> {
-            resolve(result);
+            resolve(result.map(item -> {
+                /* var label = switch (item.kind) {
+                    case CILocal | CIMember | CIStatic: item.args.name;
+                    case CIEnumField: "";
+                    case CIEnumAbstractField: "";
+                    case CIGlobal: "";
+                    case CIType: "";
+                    case CIPackage: "";
+                    case CIModule: "";
+                    case CILiteral: "";
+                    case CITimer: "";
+                    case CIMetadata: "";
+                } */
+
+                // why bother pattern matching, it's all Dynamic...
+                var label = try item.args.name catch(e:Any) "no name";
+
+                return ({
+                    label: label
+                } : CompletionItem);
+            }));
         }, error -> reject(ResponseError.internalError(error)));
     }
 
