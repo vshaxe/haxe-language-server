@@ -8,6 +8,7 @@ import haxeLanguageServer.helper.ImportHelper;
 import haxeLanguageServer.helper.TypeHelper.prepareSignature;
 import haxeLanguageServer.helper.TypeHelper.parseDisplayType;
 import haxeLanguageServer.server.Protocol;
+import haxeLanguageServer.server.Protocol.CompletionItem as HaxeCompletionItem;
 import languageServerProtocol.protocol.Protocol.CompletionParams;
 import languageServerProtocol.Types.CompletionItem;
 import languageServerProtocol.Types.CompletionItemKind;
@@ -47,7 +48,7 @@ class CompletionFeature {
 
     function onCompletion(params:CompletionParams, token:CancellationToken, resolve:Array<CompletionItem>->Void, reject:ResponseError<NoData>->Void) {
         var doc = context.documents.get(params.textDocument.uri);
-        var handle = if (false && context.haxeServer.capabilities.completionProvider) handleJsonRpc else handleLegacy;
+        var handle = if (context.haxeServer.capabilities.completionProvider) handleJsonRpc else handleLegacy;
         handle(params, token, resolve, reject, doc);
     }
 
@@ -55,28 +56,79 @@ class CompletionFeature {
         var bytePos = context.displayOffsetConverter.characterOffsetToByteOffset(doc.content, doc.offsetAt(params.position));
         var wasAutoTriggered = params.context == null ? true : params.context.triggerKind == TriggerCharacter;
         context.callHaxeMethod(HaxeMethods.Completion, {file: doc.fsPath, offset: bytePos, wasAutoTriggered: wasAutoTriggered}, doc.content, token, result -> {
-            resolve(result.map(item -> {
-                /* var label = switch (item.kind) {
-                    case CILocal | CIMember | CIStatic: item.args.name;
-                    case CIEnumField: "";
-                    case CIEnumAbstractField: "";
-                    case CIGlobal: "";
-                    case CIType: "";
-                    case CIPackage: "";
-                    case CIModule: "";
-                    case CILiteral: "";
-                    case CITimer: "";
-                    case CIMetadata: "";
-                } */
-
-                // why bother pattern matching, it's all Dynamic...
-                var label = try item.args.name catch(e:Any) "no name";
-
-                return ({
-                    label: label
-                } : CompletionItem);
-            }));
+            resolve(result.map(createCompletionItem));
         }, error -> reject(ResponseError.internalError(error)));
+    }
+
+    function createCompletionItem<T>(item:HaxeCompletionItem<T>):CompletionItem {
+        var label = "";
+        var kind = CompletionItemKind.Variable;
+
+        switch (item.kind) {
+            case CILocal:
+                // TODO: define TVar
+
+            case CIMember:
+                label = item.args.name;
+                // TODO: CompletionItemKind.Property
+                kind = if (item.args.kind.kind == JsonFieldKindKind.FMethod) {
+                    if (item.args.name == "new") Constructor;
+                    else Method;
+                } else Field;
+
+            case CIStatic:
+                label = item.args.name;
+                // TODO: CompletionItemKind.Property
+                kind = if (item.args.kind.kind == JsonFieldKindKind.FMethod) Function;
+                    else Field;
+
+            case CIEnumField:
+                label = item.args.name;
+                kind = EnumMember;
+
+            case CIEnumAbstractField:
+                label = item.args.name;
+                // TODO: stuff that isn't enum values
+                kind = EnumMember;
+
+            case CIGlobal:
+
+            case CIType:
+                inline function map<T>(type:JsonModuleType<T>) return type;
+                label = item.args.name;
+                var type = map(item.args);
+                kind = switch (type.kind) {
+                    case Class: if (type.args.isInterface) Interface else Class;
+                    case Enum: Enum;
+                    case Typedef: Struct;
+                    case Abstract: Class;
+                }
+
+            case CIPackage:
+                label = item.args;
+                kind = Module;
+
+            case CIModule:
+                label = item.args;
+                kind = Class;
+
+            case CILiteral:
+                label = Std.string(item.args);
+                kind = Constant;
+
+            case CITimer:
+                label = item.args.name;
+                kind = Value;
+
+            case CIMetadata:
+                label = item.args.name;
+                kind = Function;
+        }
+
+        return {
+            label: label,
+            kind: kind
+        };
     }
 
     function handleLegacy(params:CompletionParams, token:CancellationToken, resolve:Array<CompletionItem>->Void, reject:ResponseError<NoData>->Void, doc:TextDocument) {

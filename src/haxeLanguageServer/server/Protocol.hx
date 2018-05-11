@@ -103,12 +103,12 @@ enum abstract Literal(String) {
 
 enum abstract CompletionItemKind<T>(String) {
     var CILocal = "Local";
-    var CIMember:CompletionItemKind<JsonFieldKind<Dynamic>> = "Member";
-    var CIStatic:CompletionItemKind<JsonFieldKind<Dynamic>> = "Static";
+    var CIMember:CompletionItemKind<JsonClassField> = "Member";
+    var CIStatic:CompletionItemKind<JsonClassField> = "Static";
     var CIEnumField:CompletionItemKind<JsonEnumField> = "EnumField";
-    var CIEnumAbstractField:CompletionItemKind<JsonFieldKind<Dynamic>> = "EnumAbstractField";
+    var CIEnumAbstractField:CompletionItemKind<JsonClassField> = "EnumAbstractField";
     var CIGlobal = "Global";
-    var CIType:CompletionItemKind<JsonType<Dynamic>> = "Type";
+    var CIType:CompletionItemKind<JsonModuleType<Dynamic>> = "Type";
     var CIPackage:CompletionItemKind<String> = "Package";
     var CIModule:CompletionItemKind<String> = "Module";
     var CILiteral:CompletionItemKind<Literal> = "Literal";
