@@ -113,6 +113,8 @@ class CompletionFeature {
                 var write = fieldKind.args.write.kind;
                 switch [read, write] {
                     case [AccNormal, AccNormal]: Field;
+                    case [AccNormal, AccCtor]: Field; // final
+                    case [AccNormal, AccNever]: Field; // static final
                     case [AccInline, _] if (kind == EnumAbstractField): EnumMember;
                     case [AccInline, _]: Constant;
                     case _: Property;
