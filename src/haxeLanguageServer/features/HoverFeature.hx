@@ -54,7 +54,7 @@ class HoverFeature {
                                 return reject(new ResponseError(0, "No type information"));
                             var type = switch (parseDisplayType(s)) {
                                 case DTFunction(args, ret):
-                                    printFunctionDeclaration(args, ret, {argumentTypeHints: true, returnTypeHint: Always, useArrowSyntax: false, prefixPackages: false});
+                                    printFunctionType(args, ret);
                                 case DTValue(type):
                                     if (type == null) "unknown" else type;
                             };

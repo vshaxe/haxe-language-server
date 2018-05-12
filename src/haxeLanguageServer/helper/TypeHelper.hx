@@ -85,6 +85,18 @@ class TypeHelper {
         return result;
     }
 
+    public static function printFunctionType(args:Array<DisplayFunctionArgument>, ret:Null<String>) {
+        var result = new StringBuf();
+        result.addChar("(".code);
+        for (i in 0...args.length) {
+            if (i > 0) result.add(", ");
+            result.add(printSignatureArgument(i, args[i], true, false));
+        }
+        result.add(") -> ");
+        result.add(if (ret == null) "Unknown" else ret);
+        return result.toString();
+    }
+
     public static function parseFunctionArgumentType(argument:String):DisplayType {
         if (argument.startsWith("?"))
             argument = argument.substr(1);
