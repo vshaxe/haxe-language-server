@@ -375,7 +375,7 @@ class Context {
         actualArgs = actualArgs.concat([
             "--times",
             "-D", "macro-times",
-            "-D", "eval-times"
+            // "-D", "eval-times" // TODO: toggle button?
         ]);
         actualArgs.push("--display");
         actualArgs = actualArgs.concat(args); // finally, add given query args
