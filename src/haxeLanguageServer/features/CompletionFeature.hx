@@ -92,10 +92,6 @@ class CompletionFeature {
                 label = Std.string(item.args);
                 kind = Keyword;
 
-            case Timer:
-                label = item.args.name;
-                kind = Value;
-
             case Metadata:
                 label = item.args.name;
                 kind = Function;

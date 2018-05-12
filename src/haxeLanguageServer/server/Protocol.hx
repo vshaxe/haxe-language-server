@@ -116,7 +116,6 @@ enum abstract CompletionItemKind<T>(String) {
     var Package:CompletionItemKind<String> = "Package";
     var Module:CompletionItemKind<String> = "Module";
     var Literal:CompletionItemKind<Literal> = "Literal";
-    var Timer:CompletionItemKind<Timer> = "Timer";
     var Metadata:CompletionItemKind<JsonMetadataEntry> = "Metadata";
 }
 
