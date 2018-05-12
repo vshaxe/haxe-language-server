@@ -44,8 +44,8 @@ class DocHelper {
         function replaceNewlines(s:String, by:String) return s.replace("\n", by).replace("\r", by);
         function mapDocTags(tags) return tags.map(function(p) {
             var desc = replaceNewlines(p.doc, " ");
-            return tableLine("`" + p.value + "`", desc); }
-        ).join("");
+            return tableLine("`" + p.value + "`", desc);
+        }).join("");
 
         doc = trim(doc);
         var docInfos = JavadocHelper.parse(doc);

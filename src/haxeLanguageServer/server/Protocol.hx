@@ -98,6 +98,12 @@ typedef CompletionParams = {
 
 typedef HaxeTODO = Dynamic;
 
+typedef Global<T> = {
+    var modulePath:JsonPath;
+    var name:String;
+    var type:JsonType<T>;
+}
+
 enum abstract Literal(String) {
     var Null = "null";
     var True = "true";
@@ -111,7 +117,7 @@ enum abstract CompletionItemKind<T>(String) {
     var Static:CompletionItemKind<JsonClassField> = "Static";
     var EnumField:CompletionItemKind<JsonEnumField> = "EnumField";
     var EnumAbstractField:CompletionItemKind<JsonClassField> = "EnumAbstractField";
-    var Global = "Global";
+    var Global:CompletionItemKind<Global<Dynamic>> = "Global";
     var Type:CompletionItemKind<JsonModuleType<Dynamic>> = "Type";
     var Package:CompletionItemKind<String> = "Package";
     var Module:CompletionItemKind<String> = "Module";

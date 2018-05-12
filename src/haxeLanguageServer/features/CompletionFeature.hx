@@ -75,10 +75,12 @@ class CompletionFeature {
                 kind = EnumMember;
 
             case Global:
+                label = item.args.name;
+                kind = getKindForType(item.args.type);
 
             case Type:
                 label = item.args.name;
-                kind = getKindForType(item.args);
+                kind = getKindForModuleType(item.args);
 
             case Package:
                 label = item.args;
@@ -126,7 +128,14 @@ class CompletionFeature {
         return meta.exists(meta -> meta.name == ":op" || meta.name == ":resolve" || meta.name == ":arrayAccess");
     }
 
-    function getKindForType<T>(type:JsonModuleType<T>):CompletionItemKind {
+    function getKindForType<T>(type:JsonType<T>):CompletionItemKind {
+        return switch (type.kind) {
+            case TFun: Function;
+            case _: Field;
+        }
+    }
+
+    function getKindForModuleType<T>(type:JsonModuleType<T>):CompletionItemKind {
         inline function typed<T>(type:JsonType<T>) return type;
         return switch (type.kind) {
             case Class if (type.args.isInterface): Interface;
