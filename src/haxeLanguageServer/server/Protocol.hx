@@ -54,13 +54,15 @@ typedef Timer = {
     final info:String;
     final time:Float;
     final calls:Int;
-    final children:Array<Timer>;
+    final percentTotal:Float;
+    final percentParent:Float;
+    @:optional final children:Array<Timer>;
 }
 
 typedef Response<T> = {
     final result:T;
     /** Only sent if `--times` is enabled. **/
-    @:optional final timers:Array<Timer>;
+    @:optional final timers:Timer;
 }
 
 /* Initialize */

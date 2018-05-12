@@ -351,8 +351,9 @@ class Context {
                         errback(response.error.message);
                     else {
                         var haxeResponse:Response<Dynamic> = response.result;
-                        // callback(haxeResponse.result);
-                        callback(response.result);
+                        callback(haxeResponse.result);
+                        if (haxeResponse.timers != null)
+                            protocol.sendNotification(LanguageServerMethods.UpdateTimers, {method: method, times: haxeResponse.timers});
                     }
                 case DCancelled:
             }
@@ -369,6 +370,12 @@ class Context {
         actualArgs = actualArgs.concat([
             "-D", "display-details", // get more details in completion results,
             "--no-output", // prevent any generation
+        ]);
+        // TODO: only do this if the tree view is enabled
+        actualArgs = actualArgs.concat([
+            "--times",
+            "-D", "macro-times",
+            "-D", "eval-times"
         ]);
         actualArgs.push("--display");
         actualArgs = actualArgs.concat(args); // finally, add given query args
