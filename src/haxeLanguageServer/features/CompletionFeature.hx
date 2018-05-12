@@ -131,11 +131,13 @@ class CompletionFeature {
     }
 
     function getKindForType<T>(type:JsonModuleType<T>):CompletionItemKind {
+        inline function typed<T>(type:JsonType<T>) return type;
         return switch (type.kind) {
             case Class if (type.args.isInterface): Interface;
             case Abstract if (type.meta.exists(meta -> meta.name == ":enum")): Enum;
+            case Typedef if (typed(type.args.type).kind == TAnonymous): Struct;
+            case Typedef: Interface;
             case Enum: Enum;
-            case Typedef: Struct;
             case _: Class;
         }
     }
