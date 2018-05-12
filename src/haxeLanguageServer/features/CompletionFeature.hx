@@ -67,20 +67,20 @@ class CompletionFeature {
         var kind = CompletionItemKind.Variable;
 
         switch (item.kind) {
-            case CILocal:
+            case Local:
                 // TODO: define TVar
 
-            case CIMember | CIStatic | CIEnumAbstractField:
+            case Member | Static | EnumAbstractField:
                 label = item.args.name;
                 kind = getFieldKindKind(label, item.kind, item.args);
 
-            case CIEnumField:
+            case EnumField:
                 label = item.args.name;
                 kind = EnumMember;
 
-            case CIGlobal:
+            case Global:
 
-            case CIType:
+            case Type:
                 inline function typed<T>(type:JsonModuleType<T>) return type;
                 label = item.args.name;
                 var type = typed(item.args);
@@ -91,23 +91,23 @@ class CompletionFeature {
                     case Abstract: Class;
                 }
 
-            case CIPackage:
+            case Package:
                 label = item.args;
                 kind = Module;
 
-            case CIModule:
+            case Module:
                 label = item.args;
                 kind = Class;
 
-            case CILiteral:
+            case Literal:
                 label = Std.string(item.args);
                 kind = Keyword;
 
-            case CITimer:
+            case Timer:
                 label = item.args.name;
                 kind = Value;
 
-            case CIMetadata:
+            case Metadata:
                 label = item.args.name;
                 kind = Function;
         }
@@ -126,12 +126,12 @@ class CompletionFeature {
                 var write = fieldKind.args.write.kind;
                 switch [read, write] {
                     case [AccNormal, AccNormal]: Field;
-                    case [AccInline, _] if (kind == CIEnumAbstractField): EnumMember;
+                    case [AccInline, _] if (kind == EnumAbstractField): EnumMember;
                     case [AccInline, _]: Constant;
                     case _: Property;
                 }
             case FMethod if (hasOperatorMeta(field.meta)): Operator;
-            case FMethod if (kind == CIStatic): Function;
+            case FMethod if (kind == Static): Function;
             case FMethod if (name == "new"): Constructor;
             case FMethod: Method;
         }

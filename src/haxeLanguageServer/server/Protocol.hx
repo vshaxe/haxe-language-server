@@ -95,25 +95,25 @@ typedef Timer = {
 }
 
 enum abstract Literal(String) {
-    var LNull = "null";
-    var LTrue = "true";
-    var LFalse = "false";
-    var LThis = "this";
+    var Null = "null";
+    var True = "true";
+    var False = "false";
+    var This = "this";
 }
 
 enum abstract CompletionItemKind<T>(String) {
-    var CILocal = "Local";
-    var CIMember:CompletionItemKind<JsonClassField> = "Member";
-    var CIStatic:CompletionItemKind<JsonClassField> = "Static";
-    var CIEnumField:CompletionItemKind<JsonEnumField> = "EnumField";
-    var CIEnumAbstractField:CompletionItemKind<JsonClassField> = "EnumAbstractField";
-    var CIGlobal = "Global";
-    var CIType:CompletionItemKind<JsonModuleType<Dynamic>> = "Type";
-    var CIPackage:CompletionItemKind<String> = "Package";
-    var CIModule:CompletionItemKind<String> = "Module";
-    var CILiteral:CompletionItemKind<Literal> = "Literal";
-    var CITimer:CompletionItemKind<Timer> = "Timer";
-    var CIMetadata:CompletionItemKind<JsonMetadataEntry> = "Metadata";
+    var Local = "Local";
+    var Member:CompletionItemKind<JsonClassField> = "Member";
+    var Static:CompletionItemKind<JsonClassField> = "Static";
+    var EnumField:CompletionItemKind<JsonEnumField> = "EnumField";
+    var EnumAbstractField:CompletionItemKind<JsonClassField> = "EnumAbstractField";
+    var Global = "Global";
+    var Type:CompletionItemKind<JsonModuleType<Dynamic>> = "Type";
+    var Package:CompletionItemKind<String> = "Package";
+    var Module:CompletionItemKind<String> = "Module";
+    var Literal:CompletionItemKind<Literal> = "Literal";
+    var Timer:CompletionItemKind<Timer> = "Timer";
+    var Metadata:CompletionItemKind<JsonMetadataEntry> = "Metadata";
 }
 
 typedef CompletionItem<T> = {
