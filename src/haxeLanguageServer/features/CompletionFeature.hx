@@ -68,7 +68,7 @@ class CompletionFeature {
 
             case Member | Static | EnumAbstractField:
                 label = item.args.name;
-                kind = getFieldKindKind(label, item.kind, item.args);
+                kind = getKindForField(label, item.kind, item.args);
 
             case EnumField:
                 label = item.args.name;
@@ -77,15 +77,8 @@ class CompletionFeature {
             case Global:
 
             case Type:
-                inline function typed<T>(type:JsonModuleType<T>) return type;
                 label = item.args.name;
-                var type = typed(item.args);
-                kind = switch (type.kind) {
-                    case Class: if (type.args.isInterface) Interface else Class;
-                    case Enum: Enum;
-                    case Typedef: Struct;
-                    case Abstract: Class;
-                }
+                kind = getKindForType(item.args);
 
             case Package:
                 label = item.args;
@@ -114,7 +107,7 @@ class CompletionFeature {
         };
     }
 
-    function getFieldKindKind<T>(name:String, kind:HaxeCompletionItemKind<JsonClassField>, field:JsonClassField):CompletionItemKind {
+    function getKindForField<T>(name:String, kind:HaxeCompletionItemKind<JsonClassField>, field:JsonClassField):CompletionItemKind {
         var fieldKind:JsonFieldKind<T> = field.kind;
         return switch (fieldKind.kind) {
             case FVar:
@@ -135,5 +128,15 @@ class CompletionFeature {
 
     function hasOperatorMeta(meta:JsonMetadata) {
         return meta.exists(meta -> meta.name == ":op" || meta.name == ":resolve" || meta.name == ":arrayAccess");
+    }
+
+    function getKindForType<T>(type:JsonModuleType<T>):CompletionItemKind {
+        return switch (type.kind) {
+            case Class if (type.args.isInterface): Interface;
+            case Abstract if (type.meta.exists(meta -> meta.name == ":enum")): Enum;
+            case Enum: Enum;
+            case Typedef: Struct;
+            case _: Class;
+        }
     }
 }
