@@ -18,22 +18,22 @@ class HaxeMethods {
     /**
        Completion.
     **/
-    static inline var Completion = new HaxeRequestMethod<CompletionParams,Array<CompletionItem<Dynamic>>>("textDocument/completion");
+    static inline var Completion = new HaxeRequestMethod<CompletionParams,CompletionResult>("textDocument/completion");
 
     /**
         The goto definition request is sent from the client to Haxe to resolve the definition location(s) of a symbol at a given text document position.
     **/
-    static inline var GotoDefinition = new HaxeRequestMethod<PositionParams,Array<Location>>("textDocument/definition");
+    static inline var GotoDefinition = new HaxeRequestMethod<PositionParams,GotoDefinitionResult>("textDocument/definition");
 
     /**
         The hover request is sent from the client to Haxe to request hover information at a given text document position.
     **/
-    static inline var Hover = new HaxeRequestMethod<PositionParams,Null<HoverResult>>("textDocument/hover");
+    static inline var Hover = new HaxeRequestMethod<PositionParams,HoverResult>("textDocument/hover");
 
     /**
         This request is sent from the client to Haxe to determine the package for a given file, based on class paths configuration.
     **/
-    static inline var DeterminePackage = new HaxeRequestMethod<FileParams,Array<String>>("textDocument/package");
+    static inline var DeterminePackage = new HaxeRequestMethod<FileParams,DeterminePackageResult>("textDocument/package");
 
     /*
         TODO:
@@ -46,6 +46,21 @@ class HaxeMethods {
         - workspaceSymbols ("project/symbol"?)
         - documentSymbols ("textDocument/documentSymbol"?)
     */
+}
+
+typedef Timer = {
+    final name:String;
+    final path:String;
+    final info:String;
+    final time:Float;
+    final calls:Int;
+    final children:Array<Timer>;
+}
+
+typedef Response<T> = {
+    final result:T;
+    /** Only sent if `--times` is enabled. **/
+    @:optional final timers:Array<Timer>;
 }
 
 /* Initialize */
@@ -68,17 +83,9 @@ typedef HaxeCapabilities = {
     @:optional var packageProvider:Bool;
 }
 
-typedef InitializeResult = {
+typedef InitializeResult = Response<{
     var capabilities:HaxeCapabilities;
-}
-
-/* Hover */
-
-typedef HoverResult = {
-    var range:Range;
-    @:optional var documentation:String;
-    @:optional var type:JsonType<Dynamic>;
-}
+}>;
 
 /* Completion */
 
@@ -88,11 +95,6 @@ typedef CompletionParams = {
 }
 
 typedef HaxeTODO = Dynamic;
-
-typedef Timer = {
-    var name:String;
-    var value:String;
-}
 
 enum abstract Literal(String) {
     var Null = "null";
@@ -121,6 +123,24 @@ typedef CompletionItem<T> = {
     var args:T;
 }
 
+typedef CompletionResult = Response<Array<CompletionItem<Dynamic>>>;
+
+/* GotoDefinition */
+
+typedef GotoDefinitionResult = Response<Array<Location>>;
+
+/* Hover */
+
+typedef HoverResult = Response<Null<{
+    var range:Range;
+    @:optional var documentation:String;
+    @:optional var type:JsonType<Dynamic>;
+}>>;
+
+/* DeterminePackage */
+
+typedef DeterminePackageResult = Response<Array<String>>;
+
 /* General types */
 
 typedef FileParams = {
@@ -129,10 +149,7 @@ typedef FileParams = {
 
 typedef PositionParams = {
     > FileParams,
-
-    /**
-        Unicode character offset in the file.
-    **/
+    /** Unicode character offset in the file. **/
     var offset:Int;
 }
 

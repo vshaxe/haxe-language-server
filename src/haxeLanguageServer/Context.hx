@@ -15,6 +15,7 @@ import haxeLanguageServer.helper.TypeHelper.FunctionFormattingConfig;
 import haxeLanguageServer.helper.ImportHelper;
 import haxeLanguageServer.server.DisplayResult;
 import haxeLanguageServer.server.HaxeServer;
+import haxeLanguageServer.server.Protocol.Response;
 import haxeLanguageServer.server.Protocol.HaxeRequestMethod;
 
 private typedef FunctionGenerationConfig = {
@@ -326,7 +327,7 @@ class Context {
             diagnostics.publishDiagnostics(uri);
     }
 
-    public function callHaxeMethod<P,R>(method:HaxeRequestMethod<P,R>, ?params:P, stdin:String, token:CancellationToken, callback:R->Void, errback:(error:String)->Void) {
+    public function callHaxeMethod<P,R>(method:HaxeRequestMethod<P,Response<R>>, ?params:P, stdin:String, token:CancellationToken, callback:R->Void, errback:(error:String)->Void) {
         // TODO: avoid duplicating jsonrpc.Protocol logic
         var id = nextRequestId++;
         var request:RequestMessage = {
@@ -348,8 +349,11 @@ class Context {
                     }
                     if (Reflect.hasField(response, "error"))
                         errback(response.error.message);
-                    else
+                    else {
+                        var haxeResponse:Response<Dynamic> = response.result;
+                        // callback(haxeResponse.result);
                         callback(response.result);
+                    }
                 case DCancelled:
             }
         }, error -> {
