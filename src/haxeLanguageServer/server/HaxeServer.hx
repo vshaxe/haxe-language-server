@@ -31,6 +31,7 @@ class HaxeServer {
     var crashes:Int = 0;
 
     public var version(default,null):SemVer;
+    public var supportsJsonRpc(default,null):Bool;
     public var capabilities(default,null):HaxeCapabilities;
 
     public function new(context:Context) {
@@ -46,6 +47,7 @@ class HaxeServer {
             return;
         }
 
+        supportsJsonRpc = false;
         startRequest = null;
         stop();
 
@@ -104,13 +106,14 @@ class HaxeServer {
 
         stopProgressCallback = context.startProgress("Initializing Haxe/JSON-RPC protocol");
         context.callHaxeMethod(HaxeMethods.Initialize, null, null, null, result -> {
+            supportsJsonRpc = true;
             capabilities = result.capabilities;
             stopProgress();
             buildCompletionCache();
         }, error -> {
             // the "invalid format" error is expected for Haxe versions <= 4.0.0-preview.3
             if (error.startsWith("Error: Invalid format")) {
-                trace("Haxe does not support JSON-RPC, using legacy --display API.");
+                trace("Haxe version does not support JSON-RPC, using legacy --display API.");
             } else {
                 trace(error);
             }

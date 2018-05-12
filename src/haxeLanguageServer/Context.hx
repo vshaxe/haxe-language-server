@@ -33,9 +33,10 @@ private typedef CodeGenerationConfig = {
 }
 
 private typedef Config = {
-    var enableDiagnostics:Bool;
-    var diagnosticsPathFilter:String;
     var enableCodeLens:Bool;
+    var enableDiagnostics:Bool;
+    var enableMethodsView:Bool;
+    var diagnosticsPathFilter:String;
     var displayPort:Null<EitherType<Int, String>>;
     var buildCompletionCache:Bool;
     var codeGeneration:CodeGenerationConfig;
@@ -74,9 +75,10 @@ class Context {
         this.protocol = protocol;
         haxeServer = new HaxeServer(this);
         defaultConfig = {
-            enableDiagnostics: true,
-            diagnosticsPathFilter: "${workspaceRoot}",
             enableCodeLens: false,
+            enableDiagnostics: true,
+            enableMethodsView: false,
+            diagnosticsPathFilter: "${workspaceRoot}",
             displayPort: null,
             buildCompletionCache: true,
             codeGeneration: {},
@@ -371,12 +373,13 @@ class Context {
             "-D", "display-details", // get more details in completion results,
             "--no-output", // prevent any generation
         ]);
-        // TODO: only do this if the tree view is enabled
-        actualArgs = actualArgs.concat([
-            "--times",
-            "-D", "macro-times",
-            // "-D", "eval-times" // TODO: toggle button?
-        ]);
+        if (haxeServer.supportsJsonRpc && config.enableMethodsView) {
+            actualArgs = actualArgs.concat([
+                "--times",
+                "-D", "macro-times",
+                // "-D", "eval-times" // TODO: toggle button?
+            ]);
+        }
         actualArgs.push("--display");
         actualArgs = actualArgs.concat(args); // finally, add given query args
         haxeServer.process(actualArgs, token, true, stdin, Processed(callback, errback));
