@@ -9,12 +9,14 @@ import haxeLanguageServer.helper.TypeHelper.prepareSignature;
 import haxeLanguageServer.helper.TypeHelper.parseDisplayType;
 import haxeLanguageServer.server.Protocol;
 import haxeLanguageServer.server.Protocol.CompletionItem as HaxeCompletionItem;
+import haxeLanguageServer.server.Protocol.CompletionItemKind as HaxeCompletionItemKind;
 import languageServerProtocol.protocol.Protocol.CompletionParams;
 import languageServerProtocol.Types.CompletionItem;
 import languageServerProtocol.Types.CompletionItemKind;
 import haxe.extern.EitherType;
 import haxe.rtti.JsonModuleTypes;
 import String.fromCharCode;
+using Lambda;
 
 class CompletionFeature {
     final context:Context;
@@ -68,35 +70,20 @@ class CompletionFeature {
             case CILocal:
                 // TODO: define TVar
 
-            case CIMember:
+            case CIMember | CIStatic | CIEnumAbstractField:
                 label = item.args.name;
-                // TODO: CompletionItemKind.Property
-                kind = if (item.args.kind.kind == JsonFieldKindKind.FMethod) {
-                    if (item.args.name == "new") Constructor;
-                    else Method;
-                } else Field;
-
-            case CIStatic:
-                label = item.args.name;
-                // TODO: CompletionItemKind.Property
-                kind = if (item.args.kind.kind == JsonFieldKindKind.FMethod) Function;
-                    else Field;
+                kind = getFieldKindKind(label, item.kind, item.args);
 
             case CIEnumField:
                 label = item.args.name;
                 kind = EnumMember;
 
-            case CIEnumAbstractField:
-                label = item.args.name;
-                // TODO: stuff that isn't enum values
-                kind = EnumMember;
-
             case CIGlobal:
 
             case CIType:
-                inline function map<T>(type:JsonModuleType<T>) return type;
+                inline function typed<T>(type:JsonModuleType<T>) return type;
                 label = item.args.name;
-                var type = map(item.args);
+                var type = typed(item.args);
                 kind = switch (type.kind) {
                     case Class: if (type.args.isInterface) Interface else Class;
                     case Enum: Enum;
@@ -114,7 +101,7 @@ class CompletionFeature {
 
             case CILiteral:
                 label = Std.string(item.args);
-                kind = Constant;
+                kind = Keyword;
 
             case CITimer:
                 label = item.args.name;
@@ -129,6 +116,29 @@ class CompletionFeature {
             label: label,
             kind: kind
         };
+    }
+
+    function getFieldKindKind<T>(name:String, kind:HaxeCompletionItemKind<JsonClassField>, field:JsonClassField):CompletionItemKind {
+        var fieldKind:JsonFieldKind<T> = field.kind;
+        return switch (fieldKind.kind) {
+            case FVar:
+                var read = fieldKind.args.read.kind;
+                var write = fieldKind.args.write.kind;
+                switch [read, write] {
+                    case [AccNormal, AccNormal]: Field;
+                    case [AccInline, _] if (kind == CIEnumAbstractField): EnumMember;
+                    case [AccInline, _]: Constant;
+                    case _: Property;
+                }
+            case FMethod if (hasOperatorMeta(field.meta)): Operator;
+            case FMethod if (kind == CIStatic): Function;
+            case FMethod if (name == "new"): Constructor;
+            case FMethod: Method;
+        }
+    }
+
+    function hasOperatorMeta(meta:JsonMetadata) {
+        return meta.exists(meta -> meta.name == ":op" || meta.name == ":resolve" || meta.name == ":arrayAccess");
     }
 
     function handleLegacy(params:CompletionParams, token:CancellationToken, resolve:Array<CompletionItem>->Void, reject:ResponseError<NoData>->Void, doc:TextDocument) {
