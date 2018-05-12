@@ -53,6 +53,8 @@ class DocHelper {
         var hasParams = docInfos.params.length > 0;
         var hasReturn = docInfos.returns != null;
 
+        result += "\n";
+
         if (docInfos.deprecated != null)
             result += "\n**Deprecated:** " + docInfos.deprecated.doc + "\n";
 
