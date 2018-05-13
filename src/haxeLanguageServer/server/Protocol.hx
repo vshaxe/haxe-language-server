@@ -164,7 +164,7 @@ typedef SignatureInformation = {
 typedef SignatureItem = {
     var signatures:Array<SignatureInformation>;
     var activeSignature:Int;
-    var activateParameter:Int;
+    var activeParameter:Int;
 }
 
 typedef SignatureResult = Response<SignatureItem>;

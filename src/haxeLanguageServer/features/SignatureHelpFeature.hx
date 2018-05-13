@@ -41,7 +41,7 @@ class SignatureHelpFeature {
         var printer = new haxe.rtti.JsonModuleTypesPrinter();
         function createSignatureParameter(arg:JsonFunctionArgument):ParameterInformation {
             return {
-                label: '${arg.opt ? "?" : ""}${arg.name}:${printer.printType(arg.t)}'
+                label: printer.printFunctionArgument(arg)
             }
         }
         function createSignatureInformation(info:HaxeSignatureInformation):SignatureInformation {
@@ -56,7 +56,7 @@ class SignatureHelpFeature {
         }
         return {
             activeSignature: item.activeSignature,
-            activeParameter: item.activateParameter,
+            activeParameter: item.activeParameter,
             signatures: item.signatures.map(createSignatureInformation)
         };
     }
