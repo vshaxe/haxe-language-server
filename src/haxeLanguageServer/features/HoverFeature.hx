@@ -17,13 +17,12 @@ class HoverFeature {
 
     function onHover(params:TextDocumentPositionParams, token:CancellationToken, resolve:Hover->Void, reject:ResponseError<NoData>->Void) {
         var doc = context.documents.get(params.textDocument.uri);
-        var bytePos = context.displayOffsetConverter.characterOffsetToByteOffset(doc.content, doc.offsetAt(params.position));
         var handle = if (context.haxeServer.capabilities.hoverProvider) handleJsonRpc else handleLegacy;
-        handle(params, token, resolve, reject, doc, bytePos);
+        handle(params, token, resolve, reject, doc, doc.offsetAt(params.position));
     }
 
-    function handleJsonRpc(params:TextDocumentPositionParams, token:CancellationToken, resolve:Hover->Void, reject:ResponseError<NoData>->Void, doc:TextDocument, bytePos:Int) {
-        context.callHaxeMethod(HaxeMethods.Hover, {file: doc.fsPath, offset: bytePos}, doc.content, token, hover -> {
+    function handleJsonRpc(params:TextDocumentPositionParams, token:CancellationToken, resolve:Hover->Void, reject:ResponseError<NoData>->Void, doc:TextDocument, offset:Int) {
+        context.callHaxeMethod(HaxeMethods.Hover, {file: doc.fsPath, offset: offset}, doc.content, token, hover -> {
             var content = if (hover.type != null) {
                 var printer = new haxe.rtti.JsonModuleTypesPrinter();
                 printer.printType(hover.type);
@@ -34,7 +33,8 @@ class HoverFeature {
         }, error -> reject(ResponseError.internalError(error)));
     }
 
-    function handleLegacy(params:TextDocumentPositionParams, token:CancellationToken, resolve:Hover->Void, reject:ResponseError<NoData>->Void, doc:TextDocument, bytePos:Int) {
+    function handleLegacy(params:TextDocumentPositionParams, token:CancellationToken, resolve:Hover->Void, reject:ResponseError<NoData>->Void, doc:TextDocument, offset:Int) {
+        var bytePos = context.displayOffsetConverter.characterOffsetToByteOffset(doc.content, offset);
         var args = ['${doc.fsPath}@$bytePos@type'];
         context.callDisplay(args, doc.content, token, function(r) {
             switch (r) {

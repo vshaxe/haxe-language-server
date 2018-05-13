@@ -51,9 +51,9 @@ class CompletionFeature {
     }
 
     function handleJsonRpc(params:CompletionParams, token:CancellationToken, resolve:Array<CompletionItem>->Void, reject:ResponseError<NoData>->Void, doc:TextDocument) {
-        var bytePos = context.displayOffsetConverter.characterOffsetToByteOffset(doc.content, doc.offsetAt(params.position));
+        var offset = doc.offsetAt(params.position);
         var wasAutoTriggered = params.context == null ? true : params.context.triggerKind == TriggerCharacter;
-        context.callHaxeMethod(HaxeMethods.Completion, {file: doc.fsPath, offset: bytePos, wasAutoTriggered: wasAutoTriggered}, doc.content, token, result -> {
+        context.callHaxeMethod(HaxeMethods.Completion, {file: doc.fsPath, offset: offset, wasAutoTriggered: wasAutoTriggered}, doc.content, token, result -> {
             resolve(result.map(createCompletionItem));
         }, error -> reject(ResponseError.internalError(error)));
     }

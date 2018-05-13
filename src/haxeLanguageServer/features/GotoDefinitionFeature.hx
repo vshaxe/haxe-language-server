@@ -15,13 +15,12 @@ class GotoDefinitionFeature {
 
     public function onGotoDefinition(params:TextDocumentPositionParams, token:CancellationToken, resolve:Definition->Void, reject:ResponseError<NoData>->Void) {
         var doc = context.documents.get(params.textDocument.uri);
-        var bytePos = context.displayOffsetConverter.characterOffsetToByteOffset(doc.content, doc.offsetAt(params.position));
         var handle = if (context.haxeServer.capabilities.definitionProvider) handleJsonRpc else handleLegacy;
-        handle(params, token, resolve, reject, doc, bytePos);
+        handle(params, token, resolve, reject, doc, doc.offsetAt(params.position));
     }
 
-    function handleJsonRpc(params:TextDocumentPositionParams, token:CancellationToken, resolve:Definition->Void, reject:ResponseError<NoData>->Void, doc:TextDocument, bytePos:Int) {
-        context.callHaxeMethod(HaxeMethods.GotoDefinition, {file: doc.fsPath, offset: bytePos}, doc.content, token, locations -> {
+    function handleJsonRpc(params:TextDocumentPositionParams, token:CancellationToken, resolve:Definition->Void, reject:ResponseError<NoData>->Void, doc:TextDocument, offset:Int) {
+        context.callHaxeMethod(HaxeMethods.GotoDefinition, {file: doc.fsPath, offset: offset}, doc.content, token, locations -> {
             resolve(locations.map(location -> {
                 {
                     uri: location.file.toUri(),
@@ -31,7 +30,8 @@ class GotoDefinitionFeature {
         }, error -> reject(ResponseError.internalError(error)));
     }
 
-    function handleLegacy(params:TextDocumentPositionParams, token:CancellationToken, resolve:Definition->Void, reject:ResponseError<NoData>->Void, doc:TextDocument, bytePos:Int) {
+    function handleLegacy(params:TextDocumentPositionParams, token:CancellationToken, resolve:Definition->Void, reject:ResponseError<NoData>->Void, doc:TextDocument, offset:Int) {
+        var bytePos = context.displayOffsetConverter.characterOffsetToByteOffset(doc.content, offset);
         var args = ['${doc.fsPath}@$bytePos@position'];
         context.callDisplay(args, doc.content, token, function(r) {
             switch (r) {
