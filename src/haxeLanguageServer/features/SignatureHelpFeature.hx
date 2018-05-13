@@ -2,7 +2,10 @@ package haxeLanguageServer.features;
 
 import haxeLanguageServer.helper.ArgumentNameHelper.addNamesToSignatureType;
 import haxeLanguageServer.helper.DocHelper;
-import haxeLanguageServer.server.Protocol;
+import haxeLanguageServer.server.Protocol.HaxeMethods;
+import haxeLanguageServer.server.Protocol.SignatureItem as HaxeSignatureItem;
+import haxeLanguageServer.server.Protocol.SignatureParameter as HaxeSignatureParameter;
+import haxeLanguageServer.server.Protocol.SignatureInformation as HaxeSignatureInformation;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
@@ -34,14 +37,14 @@ class SignatureHelpFeature {
         }, error -> reject(ResponseError.internalError(error)));
     }
 
-    function createSignatureHelp(item:SignatureItem):SignatureHelp {
+    function createSignatureHelp(item:HaxeSignatureItem):SignatureHelp {
         var printer = new haxe.rtti.JsonModuleTypesPrinter();
-        function createSignatureParameter(arg:SignatureParameter):ParameterInformation {
+        function createSignatureParameter(arg:HaxeSignatureParameter):ParameterInformation {
             return {
                 label: '${arg.opt ? "?" : ""}${arg.name}:${printer.printType(arg.t)}' + (arg.defaultValue != null ? " = " + arg.defaultValue : "")
             }
         }
-        function createSignatureInformation(info:SignatureInformation):languageServerProtocol.Types.SignatureInformation { // Gama save me
+        function createSignatureInformation(info:HaxeSignatureInformation):SignatureInformation {
             return {
                 label: printer.printType({kind: TFun, args: {args: info.parameters, ret: info.returnType}}),
                 documentation: {
