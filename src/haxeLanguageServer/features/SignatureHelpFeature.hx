@@ -2,6 +2,7 @@ package haxeLanguageServer.features;
 
 import haxeLanguageServer.helper.ArgumentNameHelper.addNamesToSignatureType;
 import haxeLanguageServer.helper.DocHelper;
+import haxeLanguageServer.server.Protocol;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
@@ -22,6 +23,42 @@ class SignatureHelpFeature {
 
     function onSignatureHelp(params:TextDocumentPositionParams, token:CancellationToken, resolve:SignatureHelp->Void, reject:ResponseError<NoData>->Void) {
         var doc = context.documents.get(params.textDocument.uri);
+        var handle = if (context.haxeServer.capabilities.signatureHelpProvider) handleJsonRpc else handleLegacy;
+        handle(params, token, resolve, reject, doc);
+    }
+
+    function handleJsonRpc(params:TextDocumentPositionParams, token:CancellationToken, resolve:SignatureHelp->Void, reject:ResponseError<NoData>->Void, doc:TextDocument) {
+        var wasAutoTriggered = true; // TODO: doesn't seem to be in the API?
+        context.callHaxeMethod(HaxeMethods.SignatureHelp, {file: doc.fsPath, offset: doc.offsetAt(params.position), wasAutoTriggered: wasAutoTriggered}, doc.content, token, result -> {
+            resolve(createSignatureHelp(result));
+        }, error -> reject(ResponseError.internalError(error)));
+    }
+
+    function createSignatureHelp(item:SignatureItem):SignatureHelp {
+        var printer = new haxe.rtti.JsonModuleTypesPrinter();
+        function createSignatureParameter(arg:SignatureParameter):ParameterInformation {
+            return {
+                label: '${arg.opt ? "?" : ""}${arg.name}:${printer.printType(arg.t)}' + (arg.defaultValue != null ? " = " + arg.defaultValue : "")
+            }
+        }
+        function createSignatureInformation(info:SignatureInformation):languageServerProtocol.Types.SignatureInformation { // Gama save me
+            return {
+                label: printer.printType({kind: TFun, args: {args: info.parameters, ret: info.returnType}}),
+                documentation: {
+                    kind: MarkupKind.MarkDown,
+                    value: DocHelper.markdownFormat(info.documentation)
+                },
+                parameters: info.parameters.map(createSignatureParameter)
+            }
+        }
+        return {
+            activeSignature: item.activeSignature,
+            activeParameter: item.activateParameter,
+            signatures: item.signatures.map(createSignatureInformation)
+        };
+    }
+
+    function handleLegacy(params:TextDocumentPositionParams, token:CancellationToken, resolve:SignatureHelp->Void, reject:ResponseError<NoData>->Void, doc:TextDocument) {
         var bytePos = context.displayOffsetConverter.characterOffsetToByteOffset(doc.content, doc.offsetAt(params.position));
         var args = ['${doc.fsPath}@$bytePos@signature'];
         context.callDisplay(args, doc.content, token, function(r) {

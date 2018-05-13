@@ -35,6 +35,11 @@ class HaxeMethods {
     **/
     static inline var DeterminePackage = new HaxeRequestMethod<FileParams,DeterminePackageResult>("textDocument/package");
 
+    /**
+        Signature.
+    **/
+    static inline var SignatureHelp = new HaxeRequestMethod<CompletionParams,SignatureResult>("textDocument/signatureHelp");
+
     /*
         TODO:
 
@@ -83,6 +88,7 @@ typedef HaxeCapabilities = {
     @:optional var definitionProvider:Bool;
     @:optional var completionProvider:Bool;
     @:optional var packageProvider:Bool;
+    @:optional var signatureHelpProvider:Bool;
 }
 
 typedef InitializeResult = Response<{
@@ -147,6 +153,27 @@ typedef HoverResult = Response<Null<{
 /* DeterminePackage */
 
 typedef DeterminePackageResult = Response<Array<String>>;
+
+/* Signature */
+
+typedef SignatureParameter = {
+    > JsonFunctionArgument,
+    var defaultValue:String;
+}
+
+typedef SignatureInformation = {
+    @:optional var documentation:String;
+    var parameters:Array<SignatureParameter>;
+    var returnType:JsonType<Dynamic>;
+}
+
+typedef SignatureItem = {
+    var signatures:Array<SignatureInformation>;
+    var activeSignature:Int;
+    var activateParameter:Int;
+}
+
+typedef SignatureResult = Response<SignatureItem>;
 
 /* General types */
 
