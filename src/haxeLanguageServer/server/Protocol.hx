@@ -156,15 +156,9 @@ typedef DeterminePackageResult = Response<Array<String>>;
 
 /* Signature */
 
-typedef SignatureParameter = {
-    > JsonFunctionArgument,
-    var defaultValue:String;
-}
-
 typedef SignatureInformation = {
+    > JsonFunctionSignature,
     @:optional var documentation:String;
-    var parameters:Array<SignatureParameter>;
-    var returnType:JsonType<Dynamic>;
 }
 
 typedef SignatureItem = {

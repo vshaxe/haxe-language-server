@@ -1,10 +1,10 @@
 package haxeLanguageServer.features;
 
+import haxe.rtti.JsonModuleTypes.JsonFunctionArgument;
 import haxeLanguageServer.helper.ArgumentNameHelper.addNamesToSignatureType;
 import haxeLanguageServer.helper.DocHelper;
 import haxeLanguageServer.server.Protocol.HaxeMethods;
 import haxeLanguageServer.server.Protocol.SignatureItem as HaxeSignatureItem;
-import haxeLanguageServer.server.Protocol.SignatureParameter as HaxeSignatureParameter;
 import haxeLanguageServer.server.Protocol.SignatureInformation as HaxeSignatureInformation;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
@@ -39,19 +39,19 @@ class SignatureHelpFeature {
 
     function createSignatureHelp(item:HaxeSignatureItem):SignatureHelp {
         var printer = new haxe.rtti.JsonModuleTypesPrinter();
-        function createSignatureParameter(arg:HaxeSignatureParameter):ParameterInformation {
+        function createSignatureParameter(arg:JsonFunctionArgument):ParameterInformation {
             return {
-                label: '${arg.opt ? "?" : ""}${arg.name}:${printer.printType(arg.t)}' + (arg.defaultValue != null ? " = " + arg.defaultValue : "")
+                label: '${arg.opt ? "?" : ""}${arg.name}:${printer.printType(arg.t)}'
             }
         }
         function createSignatureInformation(info:HaxeSignatureInformation):SignatureInformation {
             return {
-                label: printer.printType({kind: TFun, args: {args: info.parameters, ret: info.returnType}}),
+                label: printer.printType({kind: TFun, args: {args: info.args, ret: info.ret}}),
                 documentation: {
                     kind: MarkupKind.MarkDown,
                     value: DocHelper.markdownFormat(info.documentation)
                 },
-                parameters: info.parameters.map(createSignatureParameter)
+                parameters: info.args.map(createSignatureParameter)
             }
         }
         return {
