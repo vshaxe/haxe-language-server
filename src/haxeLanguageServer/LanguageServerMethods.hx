@@ -1,7 +1,7 @@
 package haxeLanguageServer;
 
 import jsonrpc.Types;
-import haxeLanguageServer.server.Protocol.Timer;
+import haxeLanguageServer.server.Protocol.Response;
 
 /**
     Custom, Haxe-Language-Server-specific methods that are not part of the Language Server Protocol.
@@ -62,7 +62,7 @@ class LanguageServerMethods {
     static inline var DidChangeDisplayPort = new NotificationMethod<{port:Int},NoData>("haxe/didChangeDisplayPort");
 
     /**
-        This notification is sent from the server to the client when there are new timers from display requests.
+        This notification is sent from the server to the client when there a Haxe JSON-RPC method was executed.
     **/
-    static inline var UpdateTimers = new NotificationMethod<{method:String, times:Timer},NoData>("haxe/updateTimers");
+    static inline var DidRunHaxeMethod = new NotificationMethod<{method:String, response:Response<Dynamic>},NoData>("haxe/didRunHaxeMethod");
 }

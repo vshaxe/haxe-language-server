@@ -354,8 +354,7 @@ class Context {
                     else {
                         var haxeResponse:Response<Dynamic> = response.result;
                         callback(haxeResponse.result);
-                        if (haxeResponse.timers != null)
-                            protocol.sendNotification(LanguageServerMethods.UpdateTimers, {method: method, times: haxeResponse.timers});
+                        protocol.sendNotification(LanguageServerMethods.DidRunHaxeMethod, {method: method, response: haxeResponse});
                     }
                 case DCancelled:
             }
