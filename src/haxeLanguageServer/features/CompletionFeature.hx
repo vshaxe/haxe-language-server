@@ -59,7 +59,7 @@ class CompletionFeature {
             for (item in result.items) {
                 var completionItem = createCompletionItem(item);
                 if (result.sorted) {
-                    completionItem.sortText = "_" + counter++;
+                    completionItem.sortText = StringTools.lpad(Std.string(counter++), "0", 10);
                 }
                 if (result.replaceRange != null) {
                     completionItem.textEdit = {
