@@ -94,8 +94,8 @@ class CompletionFeature {
                 kind = getKindForType(item.args.type);
 
             case Type:
-                label = item.args.name;
-                kind = getKindForModuleType(item.args);
+                label = item.args.path.name;
+                kind = item.args.kind;
 
             case Package:
                 label = item.args;
@@ -149,18 +149,6 @@ class CompletionFeature {
         return switch (type.kind) {
             case TFun: Function;
             case _: Field;
-        }
-    }
-
-    function getKindForModuleType<T>(type:JsonModuleType<T>):CompletionItemKind {
-        inline function typed<T>(type:JsonType<T>) return type;
-        return switch (type.kind) {
-            case Class if (type.args.isInterface): Interface;
-            case Abstract if (type.meta.exists(meta -> meta.name == ":enum")): Enum;
-            case Typedef if (typed(type.args.type).kind == TAnonymous): Struct;
-            case Typedef: Interface;
-            case Enum: Enum;
-            case _: Class;
         }
     }
 }
