@@ -136,8 +136,17 @@ typedef CompletionItem<T> = {
     var args:T;
 }
 
+enum abstract CompletionResultKind(Int) {
+    var Field = 0;
+    var StructureField = 1;
+    var Toplevel = 2;
+    var Metadata = 3;
+}
+
 typedef CompletionResponse<T> = {
     var items:Array<CompletionItem<T>>;
+    var kind:CompletionResultKind;
+    var sorted:Bool;
     @:optional var replaceRange:Range;
 }
 

@@ -54,11 +54,26 @@ class CompletionFeature {
         var offset = doc.offsetAt(params.position);
         var wasAutoTriggered = params.context == null ? true : params.context.triggerKind == TriggerCharacter;
         context.callHaxeMethod(HaxeMethods.Completion, {file: doc.fsPath, offset: offset, wasAutoTriggered: wasAutoTriggered}, doc.content, token, result -> {
-            resolve(result.items.map(createCompletionItem.bind(result.replaceRange)));
+            var items = [];
+            var counter = 0;
+            for (item in result.items) {
+                var completionItem = createCompletionItem(item);
+                if (result.sorted) {
+                    completionItem.sortText = "_" + counter++;
+                }
+                if (result.replaceRange != null) {
+                    completionItem.textEdit = {
+                        range: result.replaceRange,
+                        newText: completionItem.label
+                    }
+                }
+                items.push(completionItem);
+            };
+            resolve(items);
         }, error -> reject(ResponseError.internalError(error)));
     }
 
-    function createCompletionItem<T>(replaceRange:Null<Range>, item:HaxeCompletionItem<T>):CompletionItem {
+    function createCompletionItem<T>(item:HaxeCompletionItem<T>):CompletionItem {
         var label = "";
         var kind = CompletionItemKind.Variable;
 
@@ -99,17 +114,10 @@ class CompletionFeature {
                 kind = Function;
         }
 
-        var item:CompletionItem = {
+        return {
             label: label,
             kind: kind
         };
-        if (replaceRange != null) {
-            item.textEdit = {
-                range: replaceRange,
-                newText: label
-            }
-        }
-        return item;
     }
 
     function getKindForField<T>(name:String, kind:HaxeCompletionItemKind<JsonClassField>, field:JsonClassField):CompletionItemKind {
