@@ -136,7 +136,12 @@ typedef CompletionItem<T> = {
     var args:T;
 }
 
-typedef CompletionResult = Response<Array<CompletionItem<Dynamic>>>;
+typedef CompletionResponse<T> = {
+    var items:Array<CompletionItem<T>>;
+    @:optional var replaceRange:Range;
+}
+
+typedef CompletionResult = Response<CompletionResponse<Dynamic>>;
 
 /* GotoDefinition */
 
