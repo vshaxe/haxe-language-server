@@ -103,8 +103,6 @@ typedef CompletionParams = {
     var wasAutoTriggered:Bool;
 }
 
-typedef HaxeTODO = Dynamic;
-
 typedef Global<T> = {
     var modulePath:JsonPath;
     var name:String;
@@ -121,6 +119,29 @@ enum abstract Literal(String) {
 typedef CompletionType = {
     var path:JsonPath;
     var kind:VSCodeCompletionItemKind;
+}
+
+extern enum abstract ModuleTypeKind(Int) {
+    var Class = 0;
+    var Interface = 1;
+    var Enum = 2;
+    var Abstract = 3;
+    var EnumAbstract = 4;
+    var TypeAlias = 5;
+    var Struct = 6;
+}
+
+typedef ModuleType = {
+    var pack:Array<String>;
+    var name:String;
+    var module:String;
+    var pos:JsonPos;
+    var isPrivate:Bool;
+    var params:JsonTypeParameters;
+    var meta:JsonMetadata;
+    var doc:JsonDoc;
+    var isExtern:Bool;
+    var kind:ModuleTypeKind;
 }
 
 enum abstract CompletionItemKind<T>(String) {
