@@ -121,7 +121,7 @@ typedef CompletionType = {
     var kind:VSCodeCompletionItemKind;
 }
 
-extern enum abstract ModuleTypeKind(Int) {
+enum abstract ModuleTypeKind(Int) {
     var Class = 0;
     var Interface = 1;
     var Enum = 2;
@@ -137,11 +137,62 @@ typedef ModuleType = {
     var module:String;
     var pos:JsonPos;
     var isPrivate:Bool;
-    var params:JsonTypeParameters;
+    var params:Array<ModuleTypeParameter>;
     var meta:JsonMetadata;
     var doc:JsonDoc;
     var isExtern:Bool;
     var kind:ModuleTypeKind;
+}
+
+typedef ModuleTypeParameter = {
+    var name:String;
+    var meta:JsonMetadata;
+}
+
+enum abstract MetadataUsage(String) {
+    var Class = "TClass";
+    var ClassField = "ClassField";
+    var Abstract = "TAbstract";
+    var AbstractField = "TAbstractField";
+    var Enum = "TEnum";
+    var Typedef = "TTypedef";
+    var AnyField = "TAnyField";
+    var Expr = "TExpr";
+    var TypeParameter = "TTypeParameter";
+}
+
+enum abstract Platform(String) {
+    var Cross = "Cross";
+    var Js = "Js";
+    var Lua = "Lua";
+    var Neko = "Neko";
+    var Flash = "Flash";
+    var Php = "Php";
+    var Cpp = "Cpp";
+    var Cs = "Cs";
+    var Java = "Java";
+    var Python = "Python";
+    var Hl = "Hl";
+    var Eval = "Eval";
+}
+
+enum abstract MetadataParameterKind<T>(String) {
+    var HasParam:MetadataParameterKind<String> = "HasParam";
+    var Platform:MetadataParameterKind<Platform> = "Platform";
+    var Platforms:MetadataParameterKind<Array<Platform>> = "Platforms";
+    var UsedOn:MetadataParameterKind<MetadataUsage> = "UsedOn";
+    var UsedOnEither:MetadataParameterKind<Array<MetadataUsage>> = "UsedOnEither";
+}
+
+typedef MetadataParameter<T> = {
+    var kind:MetadataParameterKind<T>;
+    var args:T;
+}
+
+typedef Metadata<T> = {
+    var name:String;
+    var doc:JsonDoc;
+    var parameters:Array<MetadataParameter<T>>;
 }
 
 enum abstract CompletionItemKind<T>(String) {
