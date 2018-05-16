@@ -94,8 +94,8 @@ class CompletionFeature {
                 kind = getKindForType(item.args.type);
 
             case Type:
-                label = item.args.path.name;
-                kind = item.args.kind;
+                label = item.args.name;
+                kind = convertSomeKindtoAnother(item.args.kind);
 
             case Package:
                 label = item.args;
@@ -118,6 +118,18 @@ class CompletionFeature {
             label: label,
             kind: kind
         };
+    }
+
+    function convertSomeKindtoAnother(kind:ModuleTypeKind):CompletionItemKind {
+        return switch (kind) {
+            case Class: Class;
+            case Interface: Interface;
+            case Enum: Enum;
+            case Abstract: Class;
+            case EnumAbstract: Enum;
+            case TypeAlias: Interface;
+            case Struct: Struct;
+        }
     }
 
     function getKindForField<T>(name:String, kind:HaxeCompletionItemKind<JsonClassField>, field:JsonClassField):CompletionItemKind {

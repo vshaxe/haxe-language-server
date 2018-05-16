@@ -2,7 +2,6 @@ package haxeLanguageServer.server;
 
 import jsonrpc.Types;
 import haxe.rtti.JsonModuleTypes;
-import languageServerProtocol.Types.CompletionItemKind as VSCodeCompletionItemKind;
 
 // TODO: use URIs instead of fs paths?
 
@@ -116,11 +115,6 @@ enum abstract Literal(String) {
     var This = "this";
 }
 
-typedef CompletionType = {
-    var path:JsonPath;
-    var kind:VSCodeCompletionItemKind;
-}
-
 enum abstract ModuleTypeKind(Int) {
     var Class = 0;
     var Interface = 1;
@@ -202,7 +196,7 @@ enum abstract CompletionItemKind<T>(String) {
     var EnumField:CompletionItemKind<JsonEnumField> = "EnumField";
     var EnumAbstractField:CompletionItemKind<JsonClassField> = "EnumAbstractField";
     var Global:CompletionItemKind<Global<Dynamic>> = "Global";
-    var Type:CompletionItemKind<CompletionType> = "Type";
+    var Type:CompletionItemKind<ModuleType> = "Type";
     var Package:CompletionItemKind<String> = "Package";
     var Module:CompletionItemKind<String> = "Module";
     var Literal:CompletionItemKind<Literal> = "Literal";
