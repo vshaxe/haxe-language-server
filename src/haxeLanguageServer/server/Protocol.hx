@@ -7,6 +7,7 @@ import haxe.rtti.JsonModuleTypes;
 
 /**
     Methods of the JSON-RPC-based `--display` protocol in Haxe 4.
+    A lot of the methods are *inspired* by the Language Server Protocol, but there is **no** intention to be directly compatible with it.
 **/
 @:publicFields
 class HaxeMethods {
@@ -16,7 +17,8 @@ class HaxeMethods {
     static inline var Initialize = new HaxeRequestMethod<InitializeParams,InitializeResult>("initialize");
 
     /**
-       Completion.
+        The completion request is sent from the client to Haxe to request code completion.
+        Haxe automatically determines the type of completion to use based on the passed position, see `CompletionResultKind`.
     **/
     static inline var Completion = new HaxeRequestMethod<CompletionParams,CompletionResult>("textDocument/completion");
 
@@ -36,7 +38,7 @@ class HaxeMethods {
     static inline var DeterminePackage = new HaxeRequestMethod<FileParams,DeterminePackageResult>("textDocument/package");
 
     /**
-        Signature.
+        The signature help request is sent from the client to Haxe to request signature information at a given cursor position.
     **/
     static inline var SignatureHelp = new HaxeRequestMethod<CompletionParams,SignatureResult>("textDocument/signatureHelp");
 
@@ -54,6 +56,9 @@ class HaxeMethods {
 
     /* Server */
 
+    /**
+        This request is sent from the client to Haxe to explore the class paths. This effectively creates a cache for toplevel completion.
+    **/
     static inline var ReadClassPaths = new HaxeRequestMethod<NoData,Response<NoData>>("server/readClassPaths");
 }
 
@@ -125,8 +130,32 @@ enum abstract ModuleTypeKind(Int) {
     var Enum = 2;
     var Abstract = 3;
     var EnumAbstract = 4;
+    /** A `typedef` that is just an alias for another type. **/
     var TypeAlias = 5;
+    /** A `typedef` that is an alias for an anonymous structure. **/
     var Struct = 6;
+}
+
+enum abstract ImportStatus(Int) {
+    /**
+        This type is already available with it's unqualified name for one of these reasons:
+          - it's a toplevel type
+          - it's imported with an `import` in the current module
+          - it's imported in an `import.hx` file
+    **/
+    var Imported = 0;
+
+    /**
+        The type is currently not imported. It can be accessed either
+        with its fully qualified name or by inserting an import.
+    **/
+    var Unimported = 1;
+
+    /**
+        A type with the same name is already imported in the module.
+        The fully qualified name has to be used to access it.
+    **/
+    var Shadowed = 2;
 }
 
 typedef ModuleType = {
@@ -140,6 +169,7 @@ typedef ModuleType = {
     var doc:JsonDoc;
     var isExtern:Bool;
     var kind:ModuleTypeKind;
+    var importStatus:ImportStatus;
 }
 
 typedef ModuleTypeParameter = {
@@ -217,6 +247,7 @@ enum abstract CompletionResultKind(Int) {
     var StructureField = 1;
     var Toplevel = 2;
     var Metadata = 3;
+    // TODO: complete this. what other kinds are there, "type hint" completion, "extends" completion..?
 }
 
 typedef CompletionResponse<T> = {
