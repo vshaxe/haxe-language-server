@@ -51,6 +51,10 @@ class HaxeMethods {
         - workspaceSymbols ("project/symbol"?)
         - documentSymbols ("textDocument/documentSymbol"?)
     */
+
+    /* Server */
+
+    static inline var ReadClassPaths = new HaxeRequestMethod<{},Response<String>>("server/readClassPaths");
 }
 
 typedef Timer = {

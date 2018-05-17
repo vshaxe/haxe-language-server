@@ -143,6 +143,7 @@ class HaxeServer {
         process(context.displayArguments.concat(["--no-output"]), null, true, null, Processed(function(_) {
             stopProgress();
             trace("Done.");
+            context.callHaxeMethod(HaxeMethods.ReadClassPaths, null, null, null, result -> { }, error -> { });
         }, function(errorMessage) {
             stopProgress();
             trace("Failed - try fixing the error(s) and restarting the language server:\n\n" + errorMessage);
