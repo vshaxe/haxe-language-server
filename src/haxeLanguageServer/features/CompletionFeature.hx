@@ -67,6 +67,9 @@ class CompletionFeature {
             var counter = 0;
             for (item in result.items) {
                 var completionItem = createCompletionItem(item);
+                if (completionItem == null) {
+                    continue;
+                }
                 if (result.sorted) {
                     completionItem.sortText = StringTools.lpad(Std.string(counter++), "0", 10);
                 }
@@ -103,10 +106,15 @@ class CompletionFeature {
                 kind = getKindForType(item.args.type);
 
             case Type:
-                label = item.args.name;
-                if (item.args.pack.length > 0)
-                    label = item.args.pack.join(".") + "." + label;
-                kind = getKindForModuleType(item.args);
+                var type = item.args;
+                if (type.isPrivate) {
+                    return null; // TODO: show private types from the current module
+                }
+
+                label = type.name;
+                if (type.pack.length > 0)
+                    label = type.pack.join(".") + "." + label;
+                kind = getKindForModuleType(type);
 
             case Package:
                 label = item.args;

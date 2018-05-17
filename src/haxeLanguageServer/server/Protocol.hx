@@ -159,9 +159,8 @@ enum abstract ImportStatus(Int) {
 }
 
 typedef ModuleType = {
-    var pack:Array<String>;
-    var name:String;
-    var module:String;
+    >JsonPath,
+    var moduleName:String;
     var pos:JsonPos;
     var isPrivate:Bool;
     var params:Array<ModuleTypeParameter>;
