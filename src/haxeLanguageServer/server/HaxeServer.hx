@@ -162,7 +162,6 @@ class HaxeServer {
             stopProgress();
             trace("Failed - " + error);
         });
-        return true;
     }
 
     function startCompletionInitializationProgress(part:Int) {
@@ -171,7 +170,7 @@ class HaxeServer {
             message += ' ($part/2)';
         }
         stopProgressCallback = context.startProgress(message);
-        trace(message);
+        trace(message + "...");
     }
 
     function hasNonCancellableRequests():Bool {
