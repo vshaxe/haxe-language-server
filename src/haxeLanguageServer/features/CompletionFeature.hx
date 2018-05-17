@@ -106,15 +106,7 @@ class CompletionFeature {
                 kind = getKindForType(item.args.type);
 
             case Type:
-                var type = item.args;
-                if (type.isPrivate) {
-                    return null; // TODO: show private types from the current module
-                }
-
-                label = type.name;
-                if (type.pack.length > 0)
-                    label = type.pack.join(".") + "." + label;
-                kind = getKindForModuleType(type);
+                return createTypeCompletionItem(item.args);
 
             case Package:
                 label = item.args;
@@ -169,6 +161,21 @@ class CompletionFeature {
             case TFun: Function;
             case _: Field;
         }
+    }
+
+    function createTypeCompletionItem(type:ModuleType):CompletionItem {
+        if (type.isPrivate) {
+            return null; // TODO: show private types from the current module
+        }
+
+        var label = type.name;
+        if (type.pack.length > 0)
+            label = type.pack.join(".") + "." + label;
+
+        return {
+            label: label,
+            kind: getKindForModuleType(type)
+        };
     }
 
     function getKindForModuleType(type:ModuleType):CompletionItemKind {
