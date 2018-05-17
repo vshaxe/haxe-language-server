@@ -101,7 +101,8 @@ class HaxeServer {
             definitionProvider: false,
             hoverProvider: false,
             completionProvider: false,
-            packageProvider: false
+            packageProvider: false,
+            signatureHelpProvider: false
         };
 
         stopProgressCallback = context.startProgress("Initializing Haxe/JSON-RPC protocol");
@@ -135,19 +136,42 @@ class HaxeServer {
     }
 
     function buildCompletionCache() {
-        if (!context.config.buildCompletionCache || context.displayArguments == null) {
+        if (!context.config.buildCompletionCache || context.displayArguments == null)
             return;
-        }
-        stopProgressCallback = context.startProgress("Initializing Completion");
-        trace("Initializing completion cache...");
+
+        startCompletionInitializationProgress(1);
         process(context.displayArguments.concat(["--no-output"]), null, true, null, Processed(function(_) {
             stopProgress();
-            trace("Done.");
-            context.callHaxeMethod(HaxeMethods.ReadClassPaths, null, null, null, result -> { }, error -> { });
-        }, function(errorMessage) {
+            if (supportsJsonRpc) {
+                readClassPaths();
+            } else {
+                trace("Done.");
+            }
+        }, function(error) {
             stopProgress();
-            trace("Failed - try fixing the error(s) and restarting the language server:\n\n" + errorMessage);
+            trace("Failed - try fixing the error(s) and restarting the language server:\n\n" + error);
         }));
+    }
+
+    function readClassPaths() {
+        startCompletionInitializationProgress(2);
+        context.callHaxeMethod(HaxeMethods.ReadClassPaths, null, null, null, _ -> {
+            stopProgress();
+            trace("Done.");
+        }, error -> {
+            stopProgress();
+            trace("Failed - " + error);
+        });
+        return true;
+    }
+
+    function startCompletionInitializationProgress(part:Int) {
+        var message = "Initializing Completion";
+        if (supportsJsonRpc) {
+            message += ' ($part/2)';
+        }
+        stopProgressCallback = context.startProgress(message);
+        trace(message);
     }
 
     function hasNonCancellableRequests():Bool {
