@@ -22,9 +22,8 @@ class CompletionFeatureLegacy {
     }
 
     public function handle(params:CompletionParams, token:CancellationToken, resolve:Array<CompletionItem>->Void, reject:ResponseError<NoData>->Void, doc:TextDocument, offset:Int, textBefore:String) {
-        if (contextSupport && !isValidCompletionPosition(params.context, textBefore)) {
-            resolve([]);
-            return;
+        if (contextSupport && isInvalidCompletionPosition(params.context, textBefore)) {
+            return resolve([]);
         }
         var r = calculateCompletionPosition(textBefore, offset);
         var bytePos = context.displayOffsetConverter.characterOffsetToByteOffset(doc.content, r.pos);
@@ -44,8 +43,8 @@ class CompletionFeatureLegacy {
     }
 
     static final reCaseOrDefault = ~/\b(case|default)\b[^:]*:$/;
-    static function isValidCompletionPosition(context:CompletionContext, text:String):Bool {
-        return context.triggerCharacter != ":" || !reCaseOrDefault.match(text);
+    static function isInvalidCompletionPosition(context:CompletionContext, text:String):Bool {
+        return context.triggerCharacter == ":" && reCaseOrDefault.match(text);
     }
 
     static final reFieldPart = ~/(\.|@(:?))(\w*)$/;
