@@ -44,13 +44,19 @@ class CompletionFeature {
         markdownSupport = documentationFormat.indexOf(MarkDown) != -1;
     }
 
+    static final reExtendsOrImplements = ~/\b(extends|implements) $/;
     function onCompletion(params:CompletionParams, token:CancellationToken, resolve:Array<CompletionItem>->Void, reject:ResponseError<NoData>->Void) {
         var doc = context.documents.get(params.textDocument.uri);
+        var offset = doc.offsetAt(params.position);
+        var textBefore = doc.content.substring(0, offset);
+        if (contextSupport && params.context.triggerCharacter == " " && !reExtendsOrImplements.match(textBefore)) {
+            return resolve([]);
+        }
         var handle = if (context.haxeServer.capabilities.completionProvider) handleJsonRpc else legacy.handle;
-        handle(params, token, resolve, reject, doc);
+        handle(params, token, resolve, reject, doc, offset, textBefore);
     }
 
-    function handleJsonRpc(params:CompletionParams, token:CancellationToken, resolve:Array<CompletionItem>->Void, reject:ResponseError<NoData>->Void, doc:TextDocument) {
+    function handleJsonRpc(params:CompletionParams, token:CancellationToken, resolve:Array<CompletionItem>->Void, reject:ResponseError<NoData>->Void, doc:TextDocument, offset:Int, _) {
         var offset = doc.offsetAt(params.position);
         var wasAutoTriggered = params.context == null ? true : params.context.triggerKind == TriggerCharacter;
         context.callHaxeMethod(HaxeMethods.Completion, {file: doc.fsPath, offset: offset, wasAutoTriggered: wasAutoTriggered}, doc.content, token, result -> {

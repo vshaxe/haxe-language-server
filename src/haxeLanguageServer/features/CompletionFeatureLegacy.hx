@@ -21,9 +21,7 @@ class CompletionFeatureLegacy {
         this.markdownSupport = markdownSupport;
     }
 
-    public function handle(params:CompletionParams, token:CancellationToken, resolve:Array<CompletionItem>->Void, reject:ResponseError<NoData>->Void, doc:TextDocument) {
-        var offset = doc.offsetAt(params.position);
-        var textBefore = doc.content.substring(0, offset);
+    public function handle(params:CompletionParams, token:CancellationToken, resolve:Array<CompletionItem>->Void, reject:ResponseError<NoData>->Void, doc:TextDocument, offset:Int, textBefore:String) {
         if (contextSupport && !isValidCompletionPosition(params.context, textBefore)) {
             resolve([]);
             return;
