@@ -95,6 +95,8 @@ class CompletionFeature {
 
             case Type:
                 label = item.args.name;
+                if (item.args.pack.length > 0)
+                    label = item.args.pack.join(".") + "." + label;
                 kind = convertSomeKindtoAnother(item.args.kind);
 
             case Package:

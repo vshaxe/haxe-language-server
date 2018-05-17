@@ -54,7 +54,7 @@ class HaxeMethods {
 
     /* Server */
 
-    static inline var ReadClassPaths = new HaxeRequestMethod<{},Response<String>>("server/readClassPaths");
+    static inline var ReadClassPaths = new HaxeRequestMethod<NoData,Response<NoData>>("server/readClassPaths");
 }
 
 typedef Timer = {
