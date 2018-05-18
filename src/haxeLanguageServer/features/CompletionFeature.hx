@@ -212,20 +212,20 @@ class CompletionFeature {
             }
         };
 
-        switch (type.importStatus) {
-            case Imported:
-                item.label = unqualifiedName;
-                item.detail = "(imported)";
-            case Unimported:
-                if (isImportCompletion) {
-                    item.textEdit.newText += ";";
-                } else {
+        if (isImportCompletion) {
+            item.textEdit.newText += ";";
+        } else {
+            switch (type.importStatus) {
+                case Imported:
+                    item.label = unqualifiedName;
+                    item.detail = "(imported)";
+                case Unimported:
                     var edit = ImportHelper.createImportEdit(doc, importPosition, qualifiedName, importConfig.style);
                     item.additionalTextEdits = [edit];
                     item.detail = "Auto-import from " + containerName;
-                }
-            case Shadowed:
-                item.detail = "(shadowed)";
+                case Shadowed:
+                    item.detail = "(shadowed)";
+            }
         }
 
         if (resultKind == New && snippetSupport) {
