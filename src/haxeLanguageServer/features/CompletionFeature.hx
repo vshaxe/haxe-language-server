@@ -193,7 +193,7 @@ class CompletionFeature {
 
         var importConfig = context.config.codeGeneration.imports;
         var autoImport = importConfig.enableAutoImports;
-        if (type.importStatus == Shadowed) {
+        if (type.importStatus == Shadowed || resultKind == Import || resultKind == Using) {
             autoImport = false; // need to insert the qualified name
         }
 
@@ -216,9 +216,11 @@ class CompletionFeature {
                 item.label = unqualifiedName;
                 item.detail = "(imported)";
             case Unimported:
-                var edit = ImportHelper.createImportEdit(doc, importPosition, qualifiedName, importConfig.style);
-                item.additionalTextEdits = [edit];
-                item.detail = "Auto-import from " + containerName;
+                if (autoImport) {
+                    var edit = ImportHelper.createImportEdit(doc, importPosition, qualifiedName, importConfig.style);
+                    item.additionalTextEdits = [edit];
+                    item.detail = "Auto-import from " + containerName;
+                }
             case Shadowed:
                 item.detail = "(shadowed)";
         }
