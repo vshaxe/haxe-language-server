@@ -17,6 +17,7 @@ import haxeLanguageServer.server.DisplayResult;
 import haxeLanguageServer.server.HaxeServer;
 import haxeLanguageServer.server.Protocol.Response;
 import haxeLanguageServer.server.Protocol.HaxeRequestMethod;
+import haxeLanguageServer.LanguageServerMethods.HaxeMethodResult;
 
 private typedef FunctionGenerationConfig = {
     @:optional var anonymous:FunctionFormattingConfig;
@@ -354,8 +355,18 @@ class Context {
                         errback(response.error.message);
                     else {
                         var haxeResponse:Response<Dynamic> = response.result;
+
+                        var arrivalDate = Date.now().getTime();
                         callback(haxeResponse.result);
-                        protocol.sendNotification(LanguageServerMethods.DidRunHaxeMethod, {method: method, response: haxeResponse});
+                        var processedDate = Date.now().getTime();
+
+                        var methodResult:HaxeMethodResult = {
+                            method: method,
+                            arrivalDate: arrivalDate,
+                            processedDate: processedDate,
+                            response: haxeResponse
+                        };
+                        protocol.sendNotification(LanguageServerMethods.DidRunHaxeMethod, methodResult);
                     }
                 case DCancelled:
             }

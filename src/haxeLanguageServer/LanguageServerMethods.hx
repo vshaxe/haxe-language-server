@@ -64,5 +64,12 @@ class LanguageServerMethods {
     /**
         This notification is sent from the server to the client when there a Haxe JSON-RPC method was executed.
     **/
-    static inline var DidRunHaxeMethod = new NotificationMethod<{method:String, response:Response<Dynamic>},NoData>("haxe/didRunHaxeMethod");
+    static inline var DidRunHaxeMethod = new NotificationMethod<HaxeMethodResult,NoData>("haxe/didRunHaxeMethod");
+}
+
+typedef HaxeMethodResult = {
+    final method:String;
+    final arrivalDate:Float;
+    final processedDate:Float;
+    final response:Response<Dynamic>;
 }
