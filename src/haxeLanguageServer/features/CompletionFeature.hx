@@ -30,6 +30,7 @@ class CompletionFeature {
         legacy = new CompletionFeatureLegacy(context, contextSupport, formatDocumentation);
         printer = new JsonModuleTypesPrinter();
         context.protocol.onRequest(Methods.Completion, onCompletion);
+        context.protocol.onRequest(Methods.CompletionItemResolve, onCompletionItemResolve);
     }
 
     function checkCapabilities() {
@@ -74,15 +75,23 @@ class CompletionFeature {
 
     function handleJsonRpc(params:CompletionParams, token:CancellationToken, resolve:Array<CompletionItem>->Void, reject:ResponseError<NoData>->Void, doc:TextDocument, offset:Int, _) {
         var wasAutoTriggered = params.context == null ? true : params.context.triggerKind == TriggerCharacter;
-        context.callHaxeMethod(HaxeMethods.Completion, {file: doc.fsPath, offset: offset, wasAutoTriggered: wasAutoTriggered}, doc.content, token, result -> {
+        var params = {
+            file: doc.fsPath,
+            offset: offset,
+            wasAutoTriggered: wasAutoTriggered,
+            supportsResolve: true
+        };
+        context.callHaxeMethod(HaxeMethods.Completion, params, doc.content, token, result -> {
             var items = [];
             var counter = 0;
             var importPosition = ImportHelper.getImportPosition(doc);
-            for (item in result.items) {
+            for (i in 0...result.items.length) {
+                var item = result.items[i];
                 var completionItem = createCompletionItem(item, doc, result.replaceRange, importPosition, result.kind);
                 if (completionItem == null) {
                     continue;
                 }
+                completionItem.data = i;
                 if (result.sorted) {
                     completionItem.sortText = StringTools.lpad(Std.string(counter++), "0", 10);
                 }
@@ -205,12 +214,15 @@ class CompletionFeature {
         var item:CompletionItem = {
             label: qualifiedName,
             kind: getKindForModuleType(type),
-            documentation: formatDocumentation(type.doc),
             textEdit: {
                 range: replaceRange,
                 newText: if (autoImport) unqualifiedName else qualifiedName
             }
         };
+
+        if (type.doc != null) {
+            item.documentation = formatDocumentation(type.doc);
+        }
 
         if (isImportCompletion) {
             item.textEdit.newText += ";";
@@ -268,5 +280,22 @@ class CompletionFeature {
             };
         }
         return DocHelper.extractText(doc);
+    }
+
+    function onCompletionItemResolve(item:CompletionItem, token:CancellationToken, resolve:CompletionItem->Void, reject:ResponseError<NoData>->Void) {
+        context.callHaxeMethod(HaxeMethods.CompletionItemResolve, {index: item.data}, null, token, result -> {
+            resolveCompletionItem(result.item, item);
+            resolve(item);
+        }, error -> {
+            reject(ResponseError.internalError(error));
+        });
+    }
+
+    function resolveCompletionItem<T>(item:HaxeCompletionItem<T>, result:CompletionItem) {
+        switch (item.kind) {
+            case Type:
+                result.documentation = formatDocumentation(item.args.doc);
+            case _:
+        }
     }
 }

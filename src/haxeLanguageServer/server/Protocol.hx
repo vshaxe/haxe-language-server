@@ -43,7 +43,7 @@ class HaxeMethods {
     /**
         The signature help request is sent from the client to Haxe to request signature information at a given cursor position.
     **/
-    static inline var SignatureHelp = new HaxeRequestMethod<CompletionParams,SignatureResult>("textDocument/signatureHelp");
+    static inline var SignatureHelp = new HaxeRequestMethod<SignatureHelpParams,SignatureHelpResult>("textDocument/signatureHelp");
 
     /*
         TODO:
@@ -112,6 +112,7 @@ typedef InitializeResult = Response<{
 typedef CompletionParams = {
     > PositionParams,
     var wasAutoTriggered:Bool;
+    var supportsResolve:Bool;
 }
 
 typedef Global<T> = {
@@ -305,6 +306,11 @@ typedef DeterminePackageResult = Response<Array<String>>;
 
 /* Signature */
 
+typedef SignatureHelpParams = {
+    > PositionParams,
+    var wasAutoTriggered:Bool;
+}
+
 typedef SignatureInformation = {
     > JsonFunctionSignature,
     @:optional var documentation:String;
@@ -316,7 +322,7 @@ typedef SignatureItem = {
     var activeParameter:Int;
 }
 
-typedef SignatureResult = Response<SignatureItem>;
+typedef SignatureHelpResult = Response<SignatureItem>;
 
 /* General types */
 

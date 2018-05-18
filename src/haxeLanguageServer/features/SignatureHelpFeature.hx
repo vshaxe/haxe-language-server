@@ -31,8 +31,12 @@ class SignatureHelpFeature {
     }
 
     function handleJsonRpc(params:TextDocumentPositionParams, token:CancellationToken, resolve:SignatureHelp->Void, reject:ResponseError<NoData>->Void, doc:TextDocument) {
-        var wasAutoTriggered = true; // TODO: doesn't seem to be in the API?
-        context.callHaxeMethod(HaxeMethods.SignatureHelp, {file: doc.fsPath, offset: doc.offsetAt(params.position), wasAutoTriggered: wasAutoTriggered}, doc.content, token, result -> {
+        var params = {
+            file: doc.fsPath,
+            offset: doc.offsetAt(params.position),
+            wasAutoTriggered: true // TODO: send this once the API supports it (https://github.com/Microsoft/vscode/issues/34737)
+        }
+        context.callHaxeMethod(HaxeMethods.SignatureHelp, params, doc.content, token, result -> {
             resolve(createSignatureHelp(result));
         }, error -> reject(ResponseError.internalError(error)));
     }
