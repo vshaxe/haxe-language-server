@@ -67,9 +67,9 @@ class CompletionFeature {
         handle(params, token, resolve, reject, doc, offset, textBefore);
     }
 
-    static final reAutoTriggerOnSpace = ~/\b(extends|implements|case|new) $/;
+    static final autoTriggerOnSpacePattern = ~/\b(import|using|extends|implements|case|new|cast) $/;
     function isInvalidCompletionPosition(context:CompletionContext, text:String):Bool {
-        return context.triggerCharacter == " " && !reAutoTriggerOnSpace.match(text);
+        return context.triggerCharacter == " " && !autoTriggerOnSpacePattern.match(text);
     }
 
     function handleJsonRpc(params:CompletionParams, token:CancellationToken, resolve:Array<CompletionItem>->Void, reject:ResponseError<NoData>->Void, doc:TextDocument, offset:Int, _) {
