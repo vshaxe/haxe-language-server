@@ -248,7 +248,7 @@ enum abstract CompletionItemKind<T>(String) {
     var Package:CompletionItemKind<String> = "Package";
     var Module:CompletionItemKind<String> = "Module";
     var Literal:CompletionItemKind<Literally<Dynamic>> = "Literal";
-    var Metadata:CompletionItemKind<JsonMetadataEntry> = "Metadata";
+    var Metadata:CompletionItemKind<Metadata<Dynamic>> = "Metadata";
     var Keyword:CompletionItemKind<Keyword> = "Keyword";
 }
 

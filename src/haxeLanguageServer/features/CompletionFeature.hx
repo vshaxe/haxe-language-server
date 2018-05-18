@@ -104,6 +104,7 @@ class CompletionFeature {
         var label = "";
         var kind = CompletionItemKind.Variable;
         var type = null;
+        var docs = null;
 
         switch (item.kind) {
             case Local:
@@ -113,16 +114,19 @@ class CompletionFeature {
                 label = item.args.name;
                 kind = getKindForField(label, item.kind, item.args);
                 type = item.args.type;
+                docs = item.args.doc;
 
             case EnumField:
                 label = item.args.name;
                 kind = EnumMember;
                 type = item.args.type;
+                docs = item.args.doc;
 
             case Global:
                 label = item.args.name;
                 kind = getKindForType(item.args.type);
                 type = item.args.type;
+                // TODO: get the actual class field for proper icons / doc?
 
             case Type:
                 return createTypeCompletionItem(item.args, doc, replaceRange, importPosition, resultKind);
@@ -143,6 +147,7 @@ class CompletionFeature {
             case Metadata:
                 label = item.args.name;
                 kind = Function;
+                docs = item.args.doc;
 
             case Keyword:
                 label = item.args.name;
@@ -155,6 +160,9 @@ class CompletionFeature {
         };
         if (type != null) {
             item.detail = printer.printType(type);
+        }
+        if (docs != null) {
+            item.documentation = formatDocumentation(docs);
         }
         if (replaceRange != null) {
             item.textEdit = {range: replaceRange, newText: label};
