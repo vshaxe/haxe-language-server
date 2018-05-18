@@ -102,13 +102,15 @@ class CompletionFeature {
 
     function createCompletionItem<T>(item:HaxeCompletionItem<T>, doc:TextDocument, replaceRange:Range, importPosition:Position, resultKind:CompletionResultKind):CompletionItem {
         var label = "";
-        var kind = CompletionItemKind.Variable;
+        var kind = null;
         var type = null;
         var docs = null;
 
         switch (item.kind) {
             case Local:
-                // TODO: define TVar
+                label = item.args.name;
+                kind = Variable;
+                type = item.args.type;
 
             case Member | Static | EnumAbstractField:
                 label = item.args.name;
@@ -154,10 +156,10 @@ class CompletionFeature {
                 kind = Keyword;
         }
 
-        var item:CompletionItem = {
-            label: label,
-            kind: kind
-        };
+        var item:CompletionItem = {label: label};
+        if (kind != null) {
+            item.kind = kind;
+        }
         if (type != null) {
             item.detail = printer.printType(type);
         }

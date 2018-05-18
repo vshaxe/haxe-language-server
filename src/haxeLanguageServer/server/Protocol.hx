@@ -117,6 +117,19 @@ typedef CompletionParams = {
     var wasAutoTriggered:Bool;
 }
 
+typedef JsonLocal<T> = {
+    var id:Int;
+    var name:String;
+    var type:JsonType<T>;
+    var capture:Bool;
+    @:optional var extra:{
+        var params:Array<JsonTypeParameter>;
+        var expr:JsonExpr;
+    };
+    var meta:JsonMetadata;
+    var pos:JsonPos;
+}
+
 typedef Global<T> = {
     var modulePath:JsonPath;
     var name:String;
@@ -182,7 +195,7 @@ typedef ModuleTypeParameter = {
     var meta:JsonMetadata;
 }
 
-typedef Literally<T> = {
+typedef JsonLiteral<T> = {
     var name:String;
     var type:JsonType<T>;
 }
@@ -238,7 +251,7 @@ typedef Keyword = {
 }
 
 enum abstract CompletionItemKind<T>(String) {
-    var Local = "Local";
+    var Local:CompletionItemKind<JsonLocal<Dynamic>> = "Local";
     var Member:CompletionItemKind<JsonClassField> = "Member";
     var Static:CompletionItemKind<JsonClassField> = "Static";
     var EnumField:CompletionItemKind<JsonEnumField> = "EnumField";
@@ -247,7 +260,7 @@ enum abstract CompletionItemKind<T>(String) {
     var Type:CompletionItemKind<ModuleType> = "Type";
     var Package:CompletionItemKind<String> = "Package";
     var Module:CompletionItemKind<String> = "Module";
-    var Literal:CompletionItemKind<Literally<Dynamic>> = "Literal";
+    var Literal:CompletionItemKind<JsonLiteral<Dynamic>> = "Literal";
     var Metadata:CompletionItemKind<Metadata<Dynamic>> = "Metadata";
     var Keyword:CompletionItemKind<Keyword> = "Keyword";
 }
