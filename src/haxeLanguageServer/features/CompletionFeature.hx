@@ -191,9 +191,10 @@ class CompletionFeature {
             return null; // TODO: show private types from the current module
         }
 
+        var isImportCompletion = resultKind == Import || resultKind == Using;
         var importConfig = context.config.codeGeneration.imports;
         var autoImport = importConfig.enableAutoImports;
-        if (type.importStatus == Shadowed || resultKind == Import || resultKind == Using) {
+        if (isImportCompletion || type.importStatus == Shadowed) {
             autoImport = false; // need to insert the qualified name
         }
 
@@ -216,7 +217,9 @@ class CompletionFeature {
                 item.label = unqualifiedName;
                 item.detail = "(imported)";
             case Unimported:
-                if (autoImport) {
+                if (isImportCompletion) {
+                    item.textEdit.newText += ";";
+                } else {
                     var edit = ImportHelper.createImportEdit(doc, importPosition, qualifiedName, importConfig.style);
                     item.additionalTextEdits = [edit];
                     item.detail = "Auto-import from " + containerName;
