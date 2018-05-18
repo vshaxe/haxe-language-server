@@ -3,8 +3,6 @@ package haxeLanguageServer.server;
 import jsonrpc.Types;
 import haxe.display.JsonModuleTypes;
 
-// TODO: use URIs instead of fs paths?
-
 /**
     Methods of the JSON-RPC-based `--display` protocol in Haxe 4.
     A lot of the methods are *inspired* by the Language Server Protocol, but there is **no** intention to be directly compatible with it.
