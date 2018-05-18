@@ -1,7 +1,7 @@
 package haxeLanguageServer.server;
 
 import jsonrpc.Types;
-import haxe.rtti.JsonModuleTypes;
+import haxe.display.JsonModuleTypes;
 
 // TODO: use URIs instead of fs paths?
 

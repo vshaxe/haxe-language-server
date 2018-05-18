@@ -1,6 +1,6 @@
 package haxeLanguageServer.features;
 
-import haxe.rtti.JsonModuleTypes.JsonFunctionArgument;
+import haxe.display.JsonModuleTypes.JsonFunctionArgument;
 import haxeLanguageServer.helper.ArgumentNameHelper.addNamesToSignatureType;
 import haxeLanguageServer.helper.DocHelper;
 import haxeLanguageServer.server.Protocol.HaxeMethods;
@@ -38,7 +38,7 @@ class SignatureHelpFeature {
     }
 
     function createSignatureHelp(item:HaxeSignatureItem):SignatureHelp {
-        var printer = new haxe.rtti.JsonModuleTypesPrinter();
+        var printer = new haxe.display.JsonModuleTypesPrinter();
         function createSignatureParameter(arg:JsonFunctionArgument):ParameterInformation {
             return {
                 label: printer.printFunctionArgument(arg)

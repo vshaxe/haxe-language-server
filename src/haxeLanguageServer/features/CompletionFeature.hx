@@ -11,7 +11,7 @@ import haxeLanguageServer.helper.ImportHelper;
 import languageServerProtocol.protocol.Protocol.CompletionParams;
 import languageServerProtocol.Types.CompletionItem;
 import languageServerProtocol.Types.CompletionItemKind;
-import haxe.rtti.JsonModuleTypes;
+import haxe.display.JsonModuleTypes;
 import haxe.extern.EitherType;
 using Lambda;
 
