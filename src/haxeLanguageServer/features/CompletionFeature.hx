@@ -122,9 +122,9 @@ class CompletionFeature {
                 kind = Class;
 
             case Literal:
-                label = Std.string(item.args);
+                label = item.args.name;
                 kind = Keyword;
-                // TODO: type
+                type = item.args.type;
 
             case Metadata:
                 label = item.args.name;

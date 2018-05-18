@@ -176,6 +176,11 @@ typedef ModuleTypeParameter = {
     var meta:JsonMetadata;
 }
 
+typedef Literally<T> = {
+    var name:String;
+    var type:JsonType<T>;
+}
+
 enum abstract MetadataUsage(String) {
     var Class = "TClass";
     var ClassField = "ClassField";
@@ -236,7 +241,7 @@ enum abstract CompletionItemKind<T>(String) {
     var Type:CompletionItemKind<ModuleType> = "Type";
     var Package:CompletionItemKind<String> = "Package";
     var Module:CompletionItemKind<String> = "Module";
-    var Literal:CompletionItemKind<Literal> = "Literal";
+    var Literal:CompletionItemKind<Literally<Dynamic>> = "Literal";
     var Metadata:CompletionItemKind<JsonMetadataEntry> = "Metadata";
     var Keyword:CompletionItemKind<Keyword> = "Keyword";
 }
