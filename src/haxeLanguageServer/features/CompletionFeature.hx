@@ -176,7 +176,7 @@ class CompletionFeature {
             autoImport = false; // need to insert the qualified name
         }
 
-        var qualifiedName = printJsonPath(type); // pack.Foo | pack.Foo.SubType
+        var qualifiedName = printTypePath(type); // pack.Foo | pack.Foo.SubType
         var unqualifiedName = type.name; // Foo | SubType
         var containerName = qualifiedName.untilLastDot(); // pack | pack.Foo
 
@@ -205,11 +205,14 @@ class CompletionFeature {
         return item;
     }
 
-    function printJsonPath(path:JsonPath):String {
-        var pack = path.pack;
-        var result = pack.join(".");
-        if (pack.length > 0 && pack[pack.length - 1] != path.name) {
-            result += "." + path.name;
+    function printTypePath(type:ModuleType):String {
+        var result = type.pack.join(".");
+        if (type.pack.length > 0) {
+            result += ".";
+        }
+        result += type.moduleName;
+        if (type.name != type.moduleName) {
+            result += "." + type.name;
         }
         return result;
     }
