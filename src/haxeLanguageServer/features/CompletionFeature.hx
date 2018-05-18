@@ -79,7 +79,6 @@ class CompletionFeature {
             file: doc.fsPath,
             offset: offset,
             wasAutoTriggered: wasAutoTriggered,
-            supportsResolve: true
         };
         context.callHaxeMethod(HaxeMethods.Completion, params, doc.content, token, result -> {
             var items = [];

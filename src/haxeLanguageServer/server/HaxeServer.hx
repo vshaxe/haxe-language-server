@@ -106,7 +106,7 @@ class HaxeServer {
         };
 
         stopProgressCallback = context.startProgress("Initializing Haxe/JSON-RPC protocol");
-        context.callHaxeMethod(HaxeMethods.Initialize, null, null, null, result -> {
+        context.callHaxeMethod(HaxeMethods.Initialize, {supportsResolve: true}, null, null, result -> {
             supportsJsonRpc = true;
             capabilities = result.capabilities;
             stopProgress();
