@@ -344,6 +344,7 @@ class Context {
         var requestJson = Json.stringify(request);
 
         callDisplay([requestJson], stdin, token, result -> {
+            var arrivalTime = Date.now().getTime();
             switch (result) {
                 case DResult(data):
                     var response:ResponseMessage = try {
@@ -356,14 +357,15 @@ class Context {
                     else {
                         var haxeResponse:Response<Dynamic> = response.result;
 
-                        var arrivalDate = Date.now().getTime();
+                        var beforeProcessingTime = Date.now().getTime();
                         callback(haxeResponse.result);
-                        var processedDate = Date.now().getTime();
+                        var afterProcessingTime = Date.now().getTime();
 
                         var methodResult:HaxeMethodResult = {
                             method: method,
-                            arrivalDate: arrivalDate,
-                            processedDate: processedDate,
+                            arrivalTime: arrivalTime,
+                            beforeProcessingTime: beforeProcessingTime,
+                            afterProcessingTime: afterProcessingTime,
                             response: haxeResponse
                         };
                         protocol.sendNotification(LanguageServerMethods.DidRunHaxeMethod, methodResult);
