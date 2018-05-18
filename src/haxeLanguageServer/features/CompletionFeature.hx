@@ -129,6 +129,10 @@ class CompletionFeature {
             case Metadata:
                 label = item.args.name;
                 kind = Function;
+
+            case Keyword:
+                label = item.args.name;
+                kind = Keyword;
         }
 
         var item:CompletionItem = {

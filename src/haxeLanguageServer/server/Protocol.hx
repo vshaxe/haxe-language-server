@@ -222,6 +222,10 @@ typedef Metadata<T> = {
     var parameters:Array<MetadataParameter<T>>;
 }
 
+typedef Keyword = {
+    var name:String;
+}
+
 enum abstract CompletionItemKind<T>(String) {
     var Local = "Local";
     var Member:CompletionItemKind<JsonClassField> = "Member";
@@ -234,6 +238,7 @@ enum abstract CompletionItemKind<T>(String) {
     var Module:CompletionItemKind<String> = "Module";
     var Literal:CompletionItemKind<Literal> = "Literal";
     var Metadata:CompletionItemKind<JsonMetadataEntry> = "Metadata";
+    var Keyword:CompletionItemKind<Keyword> = "Keyword";
 }
 
 typedef CompletionItem<T> = {
