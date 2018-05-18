@@ -21,6 +21,11 @@ class HaxeMethods {
     static inline var Completion = new HaxeRequestMethod<CompletionParams,CompletionResult>("textDocument/completion");
 
     /**
+        The request is sent from the client to Haxe to resolve additional information for a given completion item.
+    **/
+    static inline var CompletionItemResolve = new HaxeRequestMethod<CompletionItemResolveParams,CompletionItemResolveResult>("completionItem/resolve");
+
+    /**
         The goto definition request is sent from the client to Haxe to resolve the definition location(s) of a symbol at a given text document position.
     **/
     static inline var GotoDefinition = new HaxeRequestMethod<PositionParams,GotoDefinitionResult>("textDocument/definition");
@@ -271,6 +276,16 @@ typedef CompletionResponse<T> = {
 }
 
 typedef CompletionResult = Response<CompletionResponse<Dynamic>>;
+
+/* CompletionItem Resolve */
+
+typedef CompletionItemResolveParams = {
+    var index:Int;
+};
+
+typedef CompletionItemResolveResult = Response<{
+    var item:CompletionItem<Dynamic>;
+}>;
 
 /* GotoDefinition */
 
