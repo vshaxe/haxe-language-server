@@ -3,7 +3,6 @@ package haxeLanguageServer.features;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
-import haxeLanguageServer.helper.DocHelper;
 import haxeLanguageServer.helper.ImportHelper;
 import haxeLanguageServer.helper.TypeHelper.prepareSignature;
 import haxeLanguageServer.helper.TypeHelper.parseDisplayType;
@@ -13,12 +12,12 @@ import String.fromCharCode;
 class CompletionFeatureLegacy {
     final context:Context;
     final contextSupport:Bool;
-    final markdownSupport:Bool;
+    final formatDocumentation:(doc:String) -> EitherType<String, MarkupContent>;
 
-    public function new(context, contextSupport, markdownSupport) {
+    public function new(context, contextSupport, formatDocumentation) {
         this.context = context;
         this.contextSupport = contextSupport;
-        this.markdownSupport = markdownSupport;
+        this.formatDocumentation = formatDocumentation;
     }
 
     public function handle(params:CompletionParams, token:CancellationToken, resolve:Array<CompletionItem>->Void, reject:ResponseError<NoData>->Void, doc:TextDocument, offset:Int, textBefore:String) {
@@ -60,16 +59,6 @@ class CompletionFeatureLegacy {
             pos: index - whitespaceAmount,
             toplevel: true,
         };
-    }
-
-    function formatDocumentation(doc:String):EitherType<String, MarkupContent> {
-        if (markdownSupport) {
-            return {
-                kind: MarkupKind.MarkDown,
-                value: DocHelper.markdownFormat(doc)
-            };
-        }
-        return DocHelper.extractText(doc);
     }
 
     static final reWord = ~/\b(\w*)$/;

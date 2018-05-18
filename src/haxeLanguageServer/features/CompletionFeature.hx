@@ -12,6 +12,7 @@ import languageServerProtocol.protocol.Protocol.CompletionParams;
 import languageServerProtocol.Types.CompletionItem;
 import languageServerProtocol.Types.CompletionItemKind;
 import haxe.rtti.JsonModuleTypes;
+import haxe.extern.EitherType;
 using Lambda;
 
 class CompletionFeature {
@@ -23,7 +24,7 @@ class CompletionFeature {
     public function new(context) {
         this.context = context;
         checkCapabilities();
-        legacy = new CompletionFeatureLegacy(context, contextSupport, markdownSupport);
+        legacy = new CompletionFeatureLegacy(context, contextSupport, formatDocumentation);
         context.protocol.onRequest(Methods.Completion, onCompletion);
     }
 
@@ -182,7 +183,7 @@ class CompletionFeature {
         var item:CompletionItem = {
             label: qualifiedName,
             kind: getKindForModuleType(type),
-            documentation: DocHelper.markdownFormat(type.doc),
+            documentation: formatDocumentation(type.doc),
             textEdit: {
                 range: replaceRange,
                 newText: if (autoImport) unqualifiedName else qualifiedName
@@ -223,5 +224,15 @@ class CompletionFeature {
             case TypeAlias: Interface;
             case Struct: Struct;
         }
+    }
+
+    function formatDocumentation(doc:String):EitherType<String, MarkupContent> {
+        if (markdownSupport) {
+            return {
+                kind: MarkupKind.MarkDown,
+                value: DocHelper.markdownFormat(doc)
+            };
+        }
+        return DocHelper.extractText(doc);
     }
 }
