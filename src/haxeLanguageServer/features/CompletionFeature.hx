@@ -12,12 +12,14 @@ import languageServerProtocol.protocol.Protocol.CompletionParams;
 import languageServerProtocol.Types.CompletionItem;
 import languageServerProtocol.Types.CompletionItemKind;
 import haxe.display.JsonModuleTypes;
+import haxe.display.JsonModuleTypesPrinter;
 import haxe.extern.EitherType;
 using Lambda;
 
 class CompletionFeature {
     final context:Context;
     final legacy:CompletionFeatureLegacy;
+    final printer:JsonModuleTypesPrinter;
     var contextSupport:Bool;
     var markdownSupport:Bool;
 
@@ -25,6 +27,7 @@ class CompletionFeature {
         this.context = context;
         checkCapabilities();
         legacy = new CompletionFeatureLegacy(context, contextSupport, formatDocumentation);
+        printer = new JsonModuleTypesPrinter();
         context.protocol.onRequest(Methods.Completion, onCompletion);
     }
 
@@ -86,6 +89,7 @@ class CompletionFeature {
     function createCompletionItem<T>(item:HaxeCompletionItem<T>, doc:TextDocument, replaceRange:Range, importPosition:Position):CompletionItem {
         var label = "";
         var kind = CompletionItemKind.Variable;
+        var type = null;
 
         switch (item.kind) {
             case Local:
@@ -94,14 +98,17 @@ class CompletionFeature {
             case Member | Static | EnumAbstractField:
                 label = item.args.name;
                 kind = getKindForField(label, item.kind, item.args);
+                type = item.args.type;
 
             case EnumField:
                 label = item.args.name;
                 kind = EnumMember;
+                type = item.args.type;
 
             case Global:
                 label = item.args.name;
                 kind = getKindForType(item.args.type);
+                type = item.args.type;
 
             case Type:
                 return createTypeCompletionItem(item.args, doc, replaceRange, importPosition);
@@ -117,6 +124,7 @@ class CompletionFeature {
             case Literal:
                 label = Std.string(item.args);
                 kind = Keyword;
+                // TODO: type
 
             case Metadata:
                 label = item.args.name;
@@ -127,6 +135,9 @@ class CompletionFeature {
             label: label,
             kind: kind
         };
+        if (type != null) {
+            item.detail = printer.printType(type);
+        }
         if (replaceRange != null) {
             item.textEdit = {range: replaceRange, newText: label};
         }
