@@ -3,7 +3,6 @@ package haxeLanguageServer.features;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
-import haxeLanguageServer.helper.ImportHelper;
 import haxeLanguageServer.helper.TypeHelper.prepareSignature;
 import haxeLanguageServer.helper.TypeHelper.parseDisplayType;
 import haxe.extern.EitherType;
@@ -61,14 +60,7 @@ class CompletionFeatureLegacy {
         };
     }
 
-    static final reWord = ~/\b(\w*)$/;
     function parseToplevelCompletion(x:Xml, position:Position, textBefore:String, doc:TextDocument):Array<CompletionItem> {
-        var importPosition = ImportHelper.getImportPosition(doc);
-        var wordLength = 0;
-        if (reWord.match(textBefore)) {
-            wordLength = reWord.matched(1).length;
-        }
-
         var result = [];
         var timers = [];
         for (el in x.elements()) {
@@ -105,29 +97,6 @@ class CompletionFeatureLegacy {
             var documentation = el.get("d");
             if (documentation != null)
                 item.documentation = formatDocumentation(documentation);
-
-            if (kind == "type") {
-                var qualifiedName = name; // pack.Foo | pack.Foo.SubType
-                var unqalifiedName = qualifiedName.afterLastDot(); // Foo | SubType
-                var containerName = qualifiedName.untilLastDot(); // pack | pack.Foo
-
-                var importConfig = context.config.codeGeneration.imports;
-                var autoImport = importConfig.enableAutoImports;
-                item.label = qualifiedName;
-                item.textEdit = {
-                    range: {start: position.translate(0, -wordLength), end: position},
-                    newText: if (autoImport) unqalifiedName else qualifiedName
-                };
-
-                var imported = el.get("import") == null;
-                if (imported) {
-                    item.label = unqalifiedName;
-                    item.detail += " (imported)";
-                } else if (autoImport) {
-                    item.additionalTextEdits = [ImportHelper.createImportEdit(doc, importPosition, qualifiedName, importConfig.style)];
-                    item.detail = "Auto-import from " + containerName;
-                }
-            }
 
             result.push(item);
         }
