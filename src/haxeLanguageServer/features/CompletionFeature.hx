@@ -6,6 +6,8 @@ import jsonrpc.Types.NoData;
 import haxeLanguageServer.server.Protocol;
 import haxeLanguageServer.server.Protocol.CompletionItem as HaxeCompletionItem;
 import haxeLanguageServer.server.Protocol.CompletionItemKind as HaxeCompletionItemKind;
+import haxeLanguageServer.helper.DocHelper;
+import haxeLanguageServer.helper.ImportHelper;
 import languageServerProtocol.protocol.Protocol.CompletionParams;
 import languageServerProtocol.Types.CompletionItem;
 import languageServerProtocol.Types.CompletionItemKind;
@@ -65,19 +67,14 @@ class CompletionFeature {
         context.callHaxeMethod(HaxeMethods.Completion, {file: doc.fsPath, offset: offset, wasAutoTriggered: wasAutoTriggered}, doc.content, token, result -> {
             var items = [];
             var counter = 0;
+            var importPosition = ImportHelper.getImportPosition(doc);
             for (item in result.items) {
-                var completionItem = createCompletionItem(item);
+                var completionItem = createCompletionItem(item, doc, result.replaceRange, importPosition);
                 if (completionItem == null) {
                     continue;
                 }
                 if (result.sorted) {
                     completionItem.sortText = StringTools.lpad(Std.string(counter++), "0", 10);
-                }
-                if (result.replaceRange != null) {
-                    completionItem.textEdit = {
-                        range: result.replaceRange,
-                        newText: completionItem.label
-                    }
                 }
                 items.push(completionItem);
             };
@@ -85,7 +82,7 @@ class CompletionFeature {
         }, error -> reject(ResponseError.internalError(error)));
     }
 
-    function createCompletionItem<T>(item:HaxeCompletionItem<T>):CompletionItem {
+    function createCompletionItem<T>(item:HaxeCompletionItem<T>, doc:TextDocument, replaceRange:Range, importPosition:Position):CompletionItem {
         var label = "";
         var kind = CompletionItemKind.Variable;
 
@@ -106,7 +103,7 @@ class CompletionFeature {
                 kind = getKindForType(item.args.type);
 
             case Type:
-                return createTypeCompletionItem(item.args);
+                return createTypeCompletionItem(item.args, doc, replaceRange, importPosition);
 
             case Package:
                 label = item.args;
@@ -125,10 +122,14 @@ class CompletionFeature {
                 kind = Function;
         }
 
-        return {
+        var item:CompletionItem = {
             label: label,
             kind: kind
         };
+        if (replaceRange != null) {
+            item.textEdit = {range: replaceRange, newText: label};
+        }
+        return item;
     }
 
     function getKindForField<T>(name:String, kind:HaxeCompletionItemKind<JsonClassField>, field:JsonClassField):CompletionItemKind {
@@ -163,19 +164,53 @@ class CompletionFeature {
         }
     }
 
-    function createTypeCompletionItem(type:ModuleType):CompletionItem {
+    function createTypeCompletionItem(type:ModuleType, doc:TextDocument, replaceRange:Range, importPosition:Position):CompletionItem {
         if (type.isPrivate) {
             return null; // TODO: show private types from the current module
         }
 
-        var label = type.name;
-        if (type.pack.length > 0)
-            label = type.pack.join(".") + "." + label;
+        var importConfig = context.config.codeGeneration.imports;
+        var autoImport = importConfig.enableAutoImports;
+        if (type.importStatus == Shadowed) {
+            autoImport = false; // need to insert the qualified name
+        }
 
-        return {
-            label: label,
-            kind: getKindForModuleType(type)
+        var qualifiedName = printJsonPath(type); // pack.Foo | pack.Foo.SubType
+        var unqualifiedName = type.name; // Foo | SubType
+        var containerName = qualifiedName.untilLastDot(); // pack | pack.Foo
+
+        var item:CompletionItem = {
+            label: qualifiedName,
+            kind: getKindForModuleType(type),
+            documentation: DocHelper.markdownFormat(type.doc),
+            textEdit: {
+                range: replaceRange,
+                newText: if (autoImport) unqualifiedName else qualifiedName
+            }
         };
+
+        switch (type.importStatus) {
+            case Imported:
+                item.label = unqualifiedName;
+                item.detail = "(imported)";
+            case Unimported:
+                var edit = ImportHelper.createImportEdit(doc, importPosition, qualifiedName, importConfig.style);
+                item.additionalTextEdits = [edit];
+                item.detail = "Auto-import from " + containerName;
+            case Shadowed:
+                item.detail = "(shadowed)";
+        }
+
+        return item;
+    }
+
+    function printJsonPath(path:JsonPath):String {
+        var pack = path.pack;
+        var result = pack.join(".");
+        if (pack.length > 0 && pack[pack.length - 1] != path.name) {
+            result += "." + path.name;
+        }
+        return result;
     }
 
     function getKindForModuleType(type:ModuleType):CompletionItemKind {
