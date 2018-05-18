@@ -254,7 +254,13 @@ enum abstract CompletionResultKind(Int) {
     var StructureField = 1;
     var Toplevel = 2;
     var Metadata = 3;
-    // TODO: complete this. what other kinds are there, "type hint" completion, "extends" completion..?
+    var TypeHint = 4;
+    var Extends = 5;
+    var Implements = 6;
+    var StructExtension = 7;
+    var Import = 8;
+    var Using = 9;
+    var New = 10;
 }
 
 typedef CompletionResponse<T> = {

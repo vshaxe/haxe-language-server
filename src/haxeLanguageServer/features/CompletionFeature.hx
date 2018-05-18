@@ -22,6 +22,7 @@ class CompletionFeature {
     final printer:JsonModuleTypesPrinter;
     var contextSupport:Bool;
     var markdownSupport:Bool;
+    var snippetSupport:Bool;
 
     public function new(context) {
         this.context = context;
@@ -44,10 +45,15 @@ class CompletionFeature {
 
         var completionItem = completion.completionItem;
         if (completionItem == null) return;
-        var documentationFormat = completionItem.documentationFormat;
-        if (documentationFormat == null) return;
 
-        markdownSupport = documentationFormat.indexOf(MarkDown) != -1;
+        var documentationFormat = completionItem.documentationFormat;
+        if (documentationFormat != null) {
+            markdownSupport = documentationFormat.indexOf(MarkDown) != -1;
+        }
+
+        if (completionItem.snippetSupport) {
+            snippetSupport = true;
+        }
     }
 
     function onCompletion(params:CompletionParams, token:CancellationToken, resolve:Array<CompletionItem>->Void, reject:ResponseError<NoData>->Void) {
@@ -73,7 +79,7 @@ class CompletionFeature {
             var counter = 0;
             var importPosition = ImportHelper.getImportPosition(doc);
             for (item in result.items) {
-                var completionItem = createCompletionItem(item, doc, result.replaceRange, importPosition);
+                var completionItem = createCompletionItem(item, doc, result.replaceRange, importPosition, result.kind);
                 if (completionItem == null) {
                     continue;
                 }
@@ -86,7 +92,7 @@ class CompletionFeature {
         }, error -> reject(ResponseError.internalError(error)));
     }
 
-    function createCompletionItem<T>(item:HaxeCompletionItem<T>, doc:TextDocument, replaceRange:Range, importPosition:Position):CompletionItem {
+    function createCompletionItem<T>(item:HaxeCompletionItem<T>, doc:TextDocument, replaceRange:Range, importPosition:Position, resultKind:CompletionResultKind):CompletionItem {
         var label = "";
         var kind = CompletionItemKind.Variable;
         var type = null;
@@ -111,7 +117,7 @@ class CompletionFeature {
                 type = item.args.type;
 
             case Type:
-                return createTypeCompletionItem(item.args, doc, replaceRange, importPosition);
+                return createTypeCompletionItem(item.args, doc, replaceRange, importPosition, resultKind);
 
             case Package:
                 label = item.args;
@@ -180,7 +186,7 @@ class CompletionFeature {
         }
     }
 
-    function createTypeCompletionItem(type:ModuleType, doc:TextDocument, replaceRange:Range, importPosition:Position):CompletionItem {
+    function createTypeCompletionItem(type:ModuleType, doc:TextDocument, replaceRange:Range, importPosition:Position, resultKind:CompletionResultKind):CompletionItem {
         if (type.isPrivate) {
             return null; // TODO: show private types from the current module
         }
@@ -215,6 +221,11 @@ class CompletionFeature {
                 item.detail = "Auto-import from " + containerName;
             case Shadowed:
                 item.detail = "(shadowed)";
+        }
+
+        if (resultKind == New && snippetSupport) {
+            item.textEdit.newText += "($1)";
+            item.insertTextFormat = Snippet;
         }
 
         return item;
