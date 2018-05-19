@@ -55,14 +55,14 @@ class TypePrinter {
                 var args = t.args.args.map(printFunctionArgument);
                 var r = printTypeRec(t.args.ret);
                 switch (args.length) {
-                    case 0: '()->$r';
-                    case 1 if (hasNamed): '(${args[0]})->$r';
-                    case 1 : '${args[0]}->$r';
+                    case 0: '() -> $r';
+                    case 1 if (hasNamed): '(${args[0]}) -> $r';
+                    case 1 : '${args[0]} -> $r';
                     case _:
                         var busy = args.fold((args,i) -> i + args.length,0);
                         if (busy < 50) {
                             var s = args.join(", ");
-                            '($s)->$r';
+                            '($s) -> $r';
                         } else {
                             var s = args.join(',\n $indent');
                             '($s)\n$indent-> $r';
