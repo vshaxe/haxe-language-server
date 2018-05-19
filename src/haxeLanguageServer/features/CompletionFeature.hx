@@ -90,7 +90,7 @@ class CompletionFeature {
                 if (completionItem == null) {
                     continue;
                 }
-                completionItem.data = i;
+                completionItem.data = {index: i};
                 if (result.sorted) {
                     completionItem.sortText = StringTools.lpad(Std.string(counter++), "0", 10);
                 }
@@ -292,7 +292,7 @@ class CompletionFeature {
     }
 
     function onCompletionItemResolve(item:CompletionItem, token:CancellationToken, resolve:CompletionItem->Void, reject:ResponseError<NoData>->Void) {
-        context.callHaxeMethod(HaxeMethods.CompletionItemResolve, {index: item.data}, null, token, result -> {
+        context.callHaxeMethod(HaxeMethods.CompletionItemResolve, {index: item.data.index}, null, token, result -> {
             resolveCompletionItem(result.item, item);
             resolve(item);
         }, error -> {
