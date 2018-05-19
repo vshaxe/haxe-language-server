@@ -111,7 +111,7 @@ class CompletionFeature {
                 kind = Variable;
                 type = item.args.type;
 
-            case Member | Static | EnumAbstractField:
+            case ClassField | EnumAbstractField:
                 label = item.args.name;
                 kind = getKindForField(label, item.kind, item.args);
                 type = item.args.type;
@@ -121,12 +121,6 @@ class CompletionFeature {
                 label = item.args.name;
                 kind = EnumMember;
                 type = item.args.type;
-
-            case Global:
-                label = item.args.name;
-                kind = getKindForType(item.args.type);
-                type = item.args.type;
-                // TODO: get the actual class field for proper icons / doc?
 
             case Type:
                 return createTypeCompletionItem(item.args, doc, replaceRange, importPosition, resultKind);
@@ -185,7 +179,7 @@ class CompletionFeature {
                     case _: Property;
                 }
             case FMethod if (hasOperatorMeta(field.meta)): Operator;
-            case FMethod if (kind == Static): Function;
+            case FMethod if (field.scope == Static): Function;
             case FMethod if (name == "new"): Constructor;
             case FMethod: Method;
         }
@@ -303,7 +297,7 @@ class CompletionFeature {
 
     function getDocumentation<T>(item:HaxeCompletionItem<T>):JsonDoc {
         return switch (item.kind) {
-            case Member | Static | EnumAbstractField: item.args.doc;
+            case ClassField | EnumAbstractField: item.args.doc;
             case EnumField: item.args.doc;
             case Type: item.args.doc;
             case Metadata: item.args.doc;

@@ -130,12 +130,6 @@ typedef JsonLocal<T> = {
     var pos:JsonPos;
 }
 
-typedef Global<T> = {
-    var modulePath:JsonPath;
-    var name:String;
-    var type:JsonType<T>;
-}
-
 enum abstract Literal(String) {
     var Null = "null";
     var True = "true";
@@ -252,11 +246,9 @@ typedef Keyword = {
 
 enum abstract CompletionItemKind<T>(String) {
     var Local:CompletionItemKind<JsonLocal<Dynamic>> = "Local";
-    var Member:CompletionItemKind<JsonClassField> = "Member";
-    var Static:CompletionItemKind<JsonClassField> = "Static";
+    var ClassField:CompletionItemKind<JsonClassField> = "ClassField";
     var EnumField:CompletionItemKind<JsonEnumField> = "EnumField";
     var EnumAbstractField:CompletionItemKind<JsonClassField> = "EnumAbstractField";
-    var Global:CompletionItemKind<Global<Dynamic>> = "Global";
     var Type:CompletionItemKind<ModuleType> = "Type";
     var Package:CompletionItemKind<String> = "Package";
     var Module:CompletionItemKind<String> = "Module";
