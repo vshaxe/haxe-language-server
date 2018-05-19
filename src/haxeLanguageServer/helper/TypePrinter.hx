@@ -42,8 +42,8 @@ class TypePrinter {
                 }
             case TAnonymous:
                 var fields = t.args.fields;
-                var s = [for (field in fields) '${field.name}: ${printTypeRec(field.type)}'].join(", ");
-                '{ $s }';
+                var s = [for (field in fields) '${field.name}:${printTypeRec(field.type)}'].join(", ");
+                '{$s}';
             case TFun:
                 var hasNamed = false;
                 function printFunctionArgument(arg:JsonFunctionArgument) {
@@ -59,7 +59,7 @@ class TypePrinter {
                     case 1 if (hasNamed): '(${args[0]}) -> $r';
                     case 1 : '${args[0]} -> $r';
                     case _:
-                        var busy = args.fold((args,i) -> i + args.length,0);
+                        var busy = args.fold((args, i) -> i + args.length, 0);
                         if (busy < 50) {
                             var s = args.join(", ");
                             '($s) -> $r';
