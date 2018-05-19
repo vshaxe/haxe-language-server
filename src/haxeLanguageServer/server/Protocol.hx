@@ -330,6 +330,7 @@ typedef SignatureHelpResult = Response<SignatureItem>;
 
 typedef FileParams = {
     var file:FsPath;
+    @:optional var contents:String;
 }
 
 typedef PositionParams = {

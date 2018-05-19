@@ -34,10 +34,11 @@ class SignatureHelpFeature {
     function handleJsonRpc(params:TextDocumentPositionParams, token:CancellationToken, resolve:SignatureHelp->Void, reject:ResponseError<NoData>->Void, doc:TextDocument) {
         var params = {
             file: doc.fsPath,
+            contents: doc.content,
             offset: doc.offsetAt(params.position),
             wasAutoTriggered: true // TODO: send this once the API supports it (https://github.com/Microsoft/vscode/issues/34737)
         }
-        context.callHaxeMethod(HaxeMethods.SignatureHelp, params, doc.content, token, result -> {
+        context.callHaxeMethod(HaxeMethods.SignatureHelp, params, token, result -> {
             resolve(createSignatureHelp(result));
         }, error -> reject(ResponseError.internalError(error)));
     }

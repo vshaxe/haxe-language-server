@@ -77,10 +77,11 @@ class CompletionFeature {
         var wasAutoTriggered = params.context == null ? true : params.context.triggerKind == TriggerCharacter;
         var params = {
             file: doc.fsPath,
+            contents: doc.content,
             offset: offset,
             wasAutoTriggered: wasAutoTriggered,
         };
-        context.callHaxeMethod(HaxeMethods.Completion, params, doc.content, token, result -> {
+        context.callHaxeMethod(HaxeMethods.Completion, params, token, result -> {
             var items = [];
             var counter = 0;
             var importPosition = ImportHelper.getImportPosition(doc);
@@ -284,7 +285,7 @@ class CompletionFeature {
     }
 
     function onCompletionItemResolve(item:CompletionItem, token:CancellationToken, resolve:CompletionItem->Void, reject:ResponseError<NoData>->Void) {
-        context.callHaxeMethod(HaxeMethods.CompletionItemResolve, {index: item.data.index}, null, token, result -> {
+        context.callHaxeMethod(HaxeMethods.CompletionItemResolve, {index: item.data.index}, token, result -> {
             var documentation = getDocumentation(result.item);
             if (documentation != null) {
                 item.documentation = formatDocumentation(documentation);

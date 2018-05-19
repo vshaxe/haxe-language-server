@@ -331,7 +331,7 @@ class Context {
             diagnostics.publishDiagnostics(uri);
     }
 
-    public function callHaxeMethod<P,R>(method:HaxeRequestMethod<P,Response<R>>, ?params:P, stdin:String, token:CancellationToken, callback:R->Void, errback:(error:String)->Void) {
+    public function callHaxeMethod<P,R>(method:HaxeRequestMethod<P,Response<R>>, ?params:P, token:CancellationToken, callback:R->Void, errback:(error:String)->Void) {
         // TODO: avoid duplicating jsonrpc.Protocol logic
         var id = nextRequestId++;
         var request:RequestMessage = {
@@ -343,7 +343,7 @@ class Context {
             request.params = params;
         var requestJson = Json.stringify(request);
 
-        callDisplay([requestJson], stdin, token, result -> {
+        callDisplay([requestJson], null, token, result -> {
             var arrivalTime = Date.now().getTime();
             switch (result) {
                 case DResult(data):

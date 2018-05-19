@@ -20,7 +20,7 @@ class GotoDefinitionFeature {
     }
 
     function handleJsonRpc(params:TextDocumentPositionParams, token:CancellationToken, resolve:Definition->Void, reject:ResponseError<NoData>->Void, doc:TextDocument, offset:Int) {
-        context.callHaxeMethod(HaxeMethods.GotoDefinition, {file: doc.fsPath, offset: offset}, doc.content, token, locations -> {
+        context.callHaxeMethod(HaxeMethods.GotoDefinition, {file: doc.fsPath, contents: doc.content, offset: offset}, token, locations -> {
             resolve(locations.map(location -> {
                 {
                     uri: location.file.toUri(),
