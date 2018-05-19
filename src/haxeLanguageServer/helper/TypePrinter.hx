@@ -7,9 +7,12 @@ using Lambda;
     (Slightly modified) copy of haxe.display.JsonModuleTypesPrinter.
 **/
 class TypePrinter {
+    final wrap:Bool;
     var indent = "";
 
-    public function new() {}
+    public function new(wrap:Bool = false) {
+        this.wrap = wrap;
+    }
 
     public function printPath(path:JsonPath) {
         return path.name;
@@ -61,7 +64,7 @@ class TypePrinter {
                     case 1 : '${args[0]} -> $r';
                     case _:
                         var busy = args.fold((args, i) -> i + args.length, 0);
-                        if (busy < 50) {
+                        if (busy < 50 || !wrap) {
                             var s = args.join(", ");
                             '($s) -> $r';
                         } else {
