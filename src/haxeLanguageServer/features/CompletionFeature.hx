@@ -104,7 +104,6 @@ class CompletionFeature {
         var label = "";
         var kind = null;
         var type = null;
-        var docs = null;
 
         switch (item.kind) {
             case Local:
@@ -116,13 +115,12 @@ class CompletionFeature {
                 label = item.args.name;
                 kind = getKindForField(label, item.kind, item.args);
                 type = item.args.type;
-                docs = item.args.doc;
+                // TODO: merge these kinds together with some isStatic / isEnumAbstractField flags?
 
             case EnumField:
                 label = item.args.name;
                 kind = EnumMember;
                 type = item.args.type;
-                docs = item.args.doc;
 
             case Global:
                 label = item.args.name;
@@ -149,27 +147,27 @@ class CompletionFeature {
             case Metadata:
                 label = item.args.name;
                 kind = Function;
-                docs = item.args.doc;
 
             case Keyword:
                 label = item.args.name;
                 kind = Keyword;
         }
 
-        var item:CompletionItem = {label: label};
+        var result:CompletionItem = {label: label};
         if (kind != null) {
-            item.kind = kind;
+            result.kind = kind;
         }
         if (type != null) {
-            item.detail = printer.printType(type);
+            result.detail = printer.printType(type);
         }
-        if (docs != null) {
-            item.documentation = formatDocumentation(docs);
+        var documentation = getDocumentation(item);
+        if (documentation != null) {
+            result.documentation = formatDocumentation(documentation);
         }
         if (replaceRange != null) {
-            item.textEdit = {range: replaceRange, newText: label};
+            result.textEdit = {range: replaceRange, newText: label};
         }
-        return item;
+        return result;
     }
 
     function getKindForField<T>(name:String, kind:HaxeCompletionItemKind<JsonClassField>, field:JsonClassField):CompletionItemKind {
@@ -293,18 +291,23 @@ class CompletionFeature {
 
     function onCompletionItemResolve(item:CompletionItem, token:CancellationToken, resolve:CompletionItem->Void, reject:ResponseError<NoData>->Void) {
         context.callHaxeMethod(HaxeMethods.CompletionItemResolve, {index: item.data.index}, null, token, result -> {
-            resolveCompletionItem(result.item, item);
+            var documentation = getDocumentation(result.item);
+            if (documentation != null) {
+                item.documentation = formatDocumentation(documentation);
+            }
             resolve(item);
         }, error -> {
             reject(ResponseError.internalError(error));
         });
     }
 
-    function resolveCompletionItem<T>(item:HaxeCompletionItem<T>, result:CompletionItem) {
-        switch (item.kind) {
-            case Type:
-                result.documentation = formatDocumentation(item.args.doc);
-            case _:
+    function getDocumentation<T>(item:HaxeCompletionItem<T>):JsonDoc {
+        return switch (item.kind) {
+            case Member | Static | EnumAbstractField: item.args.doc;
+            case EnumField: item.args.doc;
+            case Type: item.args.doc;
+            case Metadata: item.args.doc;
+            case _: null;
         }
     }
 }
