@@ -5,6 +5,7 @@ import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
 import haxeLanguageServer.helper.DocHelper;
 import haxeLanguageServer.helper.TypeHelper.*;
+import haxeLanguageServer.helper.TypePrinter;
 import haxeLanguageServer.server.Protocol;
 
 class HoverFeature {
@@ -24,8 +25,7 @@ class HoverFeature {
     function handleJsonRpc(params:TextDocumentPositionParams, token:CancellationToken, resolve:Hover->Void, reject:ResponseError<NoData>->Void, doc:TextDocument, offset:Int) {
         context.callHaxeMethod(HaxeMethods.Hover, {file: doc.fsPath, offset: offset}, doc.content, token, hover -> {
             var content = if (hover.type != null) {
-                var printer = new haxe.display.JsonModuleTypesPrinter();
-                printer.printType(hover.type);
+                new TypePrinter().printType(hover.type);
             } else {
                 return resolve(null);
             }

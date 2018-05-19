@@ -8,18 +8,18 @@ import haxeLanguageServer.server.Protocol.CompletionItem as HaxeCompletionItem;
 import haxeLanguageServer.server.Protocol.CompletionItemKind as HaxeCompletionItemKind;
 import haxeLanguageServer.helper.DocHelper;
 import haxeLanguageServer.helper.ImportHelper;
+import haxeLanguageServer.helper.TypePrinter;
 import languageServerProtocol.protocol.Protocol.CompletionParams;
 import languageServerProtocol.Types.CompletionItem;
 import languageServerProtocol.Types.CompletionItemKind;
 import haxe.display.JsonModuleTypes;
-import haxe.display.JsonModuleTypesPrinter;
 import haxe.extern.EitherType;
 using Lambda;
 
 class CompletionFeature {
     final context:Context;
     final legacy:CompletionFeatureLegacy;
-    final printer:JsonModuleTypesPrinter;
+    final printer:TypePrinter;
     var contextSupport:Bool;
     var markdownSupport:Bool;
     var snippetSupport:Bool;
@@ -28,7 +28,7 @@ class CompletionFeature {
         this.context = context;
         checkCapabilities();
         legacy = new CompletionFeatureLegacy(context, contextSupport, formatDocumentation);
-        printer = new JsonModuleTypesPrinter();
+        printer = new TypePrinter();
         context.protocol.onRequest(Methods.Completion, onCompletion);
         context.protocol.onRequest(Methods.CompletionItemResolve, onCompletionItemResolve);
     }

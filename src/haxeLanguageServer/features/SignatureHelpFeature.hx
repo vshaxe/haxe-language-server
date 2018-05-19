@@ -3,6 +3,7 @@ package haxeLanguageServer.features;
 import haxe.display.JsonModuleTypes.JsonFunctionArgument;
 import haxeLanguageServer.helper.ArgumentNameHelper.addNamesToSignatureType;
 import haxeLanguageServer.helper.DocHelper;
+import haxeLanguageServer.helper.TypePrinter;
 import haxeLanguageServer.server.Protocol.HaxeMethods;
 import haxeLanguageServer.server.Protocol.SignatureItem as HaxeSignatureItem;
 import haxeLanguageServer.server.Protocol.SignatureInformation as HaxeSignatureInformation;
@@ -42,7 +43,7 @@ class SignatureHelpFeature {
     }
 
     function createSignatureHelp(item:HaxeSignatureItem):SignatureHelp {
-        var printer = new haxe.display.JsonModuleTypesPrinter();
+        var printer = new TypePrinter();
         function createSignatureParameter(arg:JsonFunctionArgument):ParameterInformation {
             return {
                 label: printer.printFunctionArgument(arg)
