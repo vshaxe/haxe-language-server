@@ -12,11 +12,12 @@ class TypePrinter {
     public function new() {}
 
     public function printPath(path:JsonPath) {
-        if (path.pack.length == 0) {
+        return path.name;
+        /*if (path.pack.length == 0) {
             return path.name;
         } else {
             return path.pack.join(".") + "." + path.name;
-        }
+        }*/
     }
 
     public function printPathWithParams(path:JsonPathWithParams) {
