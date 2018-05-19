@@ -285,6 +285,9 @@ class CompletionFeature {
     }
 
     function onCompletionItemResolve(item:CompletionItem, token:CancellationToken, resolve:CompletionItem->Void, reject:ResponseError<NoData>->Void) {
+        if (!context.haxeServer.capabilities.completionResolveProvider) {
+            return resolve(item);
+        }
         context.callHaxeMethod(HaxeMethods.CompletionItemResolve, {index: item.data.index}, token, result -> {
             var documentation = getDocumentation(result.item);
             if (documentation != null) {

@@ -104,6 +104,7 @@ typedef HaxeCapabilities = {
     @:optional var completionProvider:Bool;
     @:optional var packageProvider:Bool;
     @:optional var signatureHelpProvider:Bool;
+    @:optional var completionResolveProvider:Bool;
 }
 
 typedef InitializeResult = Response<{

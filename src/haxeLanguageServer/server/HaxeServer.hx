@@ -102,7 +102,8 @@ class HaxeServer {
             hoverProvider: false,
             completionProvider: false,
             packageProvider: false,
-            signatureHelpProvider: false
+            signatureHelpProvider: false,
+            completionResolveProvider: false
         };
 
         stopProgressCallback = context.startProgress("Initializing Haxe/JSON-RPC protocol");
