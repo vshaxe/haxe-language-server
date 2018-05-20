@@ -337,21 +337,27 @@ class CompletionFeature {
     }
 
     /**
-        Prints a type declaration in the form of `class Array<T>` (`keyword Name<Params>`).
+        Prints a type declaration in the form of `extern interface ArrayAccess<T>`.
+        (`modifiers... keyword Name<Params>`)
     **/
     function printTypeDeclaration(type:ModuleType):String {
-        var keyword = switch (type.kind) {
+        var components = [];
+        if (type.isPrivate) components.push("private");
+        if (type.meta.exists(meta -> meta.name == ":final")) components.push("final");
+        if (type.isExtern) components.push("extern");
+        components.push(switch (type.kind) {
             case Class: "class";
             case Interface: "interface";
             case Enum: "enum";
             case Abstract: "abstract";
             case EnumAbstract: "enum abstract";
             case TypeAlias | Struct: "typedef";
-        }
-        var params = "";
+        });
+        var typeName = type.name;
         if (type.params.length > 0) {
-            params = "<" + type.params.map(param -> param.name).join(", ") + ">";
+            typeName += "<" + type.params.map(param -> param.name).join(", ") + ">";
         }
-        return '$keyword ${type.name}$params';
+        components.push(typeName);
+        return components.join(" ");
     }
 }
