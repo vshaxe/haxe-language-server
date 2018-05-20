@@ -129,15 +129,7 @@ class CompletionFeature {
                 // TODO: merge these kinds together with some isStatic / isEnumAbstractField flags?
 
             case EnumField:
-                label = item.args.name;
-                kind = EnumMember;
-                type = item.args.type;
-                if (resultKind == Pattern) {
-                    switch (type.kind) {
-                        case TEnum: newText = label + ":";
-                        case _:
-                    }
-                }
+                return createEnumFieldCompletionItem(item.args, replaceRange, resultKind);
 
             case Type:
                 return createTypeCompletionItem(item.args, doc, replaceRange, importPosition, resultKind);
@@ -213,6 +205,46 @@ class CompletionFeature {
             case TFun: Function;
             case _: Field;
         }
+    }
+
+    function createEnumFieldCompletionItem(enumField:JsonEnumField, replaceRange:Range, resultKind:CompletionResultKind):CompletionItem {
+        var name = enumField.name;
+        var type = enumField.type;
+
+        var item:CompletionItem = {
+            label: name,
+            kind: EnumMember,
+            detail: printer.printType(type),
+            documentation: formatDocumentation(enumField.doc),
+            textEdit: {
+                newText: name,
+                range: replaceRange
+            },
+        };
+
+        if (resultKind != Pattern) {
+            return item;
+        }
+
+        switch (type.kind) {
+            case TEnum:
+                item.textEdit.newText = name + ":";
+            case TFun if (snippetSupport):
+                var signature:JsonFunctionSignature = type.args;
+                var text = '$name(';
+                for (i in 0...signature.args.length) {
+                    var arg = signature.args[i];
+                    text += '$${${i+1}:${arg.name}}';
+                    if (i < signature.args.length - 1) {
+                        text += ", ";
+                    }
+                }
+                text += "):";
+                item.insertTextFormat = Snippet;
+                item.textEdit.newText = text;
+            case _:
+        }
+        return item;
     }
 
     function createTypeCompletionItem(type:ModuleType, doc:TextDocument, replaceRange:Range, importPosition:Position, resultKind:CompletionResultKind):CompletionItem {
