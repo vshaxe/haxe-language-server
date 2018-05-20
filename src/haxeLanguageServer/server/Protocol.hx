@@ -141,7 +141,6 @@ enum abstract ClassFieldOriginKind<T>(Int) {
         The field is declared on a parent type, such as:
         - a super class field that is not overriden
         - a forwarded abstract field
-        - an inherited anonymous structure
     **/
     var Parent:ClassFieldOriginKind<JsonModuleType<T>> = 1;
 

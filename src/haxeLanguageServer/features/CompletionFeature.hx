@@ -118,7 +118,8 @@ class CompletionFeature {
                 type = item.args.type;
 
             case ClassField | EnumAbstractField:
-                // TODO: merge these kinds together with some isStatic / isEnumAbstractField flags?
+                // TODO: merge these kinds together with some isEnumAbstractField flag?
+                // actually, ClassFieldOrigin might solve that anyway...
                 return createClassFieldCompletionItem(item.args, item.kind, replaceRange, resultKind);
 
             case EnumField:
