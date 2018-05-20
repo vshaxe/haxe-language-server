@@ -212,7 +212,6 @@ class CompletionFeature {
 
         var qualifiedName = printTypePath(type); // pack.Foo | pack.Foo.SubType
         var unqualifiedName = type.name; // Foo | SubType
-        var containerName = qualifiedName.untilLastDot(); // pack | pack.Foo
 
         var item:CompletionItem = {
             label: qualifiedName,
@@ -233,14 +232,15 @@ class CompletionFeature {
             switch (type.importStatus) {
                 case Imported:
                     item.label = unqualifiedName;
-                    item.detail = "(imported)";
                 case Unimported:
                     var edit = ImportHelper.createImportEdit(doc, importPosition, qualifiedName, importConfig.style);
                     item.additionalTextEdits = [edit];
-                    item.detail = "Auto-import from " + containerName;
                 case Shadowed:
-                    item.detail = "(shadowed)";
             }
+        }
+
+        if (type.params != null) {
+            item.detail = printTypeDetail(type);
         }
 
         if (resultKind == New && snippetSupport) {
@@ -290,6 +290,10 @@ class CompletionFeature {
             return resolve(item);
         }
         context.callHaxeMethod(HaxeMethods.CompletionItemResolve, {index: item.data.index}, token, result -> {
+            var detail = getDetail(result.item);
+            if (detail != null) {
+                item.detail = detail;
+            }
             var documentation = getDocumentation(result.item);
             if (documentation != null) {
                 item.documentation = formatDocumentation(documentation);
@@ -309,5 +313,45 @@ class CompletionFeature {
             case Metadata: item.args.doc;
             case _: null;
         }
+    }
+
+    function getDetail<T>(item:HaxeCompletionItem<T>):String {
+        return switch (item.kind) {
+            case Type: printTypeDetail(item.args);
+            case _: null;
+        }
+    }
+
+    function printTypeDetail(type:ModuleType):String {
+        var detail = printTypeDeclaration(type);
+        switch (type.importStatus) {
+            case Imported:
+                detail += "\n(imported)";
+            case Unimported:
+                var containerName = printTypePath(type).untilLastDot();
+                detail = "Auto-import from '" + containerName + "'\n" + detail;
+            case Shadowed:
+                detail += "\n(shadowed)";
+        }
+        return detail;
+    }
+
+    /**
+        Prints a type declaration in the form of `class Array<T>` (`keyword Name<Params>`).
+    **/
+    function printTypeDeclaration(type:ModuleType):String {
+        var keyword = switch (type.kind) {
+            case Class: "class";
+            case Interface: "interface";
+            case Enum: "enum";
+            case Abstract: "abstract";
+            case EnumAbstract: "enum abstract";
+            case TypeAlias | Struct: "typedef";
+        }
+        var params = "";
+        if (type.params.length > 0) {
+            params = "<" + type.params.map(param -> param.name).join(", ") + ">";
+        }
+        return '$keyword ${type.name}$params';
     }
 }
