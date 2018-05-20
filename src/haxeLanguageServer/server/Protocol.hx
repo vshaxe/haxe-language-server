@@ -331,13 +331,13 @@ typedef SignatureHelpResult = Response<SignatureItem>;
 
 typedef FileParams = {
     var file:FsPath;
-    @:optional var contents:String;
 }
 
 typedef PositionParams = {
     > FileParams,
     /** Unicode character offset in the file. **/
     var offset:Int;
+    @:optional var contents:String;
 }
 
 typedef Location = {
