@@ -118,15 +118,8 @@ class CompletionFeature {
                 type = item.args.type;
 
             case ClassField | EnumAbstractField:
-                label = item.args.name;
-                kind = getKindForField(label, item.kind, item.args);
-                type = item.args.type;
-                switch (resultKind) {
-                    case StructureField: newText = label + ": ";
-                    case Pattern: newText = label + ":";
-                    case _:
-                }
                 // TODO: merge these kinds together with some isStatic / isEnumAbstractField flags?
+                return createClassFieldCompletionItem(item.args, item.kind, replaceRange, resultKind);
 
             case EnumField:
                 return createEnumFieldCompletionItem(item.args, replaceRange, resultKind);
@@ -175,7 +168,23 @@ class CompletionFeature {
         return result;
     }
 
-    function getKindForField<T>(name:String, kind:HaxeCompletionItemKind<JsonClassField>, field:JsonClassField):CompletionItemKind {
+    function createClassFieldCompletionItem(field:JsonClassField, kind:HaxeCompletionItemKind<JsonClassField>, replaceRange:Range, resultKind:CompletionResultKind):CompletionItem {
+        return {
+            label: field.name,
+            kind: getKindForField(field, kind),
+            detail: printer.printType(field.type),
+            textEdit: {
+                newText: switch (resultKind) {
+                    case StructureField: field.name + ": ";
+                    case Pattern: field.name + ":";
+                    case _: field.name;
+                },
+                range: replaceRange
+            }
+        };
+    }
+
+    function getKindForField<T>(field:JsonClassField, kind:HaxeCompletionItemKind<JsonClassField>):CompletionItemKind {
         var fieldKind:JsonFieldKind<T> = field.kind;
         return switch (fieldKind.kind) {
             case FVar:
@@ -191,7 +200,7 @@ class CompletionFeature {
                 }
             case FMethod if (hasOperatorMeta(field.meta)): Operator;
             case FMethod if (field.scope == Static): Function;
-            case FMethod if (name == "new"): Constructor;
+            case FMethod if (field.scope == Constructor): Constructor;
             case FMethod: Method;
         }
     }
@@ -219,7 +228,7 @@ class CompletionFeature {
             textEdit: {
                 newText: name,
                 range: replaceRange
-            },
+            }
         };
 
         if (resultKind != Pattern) {
