@@ -98,6 +98,7 @@ class CompletionFeature {
                 items.push(completionItem);
             };
             resolve(items);
+            return items.length + " items";
         }, error -> reject(ResponseError.internalError(error)));
     }
 
@@ -294,6 +295,7 @@ class CompletionFeature {
                 item.documentation = formatDocumentation(documentation);
             }
             resolve(item);
+            return null;
         }, error -> {
             reject(ResponseError.internalError(error));
         });

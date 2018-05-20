@@ -331,7 +331,7 @@ class Context {
             diagnostics.publishDiagnostics(uri);
     }
 
-    public function callHaxeMethod<P,R>(method:HaxeRequestMethod<P,Response<R>>, ?params:P, token:CancellationToken, callback:R->Void, errback:(error:String)->Void) {
+    public function callHaxeMethod<P,R>(method:HaxeRequestMethod<P,Response<R>>, ?params:P, token:CancellationToken, callback:R->String, errback:(error:String)->Void) {
         // TODO: avoid duplicating jsonrpc.Protocol logic
         var id = nextRequestId++;
         var request:RequestMessage = {
@@ -358,11 +358,12 @@ class Context {
                         var haxeResponse:Response<Dynamic> = response.result;
 
                         var beforeProcessingTime = Date.now().getTime();
-                        callback(haxeResponse.result);
+                        var debugInfo = callback(haxeResponse.result);
                         var afterProcessingTime = Date.now().getTime();
 
                         var methodResult:HaxeMethodResult = {
                             method: method,
+                            debugInfo: debugInfo,
                             arrivalTime: arrivalTime,
                             beforeProcessingTime: beforeProcessingTime,
                             afterProcessingTime: afterProcessingTime,

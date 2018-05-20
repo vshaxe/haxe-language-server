@@ -27,9 +27,11 @@ class HoverFeature {
             var content = if (hover.type != null) {
                 new TypePrinter(true).printType(hover.type);
             } else {
-                return resolve(null);
+                resolve(null);
+                return null;
             }
             resolve(createHover(content, hover.documentation, hover.range));
+            return null;
         }, error -> reject(ResponseError.internalError(error)));
     }
 

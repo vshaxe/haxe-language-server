@@ -40,6 +40,7 @@ class SignatureHelpFeature {
         }
         context.callHaxeMethod(HaxeMethods.SignatureHelp, params, token, result -> {
             resolve(createSignatureHelp(result));
+            return null;
         }, error -> reject(ResponseError.internalError(error)));
     }
 

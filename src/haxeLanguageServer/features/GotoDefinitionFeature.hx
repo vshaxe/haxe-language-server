@@ -27,6 +27,7 @@ class GotoDefinitionFeature {
                     range: location.range
                 }
             }));
+            return null;
         }, error -> reject(ResponseError.internalError(error)));
     }
 

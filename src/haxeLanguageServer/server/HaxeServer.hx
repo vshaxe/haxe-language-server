@@ -112,6 +112,7 @@ class HaxeServer {
             capabilities = result.capabilities;
             stopProgress();
             buildCompletionCache();
+            return null;
         }, error -> {
             // the "invalid format" error is expected for Haxe versions <= 4.0.0-preview.3
             if (error.startsWith("Error: Invalid format")) {
@@ -159,6 +160,7 @@ class HaxeServer {
         context.callHaxeMethod(HaxeMethods.ReadClassPaths, null, null, _ -> {
             stopProgress();
             trace("Done.");
+            return null;
         }, error -> {
             stopProgress();
             trace("Failed - " + error);

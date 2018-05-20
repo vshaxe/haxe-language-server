@@ -20,7 +20,10 @@ class DeterminePackageFeature {
 
     function handleJsonRpc(params:{fsPath:String}, token:CancellationToken, resolve:{pack:String}->Void, reject:ResponseError<NoData>->Void) {
         context.callHaxeMethod(HaxeMethods.DeterminePackage, {file: new FsPath(params.fsPath)}, token,
-            result -> resolve({pack: result.join(".")}),
+            result -> {
+                resolve({pack: result.join(".")});
+                return null;
+            },
             error -> reject(ResponseError.internalError(error))
         );
     }
