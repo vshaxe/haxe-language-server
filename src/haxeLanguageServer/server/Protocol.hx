@@ -131,6 +131,44 @@ typedef JsonLocal<T> = {
     var pos:JsonPos;
 }
 
+enum abstract ClassFieldOriginKind<T>(Int) {
+    /**
+        The field is declared on the current type itself.
+    **/
+    var Self:ClassFieldOriginKind<JsonModuleType<T>> = 0;
+
+    /**
+        The field is declared on a parent type, such as:
+        - a super class field that is not overriden
+        - a forwarded abstract field
+        - an inherited anonymous structure
+    **/
+    var Parent:ClassFieldOriginKind<JsonModuleType<T>> = 1;
+
+    /**
+        The field is a static extension method brought
+        into context with the `using` keyword.
+    **/
+    var StaticExtension:ClassFieldOriginKind<JsonModuleType<T>> = 2;
+
+    /**
+        Special fields built into the compiler, such as:
+        - `code` on single-character Strings
+        - `bind()` on functions.
+    **/
+    var BuiltIn:ClassFieldOriginKind<NoData> = 3;
+}
+
+typedef ClassFieldOrigin<T> = {
+    var kind:ClassFieldOriginKind<T>;
+    @:optional var args:T;
+}
+
+typedef JsonClassField<T> = {
+    >haxe.display.JsonModuleTypes.JsonClassField,
+    @:optional var origin:ClassFieldOrigin<T>;
+}
+
 enum abstract Literal(String) {
     var Null = "null";
     var True = "true";
@@ -247,9 +285,9 @@ typedef Keyword = {
 
 enum abstract CompletionItemKind<T>(String) {
     var Local:CompletionItemKind<JsonLocal<Dynamic>> = "Local";
-    var ClassField:CompletionItemKind<JsonClassField> = "ClassField";
+    var ClassField:CompletionItemKind<JsonClassField<Dynamic>> = "ClassField";
     var EnumField:CompletionItemKind<JsonEnumField> = "EnumField";
-    var EnumAbstractField:CompletionItemKind<JsonClassField> = "EnumAbstractField";
+    var EnumAbstractField:CompletionItemKind<JsonClassField<Dynamic>> = "EnumAbstractField";
     var Type:CompletionItemKind<ModuleType> = "Type";
     var Package:CompletionItemKind<String> = "Package";
     var Module:CompletionItemKind<String> = "Module";
