@@ -252,9 +252,13 @@ class CompletionFeature {
             item.detail = printTypeDetail(type);
         }
 
-        if (resultKind == New && snippetSupport) {
-            item.textEdit.newText += "($1)";
-            item.insertTextFormat = Snippet;
+        switch (resultKind) {
+            case New if (snippetSupport):
+                item.textEdit.newText += "($1)";
+                item.insertTextFormat = Snippet;
+            case StructExtension:
+                item.textEdit.newText += ",";
+            case _:
         }
 
         return item;
