@@ -131,8 +131,7 @@ class CompletionFeature {
                 return createTypeCompletionItem(item.args, doc, replaceRange, importPosition, resultKind);
 
             case Package:
-                label = item.args;
-                kind = Module;
+                return createPackageCompletionItem(item.args, replaceRange);
 
             case Module:
                 label = item.args;
@@ -362,5 +361,20 @@ class CompletionFeature {
         }
         components.push(typeName);
         return components.join(" ");
+    }
+
+    function createPackageCompletionItem(pack:String, replaceRange:Range):CompletionItem {
+        return {
+            label: pack,
+            kind: Module,
+            textEdit: {
+                newText: pack + ".",
+                range: replaceRange
+            },
+            command: {
+                title: "Trigger Suggest",
+                command: "editor.action.triggerSuggest"
+            }
+        };
     }
 }
