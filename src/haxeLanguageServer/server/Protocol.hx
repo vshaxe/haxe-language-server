@@ -18,32 +18,32 @@ class HaxeMethods {
         The completion request is sent from the client to Haxe to request code completion.
         Haxe automatically determines the type of completion to use based on the passed position, see `CompletionResultKind`.
     **/
-    static inline var Completion = new HaxeRequestMethod<CompletionParams,CompletionResult>("textDocument/completion");
+    static inline var Completion = new HaxeRequestMethod<CompletionParams,CompletionResult>("display/completion");
 
     /**
         The request is sent from the client to Haxe to resolve additional information for a given completion item.
     **/
-    static inline var CompletionItemResolve = new HaxeRequestMethod<CompletionItemResolveParams,CompletionItemResolveResult>("completionItem/resolve");
+    static inline var CompletionItemResolve = new HaxeRequestMethod<CompletionItemResolveParams,CompletionItemResolveResult>("display/completionItem/resolve");
 
     /**
         The goto definition request is sent from the client to Haxe to resolve the definition location(s) of a symbol at a given text document position.
     **/
-    static inline var GotoDefinition = new HaxeRequestMethod<PositionParams,GotoDefinitionResult>("textDocument/definition");
+    static inline var GotoDefinition = new HaxeRequestMethod<PositionParams,GotoDefinitionResult>("display/definition");
 
     /**
         The hover request is sent from the client to Haxe to request hover information at a given text document position.
     **/
-    static inline var Hover = new HaxeRequestMethod<PositionParams,HoverResult>("textDocument/hover");
+    static inline var Hover = new HaxeRequestMethod<PositionParams,HoverResult>("display/hover");
 
     /**
         This request is sent from the client to Haxe to determine the package for a given file, based on class paths configuration.
     **/
-    static inline var DeterminePackage = new HaxeRequestMethod<FileParams,DeterminePackageResult>("textDocument/package");
+    static inline var DeterminePackage = new HaxeRequestMethod<FileParams,DeterminePackageResult>("display/package");
 
     /**
         The signature help request is sent from the client to Haxe to request signature information at a given cursor position.
     **/
-    static inline var SignatureHelp = new HaxeRequestMethod<CompletionParams,SignatureHelpResult>("textDocument/signatureHelp");
+    static inline var SignatureHelp = new HaxeRequestMethod<CompletionParams,SignatureHelpResult>("display/signatureHelp");
 
     /*
         TODO:
@@ -54,7 +54,7 @@ class HaxeMethods {
         - codeLens
         - references
         - workspaceSymbols ("project/symbol"?)
-        - documentSymbols ("textDocument/documentSymbol"?)
+        - documentSymbols ("display/documentSymbol"?)
     */
 
     /* Server */
