@@ -109,6 +109,7 @@ class CompletionFeature {
         var label = "";
         var kind = null;
         var type = null;
+        var newText = null;
 
         switch (item.kind) {
             case Local:
@@ -120,6 +121,9 @@ class CompletionFeature {
                 label = item.args.name;
                 kind = getKindForField(label, item.kind, item.args);
                 type = item.args.type;
+                if (resultKind == StructureField) {
+                    newText = label + ": ";
+                }
                 // TODO: merge these kinds together with some isStatic / isEnumAbstractField flags?
 
             case EnumField:
@@ -162,8 +166,11 @@ class CompletionFeature {
         if (documentation != null) {
             result.documentation = formatDocumentation(documentation);
         }
-        if (replaceRange != null) {
-            result.textEdit = {range: replaceRange, newText: label};
+        if (replaceRange != null || newText != null) {
+            if (newText == null) {
+                newText = label;
+            }
+            result.textEdit = {range: replaceRange, newText: newText};
         }
         return result;
     }

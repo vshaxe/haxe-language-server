@@ -62,7 +62,7 @@ class SignatureHelpFeature {
         return {
             activeSignature: item.activeSignature,
             activeParameter: item.activeParameter,
-            signatures: item.signatures.map(createSignatureInformation)
+            signatures: item.signatures.map(createSignatureInformation),
         };
     }
 
