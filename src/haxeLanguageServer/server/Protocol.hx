@@ -313,6 +313,7 @@ enum abstract CompletionResultKind(Int) {
     var Import = 8;
     var Using = 9;
     var New = 10;
+    var Pattern = 11;
 }
 
 typedef CompletionResponse<T> = {

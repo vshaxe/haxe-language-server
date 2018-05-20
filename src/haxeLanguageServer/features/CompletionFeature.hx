@@ -121,8 +121,10 @@ class CompletionFeature {
                 label = item.args.name;
                 kind = getKindForField(label, item.kind, item.args);
                 type = item.args.type;
-                if (resultKind == StructureField) {
-                    newText = label + ": ";
+                switch (resultKind) {
+                    case StructureField: newText = label + ": ";
+                    case Pattern: newText = label + ":";
+                    case _:
                 }
                 // TODO: merge these kinds together with some isStatic / isEnumAbstractField flags?
 
@@ -130,6 +132,12 @@ class CompletionFeature {
                 label = item.args.name;
                 kind = EnumMember;
                 type = item.args.type;
+                if (resultKind == Pattern) {
+                    switch (type.kind) {
+                        case TEnum: newText = label + ":";
+                        case _:
+                    }
+                }
 
             case Type:
                 return createTypeCompletionItem(item.args, doc, replaceRange, importPosition, resultKind);
