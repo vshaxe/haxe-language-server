@@ -1,5 +1,6 @@
 package haxeLanguageServer.features;
 
+import haxe.extern.EitherType;
 import haxe.display.JsonModuleTypes.JsonFunctionArgument;
 import haxeLanguageServer.helper.ArgumentNameHelper.addNamesToSignatureType;
 import haxeLanguageServer.helper.DocHelper;
@@ -54,12 +55,9 @@ class SignatureHelpFeature {
         function createSignatureInformation(info:HaxeSignatureInformation):SignatureInformation {
             return {
                 label: printer.printType({kind: TFun, args: {args: info.args, ret: info.ret}}),
-                documentation: {
-                    kind: MarkupKind.MarkDown,
-                    value: DocHelper.markdownFormat(info.documentation)
-                },
+                documentation: getSignatureDocumentation(info.documentation),
                 parameters: info.args.map(createSignatureParameter)
-            }
+            };
         }
         return {
             activeSignature: item.activeSignature,
@@ -78,10 +76,7 @@ class SignatureHelpFeature {
                 case DResult(data):
                     var help:SignatureHelp = haxe.Json.parse(data);
                     for (signature in help.signatures) {
-                        signature.documentation = {
-                            kind: MarkupKind.MarkDown,
-                            value: DocHelper.markdownFormat(signature.documentation)
-                        };
+                        signature.documentation = getSignatureDocumentation(signature.documentation);
                         var parameters = signature.parameters;
                         for (i in 0...signature.parameters.length)
                             parameters[i].label = addNamesToSignatureType(parameters[i].label, i);
@@ -97,6 +92,16 @@ class SignatureHelpFeature {
                     doc.addUpdateListener(onUpdateTextDocument);
             }
         }, function(error) reject(ResponseError.internalError(error)));
+    }
+
+    function getSignatureDocumentation(documentation:String):EitherType<String,MarkupContent> {
+        if (context.config.enableSignatureHelpDocumentation) {
+            return {
+                kind: MarkupKind.MarkDown,
+                value: DocHelper.markdownFormat(documentation)
+            };
+        }
+        return null;
     }
 
     function onUpdateTextDocument(doc:TextDocument, events:Array<TextDocumentContentChangeEvent>, version:Int) {

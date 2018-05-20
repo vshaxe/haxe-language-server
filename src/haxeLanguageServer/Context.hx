@@ -37,6 +37,7 @@ private typedef Config = {
     var enableCodeLens:Bool;
     var enableDiagnostics:Bool;
     var enableMethodsView:Bool;
+    var enableSignatureHelpDocumentation:Bool;
     var diagnosticsPathFilter:String;
     var displayPort:Null<EitherType<Int, String>>;
     var buildCompletionCache:Bool;
@@ -79,6 +80,7 @@ class Context {
             enableCodeLens: false,
             enableDiagnostics: true,
             enableMethodsView: false,
+            enableSignatureHelpDocumentation: true,
             diagnosticsPathFilter: "${workspaceRoot}",
             displayPort: null,
             buildCompletionCache: true,
