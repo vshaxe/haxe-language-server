@@ -61,7 +61,7 @@ class CompletionFeature {
         var doc = context.documents.get(params.textDocument.uri);
         var offset = doc.offsetAt(params.position);
         var textBefore = doc.content.substring(0, offset);
-        if (contextSupport && isInvalidCompletionPosition(params.context, textBefore)) {
+        if (contextSupport && isInvalidCompletionPosition(params, textBefore)) {
             return resolve([]);
         }
         var handle = if (context.haxeServer.capabilities.completionProvider) handleJsonRpc else legacy.handle;
@@ -69,8 +69,11 @@ class CompletionFeature {
     }
 
     static final autoTriggerOnSpacePattern = ~/\b(import|using|extends|implements|case|new|cast) $/;
-    function isInvalidCompletionPosition(context:CompletionContext, text:String):Bool {
-        return context.triggerCharacter == " " && !autoTriggerOnSpacePattern.match(text);
+    function isInvalidCompletionPosition(params:CompletionParams, text:String):Bool {
+        if (params.context.triggerCharacter == "$" && !context.haxeServer.supportsJsonRpc) {
+            return true;
+        }
+        return params.context.triggerCharacter == " " && !autoTriggerOnSpacePattern.match(text);
     }
 
     function handleJsonRpc(params:CompletionParams, token:CancellationToken, resolve:Array<CompletionItem>->Void, reject:ResponseError<NoData>->Void, doc:TextDocument, offset:Int, _) {
