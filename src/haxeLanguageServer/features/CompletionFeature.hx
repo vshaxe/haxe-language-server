@@ -110,6 +110,15 @@ class CompletionFeature {
         var kind = null;
         var type = null;
         var newText = null;
+        var command = null;
+
+        function enableRetrigger() {
+            command = {
+                title: "Trigger Suggest",
+                command: "editor.action.triggerSuggest",
+                arguments: []
+            }
+        }
 
         switch (item.kind) {
             case Local:
@@ -146,6 +155,10 @@ class CompletionFeature {
 
             case Keyword:
                 label = item.args.name;
+                if (resultKind == ClassHerit) {
+                    label += " ";
+                    enableRetrigger();
+                }
                 kind = Keyword;
         }
 
@@ -165,6 +178,9 @@ class CompletionFeature {
                 newText = label;
             }
             result.textEdit = {range: replaceRange, newText: newText};
+        }
+        if (command != null) {
+            result.command = command;
         }
         return result;
     }

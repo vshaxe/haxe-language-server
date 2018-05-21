@@ -314,6 +314,7 @@ enum abstract CompletionResultKind(Int) {
     var New = 10;
     var Pattern = 11;
     var Override = 12;
+    var ClassHerit = 13;
 }
 
 typedef CompletionResponse<T> = {
