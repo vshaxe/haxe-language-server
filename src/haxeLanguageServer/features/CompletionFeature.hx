@@ -447,9 +447,19 @@ class CompletionFeature {
             }
         }
 
-        if (resultKind == ClassHerit) {
-            item.textEdit.newText += " ";
+        if (resultKind == TypeRelation) {
             item.command = retrigger;
+        }
+
+        switch (keyword.name) {
+            case Implements | Extends
+                | Function | Var
+                | Case | Try | Catch | New | Throw | Untyped | Macro:
+                item.textEdit.newText += " ";
+                // TODO: make it configurable for these, since not all code styles want spaces there
+            case If | Else | While | Do | For | Switch | Catch:
+                item.textEdit.newText += " ";
+            case _:
         }
 
         return item;
