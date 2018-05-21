@@ -16,12 +16,19 @@ import haxe.display.JsonModuleTypes;
 import haxe.extern.EitherType;
 using Lambda;
 
+typedef PreviousCompletionResult = {
+    var doc:TextDocument;
+    var replaceRange:Range;
+    var kind:CompletionResultKind;
+}
+
 class CompletionFeature {
     final context:Context;
     final legacy:CompletionFeatureLegacy;
     final printer:TypePrinter;
     final retrigger:Command;
 
+    var previousCompletion:PreviousCompletionResult;
     var contextSupport:Bool;
     var markdownSupport:Bool;
     var snippetSupport:Bool;
@@ -84,6 +91,19 @@ class CompletionFeature {
         return params.context.triggerCharacter == " " && !autoTriggerOnSpacePattern.match(text);
     }
 
+    function onCompletionItemResolve(item:CompletionItem, token:CancellationToken, resolve:CompletionItem->Void, reject:ResponseError<NoData>->Void) {
+        if (!context.haxeServer.capabilities.completionResolveProvider || previousCompletion == null) {
+            return resolve(item);
+        }
+        var importPosition = ImportHelper.getImportPosition(previousCompletion.doc);
+        context.callHaxeMethod(HaxeMethods.CompletionItemResolve, {index: item.data.index}, token, result -> {
+            resolve(createCompletionItem(result.item, previousCompletion.doc, previousCompletion.replaceRange, importPosition, previousCompletion.kind));
+            return null;
+        }, error -> {
+            reject(ResponseError.internalError(error));
+        });
+    }
+
     function handleJsonRpc(params:CompletionParams, token:CancellationToken, resolve:Array<CompletionItem>->Void, reject:ResponseError<NoData>->Void, doc:TextDocument, offset:Int, _) {
         var wasAutoTriggered = params.context == null ? true : params.context.triggerKind == TriggerCharacter;
         var params = {
@@ -93,6 +113,11 @@ class CompletionFeature {
             wasAutoTriggered: wasAutoTriggered,
         };
         context.callHaxeMethod(HaxeMethods.Completion, params, token, result -> {
+            previousCompletion = {
+                doc: doc,
+                kind: result.kind,
+                replaceRange: result.replaceRange
+            };
             var items = [];
             var counter = 0;
             var importPosition = ImportHelper.getImportPosition(doc);
@@ -285,10 +310,6 @@ class CompletionFeature {
             }
         };
 
-        if (type.doc != null) {
-            item.documentation = formatDocumentation(type.doc);
-        }
-
         if (isImportCompletion) {
             item.textEdit.newText += ";";
         } else {
@@ -302,10 +323,6 @@ class CompletionFeature {
             }
         }
 
-        if (type.params != null) {
-            item.detail = printTypeDetail(type);
-        }
-
         switch (resultKind) {
             case New if (snippetSupport):
                 item.textEdit.newText += "($1)";
@@ -313,6 +330,13 @@ class CompletionFeature {
             case StructExtension:
                 item.textEdit.newText += ",";
             case _:
+        }
+
+        if (type.doc != null) {
+            item.documentation = formatDocumentation(type.doc);
+        }
+        if (type.params != null) {
+            item.detail = printTypeDetail(type);
         }
 
         return item;
@@ -352,39 +376,12 @@ class CompletionFeature {
         return DocHelper.extractText(doc);
     }
 
-    function onCompletionItemResolve(item:CompletionItem, token:CancellationToken, resolve:CompletionItem->Void, reject:ResponseError<NoData>->Void) {
-        if (!context.haxeServer.capabilities.completionResolveProvider) {
-            return resolve(item);
-        }
-        context.callHaxeMethod(HaxeMethods.CompletionItemResolve, {index: item.data.index}, token, result -> {
-            var detail = getDetail(result.item);
-            if (detail != null) {
-                item.detail = detail;
-            }
-            var documentation = getDocumentation(result.item);
-            if (documentation != null) {
-                item.documentation = formatDocumentation(documentation);
-            }
-            resolve(item);
-            return null;
-        }, error -> {
-            reject(ResponseError.internalError(error));
-        });
-    }
-
     function getDocumentation<T>(item:HaxeCompletionItem<T>):JsonDoc {
         return switch (item.kind) {
             case ClassField | EnumAbstractField: item.args.doc;
             case EnumField: item.args.doc;
             case Type: item.args.doc;
             case Metadata: item.args.doc;
-            case _: null;
-        }
-    }
-
-    function getDetail<T>(item:HaxeCompletionItem<T>):String {
-        return switch (item.kind) {
-            case Type: printTypeDetail(item.args);
             case _: null;
         }
     }
