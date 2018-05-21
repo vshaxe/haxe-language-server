@@ -450,6 +450,11 @@ class CompletionFeature {
             }
         }
 
+        switch (keyword.name) {
+            case Continue: item.textEdit.newText += ";";
+            case _:
+        }
+
         if (resultKind == ClassHerit) {
             item.textEdit.newText += " ";
             item.command = retrigger;

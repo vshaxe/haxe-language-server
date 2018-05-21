@@ -279,7 +279,32 @@ typedef Metadata<T> = {
 }
 
 typedef Keyword = {
-    var name:String;
+    var name:KeywordKind;
+}
+
+enum abstract KeywordKind(String) to String {
+    var Implements = "implements";
+    var Extends = "extends";
+    var Function = "function";
+    var Var = "var";
+    var If = "if";
+    var Else = "else";
+    var While = "while";
+    var Do = "do";
+    var For = "for";
+    var Break = "break";
+    var Return = "return";
+    var Continue = "continue";
+    var Switch = "switch";
+    var Case = "case";
+    var Default = "default";
+    var Try = "try";
+    var Catch = "catch";
+    var New = "new";
+    var Throw = "throw";
+    var Untyped = "untyped";
+    var Cast = "cast";
+    var Macro = "macro";
 }
 
 enum abstract CompletionItemKind<T>(String) {
