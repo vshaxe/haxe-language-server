@@ -454,11 +454,18 @@ class CompletionFeature {
         switch (keyword.name) {
             case Implements | Extends
                 | Function | Var
-                | Case | Try | Catch | New | Throw | Untyped | Macro:
+                | Case | Try | New | Throw | Untyped | Macro:
                 item.textEdit.newText += " ";
-                // TODO: make it configurable for these, since not all code styles want spaces there
-            case If | Else | While | Do | For | Switch | Catch:
+            // TODO: make it configurable for these, since not all code styles want spaces there
+            case Else | Do | Switch:
                 item.textEdit.newText += " ";
+            case If | For | While | Catch:
+                if (snippetSupport) {
+                    item.insertTextFormat = Snippet;
+                    item.textEdit.newText = '${keyword.name} ($1)';
+                } else {
+                    item.textEdit.newText += " ";
+                }
             case _:
         }
 
