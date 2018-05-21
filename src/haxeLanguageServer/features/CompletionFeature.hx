@@ -178,6 +178,7 @@ class CompletionFeature {
                 newText: switch (resultKind) {
                     case StructureField: field.name + ": ";
                     case Pattern: field.name + ":";
+                    case Override: printer.printEmptyFunctionDefinition(field);
                     case _: field.name;
                 },
                 range: replaceRange

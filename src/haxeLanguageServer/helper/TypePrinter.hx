@@ -86,4 +86,17 @@ class TypePrinter {
     public function printFunctionArgument(arg:JsonFunctionArgument) {
         return (arg.opt ? "?" : "") + (arg.name == "" ? "" : arg.name + ":") + printTypeRec(arg.t);
     }
+
+    public function printEmptyFunctionDefinition(field:JsonClassField) {
+        var vis = field.isPublic ? "public " : "";
+        function extractFunctionSignature<T>(type:JsonType<T>) {
+            return switch (type.kind) {
+                case TFun: type.args;
+                case _: throw "function expected";
+            }
+        }
+        var sig = extractFunctionSignature(field.type);
+        var sig = sig.args.map(printFunctionArgument).join(", ");
+        return vis + "function " + field.name + "(" + sig + ")";
+    }
 }
