@@ -16,7 +16,7 @@ import haxe.display.JsonModuleTypes;
 import haxe.extern.EitherType;
 using Lambda;
 
-typedef PreviousCompletionResult = {
+private typedef PreviousCompletionResult = {
     var doc:TextDocument;
     var replaceRange:Range;
     var kind:CompletionResultKind;
@@ -445,11 +445,6 @@ class CompletionFeature {
                 newText: keyword.name,
                 range: replaceRange
             }
-        }
-
-        switch (keyword.name) {
-            case Continue: item.textEdit.newText += ";";
-            case _:
         }
 
         if (resultKind == ClassHerit) {
