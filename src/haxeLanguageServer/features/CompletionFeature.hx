@@ -308,7 +308,7 @@ class CompletionFeature {
             autoImport = false; // need to insert the qualified name
         }
 
-        var qualifiedName = printTypePath(type); // pack.Foo | pack.Foo.SubType
+        var qualifiedName = printer.printQualifiedTypePath(type); // pack.Foo | pack.Foo.SubType
         var unqualifiedName = type.name; // Foo | SubType
 
         var item:CompletionItem = {
@@ -352,18 +352,6 @@ class CompletionFeature {
         return item;
     }
 
-    function printTypePath(type:ModuleType):String {
-        var result = type.pack.join(".");
-        if (type.pack.length > 0) {
-            result += ".";
-        }
-        result += type.moduleName;
-        if (type.name != type.moduleName) {
-            result += "." + type.name;
-        }
-        return result;
-    }
-
     function getKindForModuleType(type:ModuleType):CompletionItemKind {
         return switch (type.kind) {
             case Class: Class;
@@ -397,42 +385,17 @@ class CompletionFeature {
     }
 
     function printTypeDetail(type:ModuleType):String {
-        var detail = printTypeDeclaration(type);
+        var detail = printer.printTypeDeclaration(type);
         switch (type.importStatus) {
             case Imported:
                 detail += "\n(imported)";
             case Unimported:
-                var containerName = printTypePath(type).untilLastDot();
+                var containerName = printer.printQualifiedTypePath(type).untilLastDot();
                 detail = "Auto-import from '" + containerName + "'\n" + detail;
             case Shadowed:
                 detail += "\n(shadowed)";
         }
         return detail;
-    }
-
-    /**
-        Prints a type declaration in the form of `extern interface ArrayAccess<T>`.
-        (`modifiers... keyword Name<Params>`)
-    **/
-    function printTypeDeclaration(type:ModuleType):String {
-        var components = [];
-        if (type.isPrivate) components.push("private");
-        if (type.meta.exists(meta -> meta.name == ":final")) components.push("final");
-        if (type.isExtern) components.push("extern");
-        components.push(switch (type.kind) {
-            case Class: "class";
-            case Interface: "interface";
-            case Enum: "enum";
-            case Abstract: "abstract";
-            case EnumAbstract: "enum abstract";
-            case TypeAlias | Struct: "typedef";
-        });
-        var typeName = type.name;
-        if (type.params.length > 0) {
-            typeName += "<" + type.params.map(param -> param.name).join(", ") + ">";
-        }
-        components.push(typeName);
-        return components.join(" ");
     }
 
     function createPackageCompletionItem(pack:String, replaceRange:Range):CompletionItem {

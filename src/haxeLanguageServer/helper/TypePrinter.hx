@@ -1,6 +1,7 @@
 package haxeLanguageServer.helper;
 
 import haxe.display.JsonModuleTypes;
+import haxeLanguageServer.server.Protocol.ModuleType;
 using Lambda;
 
 /**
@@ -98,5 +99,42 @@ class TypePrinter {
         var sig = extractFunctionSignature(field.type);
         var sig = sig.args.map(printFunctionArgument).join(", ");
         return vis + "function " + field.name + "(" + sig + ")";
+    }
+
+    /**
+        Prints a type declaration in the form of `extern interface ArrayAccess<T>`.
+        (`modifiers... keyword Name<Params>`)
+    **/
+    public function printTypeDeclaration(type:ModuleType):String {
+        var components = [];
+        if (type.isPrivate) components.push("private");
+        if (type.meta.exists(meta -> meta.name == ":final")) components.push("final");
+        if (type.isExtern) components.push("extern");
+        components.push(switch (type.kind) {
+            case Class: "class";
+            case Interface: "interface";
+            case Enum: "enum";
+            case Abstract: "abstract";
+            case EnumAbstract: "enum abstract";
+            case TypeAlias | Struct: "typedef";
+        });
+        var typeName = type.name;
+        if (type.params.length > 0) {
+            typeName += "<" + type.params.map(param -> param.name).join(", ") + ">";
+        }
+        components.push(typeName);
+        return components.join(" ");
+    }
+
+    public function printQualifiedTypePath(type:ModuleType):String {
+        var result = type.pack.join(".");
+        if (type.pack.length > 0) {
+            result += ".";
+        }
+        result += type.moduleName;
+        if (type.name != type.moduleName) {
+            result += "." + type.name;
+        }
+        return result;
     }
 }
