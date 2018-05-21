@@ -83,7 +83,7 @@ class CompletionFeature {
         handle(params, token, resolve, reject, doc, offset, textBefore);
     }
 
-    static final autoTriggerOnSpacePattern = ~/\b(import|using|extends|implements|case|new|cast) $/;
+    static final autoTriggerOnSpacePattern = ~/\b(import|using|extends|implements|case|new|cast|override) $/;
     function isInvalidCompletionPosition(params:CompletionParams, text:String):Bool {
         if (params.context.triggerCharacter == "$" && !context.haxeServer.supportsJsonRpc) {
             return true;
