@@ -20,6 +20,8 @@ class CompletionFeature {
     final context:Context;
     final legacy:CompletionFeatureLegacy;
     final printer:TypePrinter;
+    final retrigger:Command;
+
     var contextSupport:Bool;
     var markdownSupport:Bool;
     var snippetSupport:Bool;
@@ -31,6 +33,12 @@ class CompletionFeature {
         printer = new TypePrinter();
         context.protocol.onRequest(Methods.Completion, onCompletion);
         context.protocol.onRequest(Methods.CompletionItemResolve, onCompletionItemResolve);
+
+        retrigger = {
+            title: "Trigger Suggest",
+            command: "editor.action.triggerSuggest",
+            arguments: []
+        };
     }
 
     function checkCapabilities() {
@@ -109,16 +117,6 @@ class CompletionFeature {
         var label = "";
         var kind = null;
         var type = null;
-        var newText = null;
-        var command = null;
-
-        function enableRetrigger() {
-            command = {
-                title: "Trigger Suggest",
-                command: "editor.action.triggerSuggest",
-                arguments: []
-            }
-        }
 
         switch (item.kind) {
             case Local:
@@ -154,12 +152,7 @@ class CompletionFeature {
                 kind = Function;
 
             case Keyword:
-                label = item.args.name;
-                if (resultKind == ClassHerit) {
-                    label += " ";
-                    enableRetrigger();
-                }
-                kind = Keyword;
+                return createKeywordCompletionItem(item.args, replaceRange, resultKind);
         }
 
         var result:CompletionItem = {label: label};
@@ -173,14 +166,8 @@ class CompletionFeature {
         if (documentation != null) {
             result.documentation = formatDocumentation(documentation);
         }
-        if (replaceRange != null || newText != null) {
-            if (newText == null) {
-                newText = label;
-            }
-            result.textEdit = {range: replaceRange, newText: newText};
-        }
-        if (command != null) {
-            result.command = command;
+        if (replaceRange != null) {
+            result.textEdit = {range: replaceRange, newText: label};
         }
         return result;
     }
@@ -449,10 +436,25 @@ class CompletionFeature {
                 newText: pack + ".",
                 range: replaceRange
             },
-            command: {
-                title: "Trigger Suggest",
-                command: "editor.action.triggerSuggest"
-            }
+            command: retrigger
         };
+    }
+
+    function createKeywordCompletionItem(keyword:Keyword, replaceRange:Range, resultKind:CompletionResultKind):CompletionItem {
+        var item:CompletionItem = {
+            label: keyword.name,
+            kind: Keyword,
+            textEdit: {
+                newText: keyword.name,
+                range: replaceRange
+            }
+        }
+
+        if (resultKind == ClassHerit) {
+            item.textEdit.newText += " ";
+            item.command = retrigger;
+        }
+
+        return item;
     }
 }
