@@ -83,12 +83,18 @@ class CompletionFeature {
         handle(params, token, resolve, reject, doc, offset, textBefore);
     }
 
-    static final autoTriggerOnSpacePattern = ~/\b(import|using|extends|implements|case|new|cast|override) $/;
+    static final autoTriggerOnSpacePattern = ~/(\b(import|using|extends|implements|case|new|cast|override)|(->)) $/;
     function isInvalidCompletionPosition(params:CompletionParams, text:String):Bool {
-        if (params.context.triggerCharacter == "$" && !context.haxeServer.supportsJsonRpc) {
-            return true;
+        return switch (params.context.triggerCharacter) {
+            case "$" if (!context.haxeServer.supportsJsonRpc): true;
+            case ">" if (!isAfterArrow(text)): true;
+            case " " if (!autoTriggerOnSpacePattern.match(text)): true;
+            case _: false;
         }
-        return params.context.triggerCharacter == " " && !autoTriggerOnSpacePattern.match(text);
+    }
+
+    inline function isAfterArrow(text:String):Bool {
+        return text.trim().endsWith("->");
     }
 
     function onCompletionItemResolve(item:CompletionItem, token:CancellationToken, resolve:CompletionItem->Void, reject:ResponseError<NoData>->Void) {
@@ -104,7 +110,7 @@ class CompletionFeature {
         });
     }
 
-    function handleJsonRpc(params:CompletionParams, token:CancellationToken, resolve:Array<CompletionItem>->Void, reject:ResponseError<NoData>->Void, doc:TextDocument, offset:Int, _) {
+    function handleJsonRpc(params:CompletionParams, token:CancellationToken, resolve:Array<CompletionItem>->Void, reject:ResponseError<NoData>->Void, doc:TextDocument, offset:Int, textBefore:String) {
         var wasAutoTriggered = params.context == null ? true : params.context.triggerKind == TriggerCharacter;
         var params = {
             file: doc.fsPath,
@@ -113,6 +119,10 @@ class CompletionFeature {
             wasAutoTriggered: wasAutoTriggered,
         };
         context.callHaxeMethod(HaxeMethods.Completion, params, token, result -> {
+            if (result.kind != TypeHint && wasAutoTriggered && isAfterArrow(textBefore)) {
+                resolve([]); // avoid auto-popup after -> in arrow functions
+                return null;
+            }
             previousCompletion = {
                 doc: doc,
                 kind: result.kind,
