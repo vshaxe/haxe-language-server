@@ -232,7 +232,7 @@ typedef JsonLiteral<T> = {
     var type:JsonType<T>;
 }
 
-enum abstract MetadataUsage(String) {
+enum abstract MetadataTarget(String) {
     var Class = "TClass";
     var ClassField = "ClassField";
     var Abstract = "TAbstract";
@@ -259,23 +259,12 @@ enum abstract Platform(String) {
     var Eval = "Eval";
 }
 
-enum abstract MetadataParameterKind<T>(String) {
-    var HasParam:MetadataParameterKind<String> = "HasParam";
-    var Platform:MetadataParameterKind<Platform> = "Platform";
-    var Platforms:MetadataParameterKind<Array<Platform>> = "Platforms";
-    var UsedOn:MetadataParameterKind<MetadataUsage> = "UsedOn";
-    var UsedOnEither:MetadataParameterKind<Array<MetadataUsage>> = "UsedOnEither";
-}
-
-typedef MetadataParameter<T> = {
-    var kind:MetadataParameterKind<T>;
-    var args:T;
-}
-
-typedef Metadata<T> = {
+typedef Metadata = {
     var name:String;
     var doc:JsonDoc;
-    var parameters:Array<MetadataParameter<T>>;
+    var parameters:Array<String>;
+    var platforms:Array<Platform>;
+    var target:Array<MetadataTarget>;
 }
 
 typedef Keyword = {
@@ -316,7 +305,7 @@ enum abstract CompletionItemKind<T>(String) {
     var Package:CompletionItemKind<String> = "Package";
     var Module:CompletionItemKind<String> = "Module";
     var Literal:CompletionItemKind<JsonLiteral<Dynamic>> = "Literal";
-    var Metadata:CompletionItemKind<Metadata<Dynamic>> = "Metadata";
+    var Metadata:CompletionItemKind<Metadata> = "Metadata";
     var Keyword:CompletionItemKind<Keyword> = "Keyword";
 }
 
