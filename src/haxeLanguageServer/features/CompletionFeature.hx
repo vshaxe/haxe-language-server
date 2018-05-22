@@ -213,11 +213,12 @@ class CompletionFeature {
         return result;
     }
 
-    function createClassFieldCompletionItem(field:JsonClassField, kind:HaxeCompletionItemKind<JsonClassField>, replaceRange:Range, resultKind:CompletionResultKind):CompletionItem {
+    function createClassFieldCompletionItem<T>(usage:ClassFieldUsage<T>, kind:HaxeCompletionItemKind<Dynamic>, replaceRange:Range, resultKind:CompletionResultKind):CompletionItem {
+        var field = usage.field;
         return {
             label: field.name,
             kind: getKindForField(field, kind),
-            detail: printer.printType(field.type),
+            detail: printer.printType(field.type) + "\n" + printClassFieldOrigin(usage.origin),
             textEdit: {
                 newText: switch (resultKind) {
                     case StructureField: field.name + ": ";
@@ -230,7 +231,10 @@ class CompletionFeature {
         };
     }
 
-    function getKindForField<T>(field:JsonClassField, kind:HaxeCompletionItemKind<JsonClassField>):CompletionItemKind {
+    function getKindForField<T>(field:JsonClassField, kind:HaxeCompletionItemKind<Dynamic>):CompletionItemKind {
+        function hasOperatorMeta(meta:JsonMetadata) {
+            return meta.exists(meta -> meta.name == ":op" || meta.name == ":resolve" || meta.name == ":arrayAccess");
+        }
         var fieldKind:JsonFieldKind<T> = field.kind;
         return switch (fieldKind.kind) {
             case FVar:
@@ -251,8 +255,8 @@ class CompletionFeature {
         }
     }
 
-    function hasOperatorMeta(meta:JsonMetadata) {
-        return meta.exists(meta -> meta.name == ":op" || meta.name == ":resolve" || meta.name == ":arrayAccess");
+    function printClassFieldOrigin<T>(origin:ClassFieldOrigin<T>):String {
+        return ""; // TODO
     }
 
     function getKindForType<T>(type:JsonType<T>):CompletionItemKind {
@@ -390,7 +394,7 @@ class CompletionFeature {
 
     function getDocumentation<T>(item:HaxeCompletionItem<T>):JsonDoc {
         return switch (item.kind) {
-            case ClassField | EnumAbstractField: item.args.doc;
+            case ClassField | EnumAbstractField: item.args.field.doc;
             case EnumField: item.args.doc;
             case Type: item.args.doc;
             case Metadata: item.args.doc;

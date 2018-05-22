@@ -118,6 +118,7 @@ typedef CompletionParams = {
     var wasAutoTriggered:Bool;
 }
 
+// TODO: don't forget about EnumField
 typedef IdentifierResolution = {
     /**
         Whether it's valid to use the unqualified name of the identifier or not.
@@ -199,10 +200,10 @@ typedef ClassFieldOrigin<T> = {
     @:optional var args:T;
 }
 
-typedef JsonClassField<T> = {
-    >haxe.display.JsonModuleTypes.JsonClassField,
-    @:optional var origin:ClassFieldOrigin<T>;
+typedef ClassFieldUsage<T> = {
+    var field:JsonClassField;
     var resolution:IdentifierResolution;
+    @:optional var origin:ClassFieldOrigin<T>;
 }
 
 enum abstract Literal(String) {
@@ -336,9 +337,9 @@ enum abstract KeywordKind(String) to String {
 
 enum abstract CompletionItemKind<T>(String) {
     var Local:CompletionItemKind<JsonLocal<Dynamic>> = "Local";
-    var ClassField:CompletionItemKind<JsonClassField<Dynamic>> = "ClassField";
+    var ClassField:CompletionItemKind<ClassFieldUsage<Dynamic>> = "ClassField";
     var EnumField:CompletionItemKind<JsonEnumField> = "EnumField";
-    var EnumAbstractField:CompletionItemKind<JsonClassField<Dynamic>> = "EnumAbstractField";
+    var EnumAbstractField:CompletionItemKind<ClassFieldUsage<Dynamic>> = "EnumAbstractField";
     var Type:CompletionItemKind<ModuleType> = "Type";
     var Package:CompletionItemKind<String> = "Package";
     var Module:CompletionItemKind<String> = "Module";
