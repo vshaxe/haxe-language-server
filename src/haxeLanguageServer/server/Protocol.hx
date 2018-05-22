@@ -118,6 +118,22 @@ typedef CompletionParams = {
     var wasAutoTriggered:Bool;
 }
 
+typedef IdentifierResolution = {
+    /**
+        Whether it's valid to use the unqualified name of the identifier or not.
+        This is `false` if the identifier is shadowed.
+    **/
+    var isQualified:Bool;
+
+    /**
+        The qualifier that has to be inserted to use the identifier if `!isQualified`.
+        Can either be `this` for instance fields for the type name for `static` fields.
+
+        Note: **can be null** if there's no way to qualify this identifier (e.g. method argument shadowed by local var)!
+    **/
+    @:optional var qualifier:String;
+}
+
 typedef JsonLocal<T> = {
     var id:Int;
     var name:String;
@@ -129,6 +145,7 @@ typedef JsonLocal<T> = {
     };
     var meta:JsonMetadata;
     var pos:JsonPos;
+    var resolution:IdentifierResolution;
 }
 
 enum abstract ClassFieldOriginKind<T>(Int) {
@@ -166,6 +183,7 @@ typedef ClassFieldOrigin<T> = {
 typedef JsonClassField<T> = {
     >haxe.display.JsonModuleTypes.JsonClassField,
     @:optional var origin:ClassFieldOrigin<T>;
+    var resolution:IdentifierResolution;
 }
 
 enum abstract Literal(String) {
