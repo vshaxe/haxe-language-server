@@ -26,7 +26,8 @@ class CompletionFeature {
     final context:Context;
     final legacy:CompletionFeatureLegacy;
     final printer:TypePrinter;
-    final retrigger:Command;
+    final triggerSuggest:Command;
+    final triggerParameterHints:Command;
 
     var previousCompletion:PreviousCompletionResult;
     var contextSupport:Bool;
@@ -41,9 +42,14 @@ class CompletionFeature {
         context.protocol.onRequest(Methods.Completion, onCompletion);
         context.protocol.onRequest(Methods.CompletionItemResolve, onCompletionItemResolve);
 
-        retrigger = {
+        triggerSuggest = {
             title: "Trigger Suggest",
             command: "editor.action.triggerSuggest",
+            arguments: []
+        };
+        triggerParameterHints = {
+            title: "Trigger Parameter Hints",
+            command: "editor.action.triggerParameterHints",
             arguments: []
         };
     }
@@ -337,6 +343,7 @@ class CompletionFeature {
             case New if (snippetSupport):
                 item.textEdit.newText += "($1)";
                 item.insertTextFormat = Snippet;
+                item.command = triggerParameterHints;
             case TypeHint if (snippetSupport && type.params != null && type.params.length > 0):
                 item.textEdit.newText += "<$1>";
                 item.insertTextFormat = Snippet;
@@ -409,7 +416,7 @@ class CompletionFeature {
                 newText: pack + ".",
                 range: replaceRange
             },
-            command: retrigger
+            command: triggerSuggest
         };
     }
 
@@ -424,7 +431,7 @@ class CompletionFeature {
         }
 
         if (resultKind == TypeRelation) {
-            item.command = retrigger;
+            item.command = triggerSuggest;
         }
 
         switch (keyword.name) {
