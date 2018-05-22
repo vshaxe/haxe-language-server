@@ -339,17 +339,21 @@ class CompletionFeature {
             }
         }
 
-        switch (resultKind) {
-            case New if (snippetSupport):
-                item.textEdit.newText += "($1)";
-                item.insertTextFormat = Snippet;
-                item.command = triggerParameterHints;
-            case TypeHint if (snippetSupport && type.params != null && type.params.length > 0):
-                item.textEdit.newText += "<$1>";
-                item.insertTextFormat = Snippet;
-            case StructExtension:
-                item.textEdit.newText += ",";
-            case _:
+        if (snippetSupport) {
+            switch (resultKind) {
+                case New:
+                    item.textEdit.newText += "($1)";
+                    item.insertTextFormat = Snippet;
+                    item.command = triggerParameterHints;
+                case TypeHint | Extends | Implements | StructExtension if (type.params != null && type.params.length > 0):
+                    item.textEdit.newText += "<$1>";
+                    item.insertTextFormat = Snippet;
+                case _:
+            }
+        }
+
+        if (resultKind == StructExtension) {
+            item.textEdit.newText += ",";
         }
 
         if (type.doc != null) {
