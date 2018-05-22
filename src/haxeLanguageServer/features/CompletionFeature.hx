@@ -337,6 +337,9 @@ class CompletionFeature {
             case New if (snippetSupport):
                 item.textEdit.newText += "($1)";
                 item.insertTextFormat = Snippet;
+            case TypeHint if (snippetSupport && type.params != null && type.params.length > 0):
+                item.textEdit.newText += "<$1>";
+                item.insertTextFormat = Snippet;
             case StructExtension:
                 item.textEdit.newText += ",";
             case _:
