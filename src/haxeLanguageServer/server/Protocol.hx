@@ -138,14 +138,20 @@ typedef JsonLocal<T> = {
     var id:Int;
     var name:String;
     var type:JsonType<T>;
-    var capture:Bool;
+    var kind:LocalKind;
     @:optional var extra:{
         var params:Array<JsonTypeParameter>;
         var expr:JsonExpr;
     };
     var meta:JsonMetadata;
     var pos:JsonPos;
-    var resolution:IdentifierResolution;
+}
+
+enum abstract LocalKind(Int) {
+    var Variable = 0;
+    var Argument = 1;
+    var Iterator = 2;
+    var CaptureVariable = 3;
 }
 
 enum abstract ClassFieldOriginKind<T>(Int) {
@@ -168,11 +174,22 @@ enum abstract ClassFieldOriginKind<T>(Int) {
     var StaticExtension:ClassFieldOriginKind<JsonModuleType<T>> = 2;
 
     /**
+        The field is a static field brought into context via a static import
+        (`import pack.Module.Type.field`).
+    **/
+    var StaticImport:ClassFieldOriginKind<JsonModuleType<T>> = 3;
+
+    /**
+        This field doesn't belong to any
+    **/
+    var AnonymousStructure:ClassFieldOriginKind<JsonAnon> = 4;
+
+    /**
         Special fields built into the compiler, such as:
         - `code` on single-character Strings
         - `bind()` on functions.
     **/
-    var BuiltIn:ClassFieldOriginKind<NoData> = 3;
+    var BuiltIn:ClassFieldOriginKind<NoData> = 5;
 }
 
 typedef ClassFieldOrigin<T> = {
@@ -191,6 +208,7 @@ enum abstract Literal(String) {
     var True = "true";
     var False = "false";
     var This = "this";
+    var Trace = "trace";
 }
 
 enum abstract ModuleTypeKind(Int) {
