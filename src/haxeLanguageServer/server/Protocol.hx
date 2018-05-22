@@ -152,6 +152,8 @@ enum abstract LocalKind(Int) {
     var Argument = 1;
     var Iterator = 2;
     var CaptureVariable = 3;
+    var CatchVariable = 4;
+    var LocalFunction = 5;
 }
 
 enum abstract ClassFieldOriginKind<T>(Int) {
