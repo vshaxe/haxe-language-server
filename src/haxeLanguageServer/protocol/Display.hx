@@ -1,14 +1,15 @@
-package haxeLanguageServer.server;
+package haxeLanguageServer.protocol;
 
-import jsonrpc.Types;
+import jsonrpc.Types.NoData;
 import haxe.display.JsonModuleTypes;
+import haxeLanguageServer.protocol.Types;
 
 /**
     Methods of the JSON-RPC-based `--display` protocol in Haxe 4.
     A lot of the methods are *inspired* by the Language Server Protocol, but there is **no** intention to be directly compatible with it.
 **/
 @:publicFields
-class HaxeMethods {
+class DisplayMethods {
     /**
         The initialize request is sent from the client to Haxe to determine the capabilities.
     **/
@@ -56,54 +57,21 @@ class HaxeMethods {
         - workspaceSymbols ("project/symbol"?)
         - documentSymbols ("display/documentSymbol"?)
     */
-
-    /* Server */
-
-    /**
-        This request is sent from the client to Haxe to explore the class paths. This effectively creates a cache for toplevel completion.
-    **/
-    static inline var ReadClassPaths = new HaxeRequestMethod<NoData,Response<NoData>>("server/readClassPaths");
-
-    static inline var Configure = new HaxeRequestMethod<ConfigureParams,Response<NoData>>("server/configure");
-
-    static inline var Invalidate = new HaxeRequestMethod<FileParams,Response<NoData>>("server/invalidate");
-}
-
-typedef ConfigureParams = {
-    var noModuleChecks:Bool;
-}
-
-typedef Timer = {
-    final name:String;
-    final path:String;
-    final info:String;
-    final time:Float;
-    final calls:Int;
-    final percentTotal:Float;
-    final percentParent:Float;
-    @:optional final children:Array<Timer>;
-}
-
-typedef Response<T> = {
-    final result:T;
-    /** UNIX timestamp at the moment the data was sent. **/
-    final timestamp:Float;
-    /** Only sent if `--times` is enabled. **/
-    @:optional final timers:Timer;
 }
 
 /* Initialize */
 
-typedef InitializeParams = {
-    @:optional var logging:LoggingOptions;
-    @:optional var supportsResolve:Bool;
-}
-
+// TODO: update this
 typedef LoggingOptions = {
     @:optional var arguments:Bool;
     @:optional var cacheSignature:Bool;
     @:optional var cacheInvalidation:Bool;
     @:optional var completionResponse:Bool;
+}
+
+typedef InitializeParams = {
+    @:optional var logging:LoggingOptions;
+    @:optional var supportsResolve:Bool;
 }
 
 typedef HaxeCapabilities = {
@@ -481,10 +449,6 @@ typedef SignatureHelpResult = Response<SignatureItem>;
 
 /* General types */
 
-typedef FileParams = {
-    var file:FsPath;
-}
-
 typedef PositionParams = {
     > FileParams,
     /** Unicode character offset in the file. **/
@@ -499,5 +463,3 @@ typedef Location = {
 
 typedef Range = languageServerProtocol.Types.Range;
 typedef Position = languageServerProtocol.Types.Position;
-typedef HaxeRequestMethod<TParams,TResponse> = RequestMethod<TParams,TResponse,NoData,NoData>;
-typedef HaxeNotificationMethod<TParams> = NotificationMethod<TParams,NoData>;

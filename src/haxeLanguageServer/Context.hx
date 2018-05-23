@@ -1,6 +1,5 @@
 package haxeLanguageServer;
 
-import haxe.Timer;
 import haxe.Json;
 import haxe.extern.EitherType;
 import js.Node.process;
@@ -15,9 +14,8 @@ import haxeLanguageServer.helper.TypeHelper.FunctionFormattingConfig;
 import haxeLanguageServer.helper.ImportHelper;
 import haxeLanguageServer.server.DisplayResult;
 import haxeLanguageServer.server.HaxeServer;
-import haxeLanguageServer.server.Protocol.Response;
-import haxeLanguageServer.server.Protocol.HaxeRequestMethod;
-import haxeLanguageServer.server.Protocol.HaxeMethods;
+import haxeLanguageServer.protocol.Types;
+import haxeLanguageServer.protocol.Server.ServerMethods;
 import haxeLanguageServer.LanguageServerMethods.HaxeMethodResult;
 
 private typedef FunctionGenerationConfig = {
@@ -309,8 +307,8 @@ class Context {
     }
 
     function onDidChangeTextDocument(event:DidChangeTextDocumentParams) {
-        callHaxeMethod(HaxeMethods.Invalidate, {file: event.textDocument.uri.toFsPath()}, null, _ -> null, error -> {
-            trace("Error during " + HaxeMethods.Invalidate + " " + error);
+        callHaxeMethod(ServerMethods.Invalidate, {file: event.textDocument.uri.toFsPath()}, null, _ -> null, error -> {
+            trace("Error during " + ServerMethods.Invalidate + " " + error);
         });
         documents.onDidChangeTextDocument(event);
     }
@@ -337,7 +335,7 @@ class Context {
         if (document == null)
             return;
         // avoid running diagnostics twice when the document is initially opened (open + activate event)
-        var timeSinceOpened = Timer.stamp() - document.openTimestamp;
+        var timeSinceOpened = haxe.Timer.stamp() - document.openTimestamp;
         if (timeSinceOpened > 0.1)
             publishDiagnostics(params.uri);
     }

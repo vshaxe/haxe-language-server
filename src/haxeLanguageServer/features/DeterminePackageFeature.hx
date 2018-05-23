@@ -3,7 +3,7 @@ package haxeLanguageServer.features;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
-import haxeLanguageServer.server.Protocol;
+import haxeLanguageServer.protocol.Display;
 
 class DeterminePackageFeature {
     final context:Context;
@@ -19,7 +19,7 @@ class DeterminePackageFeature {
     }
 
     function handleJsonRpc(params:{fsPath:String}, token:CancellationToken, resolve:{pack:String}->Void, reject:ResponseError<NoData>->Void) {
-        context.callHaxeMethod(HaxeMethods.DeterminePackage, {file: new FsPath(params.fsPath)}, token,
+        context.callHaxeMethod(DisplayMethods.DeterminePackage, {file: new FsPath(params.fsPath)}, token,
             result -> {
                 resolve({pack: result.join(".")});
                 return null;

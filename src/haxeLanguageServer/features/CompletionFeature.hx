@@ -3,9 +3,9 @@ package haxeLanguageServer.features;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
-import haxeLanguageServer.server.Protocol;
-import haxeLanguageServer.server.Protocol.CompletionItem as HaxeCompletionItem;
-import haxeLanguageServer.server.Protocol.CompletionItemKind as HaxeCompletionItemKind;
+import haxeLanguageServer.protocol.Display;
+import haxeLanguageServer.protocol.Display.CompletionItem as HaxeCompletionItem;
+import haxeLanguageServer.protocol.Display.CompletionItemKind as HaxeCompletionItemKind;
 import haxeLanguageServer.helper.DocHelper;
 import haxeLanguageServer.helper.ImportHelper;
 import haxeLanguageServer.helper.TypePrinter;
@@ -108,7 +108,7 @@ class CompletionFeature {
             return resolve(item);
         }
         var importPosition = ImportHelper.getImportPosition(previousCompletion.doc);
-        context.callHaxeMethod(HaxeMethods.CompletionItemResolve, {index: item.data.index}, token, result -> {
+        context.callHaxeMethod(DisplayMethods.CompletionItemResolve, {index: item.data.index}, token, result -> {
             resolve(createCompletionItem(result.item, previousCompletion.doc, previousCompletion.replaceRange, importPosition, previousCompletion.kind));
             return null;
         }, error -> {
@@ -124,7 +124,7 @@ class CompletionFeature {
             offset: offset,
             wasAutoTriggered: wasAutoTriggered,
         };
-        context.callHaxeMethod(HaxeMethods.Completion, params, token, result -> {
+        context.callHaxeMethod(DisplayMethods.Completion, params, token, result -> {
             if (result.mode.kind != TypeHint && wasAutoTriggered && isAfterArrow(textBefore)) {
                 resolve([]); // avoid auto-popup after -> in arrow functions
                 return null;

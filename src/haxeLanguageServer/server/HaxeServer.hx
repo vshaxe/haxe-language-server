@@ -12,7 +12,9 @@ import js.node.ChildProcess;
 import js.node.stream.Readable;
 import jsonrpc.CancellationToken;
 import haxeLanguageServer.helper.SemVer;
-import haxeLanguageServer.server.Protocol;
+import haxeLanguageServer.protocol.Server.ServerMethods;
+import haxeLanguageServer.protocol.Display.DisplayMethods;
+import haxeLanguageServer.protocol.Display.HaxeCapabilities;
 
 class HaxeServer {
     final context:Context;
@@ -107,7 +109,7 @@ class HaxeServer {
         };
 
         stopProgressCallback = context.startProgress("Initializing Haxe/JSON-RPC protocol");
-        context.callHaxeMethod(HaxeMethods.Initialize, {supportsResolve: true}, null, result -> {
+        context.callHaxeMethod(DisplayMethods.Initialize, {supportsResolve: true}, null, result -> {
             supportsJsonRpc = true;
             capabilities = result.capabilities;
             stopProgress();
@@ -139,8 +141,8 @@ class HaxeServer {
     }
 
     function configure() {
-        context.callHaxeMethod(HaxeMethods.Configure, {noModuleChecks: true}, null, _ -> null, error -> {
-            trace("Error during " + HaxeMethods.Configure + " " + error);
+        context.callHaxeMethod(ServerMethods.Configure, {noModuleChecks: true}, null, _ -> null, error -> {
+            trace("Error during " + ServerMethods.Configure + " " + error);
         });
     }
 
@@ -164,7 +166,7 @@ class HaxeServer {
 
     function readClassPaths() {
         startCompletionInitializationProgress(2);
-        context.callHaxeMethod(HaxeMethods.ReadClassPaths, null, null, _ -> {
+        context.callHaxeMethod(ServerMethods.ReadClassPaths, null, null, _ -> {
             stopProgress();
             trace("Done.");
             return null;

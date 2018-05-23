@@ -1,7 +1,7 @@
 package haxeLanguageServer;
 
 import jsonrpc.Types;
-import haxeLanguageServer.server.Protocol.Response;
+import haxeLanguageServer.protocol.Types.Response;
 
 /**
     Custom, Haxe-Language-Server-specific methods that are not part of the Language Server Protocol.

@@ -3,7 +3,7 @@ package haxeLanguageServer.features;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
-import haxeLanguageServer.server.Protocol;
+import haxeLanguageServer.protocol.Display;
 
 class GotoDefinitionFeature {
     final context:Context;
@@ -20,7 +20,7 @@ class GotoDefinitionFeature {
     }
 
     function handleJsonRpc(params:TextDocumentPositionParams, token:CancellationToken, resolve:Definition->Void, reject:ResponseError<NoData>->Void, doc:TextDocument, offset:Int) {
-        context.callHaxeMethod(HaxeMethods.GotoDefinition, {file: doc.fsPath, contents: doc.content, offset: offset}, token, locations -> {
+        context.callHaxeMethod(DisplayMethods.GotoDefinition, {file: doc.fsPath, contents: doc.content, offset: offset}, token, locations -> {
             resolve(locations.map(location -> {
                 {
                     uri: location.file.toUri(),

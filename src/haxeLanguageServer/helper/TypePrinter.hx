@@ -1,7 +1,7 @@
 package haxeLanguageServer.helper;
 
 import haxe.display.JsonModuleTypes;
-import haxeLanguageServer.server.Protocol.ModuleType;
+import haxeLanguageServer.protocol.Display.ModuleType;
 using Lambda;
 
 /**

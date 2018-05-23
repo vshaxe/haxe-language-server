@@ -5,9 +5,9 @@ import haxe.display.JsonModuleTypes.JsonFunctionArgument;
 import haxeLanguageServer.helper.ArgumentNameHelper.addNamesToSignatureType;
 import haxeLanguageServer.helper.DocHelper;
 import haxeLanguageServer.helper.TypePrinter;
-import haxeLanguageServer.server.Protocol.HaxeMethods;
-import haxeLanguageServer.server.Protocol.SignatureItem as HaxeSignatureItem;
-import haxeLanguageServer.server.Protocol.SignatureInformation as HaxeSignatureInformation;
+import haxeLanguageServer.protocol.Display.DisplayMethods;
+import haxeLanguageServer.protocol.Display.SignatureItem as HaxeSignatureItem;
+import haxeLanguageServer.protocol.Display.SignatureInformation as HaxeSignatureInformation;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
@@ -39,7 +39,7 @@ class SignatureHelpFeature {
             offset: doc.offsetAt(params.position),
             wasAutoTriggered: true // TODO: send this once the API supports it (https://github.com/Microsoft/vscode/issues/34737)
         }
-        context.callHaxeMethod(HaxeMethods.SignatureHelp, params, token, result -> {
+        context.callHaxeMethod(DisplayMethods.SignatureHelp, params, token, result -> {
             resolve(createSignatureHelp(result));
             return null;
         }, error -> reject(ResponseError.internalError(error)));
