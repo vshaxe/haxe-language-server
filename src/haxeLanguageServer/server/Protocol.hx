@@ -114,11 +114,10 @@ typedef InitializeResult = Response<{
 /* Completion */
 
 typedef CompletionParams = {
-    > PositionParams,
+    >PositionParams,
     var wasAutoTriggered:Bool;
 }
 
-// TODO: don't forget about EnumField
 typedef IdentifierResolution = {
     /**
         Whether it's valid to use the unqualified name of the identifier or not.
@@ -202,6 +201,12 @@ typedef ClassFieldOrigin<T> = {
 
 typedef ClassFieldUsage<T> = {
     var field:JsonClassField;
+    var resolution:IdentifierResolution;
+    @:optional var origin:ClassFieldOrigin<T>;
+}
+
+typedef EnumFieldUsage<T> = {
+    var field:JsonEnumField;
     var resolution:IdentifierResolution;
     @:optional var origin:ClassFieldOrigin<T>;
 }
@@ -353,8 +358,19 @@ typedef CompletionItem<T> = {
     var args:T;
 }
 
-enum abstract CompletionResultKind(Int) {
-    var Field = 0;
+enum abstract FieldCompletionTypeKind<T>(Int) {
+    var Module:FieldCompletionTypeKind<ModuleType> = 0;
+    var Other:FieldCompletionTypeKind<JsonType<Dynamic>> = 1;
+}
+
+typedef FieldCompletionType<T> = {
+    var kind:FieldCompletionTypeKind<T>;
+    var args:T;
+    var unifiesWithIterable:Bool;
+}
+
+enum abstract CompletionModeKind<T>(Int) {
+    var Field:CompletionModeKind<FieldCompletionType<Dynamic>> = 0;
     var StructureField = 1;
     var Toplevel = 2;
     var Metadata = 3;
@@ -370,14 +386,20 @@ enum abstract CompletionResultKind(Int) {
     var TypeRelation = 13;
 }
 
-typedef CompletionResponse<T> = {
-    var items:Array<CompletionItem<T>>;
-    var kind:CompletionResultKind;
+typedef CompletionMode<T> = {
+    var kind:CompletionModeKind<T>;
+    @:optional var args:T;
+}
+
+typedef CompletionResponse<T1, T2> = {
+    var items:Array<CompletionItem<T1>>;
+    var kind:CompletionModeKind<Dynamic>; // TODO: remove kind once mode is added
+    var mode:CompletionMode<T2>;
     var sorted:Bool;
     @:optional var replaceRange:Range;
 }
 
-typedef CompletionResult = Response<CompletionResponse<Dynamic>>;
+typedef CompletionResult = Response<CompletionResponse<Dynamic,Dynamic>>;
 
 /* CompletionItem Resolve */
 

@@ -19,7 +19,7 @@ using Lambda;
 private typedef PreviousCompletionResult = {
     var doc:TextDocument;
     var replaceRange:Range;
-    var kind:CompletionResultKind;
+    var kind:CompletionModeKind<Dynamic>;
 }
 
 class CompletionFeature {
@@ -154,7 +154,7 @@ class CompletionFeature {
         }, error -> reject(ResponseError.internalError(error)));
     }
 
-    function createCompletionItem<T>(item:HaxeCompletionItem<T>, doc:TextDocument, replaceRange:Range, importPosition:Position, resultKind:CompletionResultKind):CompletionItem {
+    function createCompletionItem<T>(item:HaxeCompletionItem<T>, doc:TextDocument, replaceRange:Range, importPosition:Position, resultKind:CompletionModeKind<Dynamic>):CompletionItem {
         var label = "";
         var kind = null;
         var type = null;
@@ -213,7 +213,7 @@ class CompletionFeature {
         return result;
     }
 
-    function createClassFieldCompletionItem<T>(usage:ClassFieldUsage<T>, kind:HaxeCompletionItemKind<Dynamic>, replaceRange:Range, resultKind:CompletionResultKind):CompletionItem {
+    function createClassFieldCompletionItem<T>(usage:ClassFieldUsage<T>, kind:HaxeCompletionItemKind<Dynamic>, replaceRange:Range, resultKind:CompletionModeKind<Dynamic>):CompletionItem {
         var field = usage.field;
         return {
             label: field.name,
@@ -266,7 +266,7 @@ class CompletionFeature {
         }
     }
 
-    function createEnumFieldCompletionItem(enumField:JsonEnumField, replaceRange:Range, resultKind:CompletionResultKind):CompletionItem {
+    function createEnumFieldCompletionItem(enumField:JsonEnumField, replaceRange:Range, resultKind:CompletionModeKind<Dynamic>):CompletionItem {
         var name = enumField.name;
         var type = enumField.type;
 
@@ -306,7 +306,7 @@ class CompletionFeature {
         return item;
     }
 
-    function createTypeCompletionItem(type:ModuleType, doc:TextDocument, replaceRange:Range, importPosition:Position, resultKind:CompletionResultKind):CompletionItem {
+    function createTypeCompletionItem(type:ModuleType, doc:TextDocument, replaceRange:Range, importPosition:Position, resultKind:CompletionModeKind<Dynamic>):CompletionItem {
         if (type.isPrivate) {
             return null; // TODO: show private types from the current module
         }
@@ -428,7 +428,7 @@ class CompletionFeature {
         };
     }
 
-    function createKeywordCompletionItem(keyword:Keyword, replaceRange:Range, resultKind:CompletionResultKind):CompletionItem {
+    function createKeywordCompletionItem(keyword:Keyword, replaceRange:Range, resultKind:CompletionModeKind<Dynamic>):CompletionItem {
         var item:CompletionItem = {
             label: keyword.name,
             kind: Keyword,
