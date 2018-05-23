@@ -343,7 +343,7 @@ enum abstract KeywordKind(String) to String {
 enum abstract CompletionItemKind<T>(String) {
     var Local:CompletionItemKind<JsonLocal<Dynamic>> = "Local";
     var ClassField:CompletionItemKind<ClassFieldUsage<Dynamic>> = "ClassField";
-    var EnumField:CompletionItemKind<JsonEnumField> = "EnumField";
+    var EnumField:CompletionItemKind<EnumFieldUsage<Dynamic>> = "EnumField";
     var EnumAbstractField:CompletionItemKind<ClassFieldUsage<Dynamic>> = "EnumAbstractField";
     var Type:CompletionItemKind<ModuleType> = "Type";
     var Package:CompletionItemKind<String> = "Package";

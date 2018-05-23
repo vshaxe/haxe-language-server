@@ -171,7 +171,7 @@ class CompletionFeature {
                 return createClassFieldCompletionItem(item.args, item.kind, replaceRange, resultKind);
 
             case EnumField:
-                return createEnumFieldCompletionItem(item.args, replaceRange, resultKind);
+                return createEnumFieldCompletionItem(item.args.field, replaceRange, resultKind);
 
             case Type:
                 return createTypeCompletionItem(item.args, doc, replaceRange, importPosition, resultKind);
@@ -403,7 +403,7 @@ class CompletionFeature {
     function getDocumentation<T>(item:HaxeCompletionItem<T>):JsonDoc {
         return switch (item.kind) {
             case ClassField | EnumAbstractField: item.args.field.doc;
-            case EnumField: item.args.doc;
+            case EnumField: item.args.field.doc;
             case Type: item.args.doc;
             case Metadata: item.args.doc;
             case _: null;
