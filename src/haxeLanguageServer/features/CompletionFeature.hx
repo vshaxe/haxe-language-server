@@ -165,13 +165,11 @@ class CompletionFeature {
                 kind = Variable;
                 type = item.args.type;
 
-            case ClassField | EnumAbstractField:
-                // TODO: merge these kinds together with some isEnumAbstractField flag?
-                // actually, ClassFieldOrigin might solve that anyway...
+            case ClassField | EnumAbstractValue:
                 return createClassFieldCompletionItem(item.args, item.kind, replaceRange, resultKind);
 
-            case EnumField:
-                return createEnumFieldCompletionItem(item.args.field, replaceRange, resultKind);
+            case EnumValue:
+                return createEnumValueCompletionItem(item.args.field, replaceRange, resultKind);
 
             case Type:
                 return createTypeCompletionItem(item.args, doc, replaceRange, importPosition, resultKind);
@@ -244,7 +242,7 @@ class CompletionFeature {
                     case [AccNormal, AccNormal]: Field;
                     case [AccNormal, AccCtor]: Field; // final
                     case [AccNormal, AccNever]: Field; // static final
-                    case [AccInline, _] if (kind == EnumAbstractField): EnumMember;
+                    case [AccInline, _] if (kind == EnumAbstractValue): EnumMember;
                     case [AccInline, _]: Constant;
                     case _: Property;
                 }
@@ -266,15 +264,15 @@ class CompletionFeature {
         }
     }
 
-    function createEnumFieldCompletionItem(enumField:JsonEnumField, replaceRange:Range, resultKind:CompletionModeKind<Dynamic>):CompletionItem {
-        var name = enumField.name;
-        var type = enumField.type;
+    function createEnumValueCompletionItem(enumValue:JsonEnumField, replaceRange:Range, resultKind:CompletionModeKind<Dynamic>):CompletionItem {
+        var name = enumValue.name;
+        var type = enumValue.type;
 
         var item:CompletionItem = {
             label: name,
             kind: EnumMember,
             detail: printer.printType(type),
-            documentation: formatDocumentation(enumField.doc),
+            documentation: formatDocumentation(enumValue.doc),
             textEdit: {
                 newText: name,
                 range: replaceRange
@@ -402,8 +400,8 @@ class CompletionFeature {
 
     function getDocumentation<T>(item:HaxeCompletionItem<T>):JsonDoc {
         return switch (item.kind) {
-            case ClassField | EnumAbstractField: item.args.field.doc;
-            case EnumField: item.args.field.doc;
+            case ClassField | EnumAbstractValue: item.args.field.doc;
+            case EnumValue: item.args.field.doc;
             case Type: item.args.doc;
             case Metadata: item.args.doc;
             case _: null;

@@ -163,23 +163,23 @@ enum abstract ClassFieldOriginKind<T>(Int) {
     var Self:ClassFieldOriginKind<JsonModuleType<T>> = 0;
 
     /**
+        The field is a static field brought into context via a static import
+        (`import pack.Module.Type.field`).
+    **/
+    var StaticImport:ClassFieldOriginKind<JsonModuleType<T>> = 1;
+
+    /**
         The field is declared on a parent type, such as:
         - a super class field that is not overriden
         - a forwarded abstract field
     **/
-    var Parent:ClassFieldOriginKind<JsonModuleType<T>> = 1;
+    var Parent:ClassFieldOriginKind<JsonModuleType<T>> = 2;
 
     /**
         The field is a static extension method brought
         into context with the `using` keyword.
     **/
-    var StaticExtension:ClassFieldOriginKind<JsonModuleType<T>> = 2;
-
-    /**
-        The field is a static field brought into context via a static import
-        (`import pack.Module.Type.field`).
-    **/
-    var StaticImport:ClassFieldOriginKind<JsonModuleType<T>> = 3;
+    var StaticExtension:ClassFieldOriginKind<JsonModuleType<T>> = 3;
 
     /**
         This field doesn't belong to any
@@ -205,10 +205,28 @@ typedef ClassFieldUsage<T> = {
     @:optional var origin:ClassFieldOrigin<T>;
 }
 
+enum abstract EnumFieldOriginKind<T>(Int) {
+    /**
+        The enum value is declared on the current type itself.
+    **/
+    var Self:EnumFieldOriginKind<JsonModuleType<T>> = 0;
+
+    /**
+        The enum value is brought into context via a static import
+        (`import pack.Module.Enum.Value`).
+    **/
+    var StaticImport:EnumFieldOriginKind<JsonModuleType<T>> = 1;
+}
+
+typedef EnumFieldOrigin<T> = {
+    var kind:EnumFieldOriginKind<T>;
+    @:optional var args:T;
+}
+
 typedef EnumFieldUsage<T> = {
     var field:JsonEnumField;
     var resolution:IdentifierResolution;
-    @:optional var origin:ClassFieldOrigin<T>;
+    @:optional var origin:EnumFieldOrigin<T>;
 }
 
 enum abstract Literal(String) {
@@ -264,6 +282,12 @@ typedef ModuleType = {
     var isExtern:Bool;
     var kind:ModuleTypeKind;
     var importStatus:ImportStatus;
+    var unifiesWithIterable:Bool;
+}
+
+typedef JsonType<T> = {
+    >haxe.display.JsonModuleTypes.JsonType<T>,
+    var unifiesWithIterable:Bool; // TODO: move to JsonModuleTypes?
 }
 
 typedef ModuleTypeParameter = {
@@ -343,8 +367,8 @@ enum abstract KeywordKind(String) to String {
 enum abstract CompletionItemKind<T>(String) {
     var Local:CompletionItemKind<JsonLocal<Dynamic>> = "Local";
     var ClassField:CompletionItemKind<ClassFieldUsage<Dynamic>> = "ClassField";
-    var EnumField:CompletionItemKind<EnumFieldUsage<Dynamic>> = "EnumField";
-    var EnumAbstractField:CompletionItemKind<ClassFieldUsage<Dynamic>> = "EnumAbstractField";
+    var EnumValue:CompletionItemKind<EnumFieldUsage<Dynamic>> = "EnumField";
+    var EnumAbstractValue:CompletionItemKind<ClassFieldUsage<Dynamic>> = "EnumAbstractField";
     var Type:CompletionItemKind<ModuleType> = "Type";
     var Package:CompletionItemKind<String> = "Package";
     var Module:CompletionItemKind<String> = "Module";
@@ -358,19 +382,8 @@ typedef CompletionItem<T> = {
     var args:T;
 }
 
-enum abstract FieldCompletionTypeKind<T>(Int) {
-    var Module:FieldCompletionTypeKind<ModuleType> = 0;
-    var Other:FieldCompletionTypeKind<JsonType<Dynamic>> = 1;
-}
-
-typedef FieldCompletionType<T> = {
-    var kind:FieldCompletionTypeKind<T>;
-    var args:T;
-    var unifiesWithIterable:Bool;
-}
-
 enum abstract CompletionModeKind<T>(Int) {
-    var Field:CompletionModeKind<FieldCompletionType<Dynamic>> = 0;
+    var Field:CompletionModeKind<CompletionItem<Dynamic>> = 0;
     var StructureField = 1;
     var Toplevel = 2;
     var Metadata = 3;
