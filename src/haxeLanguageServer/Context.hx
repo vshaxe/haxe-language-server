@@ -17,6 +17,7 @@ import haxeLanguageServer.server.DisplayResult;
 import haxeLanguageServer.server.HaxeServer;
 import haxeLanguageServer.server.Protocol.Response;
 import haxeLanguageServer.server.Protocol.HaxeRequestMethod;
+import haxeLanguageServer.server.Protocol.HaxeMethods;
 import haxeLanguageServer.LanguageServerMethods.HaxeMethodResult;
 
 private typedef FunctionGenerationConfig = {
@@ -93,6 +94,8 @@ class Context {
         protocol.onNotification(Methods.Exit, onExit);
         protocol.onNotification(Methods.DidChangeConfiguration, onDidChangeConfiguration);
         protocol.onNotification(Methods.DidOpenTextDocument, onDidOpenTextDocument);
+        protocol.onNotification(Methods.DidChangeTextDocument, onDidChangeTextDocument);
+        protocol.onNotification(Methods.DidCloseTextDocument, onDidCloseTextDocument);
         protocol.onNotification(Methods.DidSaveTextDocument, onDidSaveTextDocument);
         protocol.onNotification(Methods.DidChangeWatchedFiles, onDidChangeWatchedFiles);
         protocol.onNotification(LanguageServerMethods.DidChangeDisplayArguments, onDidChangeDisplayArguments);
@@ -303,6 +306,17 @@ class Context {
         activeEditor = event.textDocument.uri;
         documents.onDidOpenTextDocument(event);
         publishDiagnostics(event.textDocument.uri);
+    }
+
+    function onDidChangeTextDocument(event:DidChangeTextDocumentParams) {
+        callHaxeMethod(HaxeMethods.Invalidate, {file: event.textDocument.uri.toFsPath()}, null, _ -> null, error -> {
+            trace("Error during " + HaxeMethods.Invalidate + " " + error);
+        });
+        documents.onDidChangeTextDocument(event);
+    }
+
+    function onDidCloseTextDocument(event:DidCloseTextDocumentParams) {
+        documents.onDidCloseTextDocument(event);
     }
 
     function onDidSaveTextDocument(event:DidSaveTextDocumentParams) {

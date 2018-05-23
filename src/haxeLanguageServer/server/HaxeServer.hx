@@ -111,6 +111,7 @@ class HaxeServer {
             supportsJsonRpc = true;
             capabilities = result.capabilities;
             stopProgress();
+            configure();
             buildCompletionCache();
             return null;
         }, error -> {
@@ -135,6 +136,12 @@ class HaxeServer {
 
         if (callback != null)
             callback();
+    }
+
+    function configure() {
+        context.callHaxeMethod(HaxeMethods.Configure, {noModuleChecks: true}, null, _ -> null, error -> {
+            trace("Error during " + HaxeMethods.Configure + " " + error);
+        });
     }
 
     function buildCompletionCache() {

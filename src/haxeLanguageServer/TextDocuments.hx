@@ -2,6 +2,7 @@ package haxeLanguageServer;
 
 import jsonrpc.Protocol;
 
+@:allow(haxeLanguageServer.Context)
 class TextDocuments {
     public static inline var syncKind = TextDocumentSyncKind.Incremental;
 
@@ -11,8 +12,6 @@ class TextDocuments {
     public function new(protocol:Protocol) {
         this.protocol = protocol;
         documents = new Map();
-        protocol.onNotification(Methods.DidChangeTextDocument, onDidChangeTextDocument);
-        protocol.onNotification(Methods.DidCloseTextDocument, onDidCloseTextDocument);
     }
 
     public inline function getAll():Iterator<TextDocument> {
@@ -23,7 +22,6 @@ class TextDocuments {
         return documents[uri];
     }
 
-    @:allow(haxeLanguageServer.Context)
     function onDidOpenTextDocument(event:DidOpenTextDocumentParams) {
         var td = event.textDocument;
         documents[td.uri] = new TextDocument(td.uri, td.languageId, td.version, td.text);
