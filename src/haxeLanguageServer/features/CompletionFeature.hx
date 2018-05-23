@@ -220,7 +220,7 @@ class CompletionFeature {
         return {
             label: field.name,
             kind: getKindForField(field, kind),
-            detail: printer.printType(field.type) + printClassFieldOrigin(usage.origin),
+            detail: printer.printType(field.type) + printClassFieldOrigin(usage.origin, kind),
             documentation: formatDocumentation(field.doc),
             textEdit: {
                 newText: switch (resultKind) {
@@ -258,7 +258,10 @@ class CompletionFeature {
         }
     }
 
-    function printClassFieldOrigin<T>(origin:ClassFieldOrigin<T>):String {
+    function printClassFieldOrigin<T>(origin:ClassFieldOrigin<T>, kind:HaxeCompletionItemKind<Dynamic>):String {
+        if (kind == EnumAbstractValue) {
+            return "";
+        }
         if (origin.args == null && origin.kind != cast BuiltIn) {
             return "";
         }
@@ -324,7 +327,7 @@ class CompletionFeature {
         }
         return item;
     }
-    
+
     function createTypeCompletionItem(type:ModuleType, doc:TextDocument, replaceRange:Range, importPosition:Position, resultKind:CompletionModeKind<Dynamic>):CompletionItem {
         var isImportCompletion = resultKind == Import || resultKind == Using;
         var importConfig = context.config.codeGeneration.imports;
