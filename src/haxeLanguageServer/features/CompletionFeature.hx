@@ -262,19 +262,19 @@ class CompletionFeature {
         if (origin.args == null && origin.kind != cast BuiltIn) {
             return "";
         }
-        return "\n" + switch (origin.kind) {
-            case StaticImport:
-                'from static import';
-            case AnonymousStructure:
-                'from anonymous structure';
-            case BuiltIn:
-                'from compiler (built-in)';
+        return "\nfrom " + switch (origin.kind) {
             case Self:
-                'from \'${origin.args.name}\'';
+                '\'${origin.args.name}\'';
             case Parent:
-                'from parent type \'${origin.args.name}\'';
+                'parent type \'${origin.args.name}\'';
             case StaticExtension:
-                'from \'${origin.args.name}\' (static extension method)';
+                '\'${origin.args.name}\' (static extension method)';
+            case StaticImport:
+                'static import';
+            case AnonymousStructure:
+                'anonymous structure';
+            case BuiltIn:
+                'compiler (built-in)';
         };
     }
 
@@ -324,7 +324,7 @@ class CompletionFeature {
         }
         return item;
     }
-
+    
     function createTypeCompletionItem(type:ModuleType, doc:TextDocument, replaceRange:Range, importPosition:Position, resultKind:CompletionModeKind<Dynamic>):CompletionItem {
         var isImportCompletion = resultKind == Import || resultKind == Using;
         var importConfig = context.config.codeGeneration.imports;
@@ -433,7 +433,7 @@ class CompletionFeature {
                 detail += "(imported)";
             case Unimported:
                 var containerName = printer.printQualifiedTypePath(type).untilLastDot();
-                detail += "Auto-import from '" + containerName;
+                detail += "Auto-import from '" + containerName + "'";
             case Shadowed:
                 detail += "(shadowed)";
         }

@@ -203,28 +203,28 @@ typedef ClassFieldUsage<T> = {
     @:optional var origin:ClassFieldOrigin<T>;
 }
 
-enum abstract EnumFieldOriginKind<T>(Int) {
+enum abstract EnumValueOriginKind<T>(Int) {
     /**
         The enum value is declared on the current type itself.
     **/
-    var Self:EnumFieldOriginKind<JsonModuleType<T>> = 0;
+    var Self:EnumValueOriginKind<JsonModuleType<T>> = 0;
 
     /**
         The enum value is brought into context via a static import
         (`import pack.Module.Enum.Value`).
     **/
-    var StaticImport:EnumFieldOriginKind<JsonModuleType<T>> = 1;
+    var StaticImport:EnumValueOriginKind<JsonModuleType<T>> = 1;
 }
 
-typedef EnumFieldOrigin<T> = {
-    var kind:EnumFieldOriginKind<T>;
+typedef EnumValueOrigin<T> = {
+    var kind:EnumValueOriginKind<T>;
     @:optional var args:T;
 }
 
-typedef EnumFieldUsage<T> = {
+typedef EnumValueUsage<T> = {
     var field:JsonEnumField;
     var resolution:FieldResolution;
-    @:optional var origin:EnumFieldOrigin<T>;
+    @:optional var origin:EnumValueOrigin<T>;
 }
 
 enum abstract Literal(String) {
@@ -382,7 +382,7 @@ typedef Module = {
 enum abstract CompletionItemKind<T>(String) {
     var Local:CompletionItemKind<JsonLocal<Dynamic>> = "Local";
     var ClassField:CompletionItemKind<ClassFieldUsage<Dynamic>> = "ClassField";
-    var EnumValue:CompletionItemKind<EnumFieldUsage<Dynamic>> = "EnumField";
+    var EnumValue:CompletionItemKind<EnumValueUsage<Dynamic>> = "EnumField";
     var EnumAbstractValue:CompletionItemKind<ClassFieldUsage<Dynamic>> = "EnumAbstractField";
     var Type:CompletionItemKind<ModuleType> = "Type";
     var Package:CompletionItemKind<Package> = "Package";
