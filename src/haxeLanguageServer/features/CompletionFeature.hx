@@ -175,7 +175,7 @@ class CompletionFeature {
                 return createTypeCompletionItem(item.args, doc, replaceRange, importPosition, resultKind);
 
             case Package:
-                return createPackageCompletionItem(cast item.args, replaceRange);
+                return createPackageCompletionItem(item.args, replaceRange);
 
             case Module:
                 label = cast item.args;
@@ -443,9 +443,9 @@ class CompletionFeature {
         return detail;
     }
 
-    function createPackageCompletionItem(pack:String, replaceRange:Range):CompletionItem {
+    function createPackageCompletionItem(pack:Package, replaceRange:Range):CompletionItem {
         return {
-            label: pack,
+            label: pack.name,
             kind: Module,
             textEdit: {
                 newText: pack + ".",
