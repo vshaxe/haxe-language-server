@@ -118,20 +118,18 @@ typedef CompletionParams = {
     var wasAutoTriggered:Bool;
 }
 
-typedef IdentifierResolution = {
+typedef FieldResolution = {
     /**
-        Whether it's valid to use the unqualified name of the identifier or not.
+        Whether it's valid to use the unqualified name of the field or not.
         This is `false` if the identifier is shadowed.
     **/
     var isQualified:Bool;
 
     /**
-        The qualifier that has to be inserted to use the identifier if `!isQualified`.
+        The qualifier that has to be inserted to use the field if `!isQualified`.
         Can either be `this` for instance fields for the type name for `static` fields.
-
-        Note: **can be null** if there's no way to qualify this identifier (e.g. method argument shadowed by local var)!
     **/
-    @:optional var qualifier:String;
+    var qualifier:String;
 }
 
 typedef JsonLocal<T> = {
@@ -201,7 +199,7 @@ typedef ClassFieldOrigin<T> = {
 
 typedef ClassFieldUsage<T> = {
     var field:JsonClassField;
-    var resolution:IdentifierResolution;
+    var resolution:FieldResolution;
     @:optional var origin:ClassFieldOrigin<T>;
 }
 
@@ -225,7 +223,7 @@ typedef EnumFieldOrigin<T> = {
 
 typedef EnumFieldUsage<T> = {
     var field:JsonEnumField;
-    var resolution:IdentifierResolution;
+    var resolution:FieldResolution;
     @:optional var origin:EnumFieldOrigin<T>;
 }
 
