@@ -175,7 +175,7 @@ class CompletionFeature {
                 return createTypeCompletionItem(item.args, doc, replaceRange, importPosition, resultKind);
 
             case Package:
-                return createPackageCompletionItem(item.args, replaceRange);
+                return createPackageCompletionItem(cast item.args, replaceRange);
 
             case Module:
                 label = item.args;

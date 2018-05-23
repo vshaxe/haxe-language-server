@@ -362,13 +362,23 @@ enum abstract KeywordKind(String) to String {
     var Macro = "macro";
 }
 
+enum abstract PackageContentKind(Int) {
+    var Module = 0;
+    var Package = 1;
+}
+
+typedef Package = {
+    var name:String;
+    var contents:Array<{name:String, kind:PackageContentKind}>;
+}
+
 enum abstract CompletionItemKind<T>(String) {
     var Local:CompletionItemKind<JsonLocal<Dynamic>> = "Local";
     var ClassField:CompletionItemKind<ClassFieldUsage<Dynamic>> = "ClassField";
     var EnumValue:CompletionItemKind<EnumFieldUsage<Dynamic>> = "EnumField";
     var EnumAbstractValue:CompletionItemKind<ClassFieldUsage<Dynamic>> = "EnumAbstractField";
     var Type:CompletionItemKind<ModuleType> = "Type";
-    var Package:CompletionItemKind<String> = "Package";
+    var Package:CompletionItemKind<Package> = "Package";
     var Module:CompletionItemKind<String> = "Module";
     var Literal:CompletionItemKind<JsonLiteral<Dynamic>> = "Literal";
     var Metadata:CompletionItemKind<Metadata> = "Metadata";
