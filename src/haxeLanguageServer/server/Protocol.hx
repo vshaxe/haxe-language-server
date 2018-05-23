@@ -373,6 +373,8 @@ enum abstract CompletionItemKind<T>(String) {
     var Literal:CompletionItemKind<JsonLiteral<Dynamic>> = "Literal";
     var Metadata:CompletionItemKind<Metadata> = "Metadata";
     var Keyword:CompletionItemKind<Keyword> = "Keyword";
+    var AnonymousStructure:CompletionItemKind<JsonAnon> = "AnonymousStructure";
+    var Expression:CompletionItemKind<JsonTExpr> = "Expression";
 }
 
 typedef CompletionItem<T> = {

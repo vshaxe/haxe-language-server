@@ -192,6 +192,10 @@ class CompletionFeature {
 
             case Keyword:
                 return createKeywordCompletionItem(item.args, replaceRange, resultKind);
+
+            case AnonymousStructure:
+            case Expression:
+                // these never appear as completion items right now
         }
 
         var result:CompletionItem = {label: label};
