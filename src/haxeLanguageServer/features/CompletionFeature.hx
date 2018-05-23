@@ -349,7 +349,7 @@ class CompletionFeature {
                     item.textEdit.newText += "($1)";
                     item.insertTextFormat = Snippet;
                     item.command = triggerParameterHints;
-                case TypeHint | Extends | Implements | StructExtension if (type.params != null && type.params.length > 0):
+                case TypeHint | Extends | Implements | StructExtension if (hasMandatoryTypeParameters(type)):
                     item.textEdit.newText += "<$1>";
                     item.insertTextFormat = Snippet;
                 case _:
@@ -368,6 +368,14 @@ class CompletionFeature {
         }
 
         return item;
+    }
+
+    function hasMandatoryTypeParameters(type:ModuleType):Bool {
+        // Dynamic is a special case regarding this in the compiler
+        if (type.name == "Dynamic" && type.pack.length == 0) {
+            return false;
+        }
+        return type.params != null && type.params.length > 0;
     }
 
     function getKindForModuleType(type:ModuleType):CompletionItemKind {
