@@ -125,13 +125,13 @@ class CompletionFeature {
             wasAutoTriggered: wasAutoTriggered,
         };
         context.callHaxeMethod(HaxeMethods.Completion, params, token, result -> {
-            if (result.kind != TypeHint && wasAutoTriggered && isAfterArrow(textBefore)) {
+            if (result.mode.kind != TypeHint && wasAutoTriggered && isAfterArrow(textBefore)) {
                 resolve([]); // avoid auto-popup after -> in arrow functions
                 return null;
             }
             previousCompletion = {
                 doc: doc,
-                kind: result.kind,
+                kind: result.mode.kind,
                 replaceRange: result.replaceRange
             };
             var items = [];
@@ -139,7 +139,7 @@ class CompletionFeature {
             var importPosition = ImportHelper.getImportPosition(doc);
             for (i in 0...result.items.length) {
                 var item = result.items[i];
-                var completionItem = createCompletionItem(item, doc, result.replaceRange, importPosition, result.kind);
+                var completionItem = createCompletionItem(item, doc, result.replaceRange, importPosition, result.mode.kind);
                 if (completionItem == null) {
                     continue;
                 }
@@ -154,7 +154,7 @@ class CompletionFeature {
         }, error -> reject(ResponseError.internalError(error)));
     }
 
-    function createCompletionItem<T>(item:HaxeCompletionItem<T>, doc:TextDocument, replaceRange:Range, importPosition:Position, resultKind:CompletionModeKind<Dynamic>):CompletionItem {
+    function createCompletionItem<T>(item:HaxeCompletionItem<T>, doc:TextDocument, replaceRange:Range, importPosition:Position, mode:CompletionModeKind<Dynamic>):CompletionItem {
         var label = "";
         var kind = null;
         var type = null;
@@ -166,13 +166,13 @@ class CompletionFeature {
                 type = item.args.type;
 
             case ClassField | EnumAbstractValue:
-                return createClassFieldCompletionItem(item.args, item.kind, replaceRange, resultKind);
+                return createClassFieldCompletionItem(item.args, item.kind, replaceRange, mode);
 
             case EnumValue:
-                return createEnumValueCompletionItem(item.args.field, replaceRange, resultKind);
+                return createEnumValueCompletionItem(item.args.field, replaceRange, mode);
 
             case Type:
-                return createTypeCompletionItem(item.args, doc, replaceRange, importPosition, resultKind);
+                return createTypeCompletionItem(item.args, doc, replaceRange, importPosition, mode);
 
             case Package:
                 return createPackageCompletionItem(item.args, replaceRange);
@@ -191,7 +191,7 @@ class CompletionFeature {
                 kind = Function;
 
             case Keyword:
-                return createKeywordCompletionItem(item.args, replaceRange, resultKind);
+                return createKeywordCompletionItem(item.args, replaceRange, mode);
 
             case AnonymousStructure:
             case Expression:
@@ -215,7 +215,7 @@ class CompletionFeature {
         return result;
     }
 
-    function createClassFieldCompletionItem<T>(usage:ClassFieldUsage<T>, kind:HaxeCompletionItemKind<Dynamic>, replaceRange:Range, resultKind:CompletionModeKind<Dynamic>):CompletionItem {
+    function createClassFieldCompletionItem<T>(usage:ClassFieldUsage<T>, kind:HaxeCompletionItemKind<Dynamic>, replaceRange:Range, mode:CompletionModeKind<Dynamic>):CompletionItem {
         var field = usage.field;
         return {
             label: field.name,
@@ -223,7 +223,7 @@ class CompletionFeature {
             detail: printer.printType(field.type) + printClassFieldOrigin(usage.origin, kind),
             documentation: formatDocumentation(field.doc),
             textEdit: {
-                newText: switch (resultKind) {
+                newText: switch (mode) {
                     case StructureField: field.name + ": ";
                     case Pattern: field.name + ":";
                     case Override: printer.printEmptyFunctionDefinition(field);
@@ -288,7 +288,7 @@ class CompletionFeature {
         }
     }
 
-    function createEnumValueCompletionItem(enumValue:JsonEnumField, replaceRange:Range, resultKind:CompletionModeKind<Dynamic>):CompletionItem {
+    function createEnumValueCompletionItem(enumValue:JsonEnumField, replaceRange:Range, mode:CompletionModeKind<Dynamic>):CompletionItem {
         var name = enumValue.name;
         var type = enumValue.type;
 
@@ -303,7 +303,7 @@ class CompletionFeature {
             }
         };
 
-        if (resultKind != Pattern) {
+        if (mode != Pattern) {
             return item;
         }
 
@@ -328,8 +328,8 @@ class CompletionFeature {
         return item;
     }
 
-    function createTypeCompletionItem(type:ModuleType, doc:TextDocument, replaceRange:Range, importPosition:Position, resultKind:CompletionModeKind<Dynamic>):CompletionItem {
-        var isImportCompletion = resultKind == Import || resultKind == Using;
+    function createTypeCompletionItem(type:ModuleType, doc:TextDocument, replaceRange:Range, importPosition:Position, mode:CompletionModeKind<Dynamic>):CompletionItem {
+        var isImportCompletion = mode == Import || mode == Using;
         var importConfig = context.config.codeGeneration.imports;
         var autoImport = importConfig.enableAutoImports;
         if (isImportCompletion || type.importStatus == Shadowed) {
@@ -363,7 +363,7 @@ class CompletionFeature {
         }
 
         if (snippetSupport) {
-            switch (resultKind) {
+            switch (mode) {
                 case New:
                     item.textEdit.newText += "($1)";
                     item.insertTextFormat = Snippet;
@@ -375,7 +375,7 @@ class CompletionFeature {
             }
         }
 
-        if (resultKind == StructExtension) {
+        if (mode == StructExtension) {
             item.textEdit.newText += ",";
         }
 
@@ -455,7 +455,7 @@ class CompletionFeature {
         };
     }
 
-    function createKeywordCompletionItem(keyword:Keyword, replaceRange:Range, resultKind:CompletionModeKind<Dynamic>):CompletionItem {
+    function createKeywordCompletionItem(keyword:Keyword, replaceRange:Range, mode:CompletionModeKind<Dynamic>):CompletionItem {
         var item:CompletionItem = {
             label: keyword.name,
             kind: Keyword,
@@ -465,7 +465,7 @@ class CompletionFeature {
             }
         }
 
-        if (resultKind == TypeRelation) {
+        if (mode == TypeRelation) {
             item.command = triggerSuggest;
         }
 

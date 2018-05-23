@@ -423,7 +423,6 @@ typedef CompletionMode<T> = {
 
 typedef CompletionResponse<T1, T2> = {
     var items:Array<CompletionItem<T1>>;
-    var kind:CompletionModeKind<Dynamic>; // TODO: remove kind once mode is added
     var mode:CompletionMode<T2>;
     var sorted:Bool;
     @:optional var replaceRange:Range;
