@@ -448,7 +448,7 @@ class CompletionFeature {
             label: pack.name,
             kind: Module,
             textEdit: {
-                newText: pack + ".",
+                newText: pack.name + ".",
                 range: replaceRange
             },
             command: triggerSuggest
