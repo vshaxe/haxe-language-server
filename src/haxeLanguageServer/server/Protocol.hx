@@ -180,7 +180,7 @@ enum abstract ClassFieldOriginKind<T>(Int) {
     var StaticExtension:ClassFieldOriginKind<JsonModuleType<T>> = 3;
 
     /**
-        This field doesn't belong to any
+        This field doesn't belong to any named type, just an anonymous structure.
     **/
     var AnonymousStructure:ClassFieldOriginKind<JsonAnon> = 4;
 

@@ -220,7 +220,8 @@ class CompletionFeature {
         return {
             label: field.name,
             kind: getKindForField(field, kind),
-            detail: printer.printType(field.type) + "\n" + printClassFieldOrigin(usage.origin),
+            detail: printer.printType(field.type) + printClassFieldOrigin(usage.origin),
+            documentation: formatDocumentation(field.doc),
             textEdit: {
                 newText: switch (resultKind) {
                     case StructureField: field.name + ": ";
@@ -258,7 +259,23 @@ class CompletionFeature {
     }
 
     function printClassFieldOrigin<T>(origin:ClassFieldOrigin<T>):String {
-        return ""; // TODO
+        if (origin.args == null && origin.kind != cast BuiltIn) {
+            return "";
+        }
+        return "\n" + switch (origin.kind) {
+            case StaticImport:
+                'from static import';
+            case AnonymousStructure:
+                'from anonymous structure';
+            case BuiltIn:
+                'from compiler (built-in)';
+            case Self:
+                'from \'${origin.args.name}\'';
+            case Parent:
+                'from parent type \'${origin.args.name}\'';
+            case StaticExtension:
+                'from \'${origin.args.name}\' (static extension method)';
+        };
     }
 
     function getKindForType<T>(type:JsonType<T>):CompletionItemKind {
@@ -322,6 +339,7 @@ class CompletionFeature {
         var item:CompletionItem = {
             label: qualifiedName,
             kind: getKindForModuleType(type),
+            documentation: formatDocumentation(type.doc),
             textEdit: {
                 range: replaceRange,
                 newText: if (autoImport) unqualifiedName else qualifiedName
@@ -358,9 +376,6 @@ class CompletionFeature {
             item.textEdit.newText += ",";
         }
 
-        if (type.doc != null) {
-            item.documentation = formatDocumentation(type.doc);
-        }
         if (type.params != null) {
             item.detail = printTypeDetail(type);
         }
@@ -389,6 +404,9 @@ class CompletionFeature {
     }
 
     function formatDocumentation(doc:String):EitherType<String, MarkupContent> {
+        if (doc == null) {
+            return null;
+        }
         if (markdownSupport) {
             return {
                 kind: MarkupKind.MarkDown,
@@ -409,15 +427,15 @@ class CompletionFeature {
     }
 
     function printTypeDetail(type:ModuleType):String {
-        var detail = printer.printTypeDeclaration(type);
+        var detail = printer.printTypeDeclaration(type) + "\n";
         switch (type.importStatus) {
             case Imported:
-                detail += "\n(imported)";
+                detail += "(imported)";
             case Unimported:
                 var containerName = printer.printQualifiedTypePath(type).untilLastDot();
-                detail = "Auto-import from '" + containerName + "'\n" + detail;
+                detail += "Auto-import from '" + containerName;
             case Shadowed:
-                detail += "\n(shadowed)";
+                detail += "(shadowed)";
         }
         return detail;
     }
