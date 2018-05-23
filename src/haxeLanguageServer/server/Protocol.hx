@@ -245,6 +245,8 @@ enum abstract ModuleTypeKind(Int) {
     var TypeAlias = 5;
     /** A `typedef` that is an alias for an anonymous structure. **/
     var Struct = 6;
+    /** A type name introduced by `import as` / `import in` **/
+    var ImportAlias = 7;
 }
 
 enum abstract ImportStatus(Int) {
@@ -369,7 +371,12 @@ enum abstract PackageContentKind(Int) {
 
 typedef Package = {
     var name:String;
-    var contents:Array<{name:String, kind:PackageContentKind}>;
+    @:optional var contents:Array<{name:String, kind:PackageContentKind}>;
+}
+
+typedef Module = {
+    var name:String;
+    @:optional var contents:Array<ModuleType>;
 }
 
 enum abstract CompletionItemKind<T>(String) {
@@ -379,7 +386,7 @@ enum abstract CompletionItemKind<T>(String) {
     var EnumAbstractValue:CompletionItemKind<ClassFieldUsage<Dynamic>> = "EnumAbstractField";
     var Type:CompletionItemKind<ModuleType> = "Type";
     var Package:CompletionItemKind<Package> = "Package";
-    var Module:CompletionItemKind<String> = "Module";
+    var Module:CompletionItemKind<Module> = "Module";
     var Literal:CompletionItemKind<JsonLiteral<Dynamic>> = "Literal";
     var Metadata:CompletionItemKind<Metadata> = "Metadata";
     var Keyword:CompletionItemKind<Keyword> = "Keyword";

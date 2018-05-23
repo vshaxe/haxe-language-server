@@ -178,7 +178,7 @@ class CompletionFeature {
                 return createPackageCompletionItem(cast item.args, replaceRange);
 
             case Module:
-                label = item.args;
+                label = cast item.args;
                 kind = Class;
 
             case Literal:
@@ -309,10 +309,6 @@ class CompletionFeature {
     }
 
     function createTypeCompletionItem(type:ModuleType, doc:TextDocument, replaceRange:Range, importPosition:Position, resultKind:CompletionModeKind<Dynamic>):CompletionItem {
-        if (type.isPrivate) {
-            return null; // TODO: show private types from the current module
-        }
-
         var isImportCompletion = resultKind == Import || resultKind == Using;
         var importConfig = context.config.codeGeneration.imports;
         var autoImport = importConfig.enableAutoImports;
@@ -387,7 +383,7 @@ class CompletionFeature {
             case Enum: Enum;
             case Abstract: Class;
             case EnumAbstract: Enum;
-            case TypeAlias: Interface;
+            case TypeAlias | ImportAlias: Interface;
             case Struct: Struct;
         }
     }

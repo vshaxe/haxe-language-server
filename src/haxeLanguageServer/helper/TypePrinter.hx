@@ -117,6 +117,7 @@ class TypePrinter {
             case Abstract: "abstract";
             case EnumAbstract: "enum abstract";
             case TypeAlias | Struct: "typedef";
+            case ImportAlias: "import as";
         });
         var typeName = type.name;
         if (type.params.length > 0) {
