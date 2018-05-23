@@ -179,7 +179,7 @@ class CompletionFeature {
 
             case Module:
                 label = cast item.args;
-                kind = Class;
+                kind = Folder;
 
             case Literal:
                 label = item.args.name;
