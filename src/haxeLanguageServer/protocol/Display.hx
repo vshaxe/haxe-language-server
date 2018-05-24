@@ -258,12 +258,6 @@ typedef ModuleType = {
     var isExtern:Bool;
     var kind:ModuleTypeKind;
     var importStatus:ImportStatus;
-    var unifiesWithIterable:Bool;
-}
-
-typedef JsonType<T> = {
-    >haxe.display.JsonModuleTypes.JsonType<T>,
-    var unifiesWithIterable:Bool; // TODO: move to JsonModuleTypes?
 }
 
 typedef ModuleTypeParameter = {
@@ -375,7 +369,27 @@ typedef CompletionItem<T> = {
     var args:T;
 }
 
+typedef Unification = {
+    var int:Bool;
+    var float:Bool;
+    var bool:Bool;
+    var string:Bool;
+    var iterable:Bool;
+}
+
+// rename all "Usage" stuff to "Occurence"?
+typedef CompletionItemUsage<T> = {
+    var range:Range;
+    var item:CompletionItem<T>;
+}
+
+typedef FieldCompletionSubject<T> = {
+    >CompletionItemUsage<T>,
+    var unifiesWith:Unification;
+}
+
 enum abstract CompletionModeKind<T>(Int) {
+    // var Field:CompletionModeKind<FieldCompletionSubject<Dynamic>> = 0;
     var Field:CompletionModeKind<CompletionItem<Dynamic>> = 0;
     var StructureField = 1;
     var Toplevel = 2;
