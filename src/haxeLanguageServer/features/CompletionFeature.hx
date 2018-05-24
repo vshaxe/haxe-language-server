@@ -234,7 +234,14 @@ class CompletionFeature {
         return {
             label: field.name,
             kind: getKindForField(field, kind),
-            detail: printer.printType(field.type) + printClassFieldOrigin(usage.origin, kind),
+            detail: {
+                var overloads = if (usage.field.overloads == null) 0 else usage.field.overloads.length;
+                var type = printer.printType(field.type);
+                if (overloads > 0) {
+                    type += ' (+$overloads overloads)';
+                }
+                type + printClassFieldOrigin(usage.origin, kind);
+            },
             documentation: formatDocumentation(field.doc),
             textEdit: {
                 newText: switch (mode) {
