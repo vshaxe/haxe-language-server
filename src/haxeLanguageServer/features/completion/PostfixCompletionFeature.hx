@@ -1,8 +1,8 @@
-package haxeLanguageServer.features;
+package haxeLanguageServer.features.completion;
 
 import haxeLanguageServer.protocol.Display;
 import languageServerProtocol.Types.CompletionItem;
-import haxeLanguageServer.features.CompletionFeature.CompletionItemOrigin;
+import haxeLanguageServer.features.completion.CompletionFeature.CompletionItemOrigin;
 
 class PostfixCompletionFeature {
     public function new() {}

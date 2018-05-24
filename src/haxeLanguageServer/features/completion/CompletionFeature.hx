@@ -1,4 +1,4 @@
-package haxeLanguageServer.features;
+package haxeLanguageServer.features.completion;
 
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
@@ -44,6 +44,7 @@ class CompletionFeature {
     var contextSupport:Bool;
     var markdownSupport:Bool;
     var snippetSupport:Bool;
+    var commitCharactersSupport:Bool;
 
     public function new(context) {
         this.context = context;
@@ -87,6 +88,10 @@ class CompletionFeature {
 
         if (completionItem.snippetSupport) {
             snippetSupport = true;
+        }
+
+        if (completionItem.commitCharactersSupport) {
+            commitCharactersSupport = true;
         }
     }
 

@@ -8,6 +8,7 @@ import jsonrpc.ResponseError;
 import jsonrpc.Types;
 import jsonrpc.Protocol;
 import haxeLanguageServer.features.*;
+import haxeLanguageServer.features.completion.*;
 import haxeLanguageServer.features.CodeActionFeature.CodeActionContributor;
 import haxeLanguageServer.helper.SemVer;
 import haxeLanguageServer.helper.TypeHelper.FunctionFormattingConfig;

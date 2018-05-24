@@ -1,4 +1,4 @@
-package haxeLanguageServer.features;
+package haxeLanguageServer.features.completion;
 
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
