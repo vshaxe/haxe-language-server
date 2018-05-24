@@ -376,7 +376,7 @@ typedef CompletionItemUsage<T> = {
 
 typedef FieldCompletionSubject<T1,T2> = {
     >CompletionItemUsage<T1>,
-    var type:JsonType<T2>;
+    @:optional var type:JsonType<T2>;
     // var isIterable:Bool; TODO
 }
 

@@ -14,8 +14,10 @@ class PostfixCompletionFeature {
             case _: return [];
         }
 
-        // TODO: why is this type hint necessary to get struct field completion later on?
-        var items:Array<CompletionItem> = [];
+        var type = subject.type;
+        if (type == null) {
+            return [];
+        }
 
         var range = subject.range;
         var replaceRange:Range = {
@@ -24,7 +26,8 @@ class PostfixCompletionFeature {
         };
         var expr = doc.getText(range);
 
-        var type = subject.type;
+        // TODO: why is this type hint necessary to get struct field completion later on?
+        var items:Array<CompletionItem> = [];
         switch (type.kind) {
             case TAbstract:
                 var path = type.args.path;
