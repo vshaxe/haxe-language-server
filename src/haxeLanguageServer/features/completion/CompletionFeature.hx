@@ -223,6 +223,9 @@ class CompletionFeature {
         }
         if (type != null) {
             result.detail = printer.printType(type);
+            if (commitCharactersSupport && type.kind == TFun) {
+                result.commitCharacters = ["("];
+            }
         }
         var documentation = getDocumentation(item);
         if (documentation != null) {
@@ -236,7 +239,7 @@ class CompletionFeature {
 
     function createClassFieldCompletionItem<T>(usage:ClassFieldUsage<T>, kind:HaxeCompletionItemKind<Dynamic>, replaceRange:Range, mode:CompletionModeKind<Dynamic>):CompletionItem {
         var field = usage.field;
-        return {
+        var item:CompletionItem = {
             label: field.name,
             kind: getKindForField(field, kind),
             detail: {
@@ -257,7 +260,13 @@ class CompletionFeature {
                 },
                 range: replaceRange
             }
-        };
+        }
+
+        if (commitCharactersSupport && field.type.kind == TFun) {
+            item.commitCharacters = ["("];
+        }
+
+        return item;
     }
 
     function getKindForField<T>(field:JsonClassField, kind:HaxeCompletionItemKind<Dynamic>):CompletionItemKind {
