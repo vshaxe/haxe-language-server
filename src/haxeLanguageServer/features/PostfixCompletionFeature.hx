@@ -1,48 +1,30 @@
 package haxeLanguageServer.features;
 
 import haxeLanguageServer.protocol.Display;
-import haxeLanguageServer.protocol.Display.CompletionItem as HaxeCompletionItem;
 import languageServerProtocol.Types.CompletionItem;
 import haxeLanguageServer.features.CompletionFeature.CompletionItemOrigin;
 
 class PostfixCompletionFeature {
     public function new() {}
 
-    public function createItems<T1,T2,T3>(mode:CompletionMode<T1>, position:Position, textBefore:String):Array<CompletionItem> {
-        var completingOn:HaxeCompletionItem<T2>;
+    public function createItems<TMode,TItem,TType>(mode:CompletionMode<TMode>, position:Position, textBefore:String, doc:TextDocument):Array<CompletionItem> {
+        var subject:FieldCompletionSubject<TItem,TType>;
         switch (mode.kind) {
-            case Field: completingOn = mode.args;
-            case _: return [];
-        }
-
-        var local:JsonLocal<T3>;
-        switch (completingOn.kind) {
-            case Local: local = completingOn.args;
+            case Field: subject = mode.args;
             case _: return [];
         }
 
         // TODO: why is this type hint necessary to get struct field completion later on?
         var items:Array<CompletionItem> = [];
 
-        // TODO: include replaceRange in the protocol?e
-        var textBeforeRegex = ~/\b([a-zA-Z0-9.]+)$/;
-        textBeforeRegex.match(textBefore);
-        var matched = textBeforeRegex.matched(1);
-
-        var expr = matched;
-        var dotIndex = matched.lastIndexOf(".");
-        if (dotIndex != -1) {
-            expr = matched.substr(0, dotIndex);
-        }
-
+        var range = subject.range;
         var replaceRange:Range = {
-            start: position.translate(0, -matched.length),
-            // start: position.translate(0, -1),
-            // start: position,
+            start: range.start,
             end: position
         };
+        var expr = doc.getText(range);
 
-        var type = local.type;
+        var type = subject.type;
         switch (type.kind) {
             case TAbstract:
                 var path = type.args.path;
@@ -51,7 +33,7 @@ class PostfixCompletionFeature {
                     items.push({
                         label: "for",
                         detail: "for (i in 0...expr)",
-                        filterText: matched, // https://github.com/Microsoft/vscode/issues/38982
+                        filterText: doc.getText(replaceRange), // https://github.com/Microsoft/vscode/issues/38982
                         kind: Keyword,
                         textEdit: {
                             newText: 'for (i in 0...$expr) ',

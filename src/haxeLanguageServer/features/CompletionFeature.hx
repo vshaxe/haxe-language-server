@@ -162,7 +162,7 @@ class CompletionFeature {
                 }
                 items.push(completionItem);
             };
-            items = items.concat(postfixCompletion.createItems(result.mode, params.position, textBefore));
+            items = items.concat(postfixCompletion.createItems(result.mode, params.position, textBefore, doc));
             resolve(items);
             return items.length + " items";
         }, error -> reject(ResponseError.internalError(error)));
@@ -459,10 +459,10 @@ class CompletionFeature {
 
     function createPackageCompletionItem(pack:Package, replaceRange:Range):CompletionItem {
         return {
-            label: pack.name,
+            label: pack.path.name,
             kind: Module,
             textEdit: {
-                newText: pack.name + ".",
+                newText: pack.path.name + ".",
                 range: replaceRange
             },
             command: triggerSuggest

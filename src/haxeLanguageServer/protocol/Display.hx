@@ -61,16 +61,7 @@ class DisplayMethods {
 
 /* Initialize */
 
-// TODO: update this
-typedef LoggingOptions = {
-    @:optional var arguments:Bool;
-    @:optional var cacheSignature:Bool;
-    @:optional var cacheInvalidation:Bool;
-    @:optional var completionResponse:Bool;
-}
-
 typedef InitializeParams = {
-    @:optional var logging:LoggingOptions;
     @:optional var supportsResolve:Bool;
 }
 
@@ -340,12 +331,12 @@ enum abstract PackageContentKind(Int) {
 }
 
 typedef Package = {
-    var name:String;
+    var path:JsonPath;
     @:optional var contents:Array<{name:String, kind:PackageContentKind}>;
 }
 
 typedef Module = {
-    var name:String;
+    var path:JsonPath;
     @:optional var contents:Array<ModuleType>;
 }
 
@@ -383,14 +374,14 @@ typedef CompletionItemUsage<T> = {
     var item:CompletionItem<T>;
 }
 
-typedef FieldCompletionSubject<T> = {
-    >CompletionItemUsage<T>,
-    var unifiesWith:Unification;
+typedef FieldCompletionSubject<T1,T2> = {
+    >CompletionItemUsage<T1>,
+    var type:JsonType<T2>;
+    // var isIterable:Bool; TODO
 }
 
 enum abstract CompletionModeKind<T>(Int) {
-    // var Field:CompletionModeKind<FieldCompletionSubject<Dynamic>> = 0;
-    var Field:CompletionModeKind<CompletionItem<Dynamic>> = 0;
+    var Field:CompletionModeKind<FieldCompletionSubject<Dynamic,Dynamic>> = 0;
     var StructureField = 1;
     var Toplevel = 2;
     var Metadata = 3;
