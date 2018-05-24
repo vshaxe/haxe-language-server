@@ -373,7 +373,7 @@ class Context {
                         var haxeResponse:Response<Dynamic> = response.result;
 
                         var beforeProcessingTime = Date.now().getTime();
-                        var debugInfo = callback(haxeResponse.result);
+                        var debugInfo = try callback(haxeResponse.result) catch(e:Any) null;
                         var afterProcessingTime = Date.now().getTime();
 
                         var methodResult:HaxeMethodResult = {
