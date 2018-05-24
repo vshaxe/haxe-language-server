@@ -475,6 +475,7 @@ class CompletionFeature {
         return {
             label: dotPath,
             kind: Module,
+            detail: 'package $dotPath',
             textEdit: {
                 newText: dotPath + ".",
                 range: replaceRange
