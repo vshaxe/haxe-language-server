@@ -458,11 +458,13 @@ class CompletionFeature {
     }
 
     function createPackageCompletionItem(pack:Package, replaceRange:Range):CompletionItem {
+        var path = pack.path;
+        var dotPath = path.pack.concat([path.name]).join(".");
         return {
-            label: pack.path.name,
+            label: dotPath,
             kind: Module,
             textEdit: {
-                newText: pack.path.name + ".",
+                newText: dotPath + ".",
                 range: replaceRange
             },
             command: triggerSuggest
