@@ -1,5 +1,6 @@
 package haxeLanguageServer;
 
+import haxe.CallStack;
 import haxe.Json;
 import haxe.extern.EitherType;
 import js.Node.process;
@@ -373,7 +374,14 @@ class Context {
                         var haxeResponse:Response<Dynamic> = response.result;
 
                         var beforeProcessingTime = Date.now().getTime();
-                        var debugInfo = try callback(haxeResponse.result) catch(e:Any) null;
+                        var debugInfo =
+                            try
+                                callback(haxeResponse.result)
+                            catch (e:Any) {
+                                trace(e);
+                                trace(CallStack.toString(CallStack.callStack()));
+                                null;
+                            }
                         var afterProcessingTime = Date.now().getTime();
 
                         var methodResult:HaxeMethodResult = {
