@@ -40,7 +40,7 @@ class PostfixCompletionFeature {
                             range: replaceRange
                             // TODO: no struct field completion in here?
                         },
-                        data: {origin: CompletionItemOrigin.Haxe}
+                        data: {origin: CompletionItemOrigin.Custom}
                     });
                 }
             case _:
