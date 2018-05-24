@@ -17,6 +17,31 @@ class ServerMethods {
 
 /* Configure */
 
+typedef ConfigurePrintParams = {
+	@:optional var addedDirectory:Bool;
+	@:optional var foundDirectories:Bool;
+	@:optional var changedDirectories:Bool;
+	@:optional var modulePathChanged:Bool;
+	@:optional var notCached:Bool;
+	@:optional var parsed:Bool;
+	@:optional var removedDirectory:Bool;
+	@:optional var reusing:Bool;
+	@:optional var skippingDep:Bool;
+	@:optional var unchangedContent:Bool;
+	@:optional var cachedModules:Bool;
+	@:optional var arguments:Bool;
+	@:optional var completion:Bool;
+	@:optional var defines:Bool;
+	@:optional var signature:Bool;
+	@:optional var displayPosition:Bool;
+	@:optional var stats:Bool;
+	@:optional var message:Bool;
+	@:optional var socketMessage:Bool;
+	@:optional var uncaughtError:Bool;
+	@:optional var newContext:Bool;
+}
+
 typedef ConfigureParams = {
-    var noModuleChecks:Bool;
+    @:optional var noModuleChecks:Bool;
+    @:optional var print:ConfigurePrintParams;
 }

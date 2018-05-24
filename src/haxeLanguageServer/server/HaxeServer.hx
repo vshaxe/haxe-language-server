@@ -141,7 +141,7 @@ class HaxeServer {
     }
 
     function configure() {
-        context.callHaxeMethod(ServerMethods.Configure, {noModuleChecks: true}, null, _ -> null, error -> {
+        context.callHaxeMethod(ServerMethods.Configure, {noModuleChecks: true, print: { completion: false, reusing: false }}, null, _ -> null, error -> {
             trace("Error during " + ServerMethods.Configure + " " + error);
         });
     }
