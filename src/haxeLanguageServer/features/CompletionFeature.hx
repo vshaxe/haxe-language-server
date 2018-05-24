@@ -22,9 +22,20 @@ private typedef PreviousCompletionResult = {
     var kind:CompletionModeKind<Dynamic>;
 }
 
+enum abstract CompletionItemOrigin(Int) {
+    var Haxe = 0;
+    var Custom = 1;
+}
+
+typedef CompletionItemData = {
+    var origin:CompletionItemOrigin;
+    @:optional var index:Int;
+}
+
 class CompletionFeature {
     final context:Context;
     final legacy:CompletionFeatureLegacy;
+    final postfixCompletion:PostfixCompletionFeature;
     final printer:TypePrinter;
     final triggerSuggest:Command;
     final triggerParameterHints:Command;
@@ -38,6 +49,7 @@ class CompletionFeature {
         this.context = context;
         checkCapabilities();
         legacy = new CompletionFeatureLegacy(context, contextSupport, formatDocumentation);
+        postfixCompletion = new PostfixCompletionFeature();
         printer = new TypePrinter();
         context.protocol.onRequest(Methods.Completion, onCompletion);
         context.protocol.onRequest(Methods.CompletionItemResolve, onCompletionItemResolve);
@@ -104,7 +116,8 @@ class CompletionFeature {
     }
 
     function onCompletionItemResolve(item:CompletionItem, token:CancellationToken, resolve:CompletionItem->Void, reject:ResponseError<NoData>->Void) {
-        if (!context.haxeServer.capabilities.completionResolveProvider || previousCompletion == null) {
+        var data:CompletionItemData = item.data;
+        if (!context.haxeServer.capabilities.completionResolveProvider || previousCompletion == null || data.origin == Custom) {
             return resolve(item);
         }
         var importPosition = ImportHelper.getImportPosition(previousCompletion.doc);
@@ -118,13 +131,13 @@ class CompletionFeature {
 
     function handleJsonRpc(params:CompletionParams, token:CancellationToken, resolve:Array<CompletionItem>->Void, reject:ResponseError<NoData>->Void, doc:TextDocument, offset:Int, textBefore:String) {
         var wasAutoTriggered = params.context == null ? true : params.context.triggerKind == TriggerCharacter;
-        var params = {
+        var haxeParams = {
             file: doc.fsPath,
             contents: doc.content,
             offset: offset,
             wasAutoTriggered: wasAutoTriggered,
         };
-        context.callHaxeMethod(DisplayMethods.Completion, params, token, result -> {
+        context.callHaxeMethod(DisplayMethods.Completion, haxeParams, token, result -> {
             if (result.mode.kind != TypeHint && wasAutoTriggered && isAfterArrow(textBefore)) {
                 resolve([]); // avoid auto-popup after -> in arrow functions
                 return null;
@@ -143,12 +156,13 @@ class CompletionFeature {
                 if (completionItem == null) {
                     continue;
                 }
-                completionItem.data = {index: i};
+                completionItem.data = {origin: Haxe, index: i};
                 if (result.sorted) {
                     completionItem.sortText = StringTools.lpad(Std.string(counter++), "0", 10);
                 }
                 items.push(completionItem);
             };
+            items = items.concat(postfixCompletion.createItems(result.mode, params.position, textBefore));
             resolve(items);
             return items.length + " items";
         }, error -> reject(ResponseError.internalError(error)));
