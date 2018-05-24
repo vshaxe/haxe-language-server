@@ -309,9 +309,11 @@ class Context {
     }
 
     function onDidChangeTextDocument(event:DidChangeTextDocumentParams) {
-        callHaxeMethod(ServerMethods.Invalidate, {file: event.textDocument.uri.toFsPath()}, null, _ -> null, error -> {
-            trace("Error during " + ServerMethods.Invalidate + " " + error);
-        });
+        if (haxeServer.supportsJsonRpc) {
+            callHaxeMethod(ServerMethods.Invalidate, {file: event.textDocument.uri.toFsPath()}, null, _ -> null, error -> {
+                trace("Error during " + ServerMethods.Invalidate + " " + error);
+            });
+        }
         documents.onDidChangeTextDocument(event);
     }
 
