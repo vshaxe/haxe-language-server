@@ -372,18 +372,22 @@ typedef Unification = {
 typedef CompletionItemUsage<T> = {
     var range:Range;
     var item:CompletionItem<T>;
+    @:optional var type:JsonType<Dynamic>;
 }
 
-typedef FieldCompletionSubject<T1,T2> = {
-    >CompletionItemUsage<T1>,
-    @:optional var type:JsonType<T2>;
+typedef FieldCompletionSubject<T> = {
+    >CompletionItemUsage<T>,
     // var isIterable:Bool; TODO
 }
 
+typedef ToplevelCompletion<T> = {
+    @:optional var expectedType:JsonType<T>;
+}
+
 enum abstract CompletionModeKind<T>(Int) {
-    var Field:CompletionModeKind<FieldCompletionSubject<Dynamic,Dynamic>> = 0;
+    var Field:CompletionModeKind<FieldCompletionSubject<Dynamic>> = 0;
     var StructureField = 1;
-    var Toplevel = 2;
+    var Toplevel:CompletionModeKind<ToplevelCompletion<Dynamic>> = 2;
     var Metadata = 3;
     var TypeHint = 4;
     var Extends = 5;
@@ -427,11 +431,7 @@ typedef GotoDefinitionResult = Response<Array<Location>>;
 
 /* Hover */
 
-typedef HoverResult = Response<Null<{
-    var range:Range;
-    @:optional var documentation:String;
-    @:optional var type:JsonType<Dynamic>;
-}>>;
+typedef HoverResult = Response<CompletionItemUsage<Dynamic>>;
 
 /* DeterminePackage */
 
@@ -466,5 +466,5 @@ typedef Location = {
     var range:Range;
 }
 
-typedef Range = languageServerProtocol.Types.Range;
-typedef Position = languageServerProtocol.Types.Position;
+typedef Range = haxe.display.Position.Range;
+typedef Position = haxe.display.Position.Position;

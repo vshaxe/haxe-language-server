@@ -7,8 +7,8 @@ import haxeLanguageServer.features.completion.CompletionFeature.CompletionItemOr
 class PostfixCompletionFeature {
     public function new() {}
 
-    public function createItems<TMode,TItem,TType>(mode:CompletionMode<TMode>, position:Position, textBefore:String, doc:TextDocument):Array<CompletionItem> {
-        var subject:FieldCompletionSubject<TItem,TType>;
+    public function createItems<TMode,TItem>(mode:CompletionMode<TMode>, position:Position, textBefore:String, doc:TextDocument):Array<CompletionItem> {
+        var subject:FieldCompletionSubject<TItem>;
         switch (mode.kind) {
             case Field: subject = mode.args;
             case _: return [];
@@ -26,7 +26,6 @@ class PostfixCompletionFeature {
         };
         var expr = doc.getText(range);
 
-        // TODO: why is this type hint necessary to get struct field completion later on?
         var items:Array<CompletionItem> = [];
         switch (type.kind) {
             case TAbstract:

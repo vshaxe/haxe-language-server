@@ -30,7 +30,7 @@ class HoverFeature {
                 resolve(null);
                 return null;
             }
-            resolve(createHover(content, hover.documentation, hover.range));
+            resolve(createHover(content, null /* TODO */, hover.range));
             return null;
         }, error -> reject(ResponseError.internalError(error)));
     }
