@@ -24,15 +24,19 @@ class HoverFeature {
 
     function handleJsonRpc(params:TextDocumentPositionParams, token:CancellationToken, resolve:Hover->Void, reject:ResponseError<NoData>->Void, doc:TextDocument, offset:Int) {
         context.callHaxeMethod(DisplayMethods.Hover, {file: doc.fsPath, contents: doc.content, offset: offset}, token, hover -> {
-            var content = if (hover.type != null) {
-                new TypePrinter(true).printType(hover.type);
-            } else {
-                resolve(null);
-                return null;
-            }
-            resolve(createHover(content, hover.item.getDocumentation(), hover.range));
+            resolve(createHover(printContent(hover), hover.item.getDocumentation(), hover.range));
             return null;
         }, error -> reject(ResponseError.internalError(error)));
+    }
+
+    function printContent<T>(hover:CompletionItemUsage<T>):String {
+        var printer = new TypePrinter(true);
+        var item = hover.item;
+        return switch (item.kind) {
+            // case Type: printer.printTypeDeclaration(hover.item.args);
+            case Metadata: printCodeBlock("@" + item.args.name, Haxe);
+            case _: printCodeBlock(printer.printType(hover.type), HaxeType);
+        }
     }
 
     function handleLegacy(params:TextDocumentPositionParams, token:CancellationToken, resolve:Hover->Void, reject:ResponseError<NoData>->Void, doc:TextDocument, offset:Int) {
@@ -65,7 +69,7 @@ class HoverFeature {
                             var range:Range = null;
                             if (p != null)
                                 range = p.range;
-                            resolve(createHover(type, documentation, range));
+                            resolve(createHover(printCodeBlock(type, HaxeType), documentation, range));
                     }
             }
         }, function(error) reject(ResponseError.internalError(error)));
@@ -76,11 +80,20 @@ class HoverFeature {
         var hover:Hover = {
             contents: {
                 kind: MarkupKind.MarkDown,
-                value: '```haxe.hover\n${content}\n```\n${documentation}'
+                value: '$content\n$documentation'
             }
         };
         if (range != null)
             hover.range = range;
         return hover;
     }
+
+    function printCodeBlock(content:String, languageId:LanguageId):String {
+        return '```$languageId\n$content```';
+    }
+}
+
+private enum abstract LanguageId(String) to String {
+    var Haxe = "haxe";
+    var HaxeType = "haxe.hover";
 }
