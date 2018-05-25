@@ -4,10 +4,10 @@ import haxeLanguageServer.protocol.Display;
 import languageServerProtocol.Types.CompletionItem;
 import haxeLanguageServer.features.completion.CompletionFeature.CompletionItemOrigin;
 
-class PostfixCompletionFeature {
+class PostfixCompletion {
     public function new() {}
 
-    public function createItems<TMode,TItem>(mode:CompletionMode<TMode>, position:Position, textBefore:String, doc:TextDocument):Array<CompletionItem> {
+    public function createItems<TMode,TItem>(mode:CompletionMode<TMode>, position:Position, doc:TextDocument):Array<CompletionItem> {
         var subject:FieldCompletionSubject<TItem>;
         switch (mode.kind) {
             case Field: subject = mode.args;

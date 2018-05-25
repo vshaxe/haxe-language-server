@@ -382,6 +382,7 @@ typedef FieldCompletionSubject<T> = {
 
 typedef ToplevelCompletion<T> = {
     @:optional var expectedType:JsonType<T>;
+    @:optional var expectedTypeFollowed:JsonType<T>;
 }
 
 enum abstract CompletionModeKind<T>(Int) {

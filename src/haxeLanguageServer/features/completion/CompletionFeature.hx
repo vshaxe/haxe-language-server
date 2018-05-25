@@ -35,7 +35,8 @@ typedef CompletionItemData = {
 class CompletionFeature {
     final context:Context;
     final legacy:CompletionFeatureLegacy;
-    final postfixCompletion:PostfixCompletionFeature;
+    final expectedTypeCompletion:ExpectedTypeCompletion;
+    final postfixCompletion:PostfixCompletion;
     final printer:TypePrinter;
     final triggerSuggest:Command;
     final triggerParameterHints:Command;
@@ -50,7 +51,8 @@ class CompletionFeature {
         this.context = context;
         checkCapabilities();
         legacy = new CompletionFeatureLegacy(context, contextSupport, formatDocumentation);
-        postfixCompletion = new PostfixCompletionFeature();
+        expectedTypeCompletion = new ExpectedTypeCompletion();
+        postfixCompletion = new PostfixCompletion();
         printer = new TypePrinter();
         context.protocol.onRequest(Methods.Completion, onCompletion);
         context.protocol.onRequest(Methods.CompletionItemResolve, onCompletionItemResolve);
@@ -167,7 +169,8 @@ class CompletionFeature {
                 }
                 items.push(completionItem);
             };
-            items = items.concat(postfixCompletion.createItems(result.mode, params.position, textBefore, doc));
+            items = items.concat(postfixCompletion.createItems(result.mode, params.position, doc));
+            items = items.concat(expectedTypeCompletion.createItems(result.mode, params.position, textBefore));
             resolve(items);
             return items.length + " items";
         }, error -> reject(ResponseError.internalError(error)));
