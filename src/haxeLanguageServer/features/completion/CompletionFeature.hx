@@ -194,7 +194,7 @@ class CompletionFeature {
                 return createTypeCompletionItem(item.args, doc, replaceRange, importPosition, mode);
 
             case Package:
-                return createPackageCompletionItem(item.args, replaceRange);
+                return createPackageCompletionItem(item.args, replaceRange, mode);
 
             case Module:
                 label = cast item.args;
@@ -478,7 +478,7 @@ class CompletionFeature {
         return detail;
     }
 
-    function createPackageCompletionItem(pack:Package, replaceRange:Range):CompletionItem {
+    function createPackageCompletionItem(pack:Package, replaceRange:Range, mode:CompletionModeKind<Dynamic>):CompletionItem {
         var path = pack.path;
         var dotPath = path.pack.concat([path.name]).join(".");
         return {
@@ -486,7 +486,7 @@ class CompletionFeature {
             kind: Module,
             detail: 'package $dotPath',
             textEdit: {
-                newText: dotPath + ".",
+                newText: (if (mode == Field) path.name else dotPath) + ".",
                 range: replaceRange
             },
             command: triggerSuggest
