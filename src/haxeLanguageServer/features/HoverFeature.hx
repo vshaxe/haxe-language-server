@@ -19,7 +19,7 @@ class HoverFeature {
     function onHover(params:TextDocumentPositionParams, token:CancellationToken, resolve:Hover->Void, reject:ResponseError<NoData>->Void) {
         var doc = context.documents.get(params.textDocument.uri);
         var handle = if (context.haxeServer.capabilities.hoverProvider) handleJsonRpc else handleLegacy;
-        handle(params, token, resolve, reject, doc, doc.offsetAt(param s.position));
+        handle(params, token, resolve, reject, doc, doc.offsetAt(params.position));
     }
 
     function handleJsonRpc(params:TextDocumentPositionParams, token:CancellationToken, resolve:Hover->Void, reject:ResponseError<NoData>->Void, doc:TextDocument, offset:Int) {
