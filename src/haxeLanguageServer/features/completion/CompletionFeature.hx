@@ -399,10 +399,6 @@ class CompletionFeature {
 
         if (snippetSupport) {
             switch (mode) {
-                case New:
-                    item.textEdit.newText += "($1)";
-                    item.insertTextFormat = Snippet;
-                    item.command = triggerParameterHints;
                 case TypeHint | Extends | Implements | StructExtension if (hasMandatoryTypeParameters(type)):
                     item.textEdit.newText += "<$1>";
                     item.insertTextFormat = Snippet;
@@ -412,6 +408,10 @@ class CompletionFeature {
 
         if (mode == StructExtension) {
             item.textEdit.newText += ",";
+        }
+
+        if (commitCharactersSupport && mode == New) {
+            item.commitCharacters = ["("];
         }
 
         if (type.params != null) {
@@ -494,7 +494,7 @@ class CompletionFeature {
             }
         }
 
-        if (mode == TypeRelation) {
+        if (mode == TypeRelation || keyword.name == New) {
             item.command = triggerSuggest;
         }
 
