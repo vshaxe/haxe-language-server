@@ -5,7 +5,7 @@ import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
 import haxeLanguageServer.helper.DocHelper;
 import haxeLanguageServer.helper.TypeHelper.*;
-import haxeLanguageServer.helper.TypePrinter;
+import haxeLanguageServer.protocol.helper.TypePrinter;
 import haxeLanguageServer.protocol.Display;
 
 class HoverFeature {
@@ -30,7 +30,7 @@ class HoverFeature {
                 resolve(null);
                 return null;
             }
-            resolve(createHover(content, null /* TODO */, hover.range));
+            resolve(createHover(content, hover.item.getDocumentation(), hover.range));
             return null;
         }, error -> reject(ResponseError.internalError(error)));
     }

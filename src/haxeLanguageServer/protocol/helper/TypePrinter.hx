@@ -1,4 +1,4 @@
-package haxeLanguageServer.helper;
+package haxeLanguageServer.protocol.helper;
 
 import haxe.display.JsonModuleTypes;
 import haxeLanguageServer.protocol.Display.ModuleType;

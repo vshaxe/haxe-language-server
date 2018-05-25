@@ -4,7 +4,7 @@ import haxe.extern.EitherType;
 import haxe.display.JsonModuleTypes.JsonFunctionArgument;
 import haxeLanguageServer.helper.ArgumentNameHelper.addNamesToSignatureType;
 import haxeLanguageServer.helper.DocHelper;
-import haxeLanguageServer.helper.TypePrinter;
+import haxeLanguageServer.protocol.helper.TypePrinter;
 import haxeLanguageServer.protocol.Display.DisplayMethods;
 import haxeLanguageServer.protocol.Display.SignatureItem as HaxeSignatureItem;
 import haxeLanguageServer.protocol.Display.SignatureInformation as HaxeSignatureInformation;

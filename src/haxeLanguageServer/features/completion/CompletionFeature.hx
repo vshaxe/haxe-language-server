@@ -8,7 +8,7 @@ import haxeLanguageServer.protocol.Display.CompletionItem as HaxeCompletionItem;
 import haxeLanguageServer.protocol.Display.CompletionItemKind as HaxeCompletionItemKind;
 import haxeLanguageServer.helper.DocHelper;
 import haxeLanguageServer.helper.ImportHelper;
-import haxeLanguageServer.helper.TypePrinter;
+import haxeLanguageServer.protocol.helper.TypePrinter;
 import languageServerProtocol.protocol.Protocol.CompletionParams;
 import languageServerProtocol.Types.CompletionItem;
 import languageServerProtocol.Types.CompletionItemKind;
@@ -227,7 +227,7 @@ class CompletionFeature {
                 result.commitCharacters = ["("];
             }
         }
-        var documentation = getDocumentation(item);
+        var documentation = item.getDocumentation();
         if (documentation != null) {
             result.documentation = formatDocumentation(documentation);
         }
@@ -454,16 +454,6 @@ class CompletionFeature {
         return DocHelper.extractText(doc);
     }
 
-    function getDocumentation<T>(item:HaxeCompletionItem<T>):JsonDoc {
-        return switch (item.kind) {
-            case ClassField | EnumAbstractValue: item.args.field.doc;
-            case EnumValue: item.args.field.doc;
-            case Type: item.args.doc;
-            case Metadata: item.args.doc;
-            case _: null;
-        }
-    }
-
     function printTypeDetail(type:ModuleType):String {
         var detail = printer.printTypeDeclaration(type) + "\n";
         switch (type.importStatus) {
@@ -481,12 +471,13 @@ class CompletionFeature {
     function createPackageCompletionItem(pack:Package, replaceRange:Range, mode:CompletionModeKind<Dynamic>):CompletionItem {
         var path = pack.path;
         var dotPath = path.pack.concat([path.name]).join(".");
+        var text = if (mode == Field) path.name else dotPath;
         return {
-            label: dotPath,
+            label: text,
             kind: Module,
             detail: 'package $dotPath',
             textEdit: {
-                newText: (if (mode == Field) path.name else dotPath) + ".",
+                newText: text + ".",
                 range: replaceRange
             },
             command: triggerSuggest
