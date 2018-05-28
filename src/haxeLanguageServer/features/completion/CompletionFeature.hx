@@ -207,7 +207,7 @@ class CompletionFeature {
             case AnonymousStructure: return null;
         }
 
-        if (replaceRange != null) {
+        if (completionItem.textEdit == null && replaceRange != null) {
             completionItem.textEdit = {range: replaceRange, newText: completionItem.label};
         }
 
