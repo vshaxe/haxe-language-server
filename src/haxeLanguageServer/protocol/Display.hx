@@ -410,7 +410,6 @@ typedef CompletionMode<T> = {
 typedef CompletionResponse<T1, T2> = {
     var items:Array<CompletionItem<T1>>;
     var mode:CompletionMode<T2>;
-    var sorted:Bool;
     @:optional var replaceRange:Range;
 }
 

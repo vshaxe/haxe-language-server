@@ -164,9 +164,7 @@ class CompletionFeature {
                     continue;
                 }
                 completionItem.data = {origin: Haxe, index: i};
-                if (result.sorted) {
-                    completionItem.sortText = StringTools.lpad(Std.string(counter++), "0", 10);
-                }
+                completionItem.sortText = StringTools.lpad(Std.string(counter++), "0", 10);
                 items.push(completionItem);
             };
             items = items.concat(postfixCompletion.createItems(result.mode, params.position, doc));
