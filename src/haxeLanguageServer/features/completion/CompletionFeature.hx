@@ -213,6 +213,10 @@ class CompletionFeature {
             case Keyword:
                 return createKeywordCompletionItem(item.args, replaceRange, mode);
 
+            case TypeParameter:
+                label = item.args.name;
+                kind = TypeParameter;
+
             case AnonymousStructure:
             case Expression:
                 // these never appear as completion items right now

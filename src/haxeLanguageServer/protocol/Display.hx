@@ -254,6 +254,7 @@ typedef ModuleType = {
 typedef ModuleTypeParameter = {
     var name:String;
     var meta:JsonMetadata;
+    var constraints:Array<JsonType<Dynamic>>;
 }
 
 typedef JsonLiteral<T> = {
@@ -353,6 +354,7 @@ enum abstract CompletionItemKind<T>(String) {
     var Keyword:CompletionItemKind<Keyword> = "Keyword";
     var AnonymousStructure:CompletionItemKind<JsonAnon> = "AnonymousStructure";
     var Expression:CompletionItemKind<JsonTExpr> = "Expression";
+    var TypeParameter:CompletionItemKind<ModuleTypeParameter> = "TypeParameter";
 }
 
 typedef CompletionItem<T> = {
