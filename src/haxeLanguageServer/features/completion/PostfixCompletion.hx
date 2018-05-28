@@ -1,7 +1,9 @@
 package haxeLanguageServer.features.completion;
 
+import haxe.display.JsonModuleTypes.JsonEnum;
 import haxeLanguageServer.protocol.Display;
 import languageServerProtocol.Types.CompletionItem;
+import haxeLanguageServer.protocol.helper.DisplayPrinter;
 import haxeLanguageServer.features.completion.CompletionFeature.CompletionItemOrigin;
 
 class PostfixCompletion {
@@ -15,6 +17,7 @@ class PostfixCompletion {
         }
 
         var type = subject.type;
+        var moduleType = subject.moduleType;
         if (type == null) {
             return [];
         }
@@ -40,10 +43,28 @@ class PostfixCompletion {
                     add({
                         label: "for",
                         detail: "for (i in 0...expr)",
-                        insertText: 'for (i in 0...$expr) '
+                        insertText: 'for (i in 0...$expr) ',
+                        insertTextFormat: PlainText
                     });
                 }
             case _:
+        }
+
+        if (moduleType != null) {
+            switch (moduleType.kind) {
+                case Enum:
+                    var args:JsonEnum = moduleType.args;
+                    var printer = new DisplayPrinter();
+                    var cases = args.constructors.map(field -> '\tcase ' + printer.printEnumField(field, false) + "$" + (field.index + 1));
+                    add({
+                        label: "switch",
+                        detail: "switch (expr) {cases...}",
+                        insertText: 'switch ($expr) {\n${cases.join("\n")}\n}',
+                        insertTextFormat: Snippet
+                    });
+                // TODO: enum abstract
+                case _:
+            }
         }
 
         return items;
@@ -55,6 +76,7 @@ class PostfixCompletion {
             detail: data.detail,
             filterText: doc.getText(replaceRange) + " " + data.label, // https://github.com/Microsoft/vscode/issues/38982
             kind: Keyword,
+            insertTextFormat: data.insertTextFormat,
             textEdit: {
                 newText: data.insertText,
                 range: replaceRange
@@ -70,4 +92,5 @@ private typedef PostfixCompletionItem = {
     var label:String;
     var detail:String;
     var insertText:String;
+    var insertTextFormat:InsertTextFormat;
 }

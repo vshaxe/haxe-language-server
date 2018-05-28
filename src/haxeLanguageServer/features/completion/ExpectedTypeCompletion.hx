@@ -8,7 +8,7 @@ import haxe.display.JsonModuleTypes.JsonType;
 class ExpectedTypeCompletion {
     public function new() {}
 
-    public function createItems<T,TType>(mode:CompletionMode<T>, position:Position, textBefore:String):Array<CompletionItem> {
+    public function createItems<T,TType>(mode:CompletionMode<T>, position:Position, doc:TextDocument, textBefore:String):Array<CompletionItem> {
         var toplevel:ToplevelCompletion<TType>;
         switch (mode.kind) {
             case Toplevel: toplevel = mode.args;
@@ -24,10 +24,7 @@ class ExpectedTypeCompletion {
         }
 
         var items:Array<CompletionItem> = [];
-
-        var whitespaceRegex = ~/^\s*/;
-        whitespaceRegex.match(textBefore);
-        var indent = whitespaceRegex.matched(0);
+        var indent = doc.indentAt(position.line);
 
         switch (expectedTypeFollowed.kind) {
             case TAnonymous:

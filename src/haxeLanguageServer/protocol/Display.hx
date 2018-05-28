@@ -369,19 +369,12 @@ typedef CompletionItem<T> = {
     @:optional var type:JsonType<Dynamic>;
 }
 
-typedef Unification = {
-    var int:Bool;
-    var float:Bool;
-    var bool:Bool;
-    var string:Bool;
-    var iterable:Bool;
-}
-
 // rename all "Usage" stuff to "Occurence"?
 typedef CompletionItemUsage<T> = {
     var range:Range;
     var item:CompletionItem<T>;
     @:optional var type:JsonType<Dynamic>;
+    @:optional var moduleType:JsonModuleType<Dynamic>;
 }
 
 typedef FieldCompletionSubject<T> = {

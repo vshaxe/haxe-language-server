@@ -179,4 +179,29 @@ class DisplayPrinter {
             case LocalFunction: "local function";
         }
     }
+
+    public function printEnumField<T>(field:JsonEnumField, snippets:Bool) {
+        return switch (field.type.kind) {
+            case TEnum:
+                field.name + ":";
+            case TFun:
+                var signature:JsonFunctionSignature = field.type.args;
+                var text = '${field.name}(';
+                for (i in 0...signature.args.length) {
+                    var arg = signature.args[i];
+                    text += if (snippets) {
+                        '$${${i+1}:${arg.name}}';
+                    } else {
+                        arg.name;
+                    }
+
+                    if (i < signature.args.length - 1) {
+                        text += ", ";
+                    }
+                }
+                text + "):";
+            case _:
+                "";
+        }
+    }
 }

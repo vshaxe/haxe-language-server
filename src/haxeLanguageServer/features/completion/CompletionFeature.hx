@@ -163,7 +163,7 @@ class CompletionFeature {
                 }
             };
             items = items.concat(postfixCompletion.createItems(result.mode, params.position, doc));
-            items = items.concat(expectedTypeCompletion.createItems(result.mode, params.position, textBefore));
+            items = items.concat(expectedTypeCompletion.createItems(result.mode, params.position, doc, textBefore));
             resolve(items);
             return items.length + " items";
         }, error -> reject(ResponseError.internalError(error)));
@@ -311,24 +311,11 @@ class CompletionFeature {
             return item;
         }
 
-        switch (type.kind) {
-            case TEnum:
-                item.textEdit.newText = name + ":";
-            case TFun if (snippetSupport):
-                var signature:JsonFunctionSignature = type.args;
-                var text = '$name(';
-                for (i in 0...signature.args.length) {
-                    var arg = signature.args[i];
-                    text += '$${${i+1}:${arg.name}}';
-                    if (i < signature.args.length - 1) {
-                        text += ", ";
-                    }
-                }
-                text += "):";
-                item.insertTextFormat = Snippet;
-                item.textEdit.newText = text;
-            case _:
+        item.textEdit.newText = printer.printEnumField(enumValue, snippetSupport);
+        if (snippetSupport) {
+            item.insertTextFormat = Snippet;
         }
+
         return item;
     }
 
