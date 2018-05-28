@@ -1,5 +1,6 @@
 package haxeLanguageServer.features.completion;
 
+import haxeLanguageServer.features.completion.CompletionFeature;
 import haxeLanguageServer.protocol.Display.ToplevelCompletion;
 import haxeLanguageServer.protocol.Display.CompletionMode;
 import haxe.display.JsonModuleTypes.JsonType;
@@ -49,11 +50,13 @@ class ExpectedTypeCompletion {
                     textEdit: {
                         newText: '{\n${printedFields.join("\n")}$indent\n}',
                         range: position.toRange()
+                    },
+                    data: {
+                        origin: Custom
                     }
                 });
             case _:
         }
-        trace(items);
         return items;
     }
 }
