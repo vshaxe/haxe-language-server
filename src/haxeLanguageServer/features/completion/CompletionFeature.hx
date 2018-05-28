@@ -164,7 +164,9 @@ class CompletionFeature {
                     continue;
                 }
                 completionItem.data = {origin: Haxe, index: i};
-                completionItem.sortText = StringTools.lpad(Std.string(counter++), "0", 10);
+                if (completionItem.sortText != null) {
+                    completionItem.sortText = StringTools.lpad(Std.string(counter++), "0", 10);
+                }
                 items.push(completionItem);
             };
             items = items.concat(postfixCompletion.createItems(result.mode, params.position, doc));
@@ -378,9 +380,10 @@ class CompletionFeature {
 
         var qualifiedName = printer.printQualifiedTypePath(type); // pack.Foo | pack.Foo.SubType
         var unqualifiedName = type.name; // Foo | SubType
+        var containerName = if (qualifiedName.indexOf(".") == -1) "" else qualifiedName.untilLastDot(); // pack / pack.Foo
 
         var item:CompletionItem = {
-            label: qualifiedName,
+            label: unqualifiedName + if (containerName == "") "" else " - " + containerName,
             kind: getKindForModuleType(type),
             documentation: formatDocumentation(type.doc),
             textEdit: {
@@ -394,7 +397,6 @@ class CompletionFeature {
         } else {
             switch (type.importStatus) {
                 case Imported:
-                    item.label = unqualifiedName;
                 case Unimported:
                     var edit = ImportHelper.createImportEdit(doc, importPosition, qualifiedName, importConfig.style);
                     item.additionalTextEdits = [edit];
@@ -420,7 +422,7 @@ class CompletionFeature {
         }
 
         if (type.params != null) {
-            item.detail = printTypeDetail(type);
+            item.detail = printTypeDetail(type, containerName);
         }
 
         return item;
@@ -459,13 +461,12 @@ class CompletionFeature {
         return DocHelper.extractText(doc);
     }
 
-    function printTypeDetail(type:ModuleType):String {
+    function printTypeDetail(type:ModuleType, containerName:String):String {
         var detail = printer.printTypeDeclaration(type) + "\n";
         switch (type.importStatus) {
             case Imported:
                 detail += "(imported)";
             case Unimported:
-                var containerName = printer.printQualifiedTypePath(type).untilLastDot();
                 detail += "Auto-import from '" + containerName + "'";
             case Shadowed:
                 detail += "(shadowed)";
