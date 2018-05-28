@@ -160,6 +160,11 @@ class CompletionFeature {
             for (i in 0...result.items.length) {
                 var item = result.items[i];
                 var completionItem = createCompletionItem(item, doc, result.replaceRange, importPosition, result.mode.kind);
+                if (commitCharactersSupport) {
+                    if ((item.type != null && item.type.kind == TFun) || result.mode.kind == New) {
+                        completionItem.commitCharacters = ["("];
+                    }
+                }
                 if (completionItem == null) {
                     continue;
                 }
@@ -228,9 +233,6 @@ class CompletionFeature {
         }
         if (type != null) {
             result.detail = printer.printType(type);
-            if (commitCharactersSupport && type.kind == TFun) {
-                result.commitCharacters = ["("];
-            }
         }
         var documentation = item.getDocumentation();
         if (documentation != null) {
@@ -269,10 +271,6 @@ class CompletionFeature {
                 },
                 range: replaceRange
             }
-        }
-
-        if (commitCharactersSupport && field.type.kind == TFun) {
-            item.commitCharacters = ["("];
         }
 
         return item;
@@ -394,10 +392,6 @@ class CompletionFeature {
 
         if (mode == StructExtension) {
             item.textEdit.newText += ",";
-        }
-
-        if (commitCharactersSupport && mode == New) {
-            item.commitCharacters = ["("];
         }
 
         if (type.params != null) {

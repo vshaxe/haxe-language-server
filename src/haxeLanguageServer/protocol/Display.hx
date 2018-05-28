@@ -365,6 +365,7 @@ enum abstract CompletionItemKind<T>(String) {
 typedef CompletionItem<T> = {
     var kind:CompletionItemKind<T>;
     var args:T;
+    @:optional var type:JsonType<Dynamic>;
 }
 
 typedef Unification = {
