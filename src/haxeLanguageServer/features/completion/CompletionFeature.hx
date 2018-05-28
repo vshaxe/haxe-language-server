@@ -8,7 +8,7 @@ import haxeLanguageServer.protocol.Display.CompletionItem as HaxeCompletionItem;
 import haxeLanguageServer.protocol.Display.CompletionItemKind as HaxeCompletionItemKind;
 import haxeLanguageServer.helper.DocHelper;
 import haxeLanguageServer.helper.ImportHelper;
-import haxeLanguageServer.protocol.helper.TypePrinter;
+import haxeLanguageServer.protocol.helper.DisplayPrinter;
 import languageServerProtocol.protocol.Protocol.CompletionParams;
 import languageServerProtocol.Types.CompletionItem;
 import languageServerProtocol.Types.CompletionItemKind;
@@ -37,7 +37,7 @@ class CompletionFeature {
     final legacy:CompletionFeatureLegacy;
     final expectedTypeCompletion:ExpectedTypeCompletion;
     final postfixCompletion:PostfixCompletion;
-    final printer:TypePrinter;
+    final printer:DisplayPrinter;
     final triggerSuggest:Command;
     final triggerParameterHints:Command;
 
@@ -53,7 +53,7 @@ class CompletionFeature {
         legacy = new CompletionFeatureLegacy(context, contextSupport, formatDocumentation);
         expectedTypeCompletion = new ExpectedTypeCompletion();
         postfixCompletion = new PostfixCompletion();
-        printer = new TypePrinter();
+        printer = new DisplayPrinter();
         context.protocol.onRequest(Methods.Completion, onCompletion);
         context.protocol.onRequest(Methods.CompletionItemResolve, onCompletionItemResolve);
 
@@ -179,7 +179,11 @@ class CompletionFeature {
             case Local: {
                     label: item.args.name,
                     kind: Variable,
-                    detail: printer.printType(item.args.type)
+                    detail: {
+                        var type = printer.printType(item.args.type);
+                        var origin = printer.printLocalOrigin(item.args.origin);
+                        '$type \n($origin)';
+                    }
                 }
             case Module: {
                     label: cast item.args,

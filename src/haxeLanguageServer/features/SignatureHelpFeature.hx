@@ -4,7 +4,7 @@ import haxe.extern.EitherType;
 import haxe.display.JsonModuleTypes.JsonFunctionArgument;
 import haxeLanguageServer.helper.ArgumentNameHelper.addNamesToSignatureType;
 import haxeLanguageServer.helper.DocHelper;
-import haxeLanguageServer.protocol.helper.TypePrinter;
+import haxeLanguageServer.protocol.helper.DisplayPrinter;
 import haxeLanguageServer.protocol.Display.DisplayMethods;
 import haxeLanguageServer.protocol.Display.SignatureItem as HaxeSignatureItem;
 import haxeLanguageServer.protocol.Display.SignatureInformation as HaxeSignatureInformation;
@@ -46,7 +46,7 @@ class SignatureHelpFeature {
     }
 
     function createSignatureHelp(item:HaxeSignatureItem):SignatureHelp {
-        var printer = new TypePrinter();
+        var printer = new DisplayPrinter();
         function createSignatureParameter(arg:JsonFunctionArgument):ParameterInformation {
             return {
                 label: printer.printFunctionArgument(arg)

@@ -5,7 +5,7 @@ import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
 import haxeLanguageServer.helper.DocHelper;
 import haxeLanguageServer.helper.TypeHelper.*;
-import haxeLanguageServer.protocol.helper.TypePrinter;
+import haxeLanguageServer.protocol.helper.DisplayPrinter;
 import haxeLanguageServer.protocol.Display;
 
 class HoverFeature {
@@ -30,13 +30,16 @@ class HoverFeature {
     }
 
     function printContent<T>(hover:CompletionItemUsage<T>):String {
-        var printer = new TypePrinter(true);
+        var printer = new DisplayPrinter(true);
         var item = hover.item;
         function printType() {
             return printCodeBlock(printer.printType(hover.type), HaxeType);
         }
         return switch (item.kind) {
             // case Type: printer.printTypeDeclaration(hover.item.args);
+            case Local:
+                var origin = printer.printLocalOrigin(item.args.origin);
+                printType() + '\n*$origin*';
             case ClassField:
                 var result = printType();
                 var origin = printer.printClassFieldOrigin(item.args.origin, item.kind, "");

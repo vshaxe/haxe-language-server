@@ -2,16 +2,13 @@ package haxeLanguageServer.protocol.helper;
 
 import haxe.ds.Option;
 import haxe.display.JsonModuleTypes;
-import haxeLanguageServer.protocol.Display.ModuleType;
-import haxeLanguageServer.protocol.Display.ClassFieldOrigin;
-import haxeLanguageServer.protocol.Display.ClassFieldOriginKind;
-import haxeLanguageServer.protocol.Display.CompletionItemKind;
+import haxeLanguageServer.protocol.Display;
 using Lambda;
 
 /**
     (Slightly modified) copy of haxe.display.JsonModuleTypesPrinter.
 **/
-class TypePrinter {
+class DisplayPrinter {
     final wrap:Bool;
     var indent = "";
 
@@ -170,5 +167,16 @@ class TypePrinter {
             case Unknown:
                 ''; // already handled
         });
+    }
+
+    public function printLocalOrigin(origin:LocalOrigin):String {
+        return switch (origin) {
+            case LocalVariable: "local";
+            case Argument: "argument";
+            case ForVariable: "for variable";
+            case PatternVariable: "pattern variable";
+            case CatchVariable: "catch variable";
+            case LocalFunction: "local function";
+        }
     }
 }

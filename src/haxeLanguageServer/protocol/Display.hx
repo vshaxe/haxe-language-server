@@ -103,7 +103,8 @@ typedef JsonLocal<T> = {
     var id:Int;
     var name:String;
     var type:JsonType<T>;
-    var kind:LocalKind;
+    var origin:LocalOrigin;
+    var capture:Bool;
     @:optional var extra:{
         var params:Array<JsonTypeParameter>;
         var expr:JsonExpr;
@@ -112,11 +113,11 @@ typedef JsonLocal<T> = {
     var pos:JsonPos;
 }
 
-enum abstract LocalKind(Int) {
-    var Variable = 0;
+enum abstract LocalOrigin(Int) {
+    var LocalVariable = 0;
     var Argument = 1;
-    var Iterator = 2;
-    var CaptureVariable = 3;
+    var ForVariable = 2;
+    var PatternVariable = 3;
     var CatchVariable = 4;
     var LocalFunction = 5;
 }
