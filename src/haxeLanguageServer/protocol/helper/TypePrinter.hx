@@ -2,6 +2,9 @@ package haxeLanguageServer.protocol.helper;
 
 import haxe.display.JsonModuleTypes;
 import haxeLanguageServer.protocol.Display.ModuleType;
+import haxeLanguageServer.protocol.Display.ClassFieldOrigin;
+import haxeLanguageServer.protocol.Display.ClassFieldOriginKind;
+import haxeLanguageServer.protocol.Display.CompletionItemKind;
 using Lambda;
 
 /**
@@ -137,5 +140,29 @@ class TypePrinter {
             result += "." + type.name;
         }
         return result;
+    }
+
+    public function printClassFieldOrigin<T>(origin:ClassFieldOrigin<T>, kind:CompletionItemKind<Dynamic>, quote:String):String {
+        if (kind == EnumAbstractValue) {
+            return "";
+        }
+        if (origin.args == null && origin.kind != cast BuiltIn) {
+            return "";
+        }
+        var q = quote;
+        return "from " + switch (origin.kind) {
+            case Self:
+                '$q${origin.args.name}$q';
+            case Parent:
+                'parent type $q${origin.args.name}$q';
+            case StaticExtension:
+                '$q${origin.args.name}$q (static extension method)';
+            case StaticImport:
+                'static import';
+            case AnonymousStructure:
+                'anonymous structure';
+            case BuiltIn:
+                'compiler (built-in)';
+        };
     }
 }

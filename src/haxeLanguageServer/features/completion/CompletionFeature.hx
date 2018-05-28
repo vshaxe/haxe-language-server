@@ -253,7 +253,7 @@ class CompletionFeature {
                 if (overloads > 0) {
                     type += ' (+$overloads overloads)';
                 }
-                type + printClassFieldOrigin(usage.origin, kind);
+                type + "\n" + printer.printClassFieldOrigin(usage.origin, kind, "'");
             },
             documentation: formatDocumentation(field.doc),
             textEdit: {
@@ -296,29 +296,6 @@ class CompletionFeature {
             case FMethod if (field.scope == Constructor): Constructor;
             case FMethod: Method;
         }
-    }
-
-    function printClassFieldOrigin<T>(origin:ClassFieldOrigin<T>, kind:HaxeCompletionItemKind<Dynamic>):String {
-        if (kind == EnumAbstractValue) {
-            return "";
-        }
-        if (origin.args == null && origin.kind != cast BuiltIn) {
-            return "";
-        }
-        return "\nfrom " + switch (origin.kind) {
-            case Self:
-                '\'${origin.args.name}\'';
-            case Parent:
-                'parent type \'${origin.args.name}\'';
-            case StaticExtension:
-                '\'${origin.args.name}\' (static extension method)';
-            case StaticImport:
-                'static import';
-            case AnonymousStructure:
-                'anonymous structure';
-            case BuiltIn:
-                'compiler (built-in)';
-        };
     }
 
     function getKindForType<T>(type:JsonType<T>):CompletionItemKind {

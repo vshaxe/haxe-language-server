@@ -32,10 +32,14 @@ class HoverFeature {
     function printContent<T>(hover:CompletionItemUsage<T>):String {
         var printer = new TypePrinter(true);
         var item = hover.item;
+        function printType() {
+            return printCodeBlock(printer.printType(hover.type), HaxeType);
+        }
         return switch (item.kind) {
             // case Type: printer.printTypeDeclaration(hover.item.args);
+            case ClassField: printType() + "\n*" + printer.printClassFieldOrigin(item.args.origin, item.kind, "") + "*";
             case Metadata: printCodeBlock("@" + item.args.name, Haxe);
-            case _: printCodeBlock(printer.printType(hover.type), HaxeType);
+            case _: printType();
         }
     }
 
@@ -75,8 +79,8 @@ class HoverFeature {
         }, function(error) reject(ResponseError.internalError(error)));
     }
 
-    function createHover(content:String, documentation:String, range:Range):Hover {
-        documentation = if (documentation == null) "" else "\n" + DocHelper.markdownFormat(documentation);
+    function createHover(content:String, ?documentation:String, ?range:Range):Hover {
+        documentation = if (documentation == null) "" else "\n\n\u{202F}\n\n" + DocHelper.markdownFormat(documentation);
         var hover:Hover = {
             contents: {
                 kind: MarkupKind.MarkDown,
