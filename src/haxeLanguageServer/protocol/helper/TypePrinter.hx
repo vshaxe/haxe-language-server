@@ -1,5 +1,6 @@
 package haxeLanguageServer.protocol.helper;
 
+import haxe.ds.Option;
 import haxe.display.JsonModuleTypes;
 import haxeLanguageServer.protocol.Display.ModuleType;
 import haxeLanguageServer.protocol.Display.ClassFieldOrigin;
@@ -142,15 +143,15 @@ class TypePrinter {
         return result;
     }
 
-    public function printClassFieldOrigin<T>(origin:ClassFieldOrigin<T>, kind:CompletionItemKind<Dynamic>, quote:String):String {
-        if (kind == EnumAbstractValue) {
-            return "";
+    public function printClassFieldOrigin<T>(origin:ClassFieldOrigin<T>, kind:CompletionItemKind<Dynamic>, quote:String):Option<String> {
+        if (kind == EnumAbstractValue || origin.kind == cast Unknown) {
+            return None;
         }
         if (origin.args == null && origin.kind != cast BuiltIn) {
-            return "";
+            return None;
         }
         var q = quote;
-        return "from " + switch (origin.kind) {
+        return Some("from " + switch (origin.kind) {
             case Self:
                 '$q${origin.args.name}$q';
             case Parent:
@@ -163,6 +164,8 @@ class TypePrinter {
                 'anonymous structure';
             case BuiltIn:
                 'compiler (built-in)';
-        };
+            case Unknown:
+                ''; // already handled
+        });
     }
 }

@@ -253,7 +253,11 @@ class CompletionFeature {
                 if (overloads > 0) {
                     type += ' (+$overloads overloads)';
                 }
-                type + "\n" + printer.printClassFieldOrigin(usage.origin, kind, "'");
+                var origin = printer.printClassFieldOrigin(usage.origin, kind, "'");
+                switch (origin) {
+                    case Some(v): type + "\n" + v;
+                    case None: type;
+                }
             },
             documentation: formatDocumentation(field.doc),
             textEdit: {

@@ -37,9 +37,18 @@ class HoverFeature {
         }
         return switch (item.kind) {
             // case Type: printer.printTypeDeclaration(hover.item.args);
-            case ClassField: printType() + "\n*" + printer.printClassFieldOrigin(item.args.origin, item.kind, "") + "*";
-            case Metadata: printCodeBlock("@" + item.args.name, Haxe);
-            case _: printType();
+            case ClassField:
+                var result = printType();
+                var origin = printer.printClassFieldOrigin(item.args.origin, item.kind, "");
+                switch (origin) {
+                    case Some(v): result += '\n*$v*';
+                    case None:
+                }
+                result;
+            case Metadata:
+                printCodeBlock("@" + item.args.name, Haxe);
+            case _:
+                printType();
         }
     }
 

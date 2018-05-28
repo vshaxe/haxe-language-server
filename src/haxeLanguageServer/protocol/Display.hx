@@ -157,6 +157,11 @@ enum abstract ClassFieldOriginKind<T>(Int) {
         - `bind()` on functions.
     **/
     var BuiltIn:ClassFieldOriginKind<NoData> = 5;
+
+    /**
+        The origin of this class field is unknown.
+    **/
+    var Unknown:ClassFieldOriginKind<NoData> = 6;
 }
 
 typedef ClassFieldOrigin<T> = {
