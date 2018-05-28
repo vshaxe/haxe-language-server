@@ -140,6 +140,9 @@ class TypePrinter {
         if (type.name != type.moduleName) {
             result += "." + type.name;
         }
+        if (type.pack.length == 0 && type.importStatus == Shadowed) {
+            result = "std." + result;
+        }
         return result;
     }
 
