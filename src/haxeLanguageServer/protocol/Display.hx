@@ -94,7 +94,7 @@ typedef FieldResolution = {
 
     /**
         The qualifier that has to be inserted to use the field if `!isQualified`.
-        Can either be `this` for instance fields for the type name for `static` fields.
+        Can either be `this` or `super` for instance fields for the type name for `static` fields.
     **/
     var qualifier:String;
 }

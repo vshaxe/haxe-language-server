@@ -224,6 +224,7 @@ class CompletionFeature {
 
     function createClassFieldCompletionItem<T>(usage:ClassFieldUsage<T>, kind:HaxeCompletionItemKind<Dynamic>, replaceRange:Range, mode:CompletionModeKind<Dynamic>):CompletionItem {
         var field = usage.field;
+        var resolution = usage.resolution;
         var item:CompletionItem = {
             label: field.name,
             kind: getKindForField(field, kind),
@@ -234,17 +235,21 @@ class CompletionFeature {
                     type += ' (+$overloads overloads)';
                 }
                 var origin = printer.printClassFieldOrigin(usage.origin, kind, "'");
+                var shadowed = if (!resolution.isQualified) " (shadowed)" else "";
                 switch (origin) {
-                    case Some(v): type + "\n" + v;
-                    case None: type;
+                    case Some(origin): type + "\n" + origin + shadowed;
+                    case None: type + "\n" + shadowed;
                 }
             },
             textEdit: {
-                newText: switch (mode) {
-                    case StructureField: field.name + ": ";
-                    case Pattern: field.name + ":";
-                    case Override if (field.type.kind == TFun): printer.printEmptyFunctionDefinition(field);
-                    case _: field.name;
+                newText: {
+                    var qualifier = if (resolution.isQualified) "" else resolution.qualifier + ".";
+                    qualifier + switch (mode) {
+                        case StructureField: field.name + ": ";
+                        case Pattern: field.name + ":";
+                        case Override if (field.type.kind == TFun): printer.printEmptyFunctionDefinition(field);
+                        case _: field.name;
+                    }
                 },
                 range: replaceRange
             }
