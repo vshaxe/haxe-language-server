@@ -27,22 +27,20 @@ class PostfixCompletion {
         var expr = doc.getText(range);
 
         var items:Array<CompletionItem> = [];
+
+        function add(data:PostfixCompletionItem) {
+            items.push(createPostfixCompletionItem(data, doc, replaceRange));
+        }
+
         switch (type.kind) {
             case TAbstract:
                 var path = type.args.path;
                 // TODO: unifiesWithInt, otherwise this won't work with abstract from / to's etc I guess
                 if (path.name == "Int" && path.pack.length == 0) {
-                    items.push({
+                    add({
                         label: "for",
                         detail: "for (i in 0...expr)",
-                        filterText: doc.getText(replaceRange), // https://github.com/Microsoft/vscode/issues/38982
-                        kind: Keyword,
-                        textEdit: {
-                            newText: 'for (i in 0...$expr) ',
-                            range: replaceRange
-                            // TODO: no struct field completion in here?
-                        },
-                        data: {origin: CompletionItemOrigin.Custom}
+                        insertText: 'for (i in 0...$expr) '
                     });
                 }
             case _:
@@ -50,4 +48,26 @@ class PostfixCompletion {
 
         return items;
     }
+
+    function createPostfixCompletionItem(data:PostfixCompletionItem, doc:TextDocument, replaceRange:Range):CompletionItem {
+        return {
+            label: data.label,
+            detail: data.detail,
+            filterText: doc.getText(replaceRange) + " " + data.label, // https://github.com/Microsoft/vscode/issues/38982
+            kind: Keyword,
+            textEdit: {
+                newText: data.insertText,
+                range: replaceRange
+            },
+            data: {
+                origin: CompletionItemOrigin.Custom
+            }
+        }
+    }
+}
+
+private typedef PostfixCompletionItem = {
+    var label:String;
+    var detail:String;
+    var insertText:String;
 }
