@@ -359,10 +359,10 @@ class CompletionFeature {
 
         var qualifiedName = printer.printQualifiedTypePath(type); // pack.Foo | pack.Foo.SubType
         var unqualifiedName = type.name; // Foo | SubType
-        var containerName = if (qualifiedName.indexOf(".") == -1) "" else qualifiedName.untilLastDot(); // pack / pack.Foo
+        var containerName = if (qualifiedName.indexOf(".") == -1) "" else qualifiedName.untilLastDot(); // pack | pack.Foo
 
         var item:CompletionItem = {
-            label: unqualifiedName + if (containerName == "") "" else " - " + containerName,
+            label: unqualifiedName + if (containerName == "") "" else " - " + qualifiedName,
             kind: getKindForModuleType(type),
             documentation: formatDocumentation(type.doc),
             textEdit: {
