@@ -129,7 +129,7 @@ class CompletionFeature {
         }
         var importPosition = ImportHelper.getImportPosition(previousCompletion.doc);
         context.callHaxeMethod(DisplayMethods.CompletionItemResolve, {index: item.data.index}, token, result -> {
-            resolve(createCompletionItem(result.item, previousCompletion.doc, previousCompletion.replaceRange, importPosition, previousCompletion.kind));
+            resolve(createCompletionItem(data.index, result.item, previousCompletion.doc, previousCompletion.replaceRange, importPosition, previousCompletion.kind));
             return null;
         }, error -> {
             reject(ResponseError.internalError(error));
@@ -155,22 +155,12 @@ class CompletionFeature {
                 replaceRange: result.replaceRange
             };
             var items = [];
-            var counter = 0;
             var importPosition = ImportHelper.getImportPosition(doc);
             for (i in 0...result.items.length) {
-                var item = result.items[i];
-                var completionItem = createCompletionItem(item, doc, result.replaceRange, importPosition, result.mode.kind);
-                if (commitCharactersSupport) {
-                    if ((item.type != null && item.type.kind == TFun) || result.mode.kind == New) {
-                        completionItem.commitCharacters = ["("];
-                    }
+                var completionItem = createCompletionItem(i, result.items[i], doc, result.replaceRange, importPosition, result.mode.kind);
+                if (completionItem != null) {
+                    items.push(completionItem);
                 }
-                if (completionItem == null) {
-                    continue;
-                }
-                completionItem.data = {origin: Haxe, index: i};
-                completionItem.sortText = StringTools.lpad(Std.string(counter++), "0", 10);
-                items.push(completionItem);
             };
             items = items.concat(postfixCompletion.createItems(result.mode, params.position, doc));
             items = items.concat(expectedTypeCompletion.createItems(result.mode, params.position, textBefore));
@@ -179,69 +169,57 @@ class CompletionFeature {
         }, error -> reject(ResponseError.internalError(error)));
     }
 
-    function createCompletionItem<T>(item:HaxeCompletionItem<T>, doc:TextDocument, replaceRange:Range, importPosition:Position, mode:CompletionModeKind<Dynamic>):CompletionItem {
-        var label = "";
-        var kind = null;
-        var type = null;
-
-        switch (item.kind) {
-            case Local:
-                label = item.args.name;
-                kind = Variable;
-                type = item.args.type;
-
-            case ClassField | EnumAbstractValue:
-                return createClassFieldCompletionItem(item.args, item.kind, replaceRange, mode);
-
-            case EnumValue:
-                return createEnumValueCompletionItem(item.args.field, replaceRange, mode);
-
-            case Type:
-                return createTypeCompletionItem(item.args, doc, replaceRange, importPosition, mode);
-
-            case Package:
-                return createPackageCompletionItem(item.args, replaceRange, mode);
-
-            case Module:
-                label = cast item.args;
-                kind = Folder;
-
-            case Literal:
-                label = item.args.name;
-                kind = Keyword;
-                type = item.args.type;
-
-            case Metadata:
-                label = item.args.name;
-                kind = Function;
-
-            case Keyword:
-                return createKeywordCompletionItem(item.args, replaceRange, mode);
-
-            case TypeParameter:
-                label = item.args.name;
-                kind = TypeParameter;
-
-            case AnonymousStructure:
-            case Expression:
-                // these never appear as completion items right now
+    function createCompletionItem<T>(index:Int, item:HaxeCompletionItem<T>, doc:TextDocument, replaceRange:Range, importPosition:Position, mode:CompletionModeKind<Dynamic>):CompletionItem {
+        var completionItem:CompletionItem = switch (item.kind) {
+            case ClassField | EnumAbstractValue: createClassFieldCompletionItem(item.args, item.kind, replaceRange, mode);
+            case EnumValue: createEnumValueCompletionItem(item.args.field, replaceRange, mode);
+            case Type: createTypeCompletionItem(item.args, doc, replaceRange, importPosition, mode);
+            case Package: createPackageCompletionItem(item.args, replaceRange, mode);
+            case Keyword: createKeywordCompletionItem(item.args, replaceRange, mode);
+            case Local: {
+                    label: item.args.name,
+                    kind: Variable,
+                    detail: printer.printType(item.args.type)
+                }
+            case Module: {
+                    label: cast item.args,
+                    kind: Folder
+                }
+            case Literal: {
+                    label: item.args.name,
+                    kind: Keyword,
+                    detail: printer.printType(item.args.type)
+                }
+            case Metadata: {
+                    label: item.args.name,
+                    kind: Function
+                }
+            case TypeParameter: {
+                    label: item.args.name,
+                    kind: TypeParameter
+                }
+            // these never appear during `display/completion` right now
+            case Expression: return null;
+            case AnonymousStructure: return null;
         }
 
-        var result:CompletionItem = {label: label};
-        if (kind != null) {
-            result.kind = kind;
-        }
-        if (type != null) {
-            result.detail = printer.printType(type);
-        }
-        var documentation = item.getDocumentation();
-        if (documentation != null) {
-            result.documentation = formatDocumentation(documentation);
-        }
         if (replaceRange != null) {
-            result.textEdit = {range: replaceRange, newText: label};
+            completionItem.textEdit = {range: replaceRange, newText: completionItem.label};
         }
-        return result;
+
+        if (completionItem.documentation == null) {
+            completionItem.documentation = formatDocumentation(item.getDocumentation());
+        }
+
+        if (commitCharactersSupport) {
+            if ((item.type != null && item.type.kind == TFun) || mode == New) {
+                completionItem.commitCharacters = ["("];
+            }
+        }
+
+        completionItem.sortText = StringTools.lpad(Std.string(index), "0", 10);
+        completionItem.data = {origin: Haxe, index: index};
+        return completionItem;
     }
 
     function createClassFieldCompletionItem<T>(usage:ClassFieldUsage<T>, kind:HaxeCompletionItemKind<Dynamic>, replaceRange:Range, mode:CompletionModeKind<Dynamic>):CompletionItem {
@@ -261,7 +239,6 @@ class CompletionFeature {
                     case None: type;
                 }
             },
-            documentation: formatDocumentation(field.doc),
             textEdit: {
                 newText: switch (mode) {
                     case StructureField: field.name + ": ";
@@ -315,7 +292,6 @@ class CompletionFeature {
             label: name,
             kind: EnumMember,
             detail: printer.printType(type),
-            documentation: formatDocumentation(enumValue.doc),
             textEdit: {
                 newText: name,
                 range: replaceRange
@@ -362,7 +338,6 @@ class CompletionFeature {
         var item:CompletionItem = {
             label: unqualifiedName + if (containerName == "") "" else " - " + qualifiedName,
             kind: getKindForModuleType(type),
-            documentation: formatDocumentation(type.doc),
             textEdit: {
                 range: replaceRange,
                 newText: if (autoImport) unqualifiedName else qualifiedName
