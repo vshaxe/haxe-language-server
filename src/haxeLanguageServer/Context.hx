@@ -16,7 +16,8 @@ import haxeLanguageServer.helper.TypeHelper.FunctionFormattingConfig;
 import haxeLanguageServer.helper.ImportHelper;
 import haxeLanguageServer.server.DisplayResult;
 import haxeLanguageServer.server.HaxeServer;
-import haxeLanguageServer.protocol.Types;
+import haxeLanguageServer.protocol.Protocol.HaxeRequestMethod;
+import haxeLanguageServer.protocol.Protocol.Response;
 import haxeLanguageServer.protocol.Server.ServerMethods;
 import haxeLanguageServer.LanguageServerMethods.HaxeMethodResult;
 

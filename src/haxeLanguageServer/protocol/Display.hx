@@ -2,7 +2,7 @@ package haxeLanguageServer.protocol;
 
 import jsonrpc.Types.NoData;
 import haxe.display.JsonModuleTypes;
-import haxeLanguageServer.protocol.Types;
+import haxeLanguageServer.protocol.Protocol;
 
 /**
     Methods of the JSON-RPC-based `--display` protocol in Haxe 4.
@@ -10,11 +10,6 @@ import haxeLanguageServer.protocol.Types;
 **/
 @:publicFields
 class DisplayMethods {
-    /**
-        The initialize request is sent from the client to Haxe to determine the capabilities.
-    **/
-    static inline var Initialize = new HaxeRequestMethod<InitializeParams,InitializeResult>("initialize");
-
     /**
         The completion request is sent from the client to Haxe to request code completion.
         Haxe automatically determines the type of completion to use based on the passed position, see `CompletionResultKind`.
@@ -58,37 +53,6 @@ class DisplayMethods {
         - documentSymbols ("display/documentSymbol"?)
     */
 }
-
-/* Initialize */
-
-typedef InitializeParams = {
-    @:optional var supportsResolve:Bool;
-}
-
-/**
-    Represents a semantic version, see https://semver.org/.
-**/
-typedef Version = {
-    var major:Int;
-    var minor:Int;
-    var patch:Int;
-    var pre:String;
-    var build:String;
-}
-
-typedef HaxeCapabilities = {
-    @:optional var hoverProvider:Bool;
-    @:optional var definitionProvider:Bool;
-    @:optional var completionProvider:Bool;
-    @:optional var packageProvider:Bool;
-    @:optional var signatureHelpProvider:Bool;
-    @:optional var completionResolveProvider:Bool;
-}
-
-typedef InitializeResult = Response<{
-    var version:Version;
-    var capabilities:HaxeCapabilities;
-}>;
 
 /* Completion */
 

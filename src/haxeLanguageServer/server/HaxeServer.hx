@@ -13,8 +13,7 @@ import js.node.stream.Readable;
 import jsonrpc.CancellationToken;
 import haxeLanguageServer.helper.SemVer;
 import haxeLanguageServer.protocol.Server.ServerMethods;
-import haxeLanguageServer.protocol.Display.DisplayMethods;
-import haxeLanguageServer.protocol.Display.HaxeCapabilities;
+import haxeLanguageServer.protocol.Protocol;
 
 class HaxeServer {
     final context:Context;
@@ -109,7 +108,7 @@ class HaxeServer {
         };
 
         stopProgressCallback = context.startProgress("Initializing Haxe/JSON-RPC protocol");
-        context.callHaxeMethod(DisplayMethods.Initialize, {supportsResolve: true}, null, result -> {
+        context.callHaxeMethod(Methods.Initialize, {supportsResolve: true}, null, result -> {
             supportsJsonRpc = true;
             capabilities = result.capabilities;
             stopProgress();
