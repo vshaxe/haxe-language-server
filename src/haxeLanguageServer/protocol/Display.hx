@@ -65,6 +65,17 @@ typedef InitializeParams = {
     @:optional var supportsResolve:Bool;
 }
 
+/**
+    Represents a semantic version, see https://semver.org/.
+**/
+typedef Version = {
+    var major:Int;
+    var minor:Int;
+    var patch:Int;
+    var pre:String;
+    var build:String;
+}
+
 typedef HaxeCapabilities = {
     @:optional var hoverProvider:Bool;
     @:optional var definitionProvider:Bool;
@@ -75,6 +86,7 @@ typedef HaxeCapabilities = {
 }
 
 typedef InitializeResult = Response<{
+    var version:Version;
     var capabilities:HaxeCapabilities;
 }>;
 

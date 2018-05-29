@@ -7,7 +7,7 @@ private typedef Version = {
 }
 
 abstract SemVer(Version) from Version {
-    static final reVersion = ~/^(\d+)\.(\d+)\.(\d+)(?:\s.*)?$/;
+    static final reVersion = ~/^(\d+)\.(\d+)\.(\d+)(?:\s.*)?/;
 
     var major(get,never):Int;
     inline function get_major() return this.major;
