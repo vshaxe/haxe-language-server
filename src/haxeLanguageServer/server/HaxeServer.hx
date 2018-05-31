@@ -107,10 +107,21 @@ class HaxeServer {
             completionResolveProvider: false
         };
 
+        function processAvailableMethod(s:String) {
+            switch (s) {
+                case "display/definition": capabilities.definitionProvider = true;
+                case "display/hover": capabilities.hoverProvider = true;
+                case "display/completion": capabilities.completionProvider = true;
+                case "display/package": capabilities.packageProvider = true;
+                case "display/signatureHelp": capabilities.signatureHelpProvider = true;
+                case "display/completionItem/resolve": capabilities.completionResolveProvider = true;
+            }
+        }
+
         stopProgressCallback = context.startProgress("Initializing Haxe/JSON-RPC protocol");
         context.callHaxeMethod(Methods.Initialize, {supportsResolve: true}, null, result -> {
             supportsJsonRpc = true;
-            capabilities = result.capabilities;
+            Lambda.iter(result.methods, processAvailableMethod);
             stopProgress();
             configure();
             buildCompletionCache();

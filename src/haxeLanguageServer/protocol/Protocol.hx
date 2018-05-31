@@ -38,7 +38,7 @@ typedef HaxeCapabilities = {
 
 typedef InitializeResult = Response<{
     var version:Version;
-    var capabilities:HaxeCapabilities;
+    var methods:Array<String>;
 }>;
 
 /* general protocol types */
