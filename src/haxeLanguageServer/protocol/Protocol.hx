@@ -27,15 +27,6 @@ typedef Version = {
     var build:String;
 }
 
-typedef HaxeCapabilities = {
-    @:optional var hoverProvider:Bool;
-    @:optional var definitionProvider:Bool;
-    @:optional var completionProvider:Bool;
-    @:optional var packageProvider:Bool;
-    @:optional var signatureHelpProvider:Bool;
-    @:optional var completionResolveProvider:Bool;
-}
-
 typedef InitializeResult = Response<{
     var version:Version;
     var methods:Array<String>;

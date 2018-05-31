@@ -14,7 +14,7 @@ class DeterminePackageFeature {
     }
 
     function onDeterminePackage(params:{fsPath:String}, token:CancellationToken, resolve:{pack:String}->Void, reject:ResponseError<NoData>->Void) {
-        var handle = if (context.haxeServer.capabilities.packageProvider) handleJsonRpc else handleLegacy;
+        var handle = if (context.haxeServer.supports(DisplayMethods.DeterminePackage)) handleJsonRpc else handleLegacy;
         handle(params, token, resolve, reject);
     }
 

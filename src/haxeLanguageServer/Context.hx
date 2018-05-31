@@ -18,6 +18,7 @@ import haxeLanguageServer.server.DisplayResult;
 import haxeLanguageServer.server.HaxeServer;
 import haxeLanguageServer.protocol.Protocol.HaxeRequestMethod;
 import haxeLanguageServer.protocol.Protocol.Response;
+import haxeLanguageServer.protocol.Protocol.Methods;
 import haxeLanguageServer.protocol.Server.ServerMethods;
 import haxeLanguageServer.LanguageServerMethods.HaxeMethodResult;
 
@@ -310,7 +311,7 @@ class Context {
     }
 
     function onDidChangeTextDocument(event:DidChangeTextDocumentParams) {
-        if (haxeServer.supportsJsonRpc) {
+        if (haxeServer.supports(ServerMethods.Invalidate)) {
             callHaxeMethod(ServerMethods.Invalidate, {file: event.textDocument.uri.toFsPath()}, null, _ -> null, error -> {
                 trace("Error during " + ServerMethods.Invalidate + " " + error);
             });
@@ -413,7 +414,7 @@ class Context {
             "-D", "display-details", // get more details in completion results,
             "--no-output", // prevent any generation
         ]);
-        if (haxeServer.supportsJsonRpc && config.enableMethodsView) {
+        if (haxeServer.supports(Methods.Initialize) && config.enableMethodsView) {
             actualArgs = actualArgs.concat([
                 "--times",
                 "-D", "macro-times",

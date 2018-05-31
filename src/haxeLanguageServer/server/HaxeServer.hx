@@ -28,12 +28,11 @@ class HaxeServer {
     var socketListener:js.node.net.Server;
     var stopProgressCallback:Void->Void;
     var startRequest:Void->Void;
-
     var crashes:Int = 0;
+    var supportedMethods:Array<String> = [];
 
     public var version(default,null):SemVer;
     public var supportsJsonRpc(default,null):Bool;
-    public var capabilities(default,null):HaxeCapabilities;
 
     public function new(context:Context) {
         this.context = context;
@@ -98,30 +97,10 @@ class HaxeServer {
         proc.stderr.on(ReadableEvent.Data, onData);
         proc.on(ChildProcessEvent.Exit, onExit);
 
-        capabilities = {
-            definitionProvider: false,
-            hoverProvider: false,
-            completionProvider: false,
-            packageProvider: false,
-            signatureHelpProvider: false,
-            completionResolveProvider: false
-        };
-
-        function processAvailableMethod(s:String) {
-            switch (s) {
-                case "display/definition": capabilities.definitionProvider = true;
-                case "display/hover": capabilities.hoverProvider = true;
-                case "display/completion": capabilities.completionProvider = true;
-                case "display/package": capabilities.packageProvider = true;
-                case "display/signatureHelp": capabilities.signatureHelpProvider = true;
-                case "display/completionItem/resolve": capabilities.completionResolveProvider = true;
-            }
-        }
-
         stopProgressCallback = context.startProgress("Initializing Haxe/JSON-RPC protocol");
         context.callHaxeMethod(Methods.Initialize, {supportsResolve: true}, null, result -> {
             supportsJsonRpc = true;
-            Lambda.iter(result.methods, processAvailableMethod);
+            supportedMethods = result.methods;
             stopProgress();
             configure();
             buildCompletionCache();
@@ -163,7 +142,7 @@ class HaxeServer {
         startCompletionInitializationProgress(1);
         process(context.displayArguments.concat(["--no-output"]), null, true, null, Processed(function(_) {
             stopProgress();
-            if (supportsJsonRpc) {
+            if (supports(ServerMethods.ReadClassPaths)) {
                 readClassPaths();
             } else {
                 trace("Done.");
@@ -188,7 +167,7 @@ class HaxeServer {
 
     function startCompletionInitializationProgress(part:Int) {
         var message = "Initializing Completion";
-        if (supportsJsonRpc) {
+        if (supports(ServerMethods.ReadClassPaths)) {
             message += ' ($part/2)';
         }
         stopProgressCallback = context.startProgress(message);
@@ -390,5 +369,9 @@ class HaxeServer {
             requestsHead = currentRequest.next;
             proc.stdin.write(currentRequest.prepareBody());
         }
+    }
+
+    public function supports<P,R>(method:HaxeRequestMethod<P,R>) {
+        return supportedMethods.indexOf(method) != -1;
     }
 }

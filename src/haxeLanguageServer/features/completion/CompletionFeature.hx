@@ -104,7 +104,7 @@ class CompletionFeature {
         if (contextSupport && isInvalidCompletionPosition(params, textBefore)) {
             return resolve([]);
         }
-        var handle = if (context.haxeServer.capabilities.completionProvider) handleJsonRpc else legacy.handle;
+        var handle = if (context.haxeServer.supports(DisplayMethods.Completion)) handleJsonRpc else legacy.handle;
         handle(params, token, resolve, reject, doc, offset, textBefore);
     }
 
@@ -124,7 +124,7 @@ class CompletionFeature {
 
     function onCompletionItemResolve(item:CompletionItem, token:CancellationToken, resolve:CompletionItem->Void, reject:ResponseError<NoData>->Void) {
         var data:CompletionItemData = item.data;
-        if (!context.haxeServer.capabilities.completionResolveProvider || previousCompletion == null || data.origin == Custom) {
+        if (!context.haxeServer.supports(DisplayMethods.CompletionItemResolve) || previousCompletion == null || data.origin == Custom) {
             return resolve(item);
         }
         var importPosition = ImportHelper.getImportPosition(previousCompletion.doc);
