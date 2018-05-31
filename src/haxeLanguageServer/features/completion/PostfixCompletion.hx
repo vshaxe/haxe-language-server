@@ -36,16 +36,22 @@ class PostfixCompletion {
         }
 
         switch (type.kind) {
-            case TAbstract:
-                var path = type.args.path;
-                // TODO: unifiesWithInt, otherwise this won't work with abstract from / to's etc I guess
-                if (path.name == "Int" && path.pack.length == 0) {
-                    add({
-                        label: "for",
-                        detail: "for (i in 0...expr)",
-                        insertText: 'for (i in 0...$expr) ',
-                        insertTextFormat: PlainText
-                    });
+            case TAbstract | TInst if (type.args.path.pack.length == 0):
+                switch (type.args.path.name) {
+                    case "Int":
+                        add({
+                            label: "for",
+                            detail: "for (i in 0...expr)",
+                            insertText: 'for (i in 0...$expr) ',
+                            insertTextFormat: PlainText
+                        });
+                    case "Array":
+                        add({
+                            label: "for",
+                            detail: "for (i in expr)",
+                            insertText: 'for (i in $expr) ',
+                            insertTextFormat: PlainText
+                        });
                 }
             case _:
         }
