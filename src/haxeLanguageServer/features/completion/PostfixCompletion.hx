@@ -28,6 +28,9 @@ class PostfixCompletion {
             end: position
         };
         var expr = doc.getText(range);
+        if (expr.startsWith("(") && expr.endsWith(")")) {
+            expr = expr.substring(1, expr.length - 1);
+        }
 
         var items:Array<CompletionItem> = [];
 
@@ -50,6 +53,13 @@ class PostfixCompletion {
                             label: "for",
                             detail: "for (i in expr)",
                             insertText: 'for (i in $expr) ',
+                            insertTextFormat: PlainText
+                        });
+                    case "Bool":
+                        add({
+                            label: "if",
+                            detail: "if (expr)",
+                            insertText: 'if ($expr) ',
                             insertTextFormat: PlainText
                         });
                 }
