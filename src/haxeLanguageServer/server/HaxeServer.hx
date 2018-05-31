@@ -29,7 +29,7 @@ class HaxeServer {
     var stopProgressCallback:Void->Void;
     var startRequest:Void->Void;
     var crashes:Int = 0;
-    var supportedMethods:Array<String> = [];
+    var supportedMethods:Array<String>;
 
     public var version(default,null):SemVer;
     public var supportsJsonRpc(default,null):Bool;
@@ -48,6 +48,7 @@ class HaxeServer {
         }
 
         supportsJsonRpc = false;
+        supportedMethods = [];
         startRequest = null;
         stop();
 
