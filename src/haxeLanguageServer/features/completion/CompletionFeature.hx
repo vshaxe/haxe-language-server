@@ -111,7 +111,6 @@ class CompletionFeature {
     static final autoTriggerOnSpacePattern = ~/(\b(import|using|extends|implements|case|new|cast|override)|(->)) $/;
     function isInvalidCompletionPosition(params:CompletionParams, text:String):Bool {
         return switch (params.context.triggerCharacter) {
-            case "$" if (!context.haxeServer.supportsJsonRpc): true;
             case ">" if (!isAfterArrow(text)): true;
             case " " if (!autoTriggerOnSpacePattern.match(text)): true;
             case _: false;

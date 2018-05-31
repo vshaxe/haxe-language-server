@@ -145,7 +145,7 @@ class Context {
             capabilities: {
                 textDocumentSync: TextDocuments.syncKind,
                 completionProvider: {
-                    triggerCharacters: [".", "@", ":", " ", "$", ">"],
+                    triggerCharacters: [".", "@", ":", " ", ">"],
                     resolveProvider: true
                 },
                 signatureHelpProvider: {

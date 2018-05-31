@@ -32,7 +32,6 @@ class HaxeServer {
     var supportedMethods:Array<String>;
 
     public var version(default,null):SemVer;
-    public var supportsJsonRpc(default,null):Bool;
 
     public function new(context:Context) {
         this.context = context;
@@ -47,7 +46,6 @@ class HaxeServer {
             return;
         }
 
-        supportsJsonRpc = false;
         supportedMethods = [];
         startRequest = null;
         stop();
@@ -100,7 +98,6 @@ class HaxeServer {
 
         stopProgressCallback = context.startProgress("Initializing Haxe/JSON-RPC protocol");
         context.callHaxeMethod(Methods.Initialize, {supportsResolve: true}, null, result -> {
-            supportsJsonRpc = true;
             supportedMethods = result.methods;
             stopProgress();
             configure();
