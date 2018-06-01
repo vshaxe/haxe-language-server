@@ -45,7 +45,7 @@ class PostfixCompletion {
                 switch (type.args.path.name) {
                     case "Int":
                         add({
-                            label: "for",
+                            label: "fori",
                             detail: "for (i in 0...expr)",
                             insertText: 'for (i in 0...$expr) ',
                             insertTextFormat: PlainText
@@ -63,6 +63,12 @@ class PostfixCompletion {
                             detail: "for (item in expr)",
                             insertText: 'for ($${1:$itemName} in $expr) ',
                             insertTextFormat: Snippet
+                        });
+                        add({
+                            label: "fori",
+                            detail: "for (i in 0...expr.length)",
+                            insertText: 'for (i in 0...$expr.length) ',
+                            insertTextFormat: PlainText
                         });
                     case "Bool":
                         add({
@@ -100,7 +106,7 @@ class PostfixCompletion {
             label: data.label,
             detail: data.detail,
             filterText: doc.getText(replaceRange) + " " + data.label, // https://github.com/Microsoft/vscode/issues/38982
-            kind: Keyword,
+            kind: Snippet,
             insertTextFormat: data.insertTextFormat,
             textEdit: {
                 newText: data.insertText,
