@@ -1,10 +1,11 @@
 package haxeLanguageServer.features.completion;
 
-import haxe.display.JsonModuleTypes.JsonEnum;
+import haxe.display.JsonModuleTypes;
 import haxeLanguageServer.protocol.Display;
 import languageServerProtocol.Types.CompletionItem;
 import haxeLanguageServer.protocol.helper.DisplayPrinter;
 import haxeLanguageServer.features.completion.CompletionFeature.CompletionItemOrigin;
+import haxeLanguageServer.helper.ArgumentNameHelper.guessArgumentName;
 
 class PostfixCompletion {
     public function new() {}
@@ -40,6 +41,7 @@ class PostfixCompletion {
 
         switch (type.kind) {
             case TAbstract | TInst if (type.args.path.pack.length == 0):
+                var path:JsonPathWithParams = type.args;
                 switch (type.args.path.name) {
                     case "Int":
                         add({
@@ -49,11 +51,18 @@ class PostfixCompletion {
                             insertTextFormat: PlainText
                         });
                     case "Array":
+                        var itemType:JsonType<Dynamic> = path.params[0];
+                        var itemName = switch (itemType.kind) {
+                            case TInst | TEnum | TType | TAbstract:
+                                guessArgumentName(itemType.args.path.name);
+                            case TMono, _:
+                                "item";
+                        }
                         add({
                             label: "for",
-                            detail: "for (i in expr)",
-                            insertText: 'for (i in $expr) ',
-                            insertTextFormat: PlainText
+                            detail: "for (item in expr)",
+                            insertText: 'for ($${1:$itemName} in $expr) ',
+                            insertTextFormat: Snippet
                         });
                     case "Bool":
                         add({
