@@ -92,7 +92,7 @@ class HoverFeature {
     }
 
     function createHover(content:String, ?documentation:String, ?range:Range):Hover {
-        documentation = if (documentation == null) "" else "\n\n\u{202F}\n\n" + DocHelper.markdownFormat(documentation);
+        documentation = if (documentation == null) "" else "\n" + DocHelper.markdownFormat(documentation);
         var hover:Hover = {
             contents: {
                 kind: MarkupKind.MarkDown,
