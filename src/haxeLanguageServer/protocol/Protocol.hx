@@ -28,7 +28,8 @@ typedef Version = {
 }
 
 typedef InitializeResult = Response<{
-    var version:Version;
+    var protocolVersion:Version;
+    var haxeVersion:Version;
     var methods:Array<String>;
 }>;
 
