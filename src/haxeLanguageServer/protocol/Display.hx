@@ -200,7 +200,7 @@ enum abstract ModuleTypeKind(Int) {
     /** A `typedef` that is an alias for an anonymous structure. **/
     var Struct = 6;
     /** A type name introduced by `import as` / `import in` **/
-    var ImportAlias = 7;
+    //var ImportAlias = 7;
 }
 
 enum abstract ImportStatus(Int) {
@@ -249,7 +249,7 @@ typedef JsonLiteral<T> = {
     var type:JsonType<T>;
 }
 
-enum abstract MetadataTarget(String) {
+/* enum abstract MetadataTarget(String) {
     var Class = "TClass";
     var ClassField = "ClassField";
     var Abstract = "TAbstract";
@@ -274,14 +274,14 @@ enum abstract Platform(String) {
     var Python = "Python";
     var Hl = "Hl";
     var Eval = "Eval";
-}
+} */
 
 typedef Metadata = {
     var name:String;
     var doc:JsonDoc;
-    var parameters:Array<String>;
+    /* var parameters:Array<String>;
     var platforms:Array<Platform>;
-    var target:Array<MetadataTarget>;
+    var target:Array<MetadataTarget>; */
 }
 
 typedef Keyword = {
@@ -313,19 +313,19 @@ enum abstract KeywordKind(String) to String {
     var Macro = "macro";
 }
 
-enum abstract PackageContentKind(Int) {
+/* enum abstract PackageContentKind(Int) {
     var Module = 0;
     var Package = 1;
-}
+} */
 
 typedef Package = {
     var path:JsonPath;
-    @:optional var contents:Array<{name:String, kind:PackageContentKind}>;
+    // @:optional var contents:Array<{name:String, kind:PackageContentKind}>;
 }
 
 typedef Module = {
     var path:JsonPath;
-    @:optional var contents:Array<ModuleType>;
+    // @:optional var contents:Array<ModuleType>;
 }
 
 enum abstract CompletionItemKind<T>(String) {

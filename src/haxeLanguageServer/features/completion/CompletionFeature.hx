@@ -184,9 +184,12 @@ class CompletionFeature {
                         '$type \n($origin)';
                     }
                 }
-            case Module: {
-                    label: cast item.args,
-                    kind: Folder
+            case Module:
+                var path = item.args.path;
+                {
+                    label: path.name,
+                    kind: Folder,
+                    detail: 'module ${path.pack.concat([path.name]).join(".")}'
                 }
             case Literal: {
                     label: item.args.name,
@@ -386,7 +389,7 @@ class CompletionFeature {
             case Enum: Enum;
             case Abstract: Class;
             case EnumAbstract: Enum;
-            case TypeAlias | ImportAlias: Interface;
+            case TypeAlias: Interface;
             case Struct: Struct;
         }
     }
