@@ -22,6 +22,11 @@ class DisplayMethods {
     static inline var CompletionItemResolve = new HaxeRequestMethod<CompletionItemResolveParams,CompletionItemResolveResult>("display/completionItem/resolve");
 
     /**
+        The find references request is sent from the client to Haxe to find locations that reference the symbol at a given text document position.
+    **/
+    static inline var FindReferences = new HaxeRequestMethod<PositionParams,GotoDefinitionResult>("display/findReferences");
+
+    /**
         The goto definition request is sent from the client to Haxe to resolve the definition location(s) of a symbol at a given text document position.
     **/
     static inline var GotoDefinition = new HaxeRequestMethod<PositionParams,GotoDefinitionResult>("display/definition");

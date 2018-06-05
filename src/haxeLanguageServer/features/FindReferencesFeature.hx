@@ -1,5 +1,6 @@
 package haxeLanguageServer.features;
 
+import haxeLanguageServer.protocol.Display.DisplayMethods;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
@@ -14,6 +15,23 @@ class FindReferencesFeature {
 
     function onFindReferences(params:TextDocumentPositionParams, token:CancellationToken, resolve:Array<Location>->Void, reject:ResponseError<NoData>->Void) {
         var doc = context.documents.get(params.textDocument.uri);
+        var handle = if (context.haxeServer.supports(DisplayMethods.FindReferences)) handleJsonRpc else handleLegacy;
+        handle(params, token, resolve, reject, doc, doc.offsetAt(params.position));
+    }
+
+    function handleJsonRpc(params:TextDocumentPositionParams, token:CancellationToken, resolve:Definition->Void, reject:ResponseError<NoData>->Void, doc:TextDocument, offset:Int) {
+        context.callHaxeMethod(DisplayMethods.FindReferences, {file: doc.fsPath, contents: doc.content, offset: offset}, token, locations -> {
+            resolve(locations.map(location -> {
+                {
+                    uri: location.file.toUri(),
+                    range: location.range
+                }
+            }));
+            return null;
+        }, error -> reject(ResponseError.internalError(error)));
+    }
+
+    function handleLegacy(params:TextDocumentPositionParams, token:CancellationToken, resolve:Definition->Void, reject:ResponseError<NoData>->Void, doc:TextDocument, offset:Int) {
         var bytePos = context.displayOffsetConverter.characterOffsetToByteOffset(doc.content, doc.offsetAt(params.position));
         var args = ['${doc.fsPath}@$bytePos@usage'];
         context.callDisplay(args, doc.content, token, function(r) {
