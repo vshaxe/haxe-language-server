@@ -243,6 +243,7 @@ class CompletionFeature {
         var resolution = usage.resolution;
         return {
             label: (if (mode == StructureField && field.meta.exists(meta -> meta.name == ":optional")) "?" else "") + field.name,
+            filterText: field.name,
             kind: getKindForField(field, kind),
             detail: {
                 var overloads = if (usage.field.overloads == null) 0 else usage.field.overloads.length;
