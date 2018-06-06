@@ -17,12 +17,11 @@ class DisplayPrinter {
     }
 
     public function printPath(path:JsonPath) {
-        return path.name;
-        /*if (path.pack.length == 0) {
+        if (path.pack.length == 0) {
             return path.name;
         } else {
             return path.pack.join(".") + "." + path.name;
-        }*/
+        }
     }
 
     public function printPathWithParams(path:JsonPathWithParams) {
