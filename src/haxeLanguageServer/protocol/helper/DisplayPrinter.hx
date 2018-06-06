@@ -105,7 +105,7 @@ class DisplayPrinter {
             case _: "return ";
         }
         var arguments = printCallArguments(signature, arg -> arg.name);
-        return printEmptyFunctionDefinition(field) + ' {\n${indent}$${0:${returnKeyword}super.${field.name}$arguments;}\n}';
+        return printEmptyFunctionDefinition(field) + ' {\n${indent}$${1:${returnKeyword}super.${field.name}$arguments;$0}\n}';
     }
 
     function extractFunctionSignature<T>(type:JsonType<T>) {
