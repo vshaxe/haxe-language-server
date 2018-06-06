@@ -24,8 +24,6 @@ class ExpectedTypeCompletion {
         }
 
         var items:Array<CompletionItem> = [];
-        var indent = doc.indentAt(position.line);
-
         switch (expectedTypeFollowed.kind) {
             case TAnonymous:
                 var fields = expectedTypeFollowed.args.fields;
@@ -33,7 +31,7 @@ class ExpectedTypeCompletion {
                 for (i in 0...fields.length) {
                     var name = fields[i].name;
                     // TODO: properly detect indent
-                    printedFields.push(indent + "\t" + name + ': $${${i+1}:$name}');
+                    printedFields.push("\t" + name + ': $${${i+1}:$name}');
                     if (i < fields.length - 1) {
                         printedFields[i] += ",";
                     }
@@ -45,7 +43,7 @@ class ExpectedTypeCompletion {
                     kind: Snippet,
                     insertTextFormat: Snippet,
                     textEdit: {
-                        newText: '{\n${printedFields.join("\n")}$indent\n}',
+                        newText: '{\n${printedFields.join("\n")}\n}',
                         range: position.toRange()
                     },
                     data: {
