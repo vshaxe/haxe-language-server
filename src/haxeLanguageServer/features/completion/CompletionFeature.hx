@@ -212,6 +212,10 @@ class CompletionFeature {
             case AnonymousStructure: return null;
         }
 
+        if (completionItem == null) {
+            return null;
+        }
+
         if (completionItem.textEdit == null && replaceRange != null) {
             completionItem.textEdit = {range: replaceRange, newText: completionItem.label};
         }
@@ -233,8 +237,11 @@ class CompletionFeature {
 
     function createClassFieldCompletionItem<T>(usage:ClassFieldUsage<T>, kind:HaxeCompletionItemKind<Dynamic>, replaceRange:Range, mode:CompletionModeKind<Dynamic>, indent:String):CompletionItem {
         var field = usage.field;
+        if (mode == Override && field.type.kind != TFun) {
+            return null;
+        }
         var resolution = usage.resolution;
-        var item:CompletionItem = {
+        return {
             label: field.name,
             kind: getKindForField(field, kind),
             detail: {
@@ -264,8 +271,6 @@ class CompletionFeature {
             },
             insertTextFormat: if (mode == Override) Snippet else PlainText
         }
-
-        return item;
     }
 
     function getKindForField<T>(field:JsonClassField, kind:HaxeCompletionItemKind<Dynamic>):CompletionItemKind {
