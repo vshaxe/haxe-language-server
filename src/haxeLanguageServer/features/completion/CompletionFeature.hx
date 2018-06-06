@@ -20,6 +20,7 @@ private typedef PreviousCompletionResult = {
     var doc:TextDocument;
     var replaceRange:Range;
     var kind:CompletionModeKind<Dynamic>;
+    var indent:String;
 }
 
 enum abstract CompletionItemOrigin(Int) {
@@ -128,7 +129,7 @@ class CompletionFeature {
         }
         var importPosition = ImportHelper.getImportPosition(previousCompletion.doc);
         context.callHaxeMethod(DisplayMethods.CompletionItemResolve, {index: item.data.index}, token, result -> {
-            resolve(createCompletionItem(data.index, result.item, previousCompletion.doc, previousCompletion.replaceRange, importPosition, previousCompletion.kind));
+            resolve(createCompletionItem(data.index, result.item, previousCompletion.doc, previousCompletion.replaceRange, importPosition, previousCompletion.kind, previousCompletion.indent));
             return null;
         }, error -> {
             reject(ResponseError.internalError(error));
@@ -148,15 +149,17 @@ class CompletionFeature {
                 resolve([]); // avoid auto-popup after -> in arrow functions
                 return null;
             }
+            var importPosition = ImportHelper.getImportPosition(doc);
+            var indent = doc.indentAt(params.position.line);
             previousCompletion = {
                 doc: doc,
                 kind: result.mode.kind,
-                replaceRange: result.replaceRange
+                replaceRange: result.replaceRange,
+                indent: indent
             };
             var items = [];
-            var importPosition = ImportHelper.getImportPosition(doc);
             for (i in 0...result.items.length) {
-                var completionItem = createCompletionItem(i, result.items[i], doc, result.replaceRange, importPosition, result.mode.kind);
+                var completionItem = createCompletionItem(i, result.items[i], doc, result.replaceRange, importPosition, result.mode.kind, indent);
                 if (completionItem != null) {
                     items.push(completionItem);
                 }
@@ -168,9 +171,9 @@ class CompletionFeature {
         }, error -> reject(ResponseError.internalError(error)));
     }
 
-    function createCompletionItem<T>(index:Int, item:HaxeCompletionItem<T>, doc:TextDocument, replaceRange:Range, importPosition:Position, mode:CompletionModeKind<Dynamic>):CompletionItem {
+    function createCompletionItem<T>(index:Int, item:HaxeCompletionItem<T>, doc:TextDocument, replaceRange:Range, importPosition:Position, mode:CompletionModeKind<Dynamic>, indent:String):CompletionItem {
         var completionItem:CompletionItem = switch (item.kind) {
-            case ClassField | EnumAbstractValue: createClassFieldCompletionItem(item.args, item.kind, replaceRange, mode);
+            case ClassField | EnumAbstractValue: createClassFieldCompletionItem(item.args, item.kind, replaceRange, mode, indent);
             case EnumValue: createEnumValueCompletionItem(item.args.field, replaceRange, mode);
             case Type: createTypeCompletionItem(item.args, doc, replaceRange, importPosition, mode);
             case Package: createPackageCompletionItem(item.args, replaceRange, mode);
@@ -228,7 +231,7 @@ class CompletionFeature {
         return completionItem;
     }
 
-    function createClassFieldCompletionItem<T>(usage:ClassFieldUsage<T>, kind:HaxeCompletionItemKind<Dynamic>, replaceRange:Range, mode:CompletionModeKind<Dynamic>):CompletionItem {
+    function createClassFieldCompletionItem<T>(usage:ClassFieldUsage<T>, kind:HaxeCompletionItemKind<Dynamic>, replaceRange:Range, mode:CompletionModeKind<Dynamic>, indent:String):CompletionItem {
         var field = usage.field;
         var resolution = usage.resolution;
         var item:CompletionItem = {
@@ -253,12 +256,13 @@ class CompletionFeature {
                     qualifier + switch (mode) {
                         case StructureField: field.name + ": ";
                         case Pattern: field.name + ":";
-                        case Override if (field.type.kind == TFun): printer.printEmptyFunctionDefinition(field);
+                        case Override if (field.type.kind == TFun): printer.printOverrideDefinition(field, indent);
                         case _: field.name;
                     }
                 },
                 range: replaceRange
-            }
+            },
+            insertTextFormat: if (mode == Override) Snippet else PlainText
         }
 
         return item;

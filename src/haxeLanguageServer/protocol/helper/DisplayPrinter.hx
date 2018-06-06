@@ -88,17 +88,31 @@ class DisplayPrinter {
         return (arg.opt ? "?" : "") + (arg.name == "" ? "" : arg.name + ":") + printTypeRec(arg.t);
     }
 
+    public function printCallArguments<T>(signature:JsonFunctionSignature, printFunctionArgument:JsonFunctionArgument->String) {
+        return "(" + signature.args.map(printFunctionArgument).join(", ") + ")";
+    }
+
     public function printEmptyFunctionDefinition(field:JsonClassField) {
-        var vis = field.isPublic ? "public " : "";
-        function extractFunctionSignature<T>(type:JsonType<T>) {
-            return switch (type.kind) {
-                case TFun: type.args;
-                case _: throw "function expected";
-            }
+        var visbility = field.isPublic ? "public " : "";
+        var signature = extractFunctionSignature(field.type);
+        return visbility + "function " + field.name + printCallArguments(signature, printFunctionArgument) + ":" + printTypeRec(signature.ret);
+    }
+
+    public function printOverrideDefinition(field:JsonClassField, indent:String) {
+        var signature = extractFunctionSignature(field.type);
+        var returnKeyword = switch (signature.ret.kind) {
+            case TAbstract if (signature.ret.args.path.name == "Void"): "";
+            case _: "return ";
         }
-        var sig = extractFunctionSignature(field.type);
-        var sig = sig.args.map(printFunctionArgument).join(", ");
-        return vis + "function " + field.name + "(" + sig + ")";
+        var arguments = printCallArguments(signature, arg -> arg.name);
+        return printEmptyFunctionDefinition(field) + ' {\n${indent}$${0:${returnKeyword}super.${field.name}$arguments;}\n}';
+    }
+
+    function extractFunctionSignature<T>(type:JsonType<T>) {
+        return switch (type.kind) {
+            case TFun: type.args;
+            case _: throw "function expected";
+        }
     }
 
     /**
