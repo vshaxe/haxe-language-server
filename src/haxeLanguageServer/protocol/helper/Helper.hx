@@ -1,9 +1,7 @@
 package haxeLanguageServer.protocol.helper;
 
-import haxe.display.JsonModuleTypes.JsonPath;
-import haxeLanguageServer.protocol.Display.CompletionItem;
-import haxe.display.JsonModuleTypes.JsonDoc;
-import haxe.display.JsonModuleTypes.JsonType;
+import haxeLanguageServer.protocol.Display;
+import haxe.display.JsonModuleTypes;
 using Lambda;
 
 class Helper {
@@ -48,5 +46,13 @@ class Helper {
             }
         }
         return rec(type).filterDuplicates((e1, e2) -> Reflect.compare(e1, e2) != 0);
+    }
+
+    public static function hasMeta(meta:JsonMetadata, name:CompilerMetadata) {
+        return meta.exists(meta -> meta.name == cast name);
+    }
+
+    public static function isOperator(field:JsonClassField) {
+        return field.meta.hasMeta(Op) || field.meta.hasMeta(Resolve) || field.meta.hasMeta(ArrayAccess);
     }
 }

@@ -157,7 +157,7 @@ class DisplayPrinter {
     public function printTypeDeclaration(type:ModuleType):String {
         var components = [];
         if (type.isPrivate) components.push("private");
-        if (type.meta.exists(meta -> meta.name == ":final")) components.push("final");
+        if (type.meta.hasMeta(Final)) components.push("final");
         if (type.isExtern) components.push("extern");
         components.push(switch (type.kind) {
             case Class: "class";

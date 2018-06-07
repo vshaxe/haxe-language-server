@@ -59,6 +59,15 @@ class DisplayMethods {
     */
 }
 
+enum abstract CompilerMetadata(String) {
+    var Op = ":op";
+    var Resolve = ":resolve";
+    var ArrayAccess = ":arrayAccess";
+    var Final = ":final";
+    var Optional = ":optional";
+    // TODO
+}
+
 /* Completion */
 
 typedef CompletionParams = {

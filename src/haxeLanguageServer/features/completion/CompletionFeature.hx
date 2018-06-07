@@ -287,7 +287,7 @@ class CompletionFeature {
                     );
                 }
             case StructureField:
-                if (field.meta.exists(meta -> meta.name == ":optional")) {
+                if (field.meta.hasMeta(Optional)) {
                     item.label = "?" + field.name;
                     item.filterText = field.name;
                 }
@@ -298,10 +298,6 @@ class CompletionFeature {
     }
 
     function getKindForField<T>(field:JsonClassField, kind:HaxeCompletionItemKind<Dynamic>):CompletionItemKind {
-        function hasOperatorMeta(meta:JsonMetadata) {
-            // TODO: has() static extension method
-            return meta.exists(meta -> meta.name == ":op" || meta.name == ":resolve" || meta.name == ":arrayAccess");
-        }
         var fieldKind:JsonFieldKind<T> = field.kind;
         return switch (fieldKind.kind) {
             case FVar:
@@ -315,7 +311,7 @@ class CompletionFeature {
                     case [AccInline, _]: Constant;
                     case _: Property;
                 }
-            case FMethod if (hasOperatorMeta(field.meta)): Operator;
+            case FMethod if (field.isOperator()): Operator;
             case FMethod if (field.scope == Static): Function;
             case FMethod if (field.scope == Constructor): Constructor;
             case FMethod: Method;
