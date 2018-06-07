@@ -50,6 +50,13 @@ class PostfixCompletion {
                             insertText: 'for (i in 0...$expr) ',
                             insertTextFormat: PlainText
                         });
+                    case "Float":
+                        add({
+                            label: "int",
+                            detail: "Std.int(expr)",
+                            insertText: 'Std.int($expr)',
+                            insertTextFormat: PlainText
+                        });
                     case "Array":
                         var itemType:JsonType<Dynamic> = path.params[0];
                         var itemName = switch (itemType.kind) {
