@@ -92,20 +92,20 @@ class DisplayPrinter {
         return "(" + signature.args.map(printFunctionArgument).join(", ") + ")";
     }
 
-    public function printEmptyFunctionDefinition(field:JsonClassField) {
+    public function printEmptyFunctionDefinition<T>(field:JsonClassField, concreteType:JsonType<T>) {
         var visbility = field.isPublic ? "public " : "";
-        var signature = extractFunctionSignature(field.type);
+        var signature = extractFunctionSignature(concreteType);
         return visbility + "function " + field.name + printCallArguments(signature, printFunctionArgument) + ":" + printTypeRec(signature.ret);
     }
 
-    public function printOverrideDefinition(field:JsonClassField, indent:String) {
-        var signature = extractFunctionSignature(field.type);
+    public function printOverrideDefinition<T>(field:JsonClassField, concreteType:JsonType<T>, indent:String) {
+        var signature = extractFunctionSignature(concreteType);
         var returnKeyword = switch (signature.ret.kind) {
             case TAbstract if (signature.ret.args.path.name == "Void"): "";
             case _: "return ";
         }
         var arguments = printCallArguments(signature, arg -> arg.name);
-        return printEmptyFunctionDefinition(field) + ' {\n${indent}$${1:${returnKeyword}super.${field.name}$arguments;$0}\n}';
+        return printEmptyFunctionDefinition(field, concreteType) + ' {\n${indent}$${1:${returnKeyword}super.${field.name}$arguments;$0}\n}';
     }
 
     function extractFunctionSignature<T>(type:JsonType<T>) {

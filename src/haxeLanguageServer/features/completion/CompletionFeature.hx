@@ -173,7 +173,7 @@ class CompletionFeature {
 
     function createCompletionItem<T>(index:Int, item:HaxeCompletionItem<T>, doc:TextDocument, replaceRange:Range, importPosition:Position, mode:CompletionModeKind<Dynamic>, indent:String):CompletionItem {
         var completionItem:CompletionItem = switch (item.kind) {
-            case ClassField | EnumAbstractValue: createClassFieldCompletionItem(item.args, item.kind, replaceRange, mode, indent);
+            case ClassField | EnumAbstractValue: createClassFieldCompletionItem(item, replaceRange, mode, indent);
             case EnumValue: createEnumValueCompletionItem(item.args.field, replaceRange, mode);
             case Type: createTypeCompletionItem(item.args, doc, replaceRange, importPosition, mode);
             case Package: createPackageCompletionItem(item.args, replaceRange, mode);
@@ -235,23 +235,25 @@ class CompletionFeature {
         return completionItem;
     }
 
-    function createClassFieldCompletionItem<T>(usage:ClassFieldUsage<T>, kind:HaxeCompletionItemKind<Dynamic>, replaceRange:Range, mode:CompletionModeKind<Dynamic>, indent:String):CompletionItem {
+    function createClassFieldCompletionItem<T>(item:HaxeCompletionItem<Dynamic>, replaceRange:Range, mode:CompletionModeKind<Dynamic>, indent:String):CompletionItem {
+        var usage:ClassFieldUsage<T> = item.args;
+        var concreteType = item.type; // this has importStatus, applied type params etc, which field.type does not
         var field = usage.field;
-        if (mode == Override && field.type.kind != TFun) {
+        if (mode == Override && concreteType.kind != TFun) {
             return null;
         }
         var resolution = usage.resolution;
         return {
             label: (if (mode == StructureField && field.meta.exists(meta -> meta.name == ":optional")) "?" else "") + field.name,
             filterText: field.name,
-            kind: getKindForField(field, kind),
+            kind: getKindForField(field, item.kind),
             detail: {
                 var overloads = if (usage.field.overloads == null) 0 else usage.field.overloads.length;
-                var type = printer.printType(field.type);
+                var type = printer.printType(concreteType);
                 if (overloads > 0) {
                     type += ' (+$overloads overloads)';
                 }
-                var origin = printer.printClassFieldOrigin(usage.origin, kind, "'");
+                var origin = printer.printClassFieldOrigin(usage.origin, item.kind, "'");
                 var shadowed = if (!resolution.isQualified) " (shadowed)" else "";
                 switch (origin) {
                     case Some(origin): type + "\n" + origin + shadowed;
@@ -264,7 +266,7 @@ class CompletionFeature {
                     qualifier + switch (mode) {
                         case StructureField: field.name + ": ";
                         case Pattern: field.name + ":";
-                        case Override if (field.type.kind == TFun): printer.printOverrideDefinition(field, indent);
+                        case Override if (concreteType.kind == TFun): printer.printOverrideDefinition(field, concreteType, indent);
                         case _: field.name;
                     }
                 },
