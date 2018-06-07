@@ -197,7 +197,7 @@ class CompletionFeature {
             case Literal: {
                     label: item.args.name,
                     kind: Keyword,
-                    detail: printer.printType(item.args.type)
+                    detail: printer.printType(item.type)
                 }
             case Metadata: {
                     label: item.args.name,

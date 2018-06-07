@@ -246,7 +246,6 @@ typedef ModuleTypeParameter = {
 
 typedef JsonLiteral<T> = {
     var name:String;
-    var type:JsonType<T>;
 }
 
 /* enum abstract MetadataTarget(String) {
@@ -354,7 +353,6 @@ typedef CompletionItem<T> = {
 typedef CompletionItemUsage<T> = {
     var range:Range;
     var item:CompletionItem<T>;
-    @:optional var type:JsonType<Dynamic>;
     @:optional var moduleType:JsonModuleType<Dynamic>;
 }
 

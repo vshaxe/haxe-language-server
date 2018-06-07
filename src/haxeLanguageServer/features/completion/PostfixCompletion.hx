@@ -17,7 +17,7 @@ class PostfixCompletion {
             case _: return [];
         }
 
-        var type = subject.type;
+        var type = subject.item.type;
         var moduleType = subject.moduleType;
         if (type == null) {
             return [];

@@ -33,7 +33,7 @@ class HoverFeature {
         var printer = new DisplayPrinter(true);
         var item = hover.item;
         function printType() {
-            return printCodeBlock(printer.printType(hover.type), HaxeType);
+            return printCodeBlock(printer.printType(hover.item.type), HaxeType);
         }
         return switch (item.kind) {
             // case Type: printer.printTypeDeclaration(hover.item.args);
