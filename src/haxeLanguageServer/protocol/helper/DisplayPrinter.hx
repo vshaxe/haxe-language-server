@@ -97,12 +97,9 @@ class DisplayPrinter {
             case _:
         }
         var argument = (optional ? "?" : "") + (arg.name == "" ? "" : arg.name + ":") + printTypeRec(concreteType);
-        var value = arg.value;
-        if (value != null && value.kind != TNull) {
-            argument += " = " + switch (value.kind) {
-                case TString: '"' + value.args + '"';
-                case _: value.args;
-            }
+        var value:{string:String} = cast arg.value;
+        if (value != null) {
+            argument += " = " + value.string;
         }
         return argument;
     }
