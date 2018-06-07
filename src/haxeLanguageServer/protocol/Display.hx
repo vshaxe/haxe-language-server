@@ -65,6 +65,8 @@ enum abstract CompilerMetadata(String) {
     var ArrayAccess = ":arrayAccess";
     var Final = ":final";
     var Optional = ":optional";
+    var Enum = ":enum";
+    var Value = ":value";
     // TODO
 }
 

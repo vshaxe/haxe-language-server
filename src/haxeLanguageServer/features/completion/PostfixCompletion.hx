@@ -86,19 +86,31 @@ class PostfixCompletion {
                 case Enum:
                     var args:JsonEnum = moduleType.args;
                     var printer = new DisplayPrinter();
-                    var cases = args.constructors.map(field -> '\tcase ' + printer.printEnumField(field, false) + "$" + (field.index + 1));
-                    add({
-                        label: "switch",
-                        detail: "switch (expr) {cases...}",
-                        insertText: 'switch ($expr) {\n${cases.join("\n")}\n}',
-                        insertTextFormat: Snippet
-                    });
-                // TODO: enum abstract
+                    var constructors = args.constructors.map(field -> printer.printEnumField(field, false));
+                    add(createSwitchItem(expr, constructors));
+                case Abstract if (moduleType.meta.hasMeta(Enum)):
+                    var impl:JsonClass = cast moduleType.args.impl;
+                    var values = impl.statics.filter(Helper.isEnumAbstractField).map(field -> field.name + ":");
+                    add(createSwitchItem(expr, values));
                 case _:
             }
         }
 
         return items;
+    }
+
+    function createSwitchItem(expr:String, constructors:Array<String>):PostfixCompletionItem {
+        var cases = [];
+        for (i in 0...constructors.length) {
+            var constructor = constructors[i];
+            cases.push('\tcase ' + constructor + "$" + (i + 1));
+        }
+        return {
+            label: "switch",
+            detail: "switch (expr) {cases...}",
+            insertText: 'switch ($expr) {\n${cases.join("\n")}\n}',
+            insertTextFormat: Snippet
+        };
     }
 
     function createPostfixCompletionItem(data:PostfixCompletionItem, doc:TextDocument, replaceRange:Range):CompletionItem {

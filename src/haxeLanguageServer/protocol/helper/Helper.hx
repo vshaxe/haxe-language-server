@@ -56,6 +56,10 @@ class Helper {
         return field.meta.hasMeta(Op) || field.meta.hasMeta(Resolve) || field.meta.hasMeta(ArrayAccess);
     }
 
+    public static function isEnumAbstractField(field:JsonClassField) {
+        return field.meta.hasMeta(Enum) && field.meta.hasMeta(Value);
+    }
+
     public static function isVoid<T>(type:JsonType<T>) {
         return switch (type.kind) {
             case TAbstract if (type.args.path.name == "Void"): true;
