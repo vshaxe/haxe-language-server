@@ -17,7 +17,7 @@ class DisplayPrinter {
     }
 
     public function printPath(path:JsonPath) {
-        if (path.pack.length == 0) {
+        if (path.pack.length == 0 || path.importStatus == Imported) {
             return path.name;
         } else {
             return path.pack.join(".") + "." + path.name;
