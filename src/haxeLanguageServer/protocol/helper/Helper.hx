@@ -55,4 +55,11 @@ class Helper {
     public static function isOperator(field:JsonClassField) {
         return field.meta.hasMeta(Op) || field.meta.hasMeta(Resolve) || field.meta.hasMeta(ArrayAccess);
     }
+
+    public static function isVoid<T>(type:JsonType<T>) {
+        return switch (type.kind) {
+            case TAbstract if (type.args.path.name == "Void"): true;
+            case _: false;
+        }
+    }
 }

@@ -3,7 +3,7 @@ package haxeLanguageServer.helper;
 typedef FunctionFormattingConfig = {
     var argumentTypeHints:Bool;
     var returnTypeHint:ReturnTypeHintOption;
-    var useArrowSyntax:Bool;
+    var ?useArrowSyntax:Bool;
     var prefixPackages:Bool; // NOT part of the user settings
 }
 

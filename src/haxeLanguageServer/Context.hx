@@ -24,6 +24,7 @@ import haxeLanguageServer.LanguageServerMethods.HaxeMethodResult;
 
 private typedef FunctionGenerationConfig = {
     @:optional var anonymous:FunctionFormattingConfig;
+    @:optional var field:FunctionFormattingConfig;
 }
 
 private typedef ImportGenerationConfig = {
@@ -273,6 +274,8 @@ class Context {
         var functions = codeGen.functions;
         if (functions.anonymous == null)
             functions.anonymous = {argumentTypeHints: false, returnTypeHint: Never, useArrowSyntax: true, prefixPackages: true};
+        if (functions.field == null)
+            functions.field = {argumentTypeHints: true, returnTypeHint: NonVoid, useArrowSyntax: false, prefixPackages: true};
 
         if (codeGen.imports == null)
             codeGen.imports = {enableAutoImports: true, style: Type};

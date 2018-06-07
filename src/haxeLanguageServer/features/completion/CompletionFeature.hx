@@ -268,7 +268,10 @@ class CompletionFeature {
                         case StructureField: field.name + ": ";
                         case Pattern: field.name + ":";
                         case Override if (concreteType.kind == TFun):
-                            var printer = new DisplayPrinter(false, if (importConfig.enableAutoImports) Shadowed else Qualified);
+                            var printer = new DisplayPrinter(false,
+                                if (importConfig.enableAutoImports) Shadowed else Qualified,
+                                context.config.codeGeneration.functions.field
+                            );
                             printer.printOverrideDefinition(field, concreteType, indent);
                         case _: field.name;
                     }

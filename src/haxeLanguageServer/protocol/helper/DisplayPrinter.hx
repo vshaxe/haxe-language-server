@@ -1,5 +1,6 @@
 package haxeLanguageServer.protocol.helper;
 
+import haxeLanguageServer.helper.TypeHelper.FunctionFormattingConfig;
 import haxe.ds.Option;
 import haxe.display.JsonModuleTypes;
 import haxeLanguageServer.protocol.Display;
@@ -26,13 +27,23 @@ enum PathPrinting {
 class DisplayPrinter {
     final wrap:Bool;
     final pathPrinting:PathPrinting;
+    final functionFormatting:FunctionFormattingConfig;
     var indent = "";
 
-    public function new(wrap:Bool = false, ?pathPrinting:PathPrinting) {
+    public function new(wrap:Bool = false, ?pathPrinting:PathPrinting, ?functionFormatting:FunctionFormattingConfig) {
         this.wrap = wrap;
         this.pathPrinting = pathPrinting;
         if (this.pathPrinting == null) {
             this.pathPrinting = Qualified;
+        }
+        this.functionFormatting = functionFormatting;
+        if (this.functionFormatting == null) {
+            this.functionFormatting = {
+                useArrowSyntax: true,
+                returnTypeHint: NonVoid,
+                prefixPackages: false,
+                argumentTypeHints: true
+            }
         }
     }
 
@@ -123,7 +134,10 @@ class DisplayPrinter {
                 }
             case _:
         }
-        var argument = (optional ? "?" : "") + (arg.name == "" ? "" : arg.name + ":") + printTypeRec(concreteType);
+        var argument = (optional ? "?" : "") + arg.name;
+        if (functionFormatting.argumentTypeHints) {
+            argument += (arg.name == "" ? "" : ":") + printTypeRec(concreteType);
+        }
         if (arg.value != null) {
             argument += " = " + arg.value.string;
         }
@@ -137,15 +151,17 @@ class DisplayPrinter {
     public function printEmptyFunctionDefinition<T>(field:JsonClassField, concreteType:JsonType<T>) {
         var visbility = field.isPublic ? "public " : "";
         var signature = concreteType.extractFunctionSignature();
-        return visbility + "function " + field.name + printCallArguments(signature, printFunctionArgument) + ":" + printTypeRec(signature.ret);
+        var definition = visbility + "function " + field.name + printCallArguments(signature, printFunctionArgument);
+        var returnStyle = functionFormatting.returnTypeHint;
+        if (returnStyle == Always || (returnStyle == NonVoid && !signature.ret.isVoid())) {
+            definition += ":" + printTypeRec(signature.ret);
+        }
+        return definition;
     }
 
     public function printOverrideDefinition<T>(field:JsonClassField, concreteType:JsonType<T>, indent:String) {
         var signature = concreteType.extractFunctionSignature();
-        var returnKeyword = switch (signature.ret.kind) {
-            case TAbstract if (signature.ret.args.path.name == "Void"): "";
-            case _: "return ";
-        }
+        var returnKeyword = if (signature.ret.isVoid()) "" else "return ";
         var arguments = printCallArguments(signature, arg -> arg.name);
         return printEmptyFunctionDefinition(field, concreteType) + ' {\n${indent}$${1:${returnKeyword}super.${field.name}$arguments;$0}\n}';
     }
