@@ -97,9 +97,8 @@ class DisplayPrinter {
             case _:
         }
         var argument = (optional ? "?" : "") + (arg.name == "" ? "" : arg.name + ":") + printTypeRec(concreteType);
-        var value:{string:String} = cast arg.value;
-        if (value != null) {
-            argument += " = " + value.string;
+        if (arg.value != null) {
+            argument += " = " + arg.value.string;
         }
         return argument;
     }
