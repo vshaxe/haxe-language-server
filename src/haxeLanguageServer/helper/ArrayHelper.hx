@@ -19,4 +19,20 @@ class ArrayHelper {
                 return false;
         return true;
     }
+
+    public static function filterDuplicates<T>(array:Array<T>, filter:T->T->Bool):Array<T> {
+        var unique:Array<T> = [];
+        for (element in array) {
+            var present = false;
+            for (unique in unique) if (filter(unique, element))
+                present = true;
+            if (!present)
+                unique.push(element);
+        }
+        return unique;
+    }
+
+    public static inline function unique<T>(array:Array<T>):Array<T> {
+        return filterDuplicates(array, (e1, e2) -> e1 == e2);
+    }
 }

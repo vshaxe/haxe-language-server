@@ -2,6 +2,7 @@ package haxeLanguageServer.hxParser;
 
 import hxParser.ParseTree;
 import hxParser.WalkStack;
+import haxeLanguageServer.hxParser.Helper;
 
 class DocumentSymbolsResolver extends PositionAwareWalker {
     final uri:DocumentUri;

@@ -5,23 +5,50 @@ import haxe.display.JsonModuleTypes;
 import haxeLanguageServer.protocol.Display;
 using Lambda;
 
+enum PathPrinting {
+    /**
+        Always print the full dot path for types.
+    **/
+    Always;
+    /**
+        Only print the full dot path when unimported or shadowed (so it's always qualified).
+    **/
+    Qualified;
+    /**
+        Only print the full dot path for shadowed types.
+    **/
+    Shadowed;
+}
+
 /**
     (Slightly modified) copy of haxe.display.JsonModuleTypesPrinter.
 **/
 class DisplayPrinter {
     final wrap:Bool;
+    final pathPrinting:PathPrinting;
     var indent = "";
 
-    public function new(wrap:Bool = false) {
+    public function new(wrap:Bool = false, ?pathPrinting:PathPrinting) {
         this.wrap = wrap;
+        this.pathPrinting = pathPrinting;
+        if (this.pathPrinting == null) {
+            this.pathPrinting = Qualified;
+        }
     }
 
     public function printPath(path:JsonPath) {
-        if (path.pack.length == 0 || path.importStatus == Imported) {
-            return path.name;
-        } else {
-            return path.pack.join(".") + "." + path.name;
+        function print(qualified:Bool) {
+            return if (!qualified || path.pack.length == 0) {
+                path.name;
+            } else {
+                path.pack.join(".") + "." + path.name;
+            }
         }
+        return print(switch(pathPrinting) {
+            case Always: true;
+            case Qualified: path.importStatus != Imported;
+            case Shadowed: path.importStatus == Shadowed;
+        });
     }
 
     public function printPathWithParams(path:JsonPathWithParams) {
@@ -109,25 +136,18 @@ class DisplayPrinter {
 
     public function printEmptyFunctionDefinition<T>(field:JsonClassField, concreteType:JsonType<T>) {
         var visbility = field.isPublic ? "public " : "";
-        var signature = extractFunctionSignature(concreteType);
+        var signature = concreteType.extractFunctionSignature();
         return visbility + "function " + field.name + printCallArguments(signature, printFunctionArgument) + ":" + printTypeRec(signature.ret);
     }
 
     public function printOverrideDefinition<T>(field:JsonClassField, concreteType:JsonType<T>, indent:String) {
-        var signature = extractFunctionSignature(concreteType);
+        var signature = concreteType.extractFunctionSignature();
         var returnKeyword = switch (signature.ret.kind) {
             case TAbstract if (signature.ret.args.path.name == "Void"): "";
             case _: "return ";
         }
         var arguments = printCallArguments(signature, arg -> arg.name);
         return printEmptyFunctionDefinition(field, concreteType) + ' {\n${indent}$${1:${returnKeyword}super.${field.name}$arguments;$0}\n}';
-    }
-
-    function extractFunctionSignature<T>(type:JsonType<T>) {
-        return switch (type.kind) {
-            case TFun: type.args;
-            case _: throw "function expected";
-        }
     }
 
     /**

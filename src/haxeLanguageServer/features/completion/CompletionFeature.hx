@@ -173,7 +173,7 @@ class CompletionFeature {
 
     function createCompletionItem<T>(index:Int, item:HaxeCompletionItem<T>, doc:TextDocument, replaceRange:Range, importPosition:Position, mode:CompletionModeKind<Dynamic>, indent:String):CompletionItem {
         var completionItem:CompletionItem = switch (item.kind) {
-            case ClassField | EnumAbstractValue: createClassFieldCompletionItem(item, replaceRange, mode, indent);
+            case ClassField | EnumAbstractValue: createClassFieldCompletionItem(item, doc, replaceRange, mode, indent, importPosition);
             case EnumValue: createEnumValueCompletionItem(item.args.field, replaceRange, mode);
             case Type: createTypeCompletionItem(item.args, doc, replaceRange, importPosition, mode);
             case Package: createPackageCompletionItem(item.args, replaceRange, mode);
@@ -235,7 +235,7 @@ class CompletionFeature {
         return completionItem;
     }
 
-    function createClassFieldCompletionItem<T>(item:HaxeCompletionItem<Dynamic>, replaceRange:Range, mode:CompletionModeKind<Dynamic>, indent:String):CompletionItem {
+    function createClassFieldCompletionItem<T>(item:HaxeCompletionItem<Dynamic>, doc:TextDocument, replaceRange:Range, mode:CompletionModeKind<Dynamic>, indent:String, importPosition:Position):CompletionItem {
         var usage:ClassFieldUsage<T> = item.args;
         var concreteType = item.type; // this has importStatus, applied type params etc, which field.type does not
         var field = usage.field;
@@ -243,6 +243,7 @@ class CompletionFeature {
             return null;
         }
 
+        var importConfig = context.config.codeGeneration.imports;
         var resolution = usage.resolution;
         var item:CompletionItem = {
             label: field.name,
@@ -266,7 +267,9 @@ class CompletionFeature {
                     qualifier + switch (mode) {
                         case StructureField: field.name + ": ";
                         case Pattern: field.name + ":";
-                        case Override if (concreteType.kind == TFun): printer.printOverrideDefinition(field, concreteType, indent);
+                        case Override if (concreteType.kind == TFun):
+                            var printer = new DisplayPrinter(false, if (importConfig.enableAutoImports) Shadowed else Qualified);
+                            printer.printOverrideDefinition(field, concreteType, indent);
                         case _: field.name;
                     }
                 },
@@ -277,6 +280,12 @@ class CompletionFeature {
         switch (mode) {
             case Override:
                 item.insertTextFormat = Snippet;
+                if (importConfig.enableAutoImports) {
+                    var printer = new DisplayPrinter(false, Always);
+                    item.additionalTextEdits = concreteType.resolveImports().map(path ->
+                        ImportHelper.createImportEdit(doc, importPosition, printer.printPath(path), importConfig.style)
+                    );
+                }
             case StructureField:
                 if (field.meta.exists(meta -> meta.name == ":optional")) {
                     item.label = "?" + field.name;
@@ -290,6 +299,7 @@ class CompletionFeature {
 
     function getKindForField<T>(field:JsonClassField, kind:HaxeCompletionItemKind<Dynamic>):CompletionItemKind {
         function hasOperatorMeta(meta:JsonMetadata) {
+            // TODO: has() static extension method
             return meta.exists(meta -> meta.name == ":op" || meta.name == ":resolve" || meta.name == ":arrayAccess");
         }
         var fieldKind:JsonFieldKind<T> = field.kind;
