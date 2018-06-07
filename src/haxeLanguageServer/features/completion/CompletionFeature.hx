@@ -242,10 +242,10 @@ class CompletionFeature {
         if (mode == Override && concreteType.kind != TFun) {
             return null;
         }
+
         var resolution = usage.resolution;
-        return {
-            label: (if (mode == StructureField && field.meta.exists(meta -> meta.name == ":optional")) "?" else "") + field.name,
-            filterText: field.name,
+        var item:CompletionItem = {
+            label: field.name,
             kind: getKindForField(field, item.kind),
             detail: {
                 var overloads = if (usage.field.overloads == null) 0 else usage.field.overloads.length;
@@ -271,9 +271,21 @@ class CompletionFeature {
                     }
                 },
                 range: replaceRange
-            },
-            insertTextFormat: if (mode == Override) Snippet else PlainText
+            }
         }
+
+        switch (mode) {
+            case Override:
+                item.insertTextFormat = Snippet;
+            case StructureField:
+                if (field.meta.exists(meta -> meta.name == ":optional")) {
+                    item.label = "?" + field.name;
+                    item.filterText = field.name;
+                }
+            case _:
+        }
+
+        return item;
     }
 
     function getKindForField<T>(field:JsonClassField, kind:HaxeCompletionItemKind<Dynamic>):CompletionItemKind {
