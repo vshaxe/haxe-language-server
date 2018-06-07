@@ -137,7 +137,7 @@ class HaxeServer {
         if (!context.config.buildCompletionCache || context.displayArguments == null)
             return;
 
-        startCompletionInitializationProgress(1);
+        startCompletionInitializationProgress("Building Cache");
         process(context.displayArguments.concat(["--no-output"]), null, true, null, Processed(function(_) {
             stopProgress();
             if (supports(ServerMethods.ReadClassPaths)) {
@@ -152,7 +152,7 @@ class HaxeServer {
     }
 
     function readClassPaths() {
-        startCompletionInitializationProgress(2);
+        startCompletionInitializationProgress("Parsing Classpaths");
         context.callHaxeMethod(ServerMethods.ReadClassPaths, null, null, _ -> {
             stopProgress();
             trace("Done.");
@@ -163,11 +163,7 @@ class HaxeServer {
         });
     }
 
-    function startCompletionInitializationProgress(part:Int) {
-        var message = "Initializing Completion";
-        if (supports(ServerMethods.ReadClassPaths)) {
-            message += ' ($part/2)';
-        }
+    function startCompletionInitializationProgress(message:String) {
         stopProgressCallback = context.startProgress(message);
         trace(message + "...");
     }
