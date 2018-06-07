@@ -84,8 +84,23 @@ class DisplayPrinter {
         return t;
     }
 
-    public function printFunctionArgument(arg:JsonFunctionArgument) {
-        return (arg.opt ? "?" : "") + (arg.name == "" ? "" : arg.name + ":") + printTypeRec(arg.t);
+    public function printFunctionArgument<T>(arg:JsonFunctionArgument) {
+        var optional = false;
+        var concreteType = arg.t;
+        switch (arg.t.kind) {
+            case TAbstract:
+                var typePath:JsonPathWithParams = arg.t.args;
+                if (typePath.path.pack.length == 0 && typePath.path.name == "Null") {
+                    concreteType = typePath.params[0]; // TODO: recurse (for Null<Null<T>>)?
+                    optional = true;
+                }
+            case _:
+        }
+        var argument = (optional ? "?" : "") + (arg.name == "" ? "" : arg.name + ":") + printTypeRec(concreteType);
+        if (arg.value != null && arg.value.kind != TNull) {
+            argument += " = " + arg.value.args;
+        }
+        return argument;
     }
 
     public function printCallArguments<T>(signature:JsonFunctionSignature, printFunctionArgument:JsonFunctionArgument->String) {
