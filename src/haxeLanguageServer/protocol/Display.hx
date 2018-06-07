@@ -203,28 +203,6 @@ enum abstract ModuleTypeKind(Int) {
     //var ImportAlias = 7;
 }
 
-enum abstract ImportStatus(Int) {
-    /**
-        This type is already available with it's unqualified name for one of these reasons:
-          - it's a toplevel type
-          - it's imported with an `import` in the current module
-          - it's imported in an `import.hx` file
-    **/
-    var Imported = 0;
-
-    /**
-        The type is currently not imported. It can be accessed either
-        with its fully qualified name or by inserting an import.
-    **/
-    var Unimported = 1;
-
-    /**
-        A type with the same name is already imported in the module.
-        The fully qualified name has to be used to access it.
-    **/
-    var Shadowed = 2;
-}
-
 typedef ModuleType = {
     >JsonPath,
     var moduleName:String;
