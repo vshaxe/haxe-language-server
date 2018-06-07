@@ -382,6 +382,7 @@ class Context {
                             try
                                 callback(haxeResponse.result)
                             catch (e:Any) {
+                                errback(e);
                                 trace(e);
                                 trace(CallStack.toString(CallStack.callStack()));
                                 null;

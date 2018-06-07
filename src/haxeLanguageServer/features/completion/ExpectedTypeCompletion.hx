@@ -36,6 +36,7 @@ class ExpectedTypeCompletion {
                         printedFields[i] += ",";
                     }
                 }
+                // TODO: support @:structInit
                 items.push({
                     label: "{fields...}",
                     sortText: "0",
