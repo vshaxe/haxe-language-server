@@ -4,6 +4,7 @@ typedef FunctionFormattingConfig = {
     var argumentTypeHints:Bool;
     var returnTypeHint:ReturnTypeHintOption;
     var ?useArrowSyntax:Bool;
+    var ?placeOpenBraceOnNewLine:Bool;
     var ?prefixPackages:Bool; // NOT part of the user settings, only needed for Haxe versions < 4.0.0-preview.4
 }
 

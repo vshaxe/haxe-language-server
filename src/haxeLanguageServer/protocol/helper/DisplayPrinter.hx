@@ -162,7 +162,8 @@ class DisplayPrinter {
         var signature = concreteType.extractFunctionSignature();
         var returnKeyword = if (signature.ret.isVoid()) "" else "return ";
         var arguments = printCallArguments(signature, arg -> arg.name);
-        return printEmptyFunctionDefinition(field, concreteType) + ' {\n${indent}$${1:${returnKeyword}super.${field.name}$arguments;$0}\n}';
+        var lineBreak = if (functionFormatting.placeOpenBraceOnNewLine) "\n" else " ";
+        return printEmptyFunctionDefinition(field, concreteType) + '$lineBreak{\n${indent}$${1:${returnKeyword}super.${field.name}$arguments;$0}\n}';
     }
 
     /**
