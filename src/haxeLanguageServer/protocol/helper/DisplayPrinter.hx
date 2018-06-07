@@ -98,7 +98,10 @@ class DisplayPrinter {
         }
         var argument = (optional ? "?" : "") + (arg.name == "" ? "" : arg.name + ":") + printTypeRec(concreteType);
         if (arg.value != null && arg.value.kind != TNull) {
-            argument += " = " + arg.value.args;
+            argument += " = " + switch (arg.value.kind) {
+                case TString: '"' + arg.value.args + '"';
+                case _: arg.value.args;
+            }
         }
         return argument;
     }
