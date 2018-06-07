@@ -18,30 +18,30 @@ class ServerMethods {
 /* Configure */
 
 typedef ConfigurePrintParams = {
-    @:optional var addedDirectory:Bool;
-    @:optional var foundDirectories:Bool;
-    @:optional var changedDirectories:Bool;
-    @:optional var modulePathChanged:Bool;
-    @:optional var notCached:Bool;
-    @:optional var parsed:Bool;
-    @:optional var removedDirectory:Bool;
-    @:optional var reusing:Bool;
-    @:optional var skippingDep:Bool;
-    @:optional var unchangedContent:Bool;
-    @:optional var cachedModules:Bool;
-    @:optional var arguments:Bool;
-    @:optional var completion:Bool;
-    @:optional var defines:Bool;
-    @:optional var signature:Bool;
-    @:optional var displayPosition:Bool;
-    @:optional var stats:Bool;
-    @:optional var message:Bool;
-    @:optional var socketMessage:Bool;
-    @:optional var uncaughtError:Bool;
-    @:optional var newContext:Bool;
+    var ?addedDirectory:Bool;
+    var ?foundDirectories:Bool;
+    var ?changedDirectories:Bool;
+    var ?modulePathChanged:Bool;
+    var ?notCached:Bool;
+    var ?parsed:Bool;
+    var ?removedDirectory:Bool;
+    var ?reusing:Bool;
+    var ?skippingDep:Bool;
+    var ?unchangedContent:Bool;
+    var ?cachedModules:Bool;
+    var ?arguments:Bool;
+    var ?completion:Bool;
+    var ?defines:Bool;
+    var ?signature:Bool;
+    var ?displayPosition:Bool;
+    var ?stats:Bool;
+    var ?message:Bool;
+    var ?socketMessage:Bool;
+    var ?uncaughtError:Bool;
+    var ?newContext:Bool;
 }
 
 typedef ConfigureParams = {
-    @:optional var noModuleChecks:Bool;
-    @:optional var print:ConfigurePrintParams;
+    var ?noModuleChecks:Bool;
+    var ?print:ConfigurePrintParams;
 }

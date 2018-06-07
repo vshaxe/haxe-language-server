@@ -7,23 +7,23 @@ import haxeLanguageServer.hxParser.DocumentSymbolsResolver;
 
 private enum abstract ModuleSymbolKind(Int) {
     var MClass = 1;
-    var MInterface = 2;
-    var MEnum = 3;
-    var MTypedef = 4;
-    var MAbstract = 5;
-    var MField = 6;
-    var MProperty = 7;
-    var MMethod = 8;
-    var MConstructor = 9;
-    var MFunction = 10;
-    var MVariable = 11;
+    var MInterface;
+    var MEnum;
+    var MTypedef;
+    var MAbstract;
+    var MField;
+    var MProperty;
+    var MMethod;
+    var MConstructor;
+    var MFunction;
+    var MVariable;
 }
 
 private typedef ModuleSymbolEntry = {
     var name:String;
     var kind:ModuleSymbolKind;
     var range:Range;
-    @:optional var containerName:String;
+    var ?containerName:String;
 }
 
 private typedef SymbolReply = {

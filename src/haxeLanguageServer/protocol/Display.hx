@@ -95,7 +95,7 @@ typedef JsonLocal<T> = {
     var type:JsonType<T>;
     var origin:LocalOrigin;
     var capture:Bool;
-    @:optional var extra:{
+    var ?extra:{
         var params:Array<JsonTypeParameter>;
         var expr:JsonExpr;
     };
@@ -104,90 +104,90 @@ typedef JsonLocal<T> = {
 }
 
 enum abstract LocalOrigin(Int) {
-    var LocalVariable = 0;
-    var Argument = 1;
-    var ForVariable = 2;
-    var PatternVariable = 3;
-    var CatchVariable = 4;
-    var LocalFunction = 5;
+    var LocalVariable;
+    var Argument;
+    var ForVariable;
+    var PatternVariable;
+    var CatchVariable;
+    var LocalFunction;
 }
 
 enum abstract ClassFieldOriginKind<T>(Int) {
     /**
         The field is declared on the current type itself.
     **/
-    var Self:ClassFieldOriginKind<JsonModuleType<T>> = 0;
+    var Self:ClassFieldOriginKind<JsonModuleType<T>>;
 
     /**
         The field is a static field brought into context via a static import
         (`import pack.Module.Type.field`).
     **/
-    var StaticImport:ClassFieldOriginKind<JsonModuleType<T>> = 1;
+    var StaticImport:ClassFieldOriginKind<JsonModuleType<T>>;
 
     /**
         The field is declared on a parent type, such as:
         - a super class field that is not overriden
         - a forwarded abstract field
     **/
-    var Parent:ClassFieldOriginKind<JsonModuleType<T>> = 2;
+    var Parent:ClassFieldOriginKind<JsonModuleType<T>>;
 
     /**
         The field is a static extension method brought
         into context with the `using` keyword.
     **/
-    var StaticExtension:ClassFieldOriginKind<JsonModuleType<T>> = 3;
+    var StaticExtension:ClassFieldOriginKind<JsonModuleType<T>>;
 
     /**
         This field doesn't belong to any named type, just an anonymous structure.
     **/
-    var AnonymousStructure:ClassFieldOriginKind<JsonAnon> = 4;
+    var AnonymousStructure:ClassFieldOriginKind<JsonAnon>;
 
     /**
         Special fields built into the compiler, such as:
         - `code` on single-character Strings
         - `bind()` on functions.
     **/
-    var BuiltIn:ClassFieldOriginKind<NoData> = 5;
+    var BuiltIn:ClassFieldOriginKind<NoData>;
 
     /**
         The origin of this class field is unknown.
     **/
-    var Unknown:ClassFieldOriginKind<NoData> = 6;
+    var Unknown:ClassFieldOriginKind<NoData>;
 }
 
 typedef ClassFieldOrigin<T> = {
     var kind:ClassFieldOriginKind<T>;
-    @:optional var args:T;
+    var ?args:T;
 }
 
 typedef ClassFieldUsage<T> = {
     var field:JsonClassField;
     var resolution:FieldResolution;
-    @:optional var origin:ClassFieldOrigin<T>;
+    var ?origin:ClassFieldOrigin<T>;
 }
 
 enum abstract EnumValueOriginKind<T>(Int) {
     /**
         The enum value is declared on the current type itself.
     **/
-    var Self:EnumValueOriginKind<JsonModuleType<T>> = 0;
+    var Self:EnumValueOriginKind<JsonModuleType<T>>;
 
     /**
         The enum value is brought into context via a static import
         (`import pack.Module.Enum.Value`).
     **/
-    var StaticImport:EnumValueOriginKind<JsonModuleType<T>> = 1;
+    var StaticImport:EnumValueOriginKind<JsonModuleType<T>>;
 }
 
 typedef EnumValueOrigin<T> = {
     var kind:EnumValueOriginKind<T>;
-    @:optional var args:T;
+    var ?args:T;
 }
 
 typedef EnumValueUsage<T> = {
     var field:JsonEnumField;
     var resolution:FieldResolution;
-    @:optional var origin:EnumValueOrigin<T>;
+    var ?origin:EnumValueOrigin<T>;
 }
 
 enum abstract Literal(String) {
@@ -199,17 +199,17 @@ enum abstract Literal(String) {
 }
 
 enum abstract ModuleTypeKind(Int) {
-    var Class = 0;
-    var Interface = 1;
-    var Enum = 2;
-    var Abstract = 3;
-    var EnumAbstract = 4;
+    var Class;
+    var Interface;
+    var Enum;
+    var Abstract;
+    var EnumAbstract;
     /** A `typedef` that is just an alias for another type. **/
-    var TypeAlias = 5;
+    var TypeAlias;
     /** A `typedef` that is an alias for an anonymous structure. **/
-    var Struct = 6;
+    var Struct;
     /** A type name introduced by `import as` / `import in` **/
-    //var ImportAlias = 7;
+    //var ImportAlias;
 }
 
 typedef ModuleType = {
@@ -248,18 +248,18 @@ typedef JsonLiteral<T> = {
 }
 
 enum abstract Platform(String) {
-    var Cross = "Cross";
-    var Js = "Js";
-    var Lua = "Lua";
-    var Neko = "Neko";
-    var Flash = "Flash";
-    var Php = "Php";
-    var Cpp = "Cpp";
-    var Cs = "Cs";
-    var Java = "Java";
-    var Python = "Python";
-    var Hl = "Hl";
-    var Eval = "Eval";
+    var Cross;
+    var Js;
+    var Lua;
+    var Neko;
+    var Flash;
+    var Php;
+    var Cpp;
+    var Cs;
+    var Java;
+    var Python;
+    var Hl;
+    var Eval;
 } */
 
 typedef Metadata = {
@@ -300,47 +300,47 @@ enum abstract KeywordKind(String) to String {
 }
 
 /* enum abstract PackageContentKind(Int) {
-    var Module = 0;
-    var Package = 1;
+    var Module;
+    var Package;
 } */
 
 typedef Package = {
     var path:JsonPath;
-    // @:optional var contents:Array<{name:String, kind:PackageContentKind}>;
+    // var ?contents:Array<{name:String, kind:PackageContentKind}>;
 }
 
 typedef Module = {
     var path:JsonPath;
-    // @:optional var contents:Array<ModuleType>;
+    // var ?contents:Array<ModuleType>;
 }
 
 enum abstract CompletionItemKind<T>(String) {
-    var Local:CompletionItemKind<JsonLocal<Dynamic>> = "Local";
-    var ClassField:CompletionItemKind<ClassFieldUsage<Dynamic>> = "ClassField";
-    var EnumValue:CompletionItemKind<EnumValueUsage<Dynamic>> = "EnumField";
-    var EnumAbstractValue:CompletionItemKind<ClassFieldUsage<Dynamic>> = "EnumAbstractField";
-    var Type:CompletionItemKind<ModuleType> = "Type";
-    var Package:CompletionItemKind<Package> = "Package";
-    var Module:CompletionItemKind<Module> = "Module";
-    var Literal:CompletionItemKind<JsonLiteral<Dynamic>> = "Literal";
-    var Metadata:CompletionItemKind<Metadata> = "Metadata";
-    var Keyword:CompletionItemKind<Keyword> = "Keyword";
-    var AnonymousStructure:CompletionItemKind<JsonAnon> = "AnonymousStructure";
-    var Expression:CompletionItemKind<JsonTExpr> = "Expression";
-    var TypeParameter:CompletionItemKind<ModuleTypeParameter> = "TypeParameter";
+    var Local:CompletionItemKind<JsonLocal<Dynamic>>;
+    var ClassField:CompletionItemKind<ClassFieldUsage<Dynamic>>;
+    var EnumField:CompletionItemKind<EnumValueUsage<Dynamic>>;
+    var EnumAbstractField:CompletionItemKind<ClassFieldUsage<Dynamic>>;
+    var Type:CompletionItemKind<ModuleType>;
+    var Package:CompletionItemKind<Package>;
+    var Module:CompletionItemKind<Module>;
+    var Literal:CompletionItemKind<JsonLiteral<Dynamic>>;
+    var Metadata:CompletionItemKind<Metadata>;
+    var Keyword:CompletionItemKind<Keyword>;
+    var AnonymousStructure:CompletionItemKind<JsonAnon>;
+    var Expression:CompletionItemKind<JsonTExpr>;
+    var TypeParameter:CompletionItemKind<ModuleTypeParameter>;
 }
 
 typedef CompletionItem<T> = {
     var kind:CompletionItemKind<T>;
     var args:T;
-    @:optional var type:JsonType<Dynamic>;
+    var ?type:JsonType<Dynamic>;
 }
 
 // rename all "Usage" stuff to "Occurence"?
 typedef CompletionItemUsage<T> = {
     var range:Range;
     var item:CompletionItem<T>;
-    @:optional var moduleType:JsonModuleType<Dynamic>;
+    var ?moduleType:JsonModuleType<Dynamic>;
 }
 
 typedef FieldCompletionSubject<T> = {
@@ -349,36 +349,36 @@ typedef FieldCompletionSubject<T> = {
 }
 
 typedef ToplevelCompletion<T> = {
-    @:optional var expectedType:JsonType<T>;
-    @:optional var expectedTypeFollowed:JsonType<T>;
+    var ?expectedType:JsonType<T>;
+    var ?expectedTypeFollowed:JsonType<T>;
 }
 
 enum abstract CompletionModeKind<T>(Int) {
-    var Field:CompletionModeKind<FieldCompletionSubject<Dynamic>> = 0;
-    var StructureField = 1;
-    var Toplevel:CompletionModeKind<ToplevelCompletion<Dynamic>> = 2;
-    var Metadata = 3;
-    var TypeHint = 4;
-    var Extends = 5;
-    var Implements = 6;
-    var StructExtension = 7;
-    var Import = 8;
-    var Using = 9;
-    var New = 10;
-    var Pattern = 11;
-    var Override = 12;
-    var TypeRelation = 13;
+    var Field:CompletionModeKind<FieldCompletionSubject<Dynamic>>;
+    var StructureField;
+    var Toplevel:CompletionModeKind<ToplevelCompletion<Dynamic>>;
+    var Metadata;
+    var TypeHint;
+    var Extends;
+    var Implements;
+    var StructExtension;
+    var Import;
+    var Using;
+    var New;
+    var Pattern;
+    var Override;
+    var TypeRelation;
 }
 
 typedef CompletionMode<T> = {
     var kind:CompletionModeKind<T>;
-    @:optional var args:T;
+    var ?args:T;
 }
 
 typedef CompletionResponse<T1, T2> = {
     var items:Array<CompletionItem<T1>>;
     var mode:CompletionMode<T2>;
-    @:optional var replaceRange:Range;
+    var ?replaceRange:Range;
 }
 
 typedef CompletionResult = Response<CompletionResponse<Dynamic,Dynamic>>;
@@ -409,7 +409,7 @@ typedef DeterminePackageResult = Response<Array<String>>;
 
 typedef SignatureInformation = {
     > JsonFunctionSignature,
-    @:optional var documentation:String;
+    var ?documentation:String;
 }
 
 typedef SignatureItem = {
@@ -426,7 +426,7 @@ typedef PositionParams = {
     > FileParams,
     /** Unicode character offset in the file. **/
     var offset:Int;
-    @:optional var contents:String;
+    var ?contents:String;
 }
 
 typedef Location = {

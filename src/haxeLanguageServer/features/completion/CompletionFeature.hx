@@ -14,7 +14,6 @@ import languageServerProtocol.Types.CompletionItem;
 import languageServerProtocol.Types.CompletionItemKind;
 import haxe.display.JsonModuleTypes;
 import haxe.extern.EitherType;
-using Lambda;
 
 private typedef PreviousCompletionResult = {
     var doc:TextDocument;
@@ -24,13 +23,13 @@ private typedef PreviousCompletionResult = {
 }
 
 enum abstract CompletionItemOrigin(Int) {
-    var Haxe = 0;
-    var Custom = 1;
+    var Haxe;
+    var Custom;
 }
 
 typedef CompletionItemData = {
     var origin:CompletionItemOrigin;
-    @:optional var index:Int;
+    var ?index:Int;
 }
 
 class CompletionFeature {
@@ -173,8 +172,8 @@ class CompletionFeature {
 
     function createCompletionItem<T>(index:Int, item:HaxeCompletionItem<T>, doc:TextDocument, replaceRange:Range, importPosition:Position, mode:CompletionModeKind<Dynamic>, indent:String):CompletionItem {
         var completionItem:CompletionItem = switch (item.kind) {
-            case ClassField | EnumAbstractValue: createClassFieldCompletionItem(item, doc, replaceRange, mode, indent, importPosition);
-            case EnumValue: createEnumValueCompletionItem(item.args.field, replaceRange, mode);
+            case ClassField | EnumAbstractField: createClassFieldCompletionItem(item, doc, replaceRange, mode, indent, importPosition);
+            case EnumField: createEnumFieldCompletionItem(item.args.field, replaceRange, mode);
             case Type: createTypeCompletionItem(item.args, doc, replaceRange, importPosition, mode);
             case Package: createPackageCompletionItem(item.args, replaceRange, mode);
             case Keyword: createKeywordCompletionItem(item.args, replaceRange, mode);
@@ -310,7 +309,7 @@ class CompletionFeature {
                     case [AccNormal, AccNormal]: Field;
                     case [AccNormal, AccCtor]: Field; // final
                     case [AccNormal, AccNever]: Field; // static final
-                    case [AccInline, _] if (kind == EnumAbstractValue): EnumMember;
+                    case [AccInline, _] if (kind == EnumAbstractField): EnumMember;
                     case [AccInline, _]: Constant;
                     case _: Property;
                 }
@@ -328,7 +327,7 @@ class CompletionFeature {
         }
     }
 
-    function createEnumValueCompletionItem(enumValue:JsonEnumField, replaceRange:Range, mode:CompletionModeKind<Dynamic>):CompletionItem {
+    function createEnumFieldCompletionItem(enumValue:JsonEnumField, replaceRange:Range, mode:CompletionModeKind<Dynamic>):CompletionItem {
         var name = enumValue.name;
         var type = enumValue.type;
 

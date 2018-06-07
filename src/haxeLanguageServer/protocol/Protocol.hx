@@ -13,7 +13,7 @@ class Methods {
 /* Initialize */
 
 typedef InitializeParams = {
-    @:optional var supportsResolve:Bool;
+    var ?supportsResolve:Bool;
 }
 
 /**

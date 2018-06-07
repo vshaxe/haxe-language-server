@@ -123,11 +123,11 @@ private typedef Relation = {
 
 private typedef StatisticsObject = {
     var range:Range;
-    @:optional var kind:StatisticObjectKind;
-    @:optional var implementers:Array<Relation>;
-    @:optional var subclasses:Array<Relation>;
-    @:optional var overrides:Array<Relation>;
-    @:optional var references:Array<Relation>;
+    var ?kind:StatisticObjectKind;
+    var ?implementers:Array<Relation>;
+    var ?subclasses:Array<Relation>;
+    var ?overrides:Array<Relation>;
+    var ?references:Array<Relation>;
 }
 
 private typedef Statistics = {

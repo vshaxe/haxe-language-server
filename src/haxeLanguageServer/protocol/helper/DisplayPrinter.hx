@@ -41,7 +41,6 @@ class DisplayPrinter {
             this.functionFormatting = {
                 useArrowSyntax: true,
                 returnTypeHint: NonVoid,
-                prefixPackages: false,
                 argumentTypeHints: true
             }
         }
@@ -207,7 +206,7 @@ class DisplayPrinter {
     }
 
     public function printClassFieldOrigin<T>(origin:ClassFieldOrigin<T>, kind:CompletionItemKind<Dynamic>, quote:String):Option<String> {
-        if (kind == EnumAbstractValue || origin.kind == cast Unknown) {
+        if (kind == EnumAbstractField || origin.kind == cast Unknown) {
             return None;
         }
         if (origin.args == null && origin.kind != cast BuiltIn) {

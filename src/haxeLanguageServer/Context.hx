@@ -23,8 +23,8 @@ import haxeLanguageServer.protocol.Server.ServerMethods;
 import haxeLanguageServer.LanguageServerMethods.HaxeMethodResult;
 
 private typedef FunctionGenerationConfig = {
-    @:optional var anonymous:FunctionFormattingConfig;
-    @:optional var field:FunctionFormattingConfig;
+    var ?anonymous:FunctionFormattingConfig;
+    var ?field:FunctionFormattingConfig;
 }
 
 private typedef ImportGenerationConfig = {
@@ -33,8 +33,8 @@ private typedef ImportGenerationConfig = {
 }
 
 private typedef CodeGenerationConfig = {
-    @:optional var functions:FunctionGenerationConfig;
-    @:optional var imports:ImportGenerationConfig;
+    var ?functions:FunctionGenerationConfig;
+    var ?imports:ImportGenerationConfig;
 }
 
 private typedef Config = {
@@ -273,9 +273,9 @@ class Context {
 
         var functions = codeGen.functions;
         if (functions.anonymous == null)
-            functions.anonymous = {argumentTypeHints: false, returnTypeHint: Never, useArrowSyntax: true, prefixPackages: true};
+            functions.anonymous = {argumentTypeHints: false, returnTypeHint: Never, useArrowSyntax: true};
         if (functions.field == null)
-            functions.field = {argumentTypeHints: true, returnTypeHint: NonVoid, useArrowSyntax: false, prefixPackages: true};
+            functions.field = {argumentTypeHints: true, returnTypeHint: NonVoid, useArrowSyntax: false};
 
         if (codeGen.imports == null)
             codeGen.imports = {enableAutoImports: true, style: Type};

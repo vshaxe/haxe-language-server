@@ -325,8 +325,8 @@ class DiagnosticsManager {
 
 
 private enum abstract UnresolvedIdentifierSuggestion(Int) {
-    var UISImport = 0;
-    var UISTypo = 1;
+    var UISImport;
+    var UISTypo;
 
     public inline function new(i:Int) {
         this = i;
@@ -335,10 +335,10 @@ private enum abstract UnresolvedIdentifierSuggestion(Int) {
 
 
 private enum abstract DiagnosticsKind<T>(Int) from Int to Int {
-    var DKUnusedImport:DiagnosticsKind<Void> = 0;
-    var DKUnresolvedIdentifier:DiagnosticsKind<Array<{kind: UnresolvedIdentifierSuggestion, name: String}>> = 1;
-    var DKCompilerError:DiagnosticsKind<String> = 2;
-    var DKRemovableCode:DiagnosticsKind<{description:String, range:Range}> = 3;
+    var DKUnusedImport:DiagnosticsKind<Void>;
+    var DKUnresolvedIdentifier:DiagnosticsKind<Array<{kind: UnresolvedIdentifierSuggestion, name: String}>>;
+    var DKCompilerError:DiagnosticsKind<String>;
+    var DKRemovableCode:DiagnosticsKind<{description:String, range:Range}>;
 
     public inline function new(i:Int) {
         this = i;
