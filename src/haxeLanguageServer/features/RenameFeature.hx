@@ -26,6 +26,9 @@ class RenameFeature {
             function(locations:Array<Location>) {
                 var doc = context.documents.get(params.textDocument.uri);
                 var declaration = locations[0];
+                if (declaration == null) {
+                    return reject(ResponseError.internalError("No declaration found."));
+                }
                 if (declaration.uri != params.textDocument.uri) {
                     return invalidRename();
                 }
