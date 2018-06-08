@@ -173,7 +173,7 @@ class CompletionFeature {
     function createCompletionItem<T>(index:Int, item:HaxeCompletionItem<T>, doc:TextDocument, replaceRange:Range, importPosition:Position, mode:CompletionModeKind<Dynamic>, indent:String):CompletionItem {
         var completionItem:CompletionItem = switch (item.kind) {
             case ClassField | EnumAbstractField: createClassFieldCompletionItem(item, doc, replaceRange, mode, indent, importPosition);
-            case EnumField: createEnumFieldCompletionItem(item.args.field, replaceRange, mode);
+            case EnumField: createEnumFieldCompletionItem(item, replaceRange, mode);
             case Type: createTypeCompletionItem(item.args, doc, replaceRange, importPosition, mode);
             case Package: createPackageCompletionItem(item.args, replaceRange, mode);
             case Keyword: createKeywordCompletionItem(item.args, replaceRange, mode);
@@ -333,14 +333,15 @@ class CompletionFeature {
         }
     }
 
-    function createEnumFieldCompletionItem(enumValue:JsonEnumField, replaceRange:Range, mode:CompletionModeKind<Dynamic>):CompletionItem {
-        var name = enumValue.name;
-        var type = enumValue.type;
+    function createEnumFieldCompletionItem(item:HaxeCompletionItem<Dynamic>, replaceRange:Range, mode:CompletionModeKind<Dynamic>):CompletionItem {
+        var field:JsonEnumField = item.args;
+        var name = field.name;
+        var definition = printer.printEnumField(field, item.type, false);
 
         var item:CompletionItem = {
             label: name,
             kind: EnumMember,
-            detail: printer.printType(type),
+            detail: definition,
             textEdit: {
                 newText: name,
                 range: replaceRange
@@ -351,7 +352,7 @@ class CompletionFeature {
             return item;
         }
 
-        item.textEdit.newText = printer.printEnumField(enumValue, snippetSupport);
+        item.textEdit.newText = definition + ":";
         if (snippetSupport) {
             item.insertTextFormat = Snippet;
         }

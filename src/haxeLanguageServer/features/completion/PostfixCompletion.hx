@@ -93,11 +93,11 @@ class PostfixCompletion {
                 case Enum:
                     var args:JsonEnum = moduleType.args;
                     var printer = new DisplayPrinter();
-                    var constructors = args.constructors.map(field -> printer.printEnumField(field, false));
+                    var constructors = args.constructors.map(field -> printer.printEnumField(field, field.type, false));
                     add(createSwitchItem(expr, constructors));
                 case Abstract if (moduleType.meta.hasMeta(Enum)):
                     var impl:JsonClass = cast moduleType.args.impl;
-                    var values = impl.statics.filter(Helper.isEnumAbstractField).map(field -> field.name + ":");
+                    var values = impl.statics.filter(Helper.isEnumAbstractField).map(field -> field.name);
                     add(createSwitchItem(expr, values));
                 case _:
             }
@@ -110,7 +110,7 @@ class PostfixCompletion {
         var cases = [];
         for (i in 0...constructors.length) {
             var constructor = constructors[i];
-            cases.push('\tcase ' + constructor + "$" + (i + 1));
+            cases.push('\tcase ' + constructor + ":$" + (i + 1));
         }
         return {
             label: "switch",
