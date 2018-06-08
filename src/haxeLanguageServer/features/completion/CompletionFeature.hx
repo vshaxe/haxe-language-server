@@ -392,7 +392,7 @@ class CompletionFeature {
 
         if (snippetSupport) {
             switch (mode) {
-                case TypeHint | Extends | Implements | StructExtension if (hasMandatoryTypeParameters(type)):
+                case TypeHint | Extends | Implements | StructExtension if (type.hasMandatoryTypeParameters()):
                     item.textEdit.newText += "<$1>";
                     item.insertTextFormat = Snippet;
                 case _:
@@ -408,14 +408,6 @@ class CompletionFeature {
         }
 
         return item;
-    }
-
-    function hasMandatoryTypeParameters(type:ModuleType):Bool {
-        // Dynamic is a special case regarding this in the compiler
-        if (type.name == "Dynamic" && type.pack.length == 0) {
-            return false;
-        }
-        return type.params != null && type.params.length > 0;
     }
 
     function getKindForModuleType(type:ModuleType):CompletionItemKind {
