@@ -161,9 +161,9 @@ class DisplayPrinter {
         }
     }
 
-    public function printEmptyFunctionDefinition<T>(field:JsonClassField, concreteType:JsonType<T>) {
-        var signature = concreteType.extractFunctionSignature();
-        var definition = "function " + field.name + printTypeParameters(field.params) + printCallArguments(signature, printFunctionArgument);
+    public function printEmptyFunctionDefinition<T>(name:String, signature:JsonFunctionSignature, ?params:JsonTypeParameters) {
+        var printedParams = if (params == null) "" else printTypeParameters(params);
+        var definition = "function " + name + printedParams + printCallArguments(signature, printFunctionArgument);
         var returnStyle = functionFormatting.returnTypeHint;
         if (returnStyle == Always || (returnStyle == NonVoid && !signature.ret.isVoid())) {
             definition += ":" + printTypeRec(signature.ret);
@@ -176,7 +176,7 @@ class DisplayPrinter {
         var returnKeyword = if (signature.ret.isVoid()) "" else "return ";
         var arguments = printCallArguments(signature, arg -> arg.name);
         var lineBreak = if (functionFormatting.placeOpenBraceOnNewLine) "\n" else " ";
-        return printEmptyFunctionDefinition(field, concreteType) + '$lineBreak{\n${indent}$${1:${returnKeyword}super.${field.name}$arguments;$0}\n}';
+        return printEmptyFunctionDefinition(field.name, signature, field.params) + '$lineBreak{\n${indent}$${1:${returnKeyword}super.${field.name}$arguments;$0}\n}';
     }
 
     static final castRegex = ~/^(cast )+/;
@@ -207,7 +207,7 @@ class DisplayPrinter {
                     case MethMacro: "macro ";
                 }
                 var finalKeyword = if (field.meta.hasMeta(Final)) "final " else "";
-                var definition = printEmptyFunctionDefinition(field, concreteType);
+                var definition = printEmptyFunctionDefinition(field.name, concreteType.extractFunctionSignature(), field.params);
                 '$access $staticKeyword$finalKeyword$methodKind$definition';
         };
     }
@@ -222,6 +222,24 @@ class DisplayPrinter {
             case AccInline: null;
             case AccRequire: null;
             case AccCtor: null;
+        }
+    }
+
+    public function printLocalDefinition<T1,T2>(local:JsonLocal<T1>, concreteType:JsonType<T2>) {
+        return switch (local.origin) {
+            case LocalFunction:
+                var extra = local.extra;
+                var inlineKeyword = if (extra != null && extra.expr != null) "inline " else "";
+                inlineKeyword + printEmptyFunctionDefinition(
+                    local.name, concreteType.extractFunctionSignature(),
+                    if (extra == null) null else extra.params
+                );
+            case other:
+                var definition = '${local.name}:${printType(concreteType)}';
+                if (other != Argument) {
+                    definition = "var " + definition;
+                }
+                definition;
         }
     }
 

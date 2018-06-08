@@ -181,7 +181,7 @@ class CompletionFeature {
                     label: item.args.name,
                     kind: Variable,
                     detail: {
-                        var type = printer.printType(item.args.type);
+                        var type = printer.printLocalDefinition(item.args, item.type);
                         var origin = printer.printLocalOrigin(item.args.origin);
                         '$type \n($origin)';
                     }

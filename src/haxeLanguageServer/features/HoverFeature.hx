@@ -33,14 +33,11 @@ class HoverFeature {
         var printer = new DisplayPrinter(true);
         var item = hover.item;
         var concreteType = hover.item.type;
-        function printType() {
-            return printCodeBlock(printer.printType(concreteType), HaxeType);
-        }
         return switch (item.kind) {
             // case Type: printer.printEmptyTypeDefinition(hover.item.args);
             case Local:
                 var origin = printer.printLocalOrigin(item.args.origin);
-                printType() + '\n*$origin*';
+                printCodeBlock(printer.printLocalDefinition(hover.item.args, concreteType), Haxe) + '\n*$origin*';
             case ClassField:
                 var result = printCodeBlock(printer.printFieldDefinition(item.args.field, concreteType), Haxe);
                 var origin = printer.printClassFieldOrigin(item.args.origin, item.kind, "");
@@ -52,7 +49,7 @@ class HoverFeature {
             case Metadata:
                 printCodeBlock("@" + item.args.name, Haxe);
             case _:
-                printType();
+                printCodeBlock(printer.printType(concreteType), HaxeType);
         }
     }
 
