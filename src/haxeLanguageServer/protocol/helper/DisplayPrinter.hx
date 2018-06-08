@@ -162,9 +162,8 @@ class DisplayPrinter {
     }
 
     public function printEmptyFunctionDefinition<T>(field:JsonClassField, concreteType:JsonType<T>) {
-        var visbility = field.isPublic ? "public " : "";
         var signature = concreteType.extractFunctionSignature();
-        var definition = visbility + "function " + field.name + printTypeParameters(field.params) + printCallArguments(signature, printFunctionArgument);
+        var definition = "function " + field.name + printTypeParameters(field.params) + printCallArguments(signature, printFunctionArgument);
         var returnStyle = functionFormatting.returnTypeHint;
         if (returnStyle == Always || (returnStyle == NonVoid && !signature.ret.isVoid())) {
             definition += ":" + printTypeRec(signature.ret);
@@ -178,6 +177,49 @@ class DisplayPrinter {
         var arguments = printCallArguments(signature, arg -> arg.name);
         var lineBreak = if (functionFormatting.placeOpenBraceOnNewLine) "\n" else " ";
         return printEmptyFunctionDefinition(field, concreteType) + '$lineBreak{\n${indent}$${1:${returnKeyword}super.${field.name}$arguments;$0}\n}';
+    }
+
+    public function printFieldDefinition<T1,T2>(field:JsonClassField, concreteType:JsonType<T1>) {
+        var type = printType(concreteType);
+        var name = field.name;
+        var kind:JsonFieldKind<T2> = field.kind;
+        var access = if (field.isPublic) "public" else "private";
+        return switch (kind.kind) {
+            case FVar:
+                var inlineKeyword = if (kind.args.write.kind == AccInline) "inline" else "";
+                var keyword = if (kind.args.write.kind == AccCtor) "final" else "var";
+                var read = printAccessor(kind.args.read, true);
+                var write = printAccessor(kind.args.write, false);
+                var accessors = if (read != null && write != null) '($read, $write)' else "";
+                var definition = '$access $keyword $inlineKeyword $name$accessors:$type';
+                if (field.expr != null) {
+                    definition += " = " + field.expr.string;
+                }
+                definition;
+            case FMethod:
+                var methodKind = switch (kind.args) {
+                    case MethNormal: "";
+                    case MethInline: "inline";
+                    case MethDynamic: "dynamic";
+                    case MethMacro: "macro";
+                }
+                var finalKeyword = if (field.meta.hasMeta(Final)) "final" else "";
+                var definition = printEmptyFunctionDefinition(field, concreteType);
+                '$access $finalKeyword $methodKind $definition';
+        };
+    }
+
+    public function printAccessor<T>(access:JsonVarAccess<T>, isRead:Bool) {
+        return switch (access.kind) {
+            case AccNormal: null;
+            case AccNo: null;
+            case AccNever: "never";
+            case AccResolve: null;
+            case AccCall: if (isRead) "get" else "set";
+            case AccInline: null;
+            case AccRequire: null;
+            case AccCtor: null;
+        }
     }
 
     /**

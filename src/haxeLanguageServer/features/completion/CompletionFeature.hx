@@ -249,15 +249,15 @@ class CompletionFeature {
             kind: getKindForField(field, item.kind),
             detail: {
                 var overloads = if (usage.field.overloads == null) 0 else usage.field.overloads.length;
-                var type = printer.printType(concreteType);
+                var detail = printer.printFieldDefinition(field, concreteType);
                 if (overloads > 0) {
-                    type += ' (+$overloads overloads)';
+                    detail += ' (+$overloads overloads)';
                 }
                 var origin = printer.printClassFieldOrigin(usage.origin, item.kind, "'");
                 var shadowed = if (!resolution.isQualified) " (shadowed)" else "";
                 switch (origin) {
-                    case Some(origin): type + "\n" + origin + shadowed;
-                    case None: type + "\n" + shadowed;
+                    case Some(origin): detail + "\n" + origin + shadowed;
+                    case None: detail + "\n" + shadowed;
                 }
             },
             textEdit: {
