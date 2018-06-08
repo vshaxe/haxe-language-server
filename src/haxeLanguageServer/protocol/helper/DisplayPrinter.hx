@@ -311,7 +311,7 @@ class DisplayPrinter {
 
     public function printLocalOrigin(origin:LocalOrigin):String {
         return switch (origin) {
-            case LocalVariable: "local";
+            case LocalVariable: "local variable";
             case Argument: "argument";
             case ForVariable: "for variable";
             case PatternVariable: "pattern variable";
