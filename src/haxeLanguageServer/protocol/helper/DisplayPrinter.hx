@@ -147,10 +147,24 @@ class DisplayPrinter {
         return "(" + signature.args.map(printFunctionArgument).join(", ") + ")";
     }
 
+    public function printTypeParameters(params:JsonTypeParameters) {
+        return if (params.length == 0) {
+            "";
+        } else {
+            "<" + params.map(param -> {
+                var s = param.name;
+                if (param.constraints.length > 0) {
+                    s += ":" + param.constraints.map(constraint -> printTypeRec(constraint)).join(" & ");
+                }
+                s;
+            }).join(", ") + ">";
+        }
+    }
+
     public function printEmptyFunctionDefinition<T>(field:JsonClassField, concreteType:JsonType<T>) {
         var visbility = field.isPublic ? "public " : "";
         var signature = concreteType.extractFunctionSignature();
-        var definition = visbility + "function " + field.name + printCallArguments(signature, printFunctionArgument);
+        var definition = visbility + "function " + field.name + printTypeParameters(field.params) + printCallArguments(signature, printFunctionArgument);
         var returnStyle = functionFormatting.returnTypeHint;
         if (returnStyle == Always || (returnStyle == NonVoid && !signature.ret.isVoid())) {
             definition += ":" + printTypeRec(signature.ret);
