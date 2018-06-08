@@ -34,7 +34,8 @@ class HoverFeature {
         var item = hover.item;
         var concreteType = hover.item.type;
         return switch (item.kind) {
-            // case Type: printer.printEmptyTypeDefinition(hover.item.args);
+            case Type:
+                printCodeBlock(printer.printEmptyTypeDefinition(hover.item.args), Haxe);
             case Local:
                 var origin = printer.printLocalOrigin(item.args.origin);
                 printCodeBlock(printer.printLocalDefinition(hover.item.args, concreteType), Haxe) + '\n*$origin*';
