@@ -179,7 +179,7 @@ class DisplayPrinter {
         return printEmptyFunctionDefinition(field, concreteType) + '$lineBreak{\n${indent}$${1:${returnKeyword}super.${field.name}$arguments;$0}\n}';
     }
 
-    static final castRegex = ~/(cast )+/;
+    static final castRegex = ~/^(cast )+/;
     public function printFieldDefinition<T1,T2>(field:JsonClassField, concreteType:JsonType<T1>) {
         var type = printType(concreteType);
         var name = field.name;
