@@ -446,7 +446,7 @@ class CompletionFeature {
     }
 
     function printTypeDetail(type:ModuleType, containerName:String):String {
-        var detail = printer.printTypeDeclaration(type) + "\n";
+        var detail = printer.printEmptyTypeDefinition(type) + "\n";
         switch (type.importStatus) {
             case Imported:
                 detail += "(imported)";

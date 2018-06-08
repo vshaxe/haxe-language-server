@@ -229,7 +229,7 @@ class DisplayPrinter {
         Prints a type declaration in the form of `extern interface ArrayAccess<T>`.
         (`modifiers... keyword Name<Params>`)
     **/
-    public function printTypeDeclaration(type:ModuleType):String {
+    public function printEmptyTypeDefinition(type:ModuleType):String {
         var components = [];
         if (type.isPrivate) components.push("private");
         if (type.meta.hasMeta(Final)) components.push("final");
