@@ -103,6 +103,7 @@ typedef JsonLocal<T> = {
     };
     var meta:JsonMetadata;
     var pos:JsonPos;
+    var isInline:Bool;
 }
 
 enum abstract LocalOrigin(Int) {

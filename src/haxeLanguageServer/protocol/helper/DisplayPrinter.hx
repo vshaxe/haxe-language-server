@@ -237,11 +237,10 @@ class DisplayPrinter {
     public function printLocalDefinition<T1,T2>(local:JsonLocal<T1>, concreteType:JsonType<T2>) {
         return switch (local.origin) {
             case LocalFunction:
-                var extra = local.extra;
-                var inlineKeyword = if (extra != null && extra.expr != null) "inline " else "";
+                var inlineKeyword = if (local.isInline) "inline " else "";
                 inlineKeyword + printEmptyFunctionDefinition(
                     local.name, concreteType.extractFunctionSignature(),
-                    if (extra == null) null else extra.params
+                    if (local.extra == null) null else local.extra.params
                 );
             case other:
                 'var ${local.name}:${printType(concreteType)}';
