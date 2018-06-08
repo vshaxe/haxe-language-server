@@ -235,9 +235,9 @@ class CompletionFeature {
     }
 
     function createClassFieldCompletionItem<T>(item:HaxeCompletionItem<Dynamic>, doc:TextDocument, replaceRange:Range, mode:CompletionModeKind<Dynamic>, indent:String, importPosition:Position):CompletionItem {
-        var usage:ClassFieldUsage<T> = item.args;
+        var occurrence:ClassFieldOccurrence<T> = item.args;
         var concreteType = item.type; // this has importStatus, applied type params etc, which field.type does not
-        var field = usage.field;
+        var field = occurrence.field;
         if (mode == Override) {
             if (concreteType.kind != TFun || field.meta.hasMeta(Final)) {
                 return null;
@@ -249,17 +249,17 @@ class CompletionFeature {
         }
 
         var importConfig = context.config.codeGeneration.imports;
-        var resolution = usage.resolution;
+        var resolution = occurrence.resolution;
         var item:CompletionItem = {
             label: field.name,
             kind: getKindForField(field, item.kind),
             detail: {
-                var overloads = if (usage.field.overloads == null) 0 else usage.field.overloads.length;
-                var detail = printer.printClassFieldDefinition(usage, concreteType, item.kind == EnumAbstractField);
+                var overloads = if (occurrence.field.overloads == null) 0 else occurrence.field.overloads.length;
+                var detail = printer.printClassFieldDefinition(occurrence, concreteType, item.kind == EnumAbstractField);
                 if (overloads > 0) {
                     detail += ' (+$overloads overloads)';
                 }
-                var origin = printer.printClassFieldOrigin(usage.origin, item.kind, "'");
+                var origin = printer.printClassFieldOrigin(occurrence.origin, item.kind, "'");
                 var shadowed = if (!resolution.isQualified) " (shadowed)" else "";
                 switch (origin) {
                     case Some(origin): detail + "\n" + origin + shadowed;
@@ -334,15 +334,15 @@ class CompletionFeature {
     }
 
     function createEnumFieldCompletionItem<T>(item:HaxeCompletionItem<Dynamic>, replaceRange:Range, mode:CompletionModeKind<Dynamic>):CompletionItem {
-        var usage:EnumFieldUsage<T> = item.args;
-        var field:JsonEnumField = usage.field;
+        var occurrence:EnumFieldOccurrence<T> = item.args;
+        var field:JsonEnumField = occurrence.field;
         var name = field.name;
         return {
             label: name,
             kind: EnumMember,
             detail: {
                 var definition = printer.printEnumFieldDefinition(field, item.type);
-                var origin = printer.printEnumFieldOrigin(usage.origin, "'");
+                var origin = printer.printEnumFieldOrigin(occurrence.origin, "'");
                 switch (origin) {
                     case Some(v): definition += "\n" + v;
                     case None:

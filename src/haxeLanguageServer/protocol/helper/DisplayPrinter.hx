@@ -173,8 +173,8 @@ class DisplayPrinter {
     }
 
     static final castRegex = ~/^(cast )+/;
-    public function printClassFieldDefinition<T0,T1,T2>(usage:ClassFieldUsage<T0>, concreteType:JsonType<T1>, isEnumAbstractField:Bool) {
-        var field = usage.field;
+    public function printClassFieldDefinition<T0,T1,T2>(occurrence:ClassFieldOccurrence<T0>, concreteType:JsonType<T1>, isEnumAbstractField:Bool) {
+        var field = occurrence.field;
         var type = printType(concreteType);
         var name = field.name;
         var kind:JsonFieldKind<T2> = field.kind;
@@ -188,7 +188,7 @@ class DisplayPrinter {
                 var write = printAccessor(kind.args.write, false);
                 var accessors = if ((read != null && write != null) && (read != "default" || write != "default")) '($read, $write)' else "";
                 // structure fields get some special treatment
-                if (usage.origin.isStructure()) {
+                if (occurrence.origin.isStructure()) {
                     access = "";
                     if (field.meta.hasMeta(Optional)) {
                         name = "?" + name;

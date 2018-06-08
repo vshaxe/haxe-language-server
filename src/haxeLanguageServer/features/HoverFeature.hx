@@ -30,7 +30,7 @@ class HoverFeature {
         }, error -> reject(ResponseError.internalError(error)));
     }
 
-    function printContent<T>(hover:CompletionItemUsage<T>):String {
+    function printContent<T>(hover:CompletionItemOccurrence<T>):String {
         var printer = new DisplayPrinter(true);
         var item = hover.item;
         var concreteType = hover.item.type;

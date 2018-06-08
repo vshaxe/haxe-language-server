@@ -163,7 +163,7 @@ typedef ClassFieldOrigin<T> = {
     var ?args:T;
 }
 
-typedef ClassFieldUsage<T> = {
+typedef ClassFieldOccurrence<T> = {
     var field:JsonClassField;
     var resolution:FieldResolution;
     var ?origin:ClassFieldOrigin<T>;
@@ -187,7 +187,7 @@ typedef EnumFieldOrigin<T> = {
     var ?args:T;
 }
 
-typedef EnumFieldUsage<T> = {
+typedef EnumFieldOccurrence<T> = {
     var field:JsonEnumField;
     var resolution:FieldResolution;
     var ?origin:EnumFieldOrigin<T>;
@@ -319,9 +319,9 @@ typedef Module = {
 
 enum abstract CompletionItemKind<T>(String) {
     var Local:CompletionItemKind<JsonLocal<Dynamic>>;
-    var ClassField:CompletionItemKind<ClassFieldUsage<Dynamic>>;
-    var EnumField:CompletionItemKind<EnumFieldUsage<Dynamic>>;
-    var EnumAbstractField:CompletionItemKind<ClassFieldUsage<Dynamic>>;
+    var ClassField:CompletionItemKind<ClassFieldOccurrence<Dynamic>>;
+    var EnumField:CompletionItemKind<EnumFieldOccurrence<Dynamic>>;
+    var EnumAbstractField:CompletionItemKind<ClassFieldOccurrence<Dynamic>>;
     var Type:CompletionItemKind<ModuleType>;
     var Package:CompletionItemKind<Package>;
     var Module:CompletionItemKind<Module>;
@@ -339,15 +339,13 @@ typedef CompletionItem<T> = {
     var ?type:JsonType<Dynamic>;
 }
 
-// rename all "Usage" stuff to "Occurence"?
-typedef CompletionItemUsage<T> = {
+typedef CompletionItemOccurrence<T> = {
     var range:Range;
     var item:CompletionItem<T>;
     var ?moduleType:JsonModuleType<Dynamic>;
 }
 
-typedef FieldCompletionSubject<T> = {
-    >CompletionItemUsage<T>,
+typedef FieldCompletionSubject<T> = CompletionItemOccurrence<T> & {
     // var isIterable:Bool; TODO
 }
 
@@ -402,7 +400,7 @@ typedef GotoDefinitionResult = Response<Array<Location>>;
 
 /* Hover */
 
-typedef HoverResult = Response<CompletionItemUsage<Dynamic>>;
+typedef HoverResult = Response<CompletionItemOccurrence<Dynamic>>;
 
 /* DeterminePackage */
 
