@@ -179,6 +179,7 @@ class DisplayPrinter {
         return printEmptyFunctionDefinition(field, concreteType) + '$lineBreak{\n${indent}$${1:${returnKeyword}super.${field.name}$arguments;$0}\n}';
     }
 
+    static final castRegex = ~/(cast )+/;
     public function printFieldDefinition<T1,T2>(field:JsonClassField, concreteType:JsonType<T1>) {
         var type = printType(concreteType);
         var name = field.name;
@@ -186,26 +187,27 @@ class DisplayPrinter {
         var access = if (field.isPublic) "public" else "private";
         return switch (kind.kind) {
             case FVar:
-                var inlineKeyword = if (kind.args.write.kind == AccInline) "inline" else "";
+                var inlineKeyword = if (kind.args.write.kind == AccInline) "inline " else "";
                 var keyword = if (kind.args.write.kind == AccCtor) "final" else "var";
                 var read = printAccessor(kind.args.read, true);
                 var write = printAccessor(kind.args.write, false);
                 var accessors = if (read != null && write != null) '($read, $write)' else "";
-                var definition = '$access $keyword $inlineKeyword $name$accessors:$type';
+                var definition = '$access $keyword $inlineKeyword$name$accessors:$type';
                 if (field.expr != null) {
-                    definition += " = " + field.expr.string;
+                    var expr = castRegex.replace(field.expr.string, "");
+                    definition += " = " + expr;
                 }
                 definition;
             case FMethod:
                 var methodKind = switch (kind.args) {
                     case MethNormal: "";
-                    case MethInline: "inline";
-                    case MethDynamic: "dynamic";
-                    case MethMacro: "macro";
+                    case MethInline: "inline ";
+                    case MethDynamic: "dynamic ";
+                    case MethMacro: "macro ";
                 }
-                var finalKeyword = if (field.meta.hasMeta(Final)) "final" else "";
+                var finalKeyword = if (field.meta.hasMeta(Final)) "final " else "";
                 var definition = printEmptyFunctionDefinition(field, concreteType);
-                '$access $finalKeyword $methodKind $definition';
+                '$access$finalKeyword$methodKind $definition';
         };
     }
 
