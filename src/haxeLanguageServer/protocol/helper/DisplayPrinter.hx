@@ -189,7 +189,7 @@ class DisplayPrinter {
         return switch (kind.kind) {
             case FVar:
                 var inlineKeyword = if (kind.args.write.kind == AccInline) "inline " else "";
-                var keyword = if (kind.args.write.kind == AccCtor) "final" else "var";
+                var keyword = if (kind.args.write.kind == AccCtor || field.meta.hasMeta(Final)) "final" else "var";
                 var read = printAccessor(kind.args.read, true);
                 var write = printAccessor(kind.args.write, false);
                 var accessors = if (read != null && write != null) '($read, $write)' else "";
