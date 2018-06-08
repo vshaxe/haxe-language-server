@@ -32,8 +32,9 @@ class HoverFeature {
     function printContent<T>(hover:CompletionItemUsage<T>):String {
         var printer = new DisplayPrinter(true);
         var item = hover.item;
+        var concreteType = hover.item.type;
         function printType() {
-            return printCodeBlock(printer.printType(hover.item.type), HaxeType);
+            return printCodeBlock(printer.printType(concreteType), HaxeType);
         }
         return switch (item.kind) {
             // case Type: printer.printTypeDeclaration(hover.item.args);
@@ -41,7 +42,7 @@ class HoverFeature {
                 var origin = printer.printLocalOrigin(item.args.origin);
                 printType() + '\n*$origin*';
             case ClassField:
-                var result = printType();
+                var result = printCodeBlock(printer.printFieldDefinition(item.args.field, concreteType), Haxe);
                 var origin = printer.printClassFieldOrigin(item.args.origin, item.kind, "");
                 switch (origin) {
                     case Some(v): result += '\n*$v*';
