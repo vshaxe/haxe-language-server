@@ -37,8 +37,9 @@ class HoverFeature {
             case Type:
                 printCodeBlock(printer.printEmptyTypeDefinition(hover.item.args), Haxe);
             case Local:
+                var languageId = if (item.args.origin == Argument) HaxeArgument else Haxe;
                 var origin = printer.printLocalOrigin(item.args.origin);
-                printCodeBlock(printer.printLocalDefinition(hover.item.args, concreteType), Haxe) + '\n*$origin*';
+                printCodeBlock(printer.printLocalDefinition(hover.item.args, concreteType), languageId) + '\n*$origin*';
             case ClassField:
                 var result = printCodeBlock(printer.printClassFieldDefinition(item.args, concreteType, item.kind == EnumAbstractField), Haxe);
                 var origin = printer.printClassFieldOrigin(item.args.origin, item.kind, "");
@@ -111,4 +112,5 @@ class HoverFeature {
 private enum abstract LanguageId(String) to String {
     var Haxe = "haxe";
     var HaxeType = "haxe.type";
+    var HaxeArgument = "haxe.argument";
 }
