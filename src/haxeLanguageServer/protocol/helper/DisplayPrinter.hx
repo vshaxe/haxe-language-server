@@ -185,6 +185,7 @@ class DisplayPrinter {
         var name = field.name;
         var kind:JsonFieldKind<T2> = field.kind;
         var access = if (field.isPublic) "public" else "private";
+        var staticKeyword = if (field.scope == Static) "static " else "";
         return switch (kind.kind) {
             case FVar:
                 var inlineKeyword = if (kind.args.write.kind == AccInline) "inline " else "";
@@ -192,7 +193,7 @@ class DisplayPrinter {
                 var read = printAccessor(kind.args.read, true);
                 var write = printAccessor(kind.args.write, false);
                 var accessors = if (read != null && write != null) '($read, $write)' else "";
-                var definition = '$access $keyword $inlineKeyword$name$accessors:$type';
+                var definition = '$access $staticKeyword$keyword $inlineKeyword$name$accessors:$type';
                 if (field.expr != null) {
                     var expr = castRegex.replace(field.expr.string, "");
                     definition += " = " + expr;
@@ -207,7 +208,7 @@ class DisplayPrinter {
                 }
                 var finalKeyword = if (field.meta.hasMeta(Final)) "final " else "";
                 var definition = printEmptyFunctionDefinition(field, concreteType);
-                '$access $finalKeyword$methodKind$definition';
+                '$access $staticKeyword$finalKeyword$methodKind$definition';
         };
     }
 
