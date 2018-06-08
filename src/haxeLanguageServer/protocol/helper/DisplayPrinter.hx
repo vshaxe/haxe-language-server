@@ -320,7 +320,7 @@ class DisplayPrinter {
         });
     }
 
-    public function printEnumFieldOrigin<T>(origin:EnumValueOrigin<T>, quote:String = ""):Option<String> {
+    public function printEnumFieldOrigin<T>(origin:EnumFieldOrigin<T>, quote:String = ""):Option<String> {
         if (origin.args == null) {
             return None;
         }

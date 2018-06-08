@@ -334,7 +334,7 @@ class CompletionFeature {
     }
 
     function createEnumFieldCompletionItem<T>(item:HaxeCompletionItem<Dynamic>, replaceRange:Range, mode:CompletionModeKind<Dynamic>):CompletionItem {
-        var usage:EnumValueUsage<T> = item.args;
+        var usage:EnumFieldUsage<T> = item.args;
         var field:JsonEnumField = usage.field;
         var name = field.name;
         return {

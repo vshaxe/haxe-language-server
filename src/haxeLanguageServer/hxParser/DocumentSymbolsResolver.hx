@@ -115,7 +115,7 @@ class DocumentSymbolsResolver extends PositionAwareWalker {
 
     override function walkClassField_Variable(annotations:NAnnotations, modifiers:Array<FieldModifier>, varKeyword:Token, name:Token, typeHint:Null<TypeHint>, assignment:Null<Assignment>, semicolon:Token, stack:WalkStack) {
         var kind =
-            if (Helper.isAbstractEnumValue(stack, modifiers)) SymbolKind.EnumMember
+            if (Helper.isAbstractEnumField(stack, modifiers)) SymbolKind.EnumMember
             else if (Helper.isInline(modifiers)) SymbolKind.Constant
             else SymbolKind.Field;
 

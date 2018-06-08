@@ -17,7 +17,7 @@ class Helper {
         });
     }
 
-    public static function isAbstractEnumValue(stack:WalkStack, modifiers:Array<FieldModifier>) {
+    public static function isAbstractEnumField(stack:WalkStack, modifiers:Array<FieldModifier>) {
         return !isStatic(modifiers) && isInAbstractEnum(stack);
     }
 
