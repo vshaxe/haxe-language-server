@@ -192,7 +192,6 @@ class DisplayPrinter {
                     access = "";
                     if (field.meta.hasMeta(Optional)) {
                         name = "?" + name;
-                        type = printType(concreteType.removeNulls().type);
                     }
                     if (read == "default" && write == "never") {
                         keyword = "final";
@@ -243,7 +242,15 @@ class DisplayPrinter {
                     if (local.extra == null) null else local.extra.params
                 );
             case other:
-                'var ${local.name}:${printType(concreteType)}';
+                var keyword = "var ";
+                var name = local.name;
+                if (other == Argument) {
+                    keyword = "";
+                    if (concreteType.removeNulls().optional) {
+                        name = "?" + name;
+                    }
+                }
+                '$keyword$name:${printType(concreteType)}';
         }
     }
 
