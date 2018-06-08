@@ -238,8 +238,14 @@ class CompletionFeature {
         var usage:ClassFieldUsage<T> = item.args;
         var concreteType = item.type; // this has importStatus, applied type params etc, which field.type does not
         var field = usage.field;
-        if (mode == Override && concreteType.kind != TFun) {
-            return null;
+        if (mode == Override) {
+            if (concreteType.kind != TFun || field.meta.hasMeta(Final)) {
+                return null;
+            }
+            switch (field.kind.kind) {
+                case FMethod if (field.kind.args == MethInline): return null;
+                case _:
+            }
         }
 
         var importConfig = context.config.codeGeneration.imports;

@@ -207,7 +207,7 @@ class DisplayPrinter {
                 }
                 var finalKeyword = if (field.meta.hasMeta(Final)) "final " else "";
                 var definition = printEmptyFunctionDefinition(field, concreteType);
-                '$access$finalKeyword$methodKind $definition';
+                '$access $finalKeyword$methodKind$definition';
         };
     }
 
