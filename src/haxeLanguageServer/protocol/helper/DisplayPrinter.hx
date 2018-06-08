@@ -192,7 +192,7 @@ class DisplayPrinter {
                 var keyword = if (kind.args.write.kind == AccCtor || field.meta.hasMeta(Final)) "final" else "var";
                 var read = printAccessor(kind.args.read, true);
                 var write = printAccessor(kind.args.write, false);
-                var accessors = if (read != null && write != null) '($read, $write)' else "";
+                var accessors = if ((read != null && write != null) && (read != "default" || write != "default")) '($read, $write)' else "";
                 var definition = '$access $staticKeyword$keyword $inlineKeyword$name$accessors:$type';
                 if (field.expr != null) {
                     var expr = castRegex.replace(field.expr.string, "");
@@ -214,8 +214,8 @@ class DisplayPrinter {
 
     public function printAccessor<T>(access:JsonVarAccess<T>, isRead:Bool) {
         return switch (access.kind) {
-            case AccNormal: null;
-            case AccNo: null;
+            case AccNormal: "default";
+            case AccNo: "null";
             case AccNever: "never";
             case AccResolve: null;
             case AccCall: if (isRead) "get" else "set";
