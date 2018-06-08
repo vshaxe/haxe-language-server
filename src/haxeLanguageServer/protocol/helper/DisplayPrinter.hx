@@ -294,7 +294,7 @@ class DisplayPrinter {
         return result;
     }
 
-    public function printClassFieldOrigin<T>(origin:ClassFieldOrigin<T>, kind:CompletionItemKind<Dynamic>, quote:String):Option<String> {
+    public function printClassFieldOrigin<T>(origin:ClassFieldOrigin<T>, kind:CompletionItemKind<Dynamic>, quote:String = ""):Option<String> {
         if (kind == EnumAbstractField || origin.kind == cast Unknown) {
             return None;
         }
@@ -317,6 +317,18 @@ class DisplayPrinter {
                 'compiler (built-in)';
             case Unknown:
                 ''; // already handled
+        });
+    }
+
+    public function printEnumFieldOrigin<T>(origin:EnumValueOrigin<T>, quote:String = ""):Option<String> {
+        if (origin.args == null) {
+            return None;
+        }
+        return Some('from ' + switch (origin.kind) {
+            case Self:
+                '$quote${origin.args.name}$quote';
+            case StaticImport:
+                'static import';
         });
     }
 

@@ -1,5 +1,6 @@
 package haxeLanguageServer.features;
 
+import haxe.ds.Option;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
@@ -33,6 +34,12 @@ class HoverFeature {
         var printer = new DisplayPrinter(true);
         var item = hover.item;
         var concreteType = hover.item.type;
+        function combine(defintion:String, origin:Option<String>) {
+            return switch (origin) {
+                case Some(v): defintion + '\n*$v*';
+                case None: defintion;
+            }
+        }
         return switch (item.kind) {
             case Type:
                 printCodeBlock(printer.printEmptyTypeDefinition(hover.item.args), Haxe);
@@ -41,15 +48,13 @@ class HoverFeature {
                 var origin = printer.printLocalOrigin(item.args.origin);
                 printCodeBlock(printer.printLocalDefinition(hover.item.args, concreteType), languageId) + '\n*$origin*';
             case ClassField:
-                var result = printCodeBlock(printer.printClassFieldDefinition(item.args, concreteType, item.kind == EnumAbstractField), Haxe);
-                var origin = printer.printClassFieldOrigin(item.args.origin, item.kind, "");
-                switch (origin) {
-                    case Some(v): result += '\n*$v*';
-                    case None:
-                }
-                result;
+                var definition = printCodeBlock(printer.printClassFieldDefinition(item.args, concreteType, item.kind == EnumAbstractField), Haxe);
+                var origin = printer.printClassFieldOrigin(item.args.origin, item.kind);
+                combine(definition, origin);
             case EnumField:
-                printCodeBlock(printer.printEnumFieldDefinition(item.args.field, item.type), Haxe);
+                var definition = printCodeBlock(printer.printEnumFieldDefinition(item.args.field, item.type), Haxe);
+                var origin = printer.printEnumFieldOrigin(item.args.origin);
+                combine(definition, origin);
             case Metadata:
                 printCodeBlock("@" + item.args.name, Haxe);
             case _:

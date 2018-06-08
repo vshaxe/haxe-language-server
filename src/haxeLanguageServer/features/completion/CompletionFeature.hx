@@ -333,13 +333,22 @@ class CompletionFeature {
         }
     }
 
-    function createEnumFieldCompletionItem(item:HaxeCompletionItem<Dynamic>, replaceRange:Range, mode:CompletionModeKind<Dynamic>):CompletionItem {
-        var field:JsonEnumField = item.args.field;
+    function createEnumFieldCompletionItem<T>(item:HaxeCompletionItem<Dynamic>, replaceRange:Range, mode:CompletionModeKind<Dynamic>):CompletionItem {
+        var usage:EnumValueUsage<T> = item.args;
+        var field:JsonEnumField = usage.field;
         var name = field.name;
         return {
             label: name,
             kind: EnumMember,
-            detail: printer.printEnumFieldDefinition(field, item.type),
+            detail: {
+                var definition = printer.printEnumFieldDefinition(field, item.type);
+                var origin = printer.printEnumFieldOrigin(usage.origin, "'");
+                switch (origin) {
+                    case Some(v): definition += "\n" + v;
+                    case None:
+                }
+                definition;
+            },
             textEdit: {
                 newText: if (mode == Pattern) printer.printEnumField(field, item.type, true, false) + ":" else name,
                 range: replaceRange
