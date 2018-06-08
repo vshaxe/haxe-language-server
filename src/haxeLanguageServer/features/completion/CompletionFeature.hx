@@ -334,30 +334,18 @@ class CompletionFeature {
     }
 
     function createEnumFieldCompletionItem(item:HaxeCompletionItem<Dynamic>, replaceRange:Range, mode:CompletionModeKind<Dynamic>):CompletionItem {
-        var field:JsonEnumField = item.args;
+        var field:JsonEnumField = item.args.field;
         var name = field.name;
-        var definition = printer.printEnumField(field, item.type, false);
-
-        var item:CompletionItem = {
+        return {
             label: name,
             kind: EnumMember,
-            detail: definition,
+            detail: printer.printEnumFieldDefinition(field, item.type),
             textEdit: {
-                newText: name,
+                newText: if (mode == Pattern) printer.printEnumField(field, item.type, true, false) + ":" else name,
                 range: replaceRange
-            }
+            },
+            insertTextFormat: if (mode == Pattern) Snippet else PlainText
         };
-
-        if (mode != Pattern) {
-            return item;
-        }
-
-        item.textEdit.newText = definition + ":";
-        if (snippetSupport) {
-            item.insertTextFormat = Snippet;
-        }
-
-        return item;
     }
 
     function createTypeCompletionItem(type:ModuleType, doc:TextDocument, replaceRange:Range, importPosition:Position, mode:CompletionModeKind<Dynamic>):CompletionItem {

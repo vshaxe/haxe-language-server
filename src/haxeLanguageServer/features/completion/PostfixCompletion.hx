@@ -93,7 +93,7 @@ class PostfixCompletion {
                 case Enum:
                     var args:JsonEnum = moduleType.args;
                     var printer = new DisplayPrinter();
-                    var constructors = args.constructors.map(field -> printer.printEnumField(field, field.type, false));
+                    var constructors = args.constructors.map(field -> printer.printEnumField(field, field.type, false, false));
                     add(createSwitchItem(expr, constructors));
                 case Abstract if (moduleType.meta.hasMeta(Enum)):
                     var impl:JsonClass = cast moduleType.args.impl;

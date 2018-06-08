@@ -49,7 +49,7 @@ class HoverFeature {
                 }
                 result;
             case EnumField:
-                printCodeBlock(printer.printEnumField(item.args.field, item.type, false), Haxe);
+                printCodeBlock(printer.printEnumFieldDefinition(item.args.field, item.type), Haxe);
             case Metadata:
                 printCodeBlock("@" + item.args.name, Haxe);
             case _:

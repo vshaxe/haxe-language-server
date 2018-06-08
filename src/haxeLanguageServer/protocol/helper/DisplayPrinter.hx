@@ -331,7 +331,11 @@ class DisplayPrinter {
         }
     }
 
-    public function printEnumField<T>(field:JsonEnumField, concreteType:JsonType<T>, snippets:Bool) {
+    public inline function printEnumFieldDefinition<T>(field:JsonEnumField, concreteType:JsonType<T>) {
+        return printEnumField(field, concreteType, false, true);
+    }
+
+    public function printEnumField<T>(field:JsonEnumField, concreteType:JsonType<T>, snippets:Bool, typeHints:Bool) {
         return switch (concreteType.kind) {
             case TEnum: field.name;
             case TFun:
@@ -343,6 +347,10 @@ class DisplayPrinter {
                         '$${${i+1}:${arg.name}}';
                     } else {
                         arg.name;
+                    }
+
+                    if (typeHints) {
+                        text += ":" + printTypeRec(arg.t);
                     }
 
                     if (i < signature.args.length - 1) {
