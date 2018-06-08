@@ -382,14 +382,14 @@ class Context {
 
                         var beforeProcessingTime = Date.now().getTime();
                         var debugInfo =
-                            try
-                                callback(haxeResponse.result)
-                            catch (e:Any) {
+                            // try
+                                callback(haxeResponse.result);
+                            /* catch (e:Any) {
                                 errback(e);
                                 trace(e);
                                 trace(CallStack.toString(CallStack.callStack()));
                                 null;
-                            }
+                            } */
                         var afterProcessingTime = Date.now().getTime();
 
                         var methodResult:HaxeMethodResult = {

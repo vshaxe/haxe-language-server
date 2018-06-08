@@ -173,7 +173,7 @@ class DisplayPrinter {
     }
 
     static final castRegex = ~/^(cast )+/;
-    public function printClassFieldDefinition<T0,T1,T2>(usage:ClassFieldUsage<T0>, concreteType:JsonType<T1>) {
+    public function printClassFieldDefinition<T0,T1,T2>(usage:ClassFieldUsage<T0>, concreteType:JsonType<T1>, isEnumAbstractField:Bool) {
         var field = usage.field;
         var type = printType(concreteType);
         var name = field.name;
@@ -198,6 +198,9 @@ class DisplayPrinter {
                         keyword = "final";
                         accessors = "";
                     }
+                } else if (isEnumAbstractField) {
+                    access = "";
+                    staticKeyword = "";
                 }
                 var definition = '$access$staticKeyword$keyword $inlineKeyword$name$accessors:$type';
                 if (field.expr != null) {

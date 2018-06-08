@@ -67,10 +67,16 @@ class Helper {
         }
     }
 
-    public static function isStructure<T>(origin:ClassFieldOrigin<T>) {
+    public static function isStructure<T>(?origin:ClassFieldOrigin<T>) {
+        if (origin == null) {
+            return null;
+        }
         return switch (origin.kind) {
             case Self | StaticImport | Parent | StaticExtension:
                 var moduleType:JsonModuleType<Dynamic> = origin.args;
+                if (moduleType == null) {
+                    return false;
+                }
                 switch (moduleType.kind) {
                     case Typedef:
                         var jsonTypedef:JsonTypedef = moduleType.args;
