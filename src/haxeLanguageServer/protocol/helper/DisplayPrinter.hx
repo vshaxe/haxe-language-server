@@ -310,7 +310,7 @@ class DisplayPrinter {
             case StaticExtension:
                 '$q${origin.args.name}$q (static extension method)';
             case StaticImport:
-                'static import';
+                '$q${origin.args.name}$q (statically imported)';
             case AnonymousStructure:
                 'anonymous structure';
             case BuiltIn:
@@ -328,7 +328,7 @@ class DisplayPrinter {
             case Self:
                 '$quote${origin.args.name}$quote';
             case StaticImport:
-                'static import';
+                '$quote${origin.args.name}$quote (statically imported)';
         });
     }
 
