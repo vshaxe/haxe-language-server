@@ -122,17 +122,10 @@ class DisplayPrinter {
     }
 
     public function printFunctionArgument<T>(arg:JsonFunctionArgument) {
-        var optional = false;
-        var concreteType = arg.t;
-        switch (arg.t.kind) {
-            case TAbstract:
-                var typePath:JsonPathWithParams = arg.t.args;
-                if (typePath.path.pack.length == 0 && typePath.path.name == "Null") {
-                    concreteType = typePath.params[0]; // TODO: recurse (for Null<Null<T>>)?
-                    optional = true;
-                }
-            case _:
-        }
+        var nullRemoval = arg.t.removeNulls();
+        var concreteType = nullRemoval.type;
+        var optional = nullRemoval.optional;
+
         var argument = (optional ? "?" : "") + arg.name;
         if (functionFormatting.argumentTypeHints) {
             argument += (arg.name == "" ? "" : ":") + printTypeRec(concreteType);
@@ -180,11 +173,12 @@ class DisplayPrinter {
     }
 
     static final castRegex = ~/^(cast )+/;
-    public function printFieldDefinition<T1,T2>(field:JsonClassField, concreteType:JsonType<T1>) {
+    public function printClassFieldDefinition<T0,T1,T2>(usage:ClassFieldUsage<T0>, concreteType:JsonType<T1>) {
+        var field = usage.field;
         var type = printType(concreteType);
         var name = field.name;
         var kind:JsonFieldKind<T2> = field.kind;
-        var access = if (field.isPublic) "public" else "private";
+        var access = if (field.isPublic) "public " else "private ";
         var staticKeyword = if (field.scope == Static) "static " else "";
         return switch (kind.kind) {
             case FVar:
@@ -193,7 +187,19 @@ class DisplayPrinter {
                 var read = printAccessor(kind.args.read, true);
                 var write = printAccessor(kind.args.write, false);
                 var accessors = if ((read != null && write != null) && (read != "default" || write != "default")) '($read, $write)' else "";
-                var definition = '$access $staticKeyword$keyword $inlineKeyword$name$accessors:$type';
+                // structure fields get some special treatment
+                if (usage.origin.isStructure()) {
+                    access = "";
+                    if (field.meta.hasMeta(Optional)) {
+                        name = "?" + name;
+                        type = printType(concreteType.removeNulls().type);
+                    }
+                    if (read == "default" && write == "never") {
+                        keyword = "final";
+                        accessors = "";
+                    }
+                }
+                var definition = '$access$staticKeyword$keyword $inlineKeyword$name$accessors:$type';
                 if (field.expr != null) {
                     var expr = castRegex.replace(field.expr.string, "");
                     definition += " = " + expr;
@@ -208,7 +214,7 @@ class DisplayPrinter {
                 }
                 var finalKeyword = if (field.meta.hasMeta(Final)) "final " else "";
                 var definition = printEmptyFunctionDefinition(field.name, concreteType.extractFunctionSignature(), field.params);
-                '$access $staticKeyword$finalKeyword$methodKind$definition';
+                '$access$staticKeyword$finalKeyword$methodKind$definition';
         };
     }
 
@@ -235,11 +241,7 @@ class DisplayPrinter {
                     if (extra == null) null else extra.params
                 );
             case other:
-                var definition = '${local.name}:${printType(concreteType)}';
-                if (other != Argument) {
-                    definition = "var " + definition;
-                }
-                definition;
+                'var ${local.name}:${printType(concreteType)}';
         }
     }
 

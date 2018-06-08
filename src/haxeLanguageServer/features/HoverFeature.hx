@@ -39,7 +39,7 @@ class HoverFeature {
                 var origin = printer.printLocalOrigin(item.args.origin);
                 printCodeBlock(printer.printLocalDefinition(hover.item.args, concreteType), Haxe) + '\n*$origin*';
             case ClassField:
-                var result = printCodeBlock(printer.printFieldDefinition(item.args.field, concreteType), Haxe);
+                var result = printCodeBlock(printer.printClassFieldDefinition(item.args, concreteType), Haxe);
                 var origin = printer.printClassFieldOrigin(item.args.origin, item.kind, "");
                 switch (origin) {
                     case Some(v): result += '\n*$v*';

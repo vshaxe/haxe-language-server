@@ -66,4 +66,34 @@ class Helper {
             case _: false;
         }
     }
+
+    public static function isStructure<T>(origin:ClassFieldOrigin<T>) {
+        return switch (origin.kind) {
+            case Self | StaticImport | Parent | StaticExtension:
+                var moduleType:JsonModuleType<Dynamic> = origin.args;
+                switch (moduleType.kind) {
+                    case Typedef:
+                        var jsonTypedef:JsonTypedef = moduleType.args;
+                        jsonTypedef.type.removeNulls().type.kind == TAnonymous;
+                    case _: false;
+                }
+            case AnonymousStructure: true;
+            case _: false;
+        }
+        return false;
+    }
+
+    public static function removeNulls<T>(type:JsonType<T>, optional:Bool = false):{type:JsonType<T>, optional:Bool} {
+        switch (type.kind) {
+            case TAbstract:
+                var path:JsonPathWithParams = type.args;
+                if (path.path.pack.length == 0 && path.path.name == "Null") {
+                    if (path.params != null && path.params[0] != null) {
+                        return removeNulls(path.params[0], true);
+                    }
+                }
+            case _:
+        }
+        return {type: type, optional: optional};
+    }
 }

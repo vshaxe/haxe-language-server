@@ -255,7 +255,7 @@ class CompletionFeature {
             kind: getKindForField(field, item.kind),
             detail: {
                 var overloads = if (usage.field.overloads == null) 0 else usage.field.overloads.length;
-                var detail = printer.printFieldDefinition(field, concreteType);
+                var detail = printer.printClassFieldDefinition(usage, concreteType);
                 if (overloads > 0) {
                     detail += ' (+$overloads overloads)';
                 }
