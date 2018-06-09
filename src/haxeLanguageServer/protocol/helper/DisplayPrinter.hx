@@ -396,7 +396,7 @@ class DisplayPrinter {
 
         var printedArguments = printedArgs.join(", ");
         if (functionFormatting.useArrowSyntax) {
-            if (args.length > 0) {
+            if (args.length != 1) {
                 printedArguments = '($printedArguments)';
             }
             return printedArguments + " -> ";
