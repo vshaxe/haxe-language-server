@@ -1,5 +1,6 @@
 package haxeLanguageServer.features.completion;
 
+import haxe.ds.Option;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
@@ -242,21 +243,15 @@ class CompletionFeature {
 
     function createClassFieldCompletionItem<T>(item:HaxeCompletionItem<Dynamic>, doc:TextDocument, replaceRange:Range, mode:CompletionModeKind<Dynamic>, indent:String, importPosition:Position):CompletionItem {
         var occurrence:ClassFieldOccurrence<T> = item.args;
-        var concreteType = item.type; // this has importStatus, applied type params etc, which field.type does not
+        var concreteType = item.type;
         var field = occurrence.field;
-        if (mode == Override) {
-            if (concreteType.kind != TFun || field.meta.hasMeta(Final)) {
-                return null;
-            }
-            switch (field.kind.kind) {
-                case FMethod if (field.kind.args == MethInline): return null;
-                case _:
-            }
-        }
-
-        var importConfig = context.config.codeGeneration.imports;
         var resolution = occurrence.resolution;
         var printedOrigin = printer.printClassFieldOrigin(occurrence.origin, item.kind, "'");
+
+        if (mode == Override) {
+            return createOverrideCompletionItem(item, doc, replaceRange, indent, importPosition, printedOrigin);
+        }
+
         var item:CompletionItem = {
             label: field.name,
             kind: getKindForField(field, item.kind),
@@ -286,27 +281,6 @@ class CompletionFeature {
         }
 
         switch (mode) {
-            case Override:
-                var printer = new DisplayPrinter(false,
-                    if (importConfig.enableAutoImports) Shadowed else Qualified,
-                    context.config.codeGeneration.functions.field
-                );
-                item.textEdit.newText = printer.printOverrideDefinition(field, concreteType, indent, true);
-                item.insertTextFormat = Snippet;
-                item.detail = "Auto-generate override" + switch (printedOrigin) {
-                    case Some(v): "\n" + v;
-                    case None: "";
-                };
-                item.documentation = {
-                    kind: MarkDown,
-                    value: DocHelper.printCodeBlock("override " + printer.printOverrideDefinition(field, concreteType, indent, false), Haxe)
-                }
-                if (importConfig.enableAutoImports) {
-                    var printer = new DisplayPrinter(false, Always);
-                    item.additionalTextEdits = concreteType.resolveImports().map(path ->
-                        ImportHelper.createImportEdit(doc, importPosition, printer.printPath(path), importConfig.style)
-                    );
-                }
             case StructureField:
                 if (field.meta.hasMeta(Optional)) {
                     item.label = "?" + field.name;
@@ -316,6 +290,54 @@ class CompletionFeature {
         }
 
         return item;
+    }
+
+    function createOverrideCompletionItem<T>(item:HaxeCompletionItem<Dynamic>, doc:TextDocument, replaceRange:Range, indent:String, importPosition:Position, printedOrigin:Option<String>):CompletionItem {
+        var occurrence:ClassFieldOccurrence<T> = item.args;
+        var concreteType = item.type;
+        var field = occurrence.field;
+        var importConfig = context.config.codeGeneration.imports;
+
+        if (concreteType.kind != TFun || field.meta.hasMeta(Final)) {
+            return null;
+        }
+        switch (field.kind.kind) {
+            case FMethod if (field.kind.args == MethInline): return null;
+            case _:
+        }
+
+        var printer = new DisplayPrinter(false,
+            if (importConfig.enableAutoImports) Shadowed else Qualified,
+            context.config.codeGeneration.functions.field
+        );
+
+        return {
+            label: field.name,
+            kind: getKindForField(field, item.kind),
+            textEdit: {
+                newText: printer.printOverrideDefinition(field, concreteType, indent, true),
+                range: replaceRange
+            },
+            insertTextFormat: Snippet,
+            detail: "Auto-generate override" + switch (printedOrigin) {
+                case Some(v): "\n" + v;
+                case None: "";
+            },
+            documentation: {
+                kind: MarkDown,
+                value: DocHelper.printCodeBlock("override " + printer.printOverrideDefinition(field, concreteType, indent, false), Haxe)
+            },
+            additionalTextEdits: {
+                if (importConfig.enableAutoImports) {
+                    var printer = new DisplayPrinter(false, Always);
+                    concreteType.resolveImports().map(path ->
+                        ImportHelper.createImportEdit(doc, importPosition, printer.printPath(path), importConfig.style)
+                    );
+                } else {
+                    [];
+                }
+            }
+        }
     }
 
     function getKindForField<T>(field:JsonClassField, kind:HaxeCompletionItemKind<Dynamic>):CompletionItemKind {
