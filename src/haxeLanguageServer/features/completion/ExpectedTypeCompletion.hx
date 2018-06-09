@@ -68,7 +68,7 @@ class ExpectedTypeCompletion {
     }
 
     function createExpectedTypeCompletionItem(data:ExpectedTypeCompletionItem, position:Position):CompletionItem {
-        return {
+        var item:CompletionItem = {
             label: data.label,
             detail: data.detail,
             sortText: "0",
@@ -78,14 +78,19 @@ class ExpectedTypeCompletion {
                 range: position.toRange()
             },
             insertTextFormat: data.insertTextFormat,
-            documentation: {
-                kind: MarkDown,
-                value: DocHelper.printCodeBlock(if (data.code == null) data.insertText else data.code, Haxe)
-            },
             data: {
                 origin: Custom
             }
         }
+
+        if (data.code != null) {
+            item.documentation = {
+                kind: MarkDown,
+                value: DocHelper.printCodeBlock(data.code, Haxe)
+            }
+        }
+
+        return item;
     }
 }
 

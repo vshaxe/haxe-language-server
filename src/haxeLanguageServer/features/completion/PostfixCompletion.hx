@@ -1,5 +1,6 @@
 package haxeLanguageServer.features.completion;
 
+import haxeLanguageServer.helper.DocHelper;
 import haxe.display.JsonModuleTypes;
 import haxeLanguageServer.protocol.Display;
 import languageServerProtocol.Types.CompletionItem;
@@ -87,12 +88,13 @@ class PostfixCompletion {
             case _:
         }
 
-        function addSwitchItem(insertText:String) {
+        function addSwitchItem(print:(snippets:Bool)->String) {
             add({
                 label: "switch",
                 detail: "switch (expr) {cases...}",
-                insertText: insertText,
-                insertTextFormat: Snippet
+                insertText: print(true),
+                insertTextFormat: Snippet,
+                code: print(false)
             });
         }
 
@@ -100,9 +102,9 @@ class PostfixCompletion {
         if (moduleType != null) {
             switch (moduleType.kind) {
                 case Enum:
-                    addSwitchItem(printer.printSwitchOnEnum(expr, moduleType.args, true));
+                    addSwitchItem(printer.printSwitchOnEnum.bind(expr, moduleType.args));
                 case Abstract if (moduleType.meta.hasMeta(Enum)):
-                    addSwitchItem(printer.printSwitchOnEnumAbstract(expr, moduleType.args, true));
+                    addSwitchItem(printer.printSwitchOnEnumAbstract.bind(expr, moduleType.args));
                 case _:
             }
         }
@@ -111,7 +113,7 @@ class PostfixCompletion {
     }
 
     function createPostfixCompletionItem(data:PostfixCompletionItem, doc:TextDocument, replaceRange:Range):CompletionItem {
-        return {
+        var item:CompletionItem = {
             label: data.label,
             detail: data.detail,
             filterText: doc.getText(replaceRange) + " " + data.label, // https://github.com/Microsoft/vscode/issues/38982
@@ -125,6 +127,15 @@ class PostfixCompletion {
                 origin: CompletionItemOrigin.Custom
             }
         }
+
+        if (data.code != null) {
+            item.documentation = {
+                kind: MarkDown,
+                value: DocHelper.printCodeBlock(data.code, Haxe)
+            }
+        }
+
+        return item;
     }
 }
 
@@ -133,4 +144,5 @@ private typedef PostfixCompletionItem = {
     var detail:String;
     var insertText:String;
     var insertTextFormat:InsertTextFormat;
+    var ?code:String;
 }
