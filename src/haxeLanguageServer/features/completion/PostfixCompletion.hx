@@ -7,6 +7,7 @@ import languageServerProtocol.Types.CompletionItem;
 import haxeLanguageServer.protocol.helper.DisplayPrinter;
 import haxeLanguageServer.features.completion.CompletionFeature.CompletionItemOrigin;
 import haxeLanguageServer.helper.ArgumentNameHelper.guessArgumentName;
+using Lambda;
 
 class PostfixCompletion {
     public function new() {}
@@ -102,9 +103,15 @@ class PostfixCompletion {
         if (moduleType != null) {
             switch (moduleType.kind) {
                 case Enum:
-                    addSwitchItem(printer.printSwitchOnEnum.bind(expr, moduleType.args));
+                    var e:JsonEnum = moduleType.args;
+                    if (e.constructors.length > 0) {
+                        addSwitchItem(printer.printSwitchOnEnum.bind(expr, e));
+                    }
                 case Abstract if (moduleType.meta.hasMeta(Enum)):
-                    addSwitchItem(printer.printSwitchOnEnumAbstract.bind(expr, moduleType.args));
+                    var a:JsonAbstract = moduleType.args;
+                    if (a.impl != null && a.impl.statics.exists(Helper.isEnumAbstractField)) {
+                        addSwitchItem(printer.printSwitchOnEnumAbstract.bind(expr, a));
+                    }
                 case _:
             }
         }
