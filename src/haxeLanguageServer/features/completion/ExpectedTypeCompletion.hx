@@ -44,7 +44,7 @@ class ExpectedTypeCompletion {
                 var requiredFields = printer.printObjectLiteral(anon, true, true);
                 if (allFields == requiredFields) {
                     add({
-                        label: "{fields...}",
+                        label: if (anon.fields.length == 0) "{}" else "{fields...}",
                         detail: "Auto-generate object literal",
                         insertText: allFields,
                         insertTextFormat: Snippet,

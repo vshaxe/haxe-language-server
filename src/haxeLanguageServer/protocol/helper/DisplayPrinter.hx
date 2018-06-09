@@ -427,6 +427,9 @@ class DisplayPrinter {
                 printedFields.push(printedField);
             }
         }
+        if (printedFields.length == 0) {
+            return "{}";
+        }
         return '{\n${printedFields.join(",\n")}\n}';
     }
 
