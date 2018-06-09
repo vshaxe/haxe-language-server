@@ -256,6 +256,7 @@ class CompletionFeature {
 
         var importConfig = context.config.codeGeneration.imports;
         var resolution = occurrence.resolution;
+        var printedOrigin = printer.printClassFieldOrigin(occurrence.origin, item.kind, "'");
         var item:CompletionItem = {
             label: field.name,
             kind: getKindForField(field, item.kind),
@@ -265,10 +266,9 @@ class CompletionFeature {
                 if (overloads > 0) {
                     detail += ' (+$overloads overloads)';
                 }
-                var origin = printer.printClassFieldOrigin(occurrence.origin, item.kind, "'");
                 var shadowed = if (!resolution.isQualified) " (shadowed)" else "";
-                switch (origin) {
-                    case Some(origin): detail + "\n" + origin + shadowed;
+                switch (printedOrigin) {
+                    case Some(v): detail + "\n" + v + shadowed;
                     case None: detail + "\n" + shadowed;
                 }
             },
@@ -278,7 +278,6 @@ class CompletionFeature {
                     qualifier + switch (mode) {
                         case StructureField: field.name + ": ";
                         case Pattern: field.name + ":";
-                        case Override: "";
                         case _: field.name;
                     }
                 },
@@ -292,11 +291,15 @@ class CompletionFeature {
                     if (importConfig.enableAutoImports) Shadowed else Qualified,
                     context.config.codeGeneration.functions.field
                 );
-                item.textEdit.newText += printer.printOverrideDefinition(field, concreteType, indent, true);
+                item.textEdit.newText = printer.printOverrideDefinition(field, concreteType, indent, true);
                 item.insertTextFormat = Snippet;
+                item.detail = "Auto-generate override" + switch (printedOrigin) {
+                    case Some(v): "\n" + v;
+                    case None: "";
+                };
                 item.documentation = {
                     kind: MarkDown,
-                    value: DocHelper.printCodeBlock(printer.printOverrideDefinition(field, concreteType, indent, false), Haxe)
+                    value: DocHelper.printCodeBlock("override " + printer.printOverrideDefinition(field, concreteType, indent, false), Haxe)
                 }
                 if (importConfig.enableAutoImports) {
                     var printer = new DisplayPrinter(false, Always);
