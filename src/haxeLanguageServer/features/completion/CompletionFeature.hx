@@ -57,7 +57,8 @@ class CompletionFeature {
             argumentTypeHints: true,
             returnTypeHint: NonVoid,
             explicitPublic: true,
-            explicitPrivate: true
+            explicitPrivate: true,
+            explicitNull: true
         });
         context.protocol.onRequest(Methods.Completion, onCompletion);
         context.protocol.onRequest(Methods.CompletionItemResolve, onCompletionItemResolve);

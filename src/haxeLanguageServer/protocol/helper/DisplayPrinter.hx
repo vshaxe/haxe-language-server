@@ -123,7 +123,7 @@ class DisplayPrinter {
 
     public function printFunctionArgument<T>(arg:JsonFunctionArgument) {
         var nullRemoval = arg.t.removeNulls();
-        var concreteType = nullRemoval.type;
+        var concreteType = if (functionFormatting.explicitNull) arg.t else nullRemoval.type;
         var optional = nullRemoval.optional;
 
         var argument = (optional ? "?" : "") + arg.name;

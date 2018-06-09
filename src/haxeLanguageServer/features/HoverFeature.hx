@@ -35,7 +35,8 @@ class HoverFeature {
             argumentTypeHints: true,
             returnTypeHint: NonVoid,
             explicitPublic: true,
-            explicitPrivate: true
+            explicitPrivate: true,
+            explicitNull: true
         });
         var item = hover.item;
         var concreteType = hover.item.type;

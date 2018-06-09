@@ -7,6 +7,7 @@ typedef FunctionFormattingConfig = {
     var ?placeOpenBraceOnNewLine:Bool;
     var ?explicitPublic:Bool;
     var ?explicitPrivate:Bool;
+    var ?explicitNull:Bool;
     var ?prefixPackages:Bool; // NOT part of the user settings, only needed for Haxe versions < 4.0.0-preview.4
 }
 

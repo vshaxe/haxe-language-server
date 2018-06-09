@@ -278,7 +278,7 @@ class Context {
         if (functions.anonymous == null)
             functions.anonymous = {argumentTypeHints: false, returnTypeHint: Never, useArrowSyntax: true};
         if (functions.field == null)
-            functions.field = {argumentTypeHints: true, returnTypeHint: NonVoid, placeOpenBraceOnNewLine: false, explicitPublic: false, explicitPrivate: false};
+            functions.field = {argumentTypeHints: true, returnTypeHint: NonVoid, placeOpenBraceOnNewLine: false, explicitPublic: false, explicitPrivate: false, explicitNull: false};
 
         if (codeGen.imports == null)
             codeGen.imports = {enableAutoImports: true, style: Type};
