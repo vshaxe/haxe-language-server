@@ -34,7 +34,6 @@ class PostfixCompletion {
         }
 
         var items:Array<CompletionItem> = [];
-
         function add(data:PostfixCompletionItem) {
             items.push(createPostfixCompletionItem(data, doc, replaceRange));
         }

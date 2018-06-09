@@ -51,7 +51,7 @@ class CompletionFeature {
         this.context = context;
         checkCapabilities();
         legacy = new CompletionFeatureLegacy(context, contextSupport, formatDocumentation);
-        expectedTypeCompletion = new ExpectedTypeCompletion();
+        expectedTypeCompletion = new ExpectedTypeCompletion(context);
         postfixCompletion = new PostfixCompletion();
         printer = new DisplayPrinter(false, null, {
             argumentTypeHints: true,

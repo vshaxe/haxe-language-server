@@ -1,5 +1,6 @@
 package haxeLanguageServer.protocol.helper;
 
+import haxeLanguageServer.helper.ArgumentNameHelper;
 import haxeLanguageServer.helper.TypeHelper.FunctionFormattingConfig;
 import haxe.ds.Option;
 import haxe.display.JsonModuleTypes;
@@ -378,6 +379,29 @@ class DisplayPrinter {
                 }
                 text + ")";
             case _: "";
+        }
+    }
+
+    public function printAnonymousFunctionDefinition(signature:JsonFunctionSignature) {
+        var args = signature.args.map(arg -> {
+            name: if (arg.name == "") null else arg.name,
+            opt: arg.opt,
+            type: printTypeRec(arg.t)
+        });
+        var names = ArgumentNameHelper.guessArgumentNames(args);
+        var printedArgs = [];
+        for (i in 0...args.length) {
+            printedArgs.push(names[i] + ":" + args[i].type);
+        }
+
+        var printedArguments = printedArgs.join(", ");
+        if (functionFormatting.useArrowSyntax) {
+            if (args.length > 0) {
+                printedArguments = '($printedArguments)';
+            }
+            return printedArguments + " -> ";
+        } else {
+            return "function(" + printedArguments + ") ";
         }
     }
 }

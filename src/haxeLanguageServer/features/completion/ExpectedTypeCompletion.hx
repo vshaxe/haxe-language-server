@@ -1,12 +1,17 @@
 package haxeLanguageServer.features.completion;
 
 import haxeLanguageServer.features.completion.CompletionFeature;
+import haxeLanguageServer.protocol.helper.DisplayPrinter;
 import haxeLanguageServer.protocol.Display.ToplevelCompletion;
 import haxeLanguageServer.protocol.Display.CompletionMode;
 import haxe.display.JsonModuleTypes.JsonType;
 
 class ExpectedTypeCompletion {
-    public function new() {}
+    final context:Context;
+
+    public function new(context) {
+        this.context = context;
+    }
 
     public function createItems<T,TType>(mode:CompletionMode<T>, position:Position, doc:TextDocument, textBefore:String):Array<CompletionItem> {
         var toplevel:ToplevelCompletion<TType>;
@@ -24,35 +29,63 @@ class ExpectedTypeCompletion {
         }
 
         var items:Array<CompletionItem> = [];
+        function add(data:ExpectedTypeCompletionItem) {
+            items.push(createExpectedTypeCompletionItem(data, position));
+        }
+
         switch (expectedTypeFollowed.kind) {
             case TAnonymous:
                 var fields = expectedTypeFollowed.args.fields;
                 var printedFields = [];
                 for (i in 0...fields.length) {
                     var name = fields[i].name;
-                    // TODO: properly detect indent
                     printedFields.push("\t" + name + ': $${${i+1}:$name}');
                     if (i < fields.length - 1) {
                         printedFields[i] += ",";
                     }
                 }
                 // TODO: support @:structInit
-                items.push({
+                add({
                     label: "{fields...}",
-                    sortText: "0",
                     detail: "Auto-generate object literal fields",
-                    kind: Snippet,
-                    insertTextFormat: Snippet,
-                    textEdit: {
-                        newText: '{\n${printedFields.join("\n")}\n}',
-                        range: position.toRange()
-                    },
-                    data: {
-                        origin: Custom
-                    }
+                    insertText: '{\n${printedFields.join("\n")}\n}',
+                    insertTextFormat: Snippet
+                });
+            case TFun:
+                var printer = new DisplayPrinter(false, null, context.config.codeGeneration.functions.anonymous);
+                var definition = printer.printAnonymousFunctionDefinition(expectedTypeFollowed.args);
+                add({
+                    label: definition + "{}",
+                    detail: "Auto-generate anonymous function",
+                    insertText: definition,
+                    insertTextFormat: PlainText
                 });
             case _:
         }
         return items;
     }
+
+    function createExpectedTypeCompletionItem(data:ExpectedTypeCompletionItem, position:Position):CompletionItem {
+        return {
+            label: data.label,
+            detail: data.detail,
+            sortText: "0",
+            kind: Snippet,
+            textEdit: {
+                newText: data.insertText,
+                range: position.toRange()
+            },
+            insertTextFormat: data.insertTextFormat,
+            data: {
+                origin: Custom
+            }
+        }
+    }
+}
+
+private typedef ExpectedTypeCompletionItem = {
+    var label:String;
+    var detail:String;
+    var insertText:String;
+    var insertTextFormat:InsertTextFormat;
 }
