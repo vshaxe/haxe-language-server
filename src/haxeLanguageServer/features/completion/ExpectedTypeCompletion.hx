@@ -36,19 +36,27 @@ class ExpectedTypeCompletion {
         switch (expectedTypeFollowed.kind) {
             case TAnonymous:
                 var fields = expectedTypeFollowed.args.fields;
-                var printedFields = [];
+                var allFields = [];
+                var requiredFields = [];
                 for (i in 0...fields.length) {
                     var name = fields[i].name;
-                    printedFields.push("\t" + name + ': $${${i+1}:$name}');
-                    if (i < fields.length - 1) {
-                        printedFields[i] += ",";
+                    var field = "\t" + name + ': $${${i+1}:$name}';
+                    allFields.push(field);
+                    if (!fields[i].meta.hasMeta(Optional)) {
+                        requiredFields.push(field);
                     }
                 }
                 // TODO: support @:structInit
                 add({
-                    label: "{fields...}",
-                    detail: "Auto-generate object literal fields",
-                    insertText: '{\n${printedFields.join("\n")}\n}',
+                    label: "{all fields...}",
+                    detail: "Auto-generate object literal\n(all fields)",
+                    insertText: '{\n${allFields.join(",\n")}\n}',
+                    insertTextFormat: Snippet
+                });
+                add({
+                    label: "{required fields...}",
+                    detail: "Auto-generate object literal\n(only required fields)",
+                    insertText: '{\n${requiredFields.join(",\n")}\n}',
                     insertTextFormat: Snippet
                 });
             case TFun:
