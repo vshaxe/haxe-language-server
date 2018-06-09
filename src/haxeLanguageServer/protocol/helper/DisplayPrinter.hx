@@ -429,4 +429,26 @@ class DisplayPrinter {
         }
         return '{\n${printedFields.join(",\n")}\n}';
     }
+
+    public function printSwitchOnEnum(subject:String, e:JsonEnum, snippets:Bool) {
+        var fields = e.constructors.map(field -> printEnumField(field, field.type, false, false));
+        return printSwitch(subject, fields, snippets);
+    }
+
+    public function printSwitchOnEnumAbstract(subject:String, a:JsonAbstract, snippets:Bool) {
+        var fields = a.impl.statics.filter(Helper.isEnumAbstractField).map(field -> field.name);
+        return printSwitch(subject, fields, snippets);
+    }
+
+    function printSwitch(subject:String, fields:Array<String>, snippets:Bool) {
+        for (i in 0...fields.length) {
+            var field = fields[i];
+            field = '\tcase $field:';
+            if (snippets) {
+                field += "$" + (i + 1);
+            }
+            fields[i] = field;
+        }
+        return 'switch ($subject) {\n${fields.join("\n")}\n}';
+    }
 }
