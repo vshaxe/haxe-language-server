@@ -40,20 +40,32 @@ class ExpectedTypeCompletion {
             case TAnonymous:
                 // TODO: support @:structInit
                 var anon = expectedTypeFollowed.args;
-                add({
-                    label: "{all fields...}",
-                    detail: "Auto-generate object literal\n(all fields)",
-                    insertText: printer.printObjectLiteral(anon, false, true),
-                    insertTextFormat: Snippet,
-                    code: printer.printObjectLiteral(anon, false, false)
-                });
-                add({
-                    label: "{required fields...}",
-                    detail: "Auto-generate object literal\n(only required fields)",
-                    insertText: printer.printObjectLiteral(anon, true, true),
-                    insertTextFormat: Snippet,
-                    code: printer.printObjectLiteral(anon, true, false)
-                });
+                var allFields = printer.printObjectLiteral(anon, false, true);
+                var requiredFields = printer.printObjectLiteral(anon, true, true);
+                if (allFields == requiredFields) {
+                    add({
+                        label: "{fields...}",
+                        detail: "Auto-generate object literal",
+                        insertText: allFields,
+                        insertTextFormat: Snippet,
+                        code: printer.printObjectLiteral(anon, false, false)
+                    });
+                } else {
+                    add({
+                        label: "{all fields...}",
+                        detail: "Auto-generate object literal\n(all fields)",
+                        insertText: allFields,
+                        insertTextFormat: Snippet,
+                        code: printer.printObjectLiteral(anon, false, false)
+                    });
+                    add({
+                        label: "{required fields...}",
+                        detail: "Auto-generate object literal\n(only required fields)",
+                        insertText: requiredFields,
+                        insertTextFormat: Snippet,
+                        code: printer.printObjectLiteral(anon, true, false)
+                    });
+                }
             case TFun:
                 var definition = printer.printAnonymousFunctionDefinition(expectedTypeFollowed.args);
                 add({
