@@ -399,7 +399,7 @@ class CompletionFeature {
                         field = maybeInsert(field, ":", lineAfter);
                         field;
                     } else {
-                        name
+                        name;
                     }
                 },
                 range: replaceRange
@@ -550,7 +550,7 @@ class CompletionFeature {
         return item;
     }
 
-    static var wordRegex = ~/^\w*/;
+    static final wordRegex = ~/^\w*/;
     function maybeInsert(text:String, token:String, lineAfter:String):String {
         lineAfter = wordRegex.replace(lineAfter, "");
         return if (lineAfter.charAt(0) == token.charAt(0)) text else text + token;
