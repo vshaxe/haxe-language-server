@@ -95,4 +95,14 @@ class DocHelper {
         }
         return result;
     }
+
+    public static function printCodeBlock(content:String, languageId:LanguageId):String {
+        return '```$languageId\n$content```';
+    }
+}
+
+enum abstract LanguageId(String) to String {
+    var Haxe = "haxe";
+    var HaxeType = "haxe.type";
+    var HaxeArgument = "haxe.argument";
 }

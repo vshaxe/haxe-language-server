@@ -1,5 +1,6 @@
 package haxeLanguageServer.features.completion;
 
+import haxeLanguageServer.helper.DocHelper;
 import haxeLanguageServer.features.completion.CompletionFeature;
 import haxeLanguageServer.protocol.helper.DisplayPrinter;
 import haxeLanguageServer.protocol.Display.ToplevelCompletion;
@@ -33,37 +34,30 @@ class ExpectedTypeCompletion {
             items.push(createExpectedTypeCompletionItem(data, position));
         }
 
+        var printer = new DisplayPrinter(false, null, context.config.codeGeneration.functions.anonymous);
+
         switch (expectedTypeFollowed.kind) {
             case TAnonymous:
-                var fields = expectedTypeFollowed.args.fields;
-                var allFields = [];
-                var requiredFields = [];
-                for (i in 0...fields.length) {
-                    var name = fields[i].name;
-                    var field = "\t" + name + ': $${${i+1}:$name}';
-                    allFields.push(field);
-                    if (!fields[i].meta.hasMeta(Optional)) {
-                        requiredFields.push(field);
-                    }
-                }
                 // TODO: support @:structInit
+                var anon = expectedTypeFollowed.args;
                 add({
                     label: "{all fields...}",
                     detail: "Auto-generate object literal\n(all fields)",
-                    insertText: '{\n${allFields.join(",\n")}\n}',
-                    insertTextFormat: Snippet
+                    insertText: printer.printObjectLiteral(anon, false, true),
+                    insertTextFormat: Snippet,
+                    code: printer.printObjectLiteral(anon, false, false)
                 });
                 add({
                     label: "{required fields...}",
                     detail: "Auto-generate object literal\n(only required fields)",
-                    insertText: '{\n${requiredFields.join(",\n")}\n}',
-                    insertTextFormat: Snippet
+                    insertText: printer.printObjectLiteral(anon, true, true),
+                    insertTextFormat: Snippet,
+                    code: printer.printObjectLiteral(anon, true, false)
                 });
             case TFun:
-                var printer = new DisplayPrinter(false, null, context.config.codeGeneration.functions.anonymous);
                 var definition = printer.printAnonymousFunctionDefinition(expectedTypeFollowed.args);
                 add({
-                    label: definition + "{}",
+                    label: definition,
                     detail: "Auto-generate anonymous function",
                     insertText: definition,
                     insertTextFormat: PlainText
@@ -84,6 +78,10 @@ class ExpectedTypeCompletion {
                 range: position.toRange()
             },
             insertTextFormat: data.insertTextFormat,
+            documentation: {
+                kind: MarkDown,
+                value: DocHelper.printCodeBlock(if (data.code == null) data.insertText else data.code, Haxe)
+            },
             data: {
                 origin: Custom
             }
@@ -96,4 +94,5 @@ private typedef ExpectedTypeCompletionItem = {
     var detail:String;
     var insertText:String;
     var insertTextFormat:InsertTextFormat;
+    var ?code:String;
 }

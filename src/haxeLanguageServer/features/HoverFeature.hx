@@ -5,6 +5,7 @@ import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
 import haxeLanguageServer.helper.DocHelper;
+import haxeLanguageServer.helper.DocHelper.printCodeBlock;
 import haxeLanguageServer.helper.TypeHelper.*;
 import haxeLanguageServer.protocol.helper.DisplayPrinter;
 import haxeLanguageServer.protocol.Display;
@@ -116,14 +117,4 @@ class HoverFeature {
             hover.range = range;
         return hover;
     }
-
-    function printCodeBlock(content:String, languageId:LanguageId):String {
-        return '```$languageId\n$content```';
-    }
-}
-
-private enum abstract LanguageId(String) to String {
-    var Haxe = "haxe";
-    var HaxeType = "haxe.type";
-    var HaxeArgument = "haxe.argument";
 }

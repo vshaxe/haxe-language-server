@@ -411,4 +411,22 @@ class DisplayPrinter {
             return "function(" + printedArguments + ")" + printReturn(signature) + " ";
         }
     }
+
+    public function printObjectLiteral(anon:JsonAnon, onlyRequiredFields:Bool, snippets:Bool) {
+        var printedFields = [];
+        for (i in 0...anon.fields.length) {
+            var field = anon.fields[i];
+            var name = field.name;
+            var printedField = "\t" + name + ': ';
+            printedField += if (snippets) {
+                '$${${i+1}:$name}';
+            } else {
+                name;
+            }
+            if (!onlyRequiredFields || !field.meta.hasMeta(Optional)) {
+                printedFields.push(printedField);
+            }
+        }
+        return '{\n${printedFields.join(",\n")}\n}';
+    }
 }
