@@ -21,6 +21,7 @@ private typedef PreviousCompletionResult = {
     var replaceRange:Range;
     var kind:CompletionModeKind<Dynamic>;
     var indent:String;
+    var lineAfter:String;
 }
 
 enum abstract CompletionItemOrigin(Int) {
@@ -135,7 +136,8 @@ class CompletionFeature {
         }
         var importPosition = ImportHelper.getImportPosition(previousCompletion.doc);
         context.callHaxeMethod(DisplayMethods.CompletionItemResolve, {index: item.data.index}, token, result -> {
-            resolve(createCompletionItem(data.index, result.item, previousCompletion.doc, previousCompletion.replaceRange, importPosition, previousCompletion.kind, previousCompletion.indent));
+            resolve(createCompletionItem(data.index, result.item, previousCompletion.doc, previousCompletion.replaceRange,
+                importPosition, previousCompletion.kind, previousCompletion.indent, previousCompletion.lineAfter));
             return null;
         }, error -> {
             reject(ResponseError.internalError(error));
@@ -157,15 +159,21 @@ class CompletionFeature {
             }
             var importPosition = ImportHelper.getImportPosition(doc);
             var indent = doc.indentAt(params.position.line);
+            var position = params.position;
+            var lineAfter = doc.getText({
+                start: position,
+                end: position.translate(1, 0)
+            });
             previousCompletion = {
                 doc: doc,
                 kind: result.mode.kind,
                 replaceRange: result.replaceRange,
-                indent: indent
+                indent: indent,
+                lineAfter: lineAfter
             };
             var items = [];
             for (i in 0...result.items.length) {
-                var completionItem = createCompletionItem(i, result.items[i], doc, result.replaceRange, importPosition, result.mode.kind, indent);
+                var completionItem = createCompletionItem(i, result.items[i], doc, result.replaceRange, importPosition, result.mode.kind, indent, lineAfter);
                 if (completionItem != null) {
                     items.push(completionItem);
                 }
@@ -177,12 +185,12 @@ class CompletionFeature {
         }, error -> reject(ResponseError.internalError(error)));
     }
 
-    function createCompletionItem<T>(index:Int, item:HaxeCompletionItem<T>, doc:TextDocument, replaceRange:Range, importPosition:Position, mode:CompletionModeKind<Dynamic>, indent:String):CompletionItem {
+    function createCompletionItem<T>(index:Int, item:HaxeCompletionItem<T>, doc:TextDocument, replaceRange:Range, importPosition:Position, mode:CompletionModeKind<Dynamic>, indent:String, lineAfter:String):CompletionItem {
         var completionItem:CompletionItem = switch (item.kind) {
-            case ClassField | EnumAbstractField: createClassFieldCompletionItem(item, doc, replaceRange, mode, indent, importPosition);
-            case EnumField: createEnumFieldCompletionItem(item, replaceRange, mode);
-            case Type: createTypeCompletionItem(item.args, doc, replaceRange, importPosition, mode);
-            case Package: createPackageCompletionItem(item.args, replaceRange, mode);
+            case ClassField | EnumAbstractField: createClassFieldCompletionItem(item, doc, replaceRange, mode, indent, importPosition, lineAfter);
+            case EnumField: createEnumFieldCompletionItem(item, replaceRange, mode, lineAfter);
+            case Type: createTypeCompletionItem(item.args, doc, replaceRange, importPosition, mode, lineAfter);
+            case Package: createPackageCompletionItem(item.args, replaceRange, mode, lineAfter);
             case Keyword: createKeywordCompletionItem(item.args, replaceRange, mode);
             case Local: {
                     label: item.args.name,
@@ -241,7 +249,7 @@ class CompletionFeature {
         return completionItem;
     }
 
-    function createClassFieldCompletionItem<T>(item:HaxeCompletionItem<Dynamic>, doc:TextDocument, replaceRange:Range, mode:CompletionModeKind<Dynamic>, indent:String, importPosition:Position):CompletionItem {
+    function createClassFieldCompletionItem<T>(item:HaxeCompletionItem<Dynamic>, doc:TextDocument, replaceRange:Range, mode:CompletionModeKind<Dynamic>, indent:String, importPosition:Position, lineAfter:String):CompletionItem {
         var occurrence:ClassFieldOccurrence<T> = item.args;
         var concreteType = item.type;
         var field = occurrence.field;
@@ -271,8 +279,8 @@ class CompletionFeature {
                 newText: {
                     var qualifier = if (resolution.isQualified) "" else resolution.qualifier + ".";
                     qualifier + switch (mode) {
-                        case StructureField: field.name + ": ";
-                        case Pattern: field.name + ":";
+                        case StructureField: maybeInsert(field.name, ": ", lineAfter);
+                        case Pattern: maybeInsert(field.name, ":", lineAfter);
                         case _: field.name;
                     }
                 },
@@ -368,7 +376,7 @@ class CompletionFeature {
         }
     }
 
-    function createEnumFieldCompletionItem<T>(item:HaxeCompletionItem<Dynamic>, replaceRange:Range, mode:CompletionModeKind<Dynamic>):CompletionItem {
+    function createEnumFieldCompletionItem<T>(item:HaxeCompletionItem<Dynamic>, replaceRange:Range, mode:CompletionModeKind<Dynamic>, lineAfter:String):CompletionItem {
         var occurrence:EnumFieldOccurrence<T> = item.args;
         var field:JsonEnumField = occurrence.field;
         var name = field.name;
@@ -385,14 +393,22 @@ class CompletionFeature {
                 definition;
             },
             textEdit: {
-                newText: if (mode == Pattern) printer.printEnumField(field, item.type, true, false) + ":" else name,
+                newText: {
+                    if (mode == Pattern) {
+                        var field = printer.printEnumField(field, item.type, true, false);
+                        field = maybeInsert(field, ":", lineAfter);
+                        field;
+                    } else {
+                        name
+                    }
+                },
                 range: replaceRange
             },
             insertTextFormat: if (mode == Pattern) Snippet else PlainText
         };
     }
 
-    function createTypeCompletionItem(type:ModuleType, doc:TextDocument, replaceRange:Range, importPosition:Position, mode:CompletionModeKind<Dynamic>):CompletionItem {
+    function createTypeCompletionItem(type:ModuleType, doc:TextDocument, replaceRange:Range, importPosition:Position, mode:CompletionModeKind<Dynamic>, lineAfter:String):CompletionItem {
         var isImportCompletion = mode == Import || mode == Using;
         var importConfig = context.config.codeGeneration.imports;
         var autoImport = importConfig.enableAutoImports;
@@ -414,7 +430,7 @@ class CompletionFeature {
         };
 
         if (isImportCompletion) {
-            item.textEdit.newText += ";";
+            item.textEdit.newText = maybeInsert(item.textEdit.newText, ";", lineAfter);
         } else {
             switch (type.importStatus) {
                 case Imported:
@@ -435,7 +451,7 @@ class CompletionFeature {
         }
 
         if (mode == StructExtension) {
-            item.textEdit.newText += ",";
+            item.textEdit.newText = maybeInsert(item.textEdit.newText, ",", lineAfter);
         }
 
         if (type.params != null) {
@@ -483,7 +499,7 @@ class CompletionFeature {
         return detail;
     }
 
-    function createPackageCompletionItem(pack:Package, replaceRange:Range, mode:CompletionModeKind<Dynamic>):CompletionItem {
+    function createPackageCompletionItem(pack:Package, replaceRange:Range, mode:CompletionModeKind<Dynamic>, lineAfter:String):CompletionItem {
         var path = pack.path;
         var dotPath = path.pack.concat([path.name]).join(".");
         var text = if (mode == Field) path.name else dotPath;
@@ -492,7 +508,7 @@ class CompletionFeature {
             kind: Module,
             detail: 'package $dotPath',
             textEdit: {
-                newText: text + ".",
+                newText: maybeInsert(text, ".", lineAfter),
                 range: replaceRange
             },
             command: triggerSuggest
@@ -532,5 +548,11 @@ class CompletionFeature {
         }
 
         return item;
+    }
+
+    static var wordRegex = ~/^\w*/;
+    function maybeInsert(text:String, token:String, lineAfter:String):String {
+        lineAfter = wordRegex.replace(lineAfter, "");
+        return if (lineAfter.charAt(0) == token.charAt(0)) text else text + token;
     }
 }
