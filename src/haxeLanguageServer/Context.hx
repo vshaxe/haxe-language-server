@@ -1,6 +1,5 @@
 package haxeLanguageServer;
 
-import haxe.CallStack;
 import haxe.Json;
 import haxe.extern.EitherType;
 import js.Node.process;
@@ -52,6 +51,7 @@ private typedef Config = {
 private typedef InitOptions = {
     var displayServerConfig:DisplayServerConfig;
     var displayArguments:Array<String>;
+    var sendMethodResults:Bool;
 }
 
 class Context {
@@ -67,6 +67,7 @@ class Context {
     var diagnostics:DiagnosticsManager;
     var codeActions:CodeActionFeature;
     var activeEditor:DocumentUri;
+    var sendMethodResults:Bool = false;
 
     public var config(default,null):Config;
     var unmodifiedConfig:Config;
@@ -137,9 +138,11 @@ class Context {
                 arguments: []
             };
             displayArguments = [];
+            sendMethodResults = false;
         } else {
             displayServerConfig = options.displayServerConfig;
             displayArguments = options.displayArguments;
+            sendMethodResults = options.sendMethodResults;
         }
         documents = new TextDocuments(protocol);
         return resolve({
@@ -377,37 +380,43 @@ class Context {
                     }
                     if (Reflect.hasField(response, "error"))
                         errback(response.error.message);
-                    else {
-                        var haxeResponse:Response<Dynamic> = response.result;
-
-                        var beforeProcessingTime = Date.now().getTime();
-                        var debugInfo =
-                            // try
-                                callback(haxeResponse.result);
-                            /* catch (e:Any) {
-                                errback(e);
-                                trace(e);
-                                trace(CallStack.toString(CallStack.callStack()));
-                                null;
-                            } */
-                        var afterProcessingTime = Date.now().getTime();
-
-                        var methodResult:HaxeMethodResult = {
-                            method: method,
-                            debugInfo: debugInfo,
-                            arrivalTime: arrivalTime,
-                            beforeProcessingTime: beforeProcessingTime,
-                            afterProcessingTime: afterProcessingTime,
-                            response: haxeResponse
-                        };
-                        protocol.sendNotification(LanguageServerMethods.DidRunHaxeMethod, methodResult);
-                    }
+                    else
+                        runHaxeMethodCallback(response, arrivalTime, callback, method);
                 case DCancelled:
             }
         }, error -> {
             // this should never happen (if on a Haxe version that supports JSON-RPC)
             errback(error);
         });
+    }
+
+    function runHaxeMethodCallback(response, arrivalTime, callback, method) {
+        var haxeResponse:Response<Dynamic> = response.result;
+        if (!sendMethodResults) {
+            callback(haxeResponse.result);
+            return;
+        }
+
+        var beforeProcessingTime = Date.now().getTime();
+        var debugInfo =
+            // try
+                callback(haxeResponse.result);
+            /* catch (e:Any) {
+                errback(e);
+                trace(e);
+                trace(CallStack.toString(CallStack.callStack()));
+                null;
+            } */
+        var afterProcessingTime = Date.now().getTime();
+        var methodResult:HaxeMethodResult = {
+            method: method,
+            debugInfo: debugInfo,
+            arrivalTime: arrivalTime,
+            beforeProcessingTime: beforeProcessingTime,
+            afterProcessingTime: afterProcessingTime,
+            response: haxeResponse
+        };
+        protocol.sendNotification(LanguageServerMethods.DidRunHaxeMethod, methodResult);
     }
 
     public function callDisplay(args:Array<String>, stdin:String, token:CancellationToken, callback:DisplayResult->Void, errback:(error:String)->Void) {
