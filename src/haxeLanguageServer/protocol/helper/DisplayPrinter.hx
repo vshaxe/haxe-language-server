@@ -155,14 +155,18 @@ class DisplayPrinter {
         }
     }
 
+    function printReturn(signature:JsonFunctionSignature) {
+        var returnStyle = functionFormatting.returnTypeHint;
+        return if (returnStyle == Always || (returnStyle == NonVoid && !signature.ret.isVoid())) {
+            ":" + printTypeRec(signature.ret);
+        } else {
+            "";
+        }
+    }
+
     public function printEmptyFunctionDefinition<T>(name:String, signature:JsonFunctionSignature, ?params:JsonTypeParameters) {
         var printedParams = if (params == null) "" else printTypeParameters(params);
-        var definition = "function " + name + printedParams + printCallArguments(signature, printFunctionArgument);
-        var returnStyle = functionFormatting.returnTypeHint;
-        if (returnStyle == Always || (returnStyle == NonVoid && !signature.ret.isVoid())) {
-            definition += ":" + printTypeRec(signature.ret);
-        }
-        return definition;
+        return "function " + name + printedParams + printCallArguments(signature, printFunctionArgument) + printReturn(signature);
     }
 
     public function printOverrideDefinition<T>(field:JsonClassField, concreteType:JsonType<T>, indent:String) {
@@ -391,9 +395,12 @@ class DisplayPrinter {
         var names = ArgumentNameHelper.guessArgumentNames(args);
         var printedArgs = [];
         for (i in 0...args.length) {
-            printedArgs.push(names[i] + ":" + args[i].type);
+            printedArgs.push(printFunctionArgument({
+                t: signature.args[i].t,
+                opt: args[i].opt,
+                name: names[i]
+            }));
         }
-
         var printedArguments = printedArgs.join(", ");
         if (functionFormatting.useArrowSyntax) {
             if (args.length != 1) {
@@ -401,7 +408,7 @@ class DisplayPrinter {
             }
             return printedArguments + " -> ";
         } else {
-            return "function(" + printedArguments + ") ";
+            return "function(" + printedArguments + ")" + printReturn(signature) + " ";
         }
     }
 }
