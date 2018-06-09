@@ -278,12 +278,7 @@ class CompletionFeature {
                     qualifier + switch (mode) {
                         case StructureField: field.name + ": ";
                         case Pattern: field.name + ":";
-                        case Override if (concreteType.kind == TFun):
-                            var printer = new DisplayPrinter(false,
-                                if (importConfig.enableAutoImports) Shadowed else Qualified,
-                                context.config.codeGeneration.functions.field
-                            );
-                            printer.printOverrideDefinition(field, concreteType, indent);
+                        case Override: "";
                         case _: field.name;
                     }
                 },
@@ -293,7 +288,16 @@ class CompletionFeature {
 
         switch (mode) {
             case Override:
+                var printer = new DisplayPrinter(false,
+                    if (importConfig.enableAutoImports) Shadowed else Qualified,
+                    context.config.codeGeneration.functions.field
+                );
+                item.textEdit.newText += printer.printOverrideDefinition(field, concreteType, indent, true);
                 item.insertTextFormat = Snippet;
+                item.documentation = {
+                    kind: MarkDown,
+                    value: DocHelper.printCodeBlock(printer.printOverrideDefinition(field, concreteType, indent, false), Haxe)
+                }
                 if (importConfig.enableAutoImports) {
                     var printer = new DisplayPrinter(false, Always);
                     item.additionalTextEdits = concreteType.resolveImports().map(path ->

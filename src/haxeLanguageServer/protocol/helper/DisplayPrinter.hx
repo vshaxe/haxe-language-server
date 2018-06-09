@@ -169,7 +169,7 @@ class DisplayPrinter {
         return "function " + name + printedParams + printCallArguments(signature, printFunctionArgument) + printReturn(signature);
     }
 
-    public function printOverrideDefinition<T>(field:JsonClassField, concreteType:JsonType<T>, indent:String) {
+    public function printOverrideDefinition<T>(field:JsonClassField, concreteType:JsonType<T>, indent:String, snippets:Bool) {
         var access = if (field.isPublic) "public " else "private ";
         if (field.isPublic && !functionFormatting.explicitPublic) {
             access = "";
@@ -181,7 +181,15 @@ class DisplayPrinter {
         var returnKeyword = if (signature.ret.isVoid()) "" else "return ";
         var arguments = printCallArguments(signature, arg -> arg.name);
         var lineBreak = if (functionFormatting.placeOpenBraceOnNewLine) "\n" else " ";
-        return access + printEmptyFunctionDefinition(field.name, signature, field.params) + '$lineBreak{\n${indent}$${1:${returnKeyword}super.${field.name}$arguments;$0}\n}';
+
+        var definition = access + printEmptyFunctionDefinition(field.name, signature, field.params) + '$lineBreak{\n${indent}';
+        var superCall = '${returnKeyword}super.${field.name}$arguments;';
+        var end = '\n}';
+        return if (snippets) {
+            definition + '$${1:$superCall}$0$end';
+        } else {
+            definition + superCall + end;
+        }
     }
 
     static final castRegex = ~/^(cast )+/;
