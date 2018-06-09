@@ -16,12 +16,13 @@ import languageServerProtocol.Types.CompletionItemKind;
 import haxe.display.JsonModuleTypes;
 import haxe.extern.EitherType;
 
-private typedef PreviousCompletionResult = {
-    var doc:TextDocument;
+private typedef CompletionContextData = {
     var replaceRange:Range;
-    var kind:CompletionModeKind<Dynamic>;
+    var mode:CompletionMode<Dynamic>;
+    var doc:TextDocument;
     var indent:String;
     var lineAfter:String;
+    var importPosition:Position;
 }
 
 enum abstract CompletionItemOrigin(Int) {
@@ -43,7 +44,7 @@ class CompletionFeature {
     final triggerSuggest:Command;
     final triggerParameterHints:Command;
 
-    var previousCompletion:PreviousCompletionResult;
+    var previousCompletionData:CompletionContextData;
     var contextSupport:Bool;
     var markdownSupport:Bool;
     var snippetSupport:Bool;
@@ -131,13 +132,11 @@ class CompletionFeature {
 
     function onCompletionItemResolve(item:CompletionItem, token:CancellationToken, resolve:CompletionItem->Void, reject:ResponseError<NoData>->Void) {
         var data:CompletionItemData = item.data;
-        if (!context.haxeServer.supports(DisplayMethods.CompletionItemResolve) || previousCompletion == null || data.origin == Custom) {
+        if (!context.haxeServer.supports(DisplayMethods.CompletionItemResolve) || previousCompletionData == null || data.origin == Custom) {
             return resolve(item);
         }
-        var importPosition = ImportHelper.getImportPosition(previousCompletion.doc);
         context.callHaxeMethod(DisplayMethods.CompletionItemResolve, {index: item.data.index}, token, result -> {
-            resolve(createCompletionItem(data.index, result.item, previousCompletion.doc, previousCompletion.replaceRange,
-                importPosition, previousCompletion.kind, previousCompletion.indent, previousCompletion.lineAfter));
+            resolve(createCompletionItem(data.index, result.item, previousCompletionData));
             return null;
         }, error -> {
             reject(ResponseError.internalError(error));
@@ -164,16 +163,17 @@ class CompletionFeature {
                 start: position,
                 end: position.translate(1, 0)
             });
-            previousCompletion = {
-                doc: doc,
-                kind: result.mode.kind,
+            var data:CompletionContextData = {
                 replaceRange: result.replaceRange,
+                mode: result.mode,
+                doc: doc,
                 indent: indent,
-                lineAfter: lineAfter
+                lineAfter: lineAfter,
+                importPosition: importPosition,
             };
             var items = [];
             for (i in 0...result.items.length) {
-                var completionItem = createCompletionItem(i, result.items[i], doc, result.replaceRange, importPosition, result.mode.kind, indent, lineAfter);
+                var completionItem = createCompletionItem(i, result.items[i], data);
                 if (completionItem != null) {
                     items.push(completionItem);
                 }
@@ -181,17 +181,18 @@ class CompletionFeature {
             items = items.concat(postfixCompletion.createItems(result.mode, params.position, doc));
             items = items.concat(expectedTypeCompletion.createItems(result.mode, params.position, doc, textBefore));
             resolve(items);
+            previousCompletionData = data;
             return items.length + " items";
         }, error -> reject(ResponseError.internalError(error)));
     }
 
-    function createCompletionItem<T>(index:Int, item:HaxeCompletionItem<T>, doc:TextDocument, replaceRange:Range, importPosition:Position, mode:CompletionModeKind<Dynamic>, indent:String, lineAfter:String):CompletionItem {
+    function createCompletionItem<T>(index:Int, item:HaxeCompletionItem<T>, data:CompletionContextData):CompletionItem {
         var completionItem:CompletionItem = switch (item.kind) {
-            case ClassField | EnumAbstractField: createClassFieldCompletionItem(item, doc, replaceRange, mode, indent, importPosition, lineAfter);
-            case EnumField: createEnumFieldCompletionItem(item, replaceRange, mode, lineAfter);
-            case Type: createTypeCompletionItem(item.args, doc, replaceRange, importPosition, mode, lineAfter);
-            case Package: createPackageCompletionItem(item.args, replaceRange, mode, lineAfter);
-            case Keyword: createKeywordCompletionItem(item.args, replaceRange, mode);
+            case ClassField | EnumAbstractField: createClassFieldCompletionItem(item, data);
+            case EnumField: createEnumFieldCompletionItem(item, data);
+            case Type: createTypeCompletionItem(item.args, data);
+            case Package: createPackageCompletionItem(item.args, data);
+            case Keyword: createKeywordCompletionItem(item.args, data);
             case Local: {
                     label: item.args.name,
                     kind: Variable,
@@ -230,8 +231,8 @@ class CompletionFeature {
             return null;
         }
 
-        if (completionItem.textEdit == null && replaceRange != null) {
-            completionItem.textEdit = {range: replaceRange, newText: completionItem.label};
+        if (completionItem.textEdit == null && data.replaceRange != null) {
+            completionItem.textEdit = {range: data.replaceRange, newText: completionItem.label};
         }
 
         if (completionItem.documentation == null) {
@@ -239,7 +240,7 @@ class CompletionFeature {
         }
 
         if (commitCharactersSupport) {
-            if ((item.type != null && item.type.kind == TFun) || mode == New) {
+            if ((item.type != null && item.type.kind == TFun) || data.mode.kind == New) {
                 completionItem.commitCharacters = ["("];
             }
         }
@@ -249,15 +250,15 @@ class CompletionFeature {
         return completionItem;
     }
 
-    function createClassFieldCompletionItem<T>(item:HaxeCompletionItem<Dynamic>, doc:TextDocument, replaceRange:Range, mode:CompletionModeKind<Dynamic>, indent:String, importPosition:Position, lineAfter:String):CompletionItem {
+    function createClassFieldCompletionItem<T>(item:HaxeCompletionItem<Dynamic>, data:CompletionContextData):CompletionItem {
         var occurrence:ClassFieldOccurrence<T> = item.args;
         var concreteType = item.type;
         var field = occurrence.field;
         var resolution = occurrence.resolution;
         var printedOrigin = printer.printClassFieldOrigin(occurrence.origin, item.kind, "'");
 
-        if (mode == Override) {
-            return createOverrideCompletionItem(item, doc, replaceRange, indent, importPosition, printedOrigin);
+        if (data.mode.kind == Override) {
+            return createOverrideCompletionItem(item, data, printedOrigin);
         }
 
         var item:CompletionItem = {
@@ -278,17 +279,17 @@ class CompletionFeature {
             textEdit: {
                 newText: {
                     var qualifier = if (resolution.isQualified) "" else resolution.qualifier + ".";
-                    qualifier + switch (mode) {
-                        case StructureField: maybeInsert(field.name, ": ", lineAfter);
-                        case Pattern: maybeInsert(field.name, ":", lineAfter);
+                    qualifier + switch (data.mode.kind) {
+                        case StructureField: maybeInsert(field.name, ": ", data.lineAfter);
+                        case Pattern: maybeInsert(field.name, ":", data.lineAfter);
                         case _: field.name;
                     }
                 },
-                range: replaceRange
+                range: data.replaceRange
             }
         }
 
-        switch (mode) {
+        switch (data.mode.kind) {
             case StructureField:
                 if (field.meta.hasMeta(Optional)) {
                     item.label = "?" + field.name;
@@ -300,7 +301,7 @@ class CompletionFeature {
         return item;
     }
 
-    function createOverrideCompletionItem<T>(item:HaxeCompletionItem<Dynamic>, doc:TextDocument, replaceRange:Range, indent:String, importPosition:Position, printedOrigin:Option<String>):CompletionItem {
+    function createOverrideCompletionItem<T>(item:HaxeCompletionItem<Dynamic>, data:CompletionContextData, printedOrigin:Option<String>):CompletionItem {
         var occurrence:ClassFieldOccurrence<T> = item.args;
         var concreteType = item.type;
         var field = occurrence.field;
@@ -323,8 +324,8 @@ class CompletionFeature {
             label: field.name,
             kind: getKindForField(field, item.kind),
             textEdit: {
-                newText: printer.printOverrideDefinition(field, concreteType, indent, true),
-                range: replaceRange
+                newText: printer.printOverrideDefinition(field, concreteType, data.indent, true),
+                range: data.replaceRange
             },
             insertTextFormat: Snippet,
             detail: "Auto-generate override" + switch (printedOrigin) {
@@ -333,13 +334,13 @@ class CompletionFeature {
             },
             documentation: {
                 kind: MarkDown,
-                value: DocHelper.printCodeBlock("override " + printer.printOverrideDefinition(field, concreteType, indent, false), Haxe)
+                value: DocHelper.printCodeBlock("override " + printer.printOverrideDefinition(field, concreteType, data.indent, false), Haxe)
             },
             additionalTextEdits: {
                 if (importConfig.enableAutoImports) {
                     var printer = new DisplayPrinter(false, Always);
                     concreteType.resolveImports().map(path ->
-                        ImportHelper.createImportEdit(doc, importPosition, printer.printPath(path), importConfig.style)
+                        ImportHelper.createImportEdit(data.doc, data.importPosition, printer.printPath(path), importConfig.style)
                     );
                 } else {
                     [];
@@ -376,7 +377,7 @@ class CompletionFeature {
         }
     }
 
-    function createEnumFieldCompletionItem<T>(item:HaxeCompletionItem<Dynamic>, replaceRange:Range, mode:CompletionModeKind<Dynamic>, lineAfter:String):CompletionItem {
+    function createEnumFieldCompletionItem<T>(item:HaxeCompletionItem<Dynamic>, data:CompletionContextData):CompletionItem {
         var occurrence:EnumFieldOccurrence<T> = item.args;
         var field:JsonEnumField = occurrence.field;
         var name = field.name;
@@ -394,22 +395,22 @@ class CompletionFeature {
             },
             textEdit: {
                 newText: {
-                    if (mode == Pattern) {
+                    if (data.mode.kind == Pattern) {
                         var field = printer.printEnumField(field, item.type, true, false);
-                        field = maybeInsert(field, ":", lineAfter);
+                        field = maybeInsert(field, ":", data.lineAfter);
                         field;
                     } else {
                         name;
                     }
                 },
-                range: replaceRange
+                range: data.replaceRange
             },
-            insertTextFormat: if (mode == Pattern) Snippet else PlainText
+            insertTextFormat: if (data.mode.kind == Pattern) Snippet else PlainText
         };
     }
 
-    function createTypeCompletionItem(type:ModuleType, doc:TextDocument, replaceRange:Range, importPosition:Position, mode:CompletionModeKind<Dynamic>, lineAfter:String):CompletionItem {
-        var isImportCompletion = mode == Import || mode == Using;
+    function createTypeCompletionItem(type:ModuleType, data:CompletionContextData):CompletionItem {
+        var isImportCompletion = data.mode.kind == Import || data.mode.kind == Using;
         var importConfig = context.config.codeGeneration.imports;
         var autoImport = importConfig.enableAutoImports;
         if (isImportCompletion || type.importStatus == Shadowed) {
@@ -424,25 +425,25 @@ class CompletionFeature {
             label: unqualifiedName + if (containerName == "") "" else " - " + qualifiedName,
             kind: getKindForModuleType(type),
             textEdit: {
-                range: replaceRange,
+                range: data.replaceRange,
                 newText: if (autoImport) unqualifiedName else qualifiedName
             }
         };
 
         if (isImportCompletion) {
-            item.textEdit.newText = maybeInsert(item.textEdit.newText, ";", lineAfter);
+            item.textEdit.newText = maybeInsert(item.textEdit.newText, ";", data.lineAfter);
         } else {
             switch (type.importStatus) {
                 case Imported:
                 case Unimported:
-                    var edit = ImportHelper.createImportEdit(doc, importPosition, qualifiedName, importConfig.style);
+                    var edit = ImportHelper.createImportEdit(data.doc, data.importPosition, qualifiedName, importConfig.style);
                     item.additionalTextEdits = [edit];
                 case Shadowed:
             }
         }
 
         if (snippetSupport) {
-            switch (mode) {
+            switch (data.mode.kind) {
                 case TypeHint | Extends | Implements | StructExtension if (type.hasMandatoryTypeParameters()):
                     item.textEdit.newText += "<$1>";
                     item.insertTextFormat = Snippet;
@@ -450,8 +451,8 @@ class CompletionFeature {
             }
         }
 
-        if (mode == StructExtension) {
-            item.textEdit.newText = maybeInsert(item.textEdit.newText, ",", lineAfter);
+        if (data.mode.kind == StructExtension) {
+            item.textEdit.newText = maybeInsert(item.textEdit.newText, ",", data.lineAfter);
         }
 
         if (type.params != null) {
@@ -499,33 +500,33 @@ class CompletionFeature {
         return detail;
     }
 
-    function createPackageCompletionItem(pack:Package, replaceRange:Range, mode:CompletionModeKind<Dynamic>, lineAfter:String):CompletionItem {
+    function createPackageCompletionItem(pack:Package, data:CompletionContextData):CompletionItem {
         var path = pack.path;
         var dotPath = path.pack.concat([path.name]).join(".");
-        var text = if (mode == Field) path.name else dotPath;
+        var text = if (data.mode.kind == Field) path.name else dotPath;
         return {
             label: text,
             kind: Module,
             detail: 'package $dotPath',
             textEdit: {
-                newText: maybeInsert(text, ".", lineAfter),
-                range: replaceRange
+                newText: maybeInsert(text, ".", data.lineAfter),
+                range: data.replaceRange
             },
             command: triggerSuggest
         };
     }
 
-    function createKeywordCompletionItem(keyword:Keyword, replaceRange:Range, mode:CompletionModeKind<Dynamic>):CompletionItem {
+    function createKeywordCompletionItem(keyword:Keyword, data:CompletionContextData):CompletionItem {
         var item:CompletionItem = {
             label: keyword.name,
             kind: Keyword,
             textEdit: {
                 newText: keyword.name,
-                range: replaceRange
+                range: data.replaceRange
             }
         }
 
-        if (mode == TypeRelation || keyword.name == New) {
+        if (data.mode.kind == TypeRelation || keyword.name == New) {
             item.command = triggerSuggest;
         }
 
