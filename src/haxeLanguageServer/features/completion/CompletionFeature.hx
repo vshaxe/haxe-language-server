@@ -53,7 +53,12 @@ class CompletionFeature {
         legacy = new CompletionFeatureLegacy(context, contextSupport, formatDocumentation);
         expectedTypeCompletion = new ExpectedTypeCompletion();
         postfixCompletion = new PostfixCompletion();
-        printer = new DisplayPrinter();
+        printer = new DisplayPrinter(false, null, {
+            argumentTypeHints: true,
+            returnTypeHint: NonVoid,
+            explicitPublic: true,
+            explicitPrivate: true
+        });
         context.protocol.onRequest(Methods.Completion, onCompletion);
         context.protocol.onRequest(Methods.CompletionItemResolve, onCompletionItemResolve);
 

@@ -31,7 +31,12 @@ class HoverFeature {
     }
 
     function printContent<T>(hover:CompletionItemOccurrence<T>):String {
-        var printer = new DisplayPrinter(true);
+        var printer = new DisplayPrinter(true, null, {
+            argumentTypeHints: true,
+            returnTypeHint: NonVoid,
+            explicitPublic: true,
+            explicitPrivate: true
+        });
         var item = hover.item;
         var concreteType = hover.item.type;
         function combine(defintion:String, origin:Option<String>) {
