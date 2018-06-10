@@ -306,7 +306,7 @@ class DisplayPrinter {
         }
         result += type.moduleName;
         if (type.name != type.moduleName) {
-            result += "." + type.moduleName;
+            result += "." + type.name;
         }
         if (type.pack.length == 0 && type.importStatus == Shadowed) {
             result = "std." + result;

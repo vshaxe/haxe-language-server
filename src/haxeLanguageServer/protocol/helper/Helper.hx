@@ -48,8 +48,8 @@ class Helper {
         return rec(type).filterDuplicates((e1, e2) -> Reflect.compare(e1, e2) != 0);
     }
 
-    public static function hasMeta(meta:JsonMetadata, name:CompilerMetadata) {
-        return meta.exists(meta -> meta.name == cast name);
+    public static function hasMeta(?meta:JsonMetadata, name:CompilerMetadata) {
+        return meta != null && meta.exists(meta -> meta.name == cast name);
     }
 
     public static function isOperator(field:JsonClassField) {
