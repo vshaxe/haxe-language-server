@@ -215,7 +215,10 @@ enum abstract ModuleTypeKind(Int) {
     //var ImportAlias;
 }
 
-typedef ModuleType = JsonTypePath & {
+typedef ModuleType = /* JsonTypePath & */ {
+    var pack:Array<String>;
+    var name:String;
+    var moduleName:String;
     var pos:JsonPos;
     var isPrivate:Bool;
     var params:Array<ModuleTypeParameter>;

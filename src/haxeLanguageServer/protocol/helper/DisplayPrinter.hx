@@ -291,7 +291,7 @@ class DisplayPrinter {
             case EnumAbstract: "enum abstract";
             case TypeAlias | Struct: "typedef";
         });
-        var typeName = type.typeName;
+        var typeName = type.name;
         if (type.params.length > 0) {
             typeName += "<" + type.params.map(param -> param.name).join(", ") + ">";
         }
@@ -305,7 +305,7 @@ class DisplayPrinter {
             result += ".";
         }
         result += type.moduleName;
-        if (type.typeName != type.moduleName) {
+        if (type.name != type.moduleName) {
             result += "." + type.moduleName;
         }
         if (type.pack.length == 0 && type.importStatus == Shadowed) {

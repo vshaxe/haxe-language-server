@@ -418,7 +418,7 @@ class CompletionFeature {
         }
 
         var qualifiedName = printer.printQualifiedTypePath(type); // pack.Foo | pack.Foo.SubType
-        var unqualifiedName = type.typeName; // Foo | SubType
+        var unqualifiedName = type.name; // Foo | SubType
         var containerName = if (qualifiedName.indexOf(".") == -1) "" else qualifiedName.untilLastDot(); // pack | pack.Foo
 
         var item:CompletionItem = {
