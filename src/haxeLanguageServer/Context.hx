@@ -1,5 +1,6 @@
 package haxeLanguageServer;
 
+import haxe.CallStack;
 import haxe.Json;
 import haxe.extern.EitherType;
 import js.Node.process;
@@ -381,7 +382,7 @@ class Context {
                     if (Reflect.hasField(response, "error"))
                         errback(response.error.message);
                     else
-                        runHaxeMethodCallback(response, arrivalTime, callback, method);
+                        runHaxeMethodCallback(response, arrivalTime, callback, errback, method);
                 case DCancelled:
             }
         }, error -> {
@@ -390,7 +391,7 @@ class Context {
         });
     }
 
-    function runHaxeMethodCallback(response, arrivalTime, callback, method) {
+    function runHaxeMethodCallback(response, arrivalTime, callback, errback:String->Void, method) {
         var haxeResponse:Response<Dynamic> = response.result;
         if (!sendMethodResults) {
             callback(haxeResponse.result);
@@ -399,14 +400,14 @@ class Context {
 
         var beforeProcessingTime = Date.now().getTime();
         var debugInfo =
-            // try
-                callback(haxeResponse.result);
-            /* catch (e:Any) {
+            try
+                callback(haxeResponse.result)
+            catch (e:Any) {
                 errback(e);
                 trace(e);
                 trace(CallStack.toString(CallStack.callStack()));
                 null;
-            } */
+            }
         var afterProcessingTime = Date.now().getTime();
         var methodResult:HaxeMethodResult = {
             method: method,
