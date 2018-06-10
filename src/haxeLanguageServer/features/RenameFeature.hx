@@ -22,30 +22,25 @@ class RenameFeature {
             reject(ResponseError.internalError("Only local variables and function parameters can be renamed."));
         }
 
-        context.gotoDefinition.onGotoDefinition(params, token,
-            function(locations:Array<Location>) {
-                var doc = context.documents.get(params.textDocument.uri);
-                var declaration = locations[0];
-                if (declaration == null) {
-                    return reject(ResponseError.internalError("No declaration found."));
-                }
-                if (declaration.uri != params.textDocument.uri) {
-                    return invalidRename();
-                }
-
-                var resolver = new RenameResolver(declaration.range, params.newName);
-                resolver.walkFile(doc.parseTree, Root);
-                if (resolver.edits.length == 0) {
-                    return invalidRename();
-                }
-
-                var changes = new haxe.DynamicAccess();
-                changes[params.textDocument.uri.toString()] = resolver.edits;
-                resolve({changes: changes});
-            },
-            function(_) {
-                invalidRename();
+        context.gotoDefinition.onGotoDefinition(params, token, locations -> {
+            var doc = context.documents.get(params.textDocument.uri);
+            var declaration = locations[0];
+            if (declaration == null) {
+                return reject(ResponseError.internalError("No declaration found."));
             }
-        );
+            if (declaration.uri != params.textDocument.uri) {
+                return invalidRename();
+            }
+
+            var resolver = new RenameResolver(declaration.range, params.newName);
+            resolver.walkFile(doc.parseTree, Root);
+            if (resolver.edits.length == 0) {
+                return invalidRename();
+            }
+
+            var changes = new haxe.DynamicAccess();
+            changes[params.textDocument.uri.toString()] = resolver.edits;
+            resolve({changes: changes});
+        }, _ -> invalidRename());
     }
 }
