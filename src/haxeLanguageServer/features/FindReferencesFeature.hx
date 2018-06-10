@@ -21,7 +21,7 @@ class FindReferencesFeature {
 
     function handleJsonRpc(params:TextDocumentPositionParams, token:CancellationToken, resolve:Definition->Void, reject:ResponseError<NoData>->Void, doc:TextDocument, offset:Int) {
         context.callHaxeMethod(DisplayMethods.FindReferences, {file: doc.fsPath, contents: doc.content, offset: offset}, token, locations -> {
-            resolve(locations.map(location -> {
+            resolve(locations.filter(location -> location != null).map(location -> {
                 {
                     uri: location.file.toUri(),
                     range: location.range
