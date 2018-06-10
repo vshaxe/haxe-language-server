@@ -67,6 +67,7 @@ enum abstract CompilerMetadata(String) {
     var Optional = ":optional";
     var Enum = ":enum";
     var Value = ":value";
+    var Deprecated = ":deprecated";
     // TODO
 }
 

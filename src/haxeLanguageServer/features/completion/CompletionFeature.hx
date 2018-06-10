@@ -49,6 +49,7 @@ class CompletionFeature {
     var markdownSupport:Bool;
     var snippetSupport:Bool;
     var commitCharactersSupport:Bool;
+    var deprecatedSupport:Bool;
 
     public function new(context) {
         this.context = context;
@@ -103,6 +104,10 @@ class CompletionFeature {
 
         if (completionItem.commitCharactersSupport) {
             commitCharactersSupport = true;
+        }
+
+        if (completionItem.deprecatedSupport) {
+            deprecatedSupport = true;
         }
     }
 
@@ -298,6 +303,7 @@ class CompletionFeature {
             case _:
         }
 
+        handleDeprecated(item, field.meta);
         return item;
     }
 
@@ -320,7 +326,7 @@ class CompletionFeature {
             context.config.codeGeneration.functions.field
         );
 
-        return {
+        var item:CompletionItem = {
             label: field.name,
             kind: getKindForField(field, item.kind),
             textEdit: {
@@ -347,6 +353,8 @@ class CompletionFeature {
                 }
             }
         }
+        handleDeprecated(item, field.meta);
+        return item;
     }
 
     function getKindForField<T>(field:JsonClassField, kind:HaxeCompletionItemKind<Dynamic>):CompletionItemKind {
@@ -459,6 +467,7 @@ class CompletionFeature {
             item.detail = printTypeDetail(type, containerName);
         }
 
+        handleDeprecated(item, type.meta);
         return item;
     }
 
@@ -555,5 +564,11 @@ class CompletionFeature {
     function maybeInsert(text:String, token:String, lineAfter:String):String {
         lineAfter = wordRegex.replace(lineAfter, "");
         return if (lineAfter.charAt(0) == token.charAt(0)) text else text + token;
+    }
+
+    function handleDeprecated(item:CompletionItem, meta:JsonMetadata) {
+        if (deprecatedSupport && meta.hasMeta(Deprecated)) {
+            item.deprecated = true;
+        }
     }
 }
