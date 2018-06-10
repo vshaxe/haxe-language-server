@@ -47,12 +47,12 @@ class DisplayPrinter {
         }
     }
 
-    public function printPath(path:JsonPath) {
+    public function printPath(path:JsonTypePath) {
         function print(qualified:Bool) {
             return if (!qualified || path.pack.length == 0) {
-                path.name;
+                path.typeName;
             } else {
-                path.pack.join(".") + "." + path.name;
+                path.pack.join(".") + "." + path.typeName;
             }
         }
         return print(switch(pathPrinting) {
@@ -62,7 +62,7 @@ class DisplayPrinter {
         });
     }
 
-    public function printPathWithParams(path:JsonPathWithParams) {
+    public function printPathWithParams(path:JsonTypePathWithParams) {
         var s = printPath(path.path);
         if (path.params.length == 0) {
             return s;
@@ -291,7 +291,7 @@ class DisplayPrinter {
             case EnumAbstract: "enum abstract";
             case TypeAlias | Struct: "typedef";
         });
-        var typeName = type.name;
+        var typeName = type.typeName;
         if (type.params.length > 0) {
             typeName += "<" + type.params.map(param -> param.name).join(", ") + ">";
         }
@@ -305,8 +305,8 @@ class DisplayPrinter {
             result += ".";
         }
         result += type.moduleName;
-        if (type.name != type.moduleName) {
-            result += "." + type.name;
+        if (type.typeName != type.moduleName) {
+            result += "." + type.moduleName;
         }
         if (type.pack.length == 0 && type.importStatus == Shadowed) {
             result = "std." + result;

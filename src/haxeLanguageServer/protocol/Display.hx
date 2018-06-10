@@ -216,8 +216,7 @@ enum abstract ModuleTypeKind(Int) {
 }
 
 typedef ModuleType = {
-    >JsonPath,
-    var moduleName:String;
+    >JsonTypePath,
     var pos:JsonPos;
     var isPrivate:Bool;
     var params:Array<ModuleTypeParameter>;
@@ -308,12 +307,12 @@ enum abstract KeywordKind(String) to String {
 } */
 
 typedef Package = {
-    var path:JsonPath;
+    var path:JsonPackagePath;
     // var ?contents:Array<{name:String, kind:PackageContentKind}>;
 }
 
 typedef Module = {
-    var path:JsonPath;
+    var path:JsonModulePath;
     // var ?contents:Array<ModuleType>;
 }
 

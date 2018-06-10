@@ -22,8 +22,8 @@ class Helper {
         }
     }
 
-    public static function resolveImports<T>(type:JsonType<T>):Array<JsonPath> {
-        function rec(type:JsonType<T>):Array<JsonPath> {
+    public static function resolveImports<T>(type:JsonType<T>):Array<JsonTypePath> {
+        function rec(type:JsonType<T>):Array<JsonTypePath> {
             return switch (type.kind) {
                 case TMono: [];
                 case TInst | TEnum | TType | TAbstract:
@@ -62,7 +62,7 @@ class Helper {
 
     public static function isVoid<T>(type:JsonType<T>) {
         return switch (type.kind) {
-            case TAbstract if (type.args.path.name == "Void"): true;
+            case TAbstract if (type.args.path.typeName == "Void"): true;
             case _: false;
         }
     }
@@ -92,8 +92,8 @@ class Helper {
     public static function removeNulls<T>(type:JsonType<T>, optional:Bool = false):{type:JsonType<T>, optional:Bool} {
         switch (type.kind) {
             case TAbstract:
-                var path:JsonPathWithParams = type.args;
-                if (path.path.pack.length == 0 && path.path.name == "Null") {
+                var path:JsonTypePathWithParams = type.args;
+                if (path.path.pack.length == 0 && path.path.typeName == "Null") {
                     if (path.params != null && path.params[0] != null) {
                         return removeNulls(path.params[0], true);
                     }
@@ -105,7 +105,7 @@ class Helper {
 
     public static function hasMandatoryTypeParameters(type:ModuleType):Bool {
         // Dynamic is a special case regarding this in the compiler
-        if (type.name == "Dynamic" && type.pack.length == 0) {
+        if (type.typeName == "Dynamic" && type.pack.length == 0) {
             return false;
         }
         return type.params != null && type.params.length > 0;

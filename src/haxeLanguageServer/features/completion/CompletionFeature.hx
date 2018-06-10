@@ -205,9 +205,9 @@ class CompletionFeature {
             case Module:
                 var path = item.args.path;
                 {
-                    label: path.name,
+                    label: path.moduleName,
                     kind: Folder,
-                    detail: 'module ${path.pack.concat([path.name]).join(".")}'
+                    detail: 'module ${path.pack.concat([path.moduleName]).join(".")}'
                 }
             case Literal: {
                     label: item.args.name,
@@ -418,7 +418,7 @@ class CompletionFeature {
         }
 
         var qualifiedName = printer.printQualifiedTypePath(type); // pack.Foo | pack.Foo.SubType
-        var unqualifiedName = type.name; // Foo | SubType
+        var unqualifiedName = type.typeName; // Foo | SubType
         var containerName = if (qualifiedName.indexOf(".") == -1) "" else qualifiedName.untilLastDot(); // pack | pack.Foo
 
         var item:CompletionItem = {
@@ -502,8 +502,8 @@ class CompletionFeature {
 
     function createPackageCompletionItem(pack:Package, data:CompletionContextData):CompletionItem {
         var path = pack.path;
-        var dotPath = path.pack.concat([path.name]).join(".");
-        var text = if (data.mode.kind == Field) path.name else dotPath;
+        var dotPath = path.pack.join(".");
+        var text = if (data.mode.kind == Field) path.pack[path.pack.length - 1] else dotPath;
         return {
             label: text,
             kind: Module,
