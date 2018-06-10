@@ -24,7 +24,7 @@ class DisplayMethods {
     /**
         The find references request is sent from the client to Haxe to find locations that reference the symbol at a given text document position.
     **/
-    static inline var FindReferences = new HaxeRequestMethod<PositionParams,GotoDefinitionResult>("display/findReferences");
+    static inline var FindReferences = new HaxeRequestMethod<PositionParams,GotoDefinitionResult>("display/references");
 
     /**
         The goto definition request is sent from the client to Haxe to resolve the definition location(s) of a symbol at a given text document position.
@@ -215,8 +215,7 @@ enum abstract ModuleTypeKind(Int) {
     //var ImportAlias;
 }
 
-typedef ModuleType = {
-    >JsonTypePath,
+typedef ModuleType = JsonTypePath & {
     var pos:JsonPos;
     var isPrivate:Bool;
     var params:Array<ModuleTypeParameter>;
@@ -407,8 +406,7 @@ typedef DeterminePackageResult = Response<Array<String>>;
 
 /* Signature */
 
-typedef SignatureInformation = {
-    > JsonFunctionSignature,
+typedef SignatureInformation = JsonFunctionSignature & {
     var ?documentation:String;
 }
 
@@ -422,8 +420,7 @@ typedef SignatureHelpResult = Response<SignatureItem>;
 
 /* General types */
 
-typedef PositionParams = {
-    > FileParams,
+typedef PositionParams = FileParams & {
     /** Unicode character offset in the file. **/
     var offset:Int;
     var ?contents:String;
