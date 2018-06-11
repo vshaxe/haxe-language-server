@@ -105,7 +105,7 @@ class DisplayPrinter {
                     if (arg.name != "") {
                         hasNamed = true;
                     }
-                    return this.printFunctionArgument(arg, true);
+                    return this.printFunctionArgument(arg);
                 }
                 var args = t.args.args.map(printFunctionArgument);
                 var r = printTypeRec(t.args.ret);
@@ -134,12 +134,12 @@ class DisplayPrinter {
         return t;
     }
 
-    public function printFunctionArgument<T>(arg:JsonFunctionArgument, allowOptionals:Bool) {
+    public function printFunctionArgument<T>(arg:JsonFunctionArgument) {
         var nullRemoval = arg.t.removeNulls();
         var concreteType = if (functionFormatting.explicitNull) arg.t else nullRemoval.type;
         var optional = nullRemoval.optional;
 
-        var argument = (if (optional && allowOptionals) "?" else "") + arg.name;
+        var argument = if (optional) "?" else "" + arg.name;
         if (functionFormatting.argumentTypeHints) {
             argument += (arg.name == "" ? "" : ":") + printTypeRec(concreteType);
         }
@@ -178,7 +178,7 @@ class DisplayPrinter {
 
     public function printEmptyFunctionDefinition<T>(name:String, signature:JsonFunctionSignature, ?params:JsonTypeParameters) {
         var printedParams = if (params == null) "" else printTypeParameters(params);
-        return "function " + name + printedParams + printCallArguments(signature, printFunctionArgument.bind(_, true)) + printReturn(signature);
+        return "function " + name + printedParams + printCallArguments(signature, printFunctionArgument) + printReturn(signature);
     }
 
     public function printOverrideDefinition<T>(field:JsonClassField, concreteType:JsonType<T>, indent:String, snippets:Bool) {
@@ -400,12 +400,16 @@ class DisplayPrinter {
         var names = ArgumentNameHelper.guessArgumentNames(args);
         var printedArgs = [];
         var singleArgument = args.length == 1;
-        for (i in 0...args.length) {
-            printedArgs.push(printFunctionArgument({
-                t: signature.args[i].t,
-                opt: args[i].opt,
-                name: names[i]
-            }, !singleArgument));
+        if (singleArgument) {
+            printedArgs.push(names[0]);
+        } else {
+            for (i in 0...args.length) {
+                printedArgs.push(printFunctionArgument({
+                    t: signature.args[i].t,
+                    opt: args[i].opt,
+                    name: names[i]
+                }));
+            }
         }
         var printedArguments = printedArgs.join(", ");
         if (functionFormatting.useArrowSyntax) {

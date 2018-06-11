@@ -49,7 +49,7 @@ class SignatureHelpFeature {
         var printer = new DisplayPrinter();
         function createSignatureParameter(arg:JsonFunctionArgument):ParameterInformation {
             return {
-                label: printer.printFunctionArgument(arg, true)
+                label: printer.printFunctionArgument(arg)
             }
         }
         function createSignatureInformation(info:HaxeSignatureInformation):SignatureInformation {
