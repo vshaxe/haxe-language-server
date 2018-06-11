@@ -387,7 +387,7 @@ class DisplayPrinter {
         var args = signature.args.map(arg -> {
             name: if (arg.name == "") null else arg.name,
             opt: arg.opt,
-            type: printTypeRec(arg.t)
+            type: printTypeRec(arg.t.removeNulls().type)
         });
         var names = ArgumentNameHelper.guessArgumentNames(args);
         var printedArgs = [];
