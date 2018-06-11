@@ -109,7 +109,8 @@ class Helper {
 
     public static function hasMandatoryTypeParameters(type:DisplayModuleType):Bool {
         // Dynamic is a special case regarding this in the compiler
-        if (type.name == "Dynamic" && type.pack.length == 0) {
+        var path = type.path;
+        if (path.typeName == "Dynamic" && path.pack.length == 0) {
             return false;
         }
         return type.params != null && type.params.length > 0;

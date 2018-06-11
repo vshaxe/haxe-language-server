@@ -45,21 +45,24 @@ class DisplayPrinter {
     }
 
     public function printPath(path:JsonTypePath) {
-        var qualified = switch(pathPrinting) {
+        var qualified = switch (pathPrinting) {
             case Always: true;
             case Qualified: path.importStatus != Imported;
             case Shadowed: path.importStatus == Shadowed;
         }
-
         var isSubType = path.moduleName != path.typeName;
-        return if (!qualified || (path.pack.length == 0 && !isSubType)) {
-            path.typeName;
-        } else {
+        var isToplevelType = path.pack.length == 0 && !isSubType;
+        if (isToplevelType && path.importStatus == Shadowed) {
+            path.pack.push("std");
+        }
+        return if (qualified) {
             var printedPath = path.moduleName + (if (isSubType) "." + path.typeName else "");
             if (path.pack.length > 0) {
                 printedPath = path.pack.join(".") + "." + printedPath;
             }
             printedPath;
+        } else {
+            path.typeName;
         }
     }
 
@@ -292,27 +295,12 @@ class DisplayPrinter {
             case EnumAbstract: "enum abstract";
             case TypeAlias | Struct: "typedef";
         });
-        var typeName = type.name;
+        var typeName = type.path.typeName;
         if (type.params.length > 0) {
             typeName += "<" + type.params.map(param -> param.name).join(", ") + ">";
         }
         components.push(typeName);
         return components.join(" ");
-    }
-
-    public function printQualifiedTypePath(type:DisplayModuleType):String {
-        var result = type.pack.join(".");
-        if (type.pack.length > 0) {
-            result += ".";
-        }
-        result += type.moduleName;
-        if (type.name != type.moduleName) {
-            result += "." + type.name;
-        }
-        if (type.pack.length == 0 && type.importStatus == Shadowed) {
-            result = "std." + result;
-        }
-        return result;
     }
 
     public function printClassFieldOrigin<T>(origin:ClassFieldOrigin<T>, kind:DisplayItemKind<Dynamic>, quote:String = ""):Option<String> {

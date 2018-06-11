@@ -419,12 +419,12 @@ class CompletionFeature {
         var isImportCompletion = data.mode.kind == Import || data.mode.kind == Using;
         var importConfig = context.config.codeGeneration.imports;
         var autoImport = importConfig.enableAutoImports;
-        if (isImportCompletion || type.importStatus == Shadowed) {
+        if (isImportCompletion || type.path.importStatus == Shadowed) {
             autoImport = false; // need to insert the qualified name
         }
 
-        var qualifiedName = printer.printQualifiedTypePath(type); // pack.Foo | pack.Foo.SubType
-        var unqualifiedName = type.name; // Foo | SubType
+        var qualifiedName = printer.printPath(type.path); // pack.Foo | pack.Foo.SubType
+        var unqualifiedName = type.path.typeName; // Foo | SubType
         var containerName = if (qualifiedName.indexOf(".") == -1) "" else qualifiedName.untilLastDot(); // pack | pack.Foo
 
         var item:CompletionItem = {
@@ -439,7 +439,7 @@ class CompletionFeature {
         if (isImportCompletion) {
             item.textEdit.newText = maybeInsert(item.textEdit.newText, ";", data.lineAfter);
         } else {
-            switch (type.importStatus) {
+            switch (type.path.importStatus) {
                 case Imported:
                 case Unimported:
                     var edit = ImportHelper.createImportEdit(data.doc, data.importPosition, qualifiedName, importConfig.style);
@@ -496,7 +496,7 @@ class CompletionFeature {
 
     function printTypeDetail(type:DisplayModuleType, containerName:String):String {
         var detail = printer.printEmptyTypeDefinition(type) + "\n";
-        switch (type.importStatus) {
+        switch (type.path.importStatus) {
             case Imported:
                 detail += "(imported)";
             case Unimported:

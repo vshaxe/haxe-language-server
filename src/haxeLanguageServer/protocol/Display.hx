@@ -216,10 +216,8 @@ enum abstract DisplayModuleTypeKind(Int) {
     //var ImportAlias;
 }
 
-typedef DisplayModuleType = /* JsonTypePath & */ {
-    var pack:Array<String>;
-    var name:String;
-    var moduleName:String;
+typedef DisplayModuleType = {
+    var path:JsonTypePath;
     var pos:JsonPos;
     var isPrivate:Bool;
     var params:Array<DisplayModuleTypeParameter>;
@@ -227,7 +225,6 @@ typedef DisplayModuleType = /* JsonTypePath & */ {
     var doc:JsonDoc;
     var isExtern:Bool;
     var kind:DisplayModuleTypeKind;
-    var importStatus:ImportStatus;
 }
 
 typedef DisplayModuleTypeParameter = {
