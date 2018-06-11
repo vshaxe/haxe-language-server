@@ -415,7 +415,7 @@ class CompletionFeature {
         };
     }
 
-    function createTypeCompletionItem(type:ModuleType, data:CompletionContextData):CompletionItem {
+    function createTypeCompletionItem(type:DisplayModuleType, data:CompletionContextData):CompletionItem {
         var isImportCompletion = data.mode.kind == Import || data.mode.kind == Using;
         var importConfig = context.config.codeGeneration.imports;
         var autoImport = importConfig.enableAutoImports;
@@ -469,7 +469,7 @@ class CompletionFeature {
         return item;
     }
 
-    function getKindForModuleType(type:ModuleType):CompletionItemKind {
+    function getKindForModuleType(type:DisplayModuleType):CompletionItemKind {
         return switch (type.kind) {
             case Class: Class;
             case Interface: Interface;
@@ -494,7 +494,7 @@ class CompletionFeature {
         return DocHelper.extractText(doc);
     }
 
-    function printTypeDetail(type:ModuleType, containerName:String):String {
+    function printTypeDetail(type:DisplayModuleType, containerName:String):String {
         var detail = printer.printEmptyTypeDefinition(type) + "\n";
         switch (type.importStatus) {
             case Imported:

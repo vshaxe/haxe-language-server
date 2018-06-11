@@ -278,7 +278,7 @@ class DisplayPrinter {
         Prints a type declaration in the form of `extern interface ArrayAccess<T>`.
         (`modifiers... keyword Name<Params>`)
     **/
-    public function printEmptyTypeDefinition(type:ModuleType):String {
+    public function printEmptyTypeDefinition(type:DisplayModuleType):String {
         var components = [];
         if (type.isPrivate) components.push("private");
         if (type.meta.hasMeta(Final)) components.push("final");
@@ -299,7 +299,7 @@ class DisplayPrinter {
         return components.join(" ");
     }
 
-    public function printQualifiedTypePath(type:ModuleType):String {
+    public function printQualifiedTypePath(type:DisplayModuleType):String {
         var result = type.pack.join(".");
         if (type.pack.length > 0) {
             result += ".";

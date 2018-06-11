@@ -202,7 +202,7 @@ enum abstract Literal(String) {
     var Trace = "trace";
 }
 
-enum abstract ModuleTypeKind(Int) {
+enum abstract DisplayModuleTypeKind(Int) {
     var Class;
     var Interface;
     var Enum;
@@ -216,21 +216,21 @@ enum abstract ModuleTypeKind(Int) {
     //var ImportAlias;
 }
 
-typedef ModuleType = /* JsonTypePath & */ {
+typedef DisplayModuleType = /* JsonTypePath & */ {
     var pack:Array<String>;
     var name:String;
     var moduleName:String;
     var pos:JsonPos;
     var isPrivate:Bool;
-    var params:Array<ModuleTypeParameter>;
+    var params:Array<DisplayModuleTypeParameter>;
     var meta:JsonMetadata;
     var doc:JsonDoc;
     var isExtern:Bool;
-    var kind:ModuleTypeKind;
+    var kind:DisplayModuleTypeKind;
     var importStatus:ImportStatus;
 }
 
-typedef ModuleTypeParameter = {
+typedef DisplayModuleTypeParameter = {
     var name:String;
     var meta:JsonMetadata;
     var constraints:Array<JsonType<Dynamic>>;
@@ -324,7 +324,7 @@ enum abstract DisplayItemKind<T>(String) {
     var ClassField:DisplayItemKind<ClassFieldOccurrence<Dynamic>>;
     var EnumField:DisplayItemKind<EnumFieldOccurrence<Dynamic>>;
     var EnumAbstractField:DisplayItemKind<ClassFieldOccurrence<Dynamic>>;
-    var Type:DisplayItemKind<ModuleType>;
+    var Type:DisplayItemKind<DisplayModuleType>;
     var Package:DisplayItemKind<Package>;
     var Module:DisplayItemKind<Module>;
     var Literal:DisplayItemKind<JsonLiteral<Dynamic>>;
@@ -332,7 +332,7 @@ enum abstract DisplayItemKind<T>(String) {
     var Keyword:DisplayItemKind<Keyword>;
     var AnonymousStructure:DisplayItemKind<JsonAnon>;
     var Expression:DisplayItemKind<JsonTExpr>;
-    var TypeParameter:DisplayItemKind<ModuleTypeParameter>;
+    var TypeParameter:DisplayItemKind<DisplayModuleTypeParameter>;
 }
 
 typedef DisplayItem<T> = {
