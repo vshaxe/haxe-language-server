@@ -2,7 +2,7 @@ package haxeLanguageServer.protocol.helper;
 
 import haxe.ds.Option;
 import haxe.display.JsonModuleTypes;
-import haxeLanguageServer.helper.ArgumentNameHelper;
+import haxeLanguageServer.helper.IdentifierHelper;
 import haxeLanguageServer.helper.FunctionFormattingConfig;
 import haxeLanguageServer.protocol.Display;
 using Lambda;
@@ -396,7 +396,7 @@ class DisplayPrinter {
             opt: arg.opt,
             type: new DisplayPrinter(PathPrinting.Never).printTypeRec(arg.t)
         });
-        var names = ArgumentNameHelper.guessArgumentNames(args);
+        var names = IdentifierHelper.guessNames(args);
         var printedArgs = [];
         var singleArgument = args.length == 1;
         if (singleArgument) {

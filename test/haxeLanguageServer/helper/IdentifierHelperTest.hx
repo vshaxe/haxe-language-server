@@ -1,8 +1,8 @@
 package haxeLanguageServer.helper;
 
-import haxeLanguageServer.helper.ArgumentNameHelper.*;
+import haxeLanguageServer.helper.IdentifierHelper.*;
 
-class ArgumentNameHelperTest extends TestCaseBase {
+class IdentifierHelperTest extends TestCaseBase {
     function testAvoidDuplicates() {
         function check(expected:Array<String>, original:Array<String>)
             assertTrue(expected.equals(avoidDuplicates(original)));
@@ -11,9 +11,9 @@ class ArgumentNameHelperTest extends TestCaseBase {
         check(["b1", "b2"], ["b", "b"]);
     }
 
-    function testGuessArgumentName() {
+    function testGuessName() {
         function assert(expected, original, ?posInfos)
-            assertEquals(expected, guessArgumentName(original), posInfos);
+            assertEquals(expected, guessName(original), posInfos);
 
         assert("object", "FlxObject");
         assert("f", "F");

@@ -2,7 +2,7 @@ package haxeLanguageServer.features;
 
 import haxe.extern.EitherType;
 import haxe.display.JsonModuleTypes.JsonFunctionArgument;
-import haxeLanguageServer.helper.ArgumentNameHelper.addNamesToSignatureType;
+import haxeLanguageServer.helper.IdentifierHelper.addNamesToSignatureType;
 import haxeLanguageServer.helper.DocHelper;
 import haxeLanguageServer.protocol.helper.DisplayPrinter;
 import haxeLanguageServer.protocol.Display.DisplayMethods;

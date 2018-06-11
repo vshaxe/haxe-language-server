@@ -3,12 +3,12 @@ package haxeLanguageServer.helper;
 import String.fromCharCode;
 import haxeLanguageServer.helper.TypeHelper.DisplayFunctionArgument;
 
-class ArgumentNameHelper {
-    public static function guessArgumentNames(args:Array<DisplayFunctionArgument>):Array<String> {
-        return avoidDuplicates([for (arg in args) if (arg.name != null) arg.name else guessArgumentName(arg.type)]);
+class IdentifierHelper {
+    public static function guessNames(args:Array<DisplayFunctionArgument>):Array<String> {
+        return avoidDuplicates([for (arg in args) if (arg.name != null) arg.name else guessName(arg.type)]);
     }
 
-    public static function guessArgumentName(type:String):String {
+    public static function guessName(type:String):String {
         type = TypeHelper.unwrapNullable(type);
         type = TypeHelper.getTypeWithoutParams(type);
 

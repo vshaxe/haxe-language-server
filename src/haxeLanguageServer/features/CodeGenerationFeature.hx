@@ -1,6 +1,6 @@
 package haxeLanguageServer.features;
 
-import haxeLanguageServer.helper.ArgumentNameHelper;
+import haxeLanguageServer.helper.IdentifierHelper;
 import haxeLanguageServer.helper.TypeHelper;
 import haxeLanguageServer.features.SignatureHelpFeature.CurrentSignature;
 
@@ -36,7 +36,7 @@ class CodeGenerationFeature {
         var currentType = TypeHelper.parseFunctionArgumentType(activeParam.label);
         switch (currentType) {
             case DTFunction(args, ret):
-                var names = ArgumentNameHelper.guessArgumentNames(args);
+                var names = IdentifierHelper.guessNames(args);
                 for (i in 0...args.length) args[i].name = names[i];
 
                 var generatedCode = TypeHelper.printFunctionDeclaration(args, ret, context.config.codeGeneration.functions.anonymous) + " ";
