@@ -22,9 +22,6 @@ enum PathPrinting {
     Shadowed;
 }
 
-/**
-    (Slightly modified) copy of haxe.display.JsonModuleTypesPrinter.
-**/
 class DisplayPrinter {
     final wrap:Bool;
     final pathPrinting:PathPrinting;
@@ -49,10 +46,15 @@ class DisplayPrinter {
 
     public function printPath(path:JsonTypePath) {
         function print(qualified:Bool) {
-            return if (!qualified || path.pack.length == 0) {
+            var isSubType = path.moduleName != path.typeName;
+            return if (!qualified || (path.pack.length == 0 && !isSubType)) {
                 path.typeName;
             } else {
-                path.pack.join(".") + "." + path.typeName;
+                var printedPath = path.moduleName + (if (isSubType) "." + path.typeName else "");
+                if (path.pack.length > 0) {
+                    printedPath = path.pack.join(".") + "." + printedPath;
+                }
+                printedPath;
             }
         }
         return print(switch(pathPrinting) {
