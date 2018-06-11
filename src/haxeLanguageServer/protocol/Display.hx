@@ -319,35 +319,35 @@ typedef Module = {
     // var ?contents:Array<ModuleType>;
 }
 
-enum abstract CompletionItemKind<T>(String) {
-    var Local:CompletionItemKind<JsonLocal<Dynamic>>;
-    var ClassField:CompletionItemKind<ClassFieldOccurrence<Dynamic>>;
-    var EnumField:CompletionItemKind<EnumFieldOccurrence<Dynamic>>;
-    var EnumAbstractField:CompletionItemKind<ClassFieldOccurrence<Dynamic>>;
-    var Type:CompletionItemKind<ModuleType>;
-    var Package:CompletionItemKind<Package>;
-    var Module:CompletionItemKind<Module>;
-    var Literal:CompletionItemKind<JsonLiteral<Dynamic>>;
-    var Metadata:CompletionItemKind<Metadata>;
-    var Keyword:CompletionItemKind<Keyword>;
-    var AnonymousStructure:CompletionItemKind<JsonAnon>;
-    var Expression:CompletionItemKind<JsonTExpr>;
-    var TypeParameter:CompletionItemKind<ModuleTypeParameter>;
+enum abstract DisplayItemKind<T>(String) {
+    var Local:DisplayItemKind<JsonLocal<Dynamic>>;
+    var ClassField:DisplayItemKind<ClassFieldOccurrence<Dynamic>>;
+    var EnumField:DisplayItemKind<EnumFieldOccurrence<Dynamic>>;
+    var EnumAbstractField:DisplayItemKind<ClassFieldOccurrence<Dynamic>>;
+    var Type:DisplayItemKind<ModuleType>;
+    var Package:DisplayItemKind<Package>;
+    var Module:DisplayItemKind<Module>;
+    var Literal:DisplayItemKind<JsonLiteral<Dynamic>>;
+    var Metadata:DisplayItemKind<Metadata>;
+    var Keyword:DisplayItemKind<Keyword>;
+    var AnonymousStructure:DisplayItemKind<JsonAnon>;
+    var Expression:DisplayItemKind<JsonTExpr>;
+    var TypeParameter:DisplayItemKind<ModuleTypeParameter>;
 }
 
-typedef CompletionItem<T> = {
-    var kind:CompletionItemKind<T>;
+typedef DisplayItem<T> = {
+    var kind:DisplayItemKind<T>;
     var args:T;
     var ?type:JsonType<Dynamic>;
 }
 
-typedef CompletionItemOccurrence<T> = {
+typedef DisplayItemOccurrence<T> = {
     var range:Range;
-    var item:CompletionItem<T>;
+    var item:DisplayItem<T>;
     var ?moduleType:JsonModuleType<Dynamic>;
 }
 
-typedef FieldCompletionSubject<T> = CompletionItemOccurrence<T> & {
+typedef FieldCompletionSubject<T> = DisplayItemOccurrence<T> & {
     // var isIterable:Bool; TODO
 }
 
@@ -379,7 +379,7 @@ typedef CompletionMode<T> = {
 }
 
 typedef CompletionResponse<T1, T2> = {
-    var items:Array<CompletionItem<T1>>;
+    var items:Array<DisplayItem<T1>>;
     var mode:CompletionMode<T2>;
     var ?replaceRange:Range;
 }
@@ -393,7 +393,7 @@ typedef CompletionItemResolveParams = {
 };
 
 typedef CompletionItemResolveResult = Response<{
-    var item:CompletionItem<Dynamic>;
+    var item:DisplayItem<Dynamic>;
 }>;
 
 /* GotoDefinition */
@@ -402,7 +402,7 @@ typedef GotoDefinitionResult = Response<Array<Location>>;
 
 /* Hover */
 
-typedef HoverResult = Response<CompletionItemOccurrence<Dynamic>>;
+typedef HoverResult = Response<DisplayItemOccurrence<Dynamic>>;
 
 /* DeterminePackage */
 

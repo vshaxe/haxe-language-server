@@ -314,7 +314,7 @@ class DisplayPrinter {
         return result;
     }
 
-    public function printClassFieldOrigin<T>(origin:ClassFieldOrigin<T>, kind:CompletionItemKind<Dynamic>, quote:String = ""):Option<String> {
+    public function printClassFieldOrigin<T>(origin:ClassFieldOrigin<T>, kind:DisplayItemKind<Dynamic>, quote:String = ""):Option<String> {
         if (kind == EnumAbstractField || origin.kind == cast Unknown) {
             return None;
         }

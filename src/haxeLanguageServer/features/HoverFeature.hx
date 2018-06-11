@@ -31,7 +31,7 @@ class HoverFeature {
         }, error -> reject(ResponseError.internalError(error)));
     }
 
-    function printContent<T>(hover:CompletionItemOccurrence<T>):String {
+    function printContent<T>(hover:DisplayItemOccurrence<T>):String {
         var printer = new DisplayPrinter(true, null, {
             argumentTypeHints: true,
             returnTypeHint: NonVoid,

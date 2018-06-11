@@ -5,8 +5,6 @@ import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
 import haxeLanguageServer.protocol.Display;
-import haxeLanguageServer.protocol.Display.CompletionItem as HaxeCompletionItem;
-import haxeLanguageServer.protocol.Display.CompletionItemKind as HaxeCompletionItemKind;
 import haxeLanguageServer.helper.DocHelper;
 import haxeLanguageServer.helper.ImportHelper;
 import haxeLanguageServer.protocol.helper.DisplayPrinter;
@@ -191,7 +189,7 @@ class CompletionFeature {
         }, error -> reject(ResponseError.internalError(error)));
     }
 
-    function createCompletionItem<T>(index:Int, item:HaxeCompletionItem<T>, data:CompletionContextData):CompletionItem {
+    function createCompletionItem<T>(index:Int, item:DisplayItem<T>, data:CompletionContextData):CompletionItem {
         var completionItem:CompletionItem = switch (item.kind) {
             case ClassField | EnumAbstractField: createClassFieldCompletionItem(item, data);
             case EnumField: createEnumFieldCompletionItem(item, data);
@@ -255,7 +253,7 @@ class CompletionFeature {
         return completionItem;
     }
 
-    function createClassFieldCompletionItem<T>(item:HaxeCompletionItem<Dynamic>, data:CompletionContextData):CompletionItem {
+    function createClassFieldCompletionItem<T>(item:DisplayItem<Dynamic>, data:CompletionContextData):CompletionItem {
         var occurrence:ClassFieldOccurrence<T> = item.args;
         var concreteType = item.type;
         var field = occurrence.field;
@@ -307,7 +305,7 @@ class CompletionFeature {
         return item;
     }
 
-    function createOverrideCompletionItem<T>(item:HaxeCompletionItem<Dynamic>, data:CompletionContextData, printedOrigin:Option<String>):CompletionItem {
+    function createOverrideCompletionItem<T>(item:DisplayItem<Dynamic>, data:CompletionContextData, printedOrigin:Option<String>):CompletionItem {
         var occurrence:ClassFieldOccurrence<T> = item.args;
         var concreteType = item.type;
         var field = occurrence.field;
@@ -357,7 +355,7 @@ class CompletionFeature {
         return item;
     }
 
-    function getKindForField<T>(field:JsonClassField, kind:HaxeCompletionItemKind<Dynamic>):CompletionItemKind {
+    function getKindForField<T>(field:JsonClassField, kind:DisplayItemKind<Dynamic>):CompletionItemKind {
         var fieldKind:JsonFieldKind<T> = field.kind;
         return switch (fieldKind.kind) {
             case FVar:
@@ -385,7 +383,7 @@ class CompletionFeature {
         }
     }
 
-    function createEnumFieldCompletionItem<T>(item:HaxeCompletionItem<Dynamic>, data:CompletionContextData):CompletionItem {
+    function createEnumFieldCompletionItem<T>(item:DisplayItem<Dynamic>, data:CompletionContextData):CompletionItem {
         var occurrence:EnumFieldOccurrence<T> = item.args;
         var field:JsonEnumField = occurrence.field;
         var name = field.name;

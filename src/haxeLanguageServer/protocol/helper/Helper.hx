@@ -5,7 +5,7 @@ import haxe.display.JsonModuleTypes;
 using Lambda;
 
 class Helper {
-    public static function getDocumentation<T>(item:CompletionItem<T>):JsonDoc {
+    public static function getDocumentation<T>(item:DisplayItem<T>):JsonDoc {
         return switch (item.kind) {
             case ClassField | EnumAbstractField: item.args.field.doc;
             case EnumField: item.args.field.doc;
