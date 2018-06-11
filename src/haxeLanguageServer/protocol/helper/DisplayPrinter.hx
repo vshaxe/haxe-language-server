@@ -139,7 +139,7 @@ class DisplayPrinter {
         var concreteType = if (functionFormatting.explicitNull) arg.t else nullRemoval.type;
         var optional = nullRemoval.optional;
 
-        var argument = if (optional) "?" else "" + arg.name;
+        var argument = (if (optional) "?" else "") + arg.name;
         if (functionFormatting.argumentTypeHints) {
             argument += (arg.name == "" ? "" : ":") + printTypeRec(concreteType);
         }
