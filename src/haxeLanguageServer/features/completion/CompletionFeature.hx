@@ -14,16 +14,6 @@ import languageServerProtocol.Types.CompletionItemKind;
 import haxe.display.JsonModuleTypes;
 import haxe.extern.EitherType;
 
-typedef CompletionContextData = {
-    var replaceRange:Range;
-    var mode:CompletionMode<Dynamic>;
-    var doc:TextDocument;
-    var indent:String;
-    var lineAfter:String;
-    var completionPosition:Position;
-    var importPosition:Position;
-}
-
 enum abstract CompletionItemOrigin(Int) {
     var Haxe;
     var Custom;
@@ -342,15 +332,7 @@ class CompletionFeature {
                 kind: MarkDown,
                 value: DocHelper.printCodeBlock("override " + printer.printOverrideDefinition(field, concreteType, data.indent, false), Haxe)
             },
-            additionalTextEdits: {
-                if (importConfig.enableAutoImports) {
-                    var printer = new DisplayPrinter(false, Always);
-                    var paths = concreteType.resolveImports().map(printer.printPath);
-                    [ImportHelper.createImportEdit(data.doc, data.importPosition, paths, importConfig.style)];
-                } else {
-                    [];
-                }
-            }
+            additionalTextEdits: data.createFunctionImportsEdit(context, concreteType, context.config.codeGeneration.functions.field)
         }
         handleDeprecated(item, field.meta);
         return item;
@@ -443,7 +425,7 @@ class CompletionFeature {
             switch (type.path.importStatus) {
                 case Imported:
                 case Unimported:
-                    var edit = ImportHelper.createImportEdit(data.doc, data.importPosition, [qualifiedName], importConfig.style);
+                    var edit = ImportHelper.createImportsEdit(data.doc, data.importPosition, [qualifiedName], importConfig.style);
                     item.additionalTextEdits = [edit];
                 case Shadowed:
             }

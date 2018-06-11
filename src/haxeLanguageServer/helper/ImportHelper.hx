@@ -11,7 +11,7 @@ class ImportHelper {
     static final rePackageDecl = ~/package\s*( [\w\.]*)?\s*;/;
     static final reTypeDecl = ~/^\s*(class|interface|enum|abstract|typedef)/;
 
-    public static function createImportEdit(doc:TextDocument, position:Position, paths:Array<String>, style:ImportStyle):TextEdit {
+    public static function createImportsEdit(doc:TextDocument, position:Position, paths:Array<String>, style:ImportStyle):TextEdit {
         if (style == Module) {
             paths = paths.map(TypeHelper.getModule);
         }

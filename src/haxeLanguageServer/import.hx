@@ -9,4 +9,6 @@ using haxeLanguageServer.helper.PositionHelper;
 using haxeLanguageServer.helper.ArrayHelper;
 using haxeLanguageServer.helper.StringHelper;
 using haxeLanguageServer.helper.DocumentUriHelper;
+using haxeLanguageServer.helper.FunctionFormattingConfig.FunctionFormattingConfigHelper;
 using haxeLanguageServer.protocol.helper.Helper;
+using haxeLanguageServer.features.completion.CompletionContextData.CompletionContextDataHelper;

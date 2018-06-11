@@ -12,7 +12,7 @@ import haxeLanguageServer.features.*;
 import haxeLanguageServer.features.completion.*;
 import haxeLanguageServer.features.CodeActionFeature.CodeActionContributor;
 import haxeLanguageServer.helper.SemVer;
-import haxeLanguageServer.helper.TypeHelper.FunctionFormattingConfig;
+import haxeLanguageServer.helper.FunctionFormattingConfig;
 import haxeLanguageServer.helper.ImportHelper;
 import haxeLanguageServer.server.DisplayResult;
 import haxeLanguageServer.server.HaxeServer;

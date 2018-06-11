@@ -1,5 +1,6 @@
 package haxeLanguageServer.features.completion;
 
+import haxeLanguageServer.helper.ImportHelper;
 import haxeLanguageServer.helper.DocHelper;
 import haxeLanguageServer.features.completion.CompletionFeature;
 import haxeLanguageServer.protocol.helper.DisplayPrinter;
@@ -33,7 +34,7 @@ class ExpectedTypeCompletion {
             items.push(createExpectedTypeCompletionItem(item, data.completionPosition));
         }
 
-        var printer = new DisplayPrinter(false, null, context.config.codeGeneration.functions.anonymous);
+        var printer = new DisplayPrinter(false, Shadowed, context.config.codeGeneration.functions.anonymous);
 
         switch (expectedTypeFollowed.kind) {
             case TAnonymous:
@@ -66,12 +67,15 @@ class ExpectedTypeCompletion {
                     });
                 }
             case TFun:
-                var definition = printer.printAnonymousFunctionDefinition(expectedTypeFollowed.args);
+                var signature = expectedTypeFollowed.args;
+                var definition = printer.printAnonymousFunctionDefinition(signature);
                 add({
                     label: definition,
                     detail: "Auto-generate anonymous function",
                     insertText: definition,
-                    insertTextFormat: PlainText
+                    insertTextFormat: PlainText,
+                    additionalTextEdits: data.createFunctionImportsEdit(context,
+                        expectedTypeFollowed, context.config.codeGeneration.functions.anonymous)
                 });
             case _:
         }
@@ -89,6 +93,7 @@ class ExpectedTypeCompletion {
                 range: position.toRange()
             },
             insertTextFormat: data.insertTextFormat,
+            additionalTextEdits: data.additionalTextEdits,
             data: {
                 origin: Custom
             }
@@ -111,4 +116,5 @@ private typedef ExpectedTypeCompletionItem = {
     var insertText:String;
     var insertTextFormat:InsertTextFormat;
     var ?code:String;
+    var ?additionalTextEdits:Array<TextEdit>;
 }

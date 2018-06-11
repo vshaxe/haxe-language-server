@@ -5,7 +5,6 @@ import haxe.display.JsonModuleTypes;
 import haxeLanguageServer.protocol.Display;
 import languageServerProtocol.Types.CompletionItem;
 import haxeLanguageServer.protocol.helper.DisplayPrinter;
-import haxeLanguageServer.features.completion.CompletionFeature.CompletionItemOrigin;
 import haxeLanguageServer.features.completion.CompletionFeature;
 import haxeLanguageServer.helper.ArgumentNameHelper.guessArgumentName;
 using Lambda;

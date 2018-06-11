@@ -1,9 +1,9 @@
 package haxeLanguageServer.protocol.helper;
 
-import haxeLanguageServer.helper.ArgumentNameHelper;
-import haxeLanguageServer.helper.TypeHelper.FunctionFormattingConfig;
 import haxe.ds.Option;
 import haxe.display.JsonModuleTypes;
+import haxeLanguageServer.helper.ArgumentNameHelper;
+import haxeLanguageServer.helper.FunctionFormattingConfig;
 import haxeLanguageServer.protocol.Display;
 using Lambda;
 
@@ -24,7 +24,7 @@ enum PathPrinting {
     Qualified;
 
     /**
-        Only print the full dot path for shadowed types.
+        Only print the full dot path for shadowed types (usually used when generating auto-imports).
     **/
     Shadowed;
 }
@@ -168,8 +168,7 @@ class DisplayPrinter {
     }
 
     function printReturn(signature:JsonFunctionSignature) {
-        var returnStyle = functionFormatting.returnTypeHint;
-        return if (returnStyle == Always || (returnStyle == NonVoid && !signature.ret.isVoid())) {
+        return if (functionFormatting.printReturn(signature)) {
             ":" + printTypeRec(signature.ret);
         } else {
             "";
