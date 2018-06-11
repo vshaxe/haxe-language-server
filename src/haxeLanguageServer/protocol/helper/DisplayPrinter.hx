@@ -12,10 +12,17 @@ enum PathPrinting {
         Always print the full dot path for types.
     **/
     Always;
+
+    /**
+        Always only print the unqualified type name.
+    **/
+    Never;
+
     /**
         Only print the full dot path when unimported or shadowed (so it's always qualified).
     **/
     Qualified;
+
     /**
         Only print the full dot path for shadowed types.
     **/
@@ -47,6 +54,7 @@ class DisplayPrinter {
     public function printPath(path:JsonTypePath) {
         var qualified = switch (pathPrinting) {
             case Always: true;
+            case Never: false;
             case Qualified: path.importStatus != Imported;
             case Shadowed: path.importStatus == Shadowed;
         }
@@ -387,7 +395,7 @@ class DisplayPrinter {
         var args = signature.args.map(arg -> {
             name: if (arg.name == "") null else arg.name,
             opt: arg.opt,
-            type: printTypeRec(arg.t.removeNulls().type)
+            type: new DisplayPrinter(PathPrinting.Never).printTypeRec(arg.t)
         });
         var names = ArgumentNameHelper.guessArgumentNames(args);
         var printedArgs = [];
