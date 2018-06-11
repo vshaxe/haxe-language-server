@@ -27,11 +27,15 @@ class Helper {
             return switch (type.kind) {
                 case TMono: [];
                 case TInst | TEnum | TType | TAbstract:
-                    if (type.args.path.importStatus == Unimported) {
-                        [type.args.path];
-                    } else {
-                        [];
+                    var paths = [];
+                    var typePath:JsonTypePathWithParams = type.args;
+                    if (typePath.params != null) {
+                        paths = typePath.params.map(rec).flatten().array();
                     }
+                    if (typePath.path.importStatus == Unimported) {
+                        paths.push(typePath.path);
+                    }
+                    paths;
                 case TFun:
                     var signature = type.args;
                     signature.args.map(arg -> rec(arg.t)).flatten().array().concat(rec(signature.ret));
