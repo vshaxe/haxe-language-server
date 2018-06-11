@@ -23,7 +23,7 @@ class TypeHelper {
     public static function prepareSignature(type:String):String {
         return switch (parseDisplayType(type)) {
             case DTFunction(args, ret):
-                printFunctionSignature(args, ret, {argumentTypeHints: true, returnTypeHint: Always, useArrowSyntax: false, prefixPackages: true});
+                printFunctionSignature(args, ret, {argumentTypeHints: true, returnTypeHint: Always, useArrowSyntax: false});
             case DTValue(type):
                 if (type == null) "" else type;
         }
@@ -42,12 +42,12 @@ class TypeHelper {
         if (parens) result.addChar("(".code);
         for (i in 0...args.length) {
             if (i > 0) result.add(", ");
-            result.add(printSignatureArgument(i, args[i], formatting.argumentTypeHints, formatting.prefixPackages));
+            result.add(printSignatureArgument(i, args[i], formatting.argumentTypeHints));
         }
         if (parens) result.addChar(")".code);
         if (shouldPrintReturnType(ret, formatting.returnTypeHint) && !formatting.useArrowSyntax) {
             result.addChar(":".code);
-            result.add(if (formatting.prefixPackages) ret else getTypeWithoutPackage(ret));
+            result.add(getTypeWithoutPackage(ret));
         }
         return result.toString();
     }
@@ -61,15 +61,13 @@ class TypeHelper {
         }
     }
 
-    public static function printSignatureArgument(index:Int, arg:DisplayFunctionArgument, typeHints:Bool, prefixPackages:Bool):String {
+    public static function printSignatureArgument(index:Int, arg:DisplayFunctionArgument, typeHints:Bool):String {
         var result = if (arg.name != null) arg.name else std.String.fromCharCode("a".code + index);
         if (arg.opt)
             result = "?" + result;
         if (arg.type != null && typeHints) {
             result += ":";
-            var type = arg.type;
-            if (!prefixPackages) type = getTypeWithoutPackage(type);
-            result += type;
+            result += arg.type;
         }
         return result;
     }
@@ -79,7 +77,7 @@ class TypeHelper {
         result.addChar("(".code);
         for (i in 0...args.length) {
             if (i > 0) result.add(", ");
-            result.add(printSignatureArgument(i, args[i], true, false));
+            result.add(printSignatureArgument(i, args[i], true));
         }
         result.add(") -> ");
         result.add(if (ret == null) "Unknown" else ret);
