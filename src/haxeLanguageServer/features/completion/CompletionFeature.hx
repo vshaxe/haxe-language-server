@@ -343,9 +343,8 @@ class CompletionFeature {
             additionalTextEdits: {
                 if (importConfig.enableAutoImports) {
                     var printer = new DisplayPrinter(false, Always);
-                    concreteType.resolveImports().map(path ->
-                        ImportHelper.createImportEdit(data.doc, data.importPosition, printer.printPath(path), importConfig.style)
-                    );
+                    var paths = concreteType.resolveImports().map(printer.printPath);
+                    [ImportHelper.createImportEdit(data.doc, data.importPosition, paths, importConfig.style)];
                 } else {
                     [];
                 }
@@ -442,7 +441,7 @@ class CompletionFeature {
             switch (type.path.importStatus) {
                 case Imported:
                 case Unimported:
-                    var edit = ImportHelper.createImportEdit(data.doc, data.importPosition, qualifiedName, importConfig.style);
+                    var edit = ImportHelper.createImportEdit(data.doc, data.importPosition, [qualifiedName], importConfig.style);
                     item.additionalTextEdits = [edit];
                 case Shadowed:
             }

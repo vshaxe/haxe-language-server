@@ -11,13 +11,13 @@ class ImportHelper {
     static final rePackageDecl = ~/package\s*( [\w\.]*)?\s*;/;
     static final reTypeDecl = ~/^\s*(class|interface|enum|abstract|typedef)/;
 
-    public static function createImportEdit(doc:TextDocument, position:Position, path:String, style:ImportStyle):TextEdit {
+    public static function createImportEdit(doc:TextDocument, position:Position, paths:Array<String>, style:ImportStyle):TextEdit {
         if (style == Module) {
-            path = TypeHelper.getModule(path);
+            paths = paths.map(TypeHelper.getModule);
         }
         var importData = {
             range: position.toRange(),
-            newText: 'import $path;\n'
+            newText: paths.map(path -> 'import $path;\n').join("")
         };
 
         var nextLine = doc.lineAt(position.line);
