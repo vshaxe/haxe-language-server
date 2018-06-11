@@ -9,6 +9,7 @@ class TestMain {
         CompileTime.importPackage("haxeLanguageServer.helper");
         CompileTime.importPackage("haxeLanguageServer.features");
         CompileTime.importPackage("haxeLanguageServer.hxParser");
+        CompileTime.importPackage("haxeLanguageServer.protocol.helper");
 
         var tests = CompileTime.getAllClasses(TestCaseBase);
         for (testClass in tests) runner.add(Type.createInstance(testClass, []));
