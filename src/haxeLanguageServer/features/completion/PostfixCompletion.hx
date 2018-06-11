@@ -24,6 +24,7 @@ class PostfixCompletion {
         if (type == null) {
             return [];
         }
+        var type = type.removeNulls().type;
 
         var range = subject.range;
         var replaceRange:Range = {
