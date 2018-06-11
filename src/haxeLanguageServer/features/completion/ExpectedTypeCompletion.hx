@@ -34,7 +34,8 @@ class ExpectedTypeCompletion {
             items.push(createExpectedTypeCompletionItem(item, data.completionPosition));
         }
 
-        var printer = new DisplayPrinter(false, Shadowed, context.config.codeGeneration.functions.anonymous);
+        var anonFormatting = context.config.codeGeneration.functions.anonymous;
+        var printer = new DisplayPrinter(false, Shadowed, anonFormatting);
 
         switch (expectedTypeFollowed.kind) {
             case TAnonymous:
@@ -74,8 +75,8 @@ class ExpectedTypeCompletion {
                     detail: "Auto-generate anonymous function",
                     insertText: definition,
                     insertTextFormat: PlainText,
-                    additionalTextEdits: data.createFunctionImportsEdit(context,
-                        expectedTypeFollowed, context.config.codeGeneration.functions.anonymous)
+                    additionalTextEdits: ImportHelper.createFunctionImportsEdit(data.doc,
+                        data.importPosition, context, expectedTypeFollowed, anonFormatting)
                 });
             case _:
         }

@@ -311,9 +311,10 @@ class CompletionFeature {
             case _:
         }
 
+        var fieldFormatting = context.config.codeGeneration.functions.field;
         var printer = new DisplayPrinter(false,
             if (importConfig.enableAutoImports) Shadowed else Qualified,
-            context.config.codeGeneration.functions.field
+            fieldFormatting
         );
 
         var item:CompletionItem = {
@@ -330,9 +331,11 @@ class CompletionFeature {
             },
             documentation: {
                 kind: MarkDown,
-                value: DocHelper.printCodeBlock("override " + printer.printOverrideDefinition(field, concreteType, data.indent, false), Haxe)
+                value: DocHelper.printCodeBlock("override " +
+                    printer.printOverrideDefinition(field, concreteType, data.indent, false), Haxe)
             },
-            additionalTextEdits: data.createFunctionImportsEdit(context, concreteType, context.config.codeGeneration.functions.field)
+            additionalTextEdits: ImportHelper.createFunctionImportsEdit(data.doc,
+                data.importPosition, context, concreteType, fieldFormatting)
         }
         handleDeprecated(item, field.meta);
         return item;
