@@ -92,7 +92,7 @@ typedef FieldResolution = {
     var qualifier:String;
 }
 
-typedef JsonLocal<T> = {
+typedef DisplayLocal<T> = {
     var id:Int;
     var name:String;
     var type:JsonType<T>;
@@ -236,7 +236,7 @@ typedef DisplayModuleTypeParameter = {
     var constraints:Array<JsonType<Dynamic>>;
 }
 
-typedef JsonLiteral<T> = {
+typedef DisplayLiteral<T> = {
     var name:String;
 }
 
@@ -320,14 +320,14 @@ typedef Module = {
 }
 
 enum abstract DisplayItemKind<T>(String) {
-    var Local:DisplayItemKind<JsonLocal<Dynamic>>;
+    var Local:DisplayItemKind<DisplayLocal<Dynamic>>;
     var ClassField:DisplayItemKind<ClassFieldOccurrence<Dynamic>>;
     var EnumField:DisplayItemKind<EnumFieldOccurrence<Dynamic>>;
     var EnumAbstractField:DisplayItemKind<ClassFieldOccurrence<Dynamic>>;
     var Type:DisplayItemKind<DisplayModuleType>;
     var Package:DisplayItemKind<Package>;
     var Module:DisplayItemKind<Module>;
-    var Literal:DisplayItemKind<JsonLiteral<Dynamic>>;
+    var Literal:DisplayItemKind<DisplayLiteral<Dynamic>>;
     var Metadata:DisplayItemKind<Metadata>;
     var Keyword:DisplayItemKind<Keyword>;
     var AnonymousStructure:DisplayItemKind<JsonAnon>;

@@ -253,7 +253,7 @@ class DisplayPrinter {
         }
     }
 
-    public function printLocalDefinition<T1,T2>(local:JsonLocal<T1>, concreteType:JsonType<T2>) {
+    public function printLocalDefinition<T1,T2>(local:DisplayLocal<T1>, concreteType:JsonType<T2>) {
         return switch (local.origin) {
             case LocalFunction:
                 var inlineKeyword = if (local.isInline) "inline " else "";
