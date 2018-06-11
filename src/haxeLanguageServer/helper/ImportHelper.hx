@@ -55,7 +55,6 @@ class ImportHelper {
         if (!importConfig.enableAutoImports) {
             return [];
         }
-        var printer = new DisplayPrinter(false, Always);
         var paths = [];
         var signature = type.extractFunctionSignature();
         if (formatting.argumentTypeHints && (!formatting.useArrowSyntax || signature.args.length != 1)) {
@@ -68,6 +67,7 @@ class ImportHelper {
         if (paths.length == 0) {
             return [];
         } else {
+            var printer = new DisplayPrinter(false, Always);
             return [createImportsEdit(doc, position, paths.map(printer.printPath), importConfig.style)];
         }
     }
