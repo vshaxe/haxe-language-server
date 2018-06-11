@@ -43,7 +43,7 @@ class PostfixCompletion {
         switch (type.kind) {
             case TAbstract | TInst if (type.args.path.pack.length == 0):
                 var path:JsonTypePathWithParams = type.args;
-                switch (type.args.path.name) {
+                switch (path.path.typeName) {
                     case "Int":
                         add({
                             label: "fori",
