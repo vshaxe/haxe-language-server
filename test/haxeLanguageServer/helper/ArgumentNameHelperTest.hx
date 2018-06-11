@@ -25,6 +25,9 @@ class ArgumentNameHelperTest extends TestCaseBase {
         assert("i", "Null<Null<Int>>");
         assert("s", "String");
         assert("d", "Dynamic");
+        assert("n", "Null");
+        assert("t", "True");
+        assert("f", "False");
         assert("unknown", null);
         assert("c", "C<Int,String>");
         assert("unknown", "<Int,String>");
