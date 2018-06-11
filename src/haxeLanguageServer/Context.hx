@@ -21,6 +21,7 @@ import haxeLanguageServer.protocol.Protocol.Response;
 import haxeLanguageServer.protocol.Protocol.Methods as HaxeMethods;
 import haxeLanguageServer.protocol.Server.ServerMethods;
 import haxeLanguageServer.LanguageServerMethods.HaxeMethodResult;
+import haxeFormatter.util.StructDefaultsMacro;
 
 private typedef FunctionGenerationConfig = {
     var ?anonymous:FunctionFormattingConfig;
@@ -28,8 +29,8 @@ private typedef FunctionGenerationConfig = {
 }
 
 private typedef ImportGenerationConfig = {
-    var enableAutoImports:Bool;
-    var style:ImportStyle;
+    var ?enableAutoImports:Bool;
+    var ?style:ImportStyle;
 }
 
 private typedef CodeGenerationConfig = {
@@ -38,14 +39,14 @@ private typedef CodeGenerationConfig = {
 }
 
 private typedef Config = {
-    var enableCodeLens:Bool;
-    var enableDiagnostics:Bool;
-    var enableMethodsView:Bool;
-    var enableSignatureHelpDocumentation:Bool;
-    var diagnosticsPathFilter:String;
-    var displayPort:Null<EitherType<Int, String>>;
-    var buildCompletionCache:Bool;
-    var codeGeneration:CodeGenerationConfig;
+    var ?enableCodeLens:Bool;
+    var ?enableDiagnostics:Bool;
+    var ?enableMethodsView:Bool;
+    var ?enableSignatureHelpDocumentation:Bool;
+    var ?diagnosticsPathFilter:String;
+    var ?displayPort:Null<EitherType<Int, String>>;
+    var ?buildCompletionCache:Bool;
+    var ?codeGeneration:CodeGenerationConfig;
     var format:haxeFormatter.Config;
 }
 
@@ -90,7 +91,28 @@ class Context {
             diagnosticsPathFilter: "${workspaceRoot}",
             displayPort: null,
             buildCompletionCache: true,
-            codeGeneration: {},
+            codeGeneration: {
+                functions: {
+                    anonymous: {
+                        returnTypeHint: Never,
+                        argumentTypeHints: false,
+                        useArrowSyntax: true,
+                        explicitNull: false,
+                    },
+                    field: {
+                        returnTypeHint: NonVoid,
+                        argumentTypeHints: true,
+                        placeOpenBraceOnNewLine: false,
+                        explicitPublic: false,
+                        explicitPrivate: false,
+                        explicitNull: false,
+                    }
+                },
+                imports: {
+                    style: Module,
+                    enableAutoImports: true
+                }
+            },
             format: {}
         };
 
@@ -214,7 +236,6 @@ class Context {
         unmodifiedConfig = Json.parse(newConfigJson);
 
         processSettings(newHaxeConfig);
-        updateCodeGenerationConfig();
 
         if (!initialized) {
             haxeServer.start(function() {
@@ -255,40 +276,7 @@ class Context {
 
         config = newConfig;
 
-        // apply defaults
-        if (config.enableDiagnostics == null)
-            config.enableDiagnostics = defaultConfig.enableDiagnostics;
-        if (config.diagnosticsPathFilter == null)
-            config.diagnosticsPathFilter = defaultConfig.diagnosticsPathFilter;
-        if (config.enableCodeLens == null)
-            config.enableCodeLens = defaultConfig.enableCodeLens;
-        if (config.buildCompletionCache == null)
-            config.buildCompletionCache = defaultConfig.buildCompletionCache;
-        if (config.codeGeneration == null)
-            config.codeGeneration = defaultConfig.codeGeneration;
-        if (config.format == null)
-            config.format = defaultConfig.format;
-    }
-
-    function updateCodeGenerationConfig() {
-        var codeGen = config.codeGeneration;
-        if (codeGen.functions == null)
-            codeGen.functions = {};
-
-        var functions = codeGen.functions;
-        if (functions.anonymous == null)
-            functions.anonymous = {argumentTypeHints: false, returnTypeHint: Never, useArrowSyntax: true};
-        if (functions.field == null)
-            functions.field = {argumentTypeHints: true, returnTypeHint: NonVoid, placeOpenBraceOnNewLine: false, explicitPublic: false, explicitPrivate: false, explicitNull: false};
-
-        if (codeGen.imports == null)
-            codeGen.imports = {enableAutoImports: true, style: Type};
-
-        var imports = codeGen.imports;
-        if (imports.enableAutoImports == null)
-            imports.enableAutoImports = true;
-        if (imports.style == null)
-            imports.style = Type;
+        StructDefaultsMacro.applyDefaults(config, defaultConfig);
     }
 
     function onServerStarted() {

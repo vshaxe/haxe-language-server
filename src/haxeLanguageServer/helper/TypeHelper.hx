@@ -1,8 +1,8 @@
 package haxeLanguageServer.helper;
 
 typedef FunctionFormattingConfig = {
-    var argumentTypeHints:Bool;
-    var returnTypeHint:ReturnTypeHintOption;
+    var ?argumentTypeHints:Bool;
+    var ?returnTypeHint:ReturnTypeHintOption;
     var ?useArrowSyntax:Bool;
     var ?placeOpenBraceOnNewLine:Bool;
     var ?explicitPublic:Bool;
