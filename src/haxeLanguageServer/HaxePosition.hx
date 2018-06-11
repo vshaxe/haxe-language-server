@@ -81,7 +81,7 @@ class HaxePosition {
             var acc = parts[0];
             for (i in 1...parts.length) {
                 var part = parts[i];
-                for (realFile in sys.FileSystem.readDirectory(acc)) {
+                for (realFile in sys.FileSystem.readDirectory(acc + "\\")) {
                     if (realFile.toLowerCase() == part) {
                         part = realFile;
                         break;
