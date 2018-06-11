@@ -14,12 +14,13 @@ import languageServerProtocol.Types.CompletionItemKind;
 import haxe.display.JsonModuleTypes;
 import haxe.extern.EitherType;
 
-private typedef CompletionContextData = {
+typedef CompletionContextData = {
     var replaceRange:Range;
     var mode:CompletionMode<Dynamic>;
     var doc:TextDocument;
     var indent:String;
     var lineAfter:String;
+    var completionPosition:Position;
     var importPosition:Position;
 }
 
@@ -172,6 +173,7 @@ class CompletionFeature {
                 doc: doc,
                 indent: indent,
                 lineAfter: lineAfter,
+                completionPosition: params.position,
                 importPosition: importPosition,
             };
             var items = [];
@@ -181,8 +183,8 @@ class CompletionFeature {
                     items.push(completionItem);
                 }
             };
-            items = items.concat(postfixCompletion.createItems(result.mode, params.position, doc));
-            items = items.concat(expectedTypeCompletion.createItems(result.mode, params.position, doc, textBefore));
+            items = items.concat(postfixCompletion.createItems(data));
+            items = items.concat(expectedTypeCompletion.createItems(data));
             resolve(items);
             previousCompletionData = data;
             return items.length + " items";

@@ -109,7 +109,7 @@ class Context {
                     }
                 },
                 imports: {
-                    style: Module,
+                    style: Type,
                     enableAutoImports: true
                 }
             },

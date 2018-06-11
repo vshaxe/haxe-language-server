@@ -6,16 +6,17 @@ import haxeLanguageServer.protocol.Display;
 import languageServerProtocol.Types.CompletionItem;
 import haxeLanguageServer.protocol.helper.DisplayPrinter;
 import haxeLanguageServer.features.completion.CompletionFeature.CompletionItemOrigin;
+import haxeLanguageServer.features.completion.CompletionFeature;
 import haxeLanguageServer.helper.ArgumentNameHelper.guessArgumentName;
 using Lambda;
 
 class PostfixCompletion {
     public function new() {}
 
-    public function createItems<TMode,TItem>(mode:CompletionMode<TMode>, position:Position, doc:TextDocument):Array<CompletionItem> {
+    public function createItems<TMode,TItem>(data:CompletionContextData):Array<CompletionItem> {
         var subject:FieldCompletionSubject<TItem>;
-        switch (mode.kind) {
-            case Field: subject = mode.args;
+        switch (data.mode.kind) {
+            case Field: subject = data.mode.args;
             case _: return [];
         }
 
@@ -29,16 +30,16 @@ class PostfixCompletion {
         var range = subject.range;
         var replaceRange:Range = {
             start: range.start,
-            end: position
+            end: data.completionPosition
         };
-        var expr = doc.getText(range);
+        var expr = data.doc.getText(range);
         if (expr.startsWith("(") && expr.endsWith(")")) {
             expr = expr.substring(1, expr.length - 1);
         }
 
         var items:Array<CompletionItem> = [];
-        function add(data:PostfixCompletionItem) {
-            items.push(createPostfixCompletionItem(data, doc, replaceRange));
+        function add(item:PostfixCompletionItem) {
+            items.push(createPostfixCompletionItem(item, data.doc, replaceRange));
         }
 
         switch (type.kind) {

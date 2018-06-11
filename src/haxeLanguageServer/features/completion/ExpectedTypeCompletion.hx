@@ -4,7 +4,6 @@ import haxeLanguageServer.helper.DocHelper;
 import haxeLanguageServer.features.completion.CompletionFeature;
 import haxeLanguageServer.protocol.helper.DisplayPrinter;
 import haxeLanguageServer.protocol.Display.ToplevelCompletion;
-import haxeLanguageServer.protocol.Display.CompletionMode;
 import haxe.display.JsonModuleTypes.JsonType;
 
 class ExpectedTypeCompletion {
@@ -14,10 +13,10 @@ class ExpectedTypeCompletion {
         this.context = context;
     }
 
-    public function createItems<T,TType>(mode:CompletionMode<T>, position:Position, doc:TextDocument, textBefore:String):Array<CompletionItem> {
+    public function createItems<T,TType>(data:CompletionContextData):Array<CompletionItem> {
         var toplevel:ToplevelCompletion<TType>;
-        switch (mode.kind) {
-            case Toplevel: toplevel = mode.args;
+        switch (data.mode.kind) {
+            case Toplevel: toplevel = data.mode.args;
             case _: return [];
         }
         if (toplevel == null) {
@@ -30,8 +29,8 @@ class ExpectedTypeCompletion {
         }
 
         var items:Array<CompletionItem> = [];
-        function add(data:ExpectedTypeCompletionItem) {
-            items.push(createExpectedTypeCompletionItem(data, position));
+        function add(item:ExpectedTypeCompletionItem) {
+            items.push(createExpectedTypeCompletionItem(item, data.completionPosition));
         }
 
         var printer = new DisplayPrinter(false, null, context.config.codeGeneration.functions.anonymous);
