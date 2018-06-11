@@ -45,23 +45,22 @@ class DisplayPrinter {
     }
 
     public function printPath(path:JsonTypePath) {
-        function print(qualified:Bool) {
-            var isSubType = path.moduleName != path.typeName;
-            return if (!qualified || (path.pack.length == 0 && !isSubType)) {
-                path.typeName;
-            } else {
-                var printedPath = path.moduleName + (if (isSubType) "." + path.typeName else "");
-                if (path.pack.length > 0) {
-                    printedPath = path.pack.join(".") + "." + printedPath;
-                }
-                printedPath;
-            }
-        }
-        return print(switch(pathPrinting) {
+        var qualified = switch(pathPrinting) {
             case Always: true;
             case Qualified: path.importStatus != Imported;
             case Shadowed: path.importStatus == Shadowed;
-        });
+        }
+
+        var isSubType = path.moduleName != path.typeName;
+        return if (!qualified || (path.pack.length == 0 && !isSubType)) {
+            path.typeName;
+        } else {
+            var printedPath = path.moduleName + (if (isSubType) "." + path.typeName else "");
+            if (path.pack.length > 0) {
+                printedPath = path.pack.join(".") + "." + printedPath;
+            }
+            printedPath;
+        }
     }
 
     public function printPathWithParams(path:JsonTypePathWithParams) {
