@@ -399,8 +399,8 @@ class DisplayPrinter {
         var names = IdentifierHelper.guessNames(args);
         var printedArgs = [];
         var singleArgument = args.length == 1;
-        if (singleArgument) {
-            printedArgs.push(names[0]);
+        if (singleArgument && functionFormatting.useArrowSyntax) {
+            printedArgs = [names[0]];
         } else {
             for (i in 0...args.length) {
                 printedArgs.push(printFunctionArgument({
