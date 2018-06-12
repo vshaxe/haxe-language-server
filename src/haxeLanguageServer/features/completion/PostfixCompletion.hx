@@ -6,7 +6,7 @@ import haxeLanguageServer.protocol.Display;
 import languageServerProtocol.Types.CompletionItem;
 import haxeLanguageServer.protocol.helper.DisplayPrinter;
 import haxeLanguageServer.features.completion.CompletionFeature;
-import haxeLanguageServer.helper.IdentifierHelper.guessName;
+import haxeLanguageServer.helper.IdentifierHelper;
 using Lambda;
 
 class PostfixCompletion {
@@ -63,7 +63,8 @@ class PostfixCompletion {
                         var itemType:JsonType<Dynamic> = path.params[0];
                         var itemName = switch (itemType.kind) {
                             case TInst | TEnum | TType | TAbstract:
-                                guessName(itemType.args.path.name);
+                                var path:JsonTypePath = itemType.args.path;
+                                IdentifierHelper.guessName(path.typeName);
                             case TMono, _:
                                 "item";
                         }
