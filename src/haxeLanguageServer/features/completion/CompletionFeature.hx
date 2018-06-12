@@ -424,14 +424,9 @@ class CompletionFeature {
 
         if (isImportCompletion) {
             item.textEdit.newText = maybeInsert(item.textEdit.newText, ";", data.lineAfter);
-        } else {
-            switch (type.path.importStatus) {
-                case Imported:
-                case Unimported:
-                    var edit = ImportHelper.createImportsEdit(data.doc, data.importPosition, [qualifiedName], importConfig.style);
-                    item.additionalTextEdits = [edit];
-                case Shadowed:
-            }
+        } else if (importConfig.enableAutoImports && type.path.importStatus == Unimported) {
+            var edit = ImportHelper.createImportsEdit(data.doc, data.importPosition, [qualifiedName], importConfig.style);
+            item.additionalTextEdits = [edit];
         }
 
         if (snippetSupport) {
