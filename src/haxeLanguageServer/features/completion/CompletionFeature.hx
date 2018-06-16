@@ -280,7 +280,22 @@ class CompletionFeature {
                         case _: field.name;
                     }
                 },
-                range: data.replaceRange
+                range: {
+                    if (data.replaceRange == null){
+                        {
+                            start : {
+                                line : data.completionPosition.line,
+                                character : data.completionPosition.character
+                            },
+                            end : {
+                                line : data.completionPosition.line,
+                                character : data.completionPosition.character
+                            }
+                        };
+                    } else {
+                        data.replaceRange;
+                    }
+				}
             }
         }
 
