@@ -1,0 +1,14 @@
+-lib haxe-hxparser
+-lib hxnodejs
+
+-cp src
+-cp protocol/src
+-cp formatter/src
+
+-D hxnodejs-no-version-warning
+-D JSTACK_FORMAT=vscode
+
+-js bin/server.js
+-dce full
+-debug
+-main haxeLanguageServer.Main

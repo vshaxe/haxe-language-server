@@ -14,6 +14,8 @@ import languageServerProtocol.Types.CompletionItemKind;
 import haxe.display.JsonModuleTypes;
 import haxe.extern.EitherType;
 
+using haxeLanguageServer.helper.CompletionContextDataHelper;
+
 enum abstract CompletionItemOrigin(Int) {
     var Haxe;
     var Custom;
@@ -227,7 +229,7 @@ class CompletionFeature {
         }
 
         if (completionItem.textEdit == null && data.replaceRange != null) {
-            completionItem.textEdit = {range: data.replaceRange, newText: completionItem.label};
+            completionItem.textEdit = {range: data.normalizedRange(), newText: completionItem.label};
         }
 
         if (completionItem.documentation == null) {
@@ -242,6 +244,11 @@ class CompletionFeature {
 
         completionItem.sortText = StringTools.lpad(Std.string(index), "0", 10);
         completionItem.data = {origin: Haxe, index: index};
+
+        if (completionItem.detail != null){
+            completionItem.detail = StringTools.rtrim(completionItem.detail);
+        }
+
         return completionItem;
     }
 
@@ -280,23 +287,8 @@ class CompletionFeature {
                         case _: field.name;
                     }
                 },
-                range: {
-                    if (data.replaceRange == null){
-                        {
-                            start : {
-                                line : data.completionPosition.line,
-                                character : data.completionPosition.character
-                            },
-                            end : {
-                                line : data.completionPosition.line,
-                                character : data.completionPosition.character
-                            }
-                        };
-                    } else {
-                        data.replaceRange;
-                    }
-				}
-            }
+                range: data.normalizedRange()
+			}
         }
 
         switch (data.mode.kind) {
@@ -337,7 +329,7 @@ class CompletionFeature {
             kind: getKindForField(field, item.kind),
             textEdit: {
                 newText: printer.printOverrideDefinition(field, concreteType, data.indent, true),
-                range: data.replaceRange
+                range: data.normalizedRange()
             },
             insertTextFormat: Snippet,
             detail: "Auto-generate override" + switch (printedOrigin) {
@@ -410,7 +402,7 @@ class CompletionFeature {
                         name;
                     }
                 },
-                range: data.replaceRange
+                range: data.normalizedRange()
             },
             insertTextFormat: if (data.mode.kind == Pattern) Snippet else PlainText
         };
@@ -432,7 +424,7 @@ class CompletionFeature {
             label: unqualifiedName + if (containerName == "") "" else " - " + qualifiedName,
             kind: getKindForModuleType(type),
             textEdit: {
-                range: data.replaceRange,
+                range: data.normalizedRange(),
                 newText: if (autoImport) unqualifiedName else qualifiedName
             }
         };
@@ -460,6 +452,7 @@ class CompletionFeature {
         if (type.params != null) {
             item.detail = printTypeDetail(type, containerName);
         }
+
 
         handleDeprecated(item, type.meta);
         return item;
@@ -513,7 +506,7 @@ class CompletionFeature {
             detail: 'package $dotPath',
             textEdit: {
                 newText: maybeInsert(text, ".", data.lineAfter),
-                range: data.replaceRange
+                range: data.normalizedRange()
             },
             command: triggerSuggest
         };
@@ -525,7 +518,7 @@ class CompletionFeature {
             kind: Keyword,
             textEdit: {
                 newText: keyword.name,
-                range: data.replaceRange
+                range: data.normalizedRange()
             }
         }
 
