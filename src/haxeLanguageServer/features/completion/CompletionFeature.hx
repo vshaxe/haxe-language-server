@@ -249,6 +249,12 @@ class CompletionFeature {
             completionItem.detail = StringTools.rtrim(completionItem.detail);
         }
 
+        // Fallback to insertText (temporary fix for neovaxe)
+        if (completionItem.textEdit != null) {
+            completionItem.insertText = completionItem.textEdit.newText;
+            completionItem.textEdit = null;
+        }
+
         return completionItem;
     }
 
@@ -421,7 +427,7 @@ class CompletionFeature {
         var containerName = if (qualifiedName.indexOf(".") == -1) "" else qualifiedName.untilLastDot(); // pack | pack.Foo
 
         var item:CompletionItem = {
-            label: unqualifiedName + if (containerName == "") "" else " - " + qualifiedName,
+            label: unqualifiedName,// + if (containerName == "") "" else " - " + qualifiedName,
             kind: getKindForModuleType(type),
             textEdit: {
                 range: data.normalizedRange(),
@@ -453,8 +459,8 @@ class CompletionFeature {
             item.detail = printTypeDetail(type, containerName);
         }
 
-
         handleDeprecated(item, type.meta);
+        // this.context.sendShowMessage(Info, 'item : ' + Std.string(item));
         return item;
     }
 
