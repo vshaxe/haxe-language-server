@@ -307,6 +307,13 @@ class DiagnosticsManager {
             var replacement = text.replace(is, shouldBe);
             actions.push(new ApplyFixesCommand("Change to " + replacement, params, [{range: d.range, newText: replacement}]));
         }
+
+        if (arg.indexOf("Float should be Int") != -1) {
+            actions.push(new ApplyFixesCommand("Wrap in Std.int() call", params, [
+                {range: d.range.start.toRange(), newText: 'Std.int('},
+                {range: d.range.end.toRange(), newText: ')'}
+            ]));
+        }
         return actions;
     }
 
