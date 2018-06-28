@@ -218,8 +218,8 @@ class CompletionFeature {
                     kind: TypeParameter
                 }
             // these never appear during `display/completion` right now
-            case Expression: return null;
-            case AnonymousStructure: return null;
+            case Expression: null;
+            case AnonymousStructure: null;
         }
 
         if (completionItem == null) {
@@ -235,7 +235,7 @@ class CompletionFeature {
         }
 
         if (commitCharactersSupport) {
-            if ((item.type != null && item.type.kind == TFun) || data.mode.kind == New) {
+            if ((item.type != null && item.type.kind == TFun) || data.mode.kind == New || data.mode.kind == Metadata) {
                 completionItem.commitCharacters = ["("];
             }
         }
