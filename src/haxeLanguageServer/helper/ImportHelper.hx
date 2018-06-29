@@ -1,5 +1,6 @@
 package haxeLanguageServer.helper;
 
+import haxe.Json;
 import haxe.display.JsonModuleTypes;
 import haxeLanguageServer.protocol.helper.DisplayPrinter;
 import haxeLanguageServer.TextDocument;
@@ -63,6 +64,7 @@ class ImportHelper {
         if (formatting.printReturn(signature)) {
             paths = paths.concat(signature.ret.resolveImports());
         }
+        paths = paths.filterDuplicates((e1, e2) -> Json.stringify(e1) == Json.stringify(e2));
 
         if (paths.length == 0) {
             return [];

@@ -49,7 +49,7 @@ class Helper {
                     }
             }
         }
-        return rec(type).filterDuplicates((e1, e2) -> Reflect.compare(e1, e2) == 0);
+        return rec(type);
     }
 
     public static function hasMeta(?meta:JsonMetadata, name:CompilerMetadata) {
