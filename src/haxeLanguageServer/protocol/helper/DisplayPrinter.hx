@@ -140,7 +140,7 @@ class DisplayPrinter {
         var optional = nullRemoval.optional;
 
         var argument = (if (optional) "?" else "") + arg.name;
-        if (functionFormatting.argumentTypeHints) {
+        if (functionFormatting.argumentTypeHints && concreteType.kind != TMono) {
             argument += (arg.name == "" ? "" : ":") + printTypeRec(concreteType);
         }
         if (arg.value != null) {
@@ -168,6 +168,9 @@ class DisplayPrinter {
     }
 
     function printReturn(signature:JsonFunctionSignature) {
+        if (signature.ret.kind == TMono) {
+            return "";
+        }
         return if (functionFormatting.printReturn(signature)) {
             ":" + printTypeRec(signature.ret);
         } else {
