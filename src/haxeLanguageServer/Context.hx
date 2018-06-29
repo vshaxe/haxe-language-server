@@ -347,8 +347,8 @@ class Context {
             diagnostics.publishDiagnostics(uri);
     }
 
-    function runMethod(params:{method:String}) {
-        callHaxeMethod(cast params.method, null, null, _ -> null, _ -> {});
+    function runMethod(params:{method:String, params:Any}) {
+        callHaxeMethod(cast params.method, params.params, null, _ -> null, _ -> {});
     }
 
     public function callHaxeMethod<P,R>(method:HaxeRequestMethod<P,Response<R>>, ?params:P, token:CancellationToken, callback:R->String, errback:(error:String)->Void) {
