@@ -65,6 +65,11 @@ class LanguageServerMethods {
         This notification is sent from the server to the client when there a Haxe JSON-RPC method was executed.
     **/
     static inline var DidRunHaxeMethod = new NotificationMethod<HaxeMethodResult,NoData>("haxe/didRunHaxeMethod");
+
+    /**
+        This notification is sent from the client to the server to instruct a specific Haxe JSON-RPC method to be executed.
+    **/
+    static inline var RunMethod = new NotificationMethod<{method:String},NoData>("haxe/runMethod");
 }
 
 typedef HaxeMethodResult = {

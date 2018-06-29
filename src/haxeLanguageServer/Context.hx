@@ -128,6 +128,7 @@ class Context {
         protocol.onNotification(LanguageServerMethods.DidChangeDisplayArguments, onDidChangeDisplayArguments);
         protocol.onNotification(LanguageServerMethods.DidChangeDisplayServerConfig, onDidChangeDisplayServerConfig);
         protocol.onNotification(LanguageServerMethods.DidChangeActiveTextEditor, onDidChangeActiveTextEditor);
+        protocol.onNotification(LanguageServerMethods.RunMethod, runMethod);
     }
 
     inline function isInitialized():Bool {
@@ -344,6 +345,10 @@ class Context {
     function publishDiagnostics(uri:DocumentUri) {
         if (diagnostics != null && config.enableDiagnostics)
             diagnostics.publishDiagnostics(uri);
+    }
+
+    function runMethod(params:{method:String}) {
+        callHaxeMethod(cast params.method, null, null, _ -> null, _ -> {});
     }
 
     public function callHaxeMethod<P,R>(method:HaxeRequestMethod<P,Response<R>>, ?params:P, token:CancellationToken, callback:R->String, errback:(error:String)->Void) {
