@@ -136,13 +136,17 @@ class DiagnosticsManager {
                     for (hxDiag in data.diagnostics) {
                         if (hxDiag.range == null)
                             continue;
+                        var kind:Int = hxDiag.kind;
                         var diag:Diagnostic = {
                             // range: doc.byteRangeToRange(hxDiag.range),
                             range: hxDiag.range,
                             source: DiagnosticsSource,
-                            code: (hxDiag.kind : Int),
+                            code: kind,
                             severity: hxDiag.severity,
                             message: hxDiag.kind.getMessage(hxDiag.args)
+                        }
+                        if (kind == DKRemovableCode || kind == DKUnusedImport || diag.message.indexOf("has no effect") != -1) {
+                            diag.severity = Hint;
                         }
                         argumentsMap.set({code: diag.code, range: diag.range}, hxDiag.args);
                         diagnostics.push(diag);
