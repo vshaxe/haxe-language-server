@@ -1,10 +1,11 @@
 package haxeLanguageServer.features;
 
+import haxe.extern.EitherType;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
 
-typedef CodeActionContributor = CodeActionParams->Array<Command>;
+typedef CodeActionContributor = CodeActionParams->Array<EitherType<Command,CodeAction>>;
 
 class CodeActionFeature {
     final context:Context;
@@ -19,7 +20,7 @@ class CodeActionFeature {
         contributors.push(contributor);
     }
 
-    function onCodeAction(params:CodeActionParams, token:CancellationToken, resolve:Array<Command>->Void, reject:ResponseError<NoData>->Void) {
+    function onCodeAction(params:CodeActionParams, token:CancellationToken, resolve:Array<EitherType<Command,CodeAction>>->Void, reject:ResponseError<NoData>->Void) {
         var codeActions = [];
         for (contributor in contributors) codeActions = codeActions.concat(contributor(params));
         resolve(codeActions);

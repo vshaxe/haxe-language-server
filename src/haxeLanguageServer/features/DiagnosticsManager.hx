@@ -189,7 +189,7 @@ class DiagnosticsManager {
     static final reStartsWhitespace = ~/^\s*/;
 
     function getCodeActions<T>(params:CodeActionParams) {
-        var actions:Array<Command> = [];
+        var actions:Array<CodeAction> = [];
         for (d in params.context.diagnostics) {
             if (!(d.code is Int)) // our codes are int, so we don't handle other stuff
                 continue;
@@ -204,7 +204,7 @@ class DiagnosticsManager {
         return actions;
     }
 
-    function getUnusedImportActions(params:CodeActionParams, d:Diagnostic):Array<Command> {
+    function getUnusedImportActions(params:CodeActionParams, d:Diagnostic):Array<CodeAction> {
         var doc = context.documents.get(params.textDocument.uri);
 
         function patchRange(range:Range) {
@@ -230,8 +230,10 @@ class DiagnosticsManager {
             return range;
         }
 
-        var ret:Array<Command> = new ApplyFixesCommand("Remove unused import/using", params,
-            [{range: patchRange(d.range), newText: ""}]);
+        var ret:Array<CodeAction> = [{
+            title: "Remove unused import/using",
+            edit: createWorkspaceEdit(params, [{range: patchRange(d.range), newText: ""}])
+        }];
 
         var map = diagnosticsArguments[params.textDocument.uri];
         if (map != null) {
@@ -242,15 +244,17 @@ class DiagnosticsManager {
             ];
 
             if (fixes.length > 1) {
-                ret.unshift(new ApplyFixesCommand("Remove all unused imports/usings", params, fixes));
+                ret.unshift({
+                    title: "Remove all unused imports/usings",
+                    edit: createWorkspaceEdit(params, fixes)
+                });
             }
         }
-
         return ret;
     }
 
-    function getUnresolvedIdentifierActions(params:CodeActionParams, d:Diagnostic):Array<Command> {
-        var actions:Array<Command> = [];
+    function getUnresolvedIdentifierActions(params:CodeActionParams, d:Diagnostic):Array<CodeAction> {
+        var actions:Array<CodeAction> = [];
         var args = getDiagnosticsArguments(params.textDocument.uri, DKUnresolvedIdentifier, d.range);
         for (arg in args) {
             actions = actions.concat(switch (arg.kind) {
@@ -261,26 +265,30 @@ class DiagnosticsManager {
         return actions;
     }
 
-    function getUnresolvedImportActions(params:CodeActionParams, d:Diagnostic, arg):Array<Command> {
+    function getUnresolvedImportActions(params:CodeActionParams, d:Diagnostic, arg):Array<CodeAction> {
         var doc = context.documents.get(params.textDocument.uri);
         var importStyle = context.config.codeGeneration.imports.style;
         return [
-            new ApplyFixesCommand("Import " + arg.name, params,
-                [ImportHelper.createImportsEdit(doc, ImportHelper.getImportPosition(doc), [arg.name], importStyle)]
-            ),
-            new ApplyFixesCommand("Change to " + arg.name, params,
-                [{range: d.range, newText: arg.name}]
-            )
+            {
+                title: "Import " + arg.name,
+                edit: createWorkspaceEdit(params, [ImportHelper.createImportsEdit(doc, ImportHelper.getImportPosition(doc), [arg.name], importStyle)])
+            },
+            {
+                title: "Change to " + arg.name,
+                edit: createWorkspaceEdit(params, [{range: d.range, newText: arg.name}])
+            }
         ];
     }
 
-    function getTypoActions(params:CodeActionParams, d:Diagnostic, arg):Array<Command> {
-        return new ApplyFixesCommand("Change to " + arg.name, params,
-            [{range: d.range, newText: arg.name}]);
+    function getTypoActions(params:CodeActionParams, d:Diagnostic, arg):Array<CodeAction> {
+        return [{
+            title: "Change to " + arg.name,
+            edit: createWorkspaceEdit(params, [{range: d.range, newText: arg.name}])
+        }];
     }
 
-    function getCompilerErrorActions(params:CodeActionParams, d:Diagnostic):Array<Command> {
-        var actions:Array<Command> = [];
+    function getCompilerErrorActions(params:CodeActionParams, d:Diagnostic):Array<CodeAction> {
+        var actions:Array<CodeAction> = [];
         var arg = getDiagnosticsArguments(params.textDocument.uri, DKCompilerError, d.range);
         var suggestionsRe = ~/\(Suggestions?: (.*)\)/;
         if (suggestionsRe.match(arg)) {
@@ -293,8 +301,10 @@ class DiagnosticsManager {
             }
             for (suggestion in suggestions) {
                 suggestion = suggestion.trim();
-                actions.push(new ApplyFixesCommand("Change to " + suggestion, params,
-                    [{range: range, newText: suggestion}]));
+                actions.push({
+                    title: "Change to " + suggestion,
+                    edit: createWorkspaceEdit(params, [{range: range, newText: suggestion}])
+                });
             }
             return actions;
         }
@@ -305,28 +315,44 @@ class DiagnosticsManager {
             var shouldBe = invalidPackageRe.matched(2);
             var text = context.documents.get(params.textDocument.uri).getText(d.range);
             var replacement = text.replace(is, shouldBe);
-            actions.push(new ApplyFixesCommand("Change to " + replacement, params, [{range: d.range, newText: replacement}]));
+            actions.push({
+                title: "Change to " + replacement,
+                edit: createWorkspaceEdit(params, [{range: d.range, newText: replacement}])
+            });
         }
 
         if (arg.indexOf("Float should be Int") != -1) {
-            actions.push(new ApplyFixesCommand("Wrap in Std.int() call", params, [
-                {range: d.range.start.toRange(), newText: 'Std.int('},
-                {range: d.range.end.toRange(), newText: ')'}
-            ]));
+            actions.push({
+                title: "Wrap in Std.int() call",
+                edit: createWorkspaceEdit(params, [
+                    {range: d.range.start.toRange(), newText: 'Std.int('},
+                    {range: d.range.end.toRange(), newText: ')'}
+                ])
+            });
         }
         return actions;
     }
 
-    function getRemovableCodeActions(params:CodeActionParams, d:Diagnostic):Array<Command> {
+    function getRemovableCodeActions(params:CodeActionParams, d:Diagnostic):Array<CodeAction> {
         var range = getDiagnosticsArguments(params.textDocument.uri, DKRemovableCode, d.range).range;
         if (range == null) return [];
-        return new ApplyFixesCommand("Remove", params, [{range: range, newText: ""}]);
+        return [{
+            title: "Remove",
+            edit: createWorkspaceEdit(params, [{range: range, newText: ""}])
+        }];
     }
 
     inline function getDiagnosticsArguments<T>(uri:DocumentUri, kind:DiagnosticsKind<T>, range:Range):T {
         var map = diagnosticsArguments[uri];
         if (map == null) return null;
         return map.get({code: kind, range: range});
+    }
+
+    function createWorkspaceEdit(params:CodeActionParams, edits:Array<TextEdit>):WorkspaceEdit {
+        var doc = context.documents.get(params.textDocument.uri);
+        var changes = new haxe.DynamicAccess<Array<TextEdit>>();
+        changes[doc.uri.toString()] = edits;
+        return {changes: changes};
     }
 }
 
