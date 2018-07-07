@@ -47,6 +47,7 @@ private typedef Config = {
     var ?displayPort:Null<EitherType<Int, String>>;
     var ?buildCompletionCache:Bool;
     var ?codeGeneration:CodeGenerationConfig;
+    var ?exclude:Array<String>;
     var format:haxeFormatter.Config;
 }
 
@@ -113,6 +114,9 @@ class Context {
                     enableAutoImports: true
                 }
             },
+            exclude: [
+                "zpp_nape"
+            ],
             format: {}
         };
 
@@ -428,8 +432,7 @@ class Context {
         if (haxeServer.supports(HaxeMethods.Initialize) && config.enableMethodsView) {
             actualArgs = actualArgs.concat([
                 "--times",
-                "-D", "macro-times",
-                // "-D", "eval-times" // TODO: toggle button?
+                "-D", "macro-times"
             ]);
         }
         actualArgs.push("--display");

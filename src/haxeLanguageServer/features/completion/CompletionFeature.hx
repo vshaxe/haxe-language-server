@@ -199,10 +199,15 @@ class CompletionFeature {
                 }
             case Module:
                 var path = item.args.path;
-                {
-                    label: path.moduleName,
-                    kind: Folder,
-                    detail: 'module ${path.pack.concat([path.moduleName]).join(".")}'
+                var dotPath = path.pack.concat([path.moduleName]).join(".");
+                if (isExcluded(dotPath)) {
+                    null;
+                } else {
+                    {
+                        label: path.moduleName,
+                        kind: Folder,
+                        detail: 'module $dotPath'
+                    }
                 }
             case Literal: {
                     label: item.args.name,
@@ -410,6 +415,9 @@ class CompletionFeature {
         }
 
         var qualifiedName = printer.printPath(type.path); // pack.Foo | pack.Foo.SubType
+        if (isExcluded(qualifiedName)) {
+            return null;
+        }
         var unqualifiedName = type.path.typeName; // Foo | SubType
         var containerName = if (qualifiedName.indexOf(".") == -1) "" else qualifiedName.untilLastDot(); // pack | pack.Foo
 
@@ -491,6 +499,9 @@ class CompletionFeature {
     function createPackageCompletionItem(pack:Package, data:CompletionContextData):CompletionItem {
         var path = pack.path;
         var dotPath = path.pack.join(".");
+        if (isExcluded(dotPath)) {
+            return null;
+        }
         var text = if (data.mode.kind == Field) path.pack[path.pack.length - 1] else dotPath;
         return {
             label: text,
@@ -549,5 +560,18 @@ class CompletionFeature {
         if (deprecatedSupport && meta.hasMeta(Deprecated)) {
             item.deprecated = true;
         }
+    }
+
+    function isExcluded(dotPath:String):Bool {
+        var excludes = context.config.exclude;
+        if (excludes == null) {
+            return false;
+        }
+        for (exclude in excludes) {
+            if (dotPath.startsWith(exclude)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
