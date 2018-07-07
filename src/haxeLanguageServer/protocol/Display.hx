@@ -73,8 +73,7 @@ enum abstract CompilerMetadata(String) {
 
 /* Completion */
 
-typedef CompletionParams = {
-    >PositionParams,
+typedef CompletionParams = PositionParams & {
     var wasAutoTriggered:Bool;
 }
 

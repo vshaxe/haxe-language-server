@@ -159,7 +159,11 @@ class Context {
             displayServerConfig = {
                 path: "haxe",
                 env: new haxe.DynamicAccess(),
-                arguments: []
+                arguments: [],
+                print: {
+                    completion: false,
+                    reusing: false
+                }
             };
             displayArguments = [];
             sendMethodResults = false;
