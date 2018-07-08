@@ -22,13 +22,17 @@
         {
             "name": "hx3compat",
             "installArgs": ["install", "hx3compat"]
+        },
+        {
+            "name": "tokentree-formatter",
+            "installArgs": ["install", "tokentree-formatter"]
         }
     ],
     "targets": [
         {
             "name": "language-server",
             "args": {
-                "haxelibs": ["haxe-hxparser"],
+                "haxelibs": ["haxe-hxparser", "tokentree-formatter"],
                 "classPaths": [
                     "src",
                     "protocol/src",
