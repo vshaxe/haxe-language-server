@@ -69,7 +69,7 @@ class SignatureHelpFeature {
     function handleLegacy(params:TextDocumentPositionParams, token:CancellationToken, resolve:SignatureHelp->Void, reject:ResponseError<NoData>->Void, doc:TextDocument) {
         var bytePos = context.displayOffsetConverter.characterOffsetToByteOffset(doc.content, doc.offsetAt(params.position));
         var args = ['${doc.fsPath}@$bytePos@signature'];
-        context.callDisplay(args, doc.content, token, function(r) {
+        context.callDisplay("@signature", args, doc.content, token, function(r) {
             switch (r) {
                 case DCancelled:
                     resolve(null);

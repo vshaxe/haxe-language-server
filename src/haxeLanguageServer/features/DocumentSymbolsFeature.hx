@@ -62,8 +62,8 @@ class DocumentSymbolsFeature {
         return result;
     }
 
-    function makeRequest(args:Array<String>, doc:Null<TextDocument>, token:CancellationToken, resolve:Array<SymbolInformation>->Void, reject:ResponseError<NoData>->Void) {
-        context.callDisplay(args, doc == null ? null : doc.content, token, function(r) {
+    function makeRequest(label:String, args:Array<String>, doc:Null<TextDocument>, token:CancellationToken, resolve:Array<SymbolInformation>->Void, reject:ResponseError<NoData>->Void) {
+        context.callDisplay(label, args, doc == null ? null : doc.content, token, function(r) {
             switch (r) {
                 case DCancelled:
                     resolve(null);
@@ -87,12 +87,12 @@ class DocumentSymbolsFeature {
 
         trace('Falling back to Haxe document symbols.');
         var args = ['${doc.fsPath}@0@module-symbols'];
-        makeRequest(args, doc, token, resolve, reject);
+        makeRequest("@module-symbols", args, doc, token, resolve, reject);
     }
 
     function onWorkspaceSymbols(params:WorkspaceSymbolParams, token:CancellationToken, resolve:Array<SymbolInformation>->Void, reject:ResponseError<NoData>->Void) {
         var args = ["?@0@workspace-symbols@" + params.query];
-        makeRequest(args, null, token, resolve, reject);
+        makeRequest("@workspace-symbols", args, null, token, resolve, reject);
     }
 
     function moduleSymbolEntryToSymbolInformation(entry:ModuleSymbolEntry, uri:DocumentUri):SymbolInformation {

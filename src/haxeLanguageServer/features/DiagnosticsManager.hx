@@ -26,7 +26,7 @@ class DiagnosticsManager {
 
     function onRunGlobalDiagnostics(_) {
         var stopProgress = context.startProgress("Collecting Diagnostics");
-        context.callDisplay(["diagnostics"], null, null, function(result) {
+        context.callDisplay("global diagnostics", ["diagnostics"], null, null, function(result) {
             processDiagnosticsReply(null, result);
             context.protocol.sendNotification(LanguageServerMethods.DidRunRunGlobalDiagnostics);
             stopProgress();
@@ -185,7 +185,7 @@ class DiagnosticsManager {
         }
         var doc = context.documents.get(uri);
         if (doc != null) {
-            context.callDisplay([doc.fsPath + "@0@diagnostics"], null, null, processDiagnosticsReply.bind(uri), processErrorReply.bind(uri));
+            context.callDisplay("@diagnostics", [doc.fsPath + "@0@diagnostics"], null, null, processDiagnosticsReply.bind(uri), processErrorReply.bind(uri));
         }
     }
 

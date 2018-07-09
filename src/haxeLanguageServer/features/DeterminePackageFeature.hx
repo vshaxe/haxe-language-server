@@ -30,7 +30,7 @@ class DeterminePackageFeature {
 
     function handleLegacy(params:{fsPath:String}, token:CancellationToken, resolve:{pack:String}->Void, reject:ResponseError<NoData>->Void) {
         var args = ['${params.fsPath}@0@package'];
-        context.callDisplay(args, null, token, function(r) {
+        context.callDisplay("@package", args, null, token, function(r) {
             switch (r) {
                 case DCancelled:
                     return resolve(null);

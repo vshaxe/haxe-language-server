@@ -26,7 +26,7 @@ class CompletionFeatureLegacy {
         var r = calculateCompletionPosition(textBefore, offset);
         var bytePos = context.displayOffsetConverter.characterOffsetToByteOffset(doc.content, r.pos);
         var args = ['${doc.fsPath}@$bytePos' + (if (r.toplevel) "@toplevel" else "")];
-        context.callDisplay(args, doc.content, token, function(result) {
+        context.callDisplay(if (r.toplevel) "@toplevel" else "field completion", args, doc.content, token, function(result) {
             switch (result) {
                 case DCancelled:
                     resolve(null);

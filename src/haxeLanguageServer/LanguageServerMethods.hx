@@ -62,9 +62,14 @@ class LanguageServerMethods {
     static inline var DidChangeDisplayPort = new NotificationMethod<{port:Int},NoData>("haxe/didChangeDisplayPort");
 
     /**
-        This notification is sent from the server to the client when there a Haxe JSON-RPC method was executed.
+        This notification is sent from the server to the client when a Haxe JSON-RPC method was executed.
     **/
     static inline var DidRunHaxeMethod = new NotificationMethod<HaxeMethodResult,NoData>("haxe/didRunHaxeMethod");
+
+    /**
+        This notification is sent from the server to the client when the request queue has changed.
+    **/
+    static inline var DidChangeRequestQueue = new NotificationMethod<{queue:Array<String>},NoData>("haxe/didChangeRequestQueue");
 
     /**
         This notification is sent from the client to the server to instruct a specific Haxe JSON-RPC method to be executed.

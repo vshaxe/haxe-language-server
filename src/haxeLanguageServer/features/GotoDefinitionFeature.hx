@@ -34,7 +34,7 @@ class GotoDefinitionFeature {
     function handleLegacy(params:TextDocumentPositionParams, token:CancellationToken, resolve:Definition->Void, reject:ResponseError<NoData>->Void, doc:TextDocument, offset:Int) {
         var bytePos = context.displayOffsetConverter.characterOffsetToByteOffset(doc.content, offset);
         var args = ['${doc.fsPath}@$bytePos@position'];
-        context.callDisplay(args, doc.content, token, function(r) {
+        context.callDisplay("@position", args, doc.content, token, function(r) {
             switch (r) {
                 case DCancelled:
                     resolve(null);

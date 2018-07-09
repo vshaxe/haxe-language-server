@@ -138,7 +138,7 @@ class HaxeServer {
             return;
 
         startCompletionInitializationProgress("Building Cache");
-        process(context.displayArguments.concat(["--no-output"]), null, true, null, Processed(function(_) {
+        process("cache build", context.displayArguments.concat(["--no-output"]), null, true, null, Processed(function(_) {
             stopProgress();
             if (supports(ServerMethods.ReadClassPaths)) {
                 readClassPaths();
@@ -217,7 +217,7 @@ class HaxeServer {
                     socket.destroy();
                     trace("Client disconnected");
                 }
-                process(split, null, false, null, Raw(callback));
+                process("compilation", split, null, false, null, Raw(callback));
             });
             socket.on(SocketEvent.Error, function(err) {
                 trace("Socket error: " + err);
@@ -245,6 +245,7 @@ class HaxeServer {
         }
 
         requestsHead = requestsTail = currentRequest = null;
+        updateRequestQueue();
     }
 
     function stopProgress() {
@@ -303,14 +304,15 @@ class HaxeServer {
                 var request = currentRequest;
                 currentRequest = null;
                 request.onData(msg);
+                updateRequestQueue();
                 checkQueue();
             }
         }
     }
 
-    public function process(args:Array<String>, token:CancellationToken, cancellable:Bool, stdin:String, handler:ResultHandler) {
+    public function process(label:String, args:Array<String>, token:CancellationToken, cancellable:Bool, stdin:String, handler:ResultHandler) {
         // create a request object
-        var request = new DisplayRequest(args, token, cancellable, stdin, handler);
+        var request = new DisplayRequest(label, args, token, cancellable, stdin, handler);
 
         // if the request is cancellable, set a cancel callback to remove request from queue
         if (token != null) {
@@ -330,6 +332,7 @@ class HaxeServer {
 
                 // notify about the cancellation
                 request.cancel();
+                updateRequestQueue();
             });
         }
 
@@ -344,6 +347,7 @@ class HaxeServer {
 
         // process the queue
         checkQueue();
+        updateRequestQueue();
     }
 
     function checkQueue() {
@@ -361,11 +365,25 @@ class HaxeServer {
         if (requestsHead != null) {
             currentRequest = requestsHead;
             requestsHead = currentRequest.next;
+            updateRequestQueue();
             proc.stdin.write(currentRequest.prepareBody());
         }
     }
 
     public function supports<P,R>(method:HaxeRequestMethod<P,R>) {
         return supportedMethods.indexOf(method) != -1;
+    }
+
+    function updateRequestQueue() {
+        if (!context.sendMethodResults) {
+            return;
+        }
+        var queue = [];
+        var request = currentRequest;
+        while (request != null) {
+            queue.push(request.label);
+            request = request.next;
+        }
+        context.protocol.sendNotification(LanguageServerMethods.DidChangeRequestQueue, {queue: queue});
     }
 }

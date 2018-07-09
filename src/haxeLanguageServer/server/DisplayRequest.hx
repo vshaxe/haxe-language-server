@@ -4,6 +4,7 @@ import js.node.Buffer;
 import jsonrpc.CancellationToken;
 
 class DisplayRequest {
+    public final label:String;
     public final cancellable:Bool;
 
     // these are used for the queue
@@ -17,7 +18,8 @@ class DisplayRequest {
 
     static final stdinSepBuf = new Buffer([1]);
 
-    public function new(args:Array<String>, token:CancellationToken, cancellable:Bool, stdin:String, handler:ResultHandler) {
+    public function new(label:String, args:Array<String>, token:CancellationToken, cancellable:Bool, stdin:String, handler:ResultHandler) {
+        this.label = label;
         this.args = args;
         this.token = token;
         this.cancellable = cancellable;

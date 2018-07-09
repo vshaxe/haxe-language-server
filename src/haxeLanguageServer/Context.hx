@@ -67,10 +67,10 @@ class Context {
     public var signatureHelp(default,null):SignatureHelpFeature;
     public var displayOffsetConverter(default,null):DisplayOffsetConverter;
     public var gotoDefinition(default,null):GotoDefinitionFeature;
+    public var sendMethodResults(default,null):Bool = false;
     var diagnostics:DiagnosticsManager;
     var codeActions:CodeActionFeature;
     var activeEditor:DocumentUri;
-    var sendMethodResults:Bool = false;
 
     public var config(default,null):Config;
     var unmodifiedConfig:Config;
@@ -371,7 +371,7 @@ class Context {
             request.params = params;
         var requestJson = Json.stringify(request);
 
-        callDisplay([requestJson], null, token, result -> {
+        callDisplay(method, [requestJson], null, token, result -> {
             var arrivalTime = Date.now().getTime();
             switch (result) {
                 case DResult(data):
@@ -421,7 +421,7 @@ class Context {
         protocol.sendNotification(LanguageServerMethods.DidRunHaxeMethod, methodResult);
     }
 
-    public function callDisplay(args:Array<String>, stdin:String, token:CancellationToken, callback:DisplayResult->Void, errback:(error:String)->Void) {
+    public function callDisplay(label:String, args:Array<String>, stdin:String, token:CancellationToken, callback:DisplayResult->Void, errback:(error:String)->Void) {
         var actualArgs = ["--cwd", workspacePath.toString()]; // change cwd to workspace root
         if (displayArguments != null)
             actualArgs = actualArgs.concat(displayArguments); // add arguments from the workspace settings
@@ -437,7 +437,7 @@ class Context {
         }
         actualArgs.push("--display");
         actualArgs = actualArgs.concat(args); // finally, add given query args
-        haxeServer.process(actualArgs, token, true, stdin, Processed(callback, errback));
+        haxeServer.process(label, actualArgs, token, true, stdin, Processed(callback, errback));
     }
 
     public function registerCodeActionContributor(contributor:CodeActionContributor) {

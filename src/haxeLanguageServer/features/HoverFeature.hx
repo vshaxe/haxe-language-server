@@ -72,7 +72,7 @@ class HoverFeature {
     function handleLegacy(params:TextDocumentPositionParams, token:CancellationToken, resolve:Hover->Void, reject:ResponseError<NoData>->Void, doc:TextDocument, offset:Int) {
         var bytePos = context.displayOffsetConverter.characterOffsetToByteOffset(doc.content, offset);
         var args = ['${doc.fsPath}@$bytePos@type'];
-        context.callDisplay(args, doc.content, token, function(r) {
+        context.callDisplay("@type", args, doc.content, token, function(r) {
             switch (r) {
                 case DCancelled:
                     resolve(null);

@@ -104,7 +104,7 @@ class CodeLensFeature {
                     }
             }
         }
-        context.callDisplay([doc.fsPath + "@0@statistics"], doc.content, token, processStatisticsReply, processError);
+        context.callDisplay("@statistics", [doc.fsPath + "@0@statistics"], doc.content, token, processStatisticsReply, processError);
     }
 }
 
