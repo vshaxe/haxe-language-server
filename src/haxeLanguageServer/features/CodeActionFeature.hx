@@ -5,7 +5,7 @@ import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
 
-typedef CodeActionContributor = CodeActionParams->Array<EitherType<Command,CodeAction>>;
+typedef CodeActionContributor = CodeActionParams->Array<CodeAction>;
 
 class CodeActionFeature {
     final context:Context;
@@ -20,7 +20,7 @@ class CodeActionFeature {
         contributors.push(contributor);
     }
 
-    function onCodeAction(params:CodeActionParams, token:CancellationToken, resolve:Array<EitherType<Command,CodeAction>>->Void, reject:ResponseError<NoData>->Void) {
+    function onCodeAction(params:CodeActionParams, token:CancellationToken, resolve:Array<CodeAction>->Void, reject:ResponseError<NoData>->Void) {
         var codeActions = [];
         for (contributor in contributors) codeActions = codeActions.concat(contributor(params));
         resolve(codeActions);

@@ -4,6 +4,7 @@ import haxe.io.Path;
 import haxeLanguageServer.helper.PathHelper;
 import haxeLanguageServer.helper.ImportHelper;
 import haxeLanguageServer.server.DisplayResult;
+import haxeLanguageServer.helper.WorkspaceEditHelper;
 import haxeLanguageServer.LanguageServerMethods;
 import js.node.ChildProcess;
 
@@ -236,7 +237,7 @@ class DiagnosticsManager {
 
         var ret:Array<CodeAction> = [{
             title: "Remove unused import/using",
-            edit: createWorkspaceEdit(params, [{range: patchRange(d.range), newText: ""}])
+            edit: WorkspaceEditHelper.create(context, params, [{range: patchRange(d.range), newText: ""}])
         }];
 
         var map = diagnosticsArguments[params.textDocument.uri];
@@ -250,7 +251,7 @@ class DiagnosticsManager {
             if (fixes.length > 1) {
                 ret.unshift({
                     title: "Remove all unused imports/usings",
-                    edit: createWorkspaceEdit(params, fixes)
+                    edit: WorkspaceEditHelper.create(context, params, fixes)
                 });
             }
         }
@@ -275,11 +276,12 @@ class DiagnosticsManager {
         return [
             {
                 title: "Import " + arg.name,
-                edit: createWorkspaceEdit(params, [ImportHelper.createImportsEdit(doc, ImportHelper.getImportPosition(doc), [arg.name], importStyle)])
+                edit: WorkspaceEditHelper.create(context, params,
+                    [ImportHelper.createImportsEdit(doc, ImportHelper.getImportPosition(doc), [arg.name], importStyle)])
             },
             {
                 title: "Change to " + arg.name,
-                edit: createWorkspaceEdit(params, [{range: d.range, newText: arg.name}])
+                edit: WorkspaceEditHelper.create(context, params, [{range: d.range, newText: arg.name}])
             }
         ];
     }
@@ -287,7 +289,7 @@ class DiagnosticsManager {
     function getTypoActions(params:CodeActionParams, d:Diagnostic, arg):Array<CodeAction> {
         return [{
             title: "Change to " + arg.name,
-            edit: createWorkspaceEdit(params, [{range: d.range, newText: arg.name}])
+            edit: WorkspaceEditHelper.create(context, params, [{range: d.range, newText: arg.name}])
         }];
     }
 
@@ -307,7 +309,7 @@ class DiagnosticsManager {
                 suggestion = suggestion.trim();
                 actions.push({
                     title: "Change to " + suggestion,
-                    edit: createWorkspaceEdit(params, [{range: range, newText: suggestion}])
+                    edit: WorkspaceEditHelper.create(context, params, [{range: range, newText: suggestion}])
                 });
             }
             return actions;
@@ -321,14 +323,14 @@ class DiagnosticsManager {
             var replacement = text.replace(is, shouldBe);
             actions.push({
                 title: "Change to " + replacement,
-                edit: createWorkspaceEdit(params, [{range: d.range, newText: replacement}])
+                edit: WorkspaceEditHelper.create(context, params, [{range: d.range, newText: replacement}])
             });
         }
 
         if (arg.indexOf("Float should be Int") != -1) {
             actions.push({
                 title: "Wrap in Std.int() call",
-                edit: createWorkspaceEdit(params, [
+                edit: WorkspaceEditHelper.create(context, params, [
                     {range: d.range.start.toRange(), newText: 'Std.int('},
                     {range: d.range.end.toRange(), newText: ')'}
                 ])
@@ -342,7 +344,7 @@ class DiagnosticsManager {
         if (range == null) return [];
         return [{
             title: "Remove",
-            edit: createWorkspaceEdit(params, [{range: range, newText: ""}])
+            edit: WorkspaceEditHelper.create(context, params, [{range: range, newText: ""}])
         }];
     }
 
@@ -350,13 +352,6 @@ class DiagnosticsManager {
         var map = diagnosticsArguments[uri];
         if (map == null) return null;
         return map.get({code: kind, range: range});
-    }
-
-    function createWorkspaceEdit(params:CodeActionParams, edits:Array<TextEdit>):WorkspaceEdit {
-        var doc = context.documents.get(params.textDocument.uri);
-        var changes = new haxe.DynamicAccess<Array<TextEdit>>();
-        changes[doc.uri.toString()] = edits;
-        return {changes: changes};
     }
 }
 

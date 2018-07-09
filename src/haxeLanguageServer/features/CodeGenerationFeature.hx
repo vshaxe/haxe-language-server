@@ -1,5 +1,6 @@
 package haxeLanguageServer.features;
 
+import haxeLanguageServer.helper.WorkspaceEditHelper;
 import haxeLanguageServer.helper.IdentifierHelper;
 import haxeLanguageServer.helper.TypeHelper;
 import haxeLanguageServer.features.SignatureHelpFeature.CurrentSignature;
@@ -25,7 +26,7 @@ class CodeGenerationFeature {
         return currentSignature != null && currentSignature.params.textDocument.uri == params.textDocument.uri;
     }
 
-    function generateAnonymousFunction(params:CodeActionParams):Array<Command> {
+    function generateAnonymousFunction(params:CodeActionParams):Array<CodeAction> {
         if (!isSignatureValid(params)) return [];
 
         var help = currentSignature.help;
@@ -40,14 +41,16 @@ class CodeGenerationFeature {
                 for (i in 0...args.length) args[i].name = names[i];
 
                 var generatedCode = TypeHelper.printFunctionDeclaration(args, ret, context.config.codeGeneration.functions.anonymous) + " ";
-                return new ApplyFixesCommand("Generate anonymous function", params,
-                        [{range: position.toRange(), newText: generatedCode}]);
+                return [{
+                    title: "Generate anonymous function",
+                    edit: WorkspaceEditHelper.create(context, params, [{range: position.toRange(), newText: generatedCode}])
+                }];
             case _:
                 return [];
         }
     }
 
-    function generateCaptureVariables(params:CodeActionParams):Array<Command> {
+    function generateCaptureVariables(params:CodeActionParams):Array<CodeAction> {
         if (!isSignatureValid(params) || currentSignature.help.activeParameter != 0) return [];
 
         var doc = context.documents.get(params.textDocument.uri);
@@ -61,11 +64,13 @@ class CodeGenerationFeature {
 
         var activeSignature = currentSignature.help.signatures[currentSignature.help.activeSignature];
         var argNames = [for (arg in activeSignature.parameters) arg.label.split(":")[0]];
-        return new ApplyFixesCommand("Generate capture variables", params,
-            [{range: position.toRange(), newText: argNames.join(", ")}]);
+        return [{
+            title: "Generate capture variables",
+            edit: WorkspaceEditHelper.create(context, params, [{range: position.toRange(), newText: argNames.join(", ")}])
+        }];
     }
 
-    function extractVariable(params:CodeActionParams):Array<Command> {
+    /*function extractVariable(params:CodeActionParams):Array<Command> {
         var range = params.range;
         if (range.isEmpty()) return [];
 
@@ -78,7 +83,7 @@ class CodeGenerationFeature {
 
         return new ApplyFixesCommand("Extract variable", params,
             [{range: insertRange, newText: variable}, {range: range, newText: "$"}]);
-    }
+    }*/
 
     /**
         Extracts text from a range in the document, while being smart about not including:
