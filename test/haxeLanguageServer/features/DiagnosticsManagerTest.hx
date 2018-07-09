@@ -21,8 +21,8 @@ class DiagnosticsManagerTest extends TestCaseBase {
             diagnosticsPathFilter: pathFilter
         });
         context.workspacePath.returns("");
-        context.callDisplay(cast any, cast any, cast any, cast any, cast any).calls(function(args) {
-            var errback:(error:String)->Void = args[4];
+        context.callDisplay(cast any, cast any, cast any, cast any, cast any, cast any).calls(function(args) {
+            var errback:(error:String)->Void = args[5];
             errback(errbackMsg);
         });
         context.displayOffsetConverter.returns(new Haxe4DisplayOffsetConverter());
