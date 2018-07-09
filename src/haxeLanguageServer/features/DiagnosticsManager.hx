@@ -327,6 +327,8 @@ class DiagnosticsManager {
             });
         }
 
+        #if false
+        // breaks with cases like `var i:Int = 0.0;`
         if (arg.indexOf("Float should be Int") != -1) {
             actions.push({
                 title: "Wrap in Std.int() call",
@@ -336,6 +338,8 @@ class DiagnosticsManager {
                 ])
             });
         }
+        #end
+
         return actions;
     }
 
