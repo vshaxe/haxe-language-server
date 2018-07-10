@@ -52,6 +52,20 @@ class Helper {
         return rec(type);
     }
 
+    // TODO: respect abstract implication conversions here somehow?
+    public static function resolveTypes<T>(type:JsonType<T>):Array<JsonType<T>> {
+        switch (type.kind) {
+            case TAbstract:
+                var typePath:JsonTypePathWithParams = type.args;
+                var path = typePath.path;
+                if (path.typeName == "EitherType" && path.pack.join(".") == "haxe.extern") {
+                    return typePath.params.map(resolveTypes).flatten().array();
+                }
+            case _:
+        }
+        return [type];
+    }
+
     public static function hasMeta(?meta:JsonMetadata, name:CompilerMetadata) {
         return meta != null && meta.exists(meta -> meta.name == cast name);
     }

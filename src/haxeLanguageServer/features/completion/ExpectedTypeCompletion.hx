@@ -30,21 +30,27 @@ class ExpectedTypeCompletion {
         }
 
         var items:Array<CompletionItem> = [];
-        function add(item:ExpectedTypeCompletionItem) {
-            items.push(createExpectedTypeCompletionItem(item, data.completionPosition));
+        var types = expectedTypeFollowed.resolveTypes();
+        for (type in types) {
+            items = items.concat(createItemsForType(type, data));
         }
+        items = items.filterDuplicates((item1, item2) -> item1.textEdit.newText == item2.textEdit.newText);
+        return items;
+    }
+
+    function createItemsForType<T>(concreteType:JsonType<T>, data:CompletionContextData):Array<CompletionItem> {
+        var items:Array<ExpectedTypeCompletionItem> = [];
 
         var anonFormatting = context.config.codeGeneration.functions.anonymous;
         var printer = new DisplayPrinter(false, Shadowed, anonFormatting);
-
-        switch (expectedTypeFollowed.kind) {
+        switch (concreteType.kind) {
             case TAnonymous:
                 // TODO: support @:structInit
-                var anon = expectedTypeFollowed.args;
+                var anon = concreteType.args;
                 var allFields = printer.printObjectLiteral(anon, false, true);
                 var requiredFields = printer.printObjectLiteral(anon, true, true);
                 if (allFields == requiredFields) {
-                    add({
+                    items.push({
                         label: if (anon.fields.length == 0) "{}" else "{fields...}",
                         detail: "Auto-generate object literal",
                         insertText: allFields,
@@ -52,14 +58,14 @@ class ExpectedTypeCompletion {
                         code: printer.printObjectLiteral(anon, false, false)
                     });
                 } else {
-                    add({
+                    items.push({
                         label: "{all fields...}",
                         detail: "Auto-generate object literal\n(all fields)",
                         insertText: allFields,
                         insertTextFormat: Snippet,
                         code: printer.printObjectLiteral(anon, false, false)
                     });
-                    add({
+                    items.push({
                         label: "{required fields...}",
                         detail: "Auto-generate object literal\n(only required fields)",
                         insertText: requiredFields,
@@ -68,19 +74,20 @@ class ExpectedTypeCompletion {
                     });
                 }
             case TFun:
-                var signature = expectedTypeFollowed.args;
+                var signature = concreteType.args;
                 var definition = printer.printAnonymousFunctionDefinition(signature);
-                add({
+                items.push({
                     label: definition,
                     detail: "Auto-generate anonymous function",
                     insertText: definition,
                     insertTextFormat: PlainText,
                     additionalTextEdits: ImportHelper.createFunctionImportsEdit(data.doc,
-                        data.importPosition, context, expectedTypeFollowed, anonFormatting)
+                        data.importPosition, context, concreteType, anonFormatting)
                 });
             case _:
         }
-        return items;
+
+        return items.map(createExpectedTypeCompletionItem.bind(_, data.completionPosition));
     }
 
     function createExpectedTypeCompletionItem(data:ExpectedTypeCompletionItem, position:Position):CompletionItem {
