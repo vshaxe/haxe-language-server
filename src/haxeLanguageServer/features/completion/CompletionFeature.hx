@@ -414,15 +414,16 @@ class CompletionFeature {
             autoImport = false; // need to insert the qualified name
         }
 
-        var qualifiedName = printer.printPath(type.path); // pack.Foo | pack.Foo.SubType
-        if (isExcluded(qualifiedName)) {
+        var dotPath = new DisplayPrinter(PathPrinting.Always).printPath(type.path); // pack.Foo | pack.Foo.SubType
+        if (isExcluded(dotPath)) {
             return null;
         }
         var unqualifiedName = type.path.typeName; // Foo | SubType
-        var containerName = if (qualifiedName.indexOf(".") == -1) "" else qualifiedName.untilLastDot(); // pack | pack.Foo
+        var containerName = if (dotPath.indexOf(".") == -1) "" else dotPath.untilLastDot(); // pack | pack.Foo
+        var qualifiedName = printer.printPath(type.path); // unqualifiedName or dotPath depending on importStatus
 
         var item:CompletionItem = {
-            label: unqualifiedName + if (containerName == "") "" else " - " + qualifiedName,
+            label: unqualifiedName + if (containerName == "") "" else " - " + dotPath,
             kind: getKindForModuleType(type),
             textEdit: {
                 range: data.replaceRange,
@@ -433,7 +434,7 @@ class CompletionFeature {
         if (isImportCompletion) {
             item.textEdit.newText = maybeInsert(item.textEdit.newText, ";", data.lineAfter);
         } else if (importConfig.enableAutoImports && type.path.importStatus == Unimported) {
-            var edit = ImportHelper.createImportsEdit(data.doc, data.importPosition, [qualifiedName], importConfig.style);
+            var edit = ImportHelper.createImportsEdit(data.doc, data.importPosition, [dotPath], importConfig.style);
             item.additionalTextEdits = [edit];
         }
 
