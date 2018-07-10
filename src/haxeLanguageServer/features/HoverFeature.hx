@@ -31,7 +31,7 @@ class HoverFeature {
         }, error -> reject(ResponseError.internalError(error)));
     }
 
-    function printContent<T>(hover:DisplayItemOccurrence<T>):String {
+    function printContent<T>(hover:DisplayItemOccurrence<T>):HoverContent {
         var printer = new DisplayPrinter(true, null, {
             argumentTypeHints: true,
             returnTypeHint: NonVoid,
@@ -41,31 +41,35 @@ class HoverFeature {
         });
         var item = hover.item;
         var concreteType = hover.item.type;
-        function combine(defintion:String, origin:Option<String>) {
-            return switch (origin) {
-                case Some(v): defintion + '\n*$v*';
-                case None: defintion;
-            }
-        }
         return switch (item.kind) {
             case Type:
-                printCodeBlock(printer.printEmptyTypeDefinition(hover.item.args), Haxe);
+                {definition: printCodeBlock(printer.printEmptyTypeDefinition(hover.item.args), Haxe)}
             case Local:
                 var languageId = if (item.args.origin == Argument) HaxeArgument else Haxe;
-                var origin = printer.printLocalOrigin(item.args.origin);
-                printCodeBlock(printer.printLocalDefinition(hover.item.args, concreteType), languageId) + '\n*$origin*';
+                {
+                    definition: printCodeBlock(printer.printLocalDefinition(hover.item.args, concreteType), languageId),
+                    origin: printer.printLocalOrigin(item.args.origin)
+                }
             case ClassField:
-                var definition = printCodeBlock(printer.printClassFieldDefinition(item.args, concreteType, item.kind == EnumAbstractField), Haxe);
-                var origin = printer.printClassFieldOrigin(item.args.origin, item.kind);
-                combine(definition, origin);
+                {
+                    definition: printCodeBlock(printer.printClassFieldDefinition(item.args, concreteType, item.kind == EnumAbstractField), Haxe),
+                    origin: switch (printer.printClassFieldOrigin(item.args.origin, item.kind)) {
+                        case Some(v): v;
+                        case None: null;
+                    }
+                }
             case EnumField:
-                var definition = printCodeBlock(printer.printEnumFieldDefinition(item.args.field, item.type), Haxe);
-                var origin = printer.printEnumFieldOrigin(item.args.origin);
-                combine(definition, origin);
+                {
+                    definition: printCodeBlock(printer.printEnumFieldDefinition(item.args.field, item.type), Haxe),
+                    origin: switch (printer.printEnumFieldOrigin(item.args.origin)) {
+                        case Some(v): v;
+                        case None: null;
+                    }
+                }
             case Metadata:
-                printCodeBlock("@" + item.args.name, Haxe);
+                {definition: printCodeBlock("@" + item.args.name, Haxe)};
             case _:
-                printCodeBlock(printer.printType(concreteType), HaxeType);
+                {definition: printCodeBlock(printer.printType(concreteType), HaxeType)};
         }
     }
 
@@ -99,22 +103,28 @@ class HoverFeature {
                             var range:Range = null;
                             if (p != null)
                                 range = p.range;
-                            resolve(createHover(printCodeBlock(type, HaxeType), documentation, range));
+                            var definition = {definition: printCodeBlock(type, HaxeType)};
+                            resolve(createHover(definition, documentation, range));
                     }
             }
         }, function(error) reject(ResponseError.internalError(error)));
     }
 
-    function createHover(content:String, ?documentation:String, ?range:Range):Hover {
+    function createHover(content:HoverContent, ?documentation:String, ?range:Range):Hover {
         documentation = if (documentation == null) "" else "\n" + DocHelper.markdownFormat(documentation);
+        if (content.origin != null) {
+            documentation = '*${content.origin}*\n' + documentation;
+        }
         var hover:Hover = {
-            contents: {
-                kind: MarkupKind.MarkDown,
-                value: '$content\n$documentation'
-            }
+            contents: [content.definition, documentation]
         };
         if (range != null)
             hover.range = range;
         return hover;
     }
+}
+
+private typedef HoverContent = {
+    definition:String,
+    ?origin:String
 }
