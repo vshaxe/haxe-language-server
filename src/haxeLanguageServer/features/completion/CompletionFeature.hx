@@ -245,7 +245,10 @@ class CompletionFeature {
             }
         }
 
-        completionItem.sortText = StringTools.lpad(Std.string(index), "0", 10);
+        if (completionItem.sortText == null) {
+            completionItem.sortText = StringTools.lpad(Std.string(index), "0", 10);
+        }
+
         completionItem.data = {origin: Haxe, index: index};
         return completionItem;
     }
@@ -428,7 +431,8 @@ class CompletionFeature {
             textEdit: {
                 range: data.replaceRange,
                 newText: if (autoImport) unqualifiedName else qualifiedName
-            }
+            },
+            sortText: unqualifiedName
         };
 
         if (isImportCompletion) {
