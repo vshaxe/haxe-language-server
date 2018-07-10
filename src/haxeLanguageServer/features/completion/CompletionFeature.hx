@@ -14,6 +14,8 @@ import languageServerProtocol.Types.CompletionItemKind;
 import haxe.display.JsonModuleTypes;
 import haxe.extern.EitherType;
 
+using haxeLanguageServer.helper.CompletionContextDataHelper;
+
 enum abstract CompletionItemOrigin(Int) {
     var Haxe;
     var Custom;
@@ -232,7 +234,7 @@ class CompletionFeature {
         }
 
         if (completionItem.textEdit == null && data.replaceRange != null) {
-            completionItem.textEdit = {range: data.replaceRange, newText: completionItem.label};
+            completionItem.textEdit = {range: data.normalizedRange(), newText: completionItem.label};
         }
 
         if (completionItem.documentation == null) {
@@ -247,6 +249,17 @@ class CompletionFeature {
 
         completionItem.sortText = StringTools.lpad(Std.string(index), "0", 10);
         completionItem.data = {origin: Haxe, index: index};
+
+        if (completionItem.detail != null){
+            completionItem.detail = StringTools.rtrim(completionItem.detail);
+        }
+
+        // Fallback to insertText (temporary fix for neovaxe)
+        if (completionItem.textEdit != null) {
+            completionItem.insertText = completionItem.textEdit.newText;
+            completionItem.textEdit = null;
+        }
+
         return completionItem;
     }
 
@@ -285,8 +298,8 @@ class CompletionFeature {
                         case _: field.name;
                     }
                 },
-                range: data.replaceRange
-            }
+                range: data.normalizedRange()
+			}
         }
 
         switch (data.mode.kind) {
@@ -327,7 +340,7 @@ class CompletionFeature {
             kind: getKindForField(field, item.kind),
             textEdit: {
                 newText: printer.printOverrideDefinition(field, concreteType, data.indent, true),
-                range: data.replaceRange
+                range: data.normalizedRange()
             },
             insertTextFormat: Snippet,
             detail: "Auto-generate override" + switch (printedOrigin) {
@@ -400,7 +413,7 @@ class CompletionFeature {
                         name;
                     }
                 },
-                range: data.replaceRange
+                range: data.normalizedRange()
             },
             insertTextFormat: if (data.mode.kind == Pattern) Snippet else PlainText
         };
@@ -422,10 +435,10 @@ class CompletionFeature {
         var containerName = if (qualifiedName.indexOf(".") == -1) "" else qualifiedName.untilLastDot(); // pack | pack.Foo
 
         var item:CompletionItem = {
-            label: unqualifiedName + if (containerName == "") "" else " - " + qualifiedName,
+            label: unqualifiedName,// + if (containerName == "") "" else " - " + qualifiedName,
             kind: getKindForModuleType(type),
             textEdit: {
-                range: data.replaceRange,
+                range: data.normalizedRange(),
                 newText: if (autoImport) unqualifiedName else qualifiedName
             }
         };
@@ -455,6 +468,7 @@ class CompletionFeature {
         }
 
         handleDeprecated(item, type.meta);
+        // this.context.sendShowMessage(Info, 'item : ' + Std.string(item));
         return item;
     }
 
@@ -509,7 +523,7 @@ class CompletionFeature {
             detail: 'package $dotPath',
             textEdit: {
                 newText: maybeInsert(text, ".", data.lineAfter),
-                range: data.replaceRange
+                range: data.normalizedRange()
             },
             command: triggerSuggest
         };
@@ -521,7 +535,7 @@ class CompletionFeature {
             kind: Keyword,
             textEdit: {
                 newText: keyword.name,
-                range: data.replaceRange
+                range: data.normalizedRange()
             }
         }
 

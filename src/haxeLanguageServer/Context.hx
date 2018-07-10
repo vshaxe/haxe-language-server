@@ -159,7 +159,7 @@ class Context {
         workspacePath = params.rootUri.toFsPath();
         capabilities = params.capabilities;
         var options = (params.initializationOptions : InitOptions);
-        if (options == null) {
+        if (options == null || Reflect.fields(options).length == 0 ) {
             displayServerConfig = {
                 path: "haxe",
                 env: new haxe.DynamicAccess(),
