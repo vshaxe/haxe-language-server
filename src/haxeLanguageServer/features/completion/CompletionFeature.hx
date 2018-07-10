@@ -248,7 +248,8 @@ class CompletionFeature {
         if (completionItem.sortText == null) {
             completionItem.sortText = "";
         }
-        completionItem.sortText += " " + StringTools.lpad(Std.string(index), "0", 10);
+        completionItem.sortText += StringTools.lpad(Std.string(index + 1), "0", 10);
+
         completionItem.data = {origin: Haxe, index: index};
         return completionItem;
     }
