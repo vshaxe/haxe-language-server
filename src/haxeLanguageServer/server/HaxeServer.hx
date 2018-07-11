@@ -96,12 +96,18 @@ class HaxeServer {
         proc.stderr.on(ReadableEvent.Data, onData);
         proc.on(ChildProcessEvent.Exit, onExit);
 
+        function onInitComplete() {
+            stopProgress();
+            buildCompletionCache();
+            if (callback != null)
+                callback();
+        }
+
         stopProgressCallback = context.startProgress("Initializing Haxe/JSON-RPC protocol");
         context.callHaxeMethod(Methods.Initialize, {supportsResolve: true}, null, result -> {
             supportedMethods = result.methods;
-            stopProgress();
             configure();
-            buildCompletionCache();
+            onInitComplete();
             return null;
         }, error -> {
             // the "invalid format" error is expected for Haxe versions <= 4.0.0-preview.3
@@ -110,8 +116,7 @@ class HaxeServer {
             } else {
                 trace(error);
             }
-            stopProgress();
-            buildCompletionCache();
+            onInitComplete();
         });
 
         var displayPort = context.config.displayPort;
@@ -122,9 +127,6 @@ class HaxeServer {
                 startSocketServer(displayPort);
             }
         }
-
-        if (callback != null)
-            callback();
     }
 
     function configure() {

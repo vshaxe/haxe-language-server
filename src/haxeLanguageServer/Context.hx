@@ -20,8 +20,10 @@ import haxeLanguageServer.protocol.Protocol.HaxeRequestMethod;
 import haxeLanguageServer.protocol.Protocol.Response;
 import haxeLanguageServer.protocol.Protocol.Methods as HaxeMethods;
 import haxeLanguageServer.protocol.Server.ServerMethods;
+import haxeLanguageServer.protocol.Display.DisplayMethods;
 import haxeLanguageServer.LanguageServerMethods.HaxeMethodResult;
 import haxeFormatter.util.StructDefaultsMacro;
+import languageServerProtocol.protocol.TypeDefinition.TypeDefinitionMethods;
 
 private typedef FunctionGenerationConfig = {
     var ?anonymous:FunctionFormattingConfig;
@@ -255,6 +257,7 @@ class Context {
                 new HoverFeature(this);
                 signatureHelp = new SignatureHelpFeature(this);
                 gotoDefinition = new GotoDefinitionFeature(this);
+                new GotoTypeDefinitionFeature(this);
                 new FindReferencesFeature(this);
                 new DocumentSymbolsFeature(this);
                 new DeterminePackageFeature(this);
@@ -294,6 +297,22 @@ class Context {
         var hasArrowFunctions = haxeServer.version >= new SemVer(4, 0, 0);
         if (!hasArrowFunctions)
             config.codeGeneration.functions.anonymous.useArrowSyntax = false;
+
+        if (haxeServer.supports(DisplayMethods.GotoTypeDefinition)) {
+            protocol.sendRequest(Methods.RegisterCapability, {
+                registrations: [{
+                    id: TypeDefinitionMethods.TypeDefinition,
+                    method: TypeDefinitionMethods.TypeDefinition
+                }]
+            }, null, _ -> {}, error -> trace(error));
+        } else {
+            protocol.sendRequest(Methods.UnregisterCapability, {
+                unregisterations: [{
+                    id: TypeDefinitionMethods.TypeDefinition,
+                    method: TypeDefinitionMethods.TypeDefinition
+                }]
+            }, null, _ -> {}, error -> trace(error));
+        }
     }
 
     function restartServer(reason:String) {

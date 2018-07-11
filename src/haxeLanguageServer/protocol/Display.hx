@@ -32,6 +32,11 @@ class DisplayMethods {
     static inline var GotoDefinition = new HaxeRequestMethod<PositionParams,GotoDefinitionResult>("display/definition");
 
     /**
+        The goto type definition request is sent from the client to Haxe to resolve the type definition location(s) of a symbol at a given text document position.
+    **/
+    static inline var GotoTypeDefinition = new HaxeRequestMethod<PositionParams,GotoTypeDefinitionResult>("display/typeDefinition");
+
+    /**
         The hover request is sent from the client to Haxe to request hover information at a given text document position.
     **/
     static inline var Hover = new HaxeRequestMethod<PositionParams,HoverResult>("display/hover");
@@ -395,6 +400,10 @@ typedef CompletionItemResolveResult = Response<{
 /* GotoDefinition */
 
 typedef GotoDefinitionResult = Response<Array<Location>>;
+
+/* GotoTypeDefinition */
+
+typedef GotoTypeDefinitionResult = Response<Array<Location>>;
 
 /* Hover */
 
