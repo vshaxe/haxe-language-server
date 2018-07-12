@@ -22,16 +22,19 @@ class DocumentFormattingFeature {
             var formattedFile = formatter.formatFile({
                     name: doc.uri.toFsPath().toString(),
                     content: ByteData.ofString(doc.content)
-                },
-                new Config()
+                }
             );
+            if (formattedFile == null) {
+                resolve([]);
+                return;
+            }
             var fullRange = {
                 start: {line: 0, character: 0},
                 end: {line: doc.lineCount - 1, character: doc.lineAt(doc.lineCount - 1).length}
             }
             resolve([{range: fullRange, newText: formattedFile}]);
         } catch (e:Any) {
-           trace(e);
+            trace(e);
         }
     }
 }

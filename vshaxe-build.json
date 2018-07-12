@@ -26,13 +26,17 @@
         {
             "name": "tokentree-formatter",
             "installArgs": ["install", "tokentree-formatter"]
+        },
+        {
+            "name": "json2object",
+            "installArgs": ["install", "json2object"]
         }
     ],
     "targets": [
         {
             "name": "language-server",
             "args": {
-                "haxelibs": ["haxe-hxparser", "tokentree-formatter"],
+                "haxelibs": ["haxe-hxparser", "tokentree-formatter", "json2object"],
                 "classPaths": [
                     "src",
                     "protocol/src",
