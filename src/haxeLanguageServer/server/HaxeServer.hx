@@ -148,6 +148,7 @@ class HaxeServer {
                 trace("Done.");
             }
         }, function(error) {
+            context.protocol.sendNotification(LanguageServerMethods.CacheBuildFailed);
             stopProgress();
             trace("Failed - try fixing the error(s) and restarting the language server:\n\n" + error);
         }));

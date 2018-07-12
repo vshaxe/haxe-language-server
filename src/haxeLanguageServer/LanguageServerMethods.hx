@@ -75,6 +75,11 @@ class LanguageServerMethods {
         This notification is sent from the client to the server to instruct a specific Haxe JSON-RPC method to be executed.
     **/
     static inline var RunMethod = new NotificationMethod<{method:String, params:Any},NoData>("haxe/runMethod");
+
+    /**
+        This notification is sent from the server to the client to indicate that it has failed to build a completion cache.
+    **/
+    static inline var CacheBuildFailed = new NotificationMethod<NoData,NoData>("haxe/cacheBuildFailed");
 }
 
 typedef HaxeMethodResult = {
