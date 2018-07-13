@@ -12,14 +12,6 @@
             "installArgs": ["install", "compiletime"]
         },
         {
-            "name": "mockatoo",
-            "installArgs": ["git", "mockatoo", "https://github.com/vshaxe/mockatoo", "master", "src"]
-        },
-        {
-            "name": "mconsole",
-            "installArgs": ["install", "mconsole"]
-        },
-        {
             "name": "hx3compat",
             "installArgs": ["install", "hx3compat"]
         }
@@ -48,7 +40,7 @@
         {
             "name": "language-server-tests",
             "args": {
-                "haxelibs": ["haxe-hxparser", "compiletime", "mockatoo", "mconsole", "hx3compat"],
+                "haxelibs": ["haxe-hxparser", "compiletime", "hx3compat"],
                 "classPaths": [
                     "src",
                     "test",
@@ -60,7 +52,6 @@
                     "path": "bin/test.js"
                 },
                 "deadCodeElimination": "full",
-                "noInline": true,
                 "main": "TestMain",
                 "debug": true
             },

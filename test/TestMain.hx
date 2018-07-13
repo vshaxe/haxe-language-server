@@ -7,7 +7,6 @@ class TestMain {
         var runner = new TestRunner();
 
         CompileTime.importPackage("haxeLanguageServer.helper");
-        CompileTime.importPackage("haxeLanguageServer.features");
         CompileTime.importPackage("haxeLanguageServer.hxParser");
         CompileTime.importPackage("haxeLanguageServer.protocol.helper");
 
