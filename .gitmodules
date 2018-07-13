@@ -1,6 +1,3 @@
 [submodule "protocol"]
 	path = protocol
 	url = https://github.com/vshaxe/language-server-protocol-haxe
-[submodule "haxe-formatter"]
-	path = formatter
-	url = https://github.com/vshaxe/haxe-formatter

@@ -14,6 +14,7 @@ import haxeLanguageServer.features.CodeActionFeature.CodeActionContributor;
 import haxeLanguageServer.helper.SemVer;
 import haxeLanguageServer.helper.FunctionFormattingConfig;
 import haxeLanguageServer.helper.ImportHelper;
+import haxeLanguageServer.helper.StructDefaultsMacro;
 import haxeLanguageServer.server.DisplayResult;
 import haxeLanguageServer.server.HaxeServer;
 import haxeLanguageServer.protocol.Protocol.HaxeRequestMethod;
@@ -22,7 +23,6 @@ import haxeLanguageServer.protocol.Protocol.Methods as HaxeMethods;
 import haxeLanguageServer.protocol.Server.ServerMethods;
 import haxeLanguageServer.protocol.Display.DisplayMethods;
 import haxeLanguageServer.LanguageServerMethods.HaxeMethodResult;
-import haxeFormatter.util.StructDefaultsMacro;
 import languageServerProtocol.protocol.TypeDefinition.TypeDefinitionMethods;
 
 private typedef FunctionGenerationConfig = {
@@ -50,7 +50,6 @@ private typedef Config = {
     var ?buildCompletionCache:Bool;
     var ?codeGeneration:CodeGenerationConfig;
     var ?exclude:Array<String>;
-    var format:haxeFormatter.Config;
 }
 
 private typedef InitOptions = {
@@ -118,8 +117,7 @@ class Context {
             },
             exclude: [
                 "zpp_nape"
-            ],
-            format: {}
+            ]
         };
 
         protocol.onRequest(Methods.Initialize, onInitialize);

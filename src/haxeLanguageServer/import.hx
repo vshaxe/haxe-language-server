@@ -1,7 +1,9 @@
 import languageServerProtocol.Types;
 import languageServerProtocol.protocol.Protocol;
 import haxeLanguageServer.helper.FsPath;
+#if !macro
 import haxeLanguageServer.helper.DisplayOffsetConverter;
+#end
 
 using StringTools;
 using haxeLanguageServer.helper.RangeHelper;

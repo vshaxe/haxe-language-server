@@ -23,8 +23,7 @@
                 "haxelibs": ["haxe-hxparser"],
                 "classPaths": [
                     "src",
-                    "protocol/src",
-                    "formatter/src"
+                    "protocol/src"
                 ],
                 "defines": [
                     "JSTACK_FORMAT=vscode"
@@ -44,8 +43,7 @@
                 "classPaths": [
                     "src",
                     "test",
-                    "protocol/src",
-                    "formatter/src"
+                    "protocol/src"
                 ],
                 "output": {
                     "target": "js",
