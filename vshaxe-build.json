@@ -14,13 +14,33 @@
         {
             "name": "hx3compat",
             "installArgs": ["install", "hx3compat"]
+        },
+        {
+            "name": "hxparse",
+            "installArgs": ["git", "hxparse", "https://github.com/Simn/hxparse", "--never"]
+        },
+        {
+            "name": "haxeparser",
+            "installArgs": ["git", "haxeparser", "https://github.com/Simn/haxeparser", "--never"]
+        },
+        {
+            "name": "tokentree",
+            "installArgs": ["git", "tokentree", "https://github.com/HaxeCheckstyle/tokentree", "--never"]
+        },
+        {
+            "name": "tokentree-formatter",
+            "installArgs": ["git", "tokentree-formatter", "https://github.com/HaxeCheckstyle/tokentree-formatter", "--never"]
+        },
+        {
+            "name": "json2object",
+            "installArgs": ["install", "json2object"]
         }
     ],
     "targets": [
         {
             "name": "language-server",
             "args": {
-                "haxelibs": ["haxe-hxparser"],
+                "haxelibs": ["haxe-hxparser", "hxparse", "haxeparser", "tokentree", "tokentree-formatter", "json2object"],
                 "classPaths": [
                     "src",
                     "protocol/src"
@@ -39,7 +59,7 @@
         {
             "name": "language-server-tests",
             "args": {
-                "haxelibs": ["haxe-hxparser", "compiletime", "hx3compat"],
+                "haxelibs": ["haxe-hxparser", "hxparse", "haxeparser", "tokentree", "tokentree-formatter", "json2object", "compiletime", "hx3compat"],
                 "classPaths": [
                     "src",
                     "test",
