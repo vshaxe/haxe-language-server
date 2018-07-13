@@ -177,6 +177,9 @@ class Context {
             sendMethodResults = options.sendMethodResults;
         }
         documents = new TextDocuments(protocol);
+        #if debug
+        new DocumentFormattingFeature(this);
+        #end
         return resolve({
             capabilities: {
                 textDocumentSync: TextDocuments.syncKind,
@@ -263,10 +266,6 @@ class Context {
                 diagnostics = new DiagnosticsManager(this);
                 new CodeLensFeature(this);
                 new CodeGenerationFeature(this);
-
-                #if debug
-                new DocumentFormattingFeature(this);
-                #end
 
                 for (doc in documents.getAll())
                     publishDiagnostics(doc.uri);
