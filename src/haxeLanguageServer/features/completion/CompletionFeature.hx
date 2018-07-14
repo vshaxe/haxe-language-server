@@ -166,6 +166,9 @@ class CompletionFeature {
                 completionPosition: params.position,
                 importPosition: importPosition,
             };
+            if (data.replaceRange == null) {
+                data.replaceRange = data.completionPosition.toRange();
+            }
             var items = [];
             for (i in 0...result.items.length) {
                 var completionItem = createCompletionItem(i, result.items[i], data);
