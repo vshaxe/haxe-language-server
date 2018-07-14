@@ -53,9 +53,9 @@ private typedef Config = {
 }
 
 private typedef InitOptions = {
-    var displayServerConfig:DisplayServerConfig;
-    var displayArguments:Array<String>;
-    var sendMethodResults:Bool;
+    var ?displayServerConfig:DisplayServerConfig;
+    var ?displayArguments:Array<String>;
+    var ?sendMethodResults:Bool;
 }
 
 class Context {
@@ -158,9 +158,10 @@ class Context {
     function onInitialize(params:InitializeParams, token:CancellationToken, resolve:InitializeResult->Void, reject:ResponseError<InitializeError>->Void) {
         workspacePath = params.rootUri.toFsPath();
         capabilities = params.capabilities;
-        var options = (params.initializationOptions : InitOptions);
-        if (options == null) {
-            displayServerConfig = {
+
+        var options:InitOptions = params.initializationOptions;
+        var defaults:InitOptions = {
+            displayServerConfig: {
                 path: "haxe",
                 env: new haxe.DynamicAccess(),
                 arguments: [],
@@ -168,14 +169,15 @@ class Context {
                     completion: false,
                     reusing: false
                 }
-            };
-            displayArguments = [];
-            sendMethodResults = false;
-        } else {
-            displayServerConfig = options.displayServerConfig;
-            displayArguments = options.displayArguments;
-            sendMethodResults = options.sendMethodResults;
-        }
+            },
+            displayArguments: [],
+            sendMethodResults: false
+        };
+        StructDefaultsMacro.applyDefaults(options, defaults);
+        displayServerConfig = options.displayServerConfig;
+        displayArguments = options.displayArguments;
+        sendMethodResults = options.sendMethodResults;
+
         documents = new TextDocuments(protocol);
         #if debug
         new DocumentFormattingFeature(this);

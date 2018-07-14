@@ -52,7 +52,7 @@ class StructDefaultsMacro {
         return assignments;
     }
 
-    public static function getStructFields(type:Type):Array<ClassField> {
+    static function getStructFields(type:Type):Array<ClassField> {
         return switch (type) {
             case TType(t, params):
                 switch (t.get().type) {
