@@ -239,6 +239,10 @@ class CompletionFeature {
             completionItem.documentation = formatDocumentation(item.getDocumentation());
         }
 
+        if (completionItem.detail != null) {
+            completionItem.detail = completionItem.detail.rtrim();
+        }
+
         if (commitCharactersSupport) {
             if ((item.type != null && item.type.kind == TFun) || data.mode.kind == New || data.mode.kind == Metadata) {
                 completionItem.commitCharacters = ["("];
