@@ -24,7 +24,7 @@ class DocumentFormattingFeature {
                 }
             );
             if (formattedFile == null) {
-                resolve([]);
+                reject(ResponseError.internalError("formatFile() returned null"));
                 return;
             }
             var fullRange = {
@@ -33,7 +33,7 @@ class DocumentFormattingFeature {
             }
             resolve([{range: fullRange, newText: formattedFile}]);
         } catch (e:Any) {
-            trace(e);
+            reject(ResponseError.internalError(e));
         }
     }
 }
