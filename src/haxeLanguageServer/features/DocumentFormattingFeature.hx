@@ -36,6 +36,8 @@ class DocumentFormattingFeature {
                     resolve([{range: fullRange, newText: formattedCode}]);
                 case Failure(errorMessage):
                     reject(ResponseError.internalError(errorMessage));
+                case Disabled:
+                    reject(ResponseError.internalError("Formatting is disabled for this file"));
             }
         } catch (e:Any) {
             reject(ResponseError.internalError(e));
