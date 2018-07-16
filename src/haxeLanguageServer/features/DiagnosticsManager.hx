@@ -237,7 +237,8 @@ class DiagnosticsManager {
 
         var ret:Array<CodeAction> = [{
             title: "Remove unused import/using",
-            edit: WorkspaceEditHelper.create(context, params, [{range: patchRange(d.range), newText: ""}])
+            edit: WorkspaceEditHelper.create(context, params, [{range: patchRange(d.range), newText: ""}]),
+            diagnostics: [d]
         }];
 
         var map = diagnosticsArguments[params.textDocument.uri];
@@ -251,7 +252,8 @@ class DiagnosticsManager {
             if (fixes.length > 1) {
                 ret.unshift({
                     title: "Remove all unused imports/usings",
-                    edit: WorkspaceEditHelper.create(context, params, fixes)
+                    edit: WorkspaceEditHelper.create(context, params, fixes),
+                    diagnostics: [d]
                 });
             }
         }
@@ -277,11 +279,13 @@ class DiagnosticsManager {
             {
                 title: "Import " + arg.name,
                 edit: WorkspaceEditHelper.create(context, params,
-                    [ImportHelper.createImportsEdit(doc, ImportHelper.getImportPosition(doc), [arg.name], importStyle)])
+                    [ImportHelper.createImportsEdit(doc, ImportHelper.getImportPosition(doc), [arg.name], importStyle)]),
+                diagnostics: [d]
             },
             {
                 title: "Change to " + arg.name,
-                edit: WorkspaceEditHelper.create(context, params, [{range: d.range, newText: arg.name}])
+                edit: WorkspaceEditHelper.create(context, params, [{range: d.range, newText: arg.name}]),
+                diagnostics: [d]
             }
         ];
     }
@@ -289,7 +293,8 @@ class DiagnosticsManager {
     function getTypoActions(params:CodeActionParams, d:Diagnostic, arg):Array<CodeAction> {
         return [{
             title: "Change to " + arg.name,
-            edit: WorkspaceEditHelper.create(context, params, [{range: d.range, newText: arg.name}])
+            edit: WorkspaceEditHelper.create(context, params, [{range: d.range, newText: arg.name}]),
+            diagnostics: [d]
         }];
     }
 
@@ -309,7 +314,8 @@ class DiagnosticsManager {
                 suggestion = suggestion.trim();
                 actions.push({
                     title: "Change to " + suggestion,
-                    edit: WorkspaceEditHelper.create(context, params, [{range: range, newText: suggestion}])
+                    edit: WorkspaceEditHelper.create(context, params, [{range: range, newText: suggestion}]),
+                    diagnostics: [d]
                 });
             }
             return actions;
@@ -323,7 +329,8 @@ class DiagnosticsManager {
             var replacement = text.replace(is, shouldBe);
             actions.push({
                 title: "Change to " + replacement,
-                edit: WorkspaceEditHelper.create(context, params, [{range: d.range, newText: replacement}])
+                edit: WorkspaceEditHelper.create(context, params, [{range: d.range, newText: replacement}]),
+                diagnostics: [d]
             });
         }
 
@@ -335,7 +342,8 @@ class DiagnosticsManager {
                 edit: WorkspaceEditHelper.create(context, params, [
                     {range: d.range.start.toRange(), newText: 'Std.int('},
                     {range: d.range.end.toRange(), newText: ')'}
-                ])
+                ]),
+                diagnostics: [d]
             });
         }
         #end
@@ -348,7 +356,8 @@ class DiagnosticsManager {
         if (range == null) return [];
         return [{
             title: "Remove",
-            edit: WorkspaceEditHelper.create(context, params, [{range: range, newText: ""}])
+            edit: WorkspaceEditHelper.create(context, params, [{range: range, newText: ""}]),
+            diagnostics: [d]
         }];
     }
 
