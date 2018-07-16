@@ -27,14 +27,14 @@ class DocumentFormattingFeature {
                 }
             );
             switch (result) {
-                case SUCCESS(formattedCode):
+                case Success(formattedCode):
                     var fullRange = {
                         start: {line: 0, character: 0},
                         end: {line: doc.lineCount - 1, character: doc.lineAt(doc.lineCount - 1).length}
                     }
                     trace("formatting took " + ((Timer.stamp() - stamp) * 1000) + "ms");
                     resolve([{range: fullRange, newText: formattedCode}]);
-                case FAILURE(errorMessage):
+                case Failure(errorMessage):
                     reject(ResponseError.internalError(errorMessage));
             }
         } catch (e:Any) {
