@@ -179,9 +179,11 @@ class Context {
         sendMethodResults = options.sendMethodResults;
 
         documents = new TextDocuments(protocol);
+        new DocumentSymbolsFeature(this);
         #if debug
         new DocumentFormattingFeature(this);
         #end
+
         return resolve({
             capabilities: {
                 textDocumentSync: TextDocuments.syncKind,
@@ -262,7 +264,6 @@ class Context {
                 gotoDefinition = new GotoDefinitionFeature(this);
                 new GotoTypeDefinitionFeature(this);
                 new FindReferencesFeature(this);
-                new DocumentSymbolsFeature(this);
                 new DeterminePackageFeature(this);
                 new RenameFeature(this);
                 diagnostics = new DiagnosticsManager(this);

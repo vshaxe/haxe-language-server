@@ -1,5 +1,6 @@
 package haxeLanguageServer.features;
 
+import haxe.extern.EitherType;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
@@ -74,8 +75,11 @@ class DocumentSymbolsFeature {
         }, function(error) reject(ResponseError.internalError(error)));
     }
 
-    function onDocumentSymbols(params:DocumentSymbolParams, token:CancellationToken, resolve:Array<SymbolInformation>->Void, reject:ResponseError<NoData>->Void) {
+    function onDocumentSymbols(params:DocumentSymbolParams, token:CancellationToken, resolve:Array<EitherType<SymbolInformation,DocumentSymbol>>->Void, reject:ResponseError<NoData>->Void) {
         var doc = context.documents.get(params.textDocument.uri);
+        var resolver = new haxeLanguageServer.tokentree.DocumentSymbolsResolver(doc, doc.tokenTree);
+        return resolve(resolver.resolve());
+
         var resolver = new DocumentSymbolsResolver(doc.uri);
         try if (doc.parseTree != null) {
             resolver.walkFile(doc.parseTree, Root);
