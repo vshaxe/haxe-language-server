@@ -77,7 +77,7 @@ class DocumentSymbolsFeature {
 
     function onDocumentSymbols(params:DocumentSymbolParams, token:CancellationToken, resolve:Array<EitherType<SymbolInformation,DocumentSymbol>>->Void, reject:ResponseError<NoData>->Void) {
         var doc = context.documents.get(params.textDocument.uri);
-        var resolver = new haxeLanguageServer.tokentree.DocumentSymbolsResolver(doc, doc.tokenTree);
+        var resolver = new haxeLanguageServer.tokentree.DocumentSymbolsResolver(doc);
         return resolve(resolver.resolve());
 
         var resolver = new DocumentSymbolsResolver(doc.uri);
