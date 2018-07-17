@@ -1,7 +1,6 @@
 package haxeLanguageServer.features;
 
 import haxe.Timer;
-import byte.ByteData;
 import tokentreeformatter.Formatter;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
@@ -23,7 +22,7 @@ class DocumentFormattingFeature {
         try {
             var result = formatter.formatFile({
                     name: doc.uri.toFsPath().toString(),
-                    content: ByteData.ofBytes(doc.bytes)
+                    content: doc.bytes
                 }, {
                     tokens: doc.tokens,
                     tokenTree: doc.tokenTree
