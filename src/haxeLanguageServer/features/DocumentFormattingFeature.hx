@@ -23,7 +23,10 @@ class DocumentFormattingFeature {
         try {
             var result = formatter.formatFile({
                     name: doc.uri.toFsPath().toString(),
-                    content: ByteData.ofString(doc.content)
+                    content: ByteData.ofBytes(doc.bytes)
+                }, {
+                    tokens: doc.tokens,
+                    tokenTree: doc.tokenTree
                 }
             );
             switch (result) {
