@@ -1,7 +1,13 @@
 package haxeLanguageServer;
 
+import haxe.io.Bytes;
+import byte.ByteData;
 import haxe.Timer;
 import hxParser.ParseTree;
+import haxeparser.HaxeLexer;
+import haxeparser.Data;
+import tokentree.TokenTreeBuilder;
+import tokentree.TokenTree;
 
 typedef OnTextDocumentChangeListener = TextDocument->Array<TextDocumentContentChangeEvent>->Int->Void;
 
@@ -14,7 +20,13 @@ class TextDocument {
     public var content:String;
     public var lineCount(get,never):Int;
     public var parseTree(get,never):File;
+    public var bytes(get,never):Bytes;
+    public var tokens(get,never):Array<Token>;
+    public var tokenTree(get,never):TokenTree;
     var _parseTree:Null<File>;
+    var _bytes:Bytes;
+    var _tokens:Array<Token>;
+    var _tokenTree:Null<TokenTree>;
     @:allow(haxeLanguageServer.TextDocuments)
     var lineOffsets:Array<Int>;
     var onUpdateListeners:Array<OnTextDocumentChangeListener> = [];
@@ -49,6 +61,9 @@ class TextDocument {
             }
         }
         _parseTree = null;
+        _bytes = null;
+        _tokens = null;
+        _tokenTree = null;
         lineOffsets = null;
     }
 
@@ -168,6 +183,48 @@ class TextDocument {
             _parseTree = createParseTree();
         }
         return _parseTree;
+    }
+
+    function get_bytes():Bytes {
+        if (_bytes == null) {
+            _bytes = Bytes.ofString(content);
+        }
+        return _bytes;
+    }
+
+    function createTokens():Array<Token> {
+        return try {
+            var tokens = [];
+            var lexer = new HaxeLexer(ByteData.ofBytes(bytes));
+            var t:Token = lexer.token(haxeparser.HaxeLexer.tok);
+            while (t.tok != Eof) {
+                tokens.push(t);
+                t = lexer.token(haxeparser.HaxeLexer.tok);
+            }
+            tokens;
+        } catch (e:Any) {
+            trace('failed to create tokens for $uri: $e');
+            null;
+        }
+    }
+
+    function get_tokens():Array<Token> {
+        if (_tokens == null) {
+            _tokens = createTokens();
+        }
+        return _tokens;
+    }
+
+    function get_tokenTree():TokenTree {
+        if (_tokenTree == null) {
+            try {
+                tokentree.TokenStream.MODE = RELAXED;
+                _tokenTree = TokenTreeBuilder.buildTokenTree(createTokens(), ByteData.ofBytes(bytes));
+            } catch (e:Any) {
+                trace('failed to create token tree for $uri: $e');
+            }
+        }
+        return _tokenTree;
     }
 
     #if false
