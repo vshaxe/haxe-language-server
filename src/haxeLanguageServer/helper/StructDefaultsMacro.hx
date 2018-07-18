@@ -25,7 +25,13 @@ class StructDefaultsMacro {
         if (fields == null)
             error("Unable to retrieve struct fields");
 
-        return macro $b {generateAssignments(fields, struct, defaults)};
+        return macro {
+            if ($struct == null){
+                $struct = $defaults;
+            } else {
+                $b {generateAssignments(fields, struct, defaults)};
+            }
+        }
     }
 
     static function generateAssignments(fields:Array<ClassField>, struct:Expr, defaults:Expr):Array<Expr> {
