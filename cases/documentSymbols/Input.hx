@@ -1,9 +1,39 @@
+abstract Abstract<TAbstract>(Int) {
+    inline static var CONSTANT = 5;
+
+    @:op(A * B)
+    public function repeat(rhs:Int):Abstract {
+        return this * rhs;
+    }
+
+    @:op(A + B) function add(rhs:Int):Abstract;
+
+    @:arrayAccess
+    public inline function get(key:Int) {
+        return 0;
+    }
+
+    @:resolve
+    function resolve(name:String) {
+        return null;
+    }
+
+    public function new() {}
+
+    function foo<TAbstractField>() {}
+}
+
 class Class<TClass1, TClass2> {
     inline static var CONSTANT = 5;
 
     var variable:Int;
 
     var property(default,null):Int;
+
+    @:op(A + B)
+    public function fakeAdd(rhs:Int):Int {
+        return 0;
+    }
 
     /**
 
@@ -48,42 +78,12 @@ class Class<TClass1, TClass2> {
         var var maybeIncorrectPos:Int;
     }
 
-    @:op(A + B)
-    public function fakeAdd(rhs:Int):Int {
-        return 0;
-    }
-
     function new() {}
 }
 
 interface Interface<TInterface> {
     var variable:Int;
     function foo<TInterfaceField>():Void;
-}
-
-abstract Abstract<TAbstract>(Int) {
-    inline static var CONSTANT = 5;
-
-    @:op(A * B)
-    public function repeat(rhs:Int):Abstract {
-        return this * rhs;
-    }
-
-    @:op(A + B) function add(rhs:Int):Abstract;
-
-    @:arrayAccess
-    public inline function get(key:Int) {
-        return 0;
-    }
-
-    @:resolve
-    function resolve(name:String) {
-        return null;
-    }
-
-    public function new() {}
-
-    function foo<TAbstractField>() {}
 }
 
 @:enum abstract EnumAbstract(Int) {

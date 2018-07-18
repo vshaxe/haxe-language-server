@@ -74,7 +74,14 @@ class DocumentSymbolsResolver {
                             if (name == null) {
                                 name = "<anonymous function>";
                             }
-                            add(token, if (name == "new") Constructor else Method, name);
+                            var kind:SymbolKind = if (name == "new") {
+                                Constructor;
+                            } else if (token.isOperatorFunction()) {
+                                Operator;
+                            } else {
+                                Method;
+                            }
+                            add(token, kind, name);
                         case VAR(name, _, _, isInline, _, _):
                             add(token, if (isInline) Constant else Variable, name);
                         case PROP(name, _, _, _, _):
