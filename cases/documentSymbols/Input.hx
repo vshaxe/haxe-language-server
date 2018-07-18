@@ -22,7 +22,7 @@ class Class<TClass1, TClass2> {
             }
         }
 
-        inline function foo() {}
+        inline function innerFoo() {}
 
         var f = function() {}
 
@@ -83,6 +83,13 @@ abstract Abstract<TAbstract>(Int) {
 }
 
 @:enum abstract EnumAbstract(Int) {
+    inline static var CONSTANT = 5;
+
+    var Value1 = 0;
+    var Value2 = 1;
+}
+
+enum abstract EnumAbstractHaxe4(Int) {
     inline static var CONSTANT = 5;
 
     var Value1 = 0;

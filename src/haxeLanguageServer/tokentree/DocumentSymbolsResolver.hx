@@ -1,10 +1,10 @@
 package haxeLanguageServer.tokentree;
 
 import tokentree.TokenTree;
+using tokentree.TokenTreeAccessHelper;
 
 class DocumentSymbolsResolver {
     final document:TextDocument;
-    final symbols = new Array<DocumentSymbol>();
 
     public function new(document:TextDocument) {
         this.document = document;
@@ -12,47 +12,65 @@ class DocumentSymbolsResolver {
 
     public function resolve():Array<DocumentSymbol> {
         var previousDepth = 0;
-        var parentStack = [symbols];
-        document.tokenTree.filterCallback((token, depth) -> {
+        var parentPerDepth = [new Array<DocumentSymbol>()];
+
+        document.tokenTree.filterCallback(function(token:TokenTree, depth:Int) {
             if (depth > previousDepth) {
-                parentStack[depth] = parentStack[depth - 1];
+                if (parentPerDepth[depth] == null) {
+                    parentPerDepth[depth] = parentPerDepth[depth - 1];
+                }
             } else if (depth < previousDepth) {
-                while (parentStack.length - 1 > depth) {
-                    parentStack.pop();
+                while (parentPerDepth.length - 1 > depth) {
+                    parentPerDepth.pop();
                 }
             }
 
-            var result = switch (token.tok) {
-                case Const(CIdent(ident)):
-                    function add(kind:SymbolKind) {
-                        var symbol = {
-                            name: ident,
-                            detail: "",
-                            kind: kind,
-                            range: positionToRange(token.parent.getPos()),
-                            selectionRange: positionToRange(token.pos),
-                            children: []
-                        };
-                        parentStack[depth].push(symbol);
-                        parentStack[depth] = symbol.children;
+            function add(kind:SymbolKind) {
+                var identToken = token.access().firstChild().token;
+                var name = null;
+                if (identToken == null) {
+                    identToken = token;
+                    name = '<${identToken.tok}>';
+                } else {
+                    name = switch (identToken.tok) {
+                        case Const(CIdent(ident)): ident;
+                        case _: null;
                     }
-                    switch (token.parent.tok) {
-                        case Kwd(KwdClass):
-                            add(Class);
-                        case Kwd(KwdFunction):
-                            add(Method);
-                        case Kwd(KwdVar):
-                            add(Field);
-                        case _:
-                    }
-                    GO_DEEPER;
+                }
+                var symbol = {
+                    name: name,
+                    detail: "",
+                    kind: kind,
+                    range: positionToRange(token.getPos()),
+                    selectionRange: positionToRange(identToken.pos),
+                    children: []
+                };
+                parentPerDepth[depth].push(symbol);
+                parentPerDepth[depth + 1] = symbol.children;
+            }
+
+            switch (token.tok) {
+                case Kwd(KwdClass):
+                    add(Class);
+                case Kwd(KwdAbstract):
+                    add(Class);
+                case Kwd(KwdInterface):
+                    add(Interface);
+                case Kwd(KwdTypedef):
+                    add(Struct);
+                case Kwd(KwdEnum):
+                    add(Enum);
+
+                case Kwd(KwdFunction):
+                    add(Method);
+                case Kwd(KwdVar):
+                    add(Field);
                 case _:
-                    GO_DEEPER;
             }
             previousDepth = depth;
-            result;
+            return GO_DEEPER;
         });
-        return symbols;
+        return parentPerDepth[0];
     }
 
     function positionToRange(pos:haxe.macro.Expr.Position):Range {
