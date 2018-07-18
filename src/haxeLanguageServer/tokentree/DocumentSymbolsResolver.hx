@@ -27,7 +27,7 @@ class DocumentSymbolsResolver {
                 }
             }
 
-            function add(kind:SymbolKind, ?name:String) {
+            function add(token:TokenTree, kind:SymbolKind, ?name:String) {
                 if (name == null) {
                     name = token.getName();
                 }
@@ -56,16 +56,16 @@ class DocumentSymbolsResolver {
                     if (name == null && token.isTypeMacroClass()) {
                         name = "<macro class>";
                     }
-                    add(Class, name);
+                    add(token, Class, name);
                 case Kwd(KwdInterface):
-                    add(Interface);
+                    add(token, Interface);
                 case Kwd(KwdAbstract):
-                    add(if (token.isTypeEnumAbstract()) Enum else Class);
+                    add(token, if (token.isTypeEnumAbstract()) Enum else Class);
                 case Kwd(KwdTypedef):
-                    add(if (token.isTypeStructure()) Struct else Interface);
+                    add(token, if (token.isTypeStructure()) Struct else Interface);
                 case Kwd(KwdEnum):
                     if (token.isTypeEnum()) {
-                        add(Enum);
+                        add(token, Enum);
                     }
 
                 case Kwd(KwdFunction), Kwd(KwdVar):
@@ -74,12 +74,17 @@ class DocumentSymbolsResolver {
                             if (name == null) {
                                 name = "<anonymous function>";
                             }
-                            add(if (name == "new") Constructor else Method, name);
+                            add(token, if (name == "new") Constructor else Method, name);
                         case VAR(name, _, _, isInline, _, _):
-                            add(if (isInline) Constant else Variable, name);
+                            add(token, if (isInline) Constant else Variable, name);
                         case PROP(name, _, _, _, _):
-                            add(Property, name);
+                            add(token, Property, name);
                         case UNKNOWN:
+                    }
+                case Kwd(KwdFor), Kwd(KwdCatch):
+                    var ident = token.access().firstChild().is(POpen).firstChild().isCIdent().token;
+                    if (ident != null) {
+                        add(ident, Variable);
                     }
                 case _:
             }
