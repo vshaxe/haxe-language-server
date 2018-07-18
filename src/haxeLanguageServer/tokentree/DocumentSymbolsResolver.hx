@@ -3,6 +3,7 @@ package haxeLanguageServer.tokentree;
 import tokentree.TokenTree;
 using tokentree.TokenTreeAccessHelper;
 using tokentree.utils.TokenTreeCheckUtils;
+using tokentree.utils.FieldUtils;
 
 class DocumentSymbolsResolver {
     final document:TextDocument;
@@ -26,24 +27,20 @@ class DocumentSymbolsResolver {
                 }
             }
 
-            function add(kind:SymbolKind) {
-                var identToken = token.access().firstChild().token;
-                var name = null;
-                if (identToken == null) {
-                    identToken = token;
-                    name = '<${identToken.tok}>';
-                } else {
-                    name = switch (identToken.tok) {
-                        case Const(CIdent(ident)): ident;
-                        case _: null;
-                    }
+            function add(kind:SymbolKind, ?name:String) {
+                if (name == null) {
+                    name = token.getName();
                 }
+                if (name == null) {
+                    name = "";
+                }
+                var selectedToken = token.access().firstChild().or(token);
                 var symbol = {
                     name: name,
                     detail: "",
                     kind: kind,
                     range: positionToRange(token.getPos()),
-                    selectionRange: positionToRange(identToken.pos),
+                    selectionRange: positionToRange(selectedToken.pos),
                     children: []
                 };
                 parentPerDepth[depth].push(symbol);
@@ -67,10 +64,16 @@ class DocumentSymbolsResolver {
                         add(Enum);
                     }
 
-                case Kwd(KwdFunction):
-                    add(Method);
-                case Kwd(KwdVar):
-                    add(Field);
+                case Kwd(KwdFunction), Kwd(KwdVar):
+                    switch (token.getFieldType(PRIVATE)) {
+                        case FUNCTION(name, _, _, _, _, _, _):
+                            add(if (name == "new") Constructor else Method, name);
+                        case VAR(name, _, _, isInline, _, _):
+                            add(if (isInline) Constant else Variable, name);
+                        case PROP(name, _, _, _, _):
+                            add(Property, name);
+                        case UNKNOWN:
+                    }
                 case _:
             }
 

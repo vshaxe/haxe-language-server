@@ -38,6 +38,10 @@ class Class<TClass1, TClass2> {
             var macroField:Int;
         }
 
+        macro class {
+            var macroField:Int;
+        }
+
         // inserted _ name shouldn't appear
         var
         // and also shouldn't affect positions
