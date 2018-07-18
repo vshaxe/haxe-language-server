@@ -108,7 +108,7 @@ typedef TypedefShortFields = {
     b:Bool
 }
 
-typedef TypedefComplexFields = {
+typedef TypedefComplexFields<Test> = {
     @:optional var a:Int;
     var b:Bool;
 }

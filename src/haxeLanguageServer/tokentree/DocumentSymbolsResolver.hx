@@ -52,23 +52,20 @@ class DocumentSymbolsResolver {
 
             switch (token.tok) {
                 case At:
-                    // @:enum has Kwd(KwdEnum), make sure to ignore that
-                    return SKIP_SUBTREE;
+                    return SKIP_SUBTREE; // @:enum has Kwd(KwdEnum), make sure to ignore that
 
                 case Kwd(KwdClass):
                     add(Class);
-                case Kwd(KwdAbstract):
-                    if (token.isTypeEnumAbstract()) {
-                        add(Enum);
-                    } else {
-                        add(Class);
-                    }
                 case Kwd(KwdInterface):
                     add(Interface);
+                case Kwd(KwdAbstract):
+                    add(if (token.isTypeEnumAbstract()) Enum else Class);
                 case Kwd(KwdTypedef):
-                    add(Struct);
-                case Kwd(KwdEnum) if (!token.isTypeEnumAbstract()):
-                    add(Enum);
+                    add(if (token.isTypeStructure()) Struct else Interface);
+                case Kwd(KwdEnum):
+                    if (!token.isTypeEnumAbstract()) {
+                        add(Enum);
+                    }
 
                 case Kwd(KwdFunction):
                     add(Method);
