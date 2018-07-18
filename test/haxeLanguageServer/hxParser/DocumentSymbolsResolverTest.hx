@@ -4,7 +4,7 @@ import haxe.Json;
 import haxeLanguageServer.TextDocument;
 
 class DocumentSymbolsResolverTest extends TestCaseBase {
-    function test() {
+    /* function test() {
         var basePath = "cases/documentSymbols";
         var inputPath = '$basePath/Input.hx';
 
@@ -20,6 +20,6 @@ class DocumentSymbolsResolverTest extends TestCaseBase {
         var expected = stringify(Json.parse(sys.io.File.getContent('$basePath/Expected.json')));
 
         // use "Compare Active File With..." and select Actual.json and Expected.json for debugging
-        // assertTrue(actual == expected);
-    }
+        assertTrue(actual == expected);
+    } */
 }

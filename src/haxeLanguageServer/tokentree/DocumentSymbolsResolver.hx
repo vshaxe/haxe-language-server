@@ -2,6 +2,7 @@ package haxeLanguageServer.tokentree;
 
 import tokentree.TokenTree;
 using tokentree.TokenTreeAccessHelper;
+using tokentree.utils.TokenTreeCheckUtils;
 
 class DocumentSymbolsResolver {
     final document:TextDocument;
@@ -50,15 +51,23 @@ class DocumentSymbolsResolver {
             }
 
             switch (token.tok) {
+                case At:
+                    // @:enum has Kwd(KwdEnum), make sure to ignore that
+                    return SKIP_SUBTREE;
+
                 case Kwd(KwdClass):
                     add(Class);
                 case Kwd(KwdAbstract):
-                    add(Class);
+                    if (token.isTypeEnumAbstract()) {
+                        add(Enum);
+                    } else {
+                        add(Class);
+                    }
                 case Kwd(KwdInterface):
                     add(Interface);
                 case Kwd(KwdTypedef):
                     add(Struct);
-                case Kwd(KwdEnum):
+                case Kwd(KwdEnum) if (!token.isTypeEnumAbstract()):
                     add(Enum);
 
                 case Kwd(KwdFunction):
@@ -67,6 +76,7 @@ class DocumentSymbolsResolver {
                     add(Field);
                 case _:
             }
+
             previousDepth = depth;
             return GO_DEEPER;
         });
