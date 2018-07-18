@@ -35,6 +35,9 @@ class DocumentSymbolsResolver {
                     name = "";
                 }
                 var selectedToken = token.access().firstChild().or(token);
+                if (selectedToken.inserted) {
+                    return; // don't want to show `autoInsert` vars and similar
+                }
                 var symbol = {
                     name: name,
                     detail: "",
@@ -49,7 +52,11 @@ class DocumentSymbolsResolver {
 
             switch (token.tok) {
                 case Kwd(KwdClass):
-                    add(Class);
+                    var name = token.getName();
+                    if (name == null && token.isTypeMacroClass()) {
+                        name = "<macro class>";
+                    }
+                    add(Class, name);
                 case Kwd(KwdInterface):
                     add(Interface);
                 case Kwd(KwdAbstract):
@@ -64,6 +71,9 @@ class DocumentSymbolsResolver {
                 case Kwd(KwdFunction), Kwd(KwdVar):
                     switch (token.getFieldType(PRIVATE)) {
                         case FUNCTION(name, _, _, _, _, _, _):
+                            if (name == null) {
+                                name = "<anonymous function>";
+                            }
                             add(if (name == "new") Constructor else Method, name);
                         case VAR(name, _, _, isInline, _, _):
                             add(if (isInline) Constant else Variable, name);
