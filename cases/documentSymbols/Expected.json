@@ -1,1208 +1,1842 @@
 [
     {
+        "name": "Abstract",
+        "detail": "",
+        "kind": 5,
+        "range": {
+            "start": {
+                "line": 0,
+                "character": 0
+            },
+            "end": {
+                "line": 23,
+                "character": 1
+            }
+        },
+        "selectionRange": {
+            "start": {
+                "line": 0,
+                "character": 9
+            },
+            "end": {
+                "line": 0,
+                "character": 17
+            }
+        },
+        "children": [
+            {
+                "name": "CONSTANT",
+                "detail": "",
+                "kind": 14,
+                "range": {
+                    "start": {
+                        "line": 1,
+                        "character": 4
+                    },
+                    "end": {
+                        "line": 1,
+                        "character": 35
+                    }
+                },
+                "selectionRange": {
+                    "start": {
+                        "line": 1,
+                        "character": 22
+                    },
+                    "end": {
+                        "line": 1,
+                        "character": 30
+                    }
+                },
+                "children": []
+            },
+            {
+                "name": "repeat",
+                "detail": "",
+                "kind": 6,
+                "range": {
+                    "start": {
+                        "line": 3,
+                        "character": 4
+                    },
+                    "end": {
+                        "line": 6,
+                        "character": 5
+                    }
+                },
+                "selectionRange": {
+                    "start": {
+                        "line": 4,
+                        "character": 20
+                    },
+                    "end": {
+                        "line": 4,
+                        "character": 26
+                    }
+                },
+                "children": []
+            },
+            {
+                "name": "add",
+                "detail": "",
+                "kind": 6,
+                "range": {
+                    "start": {
+                        "line": 8,
+                        "character": 4
+                    },
+                    "end": {
+                        "line": 8,
+                        "character": 47
+                    }
+                },
+                "selectionRange": {
+                    "start": {
+                        "line": 8,
+                        "character": 25
+                    },
+                    "end": {
+                        "line": 8,
+                        "character": 28
+                    }
+                },
+                "children": []
+            },
+            {
+                "name": "get",
+                "detail": "",
+                "kind": 6,
+                "range": {
+                    "start": {
+                        "line": 10,
+                        "character": 4
+                    },
+                    "end": {
+                        "line": 13,
+                        "character": 5
+                    }
+                },
+                "selectionRange": {
+                    "start": {
+                        "line": 11,
+                        "character": 27
+                    },
+                    "end": {
+                        "line": 11,
+                        "character": 30
+                    }
+                },
+                "children": []
+            },
+            {
+                "name": "resolve",
+                "detail": "",
+                "kind": 6,
+                "range": {
+                    "start": {
+                        "line": 15,
+                        "character": 4
+                    },
+                    "end": {
+                        "line": 18,
+                        "character": 5
+                    }
+                },
+                "selectionRange": {
+                    "start": {
+                        "line": 16,
+                        "character": 13
+                    },
+                    "end": {
+                        "line": 16,
+                        "character": 20
+                    }
+                },
+                "children": []
+            },
+            {
+                "name": "new",
+                "detail": "",
+                "kind": 9,
+                "range": {
+                    "start": {
+                        "line": 20,
+                        "character": 4
+                    },
+                    "end": {
+                        "line": 20,
+                        "character": 28
+                    }
+                },
+                "selectionRange": {
+                    "start": {
+                        "line": 20,
+                        "character": 20
+                    },
+                    "end": {
+                        "line": 20,
+                        "character": 23
+                    }
+                },
+                "children": []
+            },
+            {
+                "name": "foo",
+                "detail": "",
+                "kind": 6,
+                "range": {
+                    "start": {
+                        "line": 22,
+                        "character": 4
+                    },
+                    "end": {
+                        "line": 22,
+                        "character": 37
+                    }
+                },
+                "selectionRange": {
+                    "start": {
+                        "line": 22,
+                        "character": 13
+                    },
+                    "end": {
+                        "line": 22,
+                        "character": 16
+                    }
+                },
+                "children": []
+            }
+        ]
+    },
+    {
         "name": "Class",
+        "detail": "",
         "kind": 5,
-        "location": {
-            "uri": "file:///cases/documentSymbols/Input.hx",
-            "range": {
-                "start": {
-                    "line": 0,
-                    "character": 6
-                },
-                "end": {
-                    "line": 0,
-                    "character": 11
-                }
+        "range": {
+            "start": {
+                "line": 25,
+                "character": 0
+            },
+            "end": {
+                "line": 94,
+                "character": 1
             }
         },
-        "containerName": ""
-    },
-    {
-        "name": "TClass1",
-        "kind": 26,
-        "location": {
-            "uri": "file:///cases/documentSymbols/Input.hx",
-            "range": {
-                "start": {
-                    "line": 0,
-                    "character": 12
-                },
-                "end": {
-                    "line": 0,
-                    "character": 19
-                }
+        "selectionRange": {
+            "start": {
+                "line": 25,
+                "character": 6
+            },
+            "end": {
+                "line": 25,
+                "character": 11
             }
         },
-        "containerName": "Class"
-    },
-    {
-        "name": "TClass2",
-        "kind": 26,
-        "location": {
-            "uri": "file:///cases/documentSymbols/Input.hx",
-            "range": {
-                "start": {
-                    "line": 0,
-                    "character": 21
+        "children": [
+            {
+                "name": "CONSTANT",
+                "detail": "",
+                "kind": 14,
+                "range": {
+                    "start": {
+                        "line": 26,
+                        "character": 4
+                    },
+                    "end": {
+                        "line": 26,
+                        "character": 35
+                    }
                 },
-                "end": {
-                    "line": 0,
-                    "character": 28
-                }
-            }
-        },
-        "containerName": "Class"
-    },
-    {
-        "name": "CONSTANT",
-        "kind": 14,
-        "location": {
-            "uri": "file:///cases/documentSymbols/Input.hx",
-            "range": {
-                "start": {
-                    "line": 1,
-                    "character": 22
+                "selectionRange": {
+                    "start": {
+                        "line": 26,
+                        "character": 22
+                    },
+                    "end": {
+                        "line": 26,
+                        "character": 30
+                    }
                 },
-                "end": {
-                    "line": 1,
-                    "character": 30
-                }
-            }
-        },
-        "containerName": "Class"
-    },
-    {
-        "name": "variable",
-        "kind": 8,
-        "location": {
-            "uri": "file:///cases/documentSymbols/Input.hx",
-            "range": {
-                "start": {
-                    "line": 3,
-                    "character": 8
+                "children": []
+            },
+            {
+                "name": "variable",
+                "detail": "",
+                "kind": 8,
+                "range": {
+                    "start": {
+                        "line": 28,
+                        "character": 4
+                    },
+                    "end": {
+                        "line": 28,
+                        "character": 21
+                    }
                 },
-                "end": {
-                    "line": 3,
-                    "character": 16
-                }
-            }
-        },
-        "containerName": "Class"
-    },
-    {
-        "name": "property",
-        "kind": 7,
-        "location": {
-            "uri": "file:///cases/documentSymbols/Input.hx",
-            "range": {
-                "start": {
-                    "line": 5,
-                    "character": 8
+                "selectionRange": {
+                    "start": {
+                        "line": 28,
+                        "character": 8
+                    },
+                    "end": {
+                        "line": 28,
+                        "character": 16
+                    }
                 },
-                "end": {
-                    "line": 5,
-                    "character": 16
-                }
-            }
-        },
-        "containerName": "Class"
-    },
-    {
-        "name": "foo",
-        "kind": 12,
-        "location": {
-            "uri": "file:///cases/documentSymbols/Input.hx",
-            "range": {
-                "start": {
-                    "line": 12,
-                    "character": 13
+                "children": []
+            },
+            {
+                "name": "variableWithBlockInit",
+                "detail": "",
+                "kind": 8,
+                "range": {
+                    "start": {
+                        "line": 30,
+                        "character": 4
+                    },
+                    "end": {
+                        "line": 34,
+                        "character": 6
+                    }
                 },
-                "end": {
-                    "line": 12,
-                    "character": 16
-                }
-            }
-        },
-        "containerName": "Class"
-    },
-    {
-        "name": "TClassField",
-        "kind": 26,
-        "location": {
-            "uri": "file:///cases/documentSymbols/Input.hx",
-            "range": {
-                "start": {
-                    "line": 12,
-                    "character": 17
+                "selectionRange": {
+                    "start": {
+                        "line": 30,
+                        "character": 8
+                    },
+                    "end": {
+                        "line": 30,
+                        "character": 29
+                    }
                 },
-                "end": {
-                    "line": 12,
-                    "character": 28
-                }
-            }
-        },
-        "containerName": "Class.foo"
-    },
-    {
-        "name": "param1",
-        "kind": 13,
-        "location": {
-            "uri": "file:///cases/documentSymbols/Input.hx",
-            "range": {
-                "start": {
-                    "line": 12,
-                    "character": 30
+                "children": [
+                    {
+                        "name": "foo",
+                        "detail": "",
+                        "kind": 6,
+                        "range": {
+                            "start": {
+                                "line": 31,
+                                "character": 8
+                            },
+                            "end": {
+                                "line": 31,
+                                "character": 36
+                            }
+                        },
+                        "selectionRange": {
+                            "start": {
+                                "line": 31,
+                                "character": 17
+                            },
+                            "end": {
+                                "line": 31,
+                                "character": 20
+                            }
+                        },
+                        "children": []
+                    },
+                    {
+                        "name": "bar",
+                        "detail": "",
+                        "kind": 13,
+                        "range": {
+                            "start": {
+                                "line": 32,
+                                "character": 12
+                            },
+                            "end": {
+                                "line": 32,
+                                "character": 24
+                            }
+                        },
+                        "selectionRange": {
+                            "start": {
+                                "line": 32,
+                                "character": 16
+                            },
+                            "end": {
+                                "line": 32,
+                                "character": 17
+                            }
+                        },
+                        "children": []
+                    }
+                ]
+            },
+            {
+                "name": "property",
+                "detail": "",
+                "kind": 7,
+                "range": {
+                    "start": {
+                        "line": 36,
+                        "character": 4
+                    },
+                    "end": {
+                        "line": 36,
+                        "character": 35
+                    }
                 },
-                "end": {
-                    "line": 12,
-                    "character": 36
-                }
-            }
-        },
-        "containerName": "Class.foo"
-    },
-    {
-        "name": "param2",
-        "kind": 13,
-        "location": {
-            "uri": "file:///cases/documentSymbols/Input.hx",
-            "range": {
-                "start": {
-                    "line": 12,
-                    "character": 42
+                "selectionRange": {
+                    "start": {
+                        "line": 36,
+                        "character": 8
+                    },
+                    "end": {
+                        "line": 36,
+                        "character": 16
+                    }
                 },
-                "end": {
-                    "line": 12,
-                    "character": 48
-                }
-            }
-        },
-        "containerName": "Class.foo"
-    },
-    {
-        "name": "foo2",
-        "kind": 12,
-        "location": {
-            "uri": "file:///cases/documentSymbols/Input.hx",
-            "range": {
-                "start": {
-                    "line": 18,
-                    "character": 17
+                "children": []
+            },
+            {
+                "name": "finaleVariable",
+                "detail": "",
+                "kind": 8,
+                "range": {
+                    "start": {
+                        "line": 38,
+                        "character": 4
+                    },
+                    "end": {
+                        "line": 38,
+                        "character": 29
+                    }
                 },
-                "end": {
-                    "line": 18,
-                    "character": 21
-                }
-            }
-        },
-        "containerName": "Class.foo"
-    },
-    {
-        "name": "TLocalFunction",
-        "kind": 26,
-        "location": {
-            "uri": "file:///cases/documentSymbols/Input.hx",
-            "range": {
-                "start": {
-                    "line": 18,
-                    "character": 22
+                "selectionRange": {
+                    "start": {
+                        "line": 38,
+                        "character": 10
+                    },
+                    "end": {
+                        "line": 38,
+                        "character": 24
+                    }
                 },
-                "end": {
-                    "line": 18,
-                    "character": 36
-                }
-            }
-        },
-        "containerName": "Class.foo.foo2"
-    },
-    {
-        "name": "foo3",
-        "kind": 12,
-        "location": {
-            "uri": "file:///cases/documentSymbols/Input.hx",
-            "range": {
-                "start": {
-                    "line": 19,
-                    "character": 21
+                "children": []
+            },
+            {
+                "name": "finalMethod",
+                "detail": "",
+                "kind": 6,
+                "range": {
+                    "start": {
+                        "line": 40,
+                        "character": 10
+                    },
+                    "end": {
+                        "line": 40,
+                        "character": 40
+                    }
                 },
-                "end": {
-                    "line": 19,
-                    "character": 25
-                }
-            }
-        },
-        "containerName": "Class.foo.foo2"
-    },
-    {
-        "name": "foo4",
-        "kind": 13,
-        "location": {
-            "uri": "file:///cases/documentSymbols/Input.hx",
-            "range": {
-                "start": {
-                    "line": 20,
-                    "character": 20
+                "selectionRange": {
+                    "start": {
+                        "line": 40,
+                        "character": 19
+                    },
+                    "end": {
+                        "line": 40,
+                        "character": 30
+                    }
                 },
-                "end": {
-                    "line": 20,
-                    "character": 24
-                }
-            }
-        },
-        "containerName": "Class.foo.foo2.foo3"
-    },
-    {
-        "name": "foo",
-        "kind": 12,
-        "location": {
-            "uri": "file:///cases/documentSymbols/Input.hx",
-            "range": {
-                "start": {
-                    "line": 24,
-                    "character": 24
+                "children": []
+            },
+            {
+                "name": "fakeAdd",
+                "detail": "",
+                "kind": 6,
+                "range": {
+                    "start": {
+                        "line": 42,
+                        "character": 4
+                    },
+                    "end": {
+                        "line": 45,
+                        "character": 5
+                    }
                 },
-                "end": {
-                    "line": 24,
-                    "character": 27
-                }
-            }
-        },
-        "containerName": "Class.foo"
-    },
-    {
-        "name": "f",
-        "kind": 13,
-        "location": {
-            "uri": "file:///cases/documentSymbols/Input.hx",
-            "range": {
-                "start": {
-                    "line": 26,
-                    "character": 12
+                "selectionRange": {
+                    "start": {
+                        "line": 43,
+                        "character": 20
+                    },
+                    "end": {
+                        "line": 43,
+                        "character": 27
+                    }
                 },
-                "end": {
-                    "line": 26,
-                    "character": 13
-                }
-            }
-        },
-        "containerName": "Class.foo"
-    },
-    {
-        "name": "a",
-        "kind": 13,
-        "location": {
-            "uri": "file:///cases/documentSymbols/Input.hx",
-            "range": {
-                "start": {
-                    "line": 28,
-                    "character": 12
+                "children": []
+            },
+            {
+                "name": "foo",
+                "detail": "",
+                "kind": 6,
+                "range": {
+                    "start": {
+                        "line": 52,
+                        "character": 4
+                    },
+                    "end": {
+                        "line": 91,
+                        "character": 5
+                    }
                 },
-                "end": {
-                    "line": 28,
-                    "character": 13
-                }
-            }
-        },
-        "containerName": "Class.foo"
-    },
-    {
-        "name": "b",
-        "kind": 13,
-        "location": {
-            "uri": "file:///cases/documentSymbols/Input.hx",
-            "range": {
-                "start": {
-                    "line": 28,
-                    "character": 15
+                "selectionRange": {
+                    "start": {
+                        "line": 52,
+                        "character": 13
+                    },
+                    "end": {
+                        "line": 52,
+                        "character": 16
+                    }
                 },
-                "end": {
-                    "line": 28,
-                    "character": 16
-                }
-            }
-        },
-        "containerName": "Class.foo"
-    },
-    {
-        "name": "c",
-        "kind": 13,
-        "location": {
-            "uri": "file:///cases/documentSymbols/Input.hx",
-            "range": {
-                "start": {
-                    "line": 28,
-                    "character": 18
+                "children": [
+                    {
+                        "name": "foo2",
+                        "detail": "",
+                        "kind": 6,
+                        "range": {
+                            "start": {
+                                "line": 58,
+                                "character": 8
+                            },
+                            "end": {
+                                "line": 62,
+                                "character": 9
+                            }
+                        },
+                        "selectionRange": {
+                            "start": {
+                                "line": 58,
+                                "character": 17
+                            },
+                            "end": {
+                                "line": 58,
+                                "character": 21
+                            }
+                        },
+                        "children": [
+                            {
+                                "name": "foo3",
+                                "detail": "",
+                                "kind": 6,
+                                "range": {
+                                    "start": {
+                                        "line": 59,
+                                        "character": 12
+                                    },
+                                    "end": {
+                                        "line": 61,
+                                        "character": 13
+                                    }
+                                },
+                                "selectionRange": {
+                                    "start": {
+                                        "line": 59,
+                                        "character": 21
+                                    },
+                                    "end": {
+                                        "line": 59,
+                                        "character": 25
+                                    }
+                                },
+                                "children": [
+                                    {
+                                        "name": "foo4",
+                                        "detail": "",
+                                        "kind": 13,
+                                        "range": {
+                                            "start": {
+                                                "line": 60,
+                                                "character": 20
+                                            },
+                                            "end": {
+                                                "line": 60,
+                                                "character": 29
+                                            }
+                                        },
+                                        "selectionRange": {
+                                            "start": {
+                                                "line": 60,
+                                                "character": 24
+                                            },
+                                            "end": {
+                                                "line": 60,
+                                                "character": 25
+                                            }
+                                        },
+                                        "children": []
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "innerFoo",
+                        "detail": "",
+                        "kind": 6,
+                        "range": {
+                            "start": {
+                                "line": 64,
+                                "character": 15
+                            },
+                            "end": {
+                                "line": 64,
+                                "character": 37
+                            }
+                        },
+                        "selectionRange": {
+                            "start": {
+                                "line": 64,
+                                "character": 24
+                            },
+                            "end": {
+                                "line": 64,
+                                "character": 32
+                            }
+                        },
+                        "children": []
+                    },
+                    {
+                        "name": "f",
+                        "detail": "",
+                        "kind": 13,
+                        "range": {
+                            "start": {
+                                "line": 66,
+                                "character": 12
+                            },
+                            "end": {
+                                "line": 66,
+                                "character": 29
+                            }
+                        },
+                        "selectionRange": {
+                            "start": {
+                                "line": 66,
+                                "character": 14
+                            },
+                            "end": {
+                                "line": 66,
+                                "character": 15
+                            }
+                        },
+                        "children": [
+                            {
+                                "name": "<anonymous function>",
+                                "detail": "",
+                                "kind": 6,
+                                "range": {
+                                    "start": {
+                                        "line": 66,
+                                        "character": 16
+                                    },
+                                    "end": {
+                                        "line": 66,
+                                        "character": 29
+                                    }
+                                },
+                                "selectionRange": {
+                                    "start": {
+                                        "line": 66,
+                                        "character": 24
+                                    },
+                                    "end": {
+                                        "line": 66,
+                                        "character": 25
+                                    }
+                                },
+                                "children": []
+                            }
+                        ]
+                    },
+                    {
+                        "name": "a",
+                        "detail": "",
+                        "kind": 13,
+                        "range": {
+                            "start": {
+                                "line": 68,
+                                "character": 12
+                            },
+                            "end": {
+                                "line": 68,
+                                "character": 14
+                            }
+                        },
+                        "selectionRange": {
+                            "start": {
+                                "line": 68,
+                                "character": 13
+                            },
+                            "end": {
+                                "line": 68,
+                                "character": 14
+                            }
+                        },
+                        "children": []
+                    },
+                    {
+                        "name": "b",
+                        "detail": "",
+                        "kind": 13,
+                        "range": {
+                            "start": {
+                                "line": 68,
+                                "character": 15
+                            },
+                            "end": {
+                                "line": 68,
+                                "character": 17
+                            }
+                        },
+                        "selectionRange": {
+                            "start": {
+                                "line": 68,
+                                "character": 16
+                            },
+                            "end": {
+                                "line": 68,
+                                "character": 17
+                            }
+                        },
+                        "children": []
+                    },
+                    {
+                        "name": "c",
+                        "detail": "",
+                        "kind": 13,
+                        "range": {
+                            "start": {
+                                "line": 68,
+                                "character": 18
+                            },
+                            "end": {
+                                "line": 71,
+                                "character": 10
+                            }
+                        },
+                        "selectionRange": {
+                            "start": {
+                                "line": 68,
+                                "character": 20
+                            },
+                            "end": {
+                                "line": 68,
+                                "character": 21
+                            }
+                        },
+                        "children": [
+                            {
+                                "name": "f",
+                                "detail": "",
+                                "kind": 13,
+                                "range": {
+                                    "start": {
+                                        "line": 69,
+                                        "character": 16
+                                    },
+                                    "end": {
+                                        "line": 69,
+                                        "character": 28
+                                    }
+                                },
+                                "selectionRange": {
+                                    "start": {
+                                        "line": 69,
+                                        "character": 17
+                                    },
+                                    "end": {
+                                        "line": 69,
+                                        "character": 18
+                                    }
+                                },
+                                "children": []
+                            }
+                        ]
+                    },
+                    {
+                        "name": "array",
+                        "detail": "",
+                        "kind": 13,
+                        "range": {
+                            "start": {
+                                "line": 73,
+                                "character": 12
+                            },
+                            "end": {
+                                "line": 73,
+                                "character": 23
+                            }
+                        },
+                        "selectionRange": {
+                            "start": {
+                                "line": 73,
+                                "character": 18
+                            },
+                            "end": {
+                                "line": 73,
+                                "character": 19
+                            }
+                        },
+                        "children": []
+                    },
+                    {
+                        "name": "element",
+                        "detail": "",
+                        "kind": 13,
+                        "range": {
+                            "start": {
+                                "line": 74,
+                                "character": 13
+                            },
+                            "end": {
+                                "line": 74,
+                                "character": 29
+                            }
+                        },
+                        "selectionRange": {
+                            "start": {
+                                "line": 74,
+                                "character": 21
+                            },
+                            "end": {
+                                "line": 74,
+                                "character": 23
+                            }
+                        },
+                        "children": []
+                    },
+                    {
+                        "name": "exception",
+                        "detail": "",
+                        "kind": 13,
+                        "range": {
+                            "start": {
+                                "line": 77,
+                                "character": 15
+                            },
+                            "end": {
+                                "line": 77,
+                                "character": 28
+                            }
+                        },
+                        "selectionRange": {
+                            "start": {
+                                "line": 77,
+                                "character": 24
+                            },
+                            "end": {
+                                "line": 77,
+                                "character": 25
+                            }
+                        },
+                        "children": []
+                    },
+                    {
+                        "name": "MacroClass",
+                        "detail": "",
+                        "kind": 5,
+                        "range": {
+                            "start": {
+                                "line": 79,
+                                "character": 14
+                            },
+                            "end": {
+                                "line": 81,
+                                "character": 9
+                            }
+                        },
+                        "selectionRange": {
+                            "start": {
+                                "line": 79,
+                                "character": 20
+                            },
+                            "end": {
+                                "line": 79,
+                                "character": 30
+                            }
+                        },
+                        "children": [
+                            {
+                                "name": "macroField",
+                                "detail": "",
+                                "kind": 8,
+                                "range": {
+                                    "start": {
+                                        "line": 80,
+                                        "character": 12
+                                    },
+                                    "end": {
+                                        "line": 80,
+                                        "character": 31
+                                    }
+                                },
+                                "selectionRange": {
+                                    "start": {
+                                        "line": 80,
+                                        "character": 16
+                                    },
+                                    "end": {
+                                        "line": 80,
+                                        "character": 26
+                                    }
+                                },
+                                "children": []
+                            }
+                        ]
+                    },
+                    {
+                        "name": "<macro class>",
+                        "detail": "",
+                        "kind": 5,
+                        "range": {
+                            "start": {
+                                "line": 83,
+                                "character": 14
+                            },
+                            "end": {
+                                "line": 85,
+                                "character": 9
+                            }
+                        },
+                        "selectionRange": {
+                            "start": {
+                                "line": 83,
+                                "character": 20
+                            },
+                            "end": {
+                                "line": 83,
+                                "character": 21
+                            }
+                        },
+                        "children": [
+                            {
+                                "name": "macroField",
+                                "detail": "",
+                                "kind": 8,
+                                "range": {
+                                    "start": {
+                                        "line": 84,
+                                        "character": 12
+                                    },
+                                    "end": {
+                                        "line": 84,
+                                        "character": 31
+                                    }
+                                },
+                                "selectionRange": {
+                                    "start": {
+                                        "line": 84,
+                                        "character": 16
+                                    },
+                                    "end": {
+                                        "line": 84,
+                                        "character": 26
+                                    }
+                                },
+                                "children": []
+                            }
+                        ]
+                    },
+                    {
+                        "name": "maybeIncorrectPos",
+                        "detail": "",
+                        "kind": 13,
+                        "range": {
+                            "start": {
+                                "line": 90,
+                                "character": 16
+                            },
+                            "end": {
+                                "line": 90,
+                                "character": 38
+                            }
+                        },
+                        "selectionRange": {
+                            "start": {
+                                "line": 90,
+                                "character": 33
+                            },
+                            "end": {
+                                "line": 90,
+                                "character": 34
+                            }
+                        },
+                        "children": []
+                    }
+                ]
+            },
+            {
+                "name": "new",
+                "detail": "",
+                "kind": 9,
+                "range": {
+                    "start": {
+                        "line": 93,
+                        "character": 4
+                    },
+                    "end": {
+                        "line": 93,
+                        "character": 21
+                    }
                 },
-                "end": {
-                    "line": 28,
-                    "character": 19
-                }
-            }
-        },
-        "containerName": "Class.foo"
-    },
-    {
-        "name": "array",
-        "kind": 13,
-        "location": {
-            "uri": "file:///cases/documentSymbols/Input.hx",
-            "range": {
-                "start": {
-                    "line": 30,
-                    "character": 12
+                "selectionRange": {
+                    "start": {
+                        "line": 93,
+                        "character": 13
+                    },
+                    "end": {
+                        "line": 93,
+                        "character": 16
+                    }
                 },
-                "end": {
-                    "line": 30,
-                    "character": 17
-                }
+                "children": []
             }
-        },
-        "containerName": "Class.foo"
-    },
-    {
-        "name": "element",
-        "kind": 13,
-        "location": {
-            "uri": "file:///cases/documentSymbols/Input.hx",
-            "range": {
-                "start": {
-                    "line": 31,
-                    "character": 13
-                },
-                "end": {
-                    "line": 31,
-                    "character": 20
-                }
-            }
-        },
-        "containerName": "Class.foo"
-    },
-    {
-        "name": "exception",
-        "kind": 13,
-        "location": {
-            "uri": "file:///cases/documentSymbols/Input.hx",
-            "range": {
-                "start": {
-                    "line": 34,
-                    "character": 15
-                },
-                "end": {
-                    "line": 34,
-                    "character": 24
-                }
-            }
-        },
-        "containerName": "Class.foo"
-    },
-    {
-        "name": "MacroClass",
-        "kind": 5,
-        "location": {
-            "uri": "file:///cases/documentSymbols/Input.hx",
-            "range": {
-                "start": {
-                    "line": 36,
-                    "character": 20
-                },
-                "end": {
-                    "line": 36,
-                    "character": 30
-                }
-            }
-        },
-        "containerName": "Class.foo"
-    },
-    {
-        "name": "macroField",
-        "kind": 8,
-        "location": {
-            "uri": "file:///cases/documentSymbols/Input.hx",
-            "range": {
-                "start": {
-                    "line": 37,
-                    "character": 16
-                },
-                "end": {
-                    "line": 37,
-                    "character": 26
-                }
-            }
-        },
-        "containerName": "Class.foo.MacroClass"
-    },
-    {
-        "name": "maybeIncorrectPos",
-        "kind": 13,
-        "location": {
-            "uri": "file:///cases/documentSymbols/Input.hx",
-            "range": {
-                "start": {
-                    "line": 43,
-                    "character": 16
-                },
-                "end": {
-                    "line": 43,
-                    "character": 33
-                }
-            }
-        },
-        "containerName": "Class.foo"
-    },
-    {
-        "name": "fakeAdd",
-        "kind": 12,
-        "location": {
-            "uri": "file:///cases/documentSymbols/Input.hx",
-            "range": {
-                "start": {
-                    "line": 47,
-                    "character": 20
-                },
-                "end": {
-                    "line": 47,
-                    "character": 27
-                }
-            }
-        },
-        "containerName": "Class"
-    },
-    {
-        "name": "rhs",
-        "kind": 13,
-        "location": {
-            "uri": "file:///cases/documentSymbols/Input.hx",
-            "range": {
-                "start": {
-                    "line": 47,
-                    "character": 28
-                },
-                "end": {
-                    "line": 47,
-                    "character": 31
-                }
-            }
-        },
-        "containerName": "Class.fakeAdd"
-    },
-    {
-        "name": "new",
-        "kind": 9,
-        "location": {
-            "uri": "file:///cases/documentSymbols/Input.hx",
-            "range": {
-                "start": {
-                    "line": 51,
-                    "character": 13
-                },
-                "end": {
-                    "line": 51,
-                    "character": 16
-                }
-            }
-        },
-        "containerName": "Class"
+        ]
     },
     {
         "name": "Interface",
+        "detail": "",
         "kind": 11,
-        "location": {
-            "uri": "file:///cases/documentSymbols/Input.hx",
-            "range": {
-                "start": {
-                    "line": 54,
-                    "character": 10
-                },
-                "end": {
-                    "line": 54,
-                    "character": 19
-                }
+        "range": {
+            "start": {
+                "line": 96,
+                "character": 0
+            },
+            "end": {
+                "line": 99,
+                "character": 1
             }
         },
-        "containerName": ""
-    },
-    {
-        "name": "TInterface",
-        "kind": 26,
-        "location": {
-            "uri": "file:///cases/documentSymbols/Input.hx",
-            "range": {
-                "start": {
-                    "line": 54,
-                    "character": 20
-                },
-                "end": {
-                    "line": 54,
-                    "character": 30
-                }
+        "selectionRange": {
+            "start": {
+                "line": 96,
+                "character": 10
+            },
+            "end": {
+                "line": 96,
+                "character": 19
             }
         },
-        "containerName": "Interface"
-    },
-    {
-        "name": "variable",
-        "kind": 8,
-        "location": {
-            "uri": "file:///cases/documentSymbols/Input.hx",
-            "range": {
-                "start": {
-                    "line": 55,
-                    "character": 8
+        "children": [
+            {
+                "name": "variable",
+                "detail": "",
+                "kind": 8,
+                "range": {
+                    "start": {
+                        "line": 97,
+                        "character": 4
+                    },
+                    "end": {
+                        "line": 97,
+                        "character": 21
+                    }
                 },
-                "end": {
-                    "line": 55,
-                    "character": 16
-                }
-            }
-        },
-        "containerName": "Interface"
-    },
-    {
-        "name": "foo",
-        "kind": 12,
-        "location": {
-            "uri": "file:///cases/documentSymbols/Input.hx",
-            "range": {
-                "start": {
-                    "line": 56,
-                    "character": 13
+                "selectionRange": {
+                    "start": {
+                        "line": 97,
+                        "character": 8
+                    },
+                    "end": {
+                        "line": 97,
+                        "character": 16
+                    }
                 },
-                "end": {
-                    "line": 56,
-                    "character": 16
-                }
-            }
-        },
-        "containerName": "Interface"
-    },
-    {
-        "name": "TInterfaceField",
-        "kind": 26,
-        "location": {
-            "uri": "file:///cases/documentSymbols/Input.hx",
-            "range": {
-                "start": {
-                    "line": 56,
-                    "character": 17
+                "children": []
+            },
+            {
+                "name": "foo",
+                "detail": "",
+                "kind": 6,
+                "range": {
+                    "start": {
+                        "line": 98,
+                        "character": 4
+                    },
+                    "end": {
+                        "line": 98,
+                        "character": 41
+                    }
                 },
-                "end": {
-                    "line": 56,
-                    "character": 32
-                }
-            }
-        },
-        "containerName": "Interface.foo"
-    },
-    {
-        "name": "Abstract",
-        "kind": 5,
-        "location": {
-            "uri": "file:///cases/documentSymbols/Input.hx",
-            "range": {
-                "start": {
-                    "line": 59,
-                    "character": 9
+                "selectionRange": {
+                    "start": {
+                        "line": 98,
+                        "character": 13
+                    },
+                    "end": {
+                        "line": 98,
+                        "character": 16
+                    }
                 },
-                "end": {
-                    "line": 59,
-                    "character": 17
-                }
+                "children": []
             }
-        },
-        "containerName": ""
-    },
-    {
-        "name": "TAbstract",
-        "kind": 26,
-        "location": {
-            "uri": "file:///cases/documentSymbols/Input.hx",
-            "range": {
-                "start": {
-                    "line": 59,
-                    "character": 18
-                },
-                "end": {
-                    "line": 59,
-                    "character": 27
-                }
-            }
-        },
-        "containerName": "Abstract"
-    },
-    {
-        "name": "CONSTANT",
-        "kind": 14,
-        "location": {
-            "uri": "file:///cases/documentSymbols/Input.hx",
-            "range": {
-                "start": {
-                    "line": 60,
-                    "character": 22
-                },
-                "end": {
-                    "line": 60,
-                    "character": 30
-                }
-            }
-        },
-        "containerName": "Abstract"
-    },
-    {
-        "name": "repeat",
-        "kind": 25,
-        "location": {
-            "uri": "file:///cases/documentSymbols/Input.hx",
-            "range": {
-                "start": {
-                    "line": 63,
-                    "character": 20
-                },
-                "end": {
-                    "line": 63,
-                    "character": 26
-                }
-            }
-        },
-        "containerName": "Abstract"
-    },
-    {
-        "name": "rhs",
-        "kind": 13,
-        "location": {
-            "uri": "file:///cases/documentSymbols/Input.hx",
-            "range": {
-                "start": {
-                    "line": 63,
-                    "character": 27
-                },
-                "end": {
-                    "line": 63,
-                    "character": 30
-                }
-            }
-        },
-        "containerName": "Abstract.repeat"
-    },
-    {
-        "name": "add",
-        "kind": 25,
-        "location": {
-            "uri": "file:///cases/documentSymbols/Input.hx",
-            "range": {
-                "start": {
-                    "line": 67,
-                    "character": 25
-                },
-                "end": {
-                    "line": 67,
-                    "character": 28
-                }
-            }
-        },
-        "containerName": "Abstract"
-    },
-    {
-        "name": "rhs",
-        "kind": 13,
-        "location": {
-            "uri": "file:///cases/documentSymbols/Input.hx",
-            "range": {
-                "start": {
-                    "line": 67,
-                    "character": 29
-                },
-                "end": {
-                    "line": 67,
-                    "character": 32
-                }
-            }
-        },
-        "containerName": "Abstract.add"
-    },
-    {
-        "name": "get",
-        "kind": 25,
-        "location": {
-            "uri": "file:///cases/documentSymbols/Input.hx",
-            "range": {
-                "start": {
-                    "line": 70,
-                    "character": 27
-                },
-                "end": {
-                    "line": 70,
-                    "character": 30
-                }
-            }
-        },
-        "containerName": "Abstract"
-    },
-    {
-        "name": "key",
-        "kind": 13,
-        "location": {
-            "uri": "file:///cases/documentSymbols/Input.hx",
-            "range": {
-                "start": {
-                    "line": 70,
-                    "character": 31
-                },
-                "end": {
-                    "line": 70,
-                    "character": 34
-                }
-            }
-        },
-        "containerName": "Abstract.get"
-    },
-    {
-        "name": "resolve",
-        "kind": 25,
-        "location": {
-            "uri": "file:///cases/documentSymbols/Input.hx",
-            "range": {
-                "start": {
-                    "line": 75,
-                    "character": 13
-                },
-                "end": {
-                    "line": 75,
-                    "character": 20
-                }
-            }
-        },
-        "containerName": "Abstract"
-    },
-    {
-        "name": "name",
-        "kind": 13,
-        "location": {
-            "uri": "file:///cases/documentSymbols/Input.hx",
-            "range": {
-                "start": {
-                    "line": 75,
-                    "character": 21
-                },
-                "end": {
-                    "line": 75,
-                    "character": 25
-                }
-            }
-        },
-        "containerName": "Abstract.resolve"
-    },
-    {
-        "name": "new",
-        "kind": 9,
-        "location": {
-            "uri": "file:///cases/documentSymbols/Input.hx",
-            "range": {
-                "start": {
-                    "line": 79,
-                    "character": 20
-                },
-                "end": {
-                    "line": 79,
-                    "character": 23
-                }
-            }
-        },
-        "containerName": "Abstract"
-    },
-    {
-        "name": "foo",
-        "kind": 12,
-        "location": {
-            "uri": "file:///cases/documentSymbols/Input.hx",
-            "range": {
-                "start": {
-                    "line": 81,
-                    "character": 13
-                },
-                "end": {
-                    "line": 81,
-                    "character": 16
-                }
-            }
-        },
-        "containerName": "Abstract"
-    },
-    {
-        "name": "TAbstractField",
-        "kind": 26,
-        "location": {
-            "uri": "file:///cases/documentSymbols/Input.hx",
-            "range": {
-                "start": {
-                    "line": 81,
-                    "character": 17
-                },
-                "end": {
-                    "line": 81,
-                    "character": 31
-                }
-            }
-        },
-        "containerName": "Abstract.foo"
+        ]
     },
     {
         "name": "EnumAbstract",
+        "detail": "",
         "kind": 10,
-        "location": {
-            "uri": "file:///cases/documentSymbols/Input.hx",
-            "range": {
-                "start": {
-                    "line": 84,
-                    "character": 16
-                },
-                "end": {
-                    "line": 84,
-                    "character": 28
-                }
+        "range": {
+            "start": {
+                "line": 101,
+                "character": 0
+            },
+            "end": {
+                "line": 118,
+                "character": 1
             }
         },
-        "containerName": ""
+        "selectionRange": {
+            "start": {
+                "line": 101,
+                "character": 16
+            },
+            "end": {
+                "line": 101,
+                "character": 28
+            }
+        },
+        "children": [
+            {
+                "name": "foo",
+                "detail": "",
+                "kind": 6,
+                "range": {
+                    "start": {
+                        "line": 102,
+                        "character": 4
+                    },
+                    "end": {
+                        "line": 110,
+                        "character": 5
+                    }
+                },
+                "selectionRange": {
+                    "start": {
+                        "line": 102,
+                        "character": 13
+                    },
+                    "end": {
+                        "line": 102,
+                        "character": 16
+                    }
+                },
+                "children": [
+                    {
+                        "name": "MacroClass",
+                        "detail": "",
+                        "kind": 5,
+                        "range": {
+                            "start": {
+                                "line": 103,
+                                "character": 14
+                            },
+                            "end": {
+                                "line": 109,
+                                "character": 9
+                            }
+                        },
+                        "selectionRange": {
+                            "start": {
+                                "line": 103,
+                                "character": 20
+                            },
+                            "end": {
+                                "line": 103,
+                                "character": 30
+                            }
+                        },
+                        "children": [
+                            {
+                                "name": "macroField",
+                                "detail": "",
+                                "kind": 8,
+                                "range": {
+                                    "start": {
+                                        "line": 104,
+                                        "character": 12
+                                    },
+                                    "end": {
+                                        "line": 104,
+                                        "character": 31
+                                    }
+                                },
+                                "selectionRange": {
+                                    "start": {
+                                        "line": 104,
+                                        "character": 16
+                                    },
+                                    "end": {
+                                        "line": 104,
+                                        "character": 26
+                                    }
+                                },
+                                "children": []
+                            },
+                            {
+                                "name": "macroFunction",
+                                "detail": "",
+                                "kind": 6,
+                                "range": {
+                                    "start": {
+                                        "line": 106,
+                                        "character": 12
+                                    },
+                                    "end": {
+                                        "line": 108,
+                                        "character": 13
+                                    }
+                                },
+                                "selectionRange": {
+                                    "start": {
+                                        "line": 106,
+                                        "character": 21
+                                    },
+                                    "end": {
+                                        "line": 106,
+                                        "character": 34
+                                    }
+                                },
+                                "children": [
+                                    {
+                                        "name": "macroVar",
+                                        "detail": "",
+                                        "kind": 13,
+                                        "range": {
+                                            "start": {
+                                                "line": 107,
+                                                "character": 20
+                                            },
+                                            "end": {
+                                                "line": 107,
+                                                "character": 29
+                                            }
+                                        },
+                                        "selectionRange": {
+                                            "start": {
+                                                "line": 107,
+                                                "character": 28
+                                            },
+                                            "end": {
+                                                "line": 107,
+                                                "character": 29
+                                            }
+                                        },
+                                        "children": []
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "CONSTANT",
+                "detail": "",
+                "kind": 14,
+                "range": {
+                    "start": {
+                        "line": 112,
+                        "character": 4
+                    },
+                    "end": {
+                        "line": 112,
+                        "character": 35
+                    }
+                },
+                "selectionRange": {
+                    "start": {
+                        "line": 112,
+                        "character": 22
+                    },
+                    "end": {
+                        "line": 112,
+                        "character": 30
+                    }
+                },
+                "children": []
+            },
+            {
+                "name": "Value1",
+                "detail": "",
+                "kind": 22,
+                "range": {
+                    "start": {
+                        "line": 114,
+                        "character": 4
+                    },
+                    "end": {
+                        "line": 114,
+                        "character": 19
+                    }
+                },
+                "selectionRange": {
+                    "start": {
+                        "line": 114,
+                        "character": 8
+                    },
+                    "end": {
+                        "line": 114,
+                        "character": 14
+                    }
+                },
+                "children": []
+            },
+            {
+                "name": "Value2",
+                "detail": "",
+                "kind": 22,
+                "range": {
+                    "start": {
+                        "line": 115,
+                        "character": 4
+                    },
+                    "end": {
+                        "line": 115,
+                        "character": 19
+                    }
+                },
+                "selectionRange": {
+                    "start": {
+                        "line": 115,
+                        "character": 8
+                    },
+                    "end": {
+                        "line": 115,
+                        "character": 14
+                    }
+                },
+                "children": []
+            },
+            {
+                "name": "add",
+                "detail": "",
+                "kind": 25,
+                "range": {
+                    "start": {
+                        "line": 117,
+                        "character": 4
+                    },
+                    "end": {
+                        "line": 117,
+                        "character": 47
+                    }
+                },
+                "selectionRange": {
+                    "start": {
+                        "line": 117,
+                        "character": 25
+                    },
+                    "end": {
+                        "line": 117,
+                        "character": 28
+                    }
+                },
+                "children": []
+            }
+        ]
     },
     {
-        "name": "CONSTANT",
-        "kind": 14,
-        "location": {
-            "uri": "file:///cases/documentSymbols/Input.hx",
-            "range": {
-                "start": {
-                    "line": 85,
-                    "character": 22
-                },
-                "end": {
-                    "line": 85,
-                    "character": 30
-                }
+        "name": "EnumAbstractHaxe4",
+        "detail": "",
+        "kind": 10,
+        "range": {
+            "start": {
+                "line": 120,
+                "character": 5
+            },
+            "end": {
+                "line": 125,
+                "character": 1
             }
         },
-        "containerName": "EnumAbstract"
-    },
-    {
-        "name": "Value1",
-        "kind": 22,
-        "location": {
-            "uri": "file:///cases/documentSymbols/Input.hx",
-            "range": {
-                "start": {
-                    "line": 87,
-                    "character": 8
-                },
-                "end": {
-                    "line": 87,
-                    "character": 14
-                }
+        "selectionRange": {
+            "start": {
+                "line": 120,
+                "character": 14
+            },
+            "end": {
+                "line": 120,
+                "character": 31
             }
         },
-        "containerName": "EnumAbstract"
-    },
-    {
-        "name": "Value2",
-        "kind": 22,
-        "location": {
-            "uri": "file:///cases/documentSymbols/Input.hx",
-            "range": {
-                "start": {
-                    "line": 88,
-                    "character": 8
+        "children": [
+            {
+                "name": "CONSTANT",
+                "detail": "",
+                "kind": 14,
+                "range": {
+                    "start": {
+                        "line": 121,
+                        "character": 4
+                    },
+                    "end": {
+                        "line": 121,
+                        "character": 35
+                    }
                 },
-                "end": {
-                    "line": 88,
-                    "character": 14
-                }
+                "selectionRange": {
+                    "start": {
+                        "line": 121,
+                        "character": 22
+                    },
+                    "end": {
+                        "line": 121,
+                        "character": 30
+                    }
+                },
+                "children": []
+            },
+            {
+                "name": "Value1",
+                "detail": "",
+                "kind": 22,
+                "range": {
+                    "start": {
+                        "line": 123,
+                        "character": 4
+                    },
+                    "end": {
+                        "line": 123,
+                        "character": 19
+                    }
+                },
+                "selectionRange": {
+                    "start": {
+                        "line": 123,
+                        "character": 8
+                    },
+                    "end": {
+                        "line": 123,
+                        "character": 14
+                    }
+                },
+                "children": []
+            },
+            {
+                "name": "Value2",
+                "detail": "",
+                "kind": 22,
+                "range": {
+                    "start": {
+                        "line": 124,
+                        "character": 4
+                    },
+                    "end": {
+                        "line": 124,
+                        "character": 19
+                    }
+                },
+                "selectionRange": {
+                    "start": {
+                        "line": 124,
+                        "character": 8
+                    },
+                    "end": {
+                        "line": 124,
+                        "character": 14
+                    }
+                },
+                "children": []
             }
-        },
-        "containerName": "EnumAbstract"
+        ]
     },
     {
         "name": "Enum",
+        "detail": "",
         "kind": 10,
-        "location": {
-            "uri": "file:///cases/documentSymbols/Input.hx",
-            "range": {
-                "start": {
-                    "line": 91,
-                    "character": 5
-                },
-                "end": {
-                    "line": 91,
-                    "character": 9
-                }
+        "range": {
+            "start": {
+                "line": 127,
+                "character": 0
+            },
+            "end": {
+                "line": 130,
+                "character": 1
             }
         },
-        "containerName": ""
-    },
-    {
-        "name": "TEnum",
-        "kind": 26,
-        "location": {
-            "uri": "file:///cases/documentSymbols/Input.hx",
-            "range": {
-                "start": {
-                    "line": 91,
-                    "character": 10
-                },
-                "end": {
-                    "line": 91,
-                    "character": 15
-                }
+        "selectionRange": {
+            "start": {
+                "line": 127,
+                "character": 5
+            },
+            "end": {
+                "line": 127,
+                "character": 9
             }
         },
-        "containerName": "Enum"
-    },
-    {
-        "name": "Simple",
-        "kind": 22,
-        "location": {
-            "uri": "file:///cases/documentSymbols/Input.hx",
-            "range": {
-                "start": {
-                    "line": 92,
-                    "character": 4
+        "children": [
+            {
+                "name": "Simple",
+                "detail": "",
+                "kind": 22,
+                "range": {
+                    "start": {
+                        "line": 128,
+                        "character": 4
+                    },
+                    "end": {
+                        "line": 128,
+                        "character": 11
+                    }
                 },
-                "end": {
-                    "line": 92,
-                    "character": 10
-                }
-            }
-        },
-        "containerName": "Enum"
-    },
-    {
-        "name": "Complex",
-        "kind": 22,
-        "location": {
-            "uri": "file:///cases/documentSymbols/Input.hx",
-            "range": {
-                "start": {
-                    "line": 93,
-                    "character": 4
+                "selectionRange": {
+                    "start": {
+                        "line": 128,
+                        "character": 10
+                    },
+                    "end": {
+                        "line": 128,
+                        "character": 11
+                    }
                 },
-                "end": {
-                    "line": 93,
-                    "character": 11
-                }
-            }
-        },
-        "containerName": "Enum"
-    },
-    {
-        "name": "TEnumField",
-        "kind": 26,
-        "location": {
-            "uri": "file:///cases/documentSymbols/Input.hx",
-            "range": {
-                "start": {
-                    "line": 93,
-                    "character": 12
+                "children": []
+            },
+            {
+                "name": "Complex",
+                "detail": "",
+                "kind": 22,
+                "range": {
+                    "start": {
+                        "line": 129,
+                        "character": 4
+                    },
+                    "end": {
+                        "line": 129,
+                        "character": 23
+                    }
                 },
-                "end": {
-                    "line": 93,
-                    "character": 22
-                }
+                "selectionRange": {
+                    "start": {
+                        "line": 129,
+                        "character": 11
+                    },
+                    "end": {
+                        "line": 129,
+                        "character": 12
+                    }
+                },
+                "children": []
             }
-        },
-        "containerName": "Enum"
+        ]
     },
     {
         "name": "TypeAlias",
+        "detail": "",
         "kind": 11,
-        "location": {
-            "uri": "file:///cases/documentSymbols/Input.hx",
-            "range": {
-                "start": {
-                    "line": 96,
-                    "character": 8
-                },
-                "end": {
-                    "line": 96,
-                    "character": 17
-                }
+        "range": {
+            "start": {
+                "line": 132,
+                "character": 0
+            },
+            "end": {
+                "line": 132,
+                "character": 34
             }
         },
-        "containerName": ""
-    },
-    {
-        "name": "TTypedef",
-        "kind": 26,
-        "location": {
-            "uri": "file:///cases/documentSymbols/Input.hx",
-            "range": {
-                "start": {
-                    "line": 96,
-                    "character": 18
-                },
-                "end": {
-                    "line": 96,
-                    "character": 26
-                }
+        "selectionRange": {
+            "start": {
+                "line": 132,
+                "character": 8
+            },
+            "end": {
+                "line": 132,
+                "character": 17
             }
         },
-        "containerName": "TypeAlias"
+        "children": []
     },
     {
         "name": "TypedefShortFields",
+        "detail": "",
         "kind": 23,
-        "location": {
-            "uri": "file:///cases/documentSymbols/Input.hx",
-            "range": {
-                "start": {
-                    "line": 98,
-                    "character": 8
-                },
-                "end": {
-                    "line": 98,
-                    "character": 26
-                }
+        "range": {
+            "start": {
+                "line": 134,
+                "character": 0
+            },
+            "end": {
+                "line": 137,
+                "character": 1
             }
         },
-        "containerName": ""
-    },
-    {
-        "name": "a",
-        "kind": 13,
-        "location": {
-            "uri": "file:///cases/documentSymbols/Input.hx",
-            "range": {
-                "start": {
-                    "line": 99,
-                    "character": 5
-                },
-                "end": {
-                    "line": 99,
-                    "character": 6
-                }
+        "selectionRange": {
+            "start": {
+                "line": 134,
+                "character": 8
+            },
+            "end": {
+                "line": 134,
+                "character": 26
             }
         },
-        "containerName": "TypedefShortFields"
-    },
-    {
-        "name": "b",
-        "kind": 13,
-        "location": {
-            "uri": "file:///cases/documentSymbols/Input.hx",
-            "range": {
-                "start": {
-                    "line": 100,
-                    "character": 4
+        "children": [
+            {
+                "name": "a",
+                "detail": "",
+                "kind": 8,
+                "range": {
+                    "start": {
+                        "line": 135,
+                        "character": 5
+                    },
+                    "end": {
+                        "line": 135,
+                        "character": 11
+                    }
                 },
-                "end": {
-                    "line": 100,
-                    "character": 5
-                }
+                "selectionRange": {
+                    "start": {
+                        "line": 135,
+                        "character": 6
+                    },
+                    "end": {
+                        "line": 135,
+                        "character": 7
+                    }
+                },
+                "children": []
+            },
+            {
+                "name": "b",
+                "detail": "",
+                "kind": 8,
+                "range": {
+                    "start": {
+                        "line": 136,
+                        "character": 4
+                    },
+                    "end": {
+                        "line": 136,
+                        "character": 10
+                    }
+                },
+                "selectionRange": {
+                    "start": {
+                        "line": 136,
+                        "character": 5
+                    },
+                    "end": {
+                        "line": 136,
+                        "character": 6
+                    }
+                },
+                "children": []
             }
-        },
-        "containerName": "TypedefShortFields"
+        ]
     },
     {
         "name": "TypedefComplexFields",
+        "detail": "",
         "kind": 23,
-        "location": {
-            "uri": "file:///cases/documentSymbols/Input.hx",
-            "range": {
-                "start": {
-                    "line": 103,
-                    "character": 8
-                },
-                "end": {
-                    "line": 103,
-                    "character": 28
-                }
+        "range": {
+            "start": {
+                "line": 139,
+                "character": 0
+            },
+            "end": {
+                "line": 144,
+                "character": 1
             }
         },
-        "containerName": ""
-    },
-    {
-        "name": "a",
-        "kind": 8,
-        "location": {
-            "uri": "file:///cases/documentSymbols/Input.hx",
-            "range": {
-                "start": {
-                    "line": 104,
-                    "character": 19
-                },
-                "end": {
-                    "line": 104,
-                    "character": 20
-                }
+        "selectionRange": {
+            "start": {
+                "line": 139,
+                "character": 8
+            },
+            "end": {
+                "line": 139,
+                "character": 28
             }
         },
-        "containerName": "TypedefComplexFields"
-    },
-    {
-        "name": "b",
-        "kind": 8,
-        "location": {
-            "uri": "file:///cases/documentSymbols/Input.hx",
-            "range": {
-                "start": {
-                    "line": 105,
-                    "character": 8
+        "children": [
+            {
+                "name": "a",
+                "detail": "",
+                "kind": 8,
+                "range": {
+                    "start": {
+                        "line": 140,
+                        "character": 4
+                    },
+                    "end": {
+                        "line": 140,
+                        "character": 25
+                    }
                 },
-                "end": {
-                    "line": 105,
-                    "character": 9
-                }
+                "selectionRange": {
+                    "start": {
+                        "line": 140,
+                        "character": 19
+                    },
+                    "end": {
+                        "line": 140,
+                        "character": 20
+                    }
+                },
+                "children": []
+            },
+            {
+                "name": "b",
+                "detail": "",
+                "kind": 8,
+                "range": {
+                    "start": {
+                        "line": 141,
+                        "character": 4
+                    },
+                    "end": {
+                        "line": 141,
+                        "character": 15
+                    }
+                },
+                "selectionRange": {
+                    "start": {
+                        "line": 141,
+                        "character": 8
+                    },
+                    "end": {
+                        "line": 141,
+                        "character": 9
+                    }
+                },
+                "children": []
+            },
+            {
+                "name": "c",
+                "detail": "",
+                "kind": 8,
+                "range": {
+                    "start": {
+                        "line": 142,
+                        "character": 4
+                    },
+                    "end": {
+                        "line": 142,
+                        "character": 16
+                    }
+                },
+                "selectionRange": {
+                    "start": {
+                        "line": 142,
+                        "character": 8
+                    },
+                    "end": {
+                        "line": 142,
+                        "character": 9
+                    }
+                },
+                "children": []
+            },
+            {
+                "name": "foo",
+                "detail": "",
+                "kind": 6,
+                "range": {
+                    "start": {
+                        "line": 143,
+                        "character": 4
+                    },
+                    "end": {
+                        "line": 143,
+                        "character": 16
+                    }
+                },
+                "selectionRange": {
+                    "start": {
+                        "line": 143,
+                        "character": 13
+                    },
+                    "end": {
+                        "line": 143,
+                        "character": 16
+                    }
+                },
+                "children": []
             }
-        },
-        "containerName": "TypedefComplexFields"
+        ]
     },
     {
         "name": "TypedefExtension",
+        "detail": "",
         "kind": 23,
-        "location": {
-            "uri": "file:///cases/documentSymbols/Input.hx",
-            "range": {
-                "start": {
-                    "line": 108,
-                    "character": 8
-                },
-                "end": {
-                    "line": 108,
-                    "character": 24
-                }
+        "range": {
+            "start": {
+                "line": 146,
+                "character": 0
+            },
+            "end": {
+                "line": 150,
+                "character": 1
             }
         },
-        "containerName": ""
-    },
-    {
-        "name": "a",
-        "kind": 13,
-        "location": {
-            "uri": "file:///cases/documentSymbols/Input.hx",
-            "range": {
-                "start": {
-                    "line": 110,
-                    "character": 5
-                },
-                "end": {
-                    "line": 110,
-                    "character": 6
-                }
+        "selectionRange": {
+            "start": {
+                "line": 146,
+                "character": 8
+            },
+            "end": {
+                "line": 146,
+                "character": 24
             }
         },
-        "containerName": "TypedefExtension"
-    },
-    {
-        "name": "b",
-        "kind": 13,
-        "location": {
-            "uri": "file:///cases/documentSymbols/Input.hx",
-            "range": {
-                "start": {
-                    "line": 111,
-                    "character": 4
+        "children": [
+            {
+                "name": "a",
+                "detail": "",
+                "kind": 8,
+                "range": {
+                    "start": {
+                        "line": 148,
+                        "character": 5
+                    },
+                    "end": {
+                        "line": 148,
+                        "character": 11
+                    }
                 },
-                "end": {
-                    "line": 111,
-                    "character": 5
-                }
+                "selectionRange": {
+                    "start": {
+                        "line": 148,
+                        "character": 6
+                    },
+                    "end": {
+                        "line": 148,
+                        "character": 7
+                    }
+                },
+                "children": []
+            },
+            {
+                "name": "b",
+                "detail": "",
+                "kind": 8,
+                "range": {
+                    "start": {
+                        "line": 149,
+                        "character": 4
+                    },
+                    "end": {
+                        "line": 149,
+                        "character": 10
+                    }
+                },
+                "selectionRange": {
+                    "start": {
+                        "line": 149,
+                        "character": 5
+                    },
+                    "end": {
+                        "line": 149,
+                        "character": 6
+                    }
+                },
+                "children": []
             }
-        },
-        "containerName": "TypedefExtension"
+        ]
     }
 ]

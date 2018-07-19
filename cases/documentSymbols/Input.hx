@@ -140,6 +140,7 @@ typedef TypedefShortFields = {
 typedef TypedefComplexFields<Test> = {
     @:optional var a:Int;
     var b:Bool;
+    var ?c:Bool;
     function foo(bar:Int):Void;
 }
 

@@ -8,6 +8,7 @@ class TestMain {
 
         CompileTime.importPackage("haxeLanguageServer.helper");
         CompileTime.importPackage("haxeLanguageServer.hxParser");
+        CompileTime.importPackage("haxeLanguageServer.tokentree");
         CompileTime.importPackage("haxeLanguageServer.protocol.helper");
 
         var tests = CompileTime.getAllClasses(TestCaseBase);
