@@ -97,6 +97,16 @@ interface Interface<TInterface> {
 }
 
 @:enum abstract EnumAbstract(Int) {
+    function foo() {
+        macro class MacroClass {
+            var macroField:Int;
+
+            function macroFunction() {
+                var macroVar;
+            }
+        }
+    }
+
     inline static var CONSTANT = 5;
 
     var Value1 = 0;

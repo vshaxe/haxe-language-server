@@ -8,7 +8,8 @@ using tokentree.utils.FieldUtils;
 
 /** (_not_ a video game level, simn) **/
 private enum SymbolLevel {
-    Type;
+    Root;
+    Type(kind:DisplayModuleTypeKind);
     Field;
     Expression;
 }
@@ -22,8 +23,7 @@ class DocumentSymbolsResolver {
 
     public function resolve():Array<DocumentSymbol> {
         var previousDepth = 0;
-        var parentPerDepth = [{level: Type, symbols: new Array<DocumentSymbol>()}];
-        var type:DisplayModuleTypeKind;
+        var parentPerDepth = [{level: Root, symbols: new Array<DocumentSymbol>()}];
 
         document.tokenTree.filterCallback(function(token:TokenTree, depth:Int) {
             if (depth > previousDepth) {
@@ -59,35 +59,48 @@ class DocumentSymbolsResolver {
                 parentPerDepth[depth + 1] = {level: level, symbols: symbol.children};
             }
 
+            function getParentTypeKind():DisplayModuleTypeKind {
+                var i = parentPerDepth.length - 1;
+                while (i-- > 0) {
+                    switch (parentPerDepth[i].level) {
+                        case Type(kind):
+                            return kind;
+                        case _:
+                    }
+                }
+                return null;
+            }
+
             switch (token.tok) {
                 case Kwd(KwdClass):
                     var name = token.getName();
                     if (name == null && token.isTypeMacroClass()) {
                         name = "<macro class>";
                     }
-                    add(token, Class, Type, name);
-                    type = Class;
+                    add(token, Class, Type(Class), name);
                 case Kwd(KwdInterface):
-                    add(token, Interface, Type);
-                    type = Interface;
+                    add(token, Interface, Type(Interface));
                 case Kwd(KwdAbstract):
                     var isEnumAbstract = token.isTypeEnumAbstract();
-                    add(token, if (isEnumAbstract) Enum else Class, Type);
-                    type = if (isEnumAbstract) EnumAbstract else Class;
+                    add(token,
+                        if (isEnumAbstract) Enum else Class,
+                        Type(if (isEnumAbstract) EnumAbstract else Class)
+                    );
                 case Kwd(KwdTypedef):
                     var isStructure = token.isTypeStructure();
-                    add(token, if (isStructure) Struct else Interface, Type);
-                    type = if (isStructure) Struct else TypeAlias;
+                    add(token,
+                        if (isStructure) Struct else Interface,
+                        Type(if (isStructure) Struct else TypeAlias)
+                    );
                 case Kwd(KwdEnum):
                     if (token.isTypeEnum()) {
-                        add(token, Enum, Type);
-                        type = Enum;
+                        add(token, Enum, Type(Enum));
                     }
 
                 case Kwd(KwdFunction), Kwd(KwdVar), Kwd(KwdFinal):
                     var parentLevel = parentPerDepth[depth].level;
                     var currentLevel = switch (parentLevel) {
-                        case Type: Field;
+                        case Root, Type(_): Field;
                         case Field, Expression: Expression;
                     };
                     switch (token.getFieldType(PRIVATE)) {
@@ -95,6 +108,7 @@ class DocumentSymbolsResolver {
                             if (name == null) {
                                 name = "<anonymous function>";
                             }
+                            var type = getParentTypeKind();
                             var kind:SymbolKind = if (name == "new") {
                                 Constructor;
                             } else if (token.isOperatorFunction() && (type == Abstract || type == EnumAbstract)) {
@@ -104,11 +118,12 @@ class DocumentSymbolsResolver {
                             }
                             add(token, kind, currentLevel, name);
                         case VAR(name, _, isStatic, isInline, _, _):
+                            var type = getParentTypeKind();
                             var kind:SymbolKind = if (type == EnumAbstract && !isStatic) {
                                 EnumMember;
                             } else if (isInline) {
                                 Constant;
-                            } else if (parentLevel == Type) {
+                            } else if (parentLevel.match(Type(_)) || parentLevel == Root) {
                                 Field;
                             } else {
                                 Variable;
@@ -123,8 +138,9 @@ class DocumentSymbolsResolver {
                     if (ident != null) {
                         add(ident, Variable, Expression);
                     }
-                case Const(CIdent(_)) if (type != null):
-                    switch (type) {
+                case Const(CIdent(_)):
+                    switch (getParentTypeKind()) {
+                        case null:
                         case Enum:
                             if (token.access().parent().is(BrOpen).exists()) {
                                 add(token, EnumMember, Field);
