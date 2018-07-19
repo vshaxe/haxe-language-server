@@ -66,7 +66,10 @@ class Class<TClass1, TClass2> {
 
         var f = function() {}
 
-        var a, b, c;
+        var a, b, c = {
+            var f:Int = 100;
+            f;
+        };
 
         var array = [];
         for (element in array) {}

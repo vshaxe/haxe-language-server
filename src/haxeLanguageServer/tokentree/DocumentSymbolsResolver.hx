@@ -17,7 +17,7 @@ class DocumentSymbolsResolver {
         var stack = new SymbolStack();
         document.tokenTree.filterCallback(function(token:TokenTree, depth:Int) {
             stack.depth = depth;
-            function add(token:TokenTree, kind:SymbolKind, level:SymbolLevel, ?name:String) {
+            function add(token:TokenTree, kind:SymbolKind, level:SymbolLevel, ?name:String, ?opensScope:Bool) {
                 if (name == null) {
                     name = token.getName();
                 }
@@ -28,6 +28,9 @@ class DocumentSymbolsResolver {
                 if (selectedToken.inserted) {
                     return; // don't want to show `autoInsert` vars and similar
                 }
+                if (opensScope == null) {
+                    opensScope = true;
+                }
                 stack.addSymbol(level, {
                     name: name,
                     detail: "",
@@ -35,7 +38,7 @@ class DocumentSymbolsResolver {
                     range: positionToRange(token.getPos()),
                     selectionRange: positionToRange(selectedToken.pos),
                     children: []
-                });
+                }, opensScope);
             }
 
             switch (token.tok) {
@@ -84,17 +87,26 @@ class DocumentSymbolsResolver {
                             }
                             add(token, kind, currentLevel, name);
                         case VAR(name, _, isStatic, isInline, _, _):
-                            var type = stack.getParentTypeKind();
-                            var kind:SymbolKind = if (type == EnumAbstract && !isStatic) {
-                                EnumMember;
-                            } else if (isInline) {
-                                Constant;
-                            } else if (stack.level.match(Type(_)) || stack.level == Root) {
-                                Field;
+                            if (currentLevel == Expression) {
+                                var children = token.children;
+                                if (children != null) {
+                                    // at expression level, we might have a multi-var expr (`var a, b, c;`)
+                                    for (i in 0...children.length) {
+                                        var opensScope = i == children.length - 1;
+                                        add(children[i], Variable, currentLevel, opensScope);
+                                    }
+                                }
                             } else {
-                                Variable;
+                                var type = stack.getParentTypeKind();
+                                var kind:SymbolKind = if (type == EnumAbstract && !isStatic) {
+                                    EnumMember;
+                                } else if (isInline) {
+                                    Constant;
+                                } else {
+                                    Field;
+                                }
+                                add(token, kind, currentLevel, name);
                             }
-                            add(token, kind, currentLevel, name);
                         case PROP(name, _, _, _, _):
                             add(token, Property, currentLevel, name);
                         case UNKNOWN:
@@ -149,6 +161,7 @@ private abstract SymbolStack(Array<{level:SymbolLevel, symbols:Array<DocumentSym
     inline function get_depth() return this.length - 1;
     function set_depth(newDepth:Int) {
         if (newDepth > depth) {
+            // only accounts for increases of 1
             if (this[newDepth] == null) {
                 this[newDepth] = this[newDepth - 1];
             }
@@ -170,9 +183,11 @@ private abstract SymbolStack(Array<{level:SymbolLevel, symbols:Array<DocumentSym
         this = [{level: Root, symbols: new Array<DocumentSymbol>()}];
     }
 
-    public function addSymbol(level:SymbolLevel, symbol:DocumentSymbol) {
+    public function addSymbol(level:SymbolLevel, symbol:DocumentSymbol, opensScope:Bool) {
         this[depth].symbols.push(symbol);
-        this[depth + 1] = {level: level, symbols: symbol.children};
+        if (opensScope) {
+            this[depth + 1] = {level: level, symbols: symbol.children};
+        }
     }
 
     public function getParentTypeKind():DisplayModuleTypeKind {
