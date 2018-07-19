@@ -28,9 +28,11 @@ class Class<TClass1, TClass2> {
 
     var variable:Int;
 
+    var property(default,null):Int;
+
     final finaleVariable:Int;
 
-    var property(default,null):Int;
+    final function finalMethod():Void {}
 
     @:op(A + B)
     public function fakeAdd(rhs:Int):Int {

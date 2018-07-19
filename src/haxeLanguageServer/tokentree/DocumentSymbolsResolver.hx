@@ -32,7 +32,7 @@ class DocumentSymbolsResolver {
                     name = token.getName();
                 }
                 if (name == null) {
-                    name = "";
+                    return;
                 }
                 var selectedToken = token.access().firstChild().or(token);
                 if (selectedToken.inserted) {
