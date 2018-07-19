@@ -1,5 +1,6 @@
 package haxeLanguageServer.tokentree;
 
+import haxeLanguageServer.protocol.Display.DisplayModuleTypeKind;
 import tokentree.TokenTree;
 using tokentree.TokenTreeAccessHelper;
 using tokentree.utils.TokenTreeCheckUtils;
@@ -15,6 +16,7 @@ class DocumentSymbolsResolver {
     public function resolve():Array<DocumentSymbol> {
         var previousDepth = 0;
         var parentPerDepth = [new Array<DocumentSymbol>()];
+        var type:DisplayModuleTypeKind;
 
         document.tokenTree.filterCallback(function(token:TokenTree, depth:Int) {
             if (depth > previousDepth) {
@@ -57,15 +59,22 @@ class DocumentSymbolsResolver {
                         name = "<macro class>";
                     }
                     add(token, Class, name);
+                    type = Class;
                 case Kwd(KwdInterface):
                     add(token, Interface);
+                    type = Interface;
                 case Kwd(KwdAbstract):
-                    add(token, if (token.isTypeEnumAbstract()) Enum else Class);
+                    var isEnumAbstract = token.isTypeEnumAbstract();
+                    add(token, if (isEnumAbstract) Enum else Class);
+                    type = if (isEnumAbstract) EnumAbstract else Class;
                 case Kwd(KwdTypedef):
-                    add(token, if (token.isTypeStructure()) Struct else Interface);
+                    var isStructure = token.isTypeStructure();
+                    add(token, if (isStructure) Struct else Interface);
+                    type = if (isStructure) Struct else TypeAlias;
                 case Kwd(KwdEnum):
                     if (token.isTypeEnum()) {
                         add(token, Enum);
+                        type = Enum;
                     }
 
                 case Kwd(KwdFunction), Kwd(KwdVar), Kwd(KwdFinal):
@@ -82,8 +91,15 @@ class DocumentSymbolsResolver {
                                 Method;
                             }
                             add(token, kind, name);
-                        case VAR(name, _, _, isInline, _, _):
-                            add(token, if (isInline) Constant else Variable, name);
+                        case VAR(name, _, isStatic, isInline, _, _):
+                            var kind:SymbolKind = if (type == EnumAbstract && !isStatic) {
+                                EnumMember;
+                            } else if (isInline) {
+                                Constant;
+                            } else {
+                                Variable;
+                            }
+                            add(token, kind, name);
                         case PROP(name, _, _, _, _):
                             add(token, Property, name);
                         case UNKNOWN:
