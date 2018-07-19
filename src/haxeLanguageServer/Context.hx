@@ -197,7 +197,6 @@ class Context {
                 definitionProvider: true,
                 hoverProvider: true,
                 referencesProvider: true,
-                documentSymbolProvider: true,
                 workspaceSymbolProvider: true,
                 codeActionProvider: true,
                 #if debug

@@ -11,7 +11,7 @@ class DocumentSymbolsFeature {
 
     public function new(context) {
         this.context = context;
-        context.protocol.onRequest(Methods.DocumentSymbols, onDocumentSymbols);
+        context.protocol.onRequest(LanguageServerMethods.DocumentSymbols, onDocumentSymbols);
     }
 
     function onDocumentSymbols(params:DocumentSymbolParams, token:CancellationToken, resolve:Array<EitherType<SymbolInformation,DocumentSymbol>>->Void, reject:ResponseError<NoData>->Void) {
