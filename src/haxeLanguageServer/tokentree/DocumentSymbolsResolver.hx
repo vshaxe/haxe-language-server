@@ -109,6 +109,22 @@ class DocumentSymbolsResolver {
                     if (ident != null) {
                         add(ident, Variable);
                     }
+                case Const(CIdent(_)) if (type != null):
+                    switch (type) {
+                        case Enum:
+                            if (token.access().parent().is(BrOpen).exists()) {
+                                add(token, EnumMember);
+                            }
+                        case Struct:
+                            var parent = token.access().parent();
+                            if (parent.is(Question).exists()) {
+                                parent = parent.parent();
+                            }
+                            if (parent.is(BrOpen).exists() && token.access().firstChild().is(DblDot).exists()) {
+                                add(token, Variable);
+                            }
+                        case _:
+                    }
                 case _:
             }
 
