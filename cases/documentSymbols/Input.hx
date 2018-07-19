@@ -27,6 +27,12 @@ class Class<TClass1, TClass2> {
     inline static var CONSTANT = 5;
 
     var variable:Int;
+    
+    var variableWithBlockInit:Int = {
+        function foo():Int return 0;
+        var bar = foo();
+        bar;
+    };
 
     var property(default,null):Int;
 

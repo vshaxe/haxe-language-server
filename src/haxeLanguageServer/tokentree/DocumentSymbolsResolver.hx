@@ -6,6 +6,13 @@ using tokentree.TokenTreeAccessHelper;
 using tokentree.utils.TokenTreeCheckUtils;
 using tokentree.utils.FieldUtils;
 
+/** (_not_ a video game level, simn) **/
+private enum SymbolLevel {
+    Type;
+    Field;
+    Expression;
+}
+
 class DocumentSymbolsResolver {
     final document:TextDocument;
 
@@ -15,7 +22,7 @@ class DocumentSymbolsResolver {
 
     public function resolve():Array<DocumentSymbol> {
         var previousDepth = 0;
-        var parentPerDepth = [new Array<DocumentSymbol>()];
+        var parentPerDepth = [{level: Type, symbols: new Array<DocumentSymbol>()}];
         var type:DisplayModuleTypeKind;
 
         document.tokenTree.filterCallback(function(token:TokenTree, depth:Int) {
@@ -29,7 +36,7 @@ class DocumentSymbolsResolver {
                 }
             }
 
-            function add(token:TokenTree, kind:SymbolKind, ?name:String) {
+            function add(token:TokenTree, kind:SymbolKind, level:SymbolLevel, ?name:String) {
                 if (name == null) {
                     name = token.getName();
                 }
@@ -48,8 +55,8 @@ class DocumentSymbolsResolver {
                     selectionRange: positionToRange(selectedToken.pos),
                     children: []
                 };
-                parentPerDepth[depth].push(symbol);
-                parentPerDepth[depth + 1] = symbol.children;
+                parentPerDepth[depth].symbols.push(symbol);
+                parentPerDepth[depth + 1] = {level: level, symbols: symbol.children};
             }
 
             switch (token.tok) {
@@ -58,26 +65,31 @@ class DocumentSymbolsResolver {
                     if (name == null && token.isTypeMacroClass()) {
                         name = "<macro class>";
                     }
-                    add(token, Class, name);
+                    add(token, Class, Type, name);
                     type = Class;
                 case Kwd(KwdInterface):
-                    add(token, Interface);
+                    add(token, Interface, Type);
                     type = Interface;
                 case Kwd(KwdAbstract):
                     var isEnumAbstract = token.isTypeEnumAbstract();
-                    add(token, if (isEnumAbstract) Enum else Class);
+                    add(token, if (isEnumAbstract) Enum else Class, Type);
                     type = if (isEnumAbstract) EnumAbstract else Class;
                 case Kwd(KwdTypedef):
                     var isStructure = token.isTypeStructure();
-                    add(token, if (isStructure) Struct else Interface);
+                    add(token, if (isStructure) Struct else Interface, Type);
                     type = if (isStructure) Struct else TypeAlias;
                 case Kwd(KwdEnum):
                     if (token.isTypeEnum()) {
-                        add(token, Enum);
+                        add(token, Enum, Type);
                         type = Enum;
                     }
 
                 case Kwd(KwdFunction), Kwd(KwdVar), Kwd(KwdFinal):
+                    var parentLevel = parentPerDepth[depth].level;
+                    var currentLevel = switch (parentLevel) {
+                        case Type: Field;
+                        case Field, Expression: Expression;
+                    };
                     switch (token.getFieldType(PRIVATE)) {
                         case FUNCTION(name, _, _, _, _, _, _):
                             if (name == null) {
@@ -90,30 +102,32 @@ class DocumentSymbolsResolver {
                             } else {
                                 Method;
                             }
-                            add(token, kind, name);
+                            add(token, kind, currentLevel, name);
                         case VAR(name, _, isStatic, isInline, _, _):
                             var kind:SymbolKind = if (type == EnumAbstract && !isStatic) {
                                 EnumMember;
                             } else if (isInline) {
                                 Constant;
+                            } else if (parentLevel == Type) {
+                                Field;
                             } else {
                                 Variable;
                             }
-                            add(token, kind, name);
+                            add(token, kind, currentLevel, name);
                         case PROP(name, _, _, _, _):
-                            add(token, Property, name);
+                            add(token, Property, currentLevel, name);
                         case UNKNOWN:
                     }
                 case Kwd(KwdFor), Kwd(KwdCatch):
                     var ident = token.access().firstChild().is(POpen).firstChild().isCIdent().token;
                     if (ident != null) {
-                        add(ident, Variable);
+                        add(ident, Variable, Expression);
                     }
                 case Const(CIdent(_)) if (type != null):
                     switch (type) {
                         case Enum:
                             if (token.access().parent().is(BrOpen).exists()) {
-                                add(token, EnumMember);
+                                add(token, EnumMember, Field);
                             }
                         case Struct:
                             var parent = token.access().parent();
@@ -121,7 +135,7 @@ class DocumentSymbolsResolver {
                                 parent = parent.parent();
                             }
                             if (parent.is(BrOpen).exists() && token.access().firstChild().is(DblDot).exists()) {
-                                add(token, Variable);
+                                add(token, Field, Field);
                             }
                         case _:
                     }
@@ -131,7 +145,7 @@ class DocumentSymbolsResolver {
             previousDepth = depth;
             return GO_DEEPER;
         });
-        return parentPerDepth[0];
+        return parentPerDepth[0].symbols;
     }
 
     function positionToRange(pos:haxe.macro.Expr.Position):Range {
