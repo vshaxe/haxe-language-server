@@ -153,3 +153,9 @@ typedef TypedefExtension = {
     ?a:Int,
     b:Bool
 }
+
+typedef TypedefExtension = A & B & {
+    a:Bool
+} & C {
+    b:Int
+}
