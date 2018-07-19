@@ -1,10 +1,10 @@
 package haxeLanguageServer.features;
 
+import haxeLanguageServer.tokentree.DocumentSymbolsResolver;
 import haxe.extern.EitherType;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
-import haxeLanguageServer.hxParser.DocumentSymbolsResolver;
 
 private enum abstract ModuleSymbolKind(Int) {
     var MClass = 1;
@@ -77,21 +77,8 @@ class DocumentSymbolsFeature {
 
     function onDocumentSymbols(params:DocumentSymbolParams, token:CancellationToken, resolve:Array<EitherType<SymbolInformation,DocumentSymbol>>->Void, reject:ResponseError<NoData>->Void) {
         var doc = context.documents.get(params.textDocument.uri);
-        var resolver = new haxeLanguageServer.tokentree.DocumentSymbolsResolver(doc);
+        var resolver = new DocumentSymbolsResolver(doc);
         return resolve(resolver.resolve());
-
-        var resolver = new DocumentSymbolsResolver(doc.uri);
-        try if (doc.parseTree != null) {
-            resolver.walkFile(doc.parseTree, Root);
-            return resolve(resolver.getSymbols());
-        } catch (e:Any) {
-            trace('DocumentSymbolsResolver failed with \'$e\'');
-            trace(haxe.CallStack.toString(haxe.CallStack.callStack()));
-        }
-
-        trace('Falling back to Haxe document symbols.');
-        var args = ['${doc.fsPath}@0@module-symbols'];
-        makeRequest("@module-symbols", args, doc, token, resolve, reject);
     }
 
     function onWorkspaceSymbols(params:WorkspaceSymbolParams, token:CancellationToken, resolve:Array<SymbolInformation>->Void, reject:ResponseError<NoData>->Void) {
