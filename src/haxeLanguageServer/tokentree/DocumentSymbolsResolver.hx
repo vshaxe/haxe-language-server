@@ -114,7 +114,7 @@ class DocumentSymbolsResolver {
                 case Kwd(KwdFor), Kwd(KwdCatch):
                     var ident = token.access().firstChild().is(POpen).firstChild().isCIdent().token;
                     if (ident != null) {
-                        add(ident, Variable, Expression);
+                        add(ident, Variable, Expression, false);
                     }
                 case Const(CIdent(_)):
                     switch (stack.getParentTypeKind()) {

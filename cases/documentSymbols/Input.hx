@@ -27,7 +27,7 @@ class Class<TClass1, TClass2> {
     inline static var CONSTANT = 5;
 
     var variable:Int;
-    
+
     var variableWithBlockInit:Int = {
         function foo():Int return 0;
         var bar = foo();
@@ -72,10 +72,14 @@ class Class<TClass1, TClass2> {
         };
 
         var array = [];
-        for (element in array) {}
+        for (element in array) {
+            var varInFor;
+        }
 
         try {}
-        catch (exception:Any) {}
+        catch (exception:Any) {
+            var varInCatch;
+        }
 
         macro class MacroClass {
             var macroField:Int;
