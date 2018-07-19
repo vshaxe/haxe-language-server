@@ -269,6 +269,7 @@ class Context {
                 diagnostics = new DiagnosticsManager(this);
                 new CodeLensFeature(this);
                 new CodeGenerationFeature(this);
+                new WorkspaceSymbolsFeature(this);
 
                 for (doc in documents.getAll())
                     publishDiagnostics(doc.uri);
