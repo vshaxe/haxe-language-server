@@ -85,7 +85,7 @@ class DocumentSymbolsResolver {
                             }
                             var kind:SymbolKind = if (name == "new") {
                                 Constructor;
-                            } else if (token.isOperatorFunction()) {
+                            } else if (token.isOperatorFunction() && (type == Abstract || type == EnumAbstract)) {
                                 Operator;
                             } else {
                                 Method;

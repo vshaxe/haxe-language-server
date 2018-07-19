@@ -95,6 +95,8 @@ interface Interface<TInterface> {
 
     var Value1 = 0;
     var Value2 = 1;
+
+    @:op(A + B) function add(rhs:Int):Abstract;
 }
 
 enum abstract EnumAbstractHaxe4(Int) {
