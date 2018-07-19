@@ -28,6 +28,8 @@ class Class<TClass1, TClass2> {
 
     var variable:Int;
 
+    final finaleVariable:Int;
+
     var property(default,null):Int;
 
     @:op(A + B)

@@ -68,7 +68,7 @@ class DocumentSymbolsResolver {
                         add(token, Enum);
                     }
 
-                case Kwd(KwdFunction), Kwd(KwdVar):
+                case Kwd(KwdFunction), Kwd(KwdVar), Kwd(KwdFinal):
                     switch (token.getFieldType(PRIVATE)) {
                         case FUNCTION(name, _, _, _, _, _, _):
                             if (name == null) {
