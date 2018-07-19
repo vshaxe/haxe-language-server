@@ -128,7 +128,7 @@ class DocumentSymbolsResolver {
                             if (parent.is(Question).exists()) {
                                 parent = parent.parent();
                             }
-                            if (parent.is(BrOpen).exists() && token.access().firstChild().is(DblDot).exists()) {
+                            if (parent.is(BrOpen).exists()) {
                                 add(token, Field, Field);
                             }
                         case _:
