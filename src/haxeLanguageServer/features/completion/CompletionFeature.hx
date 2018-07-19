@@ -39,6 +39,7 @@ class CompletionFeature {
     var snippetSupport:Bool;
     var commitCharactersSupport:Bool;
     var deprecatedSupport:Bool;
+    var finalWord = ~/\b(\w+)$/;
 
     public function new(context) {
         this.context = context;
@@ -166,11 +167,33 @@ class CompletionFeature {
                 completionPosition: params.position,
                 importPosition: importPosition,
             };
-            // TODO: this is causing some issues when vscode invokes completion mid-identifier,
-            // probably need to scan back to word start...
-            /* if (data.replaceRange == null) {
-                data.replaceRange = data.completionPosition.toRange();
-            } */
+
+            if (data.replaceRange == null) {
+                var startLine = {
+                    character : 0,
+                    line : data.completionPosition.line
+                }
+                var lineBefore = doc.getText({
+                    start: startLine,
+                    end: data.completionPosition
+                });
+
+                var start  = {
+                    character : data.completionPosition.character,
+                    line : data.completionPosition.line
+                }
+                var end = {
+                    character : data.completionPosition.character,
+                    line : data.completionPosition.line
+                }
+
+                if (finalWord.match(lineBefore)) {
+                    start.character -= finalWord.matched(0).length;
+                }
+
+                data.replaceRange = { start : start , end : end};
+            }
+
             var items = [];
             for (i in 0...result.items.length) {
                 var completionItem = createCompletionItem(i, result.items[i], data);
