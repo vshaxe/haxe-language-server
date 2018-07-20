@@ -54,7 +54,7 @@ class DocumentSymbolsResolver {
                     var isEnumAbstract = token.isTypeEnumAbstract();
                     add(token,
                         if (isEnumAbstract) Enum else Class,
-                        Type(if (isEnumAbstract) EnumAbstract else Class)
+                        Type(if (isEnumAbstract) EnumAbstract else Abstract)
                     );
                 case Kwd(KwdTypedef):
                     var isStructure = token.isTypeStructure();

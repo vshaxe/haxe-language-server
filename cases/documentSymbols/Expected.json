@@ -53,7 +53,7 @@
             {
                 "name": "repeat",
                 "detail": "",
-                "kind": 6,
+                "kind": 25,
                 "range": {
                     "start": {
                         "line": 3,
@@ -79,7 +79,7 @@
             {
                 "name": "add",
                 "detail": "",
-                "kind": 6,
+                "kind": 25,
                 "range": {
                     "start": {
                         "line": 8,
@@ -105,7 +105,7 @@
             {
                 "name": "get",
                 "detail": "",
-                "kind": 6,
+                "kind": 25,
                 "range": {
                     "start": {
                         "line": 10,
@@ -131,7 +131,7 @@
             {
                 "name": "resolve",
                 "detail": "",
-                "kind": 6,
+                "kind": 25,
                 "range": {
                     "start": {
                         "line": 15,
