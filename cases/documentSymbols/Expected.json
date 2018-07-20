@@ -1892,17 +1892,17 @@
         ]
     },
     {
-        "name": "TypedefExtension",
+        "name": "TypedefIntersectionTypes",
         "detail": "",
-        "kind": 11,
+        "kind": 23,
         "range": {
             "start": {
                 "line": 156,
                 "character": 0
             },
             "end": {
-                "line": 158,
-                "character": 5
+                "line": 160,
+                "character": 1
             }
         },
         "selectionRange": {
@@ -1912,7 +1912,86 @@
             },
             "end": {
                 "line": 156,
-                "character": 24
+                "character": 32
+            }
+        },
+        "children": [
+            {
+                "name": "a",
+                "detail": "",
+                "kind": 8,
+                "range": {
+                    "start": {
+                        "line": 157,
+                        "character": 4
+                    },
+                    "end": {
+                        "line": 157,
+                        "character": 10
+                    }
+                },
+                "selectionRange": {
+                    "start": {
+                        "line": 157,
+                        "character": 5
+                    },
+                    "end": {
+                        "line": 157,
+                        "character": 6
+                    }
+                },
+                "children": []
+            },
+            {
+                "name": "b",
+                "detail": "",
+                "kind": 8,
+                "range": {
+                    "start": {
+                        "line": 159,
+                        "character": 4
+                    },
+                    "end": {
+                        "line": 159,
+                        "character": 9
+                    }
+                },
+                "selectionRange": {
+                    "start": {
+                        "line": 159,
+                        "character": 5
+                    },
+                    "end": {
+                        "line": 159,
+                        "character": 6
+                    }
+                },
+                "children": []
+            }
+        ]
+    },
+    {
+        "name": "TypedefToArray",
+        "detail": "",
+        "kind": 11,
+        "range": {
+            "start": {
+                "line": 162,
+                "character": 0
+            },
+            "end": {
+                "line": 162,
+                "character": 40
+            }
+        },
+        "selectionRange": {
+            "start": {
+                "line": 162,
+                "character": 8
+            },
+            "end": {
+                "line": 162,
+                "character": 22
             }
         },
         "children": []

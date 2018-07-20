@@ -154,8 +154,10 @@ typedef TypedefExtension = {
     b:Bool
 }
 
-typedef TypedefExtension = A & B & {
+typedef TypedefIntersectionTypes = A<T> & B & {
     a:Bool
-} & C {
+} & C & {
     b:Int
 }
+
+typedef TypedefToArray = Array<{i:Int}>;
