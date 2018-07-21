@@ -209,6 +209,10 @@ class DisplayPrinter {
     static final castRegex = ~/^(cast )+/;
     public function printClassFieldDefinition<T0,T1,T2>(occurrence:ClassFieldOccurrence<T0>, concreteType:JsonType<T1>, isEnumAbstractField:Bool) {
         var field = occurrence.field;
+        switch (concreteType.kind) {
+            case TMono: concreteType = field.type;
+            case _:
+        }
         var type = printType(concreteType);
         var name = field.name;
         var kind:JsonFieldKind<T2> = field.kind;
