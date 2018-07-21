@@ -1,7 +1,7 @@
 package haxeLanguageServer.features;
 
 import haxe.Timer;
-import tokentreeformatter.Formatter;
+import formatter.Formatter;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;

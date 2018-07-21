@@ -28,8 +28,8 @@
             "installArgs": ["git", "tokentree", "https://github.com/HaxeCheckstyle/tokentree", "--never"]
         },
         {
-            "name": "tokentree-formatter",
-            "installArgs": ["git", "tokentree-formatter", "https://github.com/HaxeCheckstyle/tokentree-formatter", "--never"]
+            "name": "formatter",
+            "installArgs": ["git", "formatter", "https://github.com/HaxeCheckstyle/haxe-formatter", "--never"]
         },
         {
             "name": "json2object",
@@ -40,7 +40,7 @@
         {
             "name": "language-server",
             "args": {
-                "haxelibs": ["haxe-hxparser", "hxparse", "haxeparser", "tokentree", "tokentree-formatter", "json2object"],
+                "haxelibs": ["haxe-hxparser", "hxparse", "haxeparser", "tokentree", "formatter", "json2object"],
                 "classPaths": [
                     "src",
                     "protocol/src"
@@ -59,7 +59,7 @@
         {
             "name": "language-server-tests",
             "args": {
-                "haxelibs": ["haxe-hxparser", "hxparse", "haxeparser", "tokentree", "tokentree-formatter", "json2object", "compiletime", "hx3compat"],
+                "haxelibs": ["haxe-hxparser", "hxparse", "haxeparser", "tokentree", "formatter", "json2object", "compiletime", "hx3compat"],
                 "classPaths": [
                     "src",
                     "test",
