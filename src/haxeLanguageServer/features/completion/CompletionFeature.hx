@@ -166,11 +166,9 @@ class CompletionFeature {
                 completionPosition: params.position,
                 importPosition: importPosition,
             };
-            // TODO: this is causing some issues when vscode invokes completion mid-identifier,
-            // probably need to scan back to word start...
-            /* if (data.replaceRange == null) {
+            if (data.replaceRange == null) {
                 data.replaceRange = data.completionPosition.toRange();
-            } */
+            }
             var items = [];
             for (i in 0...result.items.length) {
                 var completionItem = createCompletionItem(i, result.items[i], data);
