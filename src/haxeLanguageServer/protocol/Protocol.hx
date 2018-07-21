@@ -43,7 +43,7 @@ typedef Timer = {
     final calls:Int;
     final percentTotal:Float;
     final percentParent:Float;
-    @:optional final children:Array<Timer>;
+    final ?children:Array<Timer>;
 }
 
 typedef Response<T> = {
@@ -51,7 +51,7 @@ typedef Response<T> = {
     /** UNIX timestamp at the moment the data was sent. **/
     final timestamp:Float;
     /** Only sent if `--times` is enabled. **/
-    @:optional final timers:Timer;
+    final ?timers:Timer;
 }
 
 typedef FileParams = {
