@@ -425,7 +425,7 @@ class Context {
             catch (e:Any) {
                 errback(e);
                 trace(e);
-                trace(CallStack.toString(CallStack.callStack()));
+                trace(CallStack.toString(CallStack.exceptionStack()));
                 null;
             }
         var afterProcessingTime = Date.now().getTime();
