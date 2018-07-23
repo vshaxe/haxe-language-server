@@ -40,11 +40,6 @@ class LanguageServerMethods {
     static inline var DidChangeActiveTextEditor = new NotificationMethod<{uri:DocumentUri},NoData>("haxe/didChangeActiveTextEditor");
 
     /**
-        This notification is sent from the server to the client to update the parse tree visualization.
-    **/
-    static inline var UpdateParseTree = new NotificationMethod<{uri:String, parseTree:String},NoData>("haxe/updateParseTree");
-
-    /**
         This notification is sent from the server to the client when some long-running process is started.
         Client may display this somehow in the UI. The `id` is used later for sending `ProgressStop` notification.
     **/

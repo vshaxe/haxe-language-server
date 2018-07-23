@@ -334,20 +334,6 @@ class DiagnosticsManager {
             });
         }
 
-        #if false
-        // breaks with cases like `var i:Int = 0.0;`
-        if (arg.indexOf("Float should be Int") != -1) {
-            actions.push({
-                title: "Wrap in Std.int() call",
-                edit: WorkspaceEditHelper.create(context, params, [
-                    {range: d.range.start.toRange(), newText: 'Std.int('},
-                    {range: d.range.end.toRange(), newText: ')'}
-                ]),
-                diagnostics: [d]
-            });
-        }
-        #end
-
         return actions;
     }
 

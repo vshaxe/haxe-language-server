@@ -53,11 +53,6 @@ class TextDocument {
                 var before = content.substring(0, offset);
                 var after = content.substring(offset + event.rangeLength);
                 content = before + event.text + after;
-                #if false
-                #if false // let's be extra safe with this
-                updateParsingInfo(event.range, event.rangeLength, event.text.length);
-                #end
-                #end
             }
         }
         _parseTree = null;
@@ -226,33 +221,4 @@ class TextDocument {
         }
         return _tokenTree;
     }
-
-    #if false
-    function updateParsingInfo(range:Range, rangeLength:Int, textLength:Int) {
-        if (_parsingInfo == null) {
-            _parsingInfo = createParseTree();
-        } else {
-            // TODO: We might want to catch exceptions in this section, else we risk that the parse tree
-            // gets "stuck" if something fails.
-            var offsetBegin = offsetAt(range.start);
-            var offsetEnd = offsetAt(range.end);
-            var node = parsingInfo.parsingPointManager.findEnclosing(offsetBegin, offsetEnd);
-            if (node != null) {
-                var offsetBegin = node.start;
-                var offsetEnd = node.end - rangeLength + textLength;
-                var sectionContent = content.substring(offsetBegin, offsetEnd);
-                switch (hxParser.HxParser.parse(sectionContent, node.name)) {
-                    case Success(tree):
-                        node.callback(tree);
-                        parsingInfo.parsingPointManager.reset();
-                        parsingInfo.parsingPointManager.walkFile(parsingInfo.tree, Root);
-                    case Failure(s):
-                        _parsingInfo = null;
-                }
-            } else {
-                _parsingInfo = null;
-            }
-        }
-    }
-    #end
 }

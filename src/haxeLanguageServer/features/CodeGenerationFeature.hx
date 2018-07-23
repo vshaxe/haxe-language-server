@@ -17,9 +17,6 @@ class CodeGenerationFeature {
         this.context = context;
         context.registerCodeActionContributor(generateAnonymousFunction);
         context.registerCodeActionContributor(generateCaptureVariables);
-        #if false
-        context.registerCodeActionContributor(extractVariable);
-        #end
     }
 
     function isSignatureValid(params:CodeActionParams):Bool {
@@ -68,46 +65,5 @@ class CodeGenerationFeature {
             title: "Generate capture variables",
             edit: WorkspaceEditHelper.create(context, params, [{range: position.toRange(), newText: argNames.join(", ")}])
         }];
-    }
-
-    /*function extractVariable(params:CodeActionParams):Array<Command> {
-        var range = params.range;
-        if (range.isEmpty()) return [];
-
-        var doc = context.documents.get(params.textDocument.uri);
-        var startLine = range.start.line;
-        var indent = doc.indentAt(startLine);
-        var extraction = extractRange(doc, range);
-        var variable = '${indent}var $$ = $extraction;\n';
-        var insertRange = {line: startLine, character: 0}.toRange();
-
-        return new ApplyFixesCommand("Extract variable", params,
-            [{range: insertRange, newText: variable}, {range: range, newText: "$"}]);
-    }*/
-
-    /**
-        Extracts text from a range in the document, while being smart about not including:
-            - leading/trailing whitespace
-            - trailing semicolons
-    **/
-    function extractRange(doc:TextDocument, range:Range):String {
-        var text = doc.getText(range).replace("$", "\\$");
-
-        if (text.endsWith(";")) {
-            text = text.substr(0, text.length - 1);
-            range.end.character--;
-        }
-
-        var ltrimmed = text.ltrim();
-        var whitespaceChars = text.length - ltrimmed.length;
-        range.start.character += whitespaceChars;
-        text = ltrimmed;
-
-        var rtrimmed = text.rtrim();
-        whitespaceChars = text.length - rtrimmed.length;
-        range.end.character -= whitespaceChars;
-        text = rtrimmed;
-
-        return text;
     }
 }
