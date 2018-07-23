@@ -193,7 +193,7 @@ class CompletionFeature {
             case Keyword: createKeywordCompletionItem(item.args, data);
             case Local: {
                     label: item.args.name,
-                    kind: Variable,
+                    kind: if (item.args.origin == LocalFunction) Method else Variable,
                     detail: {
                         var type = printer.printLocalDefinition(item.args, item.type);
                         var origin = printer.printLocalOrigin(item.args.origin);
