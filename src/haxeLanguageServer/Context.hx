@@ -328,26 +328,37 @@ class Context {
     }
 
     function onDidOpenTextDocument(event:DidOpenTextDocumentParams) {
-        activeEditor = event.textDocument.uri;
-        documents.onDidOpenTextDocument(event);
-        publishDiagnostics(event.textDocument.uri);
+        var uri = event.textDocument.uri;
+        if (uri.isFile()) {
+            activeEditor = uri;
+            documents.onDidOpenTextDocument(event);
+            publishDiagnostics(uri);
+        }
     }
 
     function onDidChangeTextDocument(event:DidChangeTextDocumentParams) {
-        if (haxeServer.supports(ServerMethods.Invalidate)) {
-            callHaxeMethod(ServerMethods.Invalidate, {file: event.textDocument.uri.toFsPath()}, null, _ -> null, error -> {
-                trace("Error during " + ServerMethods.Invalidate + " " + error);
-            });
+        var uri = event.textDocument.uri;
+        if (uri.isFile()) {
+            if (haxeServer.supports(ServerMethods.Invalidate)) {
+                callHaxeMethod(ServerMethods.Invalidate, {file: uri.toFsPath()}, null, _ -> null, error -> {
+                    trace("Error during " + ServerMethods.Invalidate + " " + error);
+                });
+            }
+            documents.onDidChangeTextDocument(event);
         }
-        documents.onDidChangeTextDocument(event);
     }
 
     function onDidCloseTextDocument(event:DidCloseTextDocumentParams) {
-        documents.onDidCloseTextDocument(event);
+        if (event.textDocument.uri.isFile()) {
+            documents.onDidCloseTextDocument(event);
+        }
     }
 
     function onDidSaveTextDocument(event:DidSaveTextDocumentParams) {
-        publishDiagnostics(event.textDocument.uri);
+        var uri = event.textDocument.uri;
+        if (uri.isFile()) {
+            publishDiagnostics(event.textDocument.uri);
+        }
     }
 
     function onDidChangeWatchedFiles(event:DidChangeWatchedFilesParams) {

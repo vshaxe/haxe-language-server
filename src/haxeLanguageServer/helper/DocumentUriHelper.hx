@@ -15,5 +15,8 @@ class DocumentUriHelper {
         else
             return new FsPath(path);
     }
-}
 
+    public static function isFile(uri:DocumentUri):Bool {
+        return uri.toString().startsWith("file://");
+    }
+}
