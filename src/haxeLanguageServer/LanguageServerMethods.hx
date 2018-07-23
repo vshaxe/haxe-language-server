@@ -87,8 +87,10 @@ class LanguageServerMethods {
 typedef HaxeMethodResult = {
     final method:String;
     final debugInfo:String;
-    final arrivalTime:Float;
-    final beforeProcessingTime:Float;
-    final afterProcessingTime:Float;
     final response:Response<Dynamic>;
+    final ?additionalTimes:{
+        final arrival:Float;
+        final beforeProcessing:Float;
+        final afterProcessing:Float;
+    }
 }

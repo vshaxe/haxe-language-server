@@ -37,19 +37,19 @@ typedef InitializeResult = Response<{
 
 typedef Timer = {
     final name:String;
-    final path:String;
-    final info:String;
     final time:Float;
-    final calls:Int;
-    final percentTotal:Float;
-    final percentParent:Float;
+    final ?path:String;
+    final ?info:String;
+    final ?calls:Int;
+    final ?percentTotal:Float;
+    final ?percentParent:Float;
     final ?children:Array<Timer>;
 }
 
 typedef Response<T> = {
     final result:T;
     /** UNIX timestamp at the moment the data was sent. **/
-    final timestamp:Float;
+    final ?timestamp:Float;
     /** Only sent if `--times` is enabled. **/
     final ?timers:Timer;
 }

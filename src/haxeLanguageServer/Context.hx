@@ -432,9 +432,11 @@ class Context {
         var methodResult:HaxeMethodResult = {
             method: method,
             debugInfo: debugInfo,
-            arrivalTime: arrivalTime,
-            beforeProcessingTime: beforeProcessingTime,
-            afterProcessingTime: afterProcessingTime,
+            additionalTimes: {
+                arrival: arrivalTime,
+                beforeProcessing: beforeProcessingTime,
+                afterProcessing: afterProcessingTime
+            },
             response: haxeResponse
         };
         protocol.sendNotification(LanguageServerMethods.DidRunHaxeMethod, methodResult);
@@ -461,5 +463,25 @@ class Context {
 
     public function registerCodeActionContributor(contributor:CodeActionContributor) {
         codeActions.registerContributor(contributor);
+    }
+
+    public function startTimer(method:String) {
+        var startTime = Date.now().getTime();
+        return function(result:Dynamic, ?debugInfo:String) {
+            if (sendMethodResults) {
+                protocol.sendNotification(LanguageServerMethods.DidRunHaxeMethod, {
+                    method: method,
+                    debugInfo: debugInfo,
+                    response: {
+                        timestamp: 0,
+                        timers: {
+                            name: method,
+                            time: (Date.now().getTime() - startTime) / 1000,
+                        },
+                        result: result
+                    }
+                });
+            }
+        };
     }
 }

@@ -1,6 +1,5 @@
 package haxeLanguageServer.features;
 
-import haxe.Timer;
 import formatter.Formatter;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
@@ -15,8 +14,7 @@ class DocumentFormattingFeature {
     }
 
     function onDocumentFormatting(params:DocumentFormattingParams, token:CancellationToken, resolve:Array<TextEdit>->Void, reject:ResponseError<NoData>->Void) {
-        var stamp = Timer.stamp();
-
+        var onResolve = context.startTimer(Methods.DocumentFormatting);
         var doc = context.documents.get(params.textDocument.uri);
         var formatter = new Formatter();
         try {
@@ -34,8 +32,9 @@ class DocumentFormattingFeature {
                         start: {line: 0, character: 0},
                         end: {line: doc.lineCount - 1, character: doc.lineAt(doc.lineCount - 1).length}
                     }
-                    trace("formatting took " + ((Timer.stamp() - stamp) * 1000) + "ms");
-                    resolve([{range: fullRange, newText: formattedCode}]);
+                    var edits = [{range: fullRange, newText: formattedCode}];
+                    resolve(edits);
+                    onResolve(edits);
                 case Failure(errorMessage):
                     reject(ResponseError.internalError(errorMessage));
                 case Disabled:
