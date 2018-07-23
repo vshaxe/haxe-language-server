@@ -48,20 +48,24 @@ class DocumentSymbolsResolver {
                         name = "<macro class>";
                     }
                     add(token, Class, Type(Class), name);
+
                 case Kwd(KwdInterface):
                     add(token, Interface, Type(Interface));
+
                 case Kwd(KwdAbstract):
-                    var isEnumAbstract = token.isTypeEnumAbstract();
-                    add(token,
-                        if (isEnumAbstract) Enum else Class,
-                        Type(if (isEnumAbstract) EnumAbstract else Abstract)
-                    );
+                    if (token.isTypeEnumAbstract()) {
+                        add(token, Enum, Type(EnumAbstract));
+                    } else {
+                        add(token, Class, Type(Abstract));
+                    }
+
                 case Kwd(KwdTypedef):
-                    var isStructure = token.isTypeStructure();
-                    add(token,
-                        if (isStructure) Struct else Interface,
-                        Type(if (isStructure) Struct else TypeAlias)
-                    );
+                    if (token.isTypeStructure()) {
+                        add(token, Struct, Type(Struct));
+                    } else {
+                        add(token, Interface, Type(TypeAlias));
+                    }
+
                 case Kwd(KwdEnum):
                     if (token.isTypeEnum()) {
                         add(token, Enum, Type(Enum));
@@ -86,6 +90,7 @@ class DocumentSymbolsResolver {
                                 Method;
                             }
                             add(token, kind, currentLevel, name);
+
                         case VAR(name, _, isStatic, isInline, _, _):
                             if (currentLevel == Expression) {
                                 var children = token.children;
@@ -107,15 +112,19 @@ class DocumentSymbolsResolver {
                                 }
                                 add(token, kind, currentLevel, name);
                             }
+
                         case PROP(name, _, _, _, _):
                             add(token, Property, currentLevel, name);
+
                         case UNKNOWN:
                     }
+
                 case Kwd(KwdFor), Kwd(KwdCatch):
                     var ident = token.access().firstChild().is(POpen).firstChild().isCIdent().token;
                     if (ident != null) {
                         add(ident, Variable, Expression, false);
                     }
+
                 case Const(CIdent(_)):
                     switch (stack.getParentTypeKind()) {
                         case null:
@@ -133,6 +142,7 @@ class DocumentSymbolsResolver {
                             }
                         case _:
                     }
+
                 case _:
             }
             return GO_DEEPER;
