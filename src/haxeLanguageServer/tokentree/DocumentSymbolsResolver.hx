@@ -8,7 +8,6 @@ using tokentree.utils.FieldUtils;
 
 class DocumentSymbolsResolver {
     final document:TextDocument;
-    final displayOffsetConverter = new Haxe3DisplayOffsetConverter();
 
     public function new(document:TextDocument) {
         this.document = document;

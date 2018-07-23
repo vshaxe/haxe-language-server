@@ -1,3 +1,10 @@
+class BreakPositions {
+    // °𐐀
+    /* °𐐀 */
+    var _ = "°𐐀";
+    var _ = ~/°𐐀/;
+}
+
 abstract Abstract<TAbstract>(Int) {
     inline static var CONSTANT = 5;
 
@@ -23,7 +30,6 @@ abstract Abstract<TAbstract>(Int) {
     function foo<TAbstractField>() {}
 }
 
-// °
 class Class<TClass1, TClass2> {
     inline static var CONSTANT = 5;
 
