@@ -23,6 +23,7 @@ abstract Abstract<TAbstract>(Int) {
     function foo<TAbstractField>() {}
 }
 
+// °
 class Class<TClass1, TClass2> {
     inline static var CONSTANT = 5;
 

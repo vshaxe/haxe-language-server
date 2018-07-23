@@ -8,6 +8,7 @@ using tokentree.utils.FieldUtils;
 
 class DocumentSymbolsResolver {
     final document:TextDocument;
+    final displayOffsetConverter = new Haxe3DisplayOffsetConverter();
 
     public function new(document:TextDocument) {
         this.document = document;
@@ -141,9 +142,11 @@ class DocumentSymbolsResolver {
     }
 
     function positionToRange(pos:haxe.macro.Expr.Position):Range {
+        var min = displayOffsetConverter.byteOffsetToCharacterOffset(document.content, pos.min);
+        var max = displayOffsetConverter.byteOffsetToCharacterOffset(document.content, pos.max);
         return {
-            start: document.positionAt(pos.min),
-            end: document.positionAt(pos.max)
+            start: document.positionAt(min),
+            end: document.positionAt(max)
         };
     }
 }
