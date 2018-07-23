@@ -36,8 +36,8 @@ class DocumentSymbolsResolver {
                     name: name,
                     detail: "",
                     kind: kind,
-                    range: positionToRange(token.getPos()),
-                    selectionRange: positionToRange(selectedToken.pos),
+                    range: positionToRange(document.tokens.getTreePos(token)),
+                    selectionRange: positionToRange(document.tokens.getPos(selectedToken)),
                     children: []
                 }, opensScope);
             }
@@ -142,11 +142,9 @@ class DocumentSymbolsResolver {
     }
 
     function positionToRange(pos:haxe.macro.Expr.Position):Range {
-        var min = displayOffsetConverter.byteOffsetToCharacterOffset(document.content, pos.min);
-        var max = displayOffsetConverter.byteOffsetToCharacterOffset(document.content, pos.max);
         return {
-            start: document.positionAt(min),
-            end: document.positionAt(max)
+            start: document.positionAt(pos.min),
+            end: document.positionAt(pos.max)
         };
     }
 }

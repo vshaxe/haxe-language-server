@@ -1,5 +1,6 @@
 package haxeLanguageServer.tokentree;
 
+import js.node.Buffer;
 import byte.ByteData;
 import haxe.io.Bytes;
 import tokentree.TokenStream;
@@ -7,6 +8,7 @@ import tokentree.TokenTreeBuilder;
 import tokentree.TokenTree;
 import haxeparser.HaxeLexer;
 import haxeparser.Data.Token;
+import haxe.macro.Expr.Position;
 
 class TokenTreeManager {
     public static function create(content:String):TokenTreeManager {
@@ -43,10 +45,68 @@ class TokenTreeManager {
     public final bytes:Bytes;
     public final list:Array<Token>;
     public final tree:TokenTree;
+    var tokenCharacterRanges:Map<Int, Position>;
 
     function new(bytes:Bytes, list:Array<Token>, tree:TokenTree) {
         this.bytes = bytes;
         this.list = list;
         this.tree = tree;
+    }
+
+    /**
+        Gets the character position of a token.
+    **/
+    public function getPos(tokenTree:TokenTree):Position {
+        createTokenCharacterRanges();
+        return if (tokenCharacterRanges[tokenTree.index] == null) {
+            tokenTree.pos;
+        } else {
+            tokenCharacterRanges[tokenTree.index];
+        }
+    }
+
+    /**
+        Gets the character position of a subtree.
+        Copy of `TokenTree.getPos()`.
+    **/
+    public function getTreePos(tokenTree:TokenTree):Position {
+        var pos = getPos(tokenTree);
+        if (tokenTree.children == null || tokenTree.children.length <= 0)
+            return pos;
+
+        var fullPos:Position = {file: pos.file, min: pos.min, max: pos.max};
+        for (child in tokenTree.children) {
+            var childPos = getTreePos(child);
+            if (childPos.min < fullPos.min)
+                fullPos.min = childPos.min;
+            if (childPos.max > fullPos.max)
+                fullPos.max = childPos.max;
+        }
+        return fullPos;
+    }
+
+    function createTokenCharacterRanges() {
+        if (tokenCharacterRanges != null) {
+            return;
+        }
+        tokenCharacterRanges = new Map();
+        var offset = 0;
+        for (i in 0...list.length) {
+            var token = list[i];
+            offset += switch (token.tok) {
+                // these should be the only places where Unicode characters can appear in Haxe
+                case Const(CString(s)), Const(CRegexp(s, _)), Comment(s), CommentLine(s):
+                    s.length - Buffer.byteLength(s);
+                case _:
+                    0;
+            }
+            if (offset != 0) {
+                tokenCharacterRanges[i] = {
+                    file: token.pos.file,
+                    min: token.pos.min + offset,
+                    max: token.pos.max + offset
+                };
+            }
+        }
     }
 }
