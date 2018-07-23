@@ -20,10 +20,10 @@ class DocumentFormattingFeature {
         try {
             var result = formatter.formatFile({
                     name: doc.uri.toFsPath().toString(),
-                    content: doc.bytes
+                    content: doc.tokens.bytes
                 }, {
-                    tokens: doc.tokens,
-                    tokenTree: doc.tokenTree
+                    tokens: doc.tokens.list,
+                    tokenTree: doc.tokens.tree
                 }
             );
             switch (result) {
