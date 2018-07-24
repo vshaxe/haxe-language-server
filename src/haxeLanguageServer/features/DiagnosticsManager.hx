@@ -208,7 +208,7 @@ class DiagnosticsManager {
                 case DKRemovableCode: getRemovableCodeActions(params, d);
             });
         }
-        actions = actions.concat(getSourceActions(params, actions));
+        actions = getSourceActions(params, actions).concat(actions);
         return actions;
     }
 
@@ -326,13 +326,24 @@ class DiagnosticsManager {
                     {range: patchRange(doc, key.range), newText: ""}
         ];
 
+        var title = "Remove all unused imports/usings";
+        var edit = WorkspaceEditHelper.create(context, params, fixes);
         var diagnostics = existingActions.filter(action -> action.title == RemoveUnusedImportUsingTitle)
             .map(action -> action.diagnostics).flatten().array();
-        var actions = [];
+
+        var actions:Array<CodeAction> = [];
+        if (fixes.length > 0) {
+            actions.push({
+                title: title,
+                edit: edit,
+                diagnostics: diagnostics
+            });
+        }
         if (fixes.length > 1) {
-            existingActions.unshift({
-                title: "Remove all unused imports/usings",
-                edit: WorkspaceEditHelper.create(context, params, fixes),
+            actions.push({
+                title: title,
+                kind: SourceOrganizeImports,
+                edit: edit,
                 diagnostics: diagnostics
             });
         }
