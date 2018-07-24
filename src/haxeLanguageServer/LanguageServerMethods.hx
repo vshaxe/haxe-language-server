@@ -75,8 +75,6 @@ class LanguageServerMethods {
         This notification is sent from the server to the client to indicate that it has failed to build a completion cache.
     **/
     static inline var CacheBuildFailed = new NotificationMethod<NoData,NoData>("haxe/cacheBuildFailed");
-
-    static inline var DocumentSymbols = new RequestMethod<DocumentSymbolParams,Array<DocumentSymbol>,NoData,TextDocumentRegistrationOptions>("haxe/documentSymbol");
 }
 
 typedef HaxeMethodResult = {
