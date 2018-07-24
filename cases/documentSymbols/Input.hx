@@ -30,7 +30,9 @@ abstract Abstract<TAbstract>(Int) {
     function foo<TAbstractField>() {}
 }
 
+@:deprecated
 class Class<TClass1, TClass2> {
+    @:deprecated
     inline static var CONSTANT = 5;
 
     var variable:Int;
@@ -47,7 +49,7 @@ class Class<TClass1, TClass2> {
 
     final function finalMethod():Void {}
 
-    @:op(A + B)
+    @:op(A + B) @:deprecated
     public function fakeAdd(rhs:Int):Int {
         return 0;
     }

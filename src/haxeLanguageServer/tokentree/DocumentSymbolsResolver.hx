@@ -31,14 +31,18 @@ class DocumentSymbolsResolver {
                 if (opensScope == null) {
                     opensScope = true;
                 }
-                stack.addSymbol(level, {
+                var symbol:DocumentSymbol = {
                     name: name,
                     detail: "",
                     kind: kind,
                     range: positionToRange(document.tokens.getTreePos(token)),
                     selectionRange: positionToRange(document.tokens.getPos(selectedToken)),
                     children: []
-                }, opensScope);
+                };
+                if (token.isDeprecated()) {
+                    symbol.deprecated = true;
+                }
+                stack.addSymbol(level, symbol, opensScope);
             }
 
             switch (token.tok) {
