@@ -2,7 +2,6 @@ package haxeLanguageServer.tokentree;
 
 import tokentree.TokenTree;
 import languageServerProtocol.protocol.FoldingRange.FoldingRangeClientCapabilities;
-import haxe.macro.Expr.Position;
 
 class FoldingRangeResolver {
     final document:TextDocument;
@@ -17,9 +16,7 @@ class FoldingRangeResolver {
 
     public function resolve():Array<FoldingRange> {
         var ranges:Array<FoldingRange> = [];
-        function addRange(range:Position, ?kind:FoldingRangeKind) {
-            var start = document.positionAt(range.min);
-            var end = document.positionAt(range.max);
+        function addRange(start:Position, end:Position, ?kind:FoldingRangeKind) {
             var range:FoldingRange = {
                 startLine: start.line,
                 endLine: end.line
@@ -33,12 +30,22 @@ class FoldingRangeResolver {
             }
             ranges.push(range);
         }
-        document.tokens.tree.filterCallback(function(token:TokenTree, depth:Int) {
+        var tokens = document.tokens;
+        tokens.tree.filterCallback(function(token:TokenTree, depth:Int) {
             switch (token.tok) {
                 case BrOpen:
-                    addRange(document.tokens.getTreePos(token));
+                    var range = tokens.getTreePos(token);
+                    var start = document.positionAt(range.min);
+                    var endLine = document.positionAt(range.max).line - 1;
+                    if (endLine > start.line) {
+                        var endCharacter = document.lineAt(endLine).length - 1;
+                        addRange(start, {line: endLine, character: endCharacter});
+                    }
                 case Comment(_):
-                    addRange(document.tokens.getTreePos(token), Comment);
+                    var range = tokens.getTreePos(token);
+                    var start = document.positionAt(range.min);
+                    var end = document.positionAt(range.max);
+                    addRange(start, end, Comment);
                 case _:
             }
             return GO_DEEPER;
