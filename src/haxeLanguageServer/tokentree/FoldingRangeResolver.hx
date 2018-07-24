@@ -34,7 +34,7 @@ class FoldingRangeResolver {
         function addRange(range:haxe.macro.Expr.Position, ?kind:FoldingRangeKind) {
             var start = document.positionAt(range.min);
             var end = document.positionAt(range.max);
-            add(start, end, Comment);
+            add(start, end, kind);
         }
 
         var firstImport = null;
