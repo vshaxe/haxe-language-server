@@ -16,7 +16,7 @@ class FoldingRangeResolver {
 
     public function resolve():Array<FoldingRange> {
         var ranges:Array<FoldingRange> = [];
-        function addRange(start:Position, end:Position, ?kind:FoldingRangeKind) {
+        function add(start:Position, end:Position, ?kind:FoldingRangeKind) {
             var range:FoldingRange = {
                 startLine: start.line,
                 endLine: end.line
@@ -30,8 +30,17 @@ class FoldingRangeResolver {
             }
             ranges.push(range);
         }
+
+        function addRange(range:haxe.macro.Expr.Position, ?kind:FoldingRangeKind) {
+            var start = document.positionAt(range.min);
+            var end = document.positionAt(range.max);
+            add(start, end, Comment);
+        }
+
+        var firstImport = null;
+        var lastImport = null;
         var tokens = document.tokens;
-        tokens.tree.filterCallback(function(token:TokenTree, depth:Int) {
+        tokens.tree.filterCallback(function(token:TokenTree, _) {
             switch (token.tok) {
                 case BrOpen:
                     var range = tokens.getTreePos(token);
@@ -39,17 +48,29 @@ class FoldingRangeResolver {
                     var endLine = document.positionAt(range.max).line - 1;
                     if (endLine > start.line) {
                         var endCharacter = document.lineAt(endLine).length - 1;
-                        addRange(start, {line: endLine, character: endCharacter});
+                        add(start, {line: endLine, character: endCharacter});
                     }
+
                 case Comment(_):
-                    var range = tokens.getTreePos(token);
-                    var start = document.positionAt(range.min);
-                    var end = document.positionAt(range.max);
-                    addRange(start, end, Comment);
+                    addRange(tokens.getTreePos(token), Comment);
+
+                case Kwd(KwdImport), Kwd(KwdUsing):
+                    if (firstImport == null) {
+                        firstImport = token;
+                    }
+                    lastImport = token;
+
                 case _:
             }
             return GO_DEEPER;
         });
+
+        if (lastImport != null && firstImport != lastImport) {
+            var start = tokens.getPos(firstImport);
+            var end = tokens.getTreePos(lastImport);
+            addRange({file: start.file, min: start.min, max: end.max}, Imports);
+        }
+
         return ranges;
     }
 }
