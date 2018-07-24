@@ -334,15 +334,13 @@ class DiagnosticsManager {
             .map(action -> action.diagnostics).flatten().array();
 
         var actions:Array<CodeAction> = [];
-        if (fixes.length > 0) {
+        if (diagnostics.length > 0) {
             actions.push({
                 title: title,
                 kind: SourceOrganizeImports,
                 edit: edit,
                 diagnostics: diagnostics
             });
-        }
-        if (fixes.length > 1) {
             actions.push({
                 title: title,
                 kind: QuickFix,
