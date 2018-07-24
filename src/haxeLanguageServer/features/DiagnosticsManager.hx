@@ -216,6 +216,7 @@ class DiagnosticsManager {
         var doc = context.documents.get(params.textDocument.uri);
         return [{
             title: RemoveUnusedImportUsingTitle,
+            kind: QuickFix,
             edit: WorkspaceEditHelper.create(context, params, [{range: patchRange(doc, d.range), newText: ""}]),
             diagnostics: [d]
         }];
@@ -308,6 +309,7 @@ class DiagnosticsManager {
         if (range == null) return [];
         return [{
             title: "Remove",
+            kind: QuickFix,
             edit: WorkspaceEditHelper.create(context, params, [{range: range, newText: ""}]),
             diagnostics: [d]
         }];
@@ -335,6 +337,7 @@ class DiagnosticsManager {
         if (fixes.length > 0) {
             actions.push({
                 title: title,
+                kind: QuickFix,
                 edit: edit,
                 diagnostics: diagnostics
             });
