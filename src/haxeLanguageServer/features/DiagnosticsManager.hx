@@ -7,9 +7,11 @@ import haxeLanguageServer.server.DisplayResult;
 import haxeLanguageServer.helper.WorkspaceEditHelper;
 import haxeLanguageServer.LanguageServerMethods;
 import js.node.ChildProcess;
+using Lambda;
 
 class DiagnosticsManager {
     static inline var DiagnosticsSource = "diagnostics";
+    static inline var RemoveUnusedImportUsingTitle = "Remove unused import/using";
 
     final context:Context;
     final diagnosticsArguments:Map<DocumentUri,DiagnosticsMap<Any>>;
@@ -206,58 +208,17 @@ class DiagnosticsManager {
                 case DKRemovableCode: getRemovableCodeActions(params, d);
             });
         }
+        actions = actions.concat(getSourceActions(params, actions));
         return actions;
     }
 
     function getUnusedImportActions(params:CodeActionParams, d:Diagnostic):Array<CodeAction> {
         var doc = context.documents.get(params.textDocument.uri);
-
-        function patchRange(range:Range) {
-            var startLine = doc.lineAt(range.start.line);
-            if (reStartsWhitespace.match(startLine.substring(0, range.start.character)))
-                range = {
-                    start: {
-                        line: range.start.line,
-                        character: 0
-                    },
-                    end: range.end
-                };
-
-            var endLine = if (range.start.line == range.end.line) startLine else doc.lineAt(range.end.line);
-            if (reEndsWithWhitespace.match(endLine.substring(range.end.character)))
-                range = {
-                    start: range.start,
-                    end: {
-                        line: range.end.line + 1,
-                        character: 0
-                    }
-                };
-            return range;
-        }
-
-        var ret:Array<CodeAction> = [{
-            title: "Remove unused import/using",
-            edit: WorkspaceEditHelper.create(context, params, [{range: patchRange(d.range), newText: ""}]),
+        return [{
+            title: RemoveUnusedImportUsingTitle,
+            edit: WorkspaceEditHelper.create(context, params, [{range: patchRange(doc, d.range), newText: ""}]),
             diagnostics: [d]
         }];
-
-        var map = diagnosticsArguments[params.textDocument.uri];
-        if (map != null) {
-            var fixes = [
-                for (key in map.keys())
-                    if (key.code == DKUnusedImport)
-                        {range: patchRange(key.range), newText: ""}
-            ];
-
-            if (fixes.length > 1) {
-                ret.unshift({
-                    title: "Remove all unused imports/usings",
-                    edit: WorkspaceEditHelper.create(context, params, fixes),
-                    diagnostics: [d]
-                });
-            }
-        }
-        return ret;
     }
 
     function getUnresolvedIdentifierActions(params:CodeActionParams, d:Diagnostic):Array<CodeAction> {
@@ -350,6 +311,55 @@ class DiagnosticsManager {
             edit: WorkspaceEditHelper.create(context, params, [{range: range, newText: ""}]),
             diagnostics: [d]
         }];
+    }
+
+    function getSourceActions(params:CodeActionParams, existingActions:Array<CodeAction>):Array<CodeAction> {
+        var map = diagnosticsArguments[params.textDocument.uri];
+        if (map == null) {
+            return [];
+        }
+
+        var doc = context.documents.get(params.textDocument.uri);
+        var fixes = [
+            for (key in map.keys())
+                if (key.code == DKUnusedImport)
+                    {range: patchRange(doc, key.range), newText: ""}
+        ];
+
+        var diagnostics = existingActions.filter(action -> action.title == RemoveUnusedImportUsingTitle)
+            .map(action -> action.diagnostics).flatten().array();
+        var actions = [];
+        if (fixes.length > 1) {
+            existingActions.unshift({
+                title: "Remove all unused imports/usings",
+                edit: WorkspaceEditHelper.create(context, params, fixes),
+                diagnostics: diagnostics
+            });
+        }
+        return actions;
+    }
+
+    function patchRange(doc:TextDocument, range:Range) {
+        var startLine = doc.lineAt(range.start.line);
+        if (reStartsWhitespace.match(startLine.substring(0, range.start.character)))
+            range = {
+                start: {
+                    line: range.start.line,
+                    character: 0
+                },
+                end: range.end
+            };
+
+        var endLine = if (range.start.line == range.end.line) startLine else doc.lineAt(range.end.line);
+        if (reEndsWithWhitespace.match(endLine.substring(range.end.character)))
+            range = {
+                start: range.start,
+                end: {
+                    line: range.end.line + 1,
+                    character: 0
+                }
+            };
+        return range;
     }
 
     inline function getDiagnosticsArguments<T>(uri:DocumentUri, kind:DiagnosticsKind<T>, range:Range):T {
