@@ -278,12 +278,14 @@ class DiagnosticsManager {
         return [
             {
                 title: "Import " + arg.name,
+                kind: QuickFix,
                 edit: WorkspaceEditHelper.create(context, params,
                     [ImportHelper.createImportsEdit(doc, ImportHelper.getImportPosition(doc), [arg.name], importStyle)]),
                 diagnostics: [d]
             },
             {
                 title: "Change to " + arg.name,
+                kind: QuickFix,
                 edit: WorkspaceEditHelper.create(context, params, [{range: d.range, newText: arg.name}]),
                 diagnostics: [d]
             }
@@ -293,6 +295,7 @@ class DiagnosticsManager {
     function getTypoActions(params:CodeActionParams, d:Diagnostic, arg):Array<CodeAction> {
         return [{
             title: "Change to " + arg.name,
+            kind: QuickFix,
             edit: WorkspaceEditHelper.create(context, params, [{range: d.range, newText: arg.name}]),
             diagnostics: [d]
         }];
@@ -314,6 +317,7 @@ class DiagnosticsManager {
                 suggestion = suggestion.trim();
                 actions.push({
                     title: "Change to " + suggestion,
+                    kind: QuickFix,
                     edit: WorkspaceEditHelper.create(context, params, [{range: range, newText: suggestion}]),
                     diagnostics: [d]
                 });
@@ -329,6 +333,7 @@ class DiagnosticsManager {
             var replacement = text.replace(is, shouldBe);
             actions.push({
                 title: "Change to " + replacement,
+                kind: QuickFix,
                 edit: WorkspaceEditHelper.create(context, params, [{range: d.range, newText: replacement}]),
                 diagnostics: [d]
             });
