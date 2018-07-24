@@ -337,7 +337,7 @@ class DiagnosticsManager {
         if (fixes.length > 0) {
             actions.push({
                 title: title,
-                kind: QuickFix,
+                kind: SourceOrganizeImports,
                 edit: edit,
                 diagnostics: diagnostics
             });
@@ -345,7 +345,7 @@ class DiagnosticsManager {
         if (fixes.length > 1) {
             actions.push({
                 title: title,
-                kind: SourceOrganizeImports,
+                kind: QuickFix,
                 edit: edit,
                 diagnostics: diagnostics
             });
