@@ -47,8 +47,7 @@
                         "line": 3,
                         "character": 9
                     }
-                },
-                "children": []
+                }
             },
             {
                 "name": "_",
@@ -73,8 +72,7 @@
                         "line": 4,
                         "character": 9
                     }
-                },
-                "children": []
+                }
             }
         ]
     },
@@ -126,8 +124,7 @@
                         "line": 8,
                         "character": 30
                     }
-                },
-                "children": []
+                }
             },
             {
                 "name": "repeat",
@@ -152,8 +149,7 @@
                         "line": 11,
                         "character": 26
                     }
-                },
-                "children": []
+                }
             },
             {
                 "name": "add",
@@ -178,8 +174,7 @@
                         "line": 15,
                         "character": 28
                     }
-                },
-                "children": []
+                }
             },
             {
                 "name": "get",
@@ -204,8 +199,7 @@
                         "line": 18,
                         "character": 30
                     }
-                },
-                "children": []
+                }
             },
             {
                 "name": "resolve",
@@ -230,8 +224,7 @@
                         "line": 23,
                         "character": 20
                     }
-                },
-                "children": []
+                }
             },
             {
                 "name": "new",
@@ -256,8 +249,7 @@
                         "line": 27,
                         "character": 23
                     }
-                },
-                "children": []
+                }
             },
             {
                 "name": "foo",
@@ -282,8 +274,7 @@
                         "line": 29,
                         "character": 16
                     }
-                },
-                "children": []
+                }
             }
         ]
     },
@@ -311,6 +302,7 @@
                 "character": 11
             }
         },
+        "deprecated": true,
         "children": [
             {
                 "name": "CONSTANT",
@@ -336,7 +328,6 @@
                         "character": 30
                     }
                 },
-                "children": [],
                 "deprecated": true
             },
             {
@@ -362,8 +353,7 @@
                         "line": 37,
                         "character": 16
                     }
-                },
-                "children": []
+                }
             },
             {
                 "name": "variableWithBlockInit",
@@ -413,8 +403,7 @@
                                 "line": 40,
                                 "character": 20
                             }
-                        },
-                        "children": []
+                        }
                     },
                     {
                         "name": "bar",
@@ -439,8 +428,7 @@
                                 "line": 41,
                                 "character": 17
                             }
-                        },
-                        "children": []
+                        }
                     }
                 ]
             },
@@ -467,8 +455,7 @@
                         "line": 45,
                         "character": 16
                     }
-                },
-                "children": []
+                }
             },
             {
                 "name": "finaleVariable",
@@ -493,8 +480,7 @@
                         "line": 47,
                         "character": 24
                     }
-                },
-                "children": []
+                }
             },
             {
                 "name": "finalMethod",
@@ -519,8 +505,7 @@
                         "line": 49,
                         "character": 30
                     }
-                },
-                "children": []
+                }
             },
             {
                 "name": "fakeAdd",
@@ -546,7 +531,6 @@
                         "character": 27
                     }
                 },
-                "children": [],
                 "deprecated": true
             },
             {
@@ -647,8 +631,7 @@
                                                 "line": 69,
                                                 "character": 25
                                             }
-                                        },
-                                        "children": []
+                                        }
                                     }
                                 ]
                             }
@@ -677,8 +660,7 @@
                                 "line": 73,
                                 "character": 32
                             }
-                        },
-                        "children": []
+                        }
                     },
                     {
                         "name": "f",
@@ -728,8 +710,7 @@
                                         "line": 75,
                                         "character": 25
                                     }
-                                },
-                                "children": []
+                                }
                             }
                         ]
                     },
@@ -756,8 +737,7 @@
                                 "line": 77,
                                 "character": 14
                             }
-                        },
-                        "children": []
+                        }
                     },
                     {
                         "name": "b",
@@ -782,8 +762,7 @@
                                 "line": 77,
                                 "character": 17
                             }
-                        },
-                        "children": []
+                        }
                     },
                     {
                         "name": "c",
@@ -833,8 +812,7 @@
                                         "line": 78,
                                         "character": 18
                                     }
-                                },
-                                "children": []
+                                }
                             }
                         ]
                     },
@@ -861,8 +839,7 @@
                                 "line": 82,
                                 "character": 19
                             }
-                        },
-                        "children": []
+                        }
                     },
                     {
                         "name": "element",
@@ -887,8 +864,7 @@
                                 "line": 83,
                                 "character": 23
                             }
-                        },
-                        "children": []
+                        }
                     },
                     {
                         "name": "varInFor",
@@ -913,8 +889,7 @@
                                 "line": 84,
                                 "character": 25
                             }
-                        },
-                        "children": []
+                        }
                     },
                     {
                         "name": "exception",
@@ -939,8 +914,7 @@
                                 "line": 88,
                                 "character": 25
                             }
-                        },
-                        "children": []
+                        }
                     },
                     {
                         "name": "varInCatch",
@@ -965,8 +939,7 @@
                                 "line": 89,
                                 "character": 27
                             }
-                        },
-                        "children": []
+                        }
                     },
                     {
                         "name": "MacroClass",
@@ -1016,8 +989,7 @@
                                         "line": 93,
                                         "character": 26
                                     }
-                                },
-                                "children": []
+                                }
                             }
                         ]
                     },
@@ -1069,8 +1041,7 @@
                                         "line": 97,
                                         "character": 26
                                     }
-                                },
-                                "children": []
+                                }
                             }
                         ]
                     },
@@ -1097,8 +1068,7 @@
                                 "line": 103,
                                 "character": 34
                             }
-                        },
-                        "children": []
+                        }
                     }
                 ]
             },
@@ -1125,11 +1095,9 @@
                         "line": 106,
                         "character": 16
                     }
-                },
-                "children": []
+                }
             }
-        ],
-        "deprecated": true
+        ]
     },
     {
         "name": "Interface",
@@ -1179,8 +1147,7 @@
                         "line": 110,
                         "character": 16
                     }
-                },
-                "children": []
+                }
             },
             {
                 "name": "foo",
@@ -1205,8 +1172,7 @@
                         "line": 111,
                         "character": 16
                     }
-                },
-                "children": []
+                }
             }
         ]
     },
@@ -1308,8 +1274,7 @@
                                         "line": 117,
                                         "character": 26
                                     }
-                                },
-                                "children": []
+                                }
                             },
                             {
                                 "name": "macroFunction",
@@ -1359,8 +1324,7 @@
                                                 "line": 120,
                                                 "character": 29
                                             }
-                                        },
-                                        "children": []
+                                        }
                                     }
                                 ]
                             }
@@ -1391,8 +1355,7 @@
                         "line": 125,
                         "character": 30
                     }
-                },
-                "children": []
+                }
             },
             {
                 "name": "Value1",
@@ -1417,8 +1380,7 @@
                         "line": 127,
                         "character": 14
                     }
-                },
-                "children": []
+                }
             },
             {
                 "name": "Value2",
@@ -1443,8 +1405,7 @@
                         "line": 128,
                         "character": 14
                     }
-                },
-                "children": []
+                }
             },
             {
                 "name": "add",
@@ -1469,8 +1430,7 @@
                         "line": 130,
                         "character": 28
                     }
-                },
-                "children": []
+                }
             }
         ]
     },
@@ -1522,8 +1482,7 @@
                         "line": 134,
                         "character": 30
                     }
-                },
-                "children": []
+                }
             },
             {
                 "name": "Value1",
@@ -1548,8 +1507,7 @@
                         "line": 136,
                         "character": 14
                     }
-                },
-                "children": []
+                }
             },
             {
                 "name": "Value2",
@@ -1574,8 +1532,7 @@
                         "line": 137,
                         "character": 14
                     }
-                },
-                "children": []
+                }
             }
         ]
     },
@@ -1627,8 +1584,7 @@
                         "line": 141,
                         "character": 11
                     }
-                },
-                "children": []
+                }
             },
             {
                 "name": "Complex",
@@ -1653,8 +1609,7 @@
                         "line": 142,
                         "character": 12
                     }
-                },
-                "children": []
+                }
             }
         ]
     },
@@ -1681,8 +1636,7 @@
                 "line": 145,
                 "character": 17
             }
-        },
-        "children": []
+        }
     },
     {
         "name": "TypedefShortFields",
@@ -1732,8 +1686,7 @@
                         "line": 148,
                         "character": 7
                     }
-                },
-                "children": []
+                }
             },
             {
                 "name": "b",
@@ -1758,8 +1711,7 @@
                         "line": 149,
                         "character": 6
                     }
-                },
-                "children": []
+                }
             }
         ]
     },
@@ -1811,8 +1763,7 @@
                         "line": 153,
                         "character": 20
                     }
-                },
-                "children": []
+                }
             },
             {
                 "name": "b",
@@ -1837,8 +1788,7 @@
                         "line": 154,
                         "character": 9
                     }
-                },
-                "children": []
+                }
             },
             {
                 "name": "c",
@@ -1863,8 +1813,7 @@
                         "line": 155,
                         "character": 9
                     }
-                },
-                "children": []
+                }
             },
             {
                 "name": "foo",
@@ -1889,8 +1838,7 @@
                         "line": 156,
                         "character": 16
                     }
-                },
-                "children": []
+                }
             }
         ]
     },
@@ -1942,8 +1890,7 @@
                         "line": 161,
                         "character": 7
                     }
-                },
-                "children": []
+                }
             },
             {
                 "name": "b",
@@ -1968,8 +1915,7 @@
                         "line": 162,
                         "character": 6
                     }
-                },
-                "children": []
+                }
             }
         ]
     },
@@ -2021,8 +1967,7 @@
                         "line": 166,
                         "character": 6
                     }
-                },
-                "children": []
+                }
             },
             {
                 "name": "b",
@@ -2047,8 +1992,7 @@
                         "line": 168,
                         "character": 6
                     }
-                },
-                "children": []
+                }
             }
         ]
     },
@@ -2075,7 +2019,6 @@
                 "line": 171,
                 "character": 22
             }
-        },
-        "children": []
+        }
     }
 ]

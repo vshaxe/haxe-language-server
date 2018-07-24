@@ -36,8 +36,7 @@ class DocumentSymbolsResolver {
                     detail: "",
                     kind: kind,
                     range: positionToRange(document.tokens.getTreePos(token)),
-                    selectionRange: positionToRange(document.tokens.getPos(selectedToken)),
-                    children: []
+                    selectionRange: positionToRange(document.tokens.getPos(selectedToken))
                 };
                 if (token.isDeprecated()) {
                     symbol.deprecated = true;
@@ -170,7 +169,7 @@ private enum SymbolLevel {
     Expression;
 }
 
-private abstract SymbolStack(Array<{level:SymbolLevel, symbols:Array<DocumentSymbol>}>) {
+private abstract SymbolStack(Array<{level:SymbolLevel, symbol:DocumentSymbol}>) {
     public var depth(get,set):Int;
     inline function get_depth() return this.length - 1;
     function set_depth(newDepth:Int) {
@@ -191,16 +190,30 @@ private abstract SymbolStack(Array<{level:SymbolLevel, symbols:Array<DocumentSym
     inline function get_level() return this[depth].level;
 
     public var root(get,never):Array<DocumentSymbol>;
-    inline function get_root() return this[0].symbols;
+    inline function get_root() return this[0].symbol.children;
 
     public function new() {
-        this = [{level: Root, symbols: new Array<DocumentSymbol>()}];
+        this = [{
+            level: Root,
+            symbol: {
+                name: "root",
+                kind: Module,
+                range: null,
+                selectionRange: null,
+                children: []
+            }
+        }];
     }
 
     public function addSymbol(level:SymbolLevel, symbol:DocumentSymbol, opensScope:Bool) {
-        this[depth].symbols.push(symbol);
+        var parentSymbol = this[depth].symbol;
+        if (parentSymbol.children == null) {
+            parentSymbol.children = [];
+        }
+        parentSymbol.children.push(symbol);
+
         if (opensScope) {
-            this[depth + 1] = {level: level, symbols: symbol.children};
+            this[depth + 1] = {level: level, symbol: symbol};
         }
     }
 
