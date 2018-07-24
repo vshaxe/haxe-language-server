@@ -12,6 +12,7 @@ using Lambda;
 class DiagnosticsManager {
     static inline var DiagnosticsSource = "diagnostics";
     static inline var RemoveUnusedImportUsingTitle = "Remove unused import/using";
+    static inline var RemoveAllUnusedImportsUsingsTitle = "Remove all unused imports/usings";
 
     final context:Context;
     final diagnosticsArguments:Map<DocumentUri,DiagnosticsMap<Any>>;
@@ -208,7 +209,7 @@ class DiagnosticsManager {
                 case DKRemovableCode: getRemovableCodeActions(params, d);
             });
         }
-        actions = getSourceActions(params, actions).concat(actions);
+        actions = getOrganizeImportActions(params, actions).concat(actions);
         return actions;
     }
 
@@ -315,7 +316,12 @@ class DiagnosticsManager {
         }];
     }
 
-    function getSourceActions(params:CodeActionParams, existingActions:Array<CodeAction>):Array<CodeAction> {
+    function getOrganizeImportActions(params:CodeActionParams, existingActions:Array<CodeAction>):Array<CodeAction> {
+        var diagnostics = existingActions.filter(action -> action.title == RemoveUnusedImportUsingTitle)
+            .map(action -> action.diagnostics).flatten().array();
+        if (diagnostics.length == 0) {
+            return [];
+        }
         var map = diagnosticsArguments[params.textDocument.uri];
         if (map == null) {
             return [];
@@ -327,28 +333,22 @@ class DiagnosticsManager {
                 if (key.code == DKUnusedImport)
                     {range: patchRange(doc, key.range), newText: ""}
         ];
-
-        var title = "Remove all unused imports/usings";
         var edit = WorkspaceEditHelper.create(context, params, fixes);
-        var diagnostics = existingActions.filter(action -> action.title == RemoveUnusedImportUsingTitle)
-            .map(action -> action.diagnostics).flatten().array();
 
-        var actions:Array<CodeAction> = [];
-        if (diagnostics.length > 0) {
-            actions.push({
-                title: title,
+        return [
+            {
+                title: RemoveAllUnusedImportsUsingsTitle,
                 kind: SourceOrganizeImports,
                 edit: edit,
                 diagnostics: diagnostics
-            });
-            actions.push({
-                title: title,
+            },
+            {
+                title: RemoveAllUnusedImportsUsingsTitle,
                 kind: QuickFix,
                 edit: edit,
                 diagnostics: diagnostics
-            });
-        }
-        return actions;
+            }
+        ];
     }
 
     function patchRange(doc:TextDocument, range:Range) {
