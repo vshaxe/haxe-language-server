@@ -180,6 +180,7 @@ class Context {
 
         documents = new TextDocuments(protocol);
         new DocumentSymbolsFeature(this);
+        new FoldingRangeFeature(this);
         #if debug
         new DocumentFormattingFeature(this);
         #end
@@ -206,7 +207,8 @@ class Context {
                 codeLensProvider: {
                     resolveProvider: true
                 },
-                renameProvider: true
+                renameProvider: true,
+                foldingRangeProvider: true
             }
         });
     }
