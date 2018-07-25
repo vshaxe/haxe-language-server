@@ -48,7 +48,7 @@ class FoldingRangeResolver {
         var tokens = document.tokens;
         tokens.tree.filterCallback(function(token:TokenTree, _) {
             switch (token.tok) {
-                case BrOpen:
+                case BrOpen, Const(CString(_)), BkOpen:
                     var range = tokens.getTreePos(token);
                     var start = document.positionAt(range.min);
                     var end = getEndOfPreviousLine(range.max);
