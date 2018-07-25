@@ -335,20 +335,23 @@ class DiagnosticsManager {
         ];
         var edit = WorkspaceEditHelper.create(context, params, fixes);
 
-        return [
+        var actions = [
             {
                 title: RemoveAllUnusedImportsUsingsTitle,
                 kind: SourceOrganizeImports,
                 edit: edit,
                 diagnostics: diagnostics
-            },
-            {
+            }
+        ];
+        if (fixes.length > 1) {
+            actions.push({
                 title: RemoveAllUnusedImportsUsingsTitle,
                 kind: QuickFix,
                 edit: edit,
                 diagnostics: diagnostics
-            }
-        ];
+            });
+        }
+        return actions;
     }
 
     function patchRange(doc:TextDocument, range:Range) {
