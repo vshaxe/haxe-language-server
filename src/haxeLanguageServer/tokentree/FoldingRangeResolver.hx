@@ -1,10 +1,13 @@
 package haxeLanguageServer.tokentree;
 
 import tokentree.TokenTree;
-using tokentree.TokenTreeAccessHelper;
 import languageServerProtocol.protocol.FoldingRange.FoldingRangeClientCapabilities;
+using tokentree.TokenTreeAccessHelper;
 
 class FoldingRangeResolver {
+    static final regionStartPattern = ~/^\s*[#{]?\s*region\b/;
+    static final regionEndPattern = ~/^\s*[#}]?\s*end ?region\b/;
+
     final document:TextDocument;
     final lineFoldingOnly:Bool;
 
@@ -41,6 +44,7 @@ class FoldingRangeResolver {
         var firstImport = null;
         var lastImport = null;
         var conditionalStack = [];
+        var regionStack = [];
         var tokens = document.tokens;
         tokens.tree.filterCallback(function(token:TokenTree, _) {
             switch (token.tok) {
@@ -54,6 +58,16 @@ class FoldingRangeResolver {
 
                 case Comment(_):
                     addRange(tokens.getTreePos(token), Comment);
+
+                case CommentLine(s) if (regionStartPattern.match(s)):
+                    regionStack.push(tokens.getPos(token).max);
+
+                case CommentLine(s) if (regionEndPattern.match(s)):
+                    var start = regionStack.pop();
+                    if (start != null) {
+                        var end = tokens.getPos(token);
+                        addRange({file: end.file, min: start, max: end.max}, Region);
+                    }
 
                 case Kwd(KwdImport), Kwd(KwdUsing):
                     if (firstImport == null) {

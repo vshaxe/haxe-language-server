@@ -92,6 +92,41 @@
         "endCharacter": 16
     },
     {
+        "startLine": 63,
+        "endLine": 64,
+        "startCharacter": 20,
+        "endCharacter": 18,
+        "kind": "region"
+    },
+    {
+        "startLine": 66,
+        "endLine": 67,
+        "startCharacter": 19,
+        "endCharacter": 17,
+        "kind": "region"
+    },
+    {
+        "startLine": 62,
+        "endLine": 68,
+        "startCharacter": 16,
+        "endCharacter": 14,
+        "kind": "region"
+    },
+    {
+        "startLine": 71,
+        "endLine": 72,
+        "startCharacter": 14,
+        "endCharacter": 13,
+        "kind": "region"
+    },
+    {
+        "startLine": 75,
+        "endLine": 76,
+        "startCharacter": 16,
+        "endCharacter": 14,
+        "kind": "region"
+    },
+    {
         "startLine": 0,
         "endLine": 7,
         "startCharacter": 0,

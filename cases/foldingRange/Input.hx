@@ -59,3 +59,19 @@ class Foo {
         #end
     }
 }
+
+// # region name
+    // # region name
+    // # endregion
+
+    //# region name
+    //# endregion
+// # endregion
+
+
+// region name
+// end region
+
+
+// { region name
+// } endregion
