@@ -8,6 +8,8 @@ class BreakPositions {
 abstract Abstract<TAbstract>(Int) {
     inline static var CONSTANT = 5;
 
+    public var abstractPropery(get,never):Int;
+
     @:op(A * B)
     public function repeat(rhs:Int):Abstract {
         return this * rhs;
