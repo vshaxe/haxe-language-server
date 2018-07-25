@@ -62,20 +62,25 @@ class FoldingRangeResolver {
                     }
                     lastImport = token;
 
-                case Sharp("if"):
-                    var pClose = token.access().firstChild().is(POpen).lastChild().is(PClose).token;
-                    var pos = if (pClose == null) tokens.getPos(token) else tokens.getPos(pClose);
-                    var start = document.positionAt(pos.max);
-                    start.character++;
-                    conditionalStack.push(start);
+                case Sharp(sharp):
+                    // everything except `#if` ends a range / adds a folding marker
+                    if (sharp == "else" || sharp == "elseif" || sharp == "end") {
+                        var start = conditionalStack.pop();
+                        var pos = tokens.getPos(token);
+                        var endLine = document.positionAt(pos.max).line - 1;
+                        if (start != null && endLine > start.line) {
+                            var endCharacter = document.lineAt(endLine).length - 1;
+                            add(start, {line: endLine, character: endCharacter});
+                        }
+                    }
 
-                case Sharp("end"):
-                    var start = conditionalStack.pop();
-                    var pos = tokens.getPos(token);
-                    var endLine = document.positionAt(pos.max).line - 1;
-                    if (start != null && endLine > start.line) {
-                        var endCharacter = document.lineAt(endLine).length - 1;
-                        add(start, {line: endLine, character: endCharacter});
+                    // everything except `#end` starts a range
+                    if (sharp == "if" || sharp == "else" || sharp == "elseif") {
+                        var pClose = token.access().firstChild().is(POpen).lastChild().is(PClose).token;
+                        var pos = if (pClose == null) tokens.getPos(token) else tokens.getPos(pClose);
+                        var start = document.positionAt(pos.max);
+                        start.character++;
+                        conditionalStack.push(start);
                     }
 
                 case _:

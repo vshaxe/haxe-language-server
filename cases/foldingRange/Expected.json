@@ -8,7 +8,7 @@
     },
     {
         "startLine": 12,
-        "endLine": 47,
+        "endLine": 55,
         "startCharacter": 10,
         "endCharacter": 5
     },
@@ -21,7 +21,7 @@
     },
     {
         "startLine": 16,
-        "endLine": 46,
+        "endLine": 54,
         "startCharacter": 19,
         "endCharacter": 12
     },
@@ -56,14 +56,38 @@
         "endCharacter": 19
     },
     {
+        "startLine": 41,
+        "endLine": 42,
+        "startCharacter": 42,
+        "endCharacter": 19
+    },
+    {
         "startLine": 43,
         "endLine": 44,
+        "startCharacter": 18,
+        "endCharacter": 19
+    },
+    {
+        "startLine": 47,
+        "endLine": 48,
         "startCharacter": 16,
         "endCharacter": 19
     },
     {
+        "startLine": 49,
+        "endLine": 50,
+        "startCharacter": 42,
+        "endCharacter": 19
+    },
+    {
+        "startLine": 51,
+        "endLine": 52,
+        "startCharacter": 18,
+        "endCharacter": 19
+    },
+    {
         "startLine": 38,
-        "endLine": 45,
+        "endLine": 53,
         "startCharacter": 12,
         "endCharacter": 16
     },

@@ -39,9 +39,17 @@ class Foo {
         #if outer
             #if inner1
             call();
+            #elseif (haxe_ver >= "4.0.0")
+            call();
+            #else
+            call();
             #end
 
-            #if inner2
+            #if inner1
+            call();
+            #elseif (haxe_ver >= "4.0.0")
+            call();
+            #else
             call();
             #end
         #end
