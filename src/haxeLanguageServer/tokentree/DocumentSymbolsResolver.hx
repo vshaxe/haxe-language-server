@@ -8,14 +8,17 @@ using tokentree.utils.FieldUtils;
 
 class DocumentSymbolsResolver {
     final document:TextDocument;
+    final includeDocComments:Bool;
 
-    public function new(document:TextDocument) {
+    public function new(document:TextDocument, includeDocComments:Bool) {
         this.document = document;
+        this.includeDocComments = includeDocComments;
     }
 
     public function resolve():Array<DocumentSymbol> {
         var stack = new SymbolStack();
-        document.tokens.tree.filterCallback(function(token:TokenTree, depth:Int) {
+        var tokens = document.tokens;
+        tokens.tree.filterCallback(function(token:TokenTree, depth:Int) {
             stack.depth = depth;
             function add(token:TokenTree, kind:SymbolKind, level:SymbolLevel, ?name:String, ?opensScope:Bool) {
                 var nameToken = token.getNameToken();
@@ -31,12 +34,20 @@ class DocumentSymbolsResolver {
                 if (opensScope == null) {
                     opensScope = true;
                 }
+                var range = tokens.getTreePos(token);
+                if (level != Expression && includeDocComments) {
+                    var docComment = token.getDocComment();
+                    if (docComment != null) {
+                        var docCommentPos = tokens.getPos(docComment);
+                        range = {file: range.file, min: docCommentPos.min, max: range.max};
+                    }
+                }
                 var symbol:DocumentSymbol = {
                     name: name,
                     detail: "",
                     kind: kind,
-                    range: positionToRange(document.tokens.getTreePos(token)),
-                    selectionRange: positionToRange(document.tokens.getPos(nameToken))
+                    range: positionToRange(range),
+                    selectionRange: positionToRange(tokens.getPos(nameToken))
                 };
                 if (token.isDeprecated()) {
                     symbol.deprecated = true;

@@ -56,17 +56,7 @@ class Class<TClass1, TClass2> {
         return 0;
     }
 
-    /**
-
-
-
-    **/
     function foo<TClassField>(param1:Int, param2:Int) {
-        "
-
-
-        ";
-
         function foo2<TLocalFunction>() {
             function foo3() {
                 var foo4:Int;
@@ -181,3 +171,28 @@ typedef TypedefIntersectionTypes = A<T> & B & {
 }
 
 typedef TypedefToArray = Array<{i:Int}>;
+
+/**
+ * Type doc comment
+ */
+// other comments
+// in the way
+class Type {
+    /** var doc comment */
+    var variable:Int;
+
+    /**
+        function doc comment
+    **/
+    function func() {
+        /**
+         * local function doc comment (not a thing)
+         */
+        function localFunction() {}
+
+        /**
+         * local var doc comment (not a thing)
+         */
+        var localVar:Int;
+    }
+}

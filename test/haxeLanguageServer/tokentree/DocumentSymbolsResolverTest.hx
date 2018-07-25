@@ -11,7 +11,7 @@ class DocumentSymbolsResolverTest extends TestCaseBase {
         var content = sys.io.File.getContent(inputPath);
         var uri = new FsPath(inputPath).toUri();
         var document = new TextDocument(uri, "haxe", 0, content);
-        var resolver = new DocumentSymbolsResolver(document);
+        var resolver = new DocumentSymbolsResolver(document, true);
         var symbols = resolver.resolve();
 
         var stringify = Json.stringify.bind(_, null, "    ");
