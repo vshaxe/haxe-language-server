@@ -47,10 +47,9 @@ class FoldingRangeResolver {
                 case BrOpen:
                     var range = tokens.getTreePos(token);
                     var start = document.positionAt(range.min);
-                    var endLine = document.positionAt(range.max).line - 1;
-                    if (endLine > start.line) {
-                        var endCharacter = document.lineAt(endLine).length - 1;
-                        add(start, {line: endLine, character: endCharacter});
+                    var end = getEndOfPreviousLine(range.max);
+                    if (end.line > start.line) {
+                        add(start, end);
                     }
 
                 case Comment(_):
@@ -67,10 +66,9 @@ class FoldingRangeResolver {
                     if (sharp == "else" || sharp == "elseif" || sharp == "end") {
                         var start = conditionalStack.pop();
                         var pos = tokens.getPos(token);
-                        var endLine = document.positionAt(pos.max).line - 1;
-                        if (start != null && endLine > start.line) {
-                            var endCharacter = document.lineAt(endLine).length - 1;
-                            add(start, {line: endLine, character: endCharacter});
+                        var end = getEndOfPreviousLine(pos.max);
+                        if (start != null && end.line > start.line) {
+                            add(start, end);
                         }
                     }
 
@@ -95,5 +93,11 @@ class FoldingRangeResolver {
         }
 
         return ranges;
+    }
+
+    function getEndOfPreviousLine(offset:Int):Position {
+        var endLine = document.positionAt(offset).line - 1;
+        var endCharacter = document.lineAt(endLine).length - 1;
+        return {line: endLine, character: endCharacter};
     }
 }
