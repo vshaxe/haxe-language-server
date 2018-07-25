@@ -101,7 +101,8 @@ class DocumentSymbolsResolver {
                                     // at expression level, we might have a multi-var expr (`var a, b, c;`)
                                     for (i in 0...children.length) {
                                         var opensScope = i == children.length - 1;
-                                        add(children[i], Variable, currentLevel, opensScope);
+                                        var token = if (i == 0) token else children[i];
+                                        add(token, Variable, currentLevel, opensScope);
                                     }
                                 }
                             } else {
