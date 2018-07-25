@@ -18,15 +18,15 @@ class DocumentSymbolsResolver {
         document.tokens.tree.filterCallback(function(token:TokenTree, depth:Int) {
             stack.depth = depth;
             function add(token:TokenTree, kind:SymbolKind, level:SymbolLevel, ?name:String, ?opensScope:Bool) {
-                if (name == null) {
-                    name = token.getName();
+                var nameToken = token.getNameToken();
+                if (nameToken == null && name != null) {
+                    nameToken = token;
                 }
-                if (name == null) {
-                    return;
-                }
-                var selectedToken = token.access().firstChild().or(token);
-                if (selectedToken.inserted) {
+                if (nameToken == null || nameToken.inserted) {
                     return; // don't want to show `autoInsert` vars and similar
+                }
+                if (name == null) {
+                    name = nameToken.getName();
                 }
                 if (opensScope == null) {
                     opensScope = true;
@@ -36,7 +36,7 @@ class DocumentSymbolsResolver {
                     detail: "",
                     kind: kind,
                     range: positionToRange(document.tokens.getTreePos(token)),
-                    selectionRange: positionToRange(document.tokens.getPos(selectedToken))
+                    selectionRange: positionToRange(document.tokens.getPos(nameToken))
                 };
                 if (token.isDeprecated()) {
                     symbol.deprecated = true;
@@ -46,7 +46,7 @@ class DocumentSymbolsResolver {
 
             switch (token.tok) {
                 case Kwd(KwdClass):
-                    var name = token.getName();
+                    var name = token.getNameToken().getName();
                     if (name == null && token.isTypeMacroClass()) {
                         name = "<macro class>";
                     }
