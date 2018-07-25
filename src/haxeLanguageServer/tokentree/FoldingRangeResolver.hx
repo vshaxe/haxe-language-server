@@ -1,6 +1,7 @@
 package haxeLanguageServer.tokentree;
 
 import tokentree.TokenTree;
+using tokentree.TokenTreeAccessHelper;
 import languageServerProtocol.protocol.FoldingRange.FoldingRangeClientCapabilities;
 
 class FoldingRangeResolver {
@@ -39,6 +40,7 @@ class FoldingRangeResolver {
 
         var firstImport = null;
         var lastImport = null;
+        var conditionalStack = [];
         var tokens = document.tokens;
         tokens.tree.filterCallback(function(token:TokenTree, _) {
             switch (token.tok) {
@@ -59,6 +61,22 @@ class FoldingRangeResolver {
                         firstImport = token;
                     }
                     lastImport = token;
+
+                case Sharp("if"):
+                    var pClose = token.access().firstChild().is(POpen).lastChild().is(PClose).token;
+                    var pos = if (pClose == null) tokens.getPos(token) else tokens.getPos(pClose);
+                    var start = document.positionAt(pos.max);
+                    start.character++;
+                    conditionalStack.push(start);
+
+                case Sharp("end"):
+                    var start = conditionalStack.pop();
+                    var pos = tokens.getPos(token);
+                    var endLine = document.positionAt(pos.max).line - 1;
+                    if (start != null && endLine > start.line) {
+                        var endCharacter = document.lineAt(endLine).length - 1;
+                        add(start, {line: endLine, character: endCharacter});
+                    }
 
                 case _:
             }

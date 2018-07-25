@@ -24,5 +24,26 @@ class Foo {
 
 
         }
+
+        #if foo
+        #end
+
+        #if foo
+        
+        #end
+
+        #if (haxe_ver >= "4.0.0")
+        trace("Haxe 4");
+        #end
+
+        #if outer
+            #if inner1
+            call();
+            #end
+
+            #if inner2
+            call();
+            #end
+        #end
     }
 }
