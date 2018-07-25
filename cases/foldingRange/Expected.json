@@ -1,0 +1,47 @@
+[
+    {
+        "startLine": 9,
+        "endLine": 11,
+        "startCharacter": 0,
+        "endCharacter": 3,
+        "kind": "comment"
+    },
+    {
+        "startLine": 12,
+        "endLine": 26,
+        "startCharacter": 10,
+        "endCharacter": 6
+    },
+    {
+        "startLine": 13,
+        "endLine": 15,
+        "startCharacter": 4,
+        "endCharacter": 7,
+        "kind": "comment"
+    },
+    {
+        "startLine": 16,
+        "endLine": 25,
+        "startCharacter": 19,
+        "endCharacter": 10
+    },
+    {
+        "startLine": 17,
+        "endLine": 19,
+        "startCharacter": 25,
+        "endCharacter": 19
+    },
+    {
+        "startLine": 22,
+        "endLine": 24,
+        "startCharacter": 26,
+        "endCharacter": 1
+    },
+    {
+        "startLine": 0,
+        "endLine": 7,
+        "startCharacter": 0,
+        "endCharacter": 13,
+        "kind": "imports"
+    }
+]
