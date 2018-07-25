@@ -92,6 +92,15 @@ class Class<TClass1, TClass2> {
             var varInCatch;
         }
 
+        for (_ in 0...100) {}
+        try {} catch (_:Any) {}
+
+        var _:Int;
+        var _:Int = {
+            var visible:Int = 0;
+            visible;
+        }
+
         macro class MacroClass {
             var macroField:Int;
         }

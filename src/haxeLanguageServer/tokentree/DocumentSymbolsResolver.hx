@@ -151,7 +151,23 @@ class DocumentSymbolsResolver {
             }
             return GO_DEEPER;
         });
-        return stack.root;
+        hideIgnoredVariables(stack.root);
+        return stack.root.children;
+    }
+
+    function hideIgnoredVariables(symbol:DocumentSymbol) {
+        if (symbol.children == null) {
+            return;
+        }
+        var i = symbol.children.length;
+        while (i-- > 0) {
+            var child = symbol.children[i];
+            if (child.children == null && child.name == "_") {
+                symbol.children.remove(child);
+            } else {
+                hideIgnoredVariables(child);
+            }
+        }
     }
 
     function positionToRange(pos:haxe.macro.Expr.Position):Range {
@@ -190,8 +206,8 @@ private abstract SymbolStack(Array<{level:SymbolLevel, symbol:DocumentSymbol}>) 
     public var level(get,never):SymbolLevel;
     inline function get_level() return this[depth].level;
 
-    public var root(get,never):Array<DocumentSymbol>;
-    inline function get_root() return this[0].symbol.children;
+    public var root(get,never):DocumentSymbol;
+    inline function get_root() return this[0].symbol;
 
     public function new() {
         this = [{
