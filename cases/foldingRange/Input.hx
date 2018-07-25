@@ -47,7 +47,11 @@ class Foo {
 
             #if inner1
             call();
-            #elseif (haxe_ver >= "4.0.0")
+            #elseif foo
+            call();
+            call();
+            call();
+            #error "foo"
             call();
             #else
             call();

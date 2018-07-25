@@ -8,7 +8,7 @@
     },
     {
         "startLine": 12,
-        "endLine": 55,
+        "endLine": 59,
         "startCharacter": 10,
         "endCharacter": 5
     },
@@ -21,7 +21,7 @@
     },
     {
         "startLine": 16,
-        "endLine": 54,
+        "endLine": 58,
         "startCharacter": 19,
         "endCharacter": 12
     },
@@ -75,19 +75,19 @@
     },
     {
         "startLine": 49,
-        "endLine": 50,
-        "startCharacter": 42,
+        "endLine": 54,
+        "startCharacter": 20,
         "endCharacter": 19
     },
     {
-        "startLine": 51,
-        "endLine": 52,
+        "startLine": 55,
+        "endLine": 56,
         "startCharacter": 18,
         "endCharacter": 19
     },
     {
         "startLine": 38,
-        "endLine": 53,
+        "endLine": 57,
         "startCharacter": 12,
         "endCharacter": 16
     },
