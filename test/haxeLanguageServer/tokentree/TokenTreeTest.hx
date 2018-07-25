@@ -20,6 +20,7 @@ class TokenTreeTest extends TestCaseBase {
         var inputPath = '$basePath/Input.hx';
 
         var content = sys.io.File.getContent(inputPath);
+        content = content.replace("\r", "");
         var uri = new FsPath(inputPath).toUri();
         var document = new TextDocument(uri, "haxe", 0, content);
 
