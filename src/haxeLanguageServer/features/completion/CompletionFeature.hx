@@ -188,27 +188,8 @@ class CompletionFeature {
             case Type: createTypeCompletionItem(item.args, data);
             case Package: createPackageCompletionItem(item.args, data);
             case Keyword: createKeywordCompletionItem(item.args, data);
-            case Local: {
-                    label: item.args.name,
-                    kind: if (item.args.origin == LocalFunction) Method else Variable,
-                    detail: {
-                        var type = printer.printLocalDefinition(item.args, item.type);
-                        var origin = printer.printLocalOrigin(item.args.origin);
-                        '$type \n($origin)';
-                    }
-                }
-            case Module:
-                var path = item.args.path;
-                var dotPath = path.pack.concat([path.moduleName]).join(".");
-                if (isExcluded(dotPath)) {
-                    null;
-                } else {
-                    {
-                        label: path.moduleName,
-                        kind: Folder,
-                        detail: 'module $dotPath'
-                    }
-                }
+            case Local: createLocalCompletionItem(item, data);
+            case Module: createModuleCompletionItem(item.args, data);
             case Literal: {
                     label: item.args.name,
                     kind: Keyword,
@@ -558,6 +539,33 @@ class CompletionFeature {
         }
 
         return item;
+    }
+
+    function createLocalCompletionItem<T>(item:DisplayItem<Dynamic>, data:CompletionContextData):CompletionItem {
+        var local:DisplayLocal<T> = item.args;
+        return {
+            label: local.name,
+            kind: if (local.origin == LocalFunction) Method else Variable,
+            detail: {
+                var type = printer.printLocalDefinition(local, item.type);
+                var origin = printer.printLocalOrigin(local.origin);
+                '$type \n($origin)';
+            }
+        };
+    }
+
+    function createModuleCompletionItem(module:Module, data:CompletionContextData):CompletionItem {
+        var path = module.path;
+        var dotPath = path.pack.concat([path.moduleName]).join(".");
+        return if (isExcluded(dotPath)) {
+            null;
+        } else {
+            {
+                label: path.moduleName,
+                kind: Folder,
+                detail: 'module $dotPath'
+            }
+        }
     }
 
     static final wordRegex = ~/^\w*/;
