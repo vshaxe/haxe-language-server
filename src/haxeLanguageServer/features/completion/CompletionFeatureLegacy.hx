@@ -109,7 +109,8 @@ class CompletionFeatureLegacy {
             return type != null && parseDisplayType(type).match(DTFunction(_));
 
         return switch (kind) {
-            case "local" | "member" | "static": if (isFunction()) Method else Field;
+            case "local": if (isFunction()) Method else Variable;
+            case "member" | "static": if (isFunction()) Method else Field;
             case "enum" | "enumabstract": Enum;
             case "global": Variable;
             case "type": Class;
