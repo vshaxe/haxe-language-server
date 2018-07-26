@@ -543,6 +543,9 @@ class CompletionFeature {
 
     function createLocalCompletionItem<T>(item:DisplayItem<Dynamic>, data:CompletionContextData):CompletionItem {
         var local:DisplayLocal<T> = item.args;
+        if (local.name == "_") {
+            return null; // naming vars "_" is a common convention for ignoring them
+        }
         return {
             label: local.name,
             kind: if (local.origin == LocalFunction) Method else Variable,

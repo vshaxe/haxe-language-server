@@ -68,6 +68,10 @@ class CompletionFeatureLegacy {
             var type = el.get("t");
             var name = el.firstChild().nodeValue;
 
+            if (kind == "local" && name == "_") {
+                continue;
+            }
+
             var item:CompletionItem = {label: name, detail: ""};
 
             var displayKind = toplevelKindToCompletionItemKind(kind, type);
