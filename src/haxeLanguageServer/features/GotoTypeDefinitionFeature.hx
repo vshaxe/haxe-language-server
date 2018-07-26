@@ -19,7 +19,7 @@ class GotoTypeDefinitionFeature {
         context.callHaxeMethod(DisplayMethods.GotoTypeDefinition, {file: doc.fsPath, contents: doc.content, offset: doc.offsetAt(params.position)}, token, locations -> {
             resolve(locations.map(location -> {
                 {
-                    uri: HaxePosition.getProperFileNameCase(location.file).toUri(),
+                    uri: location.file.toUri(),
                     range: location.range
                 }
             }));

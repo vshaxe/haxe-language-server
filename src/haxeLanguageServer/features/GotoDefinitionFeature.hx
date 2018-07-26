@@ -23,7 +23,7 @@ class GotoDefinitionFeature {
         context.callHaxeMethod(DisplayMethods.GotoDefinition, {file: doc.fsPath, contents: doc.content, offset: offset}, token, locations -> {
             resolve(locations.map(location -> {
                 {
-                    uri: HaxePosition.getProperFileNameCase(location.file).toUri(),
+                    uri: location.file.toUri(),
                     range: location.range
                 }
             }));
