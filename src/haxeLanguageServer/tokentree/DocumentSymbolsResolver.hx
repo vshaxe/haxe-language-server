@@ -31,6 +31,9 @@ class DocumentSymbolsResolver {
                 if (name == null) {
                     name = nameToken.getName();
                 }
+                if (level == Expression && name == "_") {
+                    return; // naming vars "_" is a common convention for ignoring them
+                }
                 if (opensScope == null) {
                     opensScope = true;
                 }
@@ -162,23 +165,7 @@ class DocumentSymbolsResolver {
             }
             return GO_DEEPER;
         });
-        hideIgnoredVariables(stack.root);
         return stack.root.children;
-    }
-
-    function hideIgnoredVariables(symbol:DocumentSymbol) {
-        if (symbol.children == null) {
-            return;
-        }
-        var i = symbol.children.length;
-        while (i-- > 0) {
-            var child = symbol.children[i];
-            if (child.children == null && child.name == "_") {
-                symbol.children.remove(child);
-            } else {
-                hideIgnoredVariables(child);
-            }
-        }
     }
 
     function positionToRange(pos:haxe.macro.Expr.Position):Range {

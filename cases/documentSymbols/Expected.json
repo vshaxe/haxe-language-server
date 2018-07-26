@@ -23,7 +23,58 @@
                 "character": 20
             }
         },
-        "children": []
+        "children": [
+            {
+                "name": "_",
+                "detail": "",
+                "kind": 8,
+                "range": {
+                    "start": {
+                        "line": 2,
+                        "character": 1
+                    },
+                    "end": {
+                        "line": 3,
+                        "character": 18
+                    }
+                },
+                "selectionRange": {
+                    "start": {
+                        "line": 3,
+                        "character": 8
+                    },
+                    "end": {
+                        "line": 3,
+                        "character": 9
+                    }
+                }
+            },
+            {
+                "name": "_",
+                "detail": "",
+                "kind": 8,
+                "range": {
+                    "start": {
+                        "line": 4,
+                        "character": 4
+                    },
+                    "end": {
+                        "line": 4,
+                        "character": 19
+                    }
+                },
+                "selectionRange": {
+                    "start": {
+                        "line": 4,
+                        "character": 8
+                    },
+                    "end": {
+                        "line": 4,
+                        "character": 9
+                    }
+                }
+            }
+        ]
     },
     {
         "name": "Abstract",
@@ -262,7 +313,7 @@
                 "character": 0
             },
             "end": {
-                "line": 108,
+                "line": 104,
                 "character": 1
             }
         },
@@ -517,7 +568,7 @@
                         "character": 4
                     },
                     "end": {
-                        "line": 105,
+                        "line": 101,
                         "character": 5
                     }
                 },
@@ -916,13 +967,13 @@
                         }
                     },
                     {
-                        "name": "_",
+                        "name": "MacroClass",
                         "detail": "",
-                        "kind": 13,
+                        "kind": 5,
                         "range": {
                             "start": {
-                                "line": 88,
-                                "character": 8
+                                "line": 89,
+                                "character": 14
                             },
                             "end": {
                                 "line": 91,
@@ -931,44 +982,44 @@
                         },
                         "selectionRange": {
                             "start": {
-                                "line": 88,
-                                "character": 12
+                                "line": 89,
+                                "character": 20
                             },
                             "end": {
-                                "line": 88,
-                                "character": 13
+                                "line": 89,
+                                "character": 30
                             }
                         },
                         "children": [
                             {
-                                "name": "visible",
+                                "name": "macroField",
                                 "detail": "",
-                                "kind": 13,
+                                "kind": 8,
                                 "range": {
                                     "start": {
-                                        "line": 89,
+                                        "line": 90,
                                         "character": 12
                                     },
                                     "end": {
-                                        "line": 89,
-                                        "character": 32
+                                        "line": 90,
+                                        "character": 31
                                     }
                                 },
                                 "selectionRange": {
                                     "start": {
-                                        "line": 89,
+                                        "line": 90,
                                         "character": 16
                                     },
                                     "end": {
-                                        "line": 89,
-                                        "character": 23
+                                        "line": 90,
+                                        "character": 26
                                     }
                                 }
                             }
                         ]
                     },
                     {
-                        "name": "MacroClass",
+                        "name": "<macro class>",
                         "detail": "",
                         "kind": 5,
                         "range": {
@@ -984,62 +1035,10 @@
                         "selectionRange": {
                             "start": {
                                 "line": 93,
-                                "character": 20
+                                "character": 14
                             },
                             "end": {
                                 "line": 93,
-                                "character": 30
-                            }
-                        },
-                        "children": [
-                            {
-                                "name": "macroField",
-                                "detail": "",
-                                "kind": 8,
-                                "range": {
-                                    "start": {
-                                        "line": 94,
-                                        "character": 12
-                                    },
-                                    "end": {
-                                        "line": 94,
-                                        "character": 31
-                                    }
-                                },
-                                "selectionRange": {
-                                    "start": {
-                                        "line": 94,
-                                        "character": 16
-                                    },
-                                    "end": {
-                                        "line": 94,
-                                        "character": 26
-                                    }
-                                }
-                            }
-                        ]
-                    },
-                    {
-                        "name": "<macro class>",
-                        "detail": "",
-                        "kind": 5,
-                        "range": {
-                            "start": {
-                                "line": 97,
-                                "character": 14
-                            },
-                            "end": {
-                                "line": 99,
-                                "character": 9
-                            }
-                        },
-                        "selectionRange": {
-                            "start": {
-                                "line": 97,
-                                "character": 14
-                            },
-                            "end": {
-                                "line": 97,
                                 "character": 19
                             }
                         },
@@ -1050,21 +1049,21 @@
                                 "kind": 8,
                                 "range": {
                                     "start": {
-                                        "line": 98,
+                                        "line": 94,
                                         "character": 12
                                     },
                                     "end": {
-                                        "line": 98,
+                                        "line": 94,
                                         "character": 31
                                     }
                                 },
                                 "selectionRange": {
                                     "start": {
-                                        "line": 98,
+                                        "line": 94,
                                         "character": 16
                                     },
                                     "end": {
-                                        "line": 98,
+                                        "line": 94,
                                         "character": 26
                                     }
                                 }
@@ -1077,21 +1076,21 @@
                         "kind": 13,
                         "range": {
                             "start": {
-                                "line": 104,
+                                "line": 100,
                                 "character": 12
                             },
                             "end": {
-                                "line": 104,
+                                "line": 100,
                                 "character": 38
                             }
                         },
                         "selectionRange": {
                             "start": {
-                                "line": 104,
+                                "line": 100,
                                 "character": 16
                             },
                             "end": {
-                                "line": 104,
+                                "line": 100,
                                 "character": 33
                             }
                         }
@@ -1104,21 +1103,21 @@
                 "kind": 9,
                 "range": {
                     "start": {
-                        "line": 107,
+                        "line": 103,
                         "character": 4
                     },
                     "end": {
-                        "line": 107,
+                        "line": 103,
                         "character": 21
                     }
                 },
                 "selectionRange": {
                     "start": {
-                        "line": 107,
+                        "line": 103,
                         "character": 13
                     },
                     "end": {
-                        "line": 107,
+                        "line": 103,
                         "character": 16
                     }
                 }
@@ -1131,21 +1130,21 @@
         "kind": 11,
         "range": {
             "start": {
-                "line": 110,
+                "line": 106,
                 "character": 0
             },
             "end": {
-                "line": 113,
+                "line": 109,
                 "character": 1
             }
         },
         "selectionRange": {
             "start": {
-                "line": 110,
+                "line": 106,
                 "character": 10
             },
             "end": {
-                "line": 110,
+                "line": 106,
                 "character": 19
             }
         },
@@ -1156,21 +1155,21 @@
                 "kind": 8,
                 "range": {
                     "start": {
-                        "line": 111,
+                        "line": 107,
                         "character": 4
                     },
                     "end": {
-                        "line": 111,
+                        "line": 107,
                         "character": 21
                     }
                 },
                 "selectionRange": {
                     "start": {
-                        "line": 111,
+                        "line": 107,
                         "character": 8
                     },
                     "end": {
-                        "line": 111,
+                        "line": 107,
                         "character": 16
                     }
                 }
@@ -1181,21 +1180,21 @@
                 "kind": 6,
                 "range": {
                     "start": {
-                        "line": 112,
+                        "line": 108,
                         "character": 4
                     },
                     "end": {
-                        "line": 112,
+                        "line": 108,
                         "character": 41
                     }
                 },
                 "selectionRange": {
                     "start": {
-                        "line": 112,
+                        "line": 108,
                         "character": 13
                     },
                     "end": {
-                        "line": 112,
+                        "line": 108,
                         "character": 16
                     }
                 }
@@ -1208,21 +1207,21 @@
         "kind": 10,
         "range": {
             "start": {
-                "line": 115,
+                "line": 111,
                 "character": 0
             },
             "end": {
-                "line": 132,
+                "line": 128,
                 "character": 1
             }
         },
         "selectionRange": {
             "start": {
-                "line": 115,
+                "line": 111,
                 "character": 16
             },
             "end": {
-                "line": 115,
+                "line": 111,
                 "character": 28
             }
         },
@@ -1233,21 +1232,21 @@
                 "kind": 6,
                 "range": {
                     "start": {
-                        "line": 116,
+                        "line": 112,
                         "character": 4
                     },
                     "end": {
-                        "line": 124,
+                        "line": 120,
                         "character": 5
                     }
                 },
                 "selectionRange": {
                     "start": {
-                        "line": 116,
+                        "line": 112,
                         "character": 13
                     },
                     "end": {
-                        "line": 116,
+                        "line": 112,
                         "character": 16
                     }
                 },
@@ -1258,21 +1257,21 @@
                         "kind": 5,
                         "range": {
                             "start": {
-                                "line": 117,
+                                "line": 113,
                                 "character": 14
                             },
                             "end": {
-                                "line": 123,
+                                "line": 119,
                                 "character": 9
                             }
                         },
                         "selectionRange": {
                             "start": {
-                                "line": 117,
+                                "line": 113,
                                 "character": 20
                             },
                             "end": {
-                                "line": 117,
+                                "line": 113,
                                 "character": 30
                             }
                         },
@@ -1283,21 +1282,21 @@
                                 "kind": 8,
                                 "range": {
                                     "start": {
-                                        "line": 118,
+                                        "line": 114,
                                         "character": 12
                                     },
                                     "end": {
-                                        "line": 118,
+                                        "line": 114,
                                         "character": 31
                                     }
                                 },
                                 "selectionRange": {
                                     "start": {
-                                        "line": 118,
+                                        "line": 114,
                                         "character": 16
                                     },
                                     "end": {
-                                        "line": 118,
+                                        "line": 114,
                                         "character": 26
                                     }
                                 }
@@ -1308,21 +1307,21 @@
                                 "kind": 6,
                                 "range": {
                                     "start": {
-                                        "line": 120,
+                                        "line": 116,
                                         "character": 12
                                     },
                                     "end": {
-                                        "line": 122,
+                                        "line": 118,
                                         "character": 13
                                     }
                                 },
                                 "selectionRange": {
                                     "start": {
-                                        "line": 120,
+                                        "line": 116,
                                         "character": 21
                                     },
                                     "end": {
-                                        "line": 120,
+                                        "line": 116,
                                         "character": 34
                                     }
                                 },
@@ -1333,21 +1332,21 @@
                                         "kind": 13,
                                         "range": {
                                             "start": {
-                                                "line": 121,
+                                                "line": 117,
                                                 "character": 16
                                             },
                                             "end": {
-                                                "line": 121,
+                                                "line": 117,
                                                 "character": 29
                                             }
                                         },
                                         "selectionRange": {
                                             "start": {
-                                                "line": 121,
+                                                "line": 117,
                                                 "character": 20
                                             },
                                             "end": {
-                                                "line": 121,
+                                                "line": 117,
                                                 "character": 28
                                             }
                                         }
@@ -1364,21 +1363,21 @@
                 "kind": 14,
                 "range": {
                     "start": {
-                        "line": 126,
+                        "line": 122,
                         "character": 4
                     },
                     "end": {
-                        "line": 126,
+                        "line": 122,
                         "character": 35
                     }
                 },
                 "selectionRange": {
                     "start": {
-                        "line": 126,
+                        "line": 122,
                         "character": 22
                     },
                     "end": {
-                        "line": 126,
+                        "line": 122,
                         "character": 30
                     }
                 }
@@ -1389,21 +1388,21 @@
                 "kind": 22,
                 "range": {
                     "start": {
-                        "line": 128,
+                        "line": 124,
                         "character": 4
                     },
                     "end": {
-                        "line": 128,
+                        "line": 124,
                         "character": 19
                     }
                 },
                 "selectionRange": {
                     "start": {
-                        "line": 128,
+                        "line": 124,
                         "character": 8
                     },
                     "end": {
-                        "line": 128,
+                        "line": 124,
                         "character": 14
                     }
                 }
@@ -1414,21 +1413,21 @@
                 "kind": 22,
                 "range": {
                     "start": {
-                        "line": 129,
+                        "line": 125,
                         "character": 4
                     },
                     "end": {
-                        "line": 129,
+                        "line": 125,
                         "character": 19
                     }
                 },
                 "selectionRange": {
                     "start": {
-                        "line": 129,
+                        "line": 125,
                         "character": 8
                     },
                     "end": {
-                        "line": 129,
+                        "line": 125,
                         "character": 14
                     }
                 }
@@ -1439,21 +1438,21 @@
                 "kind": 25,
                 "range": {
                     "start": {
-                        "line": 131,
+                        "line": 127,
                         "character": 4
                     },
                     "end": {
-                        "line": 131,
+                        "line": 127,
                         "character": 47
                     }
                 },
                 "selectionRange": {
                     "start": {
-                        "line": 131,
+                        "line": 127,
                         "character": 25
                     },
                     "end": {
-                        "line": 131,
+                        "line": 127,
                         "character": 28
                     }
                 }
@@ -1466,21 +1465,21 @@
         "kind": 10,
         "range": {
             "start": {
-                "line": 134,
+                "line": 130,
                 "character": 0
             },
             "end": {
-                "line": 139,
+                "line": 135,
                 "character": 1
             }
         },
         "selectionRange": {
             "start": {
-                "line": 134,
+                "line": 130,
                 "character": 14
             },
             "end": {
-                "line": 134,
+                "line": 130,
                 "character": 31
             }
         },
@@ -1491,21 +1490,21 @@
                 "kind": 14,
                 "range": {
                     "start": {
-                        "line": 135,
+                        "line": 131,
                         "character": 4
                     },
                     "end": {
-                        "line": 135,
+                        "line": 131,
                         "character": 35
                     }
                 },
                 "selectionRange": {
                     "start": {
-                        "line": 135,
+                        "line": 131,
                         "character": 22
                     },
                     "end": {
-                        "line": 135,
+                        "line": 131,
                         "character": 30
                     }
                 }
@@ -1516,21 +1515,21 @@
                 "kind": 22,
                 "range": {
                     "start": {
-                        "line": 137,
+                        "line": 133,
                         "character": 4
                     },
                     "end": {
-                        "line": 137,
+                        "line": 133,
                         "character": 19
                     }
                 },
                 "selectionRange": {
                     "start": {
-                        "line": 137,
+                        "line": 133,
                         "character": 8
                     },
                     "end": {
-                        "line": 137,
+                        "line": 133,
                         "character": 14
                     }
                 }
@@ -1541,21 +1540,21 @@
                 "kind": 22,
                 "range": {
                     "start": {
-                        "line": 138,
+                        "line": 134,
                         "character": 4
                     },
                     "end": {
-                        "line": 138,
+                        "line": 134,
                         "character": 19
                     }
                 },
                 "selectionRange": {
                     "start": {
-                        "line": 138,
+                        "line": 134,
                         "character": 8
                     },
                     "end": {
-                        "line": 138,
+                        "line": 134,
                         "character": 14
                     }
                 }
@@ -1568,21 +1567,21 @@
         "kind": 10,
         "range": {
             "start": {
-                "line": 141,
+                "line": 137,
                 "character": 0
             },
             "end": {
-                "line": 144,
+                "line": 140,
                 "character": 1
             }
         },
         "selectionRange": {
             "start": {
-                "line": 141,
+                "line": 137,
                 "character": 5
             },
             "end": {
-                "line": 141,
+                "line": 137,
                 "character": 9
             }
         },
@@ -1593,21 +1592,21 @@
                 "kind": 22,
                 "range": {
                     "start": {
-                        "line": 142,
+                        "line": 138,
                         "character": 4
                     },
                     "end": {
-                        "line": 142,
+                        "line": 138,
                         "character": 11
                     }
                 },
                 "selectionRange": {
                     "start": {
-                        "line": 142,
+                        "line": 138,
                         "character": 4
                     },
                     "end": {
-                        "line": 142,
+                        "line": 138,
                         "character": 10
                     }
                 }
@@ -1618,21 +1617,21 @@
                 "kind": 22,
                 "range": {
                     "start": {
-                        "line": 143,
+                        "line": 139,
                         "character": 4
                     },
                     "end": {
-                        "line": 143,
+                        "line": 139,
                         "character": 23
                     }
                 },
                 "selectionRange": {
                     "start": {
-                        "line": 143,
+                        "line": 139,
                         "character": 4
                     },
                     "end": {
-                        "line": 143,
+                        "line": 139,
                         "character": 11
                     }
                 }
@@ -1645,21 +1644,21 @@
         "kind": 11,
         "range": {
             "start": {
-                "line": 146,
+                "line": 142,
                 "character": 0
             },
             "end": {
-                "line": 146,
+                "line": 142,
                 "character": 34
             }
         },
         "selectionRange": {
             "start": {
-                "line": 146,
+                "line": 142,
                 "character": 8
             },
             "end": {
-                "line": 146,
+                "line": 142,
                 "character": 17
             }
         }
@@ -1670,21 +1669,21 @@
         "kind": 23,
         "range": {
             "start": {
-                "line": 148,
+                "line": 144,
                 "character": 0
             },
             "end": {
-                "line": 151,
+                "line": 147,
                 "character": 1
             }
         },
         "selectionRange": {
             "start": {
-                "line": 148,
+                "line": 144,
                 "character": 8
             },
             "end": {
-                "line": 148,
+                "line": 144,
                 "character": 26
             }
         },
@@ -1695,21 +1694,21 @@
                 "kind": 8,
                 "range": {
                     "start": {
-                        "line": 149,
+                        "line": 145,
                         "character": 5
                     },
                     "end": {
-                        "line": 149,
+                        "line": 145,
                         "character": 11
                     }
                 },
                 "selectionRange": {
                     "start": {
-                        "line": 149,
+                        "line": 145,
                         "character": 5
                     },
                     "end": {
-                        "line": 149,
+                        "line": 145,
                         "character": 6
                     }
                 }
@@ -1720,21 +1719,21 @@
                 "kind": 8,
                 "range": {
                     "start": {
-                        "line": 150,
+                        "line": 146,
                         "character": 4
                     },
                     "end": {
-                        "line": 150,
+                        "line": 146,
                         "character": 10
                     }
                 },
                 "selectionRange": {
                     "start": {
-                        "line": 150,
+                        "line": 146,
                         "character": 4
                     },
                     "end": {
-                        "line": 150,
+                        "line": 146,
                         "character": 5
                     }
                 }
@@ -1747,21 +1746,21 @@
         "kind": 23,
         "range": {
             "start": {
-                "line": 153,
+                "line": 149,
                 "character": 0
             },
             "end": {
-                "line": 158,
+                "line": 154,
                 "character": 1
             }
         },
         "selectionRange": {
             "start": {
-                "line": 153,
+                "line": 149,
                 "character": 8
             },
             "end": {
-                "line": 153,
+                "line": 149,
                 "character": 28
             }
         },
@@ -1772,21 +1771,21 @@
                 "kind": 8,
                 "range": {
                     "start": {
-                        "line": 154,
+                        "line": 150,
                         "character": 4
                     },
                     "end": {
-                        "line": 154,
+                        "line": 150,
                         "character": 25
                     }
                 },
                 "selectionRange": {
                     "start": {
-                        "line": 154,
+                        "line": 150,
                         "character": 19
                     },
                     "end": {
-                        "line": 154,
+                        "line": 150,
                         "character": 20
                     }
                 }
@@ -1797,21 +1796,21 @@
                 "kind": 8,
                 "range": {
                     "start": {
-                        "line": 155,
+                        "line": 151,
                         "character": 4
                     },
                     "end": {
-                        "line": 155,
+                        "line": 151,
                         "character": 15
                     }
                 },
                 "selectionRange": {
                     "start": {
-                        "line": 155,
+                        "line": 151,
                         "character": 8
                     },
                     "end": {
-                        "line": 155,
+                        "line": 151,
                         "character": 9
                     }
                 }
@@ -1822,21 +1821,21 @@
                 "kind": 8,
                 "range": {
                     "start": {
-                        "line": 156,
+                        "line": 152,
                         "character": 4
                     },
                     "end": {
-                        "line": 156,
+                        "line": 152,
                         "character": 16
                     }
                 },
                 "selectionRange": {
                     "start": {
-                        "line": 156,
+                        "line": 152,
                         "character": 9
                     },
                     "end": {
-                        "line": 156,
+                        "line": 152,
                         "character": 10
                     }
                 }
@@ -1847,21 +1846,21 @@
                 "kind": 6,
                 "range": {
                     "start": {
-                        "line": 157,
+                        "line": 153,
                         "character": 4
                     },
                     "end": {
-                        "line": 157,
+                        "line": 153,
                         "character": 16
                     }
                 },
                 "selectionRange": {
                     "start": {
-                        "line": 157,
+                        "line": 153,
                         "character": 13
                     },
                     "end": {
-                        "line": 157,
+                        "line": 153,
                         "character": 16
                     }
                 }
@@ -1874,21 +1873,21 @@
         "kind": 23,
         "range": {
             "start": {
-                "line": 160,
+                "line": 156,
                 "character": 0
             },
             "end": {
-                "line": 164,
+                "line": 160,
                 "character": 1
             }
         },
         "selectionRange": {
             "start": {
-                "line": 160,
+                "line": 156,
                 "character": 8
             },
             "end": {
-                "line": 160,
+                "line": 156,
                 "character": 24
             }
         },
@@ -1899,21 +1898,21 @@
                 "kind": 8,
                 "range": {
                     "start": {
-                        "line": 162,
+                        "line": 158,
                         "character": 5
                     },
                     "end": {
-                        "line": 162,
+                        "line": 158,
                         "character": 11
                     }
                 },
                 "selectionRange": {
                     "start": {
-                        "line": 162,
+                        "line": 158,
                         "character": 5
                     },
                     "end": {
-                        "line": 162,
+                        "line": 158,
                         "character": 6
                     }
                 }
@@ -1924,21 +1923,21 @@
                 "kind": 8,
                 "range": {
                     "start": {
-                        "line": 163,
+                        "line": 159,
                         "character": 4
                     },
                     "end": {
-                        "line": 163,
+                        "line": 159,
                         "character": 10
                     }
                 },
                 "selectionRange": {
                     "start": {
-                        "line": 163,
+                        "line": 159,
                         "character": 4
                     },
                     "end": {
-                        "line": 163,
+                        "line": 159,
                         "character": 5
                     }
                 }
@@ -1951,21 +1950,21 @@
         "kind": 23,
         "range": {
             "start": {
-                "line": 166,
+                "line": 162,
                 "character": 0
             },
             "end": {
-                "line": 170,
+                "line": 166,
                 "character": 1
             }
         },
         "selectionRange": {
             "start": {
-                "line": 166,
+                "line": 162,
                 "character": 8
             },
             "end": {
-                "line": 166,
+                "line": 162,
                 "character": 32
             }
         },
@@ -1976,21 +1975,21 @@
                 "kind": 8,
                 "range": {
                     "start": {
-                        "line": 167,
+                        "line": 163,
                         "character": 4
                     },
                     "end": {
-                        "line": 167,
+                        "line": 163,
                         "character": 10
                     }
                 },
                 "selectionRange": {
                     "start": {
-                        "line": 167,
+                        "line": 163,
                         "character": 4
                     },
                     "end": {
-                        "line": 167,
+                        "line": 163,
                         "character": 5
                     }
                 }
@@ -2001,21 +2000,21 @@
                 "kind": 8,
                 "range": {
                     "start": {
-                        "line": 169,
+                        "line": 165,
                         "character": 4
                     },
                     "end": {
-                        "line": 169,
+                        "line": 165,
                         "character": 9
                     }
                 },
                 "selectionRange": {
                     "start": {
-                        "line": 169,
+                        "line": 165,
                         "character": 4
                     },
                     "end": {
-                        "line": 169,
+                        "line": 165,
                         "character": 5
                     }
                 }
@@ -2028,21 +2027,21 @@
         "kind": 11,
         "range": {
             "start": {
-                "line": 172,
+                "line": 168,
                 "character": 0
             },
             "end": {
-                "line": 172,
+                "line": 168,
                 "character": 40
             }
         },
         "selectionRange": {
             "start": {
-                "line": 172,
+                "line": 168,
                 "character": 8
             },
             "end": {
-                "line": 172,
+                "line": 168,
                 "character": 22
             }
         }
@@ -2053,21 +2052,21 @@
         "kind": 5,
         "range": {
             "start": {
-                "line": 174,
+                "line": 170,
                 "character": 0
             },
             "end": {
-                "line": 197,
+                "line": 193,
                 "character": 1
             }
         },
         "selectionRange": {
             "start": {
-                "line": 179,
+                "line": 175,
                 "character": 6
             },
             "end": {
-                "line": 179,
+                "line": 175,
                 "character": 10
             }
         },
@@ -2078,21 +2077,21 @@
                 "kind": 8,
                 "range": {
                     "start": {
-                        "line": 180,
+                        "line": 176,
                         "character": 4
                     },
                     "end": {
-                        "line": 181,
+                        "line": 177,
                         "character": 21
                     }
                 },
                 "selectionRange": {
                     "start": {
-                        "line": 181,
+                        "line": 177,
                         "character": 8
                     },
                     "end": {
-                        "line": 181,
+                        "line": 177,
                         "character": 16
                     }
                 }
@@ -2103,21 +2102,21 @@
                 "kind": 6,
                 "range": {
                     "start": {
-                        "line": 183,
+                        "line": 179,
                         "character": 4
                     },
                     "end": {
-                        "line": 196,
+                        "line": 192,
                         "character": 5
                     }
                 },
                 "selectionRange": {
                     "start": {
-                        "line": 186,
+                        "line": 182,
                         "character": 13
                     },
                     "end": {
-                        "line": 186,
+                        "line": 182,
                         "character": 17
                     }
                 },
@@ -2128,21 +2127,21 @@
                         "kind": 6,
                         "range": {
                             "start": {
-                                "line": 190,
+                                "line": 186,
                                 "character": 8
                             },
                             "end": {
-                                "line": 190,
+                                "line": 186,
                                 "character": 35
                             }
                         },
                         "selectionRange": {
                             "start": {
-                                "line": 190,
+                                "line": 186,
                                 "character": 17
                             },
                             "end": {
-                                "line": 190,
+                                "line": 186,
                                 "character": 30
                             }
                         }
@@ -2153,21 +2152,21 @@
                         "kind": 13,
                         "range": {
                             "start": {
-                                "line": 195,
+                                "line": 191,
                                 "character": 8
                             },
                             "end": {
-                                "line": 195,
+                                "line": 191,
                                 "character": 25
                             }
                         },
                         "selectionRange": {
                             "start": {
-                                "line": 195,
+                                "line": 191,
                                 "character": 12
                             },
                             "end": {
-                                "line": 195,
+                                "line": 191,
                                 "character": 20
                             }
                         }
