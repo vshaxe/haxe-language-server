@@ -4,6 +4,7 @@ import haxeLanguageServer.helper.WorkspaceEditHelper;
 import haxeLanguageServer.helper.IdentifierHelper;
 import haxeLanguageServer.helper.TypeHelper;
 import haxeLanguageServer.features.SignatureHelpFeature.CurrentSignature;
+import haxeLanguageServer.tokentree.SyntaxModernizer;
 
 class CodeGenerationFeature {
     final context:Context;
@@ -17,6 +18,7 @@ class CodeGenerationFeature {
         this.context = context;
         context.registerCodeActionContributor(generateAnonymousFunction);
         context.registerCodeActionContributor(generateCaptureVariables);
+        context.registerCodeActionContributor(modernizeSyntax);
     }
 
     function isSignatureValid(params:CodeActionParams):Bool {
@@ -65,5 +67,14 @@ class CodeGenerationFeature {
             title: "Generate capture variables",
             edit: WorkspaceEditHelper.create(context, params, [{range: position.toRange(), newText: argNames.join(", ")}])
         }];
+    }
+
+    function modernizeSyntax(params:CodeActionParams):Array<CodeAction> {
+        var doc = context.documents.get(params.textDocument.uri);
+        try {
+            return new SyntaxModernizer(doc).resolve();
+        } catch (e:Any) {
+            return [];
+        }
     }
 }

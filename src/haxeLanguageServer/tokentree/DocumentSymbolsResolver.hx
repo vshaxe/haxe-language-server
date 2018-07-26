@@ -49,8 +49,8 @@ class DocumentSymbolsResolver {
                     name: name,
                     detail: "",
                     kind: kind,
-                    range: positionToRange(range),
-                    selectionRange: positionToRange(tokens.getPos(nameToken))
+                    range: rangeAt(range),
+                    selectionRange: rangeAt(tokens.getPos(nameToken))
                 };
                 if (token.isDeprecated()) {
                     symbol.deprecated = true;
@@ -168,11 +168,8 @@ class DocumentSymbolsResolver {
         return stack.root.children;
     }
 
-    function positionToRange(pos:haxe.macro.Expr.Position):Range {
-        return {
-            start: document.positionAt(pos.min),
-            end: document.positionAt(pos.max)
-        };
+    inline function rangeAt(pos:haxe.macro.Expr.Position):Range {
+        return document.rangeAt(pos.min, pos.max);
     }
 }
 

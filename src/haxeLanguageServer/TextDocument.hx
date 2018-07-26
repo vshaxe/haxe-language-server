@@ -69,6 +69,13 @@ class TextDocument {
         return {line: line, character: offset - lineOffsets[line]};
     }
 
+    public function rangeAt(startOffset:Int, endOffset:Int):Range {
+        return {
+            start: positionAt(startOffset),
+            end: positionAt(endOffset)
+        };
+    }
+
     public inline function byteRangeToRange(byteRange:Range, offsetConverter:DisplayOffsetConverter):Range {
         return {
             start: bytePositionToPosition(byteRange.start, offsetConverter),
