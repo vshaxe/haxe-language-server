@@ -157,8 +157,12 @@ class CompletionFeature {
                 start: position,
                 end: position.translate(1, 0)
             });
+            var replaceRange = result.replaceRange;
+            if (replaceRange != null && replaceRange.start.line != replaceRange.end.line) {
+                replaceRange = null; // multi-line replace ranges are not allowed
+            }
             var data:CompletionContextData = {
-                replaceRange: result.replaceRange,
+                replaceRange: replaceRange,
                 mode: result.mode,
                 doc: doc,
                 indent: indent,
