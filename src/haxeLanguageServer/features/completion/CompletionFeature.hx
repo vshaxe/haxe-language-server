@@ -437,8 +437,11 @@ class CompletionFeature {
             }
         }
 
-        if (data.mode.kind == StructExtension) {
-            item.textEdit.newText = maybeInsert(item.textEdit.newText, ",", data.lineAfter);
+        if (data.mode.kind == StructExtension && data.mode.args != null) {
+            var completionData:StructExtensionCompletion = data.mode.args;
+            if (!completionData.isIntersectionType) {
+                item.textEdit.newText = maybeInsert(item.textEdit.newText, ",", data.lineAfter);
+            }
         }
 
         if (type.params != null) {

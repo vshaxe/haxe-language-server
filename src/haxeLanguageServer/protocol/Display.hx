@@ -357,6 +357,10 @@ typedef ToplevelCompletion<T> = {
     var ?expectedTypeFollowed:JsonType<T>;
 }
 
+typedef StructExtensionCompletion = {
+    var isIntersectionType:Bool;
+}
+
 enum abstract CompletionModeKind<T>(Int) {
     var Field:CompletionModeKind<FieldCompletionSubject<Dynamic>>;
     var StructureField;
@@ -365,7 +369,7 @@ enum abstract CompletionModeKind<T>(Int) {
     var TypeHint;
     var Extends;
     var Implements;
-    var StructExtension;
+    var StructExtension:CompletionModeKind<StructExtensionCompletion>;
     var Import;
     var Using;
     var New;
