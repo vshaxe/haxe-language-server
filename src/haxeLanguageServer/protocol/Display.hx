@@ -324,6 +324,7 @@ enum abstract DisplayItemKind<T>(String) {
     var Local:DisplayItemKind<DisplayLocal<Dynamic>>;
     var ClassField:DisplayItemKind<ClassFieldOccurrence<Dynamic>>;
     var EnumField:DisplayItemKind<EnumFieldOccurrence<Dynamic>>;
+    /** Only for the enum values in enum abstracts, other fields use `ClassField`. **/
     var EnumAbstractField:DisplayItemKind<ClassFieldOccurrence<Dynamic>>;
     var Type:DisplayItemKind<DisplayModuleType>;
     var Package:DisplayItemKind<Package>;
