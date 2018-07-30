@@ -18,7 +18,9 @@ class CodeGenerationFeature {
         this.context = context;
         context.registerCodeActionContributor(generateAnonymousFunction);
         context.registerCodeActionContributor(generateCaptureVariables);
+        #if debug
         context.registerCodeActionContributor(modernizeSyntax);
+        #end
     }
 
     function isSignatureValid(params:CodeActionParams):Bool {
