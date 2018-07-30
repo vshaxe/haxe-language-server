@@ -20,7 +20,6 @@ class PostfixCompletion {
         }
 
         var type = subject.item.type;
-        var moduleType = subject.moduleType;
         if (type == null) {
             return [];
         }
@@ -91,34 +90,45 @@ class PostfixCompletion {
             case _:
         }
 
-        function addSwitchItem(print:(snippets:Bool)->String) {
-            add({
+        var switchItem = createSwitchItem(subject, expr);
+        if (switchItem != null) {
+            add(switchItem);
+        }
+
+        return items;
+    }
+
+    function createSwitchItem<T>(subject:FieldCompletionSubject<T>, expr:String):Null<PostfixCompletionItem> {
+        var moduleType = subject.moduleType;
+        if (moduleType == null) {
+            return null;
+        }
+
+        function make(print:(snippets:Bool)->String):PostfixCompletionItem {
+            return {
                 label: "switch",
                 detail: "switch (expr) {cases...}",
                 insertText: print(true),
                 insertTextFormat: Snippet,
                 code: print(false)
-            });
+            };
         }
 
         var printer = new DisplayPrinter();
-        if (moduleType != null) {
-            switch (moduleType.kind) {
-                case Enum:
-                    var e:JsonEnum = moduleType.args;
-                    if (e.constructors.length > 0) {
-                        addSwitchItem(printer.printSwitchOnEnum.bind(expr, e));
-                    }
-                case Abstract if (moduleType.meta.hasMeta(Enum)):
-                    var a:JsonAbstract = moduleType.args;
-                    if (a.impl != null && a.impl.statics.exists(Helper.isEnumAbstractField)) {
-                        addSwitchItem(printer.printSwitchOnEnumAbstract.bind(expr, a));
-                    }
-                case _:
-            }
+        switch (moduleType.kind) {
+            case Enum:
+                var e:JsonEnum = moduleType.args;
+                if (e.constructors.length > 0) {
+                    return make(printer.printSwitchOnEnum.bind(expr, e));
+                }
+            case Abstract if (moduleType.meta.hasMeta(Enum)):
+                var a:JsonAbstract = moduleType.args;
+                if (a.impl != null && a.impl.statics.exists(Helper.isEnumAbstractField)) {
+                    return make(printer.printSwitchOnEnumAbstract.bind(expr, a));
+                }
+            case _:
         }
-
-        return items;
+        return null;
     }
 
     function createPostfixCompletionItem(data:PostfixCompletionItem, doc:TextDocument, replaceRange:Range):CompletionItem {
