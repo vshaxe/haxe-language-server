@@ -428,12 +428,15 @@ class DisplayPrinter {
         }
     }
 
-    public function printObjectLiteral(anon:JsonAnon, onlyRequiredFields:Bool, snippets:Bool) {
+    public function printObjectLiteral(anon:JsonAnon, singleLine:Bool, onlyRequiredFields:Bool, snippets:Bool) {
         var printedFields = [];
         for (i in 0...anon.fields.length) {
             var field = anon.fields[i];
             var name = field.name;
-            var printedField = "\t" + name + ': ';
+            var printedField = name + ': ';
+            if (!singleLine) {
+                printedField = "\t" + printedField;
+            }
             printedField += if (snippets) {
                 '$${${i+1}:$name}';
             } else {
@@ -446,7 +449,11 @@ class DisplayPrinter {
         if (printedFields.length == 0) {
             return "{}";
         }
-        return '{\n${printedFields.join(",\n")}\n}';
+        return if (singleLine) {
+            '{${printedFields.join(", ")}}';
+        } else {
+            '{\n${printedFields.join(",\n")}\n}';
+        }
     }
 
     public function printSwitchOnEnum(subject:String, e:JsonEnum, snippets:Bool) {

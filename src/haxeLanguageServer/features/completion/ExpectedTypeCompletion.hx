@@ -47,15 +47,16 @@ class ExpectedTypeCompletion {
             case TAnonymous:
                 // TODO: support @:structInit
                 var anon = concreteType.args;
-                var allFields = printer.printObjectLiteral(anon, false, true);
-                var requiredFields = printer.printObjectLiteral(anon, true, true);
+                var singleLine = data.mode.kind == Pattern;
+                var allFields = printer.printObjectLiteral(anon, singleLine, false, true);
+                var requiredFields = printer.printObjectLiteral(anon, singleLine, true, true);
                 if (allFields == requiredFields) {
                     items.push({
                         label: if (anon.fields.length == 0) "{}" else "{fields...}",
                         detail: "Auto-generate object literal",
                         insertText: allFields,
                         insertTextFormat: Snippet,
-                        code: printer.printObjectLiteral(anon, false, false)
+                        code: printer.printObjectLiteral(anon, singleLine, false, false)
                     });
                 } else {
                     items.push({
@@ -63,14 +64,14 @@ class ExpectedTypeCompletion {
                         detail: "Auto-generate object literal\n(all fields)",
                         insertText: allFields,
                         insertTextFormat: Snippet,
-                        code: printer.printObjectLiteral(anon, false, false)
+                        code: printer.printObjectLiteral(anon, singleLine, false, false)
                     });
                     items.push({
                         label: "{required fields...}",
                         detail: "Auto-generate object literal\n(only required fields)",
                         insertText: requiredFields,
                         insertTextFormat: Snippet,
-                        code: printer.printObjectLiteral(anon, true, false)
+                        code: printer.printObjectLiteral(anon, singleLine, true, false)
                     });
                 }
             case TFun:
