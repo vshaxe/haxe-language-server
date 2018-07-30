@@ -371,7 +371,7 @@ class CompletionFeature {
         var occurrence:EnumFieldOccurrence<T> = item.args;
         var field:JsonEnumField = occurrence.field;
         var name = field.name;
-        return {
+        var result:CompletionItem = {
             label: name,
             kind: EnumMember,
             detail: {
@@ -384,19 +384,20 @@ class CompletionFeature {
                 definition;
             },
             textEdit: {
-                newText: {
-                    if (data.mode.kind == Pattern) {
-                        var field = printer.printEnumField(field, item.type, true, false);
-                        field = maybeInsert(field, ":", data.lineAfter);
-                        field;
-                    } else {
-                        name;
-                    }
-                },
+                newText: name,
                 range: data.replaceRange
-            },
-            insertTextFormat: if (data.mode.kind == Pattern) Snippet else PlainText
+            }
         };
+
+        if (data.mode.kind == Pattern) {
+            var field = printer.printEnumField(field, item.type, true, false);
+            field = maybeInsert(field, ":", data.lineAfter);
+
+            result.textEdit.newText = field;
+            result.insertTextFormat = Snippet;
+        }
+
+        return result;
     }
 
     function createTypeCompletionItem(type:DisplayModuleType, data:CompletionContextData):CompletionItem {
