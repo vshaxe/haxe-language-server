@@ -17,7 +17,7 @@ class ExpectedTypeCompletion {
     public function createItems<T,TType>(data:CompletionContextData):Array<CompletionItem> {
         var toplevel:ToplevelCompletion<TType>;
         switch (data.mode.kind) {
-            case Toplevel: toplevel = data.mode.args;
+            case Toplevel, Pattern: toplevel = data.mode.args;
             case _: return [];
         }
         if (toplevel == null) {

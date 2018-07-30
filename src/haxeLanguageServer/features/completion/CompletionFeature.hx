@@ -391,7 +391,7 @@ class CompletionFeature {
 
         if (data.mode.kind == Pattern) {
             var field = printer.printEnumField(field, item.type, true, false);
-            var info:PatternCompletion = data.mode.args;
+            var info:PatternCompletion<Dynamic> = data.mode.args;
             if (info == null || info.isOutermostPattern) {
                 field = maybeInsert(field, ":", data.lineAfter);
             }

@@ -359,7 +359,7 @@ typedef StructExtensionCompletion = {
     var isIntersectionType:Bool;
 }
 
-typedef PatternCompletion = {
+typedef PatternCompletion<T> = ToplevelCompletion<T> & {
     var isOutermostPattern:Bool;
 }
 
@@ -375,7 +375,7 @@ enum abstract CompletionModeKind<T>(Int) {
     var Import;
     var Using;
     var New;
-    var Pattern:CompletionModeKind<PatternCompletion>;
+    var Pattern:CompletionModeKind<PatternCompletion<Dynamic>>;
     var Override;
     var TypeRelation;
 }
