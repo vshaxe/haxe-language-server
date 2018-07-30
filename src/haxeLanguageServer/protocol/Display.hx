@@ -375,8 +375,8 @@ enum abstract CompletionModeKind<T>(Int) {
     var Import;
     var Using;
     var New;
-    var Pattern;
-    var Override:CompletionModeKind<PatternCompletion>;
+    var Pattern:CompletionModeKind<PatternCompletion>;
+    var Override;
     var TypeRelation;
 }
 
