@@ -104,6 +104,13 @@ class PostfixCompletion {
             return null;
         }
 
+        // switching on a concrete enum value _works_, but it's sort of pointless
+        switch (subject.item.kind) {
+            case EnumField: return null;
+            case EnumAbstractField: return null;
+            case _:
+        }
+
         function make(print:(snippets:Bool)->String):PostfixCompletionItem {
             return {
                 label: "switch",
