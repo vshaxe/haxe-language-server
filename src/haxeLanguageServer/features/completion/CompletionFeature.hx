@@ -398,6 +398,7 @@ class CompletionFeature {
 
             result.textEdit.newText = field;
             result.insertTextFormat = Snippet;
+            result.command = triggerParameterHints;
         }
 
         return result;
