@@ -391,7 +391,10 @@ class CompletionFeature {
 
         if (data.mode.kind == Pattern) {
             var field = printer.printEnumField(field, item.type, true, false);
-            field = maybeInsert(field, ":", data.lineAfter);
+            var info:PatternCompletion = data.mode.args;
+            if (info != null && info.isOutermostPattern) {
+                field = maybeInsert(field, ":", data.lineAfter);
+            }
 
             result.textEdit.newText = field;
             result.insertTextFormat = Snippet;

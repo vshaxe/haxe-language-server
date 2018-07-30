@@ -56,11 +56,8 @@ class DisplayMethods {
 
         - finish completion
         - diagnostics
-        - signature
         - codeLens
-        - references
         - workspaceSymbols ("project/symbol"?)
-        - documentSymbols ("display/documentSymbol"?)
     */
 }
 
@@ -362,6 +359,10 @@ typedef StructExtensionCompletion = {
     var isIntersectionType:Bool;
 }
 
+typedef PatternCompletion = {
+    var isOutermostPattern:Bool;
+}
+
 enum abstract CompletionModeKind<T>(Int) {
     var Field:CompletionModeKind<FieldCompletionSubject<Dynamic>>;
     var StructureField;
@@ -375,7 +376,7 @@ enum abstract CompletionModeKind<T>(Int) {
     var Using;
     var New;
     var Pattern;
-    var Override;
+    var Override:CompletionModeKind<PatternCompletion>;
     var TypeRelation;
 }
 
