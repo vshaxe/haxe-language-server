@@ -406,6 +406,7 @@ class Context {
             request.params = params;
         var requestJson = Json.stringify(request);
 
+        var beforeCallTime = Date.now().getTime();
         callDisplay(method, [requestJson], null, token, result -> {
             var arrivalTime = Date.now().getTime();
             switch (result) {
@@ -418,7 +419,7 @@ class Context {
                     if (Reflect.hasField(response, "error"))
                         errback(response.error.message);
                     else
-                        runHaxeMethodCallback(response, arrivalTime, callback, errback, method);
+                        runHaxeMethodCallback(response, beforeCallTime, arrivalTime, callback, errback, method);
                 case DCancelled:
             }
         }, error -> {
@@ -427,7 +428,7 @@ class Context {
         });
     }
 
-    function runHaxeMethodCallback(response, arrivalTime, callback, errback:String->Void, method) {
+    function runHaxeMethodCallback(response, beforeCallTime, arrivalTime, callback, errback:String->Void, method) {
         var haxeResponse:Response<Dynamic> = response.result;
         if (!sendMethodResults) {
             callback(haxeResponse.result);
@@ -449,6 +450,7 @@ class Context {
             method: method,
             debugInfo: debugInfo,
             additionalTimes: {
+                beforeCall: beforeCallTime,
                 arrival: arrivalTime,
                 beforeProcessing: beforeProcessingTime,
                 afterProcessing: afterProcessingTime
