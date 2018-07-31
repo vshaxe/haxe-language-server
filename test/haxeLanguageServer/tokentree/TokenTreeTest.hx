@@ -2,6 +2,8 @@ package haxeLanguageServer.tokentree;
 
 import haxe.Json;
 import haxeLanguageServer.TextDocument;
+import haxeLanguageServer.features.foldingRange.FoldingRangeResolver;
+import haxeLanguageServer.features.documentSymbols.DocumentSymbolsResolver;
 
 class TokenTreeTest extends TestCaseBase {
     function testDocumentSymbols() {
