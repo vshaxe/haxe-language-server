@@ -1,10 +1,10 @@
-package haxeLanguageServer.tokentree;
+package haxeLanguageServer.features.documentSymbols;
 
-import haxeLanguageServer.protocol.Display.DisplayModuleTypeKind;
 import tokentree.TokenTree;
 using tokentree.TokenTreeAccessHelper;
 using tokentree.utils.TokenTreeCheckUtils;
 using tokentree.utils.FieldUtils;
+import haxeLanguageServer.features.documentSymbols.SymbolStack;
 
 class DocumentSymbolsResolver {
     final document:TextDocument;
@@ -170,74 +170,5 @@ class DocumentSymbolsResolver {
 
     inline function rangeAt(pos:haxe.macro.Expr.Position):Range {
         return document.rangeAt(pos.min, pos.max);
-    }
-}
-
-/** (_not_ a video game level, simn) **/
-private enum SymbolLevel {
-    Root;
-    Type(kind:DisplayModuleTypeKind);
-    Field;
-    Expression;
-}
-
-private abstract SymbolStack(Array<{level:SymbolLevel, symbol:DocumentSymbol}>) {
-    public var depth(get,set):Int;
-    inline function get_depth() return this.length - 1;
-    function set_depth(newDepth:Int) {
-        if (newDepth > depth) {
-            // only accounts for increases of 1
-            if (this[newDepth] == null) {
-                this[newDepth] = this[newDepth - 1];
-            }
-        } else if (newDepth < depth) {
-            while (depth > newDepth) {
-                this.pop();
-            }
-        }
-        return depth;
-    }
-
-    public var level(get,never):SymbolLevel;
-    inline function get_level() return this[depth].level;
-
-    public var root(get,never):DocumentSymbol;
-    inline function get_root() return this[0].symbol;
-
-    public function new() {
-        this = [{
-            level: Root,
-            symbol: {
-                name: "root",
-                kind: Module,
-                range: null,
-                selectionRange: null,
-                children: []
-            }
-        }];
-    }
-
-    public function addSymbol(level:SymbolLevel, symbol:DocumentSymbol, opensScope:Bool) {
-        var parentSymbol = this[depth].symbol;
-        if (parentSymbol.children == null) {
-            parentSymbol.children = [];
-        }
-        parentSymbol.children.push(symbol);
-
-        if (opensScope) {
-            this[depth + 1] = {level: level, symbol: symbol};
-        }
-    }
-
-    public function getParentTypeKind():DisplayModuleTypeKind {
-        var i = depth;
-        while (i-- > 0) {
-            switch (this[i].level) {
-                case Type(kind):
-                    return kind;
-                case _:
-            }
-        }
-        return null;
     }
 }

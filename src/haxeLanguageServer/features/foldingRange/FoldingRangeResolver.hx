@@ -1,4 +1,4 @@
-package haxeLanguageServer.tokentree;
+package haxeLanguageServer.features.foldingRange;
 
 import tokentree.TokenTree;
 import languageServerProtocol.protocol.FoldingRange.FoldingRangeClientCapabilities;

@@ -10,6 +10,8 @@ import jsonrpc.Types;
 import jsonrpc.Protocol;
 import haxeLanguageServer.features.*;
 import haxeLanguageServer.features.completion.*;
+import haxeLanguageServer.features.documentSymbols.DocumentSymbolsFeature;
+import haxeLanguageServer.features.foldingRange.FoldingRangeFeature;
 import haxeLanguageServer.features.CodeActionFeature.CodeActionContributor;
 import haxeLanguageServer.helper.SemVer;
 import haxeLanguageServer.helper.FunctionFormattingConfig;

@@ -1,6 +1,5 @@
-package haxeLanguageServer.features;
+package haxeLanguageServer.features.documentSymbols;
 
-import haxeLanguageServer.tokentree.DocumentSymbolsResolver;
 import haxe.extern.EitherType;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;

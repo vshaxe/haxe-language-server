@@ -1,6 +1,5 @@
-package haxeLanguageServer.features;
+package haxeLanguageServer.features.foldingRange;
 
-import haxeLanguageServer.tokentree.FoldingRangeResolver;
 import languageServerProtocol.protocol.FoldingRange;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
