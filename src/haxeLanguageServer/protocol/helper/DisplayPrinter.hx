@@ -239,6 +239,9 @@ class DisplayPrinter {
                     access = "";
                     staticKeyword = "";
                 }
+                if (keyword == "final") {
+                    accessors = "";
+                }
                 var definition = '$access$staticKeyword$keyword $inlineKeyword$name$accessors:$type';
                 if (field.expr != null) {
                     var expr = castRegex.replace(field.expr.string, "");
