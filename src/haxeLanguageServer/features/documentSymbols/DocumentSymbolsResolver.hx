@@ -8,11 +8,9 @@ import haxeLanguageServer.features.documentSymbols.SymbolStack;
 
 class DocumentSymbolsResolver {
     final document:TextDocument;
-    final includeDocComments:Bool;
 
-    public function new(document:TextDocument, includeDocComments:Bool) {
+    public function new(document:TextDocument) {
         this.document = document;
-        this.includeDocComments = includeDocComments;
     }
 
     public function resolve():Array<DocumentSymbol> {
@@ -38,7 +36,7 @@ class DocumentSymbolsResolver {
                     opensScope = true;
                 }
                 var range = tokens.getTreePos(token);
-                if (level != Expression && includeDocComments) {
+                if (level != Expression) {
                     var docComment = token.getDocComment();
                     if (docComment != null) {
                         var docCommentPos = tokens.getPos(docComment);

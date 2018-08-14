@@ -8,7 +8,7 @@ import haxeLanguageServer.features.documentSymbols.DocumentSymbolsResolver;
 class TokenTreeTest extends TestCaseBase {
     function testDocumentSymbols() {
         compareOutput("cases/documentSymbols", document -> {
-            return new DocumentSymbolsResolver(document, true).resolve();
+            return new DocumentSymbolsResolver(document).resolve();
         });
     }
 

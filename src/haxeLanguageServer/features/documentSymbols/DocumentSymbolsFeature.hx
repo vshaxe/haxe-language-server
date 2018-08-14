@@ -16,7 +16,7 @@ class DocumentSymbolsFeature {
     function onDocumentSymbols(params:DocumentSymbolParams, token:CancellationToken, resolve:Array<EitherType<SymbolInformation,DocumentSymbol>>->Void, reject:ResponseError<NoData>->Void) {
         var onResolve = context.startTimer(Methods.DocumentSymbols);
         var doc = context.documents.get(params.textDocument.uri);
-        var symbols = new DocumentSymbolsResolver(doc, false).resolve();
+        var symbols = new DocumentSymbolsResolver(doc).resolve();
         resolve(symbols);
         onResolve(symbols);
     }
