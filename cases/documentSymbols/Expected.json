@@ -1,7 +1,6 @@
 [
     {
         "name": "BreakPositions",
-        "detail": "",
         "kind": 5,
         "range": {
             "start": {
@@ -26,7 +25,6 @@
         "children": [
             {
                 "name": "_",
-                "detail": "",
                 "kind": 8,
                 "range": {
                     "start": {
@@ -51,7 +49,6 @@
             },
             {
                 "name": "_",
-                "detail": "",
                 "kind": 8,
                 "range": {
                     "start": {
@@ -78,7 +75,6 @@
     },
     {
         "name": "Abstract",
-        "detail": "",
         "kind": 5,
         "range": {
             "start": {
@@ -103,7 +99,6 @@
         "children": [
             {
                 "name": "CONSTANT",
-                "detail": "",
                 "kind": 14,
                 "range": {
                     "start": {
@@ -128,7 +123,6 @@
             },
             {
                 "name": "abstractPropery",
-                "detail": "",
                 "kind": 7,
                 "range": {
                     "start": {
@@ -153,7 +147,6 @@
             },
             {
                 "name": "repeat",
-                "detail": "",
                 "kind": 25,
                 "range": {
                     "start": {
@@ -178,7 +171,6 @@
             },
             {
                 "name": "add",
-                "detail": "",
                 "kind": 25,
                 "range": {
                     "start": {
@@ -203,7 +195,6 @@
             },
             {
                 "name": "get",
-                "detail": "",
                 "kind": 25,
                 "range": {
                     "start": {
@@ -228,7 +219,6 @@
             },
             {
                 "name": "resolve",
-                "detail": "",
                 "kind": 25,
                 "range": {
                     "start": {
@@ -253,7 +243,6 @@
             },
             {
                 "name": "new",
-                "detail": "",
                 "kind": 9,
                 "range": {
                     "start": {
@@ -278,7 +267,6 @@
             },
             {
                 "name": "foo",
-                "detail": "",
                 "kind": 6,
                 "range": {
                     "start": {
@@ -305,7 +293,6 @@
     },
     {
         "name": "Class",
-        "detail": "",
         "kind": 5,
         "range": {
             "start": {
@@ -331,7 +318,6 @@
         "children": [
             {
                 "name": "CONSTANT",
-                "detail": "",
                 "kind": 14,
                 "range": {
                     "start": {
@@ -357,7 +343,6 @@
             },
             {
                 "name": "variable",
-                "detail": "",
                 "kind": 8,
                 "range": {
                     "start": {
@@ -382,7 +367,6 @@
             },
             {
                 "name": "variableWithBlockInit",
-                "detail": "",
                 "kind": 8,
                 "range": {
                     "start": {
@@ -407,7 +391,6 @@
                 "children": [
                     {
                         "name": "foo",
-                        "detail": "",
                         "kind": 6,
                         "range": {
                             "start": {
@@ -432,7 +415,6 @@
                     },
                     {
                         "name": "bar",
-                        "detail": "",
                         "kind": 13,
                         "range": {
                             "start": {
@@ -459,7 +441,6 @@
             },
             {
                 "name": "property",
-                "detail": "",
                 "kind": 7,
                 "range": {
                     "start": {
@@ -484,7 +465,6 @@
             },
             {
                 "name": "finaleVariable",
-                "detail": "",
                 "kind": 8,
                 "range": {
                     "start": {
@@ -509,7 +489,6 @@
             },
             {
                 "name": "finalMethod",
-                "detail": "",
                 "kind": 6,
                 "range": {
                     "start": {
@@ -534,7 +513,6 @@
             },
             {
                 "name": "fakeAdd",
-                "detail": "",
                 "kind": 6,
                 "range": {
                     "start": {
@@ -560,7 +538,6 @@
             },
             {
                 "name": "foo",
-                "detail": "",
                 "kind": 6,
                 "range": {
                     "start": {
@@ -585,7 +562,6 @@
                 "children": [
                     {
                         "name": "foo2",
-                        "detail": "",
                         "kind": 6,
                         "range": {
                             "start": {
@@ -610,7 +586,6 @@
                         "children": [
                             {
                                 "name": "foo3",
-                                "detail": "",
                                 "kind": 6,
                                 "range": {
                                     "start": {
@@ -635,7 +610,6 @@
                                 "children": [
                                     {
                                         "name": "foo4",
-                                        "detail": "",
                                         "kind": 13,
                                         "range": {
                                             "start": {
@@ -664,7 +638,6 @@
                     },
                     {
                         "name": "innerFoo",
-                        "detail": "",
                         "kind": 6,
                         "range": {
                             "start": {
@@ -689,7 +662,6 @@
                     },
                     {
                         "name": "f",
-                        "detail": "",
                         "kind": 13,
                         "range": {
                             "start": {
@@ -714,7 +686,6 @@
                         "children": [
                             {
                                 "name": "<anonymous function>",
-                                "detail": "",
                                 "kind": 6,
                                 "range": {
                                     "start": {
@@ -741,7 +712,6 @@
                     },
                     {
                         "name": "a",
-                        "detail": "",
                         "kind": 13,
                         "range": {
                             "start": {
@@ -766,7 +736,6 @@
                     },
                     {
                         "name": "b",
-                        "detail": "",
                         "kind": 13,
                         "range": {
                             "start": {
@@ -791,7 +760,6 @@
                     },
                     {
                         "name": "c",
-                        "detail": "",
                         "kind": 13,
                         "range": {
                             "start": {
@@ -816,7 +784,6 @@
                         "children": [
                             {
                                 "name": "f",
-                                "detail": "",
                                 "kind": 13,
                                 "range": {
                                     "start": {
@@ -843,7 +810,6 @@
                     },
                     {
                         "name": "array",
-                        "detail": "",
                         "kind": 13,
                         "range": {
                             "start": {
@@ -868,7 +834,6 @@
                     },
                     {
                         "name": "element",
-                        "detail": "",
                         "kind": 13,
                         "range": {
                             "start": {
@@ -893,7 +858,6 @@
                     },
                     {
                         "name": "varInFor",
-                        "detail": "",
                         "kind": 13,
                         "range": {
                             "start": {
@@ -918,7 +882,6 @@
                     },
                     {
                         "name": "exception",
-                        "detail": "",
                         "kind": 13,
                         "range": {
                             "start": {
@@ -943,7 +906,6 @@
                     },
                     {
                         "name": "varInCatch",
-                        "detail": "",
                         "kind": 13,
                         "range": {
                             "start": {
@@ -968,7 +930,6 @@
                     },
                     {
                         "name": "MacroClass",
-                        "detail": "",
                         "kind": 5,
                         "range": {
                             "start": {
@@ -993,7 +954,6 @@
                         "children": [
                             {
                                 "name": "macroField",
-                                "detail": "",
                                 "kind": 8,
                                 "range": {
                                     "start": {
@@ -1020,7 +980,6 @@
                     },
                     {
                         "name": "<macro class>",
-                        "detail": "",
                         "kind": 5,
                         "range": {
                             "start": {
@@ -1045,7 +1004,6 @@
                         "children": [
                             {
                                 "name": "macroField",
-                                "detail": "",
                                 "kind": 8,
                                 "range": {
                                     "start": {
@@ -1072,7 +1030,6 @@
                     },
                     {
                         "name": "maybeIncorrectPos",
-                        "detail": "",
                         "kind": 13,
                         "range": {
                             "start": {
@@ -1099,7 +1056,6 @@
             },
             {
                 "name": "new",
-                "detail": "",
                 "kind": 9,
                 "range": {
                     "start": {
@@ -1126,7 +1082,6 @@
     },
     {
         "name": "Interface",
-        "detail": "",
         "kind": 11,
         "range": {
             "start": {
@@ -1151,7 +1106,6 @@
         "children": [
             {
                 "name": "variable",
-                "detail": "",
                 "kind": 8,
                 "range": {
                     "start": {
@@ -1176,7 +1130,6 @@
             },
             {
                 "name": "foo",
-                "detail": "",
                 "kind": 6,
                 "range": {
                     "start": {
@@ -1203,7 +1156,6 @@
     },
     {
         "name": "EnumAbstract",
-        "detail": "",
         "kind": 10,
         "range": {
             "start": {
@@ -1228,7 +1180,6 @@
         "children": [
             {
                 "name": "foo",
-                "detail": "",
                 "kind": 6,
                 "range": {
                     "start": {
@@ -1253,7 +1204,6 @@
                 "children": [
                     {
                         "name": "MacroClass",
-                        "detail": "",
                         "kind": 5,
                         "range": {
                             "start": {
@@ -1278,7 +1228,6 @@
                         "children": [
                             {
                                 "name": "macroField",
-                                "detail": "",
                                 "kind": 8,
                                 "range": {
                                     "start": {
@@ -1303,7 +1252,6 @@
                             },
                             {
                                 "name": "macroFunction",
-                                "detail": "",
                                 "kind": 6,
                                 "range": {
                                     "start": {
@@ -1328,7 +1276,6 @@
                                 "children": [
                                     {
                                         "name": "macroVar",
-                                        "detail": "",
                                         "kind": 13,
                                         "range": {
                                             "start": {
@@ -1359,7 +1306,6 @@
             },
             {
                 "name": "CONSTANT",
-                "detail": "",
                 "kind": 14,
                 "range": {
                     "start": {
@@ -1384,7 +1330,6 @@
             },
             {
                 "name": "Value1",
-                "detail": "",
                 "kind": 22,
                 "range": {
                     "start": {
@@ -1409,7 +1354,6 @@
             },
             {
                 "name": "Value2",
-                "detail": "",
                 "kind": 22,
                 "range": {
                     "start": {
@@ -1434,7 +1378,6 @@
             },
             {
                 "name": "add",
-                "detail": "",
                 "kind": 25,
                 "range": {
                     "start": {
@@ -1461,7 +1404,6 @@
     },
     {
         "name": "EnumAbstractHaxe4",
-        "detail": "",
         "kind": 10,
         "range": {
             "start": {
@@ -1486,7 +1428,6 @@
         "children": [
             {
                 "name": "CONSTANT",
-                "detail": "",
                 "kind": 14,
                 "range": {
                     "start": {
@@ -1511,7 +1452,6 @@
             },
             {
                 "name": "Value1",
-                "detail": "",
                 "kind": 22,
                 "range": {
                     "start": {
@@ -1536,7 +1476,6 @@
             },
             {
                 "name": "Value2",
-                "detail": "",
                 "kind": 22,
                 "range": {
                     "start": {
@@ -1563,7 +1502,6 @@
     },
     {
         "name": "Enum",
-        "detail": "",
         "kind": 10,
         "range": {
             "start": {
@@ -1588,7 +1526,6 @@
         "children": [
             {
                 "name": "Simple",
-                "detail": "",
                 "kind": 22,
                 "range": {
                     "start": {
@@ -1613,7 +1550,6 @@
             },
             {
                 "name": "Complex",
-                "detail": "",
                 "kind": 22,
                 "range": {
                     "start": {
@@ -1640,7 +1576,6 @@
     },
     {
         "name": "TypeAlias",
-        "detail": "",
         "kind": 11,
         "range": {
             "start": {
@@ -1665,7 +1600,6 @@
     },
     {
         "name": "TypedefShortFields",
-        "detail": "",
         "kind": 23,
         "range": {
             "start": {
@@ -1690,7 +1624,6 @@
         "children": [
             {
                 "name": "a",
-                "detail": "",
                 "kind": 8,
                 "range": {
                     "start": {
@@ -1715,7 +1648,6 @@
             },
             {
                 "name": "b",
-                "detail": "",
                 "kind": 8,
                 "range": {
                     "start": {
@@ -1742,7 +1674,6 @@
     },
     {
         "name": "TypedefComplexFields",
-        "detail": "",
         "kind": 23,
         "range": {
             "start": {
@@ -1767,7 +1698,6 @@
         "children": [
             {
                 "name": "a",
-                "detail": "",
                 "kind": 8,
                 "range": {
                     "start": {
@@ -1792,7 +1722,6 @@
             },
             {
                 "name": "b",
-                "detail": "",
                 "kind": 8,
                 "range": {
                     "start": {
@@ -1817,7 +1746,6 @@
             },
             {
                 "name": "c",
-                "detail": "",
                 "kind": 8,
                 "range": {
                     "start": {
@@ -1842,7 +1770,6 @@
             },
             {
                 "name": "foo",
-                "detail": "",
                 "kind": 6,
                 "range": {
                     "start": {
@@ -1869,7 +1796,6 @@
     },
     {
         "name": "TypedefExtension",
-        "detail": "",
         "kind": 23,
         "range": {
             "start": {
@@ -1894,7 +1820,6 @@
         "children": [
             {
                 "name": "a",
-                "detail": "",
                 "kind": 8,
                 "range": {
                     "start": {
@@ -1919,7 +1844,6 @@
             },
             {
                 "name": "b",
-                "detail": "",
                 "kind": 8,
                 "range": {
                     "start": {
@@ -1946,7 +1870,6 @@
     },
     {
         "name": "TypedefIntersectionTypes",
-        "detail": "",
         "kind": 23,
         "range": {
             "start": {
@@ -1971,7 +1894,6 @@
         "children": [
             {
                 "name": "a",
-                "detail": "",
                 "kind": 8,
                 "range": {
                     "start": {
@@ -1996,7 +1918,6 @@
             },
             {
                 "name": "b",
-                "detail": "",
                 "kind": 8,
                 "range": {
                     "start": {
@@ -2023,7 +1944,6 @@
     },
     {
         "name": "TypedefToArray",
-        "detail": "",
         "kind": 11,
         "range": {
             "start": {
@@ -2048,7 +1968,6 @@
     },
     {
         "name": "Type",
-        "detail": "",
         "kind": 5,
         "range": {
             "start": {
@@ -2073,7 +1992,6 @@
         "children": [
             {
                 "name": "variable",
-                "detail": "",
                 "kind": 8,
                 "range": {
                     "start": {
@@ -2098,7 +2016,6 @@
             },
             {
                 "name": "func",
-                "detail": "",
                 "kind": 6,
                 "range": {
                     "start": {
@@ -2123,7 +2040,6 @@
                 "children": [
                     {
                         "name": "localFunction",
-                        "detail": "",
                         "kind": 6,
                         "range": {
                             "start": {
@@ -2148,7 +2064,6 @@
                     },
                     {
                         "name": "localVar",
-                        "detail": "",
                         "kind": 13,
                         "range": {
                             "start": {

@@ -45,7 +45,6 @@ class DocumentSymbolsResolver {
                 }
                 var symbol:DocumentSymbol = {
                     name: name,
-                    detail: "",
                     kind: kind,
                     range: rangeAt(range),
                     selectionRange: rangeAt(tokens.getPos(nameToken))
