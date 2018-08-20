@@ -1,6 +1,6 @@
 package haxeLanguageServer.server;
 
 enum DisplayResult {
-    DCancelled;
-    DResult(msg:String);
+	DCancelled;
+	DResult(msg:String);
 }

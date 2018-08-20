@@ -1,56 +1,60 @@
 package haxeLanguageServer.helper;
 
 private typedef Version = {
-    final major:Int;
-    final minor:Int;
-    final patch:Int;
+	final major:Int;
+	final minor:Int;
+	final patch:Int;
 }
 
 abstract SemVer(Version) from Version {
-    static final reVersion = ~/^(\d+)\.(\d+)\.(\d+)(?:\s.*)?/;
+	static final reVersion = ~/^(\d+)\.(\d+)\.(\d+)(?:\s.*)?/;
 
-    var major(get,never):Int;
-    inline function get_major() return this.major;
+	var major(get, never):Int;
 
-    var minor(get,never):Int;
-    inline function get_minor() return this.minor;
+	inline function get_major()
+		return this.major;
 
-    var patch(get,never):Int;
-    inline function get_patch() return this.patch;
+	var minor(get, never):Int;
 
-    public static function parse(s:String) {
-        if (!reVersion.match(s))
-            return null;
+	inline function get_minor()
+		return this.minor;
 
-        var major = Std.parseInt(reVersion.matched(1));
-        var minor = Std.parseInt(reVersion.matched(2));
-        var patch = Std.parseInt(reVersion.matched(3));
-        return new SemVer(major, minor, patch);
-    }
+	var patch(get, never):Int;
 
-    inline public function new(major, minor, patch) {
-        this = {
-            major: major,
-            minor: minor,
-            patch: patch
-        };
-    }
+	inline function get_patch()
+		return this.patch;
 
-    @:op(a >= b) function isEqualOrGreaterThan(other:SemVer):Bool {
-        return isEqual(other) || isGreaterThan(other);
-    }
+	public static function parse(s:String) {
+		if (!reVersion.match(s))
+			return null;
 
-    @:op(a > b) function isGreaterThan(other:SemVer):Bool {
-        return (major > other.major)
-            || (major == other.major && minor > other.minor)
-            || (major == other.major && minor == other.minor && patch > other.patch);
-    }
+		var major = Std.parseInt(reVersion.matched(1));
+		var minor = Std.parseInt(reVersion.matched(2));
+		var patch = Std.parseInt(reVersion.matched(3));
+		return new SemVer(major, minor, patch);
+	}
 
-    @:op(a == b) function isEqual(other:SemVer):Bool {
-        return major == other.major && minor == other.minor && patch == other.patch;
-    }
+	inline public function new(major, minor, patch) {
+		this = {
+			major: major,
+			minor: minor,
+			patch: patch
+		};
+	}
 
-    function toString() {
-        return '$major.$minor.$patch';
-    }
+	@:op(a >= b) function isEqualOrGreaterThan(other:SemVer):Bool {
+		return isEqual(other) || isGreaterThan(other);
+	}
+
+	@:op(a > b) function isGreaterThan(other:SemVer):Bool {
+		return (major > other.major) || (major == other.major && minor > other.minor) || (major == other.major && minor == other.minor && patch > other.patch);
+	}
+
+	@:op(a == b) function isEqual(other:SemVer):Bool {
+		return major == other.major && minor == other.minor && patch == other.patch;
+	}
+
+	function toString() {
+		return '$major.$minor.$patch';
+	}
 }

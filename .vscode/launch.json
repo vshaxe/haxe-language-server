@@ -1,25 +1,25 @@
 {
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "name": "Attach",
-            "type": "node",
-            "request": "attach",
-            "port": 6004,
-            "sourceMaps": true,
-            "outFiles": [
-                "${workspaceRoot}/bin/*.js"
-            ]
-        },
-        {
-            "type": "node",
-            "request": "launch",
-            "name": "Tests",
-            "program": "${workspaceRoot}/bin/test.js",
-            "sourceMaps": true,
-            "outFiles": [
-                "${workspaceRoot}/bin/*.js"
-            ]
-        }
-    ]
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"name": "Attach",
+			"type": "node",
+			"request": "attach",
+			"port": 6004,
+			"sourceMaps": true,
+			"outFiles": [
+				"${workspaceRoot}/bin/*.js"
+			]
+		},
+		{
+			"type": "node",
+			"request": "launch",
+			"name": "Tests",
+			"program": "${workspaceRoot}/bin/test.js",
+			"sourceMaps": true,
+			"outFiles": [
+				"${workspaceRoot}/bin/*.js"
+			]
+		}
+	]
 }

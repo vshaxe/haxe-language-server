@@ -1,81 +1,81 @@
 {
-    "inherit": "vshaxe-node",
-    "mainTarget": "language-server",
-    "haxelibs": [
-        {
-            "name": "haxe-hxparser",
-            "installArgs": ["git", "haxe-hxparser", "https://github.com/vshaxe/haxe-hxparser"],
-            "includeProjectFile": true
-        },
-        {
-            "name": "compiletime",
-            "installArgs": ["install", "compiletime"]
-        },
-        {
-            "name": "hx3compat",
-            "installArgs": ["install", "hx3compat"]
-        },
-        {
-            "name": "hxparse",
-            "installArgs": ["git", "hxparse", "https://github.com/Simn/hxparse", "--never"]
-        },
-        {
-            "name": "haxeparser",
-            "installArgs": ["git", "haxeparser", "https://github.com/Simn/haxeparser", "--never"]
-        },
-        {
-            "name": "tokentree",
-            "installArgs": ["git", "tokentree", "https://github.com/HaxeCheckstyle/tokentree", "--never"]
-        },
-        {
-            "name": "formatter",
-            "installArgs": ["git", "formatter", "https://github.com/HaxeCheckstyle/haxe-formatter", "--never"]
-        },
-        {
-            "name": "json2object",
-            "installArgs": ["install", "json2object"]
-        }
-    ],
-    "targets": [
-        {
-            "name": "language-server",
-            "args": {
-                "haxelibs": ["haxe-hxparser", "hxparse", "haxeparser", "tokentree", "formatter", "json2object"],
-                "classPaths": [
-                    "src",
-                    "protocol/src"
-                ],
-                "defines": [
-                    "JSTACK_FORMAT=vscode"
-                ],
-                "output": {
-                    "target": "js",
-                    "path": "bin/server.js"
-                },
-                "deadCodeElimination": "full",
-                "main": "haxeLanguageServer.Main"
-            }
-        },
-        {
-            "name": "language-server-tests",
-            "args": {
-                "haxelibs": ["haxe-hxparser", "hxparse", "haxeparser", "tokentree", "formatter", "json2object", "compiletime", "hx3compat"],
-                "classPaths": [
-                    "src",
-                    "test",
-                    "protocol/src"
-                ],
-                "output": {
-                    "target": "js",
-                    "path": "bin/test.js"
-                },
-                "deadCodeElimination": "full",
-                "main": "TestMain",
-                "debug": true
-            },
-            "afterBuildCommands": [
-                ["node", "bin/test.js"]
-            ]
-        }
-    ]
+	"inherit": "vshaxe-node",
+	"mainTarget": "language-server",
+	"haxelibs": [
+		{
+			"name": "haxe-hxparser",
+			"installArgs": ["git", "haxe-hxparser", "https://github.com/vshaxe/haxe-hxparser"],
+			"includeProjectFile": true
+		},
+		{
+			"name": "compiletime",
+			"installArgs": ["install", "compiletime"]
+		},
+		{
+			"name": "hx3compat",
+			"installArgs": ["install", "hx3compat"]
+		},
+		{
+			"name": "hxparse",
+			"installArgs": ["git", "hxparse", "https://github.com/Simn/hxparse", "--never"]
+		},
+		{
+			"name": "haxeparser",
+			"installArgs": ["git", "haxeparser", "https://github.com/Simn/haxeparser", "--never"]
+		},
+		{
+			"name": "tokentree",
+			"installArgs": ["git", "tokentree", "https://github.com/HaxeCheckstyle/tokentree", "--never"]
+		},
+		{
+			"name": "formatter",
+			"installArgs": ["git", "formatter", "https://github.com/HaxeCheckstyle/haxe-formatter", "--never"]
+		},
+		{
+			"name": "json2object",
+			"installArgs": ["install", "json2object"]
+		}
+	],
+	"targets": [
+		{
+			"name": "language-server",
+			"args": {
+				"haxelibs": ["haxe-hxparser", "hxparse", "haxeparser", "tokentree", "formatter", "json2object"],
+				"classPaths": [
+					"src",
+					"protocol/src"
+				],
+				"defines": [
+					"JSTACK_FORMAT=vscode"
+				],
+				"output": {
+					"target": "js",
+					"path": "bin/server.js"
+				},
+				"deadCodeElimination": "full",
+				"main": "haxeLanguageServer.Main"
+			}
+		},
+		{
+			"name": "language-server-tests",
+			"args": {
+				"haxelibs": ["haxe-hxparser", "hxparse", "haxeparser", "tokentree", "formatter", "json2object", "compiletime", "hx3compat"],
+				"classPaths": [
+					"src",
+					"test",
+					"protocol/src"
+				],
+				"output": {
+					"target": "js",
+					"path": "bin/test.js"
+				},
+				"deadCodeElimination": "full",
+				"main": "TestMain",
+				"debug": true
+			},
+			"afterBuildCommands": [
+				["node", "bin/test.js"]
+			]
+		}
+	]
 }

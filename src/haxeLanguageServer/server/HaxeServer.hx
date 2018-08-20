@@ -16,377 +16,377 @@ import haxeLanguageServer.protocol.Server.ServerMethods;
 import haxeLanguageServer.protocol.Protocol;
 
 class HaxeServer {
-    final context:Context;
+	final context:Context;
+	var proc:ChildProcessObject;
+	var buffer:MessageBuffer;
+	var nextMessageLength:Int;
+	var requestsHead:DisplayRequest;
+	var requestsTail:DisplayRequest;
+	var currentRequest:DisplayRequest;
+	var socketListener:js.node.net.Server;
+	var stopProgressCallback:Void->Void;
+	var startRequest:Void->Void;
+	var crashes:Int = 0;
+	var supportedMethods:Array<String>;
 
-    var proc:ChildProcessObject;
-    var buffer:MessageBuffer;
-    var nextMessageLength:Int;
+	public var version(default, null):SemVer;
 
-    var requestsHead:DisplayRequest;
-    var requestsTail:DisplayRequest;
-    var currentRequest:DisplayRequest;
-    var socketListener:js.node.net.Server;
-    var stopProgressCallback:Void->Void;
-    var startRequest:Void->Void;
-    var crashes:Int = 0;
-    var supportedMethods:Array<String>;
+	public function new(context:Context) {
+		this.context = context;
+	}
 
-    public var version(default,null):SemVer;
+	static final reTrailingNewline = ~/\r?\n$/;
 
-    public function new(context:Context) {
-        this.context = context;
-    }
+	public function start(?callback:Void->Void) {
+		// we still have requests in our queue that are not cancelable, such as a build - try again later
+		if (hasNonCancellableRequests()) {
+			startRequest = callback;
+			return;
+		}
 
-    static final reTrailingNewline = ~/\r?\n$/;
+		supportedMethods = [];
+		startRequest = null;
+		stop();
 
-    public function start(?callback:Void->Void) {
-        // we still have requests in our queue that are not cancelable, such as a build - try again later
-        if (hasNonCancellableRequests()) {
-            startRequest = callback;
-            return;
-        }
+		inline function error(s)
+			context.sendShowMessage(Error, s);
 
-        supportedMethods = [];
-        startRequest = null;
-        stop();
+		var env = new haxe.DynamicAccess();
+		for (key in js.Node.process.env.keys())
+			env[key] = js.Node.process.env[key];
+		for (key in context.displayServerConfig.env.keys())
+			env[key] = context.displayServerConfig.env[key];
 
-        inline function error(s) context.sendShowMessage(Error, s);
+		var haxePath = context.displayServerConfig.path;
+		var checkRun = ChildProcess.spawnSync(haxePath, ["-version"], {env: env});
+		if (checkRun.error != null) {
+			if (checkRun.error.message.indexOf("ENOENT") >= 0) {
+				if (haxePath == "haxe") // default
+					return error("Could not find Haxe in PATH. Is it installed?");
+				else
+					return error('Path to Haxe executable is not valid: \'$haxePath\'. Please check your settings.');
+			}
+			return error('Error starting Haxe server: ${checkRun.error}');
+		}
 
-        var env = new haxe.DynamicAccess();
-        for (key in js.Node.process.env.keys())
-            env[key] = js.Node.process.env[key];
-        for (key in context.displayServerConfig.env.keys())
-            env[key] = context.displayServerConfig.env[key];
+		var output = (checkRun.stderr : Buffer).toString().trim();
+		if (output == "")
+			output = (checkRun.stdout : Buffer).toString().trim(); // haxe 4.0 prints -version output to stdout instead
 
-        var haxePath = context.displayServerConfig.path;
-        var checkRun = ChildProcess.spawnSync(haxePath, ["-version"], {env: env});
-        if (checkRun.error != null) {
-            if (checkRun.error.message.indexOf("ENOENT") >= 0) {
-                if (haxePath == "haxe") // default
-                    return error("Could not find Haxe in PATH. Is it installed?");
-                else
-                    return error('Path to Haxe executable is not valid: \'$haxePath\'. Please check your settings.');
-            }
-            return error('Error starting Haxe server: ${checkRun.error}');
-        }
+		if (checkRun.status != 0)
+			return error("Haxe version check failed: " + output);
 
-        var output = (checkRun.stderr : Buffer).toString().trim();
-        if (output == "")
-            output = (checkRun.stdout : Buffer).toString().trim(); // haxe 4.0 prints -version output to stdout instead
+		version = SemVer.parse(output);
+		if (version == null)
+			return error("Error parsing Haxe version " + haxe.Json.stringify(output));
 
-        if (checkRun.status != 0)
-            return error("Haxe version check failed: " + output);
+		var isVersionSupported = version >= new SemVer(3, 4, 0);
+		if (!isVersionSupported)
+			return error('Unsupported Haxe version! Minimum required: 3.4.0. Found: $version.');
 
-        version = SemVer.parse(output);
-        if (version == null)
-            return error("Error parsing Haxe version " + haxe.Json.stringify(output));
+		buffer = new MessageBuffer();
+		nextMessageLength = -1;
 
-        var isVersionSupported = version >= new SemVer(3, 4, 0);
-        if (!isVersionSupported)
-            return error('Unsupported Haxe version! Minimum required: 3.4.0. Found: $version.');
+		proc = ChildProcess.spawn(context.displayServerConfig.path, context.displayServerConfig.arguments.concat(["--wait", "stdio"]), {env: env});
 
-        buffer = new MessageBuffer();
-        nextMessageLength = -1;
+		proc.stdout.on(ReadableEvent.Data, function(buf:Buffer) {
+			context.sendLogMessage(Log, reTrailingNewline.replace(buf.toString(), ""));
+		});
+		proc.stderr.on(ReadableEvent.Data, onData);
+		proc.on(ChildProcessEvent.Exit, onExit);
 
-        proc = ChildProcess.spawn(context.displayServerConfig.path, context.displayServerConfig.arguments.concat(["--wait", "stdio"]), {env: env});
+		function onInitComplete() {
+			stopProgress();
+			buildCompletionCache();
+			if (callback != null)
+				callback();
+		}
 
-        proc.stdout.on(ReadableEvent.Data, function(buf:Buffer) {
-            context.sendLogMessage(Log, reTrailingNewline.replace(buf.toString(), ""));
-        });
-        proc.stderr.on(ReadableEvent.Data, onData);
-        proc.on(ChildProcessEvent.Exit, onExit);
+		stopProgressCallback = context.startProgress("Initializing Haxe/JSON-RPC protocol");
+		context.callHaxeMethod(Methods.Initialize, {supportsResolve: true}, null, result -> {
+			supportedMethods = result.methods;
+			configure();
+			onInitComplete();
+			return null;
+		}, error -> {
+			// the "invalid format" error is expected for Haxe versions <= 4.0.0-preview.3
+			if (error.startsWith("Error: Invalid format")) {
+				trace("Haxe version does not support JSON-RPC, using legacy --display API.");
+			} else {
+				trace(error);
+			}
+			onInitComplete();
+		});
 
-        function onInitComplete() {
-            stopProgress();
-            buildCompletionCache();
-            if (callback != null)
-                callback();
-        }
+		var displayPort = context.config.displayPort;
+		if (socketListener == null && displayPort != null) {
+			if (displayPort == "auto") {
+				getAvailablePort(6000).then(startSocketServer);
+			} else {
+				startSocketServer(displayPort);
+			}
+		}
+	}
 
-        stopProgressCallback = context.startProgress("Initializing Haxe/JSON-RPC protocol");
-        context.callHaxeMethod(Methods.Initialize, {supportsResolve: true}, null, result -> {
-            supportedMethods = result.methods;
-            configure();
-            onInitComplete();
-            return null;
-        }, error -> {
-            // the "invalid format" error is expected for Haxe versions <= 4.0.0-preview.3
-            if (error.startsWith("Error: Invalid format")) {
-                trace("Haxe version does not support JSON-RPC, using legacy --display API.");
-            } else {
-                trace(error);
-            }
-            onInitComplete();
-        });
+	function configure() {
+		context.callHaxeMethod(ServerMethods.Configure, {noModuleChecks: true, print: context.displayServerConfig.print}, null, _ -> null, error -> {
+			trace("Error during " + ServerMethods.Configure + " " + error);
+		});
+	}
 
-        var displayPort = context.config.displayPort;
-        if (socketListener == null && displayPort != null) {
-            if (displayPort == "auto") {
-                getAvailablePort(6000).then(startSocketServer);
-            } else {
-                startSocketServer(displayPort);
-            }
-        }
-    }
+	function buildCompletionCache() {
+		if (!context.config.buildCompletionCache || context.displayArguments == null)
+			return;
 
-    function configure() {
-        context.callHaxeMethod(ServerMethods.Configure, {noModuleChecks: true, print: context.displayServerConfig.print}, null, _ -> null, error -> {
-            trace("Error during " + ServerMethods.Configure + " " + error);
-        });
-    }
+		startCompletionInitializationProgress("Building Cache");
+		process("cache build", context.displayArguments.concat(["--no-output"]), null, true, null, Processed(function(_) {
+			stopProgress();
+			if (supports(ServerMethods.ReadClassPaths)) {
+				readClassPaths();
+			} else {
+				trace("Done.");
+			}
+		}, function(error) {
+			context.protocol.sendNotification(LanguageServerMethods.CacheBuildFailed);
+			stopProgress();
+			trace("Failed - try fixing the error(s) and restarting the language server:\n\n" + error);
+		}));
+	}
 
-    function buildCompletionCache() {
-        if (!context.config.buildCompletionCache || context.displayArguments == null)
-            return;
+	function readClassPaths() {
+		startCompletionInitializationProgress("Parsing Classpaths");
+		context.callHaxeMethod(ServerMethods.ReadClassPaths, null, null, _ -> {
+			stopProgress();
+			trace("Done.");
+			return null;
+		}, error -> {
+			stopProgress();
+			trace("Failed - " + error);
+		});
+	}
 
-        startCompletionInitializationProgress("Building Cache");
-        process("cache build", context.displayArguments.concat(["--no-output"]), null, true, null, Processed(function(_) {
-            stopProgress();
-            if (supports(ServerMethods.ReadClassPaths)) {
-                readClassPaths();
-            } else {
-                trace("Done.");
-            }
-        }, function(error) {
-            context.protocol.sendNotification(LanguageServerMethods.CacheBuildFailed);
-            stopProgress();
-            trace("Failed - try fixing the error(s) and restarting the language server:\n\n" + error);
-        }));
-    }
+	function startCompletionInitializationProgress(message:String) {
+		stopProgressCallback = context.startProgress(message);
+		trace(message + "...");
+	}
 
-    function readClassPaths() {
-        startCompletionInitializationProgress("Parsing Classpaths");
-        context.callHaxeMethod(ServerMethods.ReadClassPaths, null, null, _ -> {
-            stopProgress();
-            trace("Done.");
-            return null;
-        }, error -> {
-            stopProgress();
-            trace("Failed - " + error);
-        });
-    }
+	function hasNonCancellableRequests():Bool {
+		if (currentRequest != null && !currentRequest.cancellable)
+			return true;
 
-    function startCompletionInitializationProgress(message:String) {
-        stopProgressCallback = context.startProgress(message);
-        trace(message + "...");
-    }
+		var request = requestsHead;
+		while (request != null) {
+			if (!request.cancellable) {
+				return true;
+			}
+			request = request.next;
+		}
 
-    function hasNonCancellableRequests():Bool {
-        if (currentRequest != null && !currentRequest.cancellable)
-            return true;
+		return false;
+	}
 
-        var request = requestsHead;
-        while (request != null) {
-            if (!request.cancellable) {
-                return true;
-            }
-            request = request.next;
-        }
+	// https://gist.github.com/mikeal/1840641#gistcomment-2337132
+	function getAvailablePort(startingAt:Int):Promise<Int> {
+		function getNextAvailablePort(currentPort:Int, cb:Int->Void) {
+			var server = Net.createServer();
+			server.listen(currentPort, "localhost", () -> {
+				server.once(ServerEvent.Close, cb.bind(currentPort));
+				server.close();
+			});
+			server.on(ServerEvent.Error, _ -> getNextAvailablePort(currentPort + 1, cb));
+		}
 
-        return false;
-    }
+		return new Promise((resolve, reject) -> getNextAvailablePort(startingAt, resolve));
+	}
 
-    // https://gist.github.com/mikeal/1840641#gistcomment-2337132
-    function getAvailablePort(startingAt:Int):Promise<Int> {
-        function getNextAvailablePort(currentPort:Int, cb:Int->Void) {
-            var server = Net.createServer();
-            server.listen(currentPort, "localhost", () -> {
-                server.once(ServerEvent.Close, cb.bind(currentPort));
-                server.close();
-            });
-            server.on(ServerEvent.Error, _ -> getNextAvailablePort(currentPort + 1, cb));
-        }
+	public function startSocketServer(port:Int) {
+		if (socketListener != null) {
+			socketListener.close();
+		}
+		socketListener = Net.createServer(function(socket) {
+			trace("Client connected");
+			socket.on(SocketEvent.Data, function(data:Buffer) {
+				var s = data.toString();
+				var split = s.split("\n");
+				split.pop(); // --connect passes extra \0
+				function callback(result:DisplayResult) {
+					switch (result) {
+						case DResult(data):
+							socket.write(data);
+						case DCancelled:
+					}
+					socket.end();
+					socket.destroy();
+					trace("Client disconnected");
+				}
+				process("compilation", split, null, false, null, Raw(callback));
+			});
+			socket.on(SocketEvent.Error, function(err) {
+				trace("Socket error: " + err);
+			});
+		});
+		socketListener.listen(port, "localhost");
+		context.sendLogMessage(Log, 'Listening on port $port');
+		context.protocol.sendNotification(LanguageServerMethods.DidChangeDisplayPort, {port: port});
+	}
 
-        return new Promise((resolve, reject) -> getNextAvailablePort(startingAt, resolve));
-    }
+	public function stop() {
+		if (proc != null) {
+			proc.removeAllListeners();
+			proc.kill();
+			proc = null;
+		}
 
-    public function startSocketServer(port:Int) {
-        if (socketListener != null) {
-            socketListener.close();
-        }
-        socketListener = Net.createServer(function(socket) {
-            trace("Client connected");
-            socket.on(SocketEvent.Data, function(data:Buffer) {
-                var s = data.toString();
-                var split = s.split("\n");
-                split.pop(); // --connect passes extra \0
-                function callback(result:DisplayResult) {
-                    switch (result) {
-                        case DResult(data):
-                            socket.write(data);
-                        case DCancelled:
-                    }
-                    socket.end();
-                    socket.destroy();
-                    trace("Client disconnected");
-                }
-                process("compilation", split, null, false, null, Raw(callback));
-            });
-            socket.on(SocketEvent.Error, function(err) {
-                trace("Socket error: " + err);
-            });
-        });
-        socketListener.listen(port, "localhost");
-        context.sendLogMessage(Log, 'Listening on port $port');
-        context.protocol.sendNotification(LanguageServerMethods.DidChangeDisplayPort, {port: port});
-    }
+		stopProgress();
 
-    public function stop() {
-        if (proc != null) {
-            proc.removeAllListeners();
-            proc.kill();
-            proc = null;
-        }
+		// cancel all callbacks
+		var request = requestsHead;
+		while (request != null) {
+			request.cancel();
+			request = request.next;
+		}
 
-        stopProgress();
+		requestsHead = requestsTail = currentRequest = null;
+		updateRequestQueue();
+	}
 
-        // cancel all callbacks
-        var request = requestsHead;
-        while (request != null) {
-            request.cancel();
-            request = request.next;
-        }
+	function stopProgress() {
+		if (stopProgressCallback != null) {
+			stopProgressCallback();
+		}
+		stopProgressCallback = null;
+	}
 
-        requestsHead = requestsTail = currentRequest = null;
-        updateRequestQueue();
-    }
+	public function restart(reason:String, ?callback:Void->Void) {
+		context.sendLogMessage(Log, 'Haxe server restart requested: $reason');
+		start(function() {
+			context.sendLogMessage(Log, 'Restarted Haxe server: $reason');
+			if (callback != null)
+				callback();
+		});
+	}
 
-    function stopProgress() {
-        if (stopProgressCallback != null) {
-            stopProgressCallback();
-        }
-        stopProgressCallback = null;
-    }
+	function onExit(_, _) {
+		crashes++;
+		if (crashes < 3) {
+			restart("Haxe process was killed");
+			return;
+		}
 
-    public function restart(reason:String, ?callback:Void->Void) {
-        context.sendLogMessage(Log, 'Haxe server restart requested: $reason');
-        start(function() {
-            context.sendLogMessage(Log, 'Restarted Haxe server: $reason');
-            if (callback != null)
-                callback();
-        });
-    }
+		var haxeResponse = buffer.getContent();
 
-    function onExit(_, _) {
-        crashes++;
-        if (crashes <3) {
-            restart("Haxe process was killed");
-            return;
-        }
+		// invalid compiler argument?
+		var invalidOptionRegex = ~/unknown option `(.*?)'./;
+		if (invalidOptionRegex.match(haxeResponse)) {
+			var option = invalidOptionRegex.matched(1);
+			context.sendShowMessage(Error, 'Invalid compiler argument \'$option\' detected. ' +
+				'Please verify "haxe.displayConfigurations" and "haxe.displayServer.arguments".');
+			return;
+		}
 
-        var haxeResponse = buffer.getContent();
+		context.sendShowMessage(Error,
+			"Haxe process has crashed 3 times, not attempting any more restarts. Please check the output channel for the full error.");
+		trace("\nError message from the compiler:\n");
+		trace(haxeResponse);
+	}
 
-        // invalid compiler argument?
-        var invalidOptionRegex = ~/unknown option `(.*?)'./;
-        if (invalidOptionRegex.match(haxeResponse)) {
-            var option = invalidOptionRegex.matched(1);
-            context.sendShowMessage(Error, 'Invalid compiler argument \'$option\' detected. '
-                + 'Please verify "haxe.displayConfigurations" and "haxe.displayServer.arguments".');
-            return;
-        }
+	function onData(data:Buffer) {
+		buffer.append(data);
+		while (true) {
+			if (nextMessageLength == -1) {
+				var length = buffer.tryReadLength();
+				if (length == -1)
+					return;
+				nextMessageLength = length;
+			}
+			var msg = buffer.tryReadContent(nextMessageLength);
+			if (msg == null)
+				return;
+			nextMessageLength = -1;
+			if (currentRequest != null) {
+				var request = currentRequest;
+				currentRequest = null;
+				request.onData(msg);
+				updateRequestQueue();
+				checkQueue();
+			}
+		}
+	}
 
-        context.sendShowMessage(Error, "Haxe process has crashed 3 times, not attempting any more restarts. Please check the output channel for the full error.");
-        trace("\nError message from the compiler:\n");
-        trace(haxeResponse);
-    }
+	public function process(label:String, args:Array<String>, token:CancellationToken, cancellable:Bool, stdin:String, handler:ResultHandler) {
+		// create a request object
+		var request = new DisplayRequest(label, args, token, cancellable, stdin, handler);
 
-    function onData(data:Buffer) {
-        buffer.append(data);
-        while (true) {
-            if (nextMessageLength == -1) {
-                var length = buffer.tryReadLength();
-                if (length == -1)
-                    return;
-                nextMessageLength = length;
-            }
-            var msg = buffer.tryReadContent(nextMessageLength);
-            if (msg == null)
-                return;
-            nextMessageLength = -1;
-            if (currentRequest != null) {
-                var request = currentRequest;
-                currentRequest = null;
-                request.onData(msg);
-                updateRequestQueue();
-                checkQueue();
-            }
-        }
-    }
+		// if the request is cancellable, set a cancel callback to remove request from queue
+		if (token != null) {
+			token.setCallback(function() {
+				if (request == currentRequest)
+					return; // currently processing requests can't be canceled
 
-    public function process(label:String, args:Array<String>, token:CancellationToken, cancellable:Bool, stdin:String, handler:ResultHandler) {
-        // create a request object
-        var request = new DisplayRequest(label, args, token, cancellable, stdin, handler);
+				// remove from the queue
+				if (request == requestsHead)
+					requestsHead = request.next;
+				if (request == requestsTail)
+					requestsTail = request.prev;
+				if (request.prev != null)
+					request.prev.next = request.next;
+				if (request.next != null)
+					request.next.prev = request.prev;
 
-        // if the request is cancellable, set a cancel callback to remove request from queue
-        if (token != null) {
-            token.setCallback(function() {
-                if (request == currentRequest)
-                    return; // currently processing requests can't be canceled
+				// notify about the cancellation
+				request.cancel();
+				updateRequestQueue();
+			});
+		}
 
-                // remove from the queue
-                if (request == requestsHead)
-                    requestsHead = request.next;
-                if (request == requestsTail)
-                    requestsTail = request.prev;
-                if (request.prev != null)
-                    request.prev.next = request.next;
-                if (request.next != null)
-                    request.next.prev = request.prev;
+		// add to the queue
+		if (requestsHead == null) {
+			requestsHead = requestsTail = request;
+		} else {
+			requestsTail.next = request;
+			request.prev = requestsTail;
+			requestsTail = request;
+		}
 
-                // notify about the cancellation
-                request.cancel();
-                updateRequestQueue();
-            });
-        }
+		// process the queue
+		checkQueue();
+		updateRequestQueue();
+	}
 
-        // add to the queue
-        if (requestsHead == null) {
-            requestsHead = requestsTail = request;
-        } else {
-            requestsTail.next = request;
-            request.prev = requestsTail;
-            requestsTail = request;
-        }
+	function checkQueue() {
+		// a restart has been requested
+		if (startRequest != null) {
+			start(startRequest);
+			return;
+		}
 
-        // process the queue
-        checkQueue();
-        updateRequestQueue();
-    }
+		// there's a currently processing request, wait and don't send another one to Haxe
+		if (currentRequest != null)
+			return;
 
-    function checkQueue() {
-        // a restart has been requested
-        if (startRequest != null) {
-            start(startRequest);
-            return;
-        }
+		// pop the first request still in queue, set it as current and send to Haxe
+		if (requestsHead != null) {
+			currentRequest = requestsHead;
+			requestsHead = currentRequest.next;
+			updateRequestQueue();
+			proc.stdin.write(currentRequest.prepareBody());
+		}
+	}
 
-        // there's a currently processing request, wait and don't send another one to Haxe
-        if (currentRequest != null)
-            return;
+	public function supports<P, R>(method:HaxeRequestMethod<P, R>) {
+		return supportedMethods.indexOf(method) != -1;
+	}
 
-        // pop the first request still in queue, set it as current and send to Haxe
-        if (requestsHead != null) {
-            currentRequest = requestsHead;
-            requestsHead = currentRequest.next;
-            updateRequestQueue();
-            proc.stdin.write(currentRequest.prepareBody());
-        }
-    }
-
-    public function supports<P,R>(method:HaxeRequestMethod<P,R>) {
-        return supportedMethods.indexOf(method) != -1;
-    }
-
-    function updateRequestQueue() {
-        if (!context.sendMethodResults) {
-            return;
-        }
-        var queue = [];
-        var request = currentRequest;
-        while (request != null) {
-            queue.push(request.label);
-            request = request.next;
-        }
-        context.protocol.sendNotification(LanguageServerMethods.DidChangeRequestQueue, {queue: queue});
-    }
+	function updateRequestQueue() {
+		if (!context.sendMethodResults) {
+			return;
+		}
+		var queue = [];
+		var request = currentRequest;
+		while (request != null) {
+			queue.push(request.label);
+			request = request.next;
+		}
+		context.protocol.sendNotification(LanguageServerMethods.DidChangeRequestQueue, {queue: queue});
+	}
 }
