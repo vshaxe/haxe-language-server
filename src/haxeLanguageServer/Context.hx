@@ -182,9 +182,7 @@ class Context {
 		documents = new TextDocuments(protocol);
 		new DocumentSymbolsFeature(this);
 		new FoldingRangeFeature(this);
-		#if debug
 		new DocumentFormattingFeature(this);
-		#end
 
 		return resolve({
 			capabilities: {
@@ -202,9 +200,7 @@ class Context {
 				documentSymbolProvider: true,
 				workspaceSymbolProvider: true,
 				codeActionProvider: true,
-				#if debug
 				documentFormattingProvider: true,
-				#end
 				codeLensProvider: {
 					resolveProvider: true
 				},
