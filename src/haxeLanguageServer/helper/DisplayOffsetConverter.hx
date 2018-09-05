@@ -11,7 +11,7 @@ import js.node.Buffer;
 **/
 class DisplayOffsetConverter {
 	public static function create(haxeVersion:SemVer):DisplayOffsetConverter {
-		if (haxeVersion >= {major: 4, minor: 0, patch: 0})
+		if (haxeVersion >= new SemVer(4, 0, 0))
 			return new Haxe4DisplayOffsetConverter();
 		else
 			return new Haxe3DisplayOffsetConverter();
