@@ -234,10 +234,6 @@ class DisplayPrinter {
 					if (field.meta.hasMeta(Optional)) {
 						name = "?" + name;
 					}
-					if (read == "default" && write == "never") {
-						keyword = "final";
-						accessors = "";
-					}
 				} else if (isEnumAbstractField) {
 					access = "";
 					staticKeyword = "";
