@@ -131,4 +131,12 @@ class Helper {
 		}
 		return type.params != null && type.params.length > 0;
 	}
+
+	public static function isFinalField(field:JsonClassField) {
+		return field.meta.hasMeta(Final) || field.isFinal;
+	}
+
+	public static function isFinalType(type:DisplayModuleType) {
+		return type.meta.hasMeta(Final) || type.isFinal;
+	}
 }

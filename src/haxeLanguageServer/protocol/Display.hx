@@ -225,6 +225,7 @@ typedef DisplayModuleType = {
 	var meta:JsonMetadata;
 	var doc:JsonDoc;
 	var isExtern:Bool;
+	var isFinal:Bool;
 	var kind:DisplayModuleTypeKind;
 }
 

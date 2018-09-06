@@ -305,7 +305,7 @@ class CompletionFeature {
 		var field = occurrence.field;
 		var importConfig = context.config.codeGeneration.imports;
 
-		if (concreteType.kind != TFun || field.meta.hasMeta(Final)) {
+		if (concreteType.kind != TFun || field.isFinalField()) {
 			return null;
 		}
 		switch (field.kind.kind) {
@@ -343,7 +343,7 @@ class CompletionFeature {
 		var fieldKind:JsonFieldKind<T> = field.kind;
 		return switch (fieldKind.kind) {
 			case FVar:
-				if (field.meta.hasMeta(Final)) {
+				if (field.isFinalField()) {
 					return Field;
 				}
 				var read = fieldKind.args.read.kind;

@@ -224,7 +224,7 @@ class DisplayPrinter {
 		return switch (kind.kind) {
 			case FVar:
 				var inlineKeyword = if (kind.args.write.kind == AccInline) "inline " else "";
-				var keyword = if (kind.args.write.kind == AccCtor || field.meta.hasMeta(Final)) "final" else "var";
+				var keyword = if (kind.args.write.kind == AccCtor || field.isFinalField()) "final" else "var";
 				var read = printAccessor(kind.args.read, true);
 				var write = printAccessor(kind.args.write, false);
 				var accessors = if ((read != null && write != null) && (read != "default" || write != "default")) '($read, $write)' else "";
@@ -258,7 +258,7 @@ class DisplayPrinter {
 					case MethDynamic: "dynamic ";
 					case MethMacro: "macro ";
 				}
-				var finalKeyword = if (field.meta.hasMeta(Final)) "final " else "";
+				var finalKeyword = if (field.isFinalField()) "final " else "";
 				var definition = printEmptyFunctionDefinition(field.name, concreteType.extractFunctionSignature(), field.params);
 				'$access$staticKeyword$finalKeyword$methodKind$definition';
 		};
@@ -304,7 +304,7 @@ class DisplayPrinter {
 		var components = [];
 		if (type.isPrivate)
 			components.push("private");
-		if (type.meta.hasMeta(Final))
+		if (type.isFinalType())
 			components.push("final");
 		if (type.isExtern)
 			components.push("extern");
