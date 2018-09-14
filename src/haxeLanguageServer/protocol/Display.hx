@@ -409,7 +409,22 @@ typedef GotoDefinitionResult = Response<Array<Location>>;
 typedef GotoTypeDefinitionResult = Response<Array<Location>>;
 
 /* Hover */
-typedef HoverResult = Response<DisplayItemOccurrence<Dynamic>>;
+typedef HoverResult = Response<HoverDisplayItemOccurence<Dynamic>>;
+
+typedef HoverDisplayItemOccurence<T> = DisplayItemOccurrence<T> & {
+	var ?expected:{
+		var ?type:JsonType<Dynamic>;
+		var name:{
+			var name:String;
+			var kind:HoverExpectedKind;
+		};
+	};
+}
+
+enum abstract HoverExpectedKind(Int) {
+	var FunctionArgument;
+	var StructureField;
+}
 
 /* DeterminePackage */
 typedef DeterminePackageResult = Response<Array<String>>;

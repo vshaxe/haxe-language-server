@@ -1,6 +1,5 @@
 package haxeLanguageServer.features;
 
-import haxe.ds.Option;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
@@ -32,7 +31,7 @@ class HoverFeature {
 		}, error -> reject(ResponseError.internalError(error)));
 	}
 
-	function printContent<T>(hover:DisplayItemOccurrence<T>):HoverContent {
+	function printContent<T>(hover:HoverDisplayItemOccurence<T>):HoverContent {
 		var printer = new DisplayPrinter(true, null, {
 			argumentTypeHints: true,
 			returnTypeHint: NonVoid,
@@ -42,7 +41,7 @@ class HoverFeature {
 		});
 		var item = hover.item;
 		var concreteType = hover.item.type;
-		return switch (item.kind) {
+		var result:HoverContent = switch (item.kind) {
 			case Type:
 				{definition: printCodeBlock(printer.printEmptyTypeDefinition(hover.item.args), Haxe)}
 			case Local:
@@ -72,6 +71,18 @@ class HoverFeature {
 			case _:
 				{definition: printCodeBlock(printer.printType(concreteType), HaxeType)};
 		}
+
+		var expected = hover.expected;
+		if (expected != null && expected.name.kind == FunctionArgument) {
+			var argument = expected.name.name;
+			if (expected.type != null) {
+				var printer = new DisplayPrinter(PathPrinting.Never);
+				argument += ":" + printer.printType(expected.type);
+			}
+			result.additionalContents = ['*for argument `$argument`*'];
+		}
+
+		return result;
 	}
 
 	function handleLegacy(params:TextDocumentPositionParams, token:CancellationToken, resolve:Hover->Void, reject:ResponseError<NoData>->Void,
@@ -118,8 +129,10 @@ class HoverFeature {
 		if (content.origin != null) {
 			documentation = '*${content.origin}*\n' + documentation;
 		}
+		if (content.additionalContents == null)
+			content.additionalContents = [];
 		var hover:Hover = {
-			contents: [content.definition, documentation]
+			contents: [content.definition, documentation].concat(content.additionalContents)
 		};
 		if (range != null)
 			hover.range = range;
@@ -129,5 +142,6 @@ class HoverFeature {
 
 private typedef HoverContent = {
 	definition:String,
-	?origin:String
+	?origin:String,
+	?additionalContents:Array<String>
 }
