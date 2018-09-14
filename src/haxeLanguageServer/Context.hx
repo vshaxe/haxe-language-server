@@ -199,7 +199,9 @@ class Context {
 				referencesProvider: true,
 				documentSymbolProvider: true,
 				workspaceSymbolProvider: true,
-				codeActionProvider: true,
+				codeActionProvider: {
+					codeActionKinds: [QuickFix, SourceOrganizeImports]
+				},
 				documentFormattingProvider: true,
 				codeLensProvider: {
 					resolveProvider: true
