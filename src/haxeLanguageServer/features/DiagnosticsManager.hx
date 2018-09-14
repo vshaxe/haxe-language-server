@@ -326,23 +326,19 @@ class DiagnosticsManager {
 	}
 
 	function getOrganizeImportActions(params:CodeActionParams, existingActions:Array<CodeAction>):Array<CodeAction> {
-		var diagnostics = existingActions.filter(action -> action.title == RemoveUnusedImportUsingTitle).map(action -> action.diagnostics).flatten().array();
-		if (diagnostics.length == 0) {
-			return [];
-		}
-		var map = diagnosticsArguments[params.textDocument.uri];
-		if (map == null) {
-			return [];
-		}
-
 		var doc = context.documents.get(params.textDocument.uri);
-		var fixes = [
+		var map = diagnosticsArguments[params.textDocument.uri];
+		var fixes = if (map == null) [] else [
 			for (key in map.keys())
 				if (key.code == DKUnusedImport)
 					{range: patchRange(doc, key.range), newText: ""}
 		];
-		var edit = WorkspaceEditHelper.create(context, params, fixes);
 
+		var edit = WorkspaceEditHelper.create(context, params, fixes);
+		var diagnostics = existingActions.filter(action -> action.title == RemoveUnusedImportUsingTitle)
+			.map(action -> action.diagnostics)
+			.flatten()
+			.array();
 		var actions = [
 			{
 				title: RemoveAllUnusedImportsUsingsTitle,
@@ -351,7 +347,8 @@ class DiagnosticsManager {
 				diagnostics: diagnostics
 			}
 		];
-		if (fixes.length > 1) {
+
+		if (diagnostics.length > 0 && fixes.length > 1) {
 			actions.push({
 				title: RemoveAllUnusedImportsUsingsTitle,
 				kind: QuickFix,
@@ -359,6 +356,7 @@ class DiagnosticsManager {
 				diagnostics: diagnostics
 			});
 		}
+
 		return actions;
 	}
 
