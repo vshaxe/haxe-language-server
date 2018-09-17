@@ -73,7 +73,7 @@ class HoverFeature {
 		}
 
 		var expected = hover.expected;
-		if (expected != null && expected.name.kind == FunctionArgument) {
+		if (expected != null && expected.name != null && expected.name.kind == FunctionArgument) {
 			var argument = expected.name.name;
 			if (expected.type != null) {
 				var printer = new DisplayPrinter(PathPrinting.Never);

@@ -414,14 +414,14 @@ typedef HoverResult = Response<HoverDisplayItemOccurence<Dynamic>>;
 typedef HoverDisplayItemOccurence<T> = DisplayItemOccurrence<T> & {
 	var ?expected:{
 		var ?type:JsonType<Dynamic>;
-		var name:{
+		var ?name:{
 			var name:String;
-			var kind:HoverExpectedKind;
+			var kind:HoverExpectedNameKind;
 		};
 	};
 }
 
-enum abstract HoverExpectedKind(Int) {
+enum abstract HoverExpectedNameKind(Int) {
 	var FunctionArgument;
 	var StructureField;
 }
