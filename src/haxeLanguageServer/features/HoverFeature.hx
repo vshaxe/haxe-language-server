@@ -67,7 +67,10 @@ class HoverFeature {
 					}
 				}
 			case Metadata:
-				{definition: printCodeBlock("@" + item.args.name, Haxe)};
+				var name = item.args.name;
+				if (name.charAt(0) != "@")
+					name = "@" + name; // backward compatibility with preview 4
+				{definition: printCodeBlock(name, Haxe)};
 			case _:
 				{definition: printCodeBlock(printer.printType(concreteType), HaxeType)};
 		}
