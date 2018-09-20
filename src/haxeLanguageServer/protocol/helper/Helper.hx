@@ -11,7 +11,7 @@ class Helper {
 			case ClassField | EnumAbstractField: item.args.field.doc;
 			case EnumField: item.args.field.doc;
 			case Type: item.args.doc;
-			case Metadata: item.args.doc;
+			case Metadata: new DisplayPrinter().printMetadataDetails(item.args);
 			case _: null;
 		}
 	}

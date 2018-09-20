@@ -242,7 +242,7 @@ typedef DisplayLiteral<T> = {
 
 enum abstract MetadataTarget(String) {
 	var Class = "TClass";
-	var ClassField = "ClassField";
+	var ClassField = "TClassField";
 	var Abstract = "TAbstract";
 	var AbstractField = "TAbstractField";
 	var Enum = "TEnum";

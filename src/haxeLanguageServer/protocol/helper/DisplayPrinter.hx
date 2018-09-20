@@ -480,4 +480,56 @@ class DisplayPrinter {
 		}
 		return 'switch ($subject) {\n${fields.join("\n")}\n}';
 	}
+
+	function printMetadataTarget(target:MetadataTarget):String {
+		return switch (target) {
+			case Class: "classes";
+			case ClassField: "class fields";
+			case Abstract: "abstracts";
+			case AbstractField: "abstract fields";
+			case Enum: "enums";
+			case Typedef: "typedefs";
+			case AnyField: "any field";
+			case Expr: "expressions";
+			case TypeParameter: "type parameters";
+		}
+	}
+
+	function printPlatform(platform:Platform):String {
+		return switch (platform) {
+			case Cross: "cross";
+			case Js: "JavaScript";
+			case Lua: "Lua";
+			case Neko: "Neko";
+			case Flash: "Flash";
+			case Php: "PHP";
+			case Cpp: "C++";
+			case Cs: "C#";
+			case Java: "Java";
+			case Python: "Python";
+			case Hl: "HashLink";
+			case Eval: "Eval";
+		}
+	}
+
+	public function printMetadataDetails(metadata:Metadata):String {
+		var details = metadata.doc + "\n";
+		inline function printList(name:String, list:Array<String>) {
+			return if (list.length == 0) {
+				"";
+			} else {
+				'- **$name:** ' + list.join(", ") + "\n";
+			}
+		}
+		if (metadata.parameters != null) {
+			details += printList("Parameters", metadata.parameters);
+		}
+		if (metadata.platforms != null) {
+			details += printList("Targets", metadata.platforms.map(printPlatform));
+		}
+		if (metadata.targets != null) {
+			details += printList("Can be uesd on", metadata.targets.map(printMetadataTarget));
+		}
+		return details;
+	}
 }
