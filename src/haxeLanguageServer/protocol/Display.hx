@@ -240,7 +240,7 @@ typedef DisplayLiteral<T> = {
 	var name:String;
 }
 
-/* enum abstract MetadataTarget(String) {
+enum abstract MetadataTarget(String) {
 	var Class = "TClass";
 	var ClassField = "ClassField";
 	var Abstract = "TAbstract";
@@ -250,28 +250,29 @@ typedef DisplayLiteral<T> = {
 	var AnyField = "TAnyField";
 	var Expr = "TExpr";
 	var TypeParameter = "TTypeParameter";
-	}
+}
 
-	enum abstract Platform(String) {
-	var Cross;
-	var Js;
-	var Lua;
-	var Neko;
-	var Flash;
-	var Php;
-	var Cpp;
-	var Cs;
-	var Java;
-	var Python;
-	var Hl;
-	var Eval;
-}*/
+enum abstract Platform(String) {
+	var Cross = "cross";
+	var Js = "js";
+	var Lua = "lua";
+	var Neko = "neko";
+	var Flash = "flash";
+	var Php = "php";
+	var Cpp = "cpp";
+	var Cs = "cs";
+	var Java = "java";
+	var Python = "python";
+	var Hl = "hl";
+	var Eval = "eval";
+}
+
 typedef Metadata = {
 	var name:String;
 	var doc:JsonDoc;
-	/* var parameters:Array<String>;
-		var platforms:Array<Platform>;
-		var target:Array<MetadataTarget>; */
+	var parameters:Array<String>;
+	var platforms:Array<Platform>;
+	var targets:Array<MetadataTarget>;
 }
 
 typedef Keyword = {
