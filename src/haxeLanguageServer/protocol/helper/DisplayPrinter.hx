@@ -280,7 +280,7 @@ class DisplayPrinter {
 				inlineKeyword + printEmptyFunctionDefinition(local.name, concreteType.extractFunctionSignature(), if (local.extra == null) null else local.extra
 					.params);
 			case other:
-				var keyword = "var ";
+				var keyword = if (local.isFinal) "final " else "var ";
 				var name = local.name;
 				if (other == Argument) {
 					keyword = "";

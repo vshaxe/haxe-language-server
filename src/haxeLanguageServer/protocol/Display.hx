@@ -104,6 +104,7 @@ typedef DisplayLocal<T> = {
 	var meta:JsonMetadata;
 	var pos:JsonPos;
 	var isInline:Bool;
+	var isFinal:Bool;
 }
 
 enum abstract LocalOrigin(Int) {
