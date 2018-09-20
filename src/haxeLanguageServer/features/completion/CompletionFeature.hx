@@ -203,7 +203,10 @@ class CompletionFeature {
 					kind: Keyword,
 					detail: printer.printType(item.type)
 				}
-			case Metadata: {
+			case Metadata:
+				if (item.args.internal) {
+					null;
+				} else {
 					label: item.args.name,
 					kind: Function
 				}

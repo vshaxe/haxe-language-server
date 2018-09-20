@@ -273,6 +273,7 @@ typedef Metadata = {
 	var parameters:Array<String>;
 	var platforms:Array<Platform>;
 	var targets:Array<MetadataTarget>;
+	var internal:Bool;
 }
 
 typedef Keyword = {
