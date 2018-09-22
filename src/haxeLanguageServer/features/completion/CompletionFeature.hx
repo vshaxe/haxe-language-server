@@ -1,5 +1,6 @@
 package haxeLanguageServer.features.completion;
 
+import haxe.io.Path;
 import haxe.ds.Option;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
@@ -562,6 +563,14 @@ class CompletionFeature {
 				}
 			// do nothing for these, you might not want a space after
 			case Break | Cast | Continue | Default | Return | Package:
+			case Class if (snippetSupport):
+				var moduleName = Path.withoutDirectory(Path.withoutExtension(data.doc.fsPath.toString()));
+				item.insertTextFormat = Snippet;
+				item.textEdit.newText = 'class $${1:$moduleName} {\n\t$0\n}';
+				item.documentation = {
+					kind: MarkDown,
+					value: DocHelper.printCodeBlock('class $moduleName {\n\t|\n}', Haxe)
+				}
 			// assume a space is needed for all the rest
 			case _:
 				maybeAddSpace();
