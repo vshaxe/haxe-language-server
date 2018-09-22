@@ -449,10 +449,16 @@ typedef SignatureInformation = JsonFunctionSignature & {
 	var ?documentation:String;
 }
 
+enum abstract SignatureItemKind(Int) {
+	var Call;
+	var ArrayAccess;
+}
+
 typedef SignatureItem = {
 	var signatures:Array<SignatureInformation>;
 	var activeSignature:Int;
 	var activeParameter:Int;
+	var kind:SignatureItemKind;
 }
 
 typedef SignatureHelpResult = Response<SignatureItem>;

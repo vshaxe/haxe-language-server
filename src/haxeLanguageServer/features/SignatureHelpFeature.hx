@@ -55,8 +55,13 @@ class SignatureHelpFeature {
 			}
 		}
 		function createSignatureInformation(info:HaxeSignatureInformation):SignatureInformation {
+			var label = if (item.kind == ArrayAccess) {
+				printer.printArrayAccess(info);
+			} else {
+				printer.printType({kind: TFun, args: {args: info.args, ret: info.ret}});
+			}
 			return {
-				label: printer.printType({kind: TFun, args: {args: info.args, ret: info.ret}}),
+				label: label,
 				documentation: getSignatureDocumentation(info.documentation),
 				parameters: info.args.map(createSignatureParameter)
 			};

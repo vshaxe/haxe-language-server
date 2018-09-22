@@ -532,4 +532,17 @@ class DisplayPrinter {
 		}
 		return details;
 	}
+
+	public function printArrayAccess(signature:JsonFunctionSignature) {
+		var index = printFunctionArgument(signature.args[0]);
+		return if (signature.args.length > 1) {
+			// set
+			var rhs = printFunctionArgument(signature.args[1]);
+			'[$index] = $rhs';
+		} else {
+			// get
+			var ret = printType(signature.ret);
+			'[$index] -> $ret';
+		}
+	}
 }
