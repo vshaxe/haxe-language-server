@@ -536,22 +536,26 @@ class CompletionFeature {
 			item.command = triggerSuggest;
 		}
 
+		inline function addSpace() {
+			item.textEdit.newText = maybeInsert(item.textEdit.newText, " ", data.lineAfter);
+		}
+
 		switch (keyword.name) {
 			// TODO: make it configurable for these, since not all code styles want spaces there
 			case Else | Do | Switch:
-				item.textEdit.newText += " ";
+				addSpace();
 			case If | For | While | Catch:
 				if (snippetSupport) {
 					item.insertTextFormat = Snippet;
 					item.textEdit.newText = '${keyword.name} ($1)';
 				} else {
-					item.textEdit.newText += " ";
+					addSpace();
 				}
 			// do nothing for these, you might not want a space after
-			case Break | Cast | Continue | Default | Return:
+			case Break | Cast | Continue | Default | Return | Package:
 			// assume a space is needed for all the rest
 			case _:
-				item.textEdit.newText += " ";
+				addSpace();
 		}
 
 		return item;
@@ -587,10 +591,7 @@ class CompletionFeature {
 		}
 	}
 
-	static final wordRegex = ~/^\w*/;
-
 	function maybeInsert(text:String, token:String, lineAfter:String):String {
-		lineAfter = wordRegex.replace(lineAfter, "");
 		return if (lineAfter.charAt(0) == token.charAt(0)) text else text + token;
 	}
 
