@@ -537,8 +537,6 @@ class CompletionFeature {
 		}
 
 		switch (keyword.name) {
-			case Implements | Extends | Function | Var | Case | Try | New | Throw | Untyped | Macro:
-				item.textEdit.newText += " ";
 			// TODO: make it configurable for these, since not all code styles want spaces there
 			case Else | Do | Switch:
 				item.textEdit.newText += " ";
@@ -549,7 +547,11 @@ class CompletionFeature {
 				} else {
 					item.textEdit.newText += " ";
 				}
+			// do nothing for these, you might not want a space after
+			case Break | Cast | Continue | Default | Return:
+			// assume a space is needed for all the rest
 			case _:
+				item.textEdit.newText += " ";
 		}
 
 		return item;

@@ -303,6 +303,16 @@ enum abstract KeywordKind(String) to String {
 	var Untyped = "untyped";
 	var Cast = "cast";
 	var Macro = "macro";
+	var Import = "import";
+	var Using = "using";
+	var Private = "private";
+	var Extern = "extern";
+	var Class = "class";
+	var Interface = "interface";
+	var Enum = "enum";
+	var Abstract = "abstract";
+	var Typedef = "typedef";
+	var Final = "final";
 }
 
 /* enum abstract PackageContentKind(Int) {
