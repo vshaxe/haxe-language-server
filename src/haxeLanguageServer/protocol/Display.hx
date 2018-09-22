@@ -392,6 +392,7 @@ enum abstract CompletionModeKind<T>(Int) {
 	var Pattern:CompletionModeKind<PatternCompletion<Dynamic>>;
 	var Override;
 	var TypeRelation;
+	var TypeDeclaration;
 }
 
 typedef CompletionMode<T> = {

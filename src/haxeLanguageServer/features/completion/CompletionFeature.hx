@@ -535,6 +535,13 @@ class CompletionFeature {
 		if (data.mode.kind == TypeRelation || keyword.name == New) {
 			item.command = triggerSuggest;
 		}
+		if (data.mode.kind == TypeDeclaration) {
+			switch (keyword.name) {
+				case Import | Using | Final | Extern | Private:
+					item.command = triggerSuggest;
+				case _:
+			}
+		}
 
 		inline function maybeAddSpace() {
 			item.textEdit.newText = maybeInsert(item.textEdit.newText, " ", data.lineAfter);
