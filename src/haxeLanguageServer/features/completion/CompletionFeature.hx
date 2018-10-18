@@ -236,7 +236,8 @@ class CompletionFeature {
 		}
 
 		if (commitCharactersSupport) {
-			if ((item.type != null && item.type.kind == TFun) || data.mode.kind == New || data.mode.kind == Metadata) {
+			var mode = data.mode.kind;
+			if ((item.type != null && item.type.kind == TFun && mode != Pattern) || mode == New || mode == Metadata) {
 				completionItem.commitCharacters = ["("];
 			}
 		}
