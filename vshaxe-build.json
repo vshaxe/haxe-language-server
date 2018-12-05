@@ -9,7 +9,7 @@
 		},
 		{
 			"name": "compiletime",
-			"installArgs": ["install", "compiletime"]
+			"installArgs": ["git", "compiletime", "https://github.com/andyli/compiletime/", "haxe4", "--never"]
 		},
 		{
 			"name": "hx3compat",
