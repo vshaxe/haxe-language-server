@@ -71,7 +71,7 @@ class CodeGenerationFeature {
 			return [];
 
 		var activeSignature = currentSignature.help.signatures[currentSignature.help.activeSignature];
-		var argNames = [for (arg in activeSignature.parameters) arg.label.split(":")[0]];
+		var argNames = [for (arg in activeSignature.parameters)(arg.label:String).split(":")[0]];
 		return [
 			{
 				title: "Generate capture variables",
