@@ -15,7 +15,7 @@ class DisplayRequest {
 	final stdin:String;
 	final handler:ResultHandler;
 
-	static final stdinSepBuf = new Buffer([1]);
+	static final stdinSepBuf = Buffer.alloc(1, 1);
 
 	public function new(label:String, args:Array<String>, token:CancellationToken, cancellable:Bool, stdin:String, handler:ResultHandler) {
 		this.label = label;
@@ -32,18 +32,18 @@ class DisplayRequest {
 			args.push("display-stdin");
 		}
 
-		var lenBuf = new Buffer(4);
+		var lenBuf = Buffer.alloc(4);
 		var chunks = [lenBuf];
 		var length = 0;
 		for (arg in args) {
-			var buf = new Buffer(arg + "\n");
+			var buf = Buffer.from(arg + "\n");
 			chunks.push(buf);
 			length += buf.length;
 		}
 
 		if (stdin != null) {
 			chunks.push(stdinSepBuf);
-			var buf = new Buffer(stdin);
+			var buf = Buffer.from(stdin);
 			chunks.push(buf);
 			length += buf.length + stdinSepBuf.length;
 		}

@@ -10,7 +10,7 @@ class MessageBuffer {
 
 	public function new() {
 		index = 0;
-		buffer = new Buffer(DEFAULT_SIZE);
+		buffer = Buffer.alloc(DEFAULT_SIZE);
 	}
 
 	public function append(chunk:Buffer):Void {
@@ -19,7 +19,7 @@ class MessageBuffer {
 		} else {
 			var newSize = (Math.ceil((index + chunk.length) / DEFAULT_SIZE) + 1) * DEFAULT_SIZE;
 			if (index == 0) {
-				buffer = new Buffer(newSize);
+				buffer = Buffer.alloc(newSize);
 				chunk.copy(buffer, 0, 0, chunk.length);
 			} else {
 				buffer = Buffer.concat([buffer.slice(0, index), chunk], newSize);
