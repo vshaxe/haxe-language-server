@@ -44,9 +44,34 @@ class PostfixCompletion {
 		}
 
 		switch (type.kind) {
-			case TAbstract | TInst if (type.args.path.pack.length == 0):
+			case TAbstract | TInst:
+				function keyValueIterator() {
+					add({
+						label: "for key/value",
+						detail: "for (key => value in expr)",
+						insertText: 'for (key => value in $expr) ',
+						insertTextFormat: PlainText
+					});
+				}
+				function iterator(itemType:JsonType<Dynamic>) {
+					var itemName = switch (itemType.kind) {
+						case TInst | TEnum | TType | TAbstract:
+							var path:JsonTypePath = itemType.args.path;
+							IdentifierHelper.guessName(path.typeName);
+						case TMono, _:
+							"item";
+					}
+					add({
+						label: "for",
+						detail: "for (item in expr)",
+						insertText: 'for ($${1:$itemName} in $expr) ',
+						insertTextFormat: Snippet
+					});
+				}
+
 				var path:JsonTypePathWithParams = type.args;
-				switch (path.path.typeName) {
+				var dotPath = path.path.pack.join(".") + "." + path.path.typeName;
+				switch (dotPath) {
 					case "Int":
 						add({
 							label: "fori",
@@ -62,26 +87,16 @@ class PostfixCompletion {
 							insertTextFormat: PlainText
 						});
 					case "Array":
-						var itemType:JsonType<Dynamic> = path.params[0];
-						var itemName = switch (itemType.kind) {
-							case TInst | TEnum | TType | TAbstract:
-								var path:JsonTypePath = itemType.args.path;
-								IdentifierHelper.guessName(path.typeName);
-							case TMono, _:
-								"item";
-						}
-						add({
-							label: "for",
-							detail: "for (item in expr)",
-							insertText: 'for ($${1:$itemName} in $expr) ',
-							insertTextFormat: Snippet
-						});
+						iterator(path.params[0]);
 						add({
 							label: "fori",
 							detail: "for (i in 0...expr.length)",
 							insertText: 'for (i in 0...$expr.length) ',
 							insertTextFormat: PlainText
 						});
+					case "haxe.ds.Map":
+						keyValueIterator();
+						iterator(path.params[1]);
 					case "Bool":
 						add({
 							label: "if",
@@ -147,6 +162,7 @@ class PostfixCompletion {
 		var item:CompletionItem = {
 			label: data.label,
 			detail: data.detail,
+			sortText: data.sortText,
 			filterText: doc.getText(replaceRange) + " " + data.label, // https://github.com/Microsoft/vscode/issues/38982
 			kind: Snippet,
 			insertTextFormat: data.insertTextFormat,
@@ -176,4 +192,5 @@ private typedef PostfixCompletionItem = {
 	var insertText:String;
 	var insertTextFormat:InsertTextFormat;
 	var ?code:String;
+	var ?sortText:String;
 }
