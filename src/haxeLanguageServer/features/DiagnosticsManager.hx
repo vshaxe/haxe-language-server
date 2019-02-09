@@ -16,12 +16,23 @@ class DiagnosticsManager {
 	static inline var RemoveAllUnusedImportsUsingsTitle = "Remove all unused imports/usings";
 
 	final context:Context;
+	final tagSupport:Bool;
 	final diagnosticsArguments:Map<DocumentUri, DiagnosticsMap<Any>>;
 	final errorUri:DocumentUri;
 	var haxelibPath:FsPath;
 
 	public function new(context:Context) {
 		this.context = context;
+
+		tagSupport = false;
+		var textDocument = context.capabilities.textDocument;
+		if (textDocument != null) {
+			var diagnostics = textDocument.publishDiagnostics;
+			if (diagnostics != null && diagnostics.tagSupport) {
+				tagSupport = true;
+			}
+		}
+
 		context.registerCodeActionContributor(getCodeActions);
 		diagnosticsArguments = new Map();
 		errorUri = new FsPath(Path.join([context.workspacePath.toString(), "Error"])).toUri();
@@ -151,6 +162,7 @@ class DiagnosticsManager {
 						}
 						if (kind == DKRemovableCode || kind == DKUnusedImport || diag.message.indexOf("has no effect") != -1) {
 							diag.severity = Hint;
+							// diag.tags = [Unnecessary];
 						}
 						argumentsMap.set({code: diag.code, range: diag.range}, hxDiag.args);
 						diagnostics.push(diag);
