@@ -45,14 +45,6 @@ class PostfixCompletion {
 
 		switch (type.kind) {
 			case TAbstract | TInst:
-				function keyValueIterator() {
-					add({
-						label: "for key/value",
-						detail: "for (key => value in expr)",
-						insertText: 'for (key => value in $expr) ',
-						insertTextFormat: PlainText
-					});
-				}
 				function iterator(itemType:JsonType<Dynamic>) {
 					var itemName = switch (itemType.kind) {
 						case TInst | TEnum | TType | TAbstract:
@@ -66,6 +58,22 @@ class PostfixCompletion {
 						detail: "for (item in expr)",
 						insertText: 'for ($${1:$itemName} in $expr) ',
 						insertTextFormat: Snippet
+					});
+				}
+				function keyValueIterator(key:String) {
+					add({
+						label: "for k=>v",
+						detail: 'for ($key => value in expr)',
+						insertText: 'for ($key => value in $expr) ',
+						insertTextFormat: PlainText
+					});
+				}
+				function indexedIterator() {
+					add({
+						label: "fori",
+						detail: "for (i in 0...expr.length)",
+						insertText: 'for (i in 0...$expr.length) ',
+						insertTextFormat: PlainText
 					});
 				}
 
@@ -88,15 +96,14 @@ class PostfixCompletion {
 						});
 					case "Array":
 						iterator(path.params[0]);
-						add({
-							label: "fori",
-							detail: "for (i in 0...expr.length)",
-							insertText: 'for (i in 0...$expr.length) ',
-							insertTextFormat: PlainText
-						});
+						indexedIterator();
 					case "haxe.ds.Map":
-						keyValueIterator();
+						keyValueIterator("key");
 						iterator(path.params[1]);
+					case "haxe.ds.List":
+						keyValueIterator("index");
+						iterator(path.params[0]);
+						indexedIterator();
 					case "Bool":
 						add({
 							label: "if",
