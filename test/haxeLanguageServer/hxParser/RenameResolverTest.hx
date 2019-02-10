@@ -2,7 +2,7 @@ package haxeLanguageServer.hxParser;
 
 import haxeLanguageServer.TextDocument;
 
-class RenameResolverTest extends TestCaseBase {
+class RenameResolverTest extends Test {
 	function check(code:String, ?expected:String) {
 		var markedUsages = findMarkedRanges(code, "%");
 		var declaration = markedUsages[0];
@@ -27,7 +27,7 @@ class RenameResolverTest extends TestCaseBase {
 			expected = applyEdits(code, expectedEdits);
 		}
 
-		assertEquals(expected, applyEdits(code, resolver.edits));
+		Assert.equals(expected, applyEdits(code, resolver.edits));
 	}
 
 	function applyEdits(document:String, edits:Array<TextEdit>):String {

@@ -5,7 +5,7 @@ import haxeLanguageServer.TextDocument;
 import haxeLanguageServer.features.foldingRange.FoldingRangeResolver;
 import haxeLanguageServer.features.documentSymbols.DocumentSymbolsResolver;
 
-class TokenTreeTest extends TestCaseBase {
+class TokenTreeTest extends Test {
 	function testDocumentSymbols() {
 		compareOutput("cases/documentSymbols", document -> {
 			return new DocumentSymbolsResolver(document).resolve();
@@ -32,6 +32,6 @@ class TokenTreeTest extends TestCaseBase {
 		var expected = stringify(Json.parse(sys.io.File.getContent('$basePath/Expected.json')));
 
 		// use "Compare Active File With..." and select Actual.json and Expected.json for debugging
-		assertTrue(actual == expected);
+		Assert.isTrue(actual == expected);
 	}
 }

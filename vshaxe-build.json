@@ -8,12 +8,8 @@
 			"includeProjectFile": true
 		},
 		{
-			"name": "compiletime",
-			"installArgs": ["git", "compiletime", "https://github.com/andyli/compiletime/", "haxe4", "--never"]
-		},
-		{
-			"name": "hx3compat",
-			"installArgs": ["install", "hx3compat"]
+			"name": "utest",
+			"installArgs": ["install", "utest"]
 		},
 		{
 			"name": "hxparse",
@@ -59,7 +55,7 @@
 		{
 			"name": "language-server-tests",
 			"args": {
-				"haxelibs": ["haxe-hxparser", "hxparse", "haxeparser", "tokentree", "formatter", "json2object", "compiletime", "hx3compat"],
+				"haxelibs": ["haxe-hxparser", "hxparse", "haxeparser", "tokentree", "formatter", "json2object", "utest"],
 				"classPaths": [
 					"src",
 					"test",
@@ -69,7 +65,7 @@
 					"target": "js",
 					"path": "bin/test.js"
 				},
-				"deadCodeElimination": "full",
+				"deadCodeElimination": "std",
 				"main": "TestMain",
 				"debug": true
 			},

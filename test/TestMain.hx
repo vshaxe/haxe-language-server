@@ -1,25 +1,26 @@
 package;
 
-import haxe.unit.TestRunner;
+import utest.UTest;
+import haxeLanguageServer.helper.*;
+import haxeLanguageServer.hxParser.*;
+import haxeLanguageServer.tokentree.*;
+import haxeLanguageServer.protocol.helper.*;
 
 class TestMain {
-	public function new() {
-		var runner = new TestRunner();
-
-		CompileTime.importPackage("haxeLanguageServer.helper");
-		CompileTime.importPackage("haxeLanguageServer.hxParser");
-		CompileTime.importPackage("haxeLanguageServer.tokentree");
-		CompileTime.importPackage("haxeLanguageServer.protocol.helper");
-
-		var tests = CompileTime.getAllClasses(TestCaseBase);
-		for (testClass in tests)
-			runner.add(Type.createInstance(testClass, []));
-
-		var success = runner.run();
-		Sys.exit(if (success) 0 else 1);
-	}
-
 	static function main() {
-		new TestMain();
+		// @formatter:off
+		UTest.run([
+			new ArrayHelperTest(),
+			new IdentifierHelperTest(),
+			new ImportHelperTest(),
+			new PathHelperTest(),
+			new PositionHelperTest(),
+			new RangeHelperTest(),
+			new TypeHelperTest(),
+			new RenameResolverTest(), 
+			new HelperTest(),
+			new TokenTreeTest()
+		]);
+		// @formatter:on
 	}
 }

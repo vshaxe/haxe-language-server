@@ -1,17 +1,17 @@
 package haxeLanguageServer.helper;
 
-class ArrayHelperTest extends TestCaseBase {
+class ArrayHelperTest extends Test {
 	function testEquals() {
-		assertTrue([].equals([]));
-		assertTrue([1].equals([1]));
+		Assert.isTrue([].equals([]));
+		Assert.isTrue([1].equals([1]));
 
-		assertFalse([1, 2].equals([2, 1]));
-		assertFalse([1].equals([1, 1]));
+		Assert.isFalse([1, 2].equals([2, 1]));
+		Assert.isFalse([1].equals([1, 1]));
 	}
 
 	function testOccurrences() {
-		assertEquals(0, [].occurrences("foo"));
-		assertEquals(1, ["foo"].occurrences("foo"));
-		assertEquals(2, ["bar", "foo", "bar", "bar", "foo"].occurrences("foo"));
+		Assert.equals(0, [].occurrences("foo"));
+		Assert.equals(1, ["foo"].occurrences("foo"));
+		Assert.equals(2, ["bar", "foo", "bar", "bar", "foo"].occurrences("foo"));
 	}
 }

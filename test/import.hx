@@ -1,6 +1,8 @@
 import languageServerProtocol.Types;
 import languageServerProtocol.protocol.Protocol;
 import haxeLanguageServer.helper.FsPath;
+import utest.Assert;
+import utest.Test;
 
 using StringTools;
 using haxeLanguageServer.helper.RangeHelper;

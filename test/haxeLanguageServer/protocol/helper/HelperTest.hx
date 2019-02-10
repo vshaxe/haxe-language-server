@@ -4,7 +4,7 @@ import haxe.display.JsonModuleTypes.ImportStatus;
 
 using Lambda;
 
-class HelperTest extends TestCaseBase {
+class HelperTest extends Test {
 	function testResolveImports() {
 		var imports = Helper.resolveImports({
 			kind: TInst,
@@ -30,8 +30,8 @@ class HelperTest extends TestCaseBase {
 				]
 			}
 		});
-		assertEquals(2, imports.length);
-		assertTrue(imports.exists(path -> path.typeName == "PosInfos"));
-		assertTrue(imports.exists(path -> path.typeName == "Vector"));
+		Assert.equals(2, imports.length);
+		Assert.isTrue(imports.exists(path -> path.typeName == "PosInfos"));
+		Assert.isTrue(imports.exists(path -> path.typeName == "Vector"));
 	}
 }

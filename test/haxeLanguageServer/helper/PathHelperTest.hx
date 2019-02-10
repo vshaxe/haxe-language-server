@@ -2,17 +2,17 @@ package haxeLanguageServer.helper;
 
 import haxe.PosInfos;
 
-class PathHelperTest extends TestCaseBase {
+class PathHelperTest extends Test {
 	public function testMatches() {
 		function matches(filter:TestFilter, path:TestPath):Bool {
 			var pathFilter = PathHelper.preparePathFilter(filter, TestPath.HaxelibPath, TestPath.WorkspaceRoot);
 			return PathHelper.matches(path, pathFilter);
 		}
 		function match(filter:TestFilter, path:TestPath, ?pos:PosInfos) {
-			assertTrue(matches(filter, path), pos);
+			Assert.isTrue(matches(filter, path), pos);
 		}
 		function fail(filter:TestFilter, path:TestPath, ?pos:PosInfos) {
-			assertFalse(matches(filter, path), pos);
+			Assert.isFalse(matches(filter, path), pos);
 		}
 
 		match(WorkspaceRoot, WorkspaceRoot);
@@ -37,7 +37,7 @@ class PathHelperTest extends TestCaseBase {
 
 	public function testNormalize() {
 		function test(expected:String, path:String, ?pos:PosInfos) {
-			assertEquals(expected, PathHelper.normalize(new FsPath(path)).toString(), pos);
+			Assert.equals(expected, PathHelper.normalize(new FsPath(path)).toString(), pos);
 		}
 
 		test("c:/HaxeToolkit/haxe", "C:\\HaxeToolkit\\haxe");
@@ -46,7 +46,7 @@ class PathHelperTest extends TestCaseBase {
 	}
 }
 
-@:enum abstract TestFilter(String) to String {
+enum abstract TestFilter(String) to String {
 	var WorkspaceRoot = "${workspaceRoot}";
 	var WorkspaceSource = WorkspaceRoot + "/source";
 	var HaxelibPath = "${haxelibPath}";
@@ -55,7 +55,7 @@ class PathHelperTest extends TestCaseBase {
 	var MatchAll = ".*?";
 }
 
-@:enum abstract TestPath(String) to String {
+enum abstract TestPath(String) to String {
 	var WorkspaceRoot = "c:/projects/vshaxe";
 	var WorkspaceSource = WorkspaceRoot + "/source";
 	var WorkspaceExport = WorkspaceRoot + "/export";

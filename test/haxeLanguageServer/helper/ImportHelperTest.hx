@@ -3,7 +3,7 @@ package haxeLanguageServer.helper;
 import haxeLanguageServer.TextDocument;
 import haxe.PosInfos;
 
-class ImportHelperTest extends TestCaseBase {
+class ImportHelperTest extends Test {
 	function testGetImportInsertPosition() {
 		function test(file:TestFile, ?pos:PosInfos) {
 			var line = -1;
@@ -21,8 +21,8 @@ class ImportHelperTest extends TestCaseBase {
 
 			var doc = new TextDocument(new DocumentUri("file://dummy"), "", 0, file.replace("|", ""));
 			var importPos = ImportHelper.getImportPosition(doc);
-			assertEquals(0, importPos.character, pos);
-			assertEquals(line, importPos.line, pos);
+			Assert.equals(0, importPos.character, pos);
+			Assert.equals(line, importPos.line, pos);
 		}
 
 		test(EmptyPackage);
@@ -34,7 +34,7 @@ class ImportHelperTest extends TestCaseBase {
 	}
 }
 
-@:enum abstract TestFile(String) to String {
+enum abstract TestFile(String) to String {
 	var EmptyPackage = "
     package;
 
