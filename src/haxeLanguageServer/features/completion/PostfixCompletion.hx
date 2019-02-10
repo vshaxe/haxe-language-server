@@ -77,23 +77,9 @@ class PostfixCompletion {
 					});
 				}
 
-				var path:JsonTypePathWithParams = type.args;
-				var dotPath = path.path.pack.join(".") + "." + path.path.typeName;
+				var path = type.args;
+				var dotPath = new DisplayPrinter(PathPrinting.Always).printPath(path.path);
 				switch (dotPath) {
-					case "Int":
-						add({
-							label: "fori",
-							detail: "for (i in 0...expr)",
-							insertText: 'for (i in 0...$expr) ',
-							insertTextFormat: PlainText
-						});
-					case "Float":
-						add({
-							label: "int",
-							detail: "Std.int(expr)",
-							insertText: 'Std.int($expr)',
-							insertTextFormat: PlainText
-						});
 					case "Array":
 						iterator(path.params[0]);
 						indexedIterator();
@@ -104,11 +90,25 @@ class PostfixCompletion {
 						keyValueIterator("index");
 						iterator(path.params[0]);
 						indexedIterator();
-					case "Bool":
+					case "StdTypes.Bool":
 						add({
 							label: "if",
 							detail: "if (expr)",
 							insertText: 'if ($expr) ',
+							insertTextFormat: PlainText
+						});
+					case "StdTypes.Int":
+						add({
+							label: "fori",
+							detail: "for (i in 0...expr)",
+							insertText: 'for (i in 0...$expr) ',
+							insertTextFormat: PlainText
+						});
+					case "StdTypes.Float":
+						add({
+							label: "int",
+							detail: "Std.int(expr)",
+							insertText: 'Std.int($expr)',
 							insertTextFormat: PlainText
 						});
 				}
