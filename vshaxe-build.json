@@ -65,7 +65,7 @@
 					"target": "js",
 					"path": "bin/test.js"
 				},
-				"deadCodeElimination": "std",
+				"deadCodeElimination": "full",
 				"main": "TestMain",
 				"debug": true
 			},
