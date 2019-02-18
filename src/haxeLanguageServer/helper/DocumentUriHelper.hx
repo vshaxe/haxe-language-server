@@ -19,4 +19,8 @@ class DocumentUriHelper {
 	public static function isFile(uri:DocumentUri):Bool {
 		return uri.toString().startsWith("file://");
 	}
+
+	public static function isUntitled(uri:DocumentUri):Bool {
+		return uri.toString().startsWith("untitled:");
+	}
 }

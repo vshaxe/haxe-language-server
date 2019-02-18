@@ -29,6 +29,9 @@ class SignatureHelpFeature {
 
 	function onSignatureHelp(params:TextDocumentPositionParams, token:CancellationToken, resolve:SignatureHelp->Void, reject:ResponseError<NoData>->Void) {
 		var doc = context.documents.get(params.textDocument.uri);
+		if (!doc.uri.isFile()) {
+			return reject.notAFile();
+		}
 		var handle = if (context.haxeServer.supports(DisplayMethods.SignatureHelp)) handleJsonRpc else handleLegacy;
 		handle(params, token, resolve, reject, doc);
 	}

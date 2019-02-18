@@ -16,6 +16,9 @@ class GotoDefinitionFeature {
 	public function onGotoDefinition(params:TextDocumentPositionParams, token:CancellationToken, resolve:Definition->Void,
 			reject:ResponseError<NoData>->Void) {
 		var doc = context.documents.get(params.textDocument.uri);
+		if (!doc.uri.isFile()) {
+			return reject.notAFile();
+		}
 		var handle = if (context.haxeServer.supports(DisplayMethods.GotoDefinition)) handleJsonRpc else handleLegacy;
 		handle(params, token, resolve, reject, doc, doc.offsetAt(params.position));
 	}

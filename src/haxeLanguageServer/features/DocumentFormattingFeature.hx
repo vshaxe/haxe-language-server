@@ -13,12 +13,17 @@ class DocumentFormattingFeature {
 		context.protocol.onRequest(Methods.DocumentFormatting, onDocumentFormatting);
 	}
 
-	function onDocumentFormatting(params:DocumentFormattingParams, token:CancellationToken, resolve:Array<TextEdit>->Void, reject:ResponseError<NoData>->Void) {
+	function onDocumentFormatting(params:DocumentFormattingParams, token:CancellationToken, resolve:Array<TextEdit>->Void,
+			reject:ResponseError<NoData>->Void) {
 		var onResolve = context.startTimer(Methods.DocumentFormatting);
 		var doc = context.documents.get(params.textDocument.uri);
 		var formatter = new Formatter();
 		var result = formatter.formatFile({
-			name: doc.uri.toFsPath().toString(),
+			name: if (doc.uri.isFile()) {
+				doc.uri.toFsPath().toString();
+			} else {
+				context.workspacePath + "/untitled.hx";
+			},
 			content: doc.tokens.bytes
 		}, {
 			tokens: doc.tokens.list,

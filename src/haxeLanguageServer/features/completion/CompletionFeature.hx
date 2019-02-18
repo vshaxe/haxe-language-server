@@ -104,6 +104,9 @@ class CompletionFeature {
 
 	function onCompletion(params:CompletionParams, token:CancellationToken, resolve:Array<CompletionItem>->Void, reject:ResponseError<NoData>->Void) {
 		var doc = context.documents.get(params.textDocument.uri);
+		if (!doc.uri.isFile()) {
+			return reject.notAFile();
+		}
 		var offset = doc.offsetAt(params.position);
 		var textBefore = doc.content.substring(0, offset);
 		if (contextSupport && isInvalidCompletionPosition(params, textBefore)) {

@@ -1,6 +1,5 @@
 package haxeLanguageServer.features;
 
-import haxe.extern.EitherType;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;

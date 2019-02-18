@@ -11,4 +11,8 @@ class ResponseErrorHelper {
 	public static function invalidXml(reject:ResponseError<NoData>->Void, data:String) {
 		reject(ResponseError.internalError("Invalid xml data: " + data));
 	}
+
+	public static function notAFile(reject:ResponseError<NoData>->Void) {
+		reject(ResponseError.internalError("Only supported for file:// URIs"));
+	}
 }

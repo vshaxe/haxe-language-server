@@ -333,9 +333,13 @@ class Context {
 		});
 	}
 
+	function isUriSupported(uri:DocumentUri):Bool {
+		return uri.isFile() || uri.isUntitled();
+	}
+
 	function onDidOpenTextDocument(event:DidOpenTextDocumentParams) {
 		var uri = event.textDocument.uri;
-		if (uri.isFile()) {
+		if (isUriSupported(uri)) {
 			activeEditor = uri;
 			documents.onDidOpenTextDocument(event);
 			publishDiagnostics(uri);
@@ -344,8 +348,8 @@ class Context {
 
 	function onDidChangeTextDocument(event:DidChangeTextDocumentParams) {
 		var uri = event.textDocument.uri;
-		if (uri.isFile()) {
-			if (haxeServer.supports(ServerMethods.Invalidate)) {
+		if (isUriSupported(uri)) {
+			if (uri.isFile() && haxeServer.supports(ServerMethods.Invalidate)) {
 				callHaxeMethod(ServerMethods.Invalidate, {file: uri.toFsPath()}, null, _ -> null, error -> {
 					trace("Error during " + ServerMethods.Invalidate + " " + error);
 				});
@@ -355,15 +359,15 @@ class Context {
 	}
 
 	function onDidCloseTextDocument(event:DidCloseTextDocumentParams) {
-		if (event.textDocument.uri.isFile()) {
+		if (isUriSupported(event.textDocument.uri)) {
 			documents.onDidCloseTextDocument(event);
 		}
 	}
 
 	function onDidSaveTextDocument(event:DidSaveTextDocumentParams) {
 		var uri = event.textDocument.uri;
-		if (uri.isFile()) {
-			publishDiagnostics(event.textDocument.uri);
+		if (isUriSupported(uri)) {
+			publishDiagnostics(uri);
 		}
 	}
 

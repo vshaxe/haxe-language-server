@@ -196,7 +196,7 @@ class DiagnosticsManager {
 	}
 
 	public function publishDiagnostics(uri:DocumentUri) {
-		if (isPathFiltered(uri.toFsPath())) {
+		if (!uri.isFile() || isPathFiltered(uri.toFsPath())) {
 			clearDiagnostics(uri);
 			return;
 		}
@@ -210,6 +210,9 @@ class DiagnosticsManager {
 	static final reStartsWhitespace = ~/^\s*/;
 
 	function getCodeActions<T>(params:CodeActionParams) {
+		if (!params.textDocument.uri.isFile()) {
+			return [];
+		}
 		var actions:Array<CodeAction> = [];
 		for (d in params.context.diagnostics) {
 			if (!(d.code is Int)) // our codes are int, so we don't handle other stuff

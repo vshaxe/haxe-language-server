@@ -14,6 +14,10 @@ class RenameFeature {
 	}
 
 	function onRename(params:RenameParams, token:CancellationToken, resolve:WorkspaceEdit->Void, reject:ResponseError<NoData>->Void) {
+		if (!params.textDocument.uri.isFile()) {
+			return reject.notAFile();
+		}
+
 		if (!~/[_A-Za-z]\w*/.match(params.newName)) {
 			return reject(ResponseError.internalError("'" + params.newName + "' is not a valid identifier name."));
 		}

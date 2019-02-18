@@ -81,10 +81,14 @@ class CodeLensFeature {
 	}
 
 	function onCodeLens(params:CodeLensParams, token:CancellationToken, resolve:Array<CodeLens>->Void, reject:ResponseError<NoData>->Void) {
-		if (!context.config.enableCodeLens)
+		if (!context.config.enableCodeLens) {
 			return resolve([]);
-
-		var doc = context.documents.get(params.textDocument.uri);
+		}
+		var uri = params.textDocument.uri;
+		if (!uri.isFile()) {
+			return reject.notAFile();
+		}
+		var doc = context.documents.get(uri);
 		context.callDisplay("@statistics", [doc.uri.toFsPath() + "@0@statistics"], doc.content, token, function(r:DisplayResult) {
 			switch (r) {
 				case DCancelled:
@@ -93,8 +97,8 @@ class CodeLensFeature {
 					var data:Array<Statistics> = try haxe.Json.parse(s) catch (e:Any) return reject(ResponseError
 						.internalError("Error parsing stats response: " + Std.string(e)));
 					for (statistics in data) {
-						var uri = statistics.file.toUri();
-						if (uri == params.textDocument.uri) {
+						var currentUri = statistics.file.toUri();
+						if (currentUri == uri) {
 							return resolve(getCodeLensFromStatistics(uri, statistics.statistics));
 						}
 					}
