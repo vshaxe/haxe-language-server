@@ -85,7 +85,7 @@ class CodeLensFeature {
 			return resolve([]);
 
 		var doc = context.documents.get(params.textDocument.uri);
-		context.callDisplay("@statistics", [doc.fsPath + "@0@statistics"], doc.content, token, function(r:DisplayResult) {
+		context.callDisplay("@statistics", [doc.uri.toFsPath() + "@0@statistics"], doc.content, token, function(r:DisplayResult) {
 			switch (r) {
 				case DCancelled:
 					resolve(null);

@@ -25,7 +25,7 @@ class HoverFeature {
 
 	function handleJsonRpc(params:TextDocumentPositionParams, token:CancellationToken, resolve:Hover->Void, reject:ResponseError<NoData>->Void,
 			doc:TextDocument, offset:Int) {
-		context.callHaxeMethod(DisplayMethods.Hover, {file: doc.fsPath, contents: doc.content, offset: offset}, token, hover -> {
+		context.callHaxeMethod(DisplayMethods.Hover, {file: doc.uri.toFsPath(), contents: doc.content, offset: offset}, token, hover -> {
 			resolve(createHover(printContent(hover), hover.item.getDocumentation(), hover.range));
 			return null;
 		}, reject.handler());
@@ -91,7 +91,7 @@ class HoverFeature {
 	function handleLegacy(params:TextDocumentPositionParams, token:CancellationToken, resolve:Hover->Void, reject:ResponseError<NoData>->Void,
 			doc:TextDocument, offset:Int) {
 		var bytePos = context.displayOffsetConverter.characterOffsetToByteOffset(doc.content, offset);
-		var args = ['${doc.fsPath}@$bytePos@type'];
+		var args = ['${doc.uri.toFsPath()}@$bytePos@type'];
 		context.callDisplay("@type", args, doc.content, token, function(r) {
 			switch (r) {
 				case DCancelled:

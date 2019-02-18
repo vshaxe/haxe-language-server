@@ -36,7 +36,7 @@ class SignatureHelpFeature {
 	function handleJsonRpc(params:TextDocumentPositionParams, token:CancellationToken, resolve:SignatureHelp->Void, reject:ResponseError<NoData>->Void,
 			doc:TextDocument) {
 		var params = {
-			file: doc.fsPath,
+			file: doc.uri.toFsPath(),
 			contents: doc.content,
 			offset: doc.offsetAt(params.position),
 			wasAutoTriggered: true // TODO: send this once the API supports it (https://github.com/Microsoft/vscode/issues/34737)
@@ -76,7 +76,7 @@ class SignatureHelpFeature {
 	function handleLegacy(params:TextDocumentPositionParams, token:CancellationToken, resolve:SignatureHelp->Void, reject:ResponseError<NoData>->Void,
 			doc:TextDocument) {
 		var bytePos = context.displayOffsetConverter.characterOffsetToByteOffset(doc.content, doc.offsetAt(params.position));
-		var args = ['${doc.fsPath}@$bytePos@signature'];
+		var args = ['${doc.uri.toFsPath()}@$bytePos@signature'];
 		context.callDisplay("@signature", args, doc.content, token, function(r) {
 			switch (r) {
 				case DCancelled:

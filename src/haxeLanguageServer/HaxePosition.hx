@@ -7,7 +7,8 @@ class HaxePosition {
 	static final properFileNameCaseCache = new Map<FsPath, FsPath>();
 	static final isWindows = (Sys.systemName() == "Windows");
 
-	public static function parse(pos:String, doc:TextDocument, cache:Map<FsPath, Array<String>>, offsetConverter:DisplayOffsetConverter):Null<Location> {
+	public static function parse(pos:String, doc:TextDocument, cache:Map<FsPath, Array<String>>,
+			offsetConverter:DisplayOffsetConverter):Null<Location> {
 		if (!positionRe.match(pos))
 			return null;
 
@@ -17,7 +18,7 @@ class HaxePosition {
 			var startLine = Std.parseInt(s);
 			var endLine = Std.parseInt(positionRe.matched(4));
 			return {
-				uri: if (file == doc.fsPath) doc.uri else file.toUri(),
+				uri: if (file == doc.uri.toFsPath()) doc.uri else file.toUri(),
 				range: {
 					start: {line: startLine - 1, character: 0},
 					end: {line: endLine, character: 0}, // don't -1 the end line, since we're pointing to the start of the next line
@@ -28,7 +29,7 @@ class HaxePosition {
 			line--;
 
 			var lineContent, uri;
-			if (file == doc.fsPath) {
+			if (file == doc.uri.toFsPath()) {
 				// it's a stdin file, we have its content in memory
 				lineContent = doc.lineAt(line);
 				uri = doc.uri;

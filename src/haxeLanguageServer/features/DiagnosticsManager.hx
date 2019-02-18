@@ -202,7 +202,7 @@ class DiagnosticsManager {
 		}
 		var doc = context.documents.get(uri);
 		if (doc != null) {
-			context.callDisplay("@diagnostics", [doc.fsPath + "@0@diagnostics"], null, null, processDiagnosticsReply.bind(uri), processErrorReply.bind(uri));
+			context.callDisplay("@diagnostics", [doc.uri.toFsPath() + "@0@diagnostics"], null, null, processDiagnosticsReply.bind(uri), processErrorReply.bind(uri));
 		}
 	}
 

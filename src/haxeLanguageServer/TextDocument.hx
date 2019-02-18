@@ -8,7 +8,6 @@ typedef OnTextDocumentChangeListener = TextDocument->Array<TextDocumentContentCh
 
 class TextDocument {
 	public final uri:DocumentUri;
-	public final fsPath:FsPath;
 	public final languageId:String;
 	public final openTimestamp:Float;
 	public var version:Int;
@@ -25,7 +24,6 @@ class TextDocument {
 
 	public function new(uri:DocumentUri, languageId:String, version:Int, content:String) {
 		this.uri = uri;
-		this.fsPath = uri.toFsPath();
 		this.languageId = languageId;
 		this.openTimestamp = Timer.stamp();
 		this.version = version;

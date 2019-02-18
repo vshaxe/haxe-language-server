@@ -142,7 +142,7 @@ class CompletionFeature {
 			doc:TextDocument, offset:Int, textBefore:String) {
 		var wasAutoTriggered = params.context == null ? true : params.context.triggerKind == TriggerCharacter;
 		var haxeParams = {
-			file: doc.fsPath,
+			file: doc.uri.toFsPath(),
 			contents: doc.content,
 			offset: offset,
 			wasAutoTriggered: wasAutoTriggered,
