@@ -17,6 +17,9 @@ class DocumentSymbolsFeature {
 			reject:ResponseError<NoData>->Void) {
 		var onResolve = context.startTimer(Methods.DocumentSymbols);
 		var doc = context.documents.get(params.textDocument.uri);
+		if (doc.tokens == null) {
+			return reject.noTokens();
+		}
 		var symbols = new DocumentSymbolsResolver(doc).resolve();
 		resolve(symbols);
 		onResolve(symbols);

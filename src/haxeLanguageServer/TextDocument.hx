@@ -14,7 +14,7 @@ class TextDocument {
 	public var content:String;
 	public var lineCount(get, never):Int;
 	public var parseTree(get, never):File;
-	public var tokens(get, never):TokenTreeManager;
+	public var tokens(get, never):Null<TokenTreeManager>;
 
 	var _parseTree:Null<File>;
 	var _tokens:Null<TokenTreeManager>;

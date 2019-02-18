@@ -15,4 +15,8 @@ class ResponseErrorHelper {
 	public static function notAFile(reject:ResponseError<NoData>->Void) {
 		reject(ResponseError.internalError("Only supported for file:// URIs"));
 	}
+
+	public static function noTokens(reject:ResponseError<NoData>->Void) {
+		reject(ResponseError.internalError("Unable to build token tree"));
+	}
 }

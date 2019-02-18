@@ -17,6 +17,9 @@ class DocumentFormattingFeature {
 			reject:ResponseError<NoData>->Void) {
 		var onResolve = context.startTimer(Methods.DocumentFormatting);
 		var doc = context.documents.get(params.textDocument.uri);
+		if (doc.tokens == null) {
+			return reject.noTokens();
+		}
 		var formatter = new Formatter();
 		var result = formatter.formatFile({
 			name: if (doc.uri.isFile()) {
