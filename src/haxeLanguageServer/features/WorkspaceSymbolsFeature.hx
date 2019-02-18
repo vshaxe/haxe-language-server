@@ -68,7 +68,7 @@ class WorkspaceSymbolsFeature {
 					var result = processSymbolsReply(data, reject);
 					resolve(result);
 			}
-		}, function(error) reject(ResponseError.internalError(error)));
+		}, reject.handler());
 	}
 
 	function onWorkspaceSymbols(params:WorkspaceSymbolParams, token:CancellationToken, resolve:Array<SymbolInformation>->Void,

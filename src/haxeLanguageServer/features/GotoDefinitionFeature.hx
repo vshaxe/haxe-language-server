@@ -13,7 +13,8 @@ class GotoDefinitionFeature {
 		context.protocol.onRequest(Methods.GotoDefinition, onGotoDefinition);
 	}
 
-	public function onGotoDefinition(params:TextDocumentPositionParams, token:CancellationToken, resolve:Definition->Void, reject:ResponseError<NoData>->Void) {
+	public function onGotoDefinition(params:TextDocumentPositionParams, token:CancellationToken, resolve:Definition->Void,
+			reject:ResponseError<NoData>->Void) {
 		var doc = context.documents.get(params.textDocument.uri);
 		var handle = if (context.haxeServer.supports(DisplayMethods.GotoDefinition)) handleJsonRpc else handleLegacy;
 		handle(params, token, resolve, reject, doc, doc.offsetAt(params.position));
@@ -29,7 +30,7 @@ class GotoDefinitionFeature {
 				}
 			}));
 			return null;
-		}, error -> reject(ResponseError.internalError(error)));
+		}, reject.handler());
 	}
 
 	function handleLegacy(params:TextDocumentPositionParams, token:CancellationToken, resolve:Definition->Void, reject:ResponseError<NoData>->Void,
@@ -43,7 +44,8 @@ class GotoDefinitionFeature {
 				case DResult(data):
 					var xml = try Xml.parse(data).firstElement() catch (_:Any) null;
 					if (xml == null)
-						return reject(ResponseError.internalError("Invalid xml data: " + data));
+						return reject.invalidXml(data);
+
 					var positions = [for (el in xml.elements()) el.firstChild().nodeValue];
 					if (positions.length == 0)
 						resolve([]);
@@ -59,6 +61,6 @@ class GotoDefinitionFeature {
 					}
 					resolve(results);
 			}
-		}, function(error) reject(ResponseError.internalError(error)));
+		}, reject.handler());
 	}
 }

@@ -28,7 +28,7 @@ class HoverFeature {
 		context.callHaxeMethod(DisplayMethods.Hover, {file: doc.fsPath, contents: doc.content, offset: offset}, token, hover -> {
 			resolve(createHover(printContent(hover), hover.item.getDocumentation(), hover.range));
 			return null;
-		}, error -> reject(ResponseError.internalError(error)));
+		}, reject.handler());
 	}
 
 	function printContent<T>(hover:HoverDisplayItemOccurence<T>):HoverContent {
@@ -99,7 +99,8 @@ class HoverFeature {
 				case DResult(data):
 					var xml = try Xml.parse(data).firstElement() catch (_:Any) null;
 					if (xml == null)
-						return reject(ResponseError.internalError("Invalid xml data: " + data));
+						return reject.invalidXml(data);
+
 					var s = StringTools.trim(xml.firstChild().nodeValue);
 					switch (xml.nodeName) {
 						case "metadata":
@@ -124,7 +125,7 @@ class HoverFeature {
 							resolve(createHover(definition, documentation, range));
 					}
 			}
-		}, function(error) reject(ResponseError.internalError(error)));
+		}, reject.handler());
 	}
 
 	function createHover(content:HoverContent, ?documentation:String, ?range:Range):Hover {

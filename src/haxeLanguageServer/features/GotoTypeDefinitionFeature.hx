@@ -26,6 +26,6 @@ class GotoTypeDefinitionFeature {
 				}
 			}));
 			return null;
-		}, error -> reject(ResponseError.internalError(error)));
+		}, reject.handler());
 	}
 }

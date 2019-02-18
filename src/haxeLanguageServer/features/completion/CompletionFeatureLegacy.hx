@@ -34,13 +34,13 @@ class CompletionFeatureLegacy {
 				case DResult(data):
 					var xml = try Xml.parse(data).firstElement() catch (_:Any) null;
 					if (xml == null)
-						return reject(ResponseError.internalError("Invalid xml data: " + data));
+						return reject.invalidXml(data);
 
 					var items = if (r.toplevel) parseToplevelCompletion(xml, params.position, textBefore, doc) else parseFieldCompletion(xml, textBefore, params
 						.position);
 					resolve(items);
 			}
-		}, function(error) reject(ResponseError.internalError(error)));
+		}, reject.handler());
 	}
 
 	static final reCaseOrDefault = ~/\b(case|default)\b[^:]*:$/;

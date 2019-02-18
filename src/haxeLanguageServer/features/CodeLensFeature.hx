@@ -85,16 +85,13 @@ class CodeLensFeature {
 			return resolve([]);
 
 		var doc = context.documents.get(params.textDocument.uri);
-		function processError(error:String) {
-			reject(jsonrpc.ResponseError.internalError(error));
-		}
-		function processStatisticsReply(r:DisplayResult) {
+		context.callDisplay("@statistics", [doc.fsPath + "@0@statistics"], doc.content, token, function(r:DisplayResult) {
 			switch (r) {
 				case DCancelled:
 					resolve(null);
 				case DResult(s):
-					var data:Array<Statistics> = try haxe.Json.parse(s) catch (e:Any) return reject(ResponseError.internalError
-						("Error parsing stats response: " + Std.string(e)));
+					var data:Array<Statistics> = try haxe.Json.parse(s) catch (e:Any) return reject(ResponseError
+						.internalError("Error parsing stats response: " + Std.string(e)));
 					for (statistics in data) {
 						var uri = statistics.file.toUri();
 						if (uri == params.textDocument.uri) {
@@ -102,12 +99,11 @@ class CodeLensFeature {
 						}
 					}
 			}
-		}
-		context.callDisplay("@statistics", [doc.fsPath + "@0@statistics"], doc.content, token, processStatisticsReply, processError);
+		}, reject.handler());
 	}
 }
 
-enum abstract StatisticObjectKind(String) {
+private enum abstract StatisticObjectKind(String) {
 	var ClassType = "class type";
 	var InterfaceType = "interface type";
 	var EnumType = "enum type";

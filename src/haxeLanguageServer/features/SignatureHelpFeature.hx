@@ -44,7 +44,7 @@ class SignatureHelpFeature {
 		context.callHaxeMethod(DisplayMethods.SignatureHelp, params, token, result -> {
 			resolve(createSignatureHelp(result));
 			return null;
-		}, error -> reject(ResponseError.internalError(error)));
+		}, reject.handler());
 	}
 
 	function createSignatureHelp(item:HaxeSignatureItem):SignatureHelp {
@@ -99,7 +99,7 @@ class SignatureHelpFeature {
 					currentSignature = {help: help, params: params};
 					doc.addUpdateListener(onUpdateTextDocument);
 			}
-		}, function(error) reject(ResponseError.internalError(error)));
+		}, reject.handler());
 	}
 
 	function getSignatureDocumentation(documentation:String):EitherType<String, MarkupContent> {

@@ -135,9 +135,7 @@ class CompletionFeature {
 		context.callHaxeMethod(DisplayMethods.CompletionItemResolve, {index: item.data.index}, token, result -> {
 			resolve(createCompletionItem(data.index, result.item, previousCompletionData));
 			return null;
-		}, error -> {
-			reject(ResponseError.internalError(error));
-		});
+		}, reject.handler());
 	}
 
 	function handleJsonRpc(params:CompletionParams, token:CancellationToken, resolve:Array<CompletionItem>->Void, reject:ResponseError<NoData>->Void,
@@ -186,7 +184,7 @@ class CompletionFeature {
 			resolve(items);
 			previousCompletionData = data;
 			return items.length + " items";
-		}, error -> reject(ResponseError.internalError(error)));
+		}, reject.handler());
 	}
 
 	function createCompletionItem<T>(index:Int, item:DisplayItem<T>, data:CompletionContextData):CompletionItem {

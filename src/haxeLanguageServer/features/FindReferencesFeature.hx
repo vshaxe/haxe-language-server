@@ -29,7 +29,7 @@ class FindReferencesFeature {
 				}
 			}));
 			return null;
-		}, error -> reject(ResponseError.internalError(error)));
+		}, reject.handler());
 	}
 
 	function handleLegacy(params:TextDocumentPositionParams, token:CancellationToken, resolve:Definition->Void, reject:ResponseError<NoData>->Void,
@@ -43,7 +43,7 @@ class FindReferencesFeature {
 				case DResult(data):
 					var xml = try Xml.parse(data).firstElement() catch (_:Any) null;
 					if (xml == null)
-						return reject(ResponseError.internalError("Invalid xml data: " + data));
+						return reject.invalidXml(data);
 
 					var positions = [for (el in xml.elements()) el.firstChild().nodeValue];
 					if (positions.length == 0)
@@ -62,6 +62,6 @@ class FindReferencesFeature {
 
 					resolve(results);
 			}
-		}, function(error) reject(ResponseError.internalError(error)));
+		}, reject.handler());
 	}
 }

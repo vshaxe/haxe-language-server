@@ -22,7 +22,7 @@ class DeterminePackageFeature {
 		context.callHaxeMethod(DisplayMethods.DeterminePackage, {file: new FsPath(params.fsPath)}, token, result -> {
 			resolve({pack: result.join(".")});
 			return null;
-		}, error -> reject(ResponseError.internalError(error)));
+		}, reject.handler());
 	}
 
 	function handleLegacy(params:{fsPath:String}, token:CancellationToken, resolve:{pack:String}->Void, reject:ResponseError<NoData>->Void) {
@@ -34,6 +34,6 @@ class DeterminePackageFeature {
 				case DResult(data):
 					resolve({pack: data});
 			}
-		}, function(error) reject(ResponseError.internalError(error)));
+		}, reject.handler());
 	}
 }
