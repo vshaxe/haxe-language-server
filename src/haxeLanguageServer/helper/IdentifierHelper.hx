@@ -22,6 +22,7 @@ class IdentifierHelper {
 			case "Null": "n";
 			case "True": "t";
 			case "False": "f";
+			case "Void": "_";
 			case type if (type.startsWith("{")): "struct";
 			case type:
 				var segments = ~/(?=[A-Z][^A-Z]*$)/.split(type);

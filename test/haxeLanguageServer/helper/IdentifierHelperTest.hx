@@ -35,6 +35,8 @@ class IdentifierHelperTest extends Test {
 		assert("struct", "{ i : Int }");
 		assert("t", "method.T");
 		assert("event", "foo.bar.SomeEvent");
+		assert("_", "Void");
+		assert("_", "Null<Void>");
 	}
 
 	function testAddNamesToSignatureType() {
