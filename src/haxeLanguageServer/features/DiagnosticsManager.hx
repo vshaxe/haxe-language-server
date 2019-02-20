@@ -202,7 +202,8 @@ class DiagnosticsManager {
 		}
 		var doc = context.documents.get(uri);
 		if (doc != null) {
-			context.callDisplay("@diagnostics", [doc.uri.toFsPath() + "@0@diagnostics"], null, null, processDiagnosticsReply.bind(uri), processErrorReply.bind(uri));
+			context.callDisplay("@diagnostics", [doc.uri.toFsPath() + "@0@diagnostics"], null, null, processDiagnosticsReply.bind(uri), processErrorReply
+				.bind(uri));
 		}
 	}
 
@@ -457,7 +458,8 @@ private class DiagnosticsMap<T> extends haxe.ds.BalancedTree<DiagnosticsMapKey, 
 		var end2 = k2.range.end;
 		inline function compare(i1, i2, e)
 			return i1 < i2 ? -1 : i1 > i2 ? 1 : e;
-		return compare(k1.code, k2.code, compare(start1.line, start2.line, compare(start1.character, start2.character, compare(end1.line, end2.line, compare
-			(end1.character, end2.character, 0)))));
+		return compare(k1.code, k2.code,
+			compare(start1.line, start2.line,
+				compare(start1.character, start2.character, compare(end1.line, end2.line, compare(end1.character, end2.character, 0)))));
 	}
 }

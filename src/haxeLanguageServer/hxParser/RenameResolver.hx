@@ -167,8 +167,10 @@ class RenameResolver extends PositionAwareWalker {
 		var identText = getRawIdentifier(ident.text);
 		// assume that lowercase idents in `case` are capture vars
 		var firstChar = identText.charAt(0);
-		if (ident.text.charAt(0) != "$" && firstChar == firstChar.toLowerCase() && isCaptureVariable
-			(stack) && (declarationInfo == null || !isCaptureVariableInSameScope(declarationInfo, scope))) {
+		if (ident.text.charAt(0) != "$"
+			&& firstChar == firstChar.toLowerCase()
+			&& isCaptureVariable(stack)
+			&& (declarationInfo == null || !isCaptureVariableInSameScope(declarationInfo, scope))) {
 			checkShadowing(ident, stack, true);
 		} else if (declarationInScope) {
 			if (declarationIdentifier == identText && shadowingDecls.length == 0) {

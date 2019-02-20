@@ -468,9 +468,7 @@ class Context {
 		var actualArgs = ["--cwd", workspacePath.toString()]; // change cwd to workspace root
 		if (displayArguments != null)
 			actualArgs = actualArgs.concat(displayArguments); // add arguments from the workspace settings
-		actualArgs = actualArgs.concat([
-			"-D",
-			"display-details", // get more details in completion results,
+		actualArgs = actualArgs.concat(["-D", "display-details", // get more details in completion results,
 			"--no-output", // prevent any generation
 		]);
 		if (haxeServer.supports(HaxeMethods.Initialize) && config.enableMethodsView) {

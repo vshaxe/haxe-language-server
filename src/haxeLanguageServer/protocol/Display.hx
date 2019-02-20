@@ -419,10 +419,8 @@ typedef CompletionItemResolveResult = Response<{
 
 /* GotoDefinition */
 typedef GotoDefinitionResult = Response<Array<Location>>;
-
 /* GotoTypeDefinition */
 typedef GotoTypeDefinitionResult = Response<Array<Location>>;
-
 /* Hover */
 typedef HoverResult = Response<HoverDisplayItemOccurence<Dynamic>>;
 
@@ -476,5 +474,4 @@ typedef Location = {
 }
 
 typedef Range = haxe.display.Position.Range;
-
 typedef Position = haxe.display.Position.Position;

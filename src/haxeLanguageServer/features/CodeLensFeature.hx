@@ -94,8 +94,8 @@ class CodeLensFeature {
 				case DCancelled:
 					resolve(null);
 				case DResult(s):
-					var data:Array<Statistics> = try haxe.Json.parse(s) catch (e:Any) return reject(ResponseError
-						.internalError("Error parsing stats response: " + Std.string(e)));
+					var data:Array<Statistics> = try haxe.Json.parse(s) catch (e:Any) return reject(ResponseError.internalError("Error parsing stats response: "
+						+ Std.string(e)));
 					for (statistics in data) {
 						var currentUri = statistics.file.toUri();
 						if (currentUri == uri) {

@@ -132,7 +132,9 @@ class CompletionFeature {
 
 	function onCompletionItemResolve(item:CompletionItem, token:CancellationToken, resolve:CompletionItem->Void, reject:ResponseError<NoData>->Void) {
 		var data:CompletionItemData = item.data;
-		if (!context.haxeServer.supports(DisplayMethods.CompletionItemResolve) || previousCompletionData == null || data.origin == Custom) {
+		if (!context.haxeServer.supports(DisplayMethods.CompletionItemResolve)
+			|| previousCompletionData == null
+			|| data.origin == Custom) {
 			return resolve(item);
 		}
 		context.callHaxeMethod(DisplayMethods.CompletionItemResolve, {index: item.data.index}, token, result -> {
@@ -336,7 +338,8 @@ class CompletionFeature {
 			},
 			documentation: {
 				kind: MarkDown,
-				value: DocHelper.printCodeBlock("override " + printer.printOverrideDefinition(field, concreteType, data.indent, false), Haxe)
+				value: DocHelper.printCodeBlock("override "
+					+ printer.printOverrideDefinition(field, concreteType, data.indent, false), Haxe)
 			},
 			additionalTextEdits: ImportHelper.createFunctionImportsEdit(data.doc, data.importPosition, context, concreteType, fieldFormatting)
 		}

@@ -44,7 +44,8 @@ class CodeGenerationFeature {
 				for (i in 0...args.length)
 					args[i].name = names[i];
 
-				var generatedCode = TypeHelper.printFunctionDeclaration(args, ret, context.config.codeGeneration.functions.anonymous) + " ";
+				var generatedCode = TypeHelper.printFunctionDeclaration(args, ret, context.config.codeGeneration.functions.anonymous)
+					+ " ";
 				return [
 					{
 						title: "Generate anonymous function",
@@ -71,7 +72,7 @@ class CodeGenerationFeature {
 			return [];
 
 		var activeSignature = currentSignature.help.signatures[currentSignature.help.activeSignature];
-		var argNames = [for (arg in activeSignature.parameters)(arg.label:String).split(":")[0]];
+		var argNames = [for (arg in activeSignature.parameters) (arg.label : String).split(":")[0]];
 		return [
 			{
 				title: "Generate capture variables",

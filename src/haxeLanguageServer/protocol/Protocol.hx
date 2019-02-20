@@ -59,5 +59,4 @@ typedef FileParams = {
 }
 
 typedef HaxeRequestMethod<TParams, TResponse> = RequestMethod<TParams, TResponse, NoData, NoData>;
-
 typedef HaxeNotificationMethod<TParams> = NotificationMethod<TParams, NoData>;

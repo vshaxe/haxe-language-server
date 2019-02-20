@@ -279,8 +279,8 @@ class HaxeServer {
 		var invalidOptionRegex = ~/unknown option `(.*?)'./;
 		if (invalidOptionRegex.match(haxeResponse)) {
 			var option = invalidOptionRegex.matched(1);
-			context.sendShowMessage(Error, 'Invalid compiler argument \'$option\' detected. ' +
-				'Please verify "haxe.displayConfigurations" and "haxe.displayServer.arguments".');
+			context.sendShowMessage(Error, 'Invalid compiler argument \'$option\' detected. '
+				+ 'Please verify "haxe.displayConfigurations" and "haxe.displayServer.arguments".');
 			return;
 		}
 

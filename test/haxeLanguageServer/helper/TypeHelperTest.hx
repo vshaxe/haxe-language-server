@@ -35,8 +35,7 @@ class TypeHelperTest extends Test {
 		assertPrintedEquals(parseFunctionArgumentType, "function(a:flixel.FlxObject, ?b:String):Void", "?Callback:Null<flixel.FlxObject -> ?String -> Void>",
 			{argumentTypeHints: true, returnTypeHint: Always, useArrowSyntax: false});
 
-		assertPrintedEquals(parseDisplayType, "function(a, b)", "String -> Bool -> Void>",
-			{argumentTypeHints: false, returnTypeHint: Never, useArrowSyntax: false});
+		assertPrintedEquals(parseDisplayType, "function(a, b)", "String -> Bool -> Void>", {argumentTypeHints: false, returnTypeHint: Never, useArrowSyntax: false});
 
 		assertPrintedEquals(parseDisplayType, "function(a:String, b:Bool)", "String -> Bool -> Void",
 			{argumentTypeHints: true, returnTypeHint: NonVoid, useArrowSyntax: false});

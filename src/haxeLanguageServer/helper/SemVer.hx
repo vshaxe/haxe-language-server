@@ -47,7 +47,9 @@ abstract SemVer(Version) from Version {
 	}
 
 	@:op(a > b) function isGreaterThan(other:SemVer):Bool {
-		return (major > other.major) || (major == other.major && minor > other.minor) || (major == other.major && minor == other.minor && patch > other.patch);
+		return (major > other.major)
+			|| (major == other.major && minor > other.minor)
+			|| (major == other.major && minor == other.minor && patch > other.patch);
 	}
 
 	@:op(a == b) function isEqual(other:SemVer):Bool {

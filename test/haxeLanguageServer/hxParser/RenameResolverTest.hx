@@ -126,8 +126,7 @@ class Foo {
 	}
 
 	function testNestedShadowing() {
-		check
-		("
+		check("
 class Foo {
     function foo() {
         var %bar%;
@@ -153,8 +152,7 @@ class Foo {
 	}
 
 	function testForLoopShadowing() {
-		check
-		("
+		check("
 class Foo {
     function foo() {
         var %bar%;
@@ -171,8 +169,7 @@ class Foo {
 	}
 
 	function testCatchVariableShadowing() {
-		check
-		("
+		check("
 class Foo {
     function foo() {
         var %bar%;
@@ -190,8 +187,7 @@ class Foo {
 	}
 
 	function testParameterShadowing() {
-		check
-		("
+		check("
 class Foo {
     function foo() {
         var %bar%;
@@ -208,8 +204,7 @@ class Foo {
 	}
 
 	function testCaseShadowing() {
-		check
-		("
+		check("
 class Foo {
     function foo() {
         var %bar%;
@@ -228,8 +223,7 @@ class Foo {
 	}
 
 	function testCaptureVariableShadowing() {
-		check
-		("
+		check("
 class Foo {
     function foo() {
         var %bar%;
@@ -299,8 +293,7 @@ class Foo {
 	}
 
 	function testDollarFunctionName() {
-		check
-		("
+		check("
 class Foo {
     function foo() {
         var %name%;
@@ -346,8 +339,7 @@ class Foo {
 	}
 
 	function testDollarDollarDollar() {
-		check
-		("
+		check("
 class Foo {
     function foo() {
         var %name%;
@@ -369,8 +361,7 @@ class Foo {
 	}
 
 	function testRenameWithSwitch() {
-		check
-		("
+		check("
 class Foo {
     function foo() {
         var %bar%;
@@ -392,8 +383,7 @@ class Foo {
         var %bar%;
         newName;
     }
-}",
-			"
+}", "
 class Foo {
     function foo() {
         var newName;
@@ -409,8 +399,7 @@ class Foo {
         var %bar%;
         newName;
     }
-}",
-			"
+}", "
 class Foo {
     static function foo() {
         var newName;
@@ -420,8 +409,7 @@ class Foo {
 	}
 
 	function testDontAvoidConflict() {
-		check
-		("
+		check("
 class Foo {
     function foo() {
         var %bar%;
@@ -448,8 +436,7 @@ class Foo {
 	}
 
 	function testDuplicatedCaptureVariable() {
-		check
-		("
+		check("
 class Foo {
     function foo() {
         switch (foo) {
@@ -463,8 +450,7 @@ class Foo {
 	}
 
 	function testDuplicatedCaptureVariableDifferentScopes() {
-		check
-		("
+		check("
 class Foo {
     function foo() {
         switch (foo) {
@@ -490,8 +476,7 @@ class Foo {
 
 	// #141
 	function testDollarVarInCase() {
-		check
-		("
+		check("
 class Foo {
     macro function foo(e) {
         switch (e) {
@@ -499,8 +484,7 @@ class Foo {
                 %expr%;
         }
     }
-}",
-			"
+}", "
 class Foo {
     macro function foo(e) {
         switch (e) {
@@ -512,8 +496,7 @@ class Foo {
 	}
 
 	function testDollarVarInCaseShadowing() {
-		check
-		("
+		check("
 class Foo {
     macro function foo(e) {
         var %name%;
