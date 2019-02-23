@@ -7,17 +7,17 @@ class DisplayRequest {
 	public final label:String;
 	public final cancellable:Bool;
 	// these are used for the queue
-	public var prev:DisplayRequest;
-	public var next:DisplayRequest;
+	public var prev:Null<DisplayRequest>;
+	public var next:Null<DisplayRequest>;
 
 	final args:Array<String>;
-	final token:CancellationToken;
-	final stdin:String;
+	final token:Null<CancellationToken>;
+	final stdin:Null<String>;
 	final handler:ResultHandler;
 
 	static final stdinSepBuf = Buffer.alloc(1, 1);
 
-	public function new(label:String, args:Array<String>, token:CancellationToken, cancellable:Bool, stdin:String, handler:ResultHandler) {
+	public function new(label:String, args:Array<String>, ?token:CancellationToken, cancellable:Bool, ?stdin:String, handler:ResultHandler) {
 		this.label = label;
 		this.args = args;
 		this.token = token;

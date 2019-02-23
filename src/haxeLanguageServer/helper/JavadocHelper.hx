@@ -10,7 +10,7 @@ class JavadocHelper {
 		doc = ereg.map(doc, function(e) {
 			var name = e.matched(1);
 			var doc = e.matched(2);
-			var value = null;
+			var value:Null<String> = null;
 
 			switch (name) {
 				case 'param', 'exception', 'throws', 'event':

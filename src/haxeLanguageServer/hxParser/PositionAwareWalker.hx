@@ -98,7 +98,9 @@ class PositionAwareWalker extends StackAwareWalker {
 	}
 
 	override function walkFunction(node:Function, stack:WalkStack) {
-		scope.push(node.name);
+		if (node.name != null) {
+			scope.push(node.name);
+		}
 		super.walkFunction(node, stack);
 		closeScope();
 	}

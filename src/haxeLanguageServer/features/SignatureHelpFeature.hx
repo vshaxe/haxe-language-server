@@ -18,7 +18,7 @@ typedef CurrentSignature = {
 }
 
 class SignatureHelpFeature {
-	public var currentSignature(default, null):CurrentSignature;
+	public var currentSignature(default, null):Null<CurrentSignature>;
 
 	final context:Context;
 
@@ -28,8 +28,12 @@ class SignatureHelpFeature {
 	}
 
 	function onSignatureHelp(params:TextDocumentPositionParams, token:CancellationToken, resolve:SignatureHelp->Void, reject:ResponseError<NoData>->Void) {
-		var doc = context.documents.get(params.textDocument.uri);
-		if (!doc.uri.isFile()) {
+		var uri = params.textDocument.uri;
+		var doc:Null<TextDocument> = context.documents.get(uri);
+		if (doc == null) {
+			return reject.documentNotFound(uri);
+		}
+		if (!uri.isFile()) {
 			return reject.notAFile();
 		}
 		var handle = if (context.haxeServer.supports(DisplayMethods.SignatureHelp)) handleJsonRpc else handleLegacy;
@@ -105,7 +109,7 @@ class SignatureHelpFeature {
 		}, reject.handler());
 	}
 
-	function getSignatureDocumentation(documentation:String):EitherType<String, MarkupContent> {
+	function getSignatureDocumentation(documentation:String):Null<EitherType<String, MarkupContent>> {
 		if (context.config.enableSignatureHelpDocumentation) {
 			return {
 				kind: MarkupKind.MarkDown,

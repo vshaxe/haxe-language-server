@@ -17,6 +17,9 @@ class DocumentSymbolsResolver {
 	public function resolve():Array<DocumentSymbol> {
 		var stack = new SymbolStack();
 		var tokens = document.tokens;
+		if (tokens == null) {
+			return [];
+		}
 		tokens.tree.filterCallback(function(token:TokenTree, depth:Int) {
 			stack.depth = depth;
 			function add(token:TokenTree, kind:SymbolKind, level:SymbolLevel, ?name:String, ?opensScope:Bool) {

@@ -63,9 +63,10 @@ class RenameResolver extends PositionAwareWalker {
 			}
 		}
 
-		if (rangeConsumers[token] != null) {
-			rangeConsumers[token](getRange());
-			rangeConsumers[token] = null;
+		var consumer = rangeConsumers[token];
+		if (consumer != null) {
+			consumer(getRange());
+			rangeConsumers.remove(token);
 		}
 
 		super.processToken(token, stack);

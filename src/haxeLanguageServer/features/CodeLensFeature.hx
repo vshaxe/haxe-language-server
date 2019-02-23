@@ -88,7 +88,10 @@ class CodeLensFeature {
 		if (!uri.isFile()) {
 			return reject.notAFile();
 		}
-		var doc = context.documents.get(uri);
+		var doc:Null<TextDocument> = context.documents.get(uri);
+		if (doc == null) {
+			return reject.documentNotFound(uri);
+		}
 		context.callDisplay("@statistics", [doc.uri.toFsPath() + "@0@statistics"], doc.content, token, function(r:DisplayResult) {
 			switch (r) {
 				case DCancelled:

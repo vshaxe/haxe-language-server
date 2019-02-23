@@ -17,19 +17,19 @@ import haxeLanguageServer.protocol.Protocol;
 
 class HaxeServer {
 	final context:Context;
-	var proc:ChildProcessObject;
+	var proc:Null<ChildProcessObject>;
 	var buffer:MessageBuffer;
 	var nextMessageLength:Int;
-	var requestsHead:DisplayRequest;
-	var requestsTail:DisplayRequest;
-	var currentRequest:DisplayRequest;
-	var socketListener:js.node.net.Server;
-	var stopProgressCallback:Void->Void;
-	var startRequest:Void->Void;
+	var requestsHead:Null<DisplayRequest>;
+	var requestsTail:Null<DisplayRequest>;
+	var currentRequest:Null<DisplayRequest>;
+	var socketListener:Null<js.node.net.Server>;
+	var stopProgressCallback:Null<Void->Void>;
+	var startRequest:Null<Void->Void>;
 	var crashes:Int = 0;
-	var supportedMethods:Array<String>;
+	var supportedMethods:Array<String> = [];
 
-	public var version(default, null):SemVer;
+	public var version(default, null):Null<SemVer>;
 
 	public function new(context:Context) {
 		this.context = context;
@@ -52,10 +52,10 @@ class HaxeServer {
 			context.sendShowMessage(Error, s);
 
 		var env = new haxe.DynamicAccess();
-		for (key in js.Node.process.env.keys())
-			env[key] = js.Node.process.env[key];
-		for (key in context.displayServerConfig.env.keys())
-			env[key] = context.displayServerConfig.env[key];
+		for (key => value in js.Node.process.env)
+			env[key] = value;
+		for (key => value in context.displayServerConfig.env)
+			env[key] = value;
 
 		var haxePath = context.displayServerConfig.path;
 		var checkRun = ChildProcess.spawnSync(haxePath, ["-version"], {env: env});
@@ -313,7 +313,7 @@ class HaxeServer {
 		}
 	}
 
-	public function process(label:String, args:Array<String>, token:CancellationToken, cancellable:Bool, stdin:String, handler:ResultHandler) {
+	public function process(label:String, args:Array<String>, ?token:CancellationToken, cancellable:Bool, ?stdin:String, handler:ResultHandler) {
 		// create a request object
 		var request = new DisplayRequest(label, args, token, cancellable, stdin, handler);
 
@@ -365,7 +365,7 @@ class HaxeServer {
 			return;
 
 		// pop the first request still in queue, set it as current and send to Haxe
-		if (requestsHead != null) {
+		if (requestsHead != null && proc != null) {
 			currentRequest = requestsHead;
 			requestsHead = currentRequest.next;
 			updateRequestQueue();

@@ -24,7 +24,7 @@ abstract SemVer(Version) from Version {
 	inline function get_patch()
 		return this.patch;
 
-	public static function parse(s:String) {
+	public static function parse(s:String):Null<SemVer> {
 		if (!reVersion.match(s))
 			return null;
 

@@ -18,9 +18,13 @@ class HoverFeature {
 	}
 
 	function onHover(params:TextDocumentPositionParams, token:CancellationToken, resolve:Hover->Void, reject:ResponseError<NoData>->Void) {
-		var doc = context.documents.get(params.textDocument.uri);
-		if (!doc.uri.isFile()) {
+		var uri = params.textDocument.uri;
+		if (!uri.isFile()) {
 			return reject.notAFile();
+		}
+		var doc:Null<TextDocument> = context.documents.get(uri);
+		if (doc == null) {
+			return reject.documentNotFound(uri);
 		}
 		var handle = if (context.haxeServer.supports(DisplayMethods.Hover)) handleJsonRpc else handleLegacy;
 		handle(params, token, resolve, reject, doc, doc.offsetAt(params.position));
@@ -121,7 +125,7 @@ class HoverFeature {
 							};
 							var documentation = xml.get("d");
 							var p = HaxePosition.parse(xml.get("p"), doc, null, context.displayOffsetConverter);
-							var range:Range = null;
+							var range:Null<Range> = null;
 							if (p != null)
 								range = p.range;
 							var definition = {definition: printCodeBlock(type, HaxeType)};

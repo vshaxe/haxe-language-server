@@ -56,9 +56,9 @@ class StructDefaultsMacro {
 		return assignments;
 	}
 
-	static function getStructFields(type:Type):Array<ClassField> {
+	static function getStructFields(type:Type):Null<Array<ClassField>> {
 		return switch (type) {
-			case TType(t, params):
+			case TType(t, _):
 				switch (t.get().type) {
 					case TAnonymous(a): a.get().fields;
 					case _: null;

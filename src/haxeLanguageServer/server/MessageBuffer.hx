@@ -37,7 +37,7 @@ class MessageBuffer {
 		return length;
 	}
 
-	public function tryReadContent(length:Int):String {
+	public function tryReadContent(length:Int):Null<String> {
 		if (index < length)
 			return null;
 		var result = buffer.toString("utf-8", 0, length);

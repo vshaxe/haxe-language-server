@@ -19,7 +19,7 @@ class DiagnosticsManager {
 	final tagSupport:Bool;
 	final diagnosticsArguments:Map<DocumentUri, DiagnosticsMap<Any>>;
 	final errorUri:DocumentUri;
-	var haxelibPath:FsPath;
+	var haxelibPath:Null<FsPath>;
 
 	public function new(context:Context) {
 		this.context = context;
@@ -33,11 +33,13 @@ class DiagnosticsManager {
 			}
 		}
 
-		context.registerCodeActionContributor(getCodeActions);
 		diagnosticsArguments = new Map();
 		errorUri = new FsPath(Path.join([context.workspacePath.toString(), "Error"])).toUri();
-		context.protocol.onNotification(LanguageServerMethods.RunGlobalDiagnostics, onRunGlobalDiagnostics);
+
 		ChildProcess.exec("haxelib config", (error, stdout, stderr) -> haxelibPath = new FsPath(stdout.trim()));
+
+		context.registerCodeActionContributor(getCodeActions);
+		context.protocol.onNotification(LanguageServerMethods.RunGlobalDiagnostics, onRunGlobalDiagnostics);
 	}
 
 	function onRunGlobalDiagnostics(_) {
@@ -54,7 +56,9 @@ class DiagnosticsManager {
 
 	function processErrorReply(uri:Null<DocumentUri>, error:String) {
 		if (!extractDiagnosticsFromHaxeError(uri, error) && !extractDiagnosticsFromHaxeError2(error)) {
-			clearDiagnostics(uri);
+			if (uri != null) {
+				clearDiagnostics(uri);
+			}
 			clearDiagnostics(errorUri);
 		}
 		context.sendLogMessage(Log, error);
@@ -200,7 +204,7 @@ class DiagnosticsManager {
 			clearDiagnostics(uri);
 			return;
 		}
-		var doc = context.documents.get(uri);
+		var doc:Null<TextDocument> = context.documents.get(uri);
 		if (doc != null) {
 			context.callDisplay("@diagnostics", [doc.uri.toFsPath() + "@0@diagnostics"], null, null, processDiagnosticsReply.bind(uri), processErrorReply
 				.bind(uri));

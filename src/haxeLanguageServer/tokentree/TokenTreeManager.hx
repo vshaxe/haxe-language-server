@@ -46,7 +46,7 @@ class TokenTreeManager {
 	public final list:Array<Token>;
 	public final tree:TokenTree;
 
-	var tokenCharacterRanges:Map<Int, Position>;
+	var tokenCharacterRanges:Null<Map<Int, Position>>;
 
 	function new(bytes:Bytes, list:Array<Token>, tree:TokenTree) {
 		this.bytes = bytes;
@@ -57,8 +57,8 @@ class TokenTreeManager {
 	/**
 		Gets the character position of a token.
 	**/
-	public function getPos(tokenTree:TokenTree):Position {
-		createTokenCharacterRanges();
+	public function getPos(tokenTree:TokenTree):Null<Position> {
+		inline createTokenCharacterRanges();
 		return if (tokenCharacterRanges[tokenTree.index] == null) {
 			tokenTree.pos;
 		} else {
@@ -70,14 +70,17 @@ class TokenTreeManager {
 		Gets the character position of a subtree.
 		Copy of `TokenTree.getPos()`.
 	**/
-	public function getTreePos(tokenTree:TokenTree):Position {
+	public function getTreePos(tokenTree:TokenTree):Null<Position> {
 		var pos = getPos(tokenTree);
-		if (tokenTree.children == null || tokenTree.children.length <= 0)
+		if (pos == null || tokenTree.children == null || tokenTree.children.length <= 0)
 			return pos;
 
 		var fullPos:Position = {file: pos.file, min: pos.min, max: pos.max};
 		for (child in tokenTree.children) {
 			var childPos = getTreePos(child);
+			if (childPos == null)
+				continue;
+
 			if (childPos.min < fullPos.min)
 				fullPos.min = childPos.min;
 			if (childPos.max > fullPos.max)

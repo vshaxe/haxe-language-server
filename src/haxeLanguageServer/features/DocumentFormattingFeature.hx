@@ -16,8 +16,13 @@ class DocumentFormattingFeature {
 	function onDocumentFormatting(params:DocumentFormattingParams, token:CancellationToken, resolve:Array<TextEdit>->Void,
 			reject:ResponseError<NoData>->Void) {
 		var onResolve = context.startTimer(Methods.DocumentFormatting);
-		var doc = context.documents.get(params.textDocument.uri);
-		if (doc.tokens == null) {
+		var uri = params.textDocument.uri;
+		var doc:Null<TextDocument> = context.documents.get(uri);
+		if (doc == null) {
+			return reject.documentNotFound(uri);
+		}
+		var tokens = doc.tokens;
+		if (tokens == null) {
 			return reject.noTokens();
 		}
 		var formatter = new Formatter();
@@ -27,10 +32,10 @@ class DocumentFormattingFeature {
 			} else {
 				context.workspacePath + "/untitled.hx";
 			},
-			content: doc.tokens.bytes
+			content: tokens.bytes
 		}, {
-			tokens: doc.tokens.list,
-			tokenTree: doc.tokens.tree
+			tokens: tokens.list,
+			tokenTree: tokens.tree
 		});
 		switch (result) {
 			case Success(formattedCode):

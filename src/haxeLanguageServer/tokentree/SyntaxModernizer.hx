@@ -16,6 +16,9 @@ class SyntaxModernizer {
 	public function resolve():Array<CodeAction> {
 		var actions:Array<CodeAction> = [];
 		var tokens = document.tokens;
+		if (tokens == null) {
+			return actions;
+		}
 		tokens.tree.filterCallback(function(token:TokenTree, _) {
 			switch (token.tok) {
 				case Kwd(kwd) if (kwd == KwdEnum || kwd == KwdExtern || kwd == KwdFinal):

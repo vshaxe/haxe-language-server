@@ -157,7 +157,9 @@ class Context {
 	}
 
 	function onInitialize(params:InitializeParams, token:CancellationToken, resolve:InitializeResult->Void, reject:ResponseError<InitializeError>->Void) {
-		workspacePath = params.rootUri.toFsPath();
+		if (params.rootUri != null) {
+			workspacePath = params.rootUri.toFsPath();
+		}
 		capabilities = params.capabilities;
 
 		var options:InitOptions = params.initializationOptions;
@@ -399,7 +401,7 @@ class Context {
 		callHaxeMethod(cast params.method, params.params, null, _ -> null, _ -> {});
 	}
 
-	public function callHaxeMethod<P, R>(method:HaxeRequestMethod<P, Response<R>>, ?params:P, token:CancellationToken, callback:R->String,
+	public function callHaxeMethod<P, R>(method:HaxeRequestMethod<P, Response<R>>, ?params:P, ?token:CancellationToken, callback:R->Null<String>,
 			errback:(error:String) -> Void) {
 		// TODO: avoid duplicating jsonrpc.Protocol logic
 		var id = nextRequestId++;
@@ -442,7 +444,7 @@ class Context {
 		}
 
 		var beforeProcessingTime = Date.now().getTime();
-		var debugInfo = try callback(haxeResponse.result) catch (e:Any) {
+		var debugInfo:Null<String> = try callback(haxeResponse.result) catch (e:Any) {
 			errback(e);
 			trace(e);
 			trace(CallStack.toString(CallStack.exceptionStack()));
@@ -463,7 +465,7 @@ class Context {
 		protocol.sendNotification(LanguageServerMethods.DidRunHaxeMethod, methodResult);
 	}
 
-	public function callDisplay(label:String, args:Array<String>, stdin:String, token:CancellationToken, callback:DisplayResult->Void,
+	public function callDisplay(label:String, args:Array<String>, ?stdin:String, ?token:CancellationToken, callback:DisplayResult->Void,
 			errback:(error:String) -> Void) {
 		var actualArgs = ["--cwd", workspacePath.toString()]; // change cwd to workspace root
 		if (displayArguments != null)

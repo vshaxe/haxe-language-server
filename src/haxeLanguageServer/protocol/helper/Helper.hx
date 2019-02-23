@@ -89,7 +89,7 @@ class Helper {
 
 	public static function isStructure<T>(?origin:ClassFieldOrigin<T>) {
 		if (origin == null) {
-			return null;
+			return false;
 		}
 		return switch (origin.kind) {
 			case Self | StaticImport | Parent | StaticExtension:

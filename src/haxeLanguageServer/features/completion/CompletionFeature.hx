@@ -32,7 +32,7 @@ class CompletionFeature {
 	final printer:DisplayPrinter;
 	final triggerSuggest:Command;
 	final triggerParameterHints:Command;
-	var previousCompletionData:CompletionContextData;
+	var previousCompletionData:Null<CompletionContextData>;
 	var contextSupport:Bool;
 	var markdownSupport:Bool;
 	var snippetSupport:Bool;
@@ -41,8 +41,7 @@ class CompletionFeature {
 
 	public function new(context) {
 		this.context = context;
-		checkCapabilities();
-		legacy = new CompletionFeatureLegacy(context, contextSupport, formatDocumentation);
+		inline checkCapabilities();
 		expectedTypeCompletion = new ExpectedTypeCompletion(context);
 		postfixCompletion = new PostfixCompletion();
 		printer = new DisplayPrinter(false, null, {
@@ -52,8 +51,6 @@ class CompletionFeature {
 			explicitPrivate: true,
 			explicitNull: true
 		});
-		context.protocol.onRequest(Methods.Completion, onCompletion);
-		context.protocol.onRequest(Methods.CompletionItemResolve, onCompletionItemResolve);
 
 		triggerSuggest = {
 			title: "Trigger Suggest",
@@ -65,11 +62,19 @@ class CompletionFeature {
 			command: "editor.action.triggerParameterHints",
 			arguments: []
 		};
+
+		legacy = new CompletionFeatureLegacy(context, contextSupport, formatDocumentation);
+
+		context.protocol.onRequest(Methods.Completion, onCompletion);
+		context.protocol.onRequest(Methods.CompletionItemResolve, onCompletionItemResolve);
 	}
 
 	function checkCapabilities() {
 		contextSupport = false;
 		markdownSupport = false;
+		snippetSupport = false;
+		commitCharactersSupport = false;
+		deprecatedSupport = false;
 
 		var textDocument = context.capabilities.textDocument;
 		if (textDocument == null)
@@ -89,23 +94,27 @@ class CompletionFeature {
 			markdownSupport = documentationFormat.indexOf(MarkDown) != -1;
 		}
 
-		if (completionItem.snippetSupport) {
+		if (completionItem.snippetSupport == true) {
 			snippetSupport = true;
 		}
 
-		if (completionItem.commitCharactersSupport) {
+		if (completionItem.commitCharactersSupport == true) {
 			commitCharactersSupport = true;
 		}
 
-		if (completionItem.deprecatedSupport) {
+		if (completionItem.deprecatedSupport == true) {
 			deprecatedSupport = true;
 		}
 	}
 
 	function onCompletion(params:CompletionParams, token:CancellationToken, resolve:Array<CompletionItem>->Void, reject:ResponseError<NoData>->Void) {
-		var doc = context.documents.get(params.textDocument.uri);
-		if (!doc.uri.isFile()) {
+		var uri = params.textDocument.uri;
+		if (!uri.isFile()) {
 			return reject.notAFile();
+		}
+		var doc:Null<TextDocument> = context.documents.get(uri);
+		if (doc == null) {
+			return reject.documentNotFound(uri);
 		}
 		var offset = doc.offsetAt(params.position);
 		var textBefore = doc.content.substring(0, offset);
@@ -119,7 +128,11 @@ class CompletionFeature {
 	static final autoTriggerOnSpacePattern = ~/(\b(import|using|extends|implements|from|to|case|new|cast|override)|(->)) $/;
 
 	function isInvalidCompletionPosition(params:CompletionParams, text:String):Bool {
+		if (params.context == null) {
+			return false;
+		}
 		return switch (params.context.triggerCharacter) {
+			case null: false;
 			case ">" if (!isAfterArrow(text)): true;
 			case " " if (!autoTriggerOnSpacePattern.match(text)): true;
 			case _: false;
@@ -131,10 +144,10 @@ class CompletionFeature {
 	}
 
 	function onCompletionItemResolve(item:CompletionItem, token:CancellationToken, resolve:CompletionItem->Void, reject:ResponseError<NoData>->Void) {
-		var data:CompletionItemData = item.data;
+		var data:Null<CompletionItemData> = item.data;
 		if (!context.haxeServer.supports(DisplayMethods.CompletionItemResolve)
 			|| previousCompletionData == null
-			|| data.origin == Custom) {
+			|| (data != null && data.origin == Custom)) {
 			return resolve(item);
 		}
 		context.callHaxeMethod(DisplayMethods.CompletionItemResolve, {index: item.data.index}, token, result -> {
@@ -192,7 +205,7 @@ class CompletionFeature {
 		}, reject.handler());
 	}
 
-	function createCompletionItem<T>(index:Int, item:DisplayItem<T>, data:CompletionContextData):CompletionItem {
+	function createCompletionItem<T>(index:Int, item:DisplayItem<T>, data:CompletionContextData):Null<CompletionItem> {
 		var completionItem:CompletionItem = switch (item.kind) {
 			case ClassField | EnumAbstractField: createClassFieldCompletionItem(item, data);
 			case EnumField: createEnumFieldCompletionItem(item, data);
@@ -306,13 +319,13 @@ class CompletionFeature {
 		return item;
 	}
 
-	function createOverrideCompletionItem<T>(item:DisplayItem<Dynamic>, data:CompletionContextData, printedOrigin:Option<String>):CompletionItem {
+	function createOverrideCompletionItem<T>(item:DisplayItem<Dynamic>, data:CompletionContextData, printedOrigin:Option<String>):Null<CompletionItem> {
 		var occurrence:ClassFieldOccurrence<T> = item.args;
 		var concreteType = item.type;
 		var field = occurrence.field;
 		var importConfig = context.config.codeGeneration.imports;
 
-		if (concreteType.kind != TFun || field.isFinalField()) {
+		if (concreteType == null || concreteType.kind != TFun || field.isFinalField()) {
 			return null;
 		}
 		switch (field.kind.kind) {
@@ -413,7 +426,7 @@ class CompletionFeature {
 		return result;
 	}
 
-	function createTypeCompletionItem(type:DisplayModuleType, data:CompletionContextData):CompletionItem {
+	function createTypeCompletionItem(type:DisplayModuleType, data:CompletionContextData):Null<CompletionItem> {
 		var isImportCompletion = data.mode.kind == Import || data.mode.kind == Using;
 		var importConfig = context.config.codeGeneration.imports;
 		var autoImport = importConfig.enableAutoImports;
@@ -482,7 +495,7 @@ class CompletionFeature {
 		}
 	}
 
-	function formatDocumentation(doc:String):EitherType<String, MarkupContent> {
+	function formatDocumentation(doc:String):Null<EitherType<String, MarkupContent>> {
 		if (doc == null) {
 			return null;
 		}
@@ -508,7 +521,7 @@ class CompletionFeature {
 		return detail;
 	}
 
-	function createPackageCompletionItem(pack:Package, data:CompletionContextData):CompletionItem {
+	function createPackageCompletionItem(pack:Package, data:CompletionContextData):Null<CompletionItem> {
 		var path = pack.path;
 		var dotPath = path.pack.join(".");
 		if (isExcluded(dotPath)) {
@@ -575,7 +588,7 @@ class CompletionFeature {
 		return item;
 	}
 
-	function createLocalCompletionItem<T>(item:DisplayItem<Dynamic>, data:CompletionContextData):CompletionItem {
+	function createLocalCompletionItem<T>(item:DisplayItem<Dynamic>, data:CompletionContextData):Null<CompletionItem> {
 		var local:DisplayLocal<T> = item.args;
 		if (local.name == "_") {
 			return null; // naming vars "_" is a common convention for ignoring them
@@ -591,7 +604,7 @@ class CompletionFeature {
 		};
 	}
 
-	function createModuleCompletionItem(module:Module, data:CompletionContextData):CompletionItem {
+	function createModuleCompletionItem(module:Module, data:CompletionContextData):Null<CompletionItem> {
 		var path = module.path;
 		var dotPath = path.pack.concat([path.moduleName]).join(".");
 		return if (isExcluded(dotPath)) {

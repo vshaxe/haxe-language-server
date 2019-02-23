@@ -19,4 +19,8 @@ class ResponseErrorHelper {
 	public static function noTokens(reject:ResponseError<NoData>->Void) {
 		reject(ResponseError.internalError("Unable to build token tree"));
 	}
+
+	public static function documentNotFound(reject:ResponseError<NoData>->Void, uri:DocumentUri) {
+		reject(ResponseError.internalError("Unable to find document for URI " + uri));
+	}
 }
