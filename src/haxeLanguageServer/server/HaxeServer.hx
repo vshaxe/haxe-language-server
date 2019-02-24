@@ -155,10 +155,13 @@ class HaxeServer {
 
 	function readClassPaths() {
 		startCompletionInitializationProgress("Parsing Classpaths");
-		context.callHaxeMethod(ServerMethods.ReadClassPaths, null, null, _ -> {
+		context.callHaxeMethod(ServerMethods.ReadClassPaths, null, null, result -> {
 			stopProgress();
 			trace("Done.");
-			return null;
+			if (result.files == null) {
+				return null;
+			}
+			return result.files + " files";
 		}, error -> {
 			stopProgress();
 			trace("Failed - " + error);
