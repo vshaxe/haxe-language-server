@@ -73,8 +73,13 @@ class HaxeServer {
 		if (output == "")
 			output = (checkRun.stdout : Buffer).toString().trim(); // haxe 4.0 prints -version output to stdout instead
 
-		if (checkRun.status != 0)
-			return error("Haxe version check failed: " + output);
+		if (checkRun.status != 0) {
+			return error(if (output == "") {
+				'`haxe -version` exited with error code ${checkRun.status}';
+			} else {
+				'Haxe version check failed: "$output"';
+			});
+		}
 
 		version = SemVer.parse(output);
 		if (version == null)
