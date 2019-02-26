@@ -138,7 +138,7 @@ class DiagnosticsManager {
 			case DCancelled:
 			// nothing to do \o/
 			case DResult(s):
-				var data:Array<HaxeDiagnosticsResponse<Any>> = try haxe.Json.parse(s) catch (e:Any) {
+				var data:Array<HaxeDiagnosticResponse<Any>> = try haxe.Json.parse(s) catch (e:Any) {
 					trace("Error parsing diagnostics response: " + Std.string(e));
 					return;
 				}
@@ -222,7 +222,7 @@ class DiagnosticsManager {
 		for (d in params.context.diagnostics) {
 			if (!(d.code is Int)) // our codes are int, so we don't handle other stuff
 				continue;
-			var code = new DiagnosticsKind<T>(d.code);
+			var code = new DiagnosticKind<T>(d.code);
 			actions = actions.concat(switch (code) {
 				case DKUnusedImport: getUnusedImportActions(params, d);
 				case DKUnresolvedIdentifier: getUnresolvedIdentifierActions(params, d);
@@ -403,7 +403,7 @@ class DiagnosticsManager {
 		return range;
 	}
 
-	inline function getDiagnosticsArguments<T>(uri:DocumentUri, kind:DiagnosticsKind<T>, range:Range):T {
+	inline function getDiagnosticsArguments<T>(uri:DocumentUri, kind:DiagnosticKind<T>, range:Range):T {
 		var map = diagnosticsArguments[uri];
 		if (map == null)
 			return null;
@@ -420,18 +420,18 @@ private enum abstract UnresolvedIdentifierSuggestion(Int) {
 	}
 }
 
-private enum abstract DiagnosticsKind<T>(Int) from Int to Int {
-	var DKUnusedImport:DiagnosticsKind<Void>;
-	var DKUnresolvedIdentifier:DiagnosticsKind<Array<{kind:UnresolvedIdentifierSuggestion, name:String}>>;
-	var DKCompilerError:DiagnosticsKind<String>;
-	var DKRemovableCode:DiagnosticsKind<{description:String, range:Range}>;
+private enum abstract DiagnosticKind<T>(Int) from Int to Int {
+	var DKUnusedImport:DiagnosticKind<Void>;
+	var DKUnresolvedIdentifier:DiagnosticKind<Array<{kind:UnresolvedIdentifierSuggestion, name:String}>>;
+	var DKCompilerError:DiagnosticKind<String>;
+	var DKRemovableCode:DiagnosticKind<{description:String, range:Range}>;
 
 	public inline function new(i:Int) {
 		this = i;
 	}
 
 	public function getMessage(args:T) {
-		return switch ((this : DiagnosticsKind<T>)) {
+		return switch ((this : DiagnosticKind<T>)) {
 			case DKUnusedImport: "Unused import/using";
 			case DKUnresolvedIdentifier: "Unresolved identifier";
 			case DKCompilerError: args;
@@ -440,16 +440,16 @@ private enum abstract DiagnosticsKind<T>(Int) from Int to Int {
 	}
 }
 
-private typedef HaxeDiagnostics<T> = {
-	var kind:DiagnosticsKind<T>;
+private typedef HaxeDiagnostic<T> = {
+	var kind:DiagnosticKind<T>;
 	var range:Range;
 	var severity:DiagnosticSeverity;
 	var args:T;
 }
 
-private typedef HaxeDiagnosticsResponse<T> = {
+private typedef HaxeDiagnosticResponse<T> = {
 	var file:FsPath;
-	var diagnostics:Array<HaxeDiagnostics<T>>;
+	var diagnostics:Array<HaxeDiagnostic<T>>;
 }
 
 private typedef DiagnosticsMapKey = {code:Int, range:Range};
