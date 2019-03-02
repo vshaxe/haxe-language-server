@@ -133,7 +133,7 @@ class Context {
 		protocol.onNotification(LanguageServerMethods.DidChangeDisplayArguments, onDidChangeDisplayArguments);
 		protocol.onNotification(LanguageServerMethods.DidChangeDisplayServerConfig, onDidChangeDisplayServerConfig);
 		protocol.onNotification(LanguageServerMethods.DidChangeActiveTextEditor, onDidChangeActiveTextEditor);
-		protocol.onNotification(LanguageServerMethods.RunMethod, runMethod);
+		protocol.onRequest(LanguageServerMethods.RunMethod, runMethod);
 	}
 
 	inline function isInitialized():Bool {
@@ -397,8 +397,13 @@ class Context {
 			diagnostics.publishDiagnostics(uri);
 	}
 
-	function runMethod(params:{method:String, params:Any}) {
-		callHaxeMethod(cast params.method, params.params, null, _ -> null, _ -> {});
+	function runMethod(params:{method:String, params:Any}, token:CancellationToken, resolve:Dynamic->Void, reject:ResponseError<NoData>->Void) {
+		callHaxeMethod(cast params.method, params.params, token, function(response) {
+			resolve(response);
+			return null;
+		}, function(error) {
+			reject(new ResponseError(0, error));
+		});
 	}
 
 	public function callHaxeMethod<P, R>(method:HaxeRequestMethod<P, Response<R>>, ?params:P, ?token:CancellationToken, callback:R->Null<String>,
