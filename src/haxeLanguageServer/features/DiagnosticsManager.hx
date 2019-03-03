@@ -160,7 +160,6 @@ class DiagnosticsManager {
 							// range: doc.byteRangeToRange(hxDiag.range),
 							range: hxDiag.range,
 							source: DiagnosticsSource,
-							code: kind,
 							severity: hxDiag.severity,
 							message: hxDiag.kind.getMessage(hxDiag.args)
 						}
@@ -168,7 +167,7 @@ class DiagnosticsManager {
 							diag.severity = Hint;
 							// diag.tags = [Unnecessary];
 						}
-						argumentsMap.set({code: diag.code, range: diag.range}, hxDiag.args);
+						argumentsMap.set({code: kind, range: diag.range}, hxDiag.args);
 						diagnostics.push(diag);
 					}
 					context.protocol.sendNotification(Methods.PublishDiagnostics, {uri: uri, diagnostics: diagnostics});
