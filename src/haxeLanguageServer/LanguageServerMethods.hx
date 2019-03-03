@@ -69,7 +69,7 @@ class LanguageServerMethods {
 	/**
 		This notification is sent from the client to the server to instruct a specific Haxe JSON-RPC method to be executed.
 	**/
-	static inline var RunMethod = new RequestMethod<{method:String, params:Any}, Dynamic, NoData, NoData>("haxe/runMethod");
+	static inline var RunMethod = new RequestMethod<{method:String, ?params:Dynamic}, Dynamic, NoData, NoData>("haxe/runMethod");
 
 	/**
 		This notification is sent from the server to the client to indicate that it has failed to build a completion cache.
@@ -81,10 +81,12 @@ typedef HaxeMethodResult = {
 	final method:String;
 	final debugInfo:String;
 	final response:Response<Dynamic>;
-	final ?additionalTimes:{
-		final beforeCall:Float;
-		final arrival:Float;
-		final beforeProcessing:Float;
-		final afterProcessing:Float;
-	}
+	final ?additionalTimes:AdditionalTimes;
+}
+
+typedef AdditionalTimes = {
+	final beforeCall:Float;
+	final arrival:Float;
+	final beforeProcessing:Float;
+	final afterProcessing:Float;
 }
