@@ -45,7 +45,7 @@ private typedef CodeGenerationConfig = {
 private typedef Config = {
 	var ?enableCodeLens:Bool;
 	var ?enableDiagnostics:Bool;
-	var ?enableMethodsView:Bool;
+	var ?enableServerView:Bool;
 	var ?enableSignatureHelpDocumentation:Bool;
 	var ?diagnosticsPathFilter:String;
 	var ?displayPort:Null<EitherType<Int, String>>;
@@ -91,7 +91,7 @@ class Context {
 		defaultConfig = {
 			enableCodeLens: false,
 			enableDiagnostics: true,
-			enableMethodsView: false,
+			enableServerView: false,
 			enableSignatureHelpDocumentation: true,
 			diagnosticsPathFilter: "${workspaceRoot}",
 			displayPort: null,
@@ -478,7 +478,7 @@ class Context {
 		actualArgs = actualArgs.concat(["-D", "display-details", // get more details in completion results,
 			"--no-output", // prevent any generation
 		]);
-		if (haxeServer.supports(HaxeMethods.Initialize) && config.enableMethodsView) {
+		if (haxeServer.supports(HaxeMethods.Initialize) && config.enableServerView) {
 			actualArgs = actualArgs.concat(["--times", "-D", "macro-times"]);
 		}
 		actualArgs.push("--display");
