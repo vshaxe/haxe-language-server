@@ -47,7 +47,10 @@ class RenameResolver extends PositionAwareWalker {
 		// have we found the declaration yet? (assume that usages can only be after the declaration)
 		if (!declarationInScope) {
 			var range = getRange();
-			if (declaration.isEqual(range)) {
+			function isLocal() {
+				return stack.find(stack -> stack.match(Edge("expr" | "args", _))) != null;
+			}
+			if (declaration.isEqual(range) && isLocal()) {
 				declarationInScope = true;
 				declarationInfo = {
 					scope: scope.copy(),
