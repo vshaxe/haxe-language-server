@@ -361,6 +361,9 @@ class CompletionFeature {
 	}
 
 	function getKindForField<T>(field:JsonClassField, kind:DisplayItemKind<Dynamic>):CompletionItemKind {
+		if (kind == EnumAbstractField) {
+			return EnumMember;
+		}
 		var fieldKind:JsonFieldKind<T> = field.kind;
 		return switch (fieldKind.kind) {
 			case FVar:
@@ -371,7 +374,6 @@ class CompletionFeature {
 				var write = fieldKind.args.write.kind;
 				switch [read, write] {
 					case [AccNormal, AccNormal]: Field;
-					case [AccInline, _] if (kind == EnumAbstractField): EnumMember;
 					case [AccInline, _]: Constant;
 					case _: Property;
 				}
