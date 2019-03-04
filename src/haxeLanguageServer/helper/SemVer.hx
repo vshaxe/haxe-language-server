@@ -9,17 +9,17 @@ private typedef Version = {
 abstract SemVer(Version) from Version {
 	static final reVersion = ~/^(\d+)\.(\d+)\.(\d+)(?:\s.*)?/;
 
-	var major(get, never):Int;
+	public var major(get, never):Int;
 
 	inline function get_major()
 		return this.major;
 
-	var minor(get, never):Int;
+	public var minor(get, never):Int;
 
 	inline function get_minor()
 		return this.minor;
 
-	var patch(get, never):Int;
+	public var patch(get, never):Int;
 
 	inline function get_patch()
 		return this.patch;

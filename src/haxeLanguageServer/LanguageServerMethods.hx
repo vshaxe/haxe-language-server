@@ -75,6 +75,11 @@ class LanguageServerMethods {
 		This notification is sent from the server to the client to indicate that it has failed to build a completion cache.
 	**/
 	static inline var CacheBuildFailed = new NotificationMethod<NoData, NoData>("haxe/cacheBuildFailed");
+
+	/**
+		This notification is sent from the server to the client to indicate that an old Haxe 4 preview build is being used.
+	**/
+	static inline var DidDetectOldPreview = new NotificationMethod<Null<{preview:String}>, NoData>("haxe/didDetectOldPreview");
 }
 
 typedef HaxeMethodResult = {

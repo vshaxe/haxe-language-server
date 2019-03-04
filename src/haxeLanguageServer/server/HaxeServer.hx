@@ -109,6 +109,9 @@ class HaxeServer {
 
 		stopProgressCallback = context.startProgress("Initializing Haxe/JSON-RPC protocol");
 		context.callHaxeMethod(Methods.Initialize, {supportsResolve: true}, null, result -> {
+			if (result.haxeVersion.major == 4 && result.haxeVersion.pre.startsWith("preview.")) {
+				context.protocol.sendNotification(LanguageServerMethods.DidDetectOldPreview, {preview: result.haxeVersion.pre});
+			}
 			supportedMethods = result.methods;
 			configure();
 			onInitComplete();
@@ -117,6 +120,9 @@ class HaxeServer {
 			// the "invalid format" error is expected for Haxe versions <= 4.0.0-preview.3
 			if (error.startsWith("Error: Invalid format")) {
 				trace("Haxe version does not support JSON-RPC, using legacy --display API.");
+				if (version.major == 4) {
+					context.protocol.sendNotification(LanguageServerMethods.DidDetectOldPreview);
+				}
 			} else {
 				trace(error);
 			}

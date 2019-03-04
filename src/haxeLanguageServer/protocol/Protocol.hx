@@ -12,24 +12,24 @@ class Methods {
 
 /* Initialize */
 typedef InitializeParams = {
-	var ?supportsResolve:Bool;
+	final ?supportsResolve:Bool;
 }
 
 /**
 	Represents a semantic version, see https://semver.org/.
 **/
 typedef Version = {
-	var major:Int;
-	var minor:Int;
-	var patch:Int;
-	var pre:String;
-	var build:String;
+	final major:Int;
+	final minor:Int;
+	final patch:Int;
+	final pre:String;
+	final build:String;
 }
 
 typedef InitializeResult = Response<{
-	var protocolVersion:Version;
-	var haxeVersion:Version;
-	var methods:Array<String>;
+	final protocolVersion:Version;
+	final haxeVersion:Version;
+	final methods:Array<String>;
 }>;
 
 /* general protocol types */
