@@ -160,6 +160,7 @@ class DiagnosticsManager {
 							// range: doc.byteRangeToRange(hxDiag.range),
 							range: hxDiag.range,
 							source: DiagnosticsSource,
+							code: kind,
 							severity: hxDiag.severity,
 							message: hxDiag.kind.getMessage(hxDiag.args)
 						}
