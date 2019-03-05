@@ -442,7 +442,9 @@ class CompletionFeature {
 		}
 		var unqualifiedName = type.path.typeName; // Foo | SubType
 		var containerName = if (dotPath.indexOf(".") == -1) "" else dotPath.untilLastDot(); // pack | pack.Foo
-		var qualifiedName = printer.printPath(type.path); // unqualifiedName or dotPath depending on importStatus
+
+		var pathPrinting = if (isImportCompletion) Always else Qualified;
+		var qualifiedName = new DisplayPrinter(pathPrinting).printPath(type.path); // unqualifiedName or dotPath depending on importStatus
 
 		var item:CompletionItem = {
 			label: unqualifiedName + if (containerName == "") "" else " - " + dotPath,
