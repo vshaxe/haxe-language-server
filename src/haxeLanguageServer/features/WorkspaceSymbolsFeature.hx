@@ -60,6 +60,7 @@ class WorkspaceSymbolsFeature {
 
 	function makeRequest(label:String, args:Array<String>, doc:Null<TextDocument>, token:CancellationToken, resolve:Array<SymbolInformation>->Void,
 			reject:ResponseError<NoData>->Void) {
+		var onResolve = context.startTimer("@workspace-symbols");
 		context.callDisplay(label, args, doc == null ? null : doc.content, token, function(r) {
 			switch (r) {
 				case DCancelled:
@@ -67,6 +68,7 @@ class WorkspaceSymbolsFeature {
 				case DResult(data):
 					var result = processSymbolsReply(data, reject);
 					resolve(result);
+					onResolve(result);
 			}
 		}, reject.handler());
 	}

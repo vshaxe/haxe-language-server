@@ -44,8 +44,10 @@ class DiagnosticsManager {
 
 	function onRunGlobalDiagnostics(_) {
 		var stopProgress = context.startProgress("Collecting Diagnostics");
+		var onResolve = context.startTimer("@diagnostics");
+
 		context.callDisplay("global diagnostics", ["diagnostics"], null, null, function(result) {
-			processDiagnosticsReply(null, result);
+			processDiagnosticsReply(null, onResolve, result);
 			context.protocol.sendNotification(LanguageServerMethods.DidRunRunGlobalDiagnostics);
 			stopProgress();
 		}, function(error) {
@@ -132,7 +134,7 @@ class DiagnosticsManager {
 		argumentsMap.set({code: DKCompilerError, range: diag.range}, error);
 	}
 
-	function processDiagnosticsReply(uri:Null<DocumentUri>, r:DisplayResult) {
+	function processDiagnosticsReply(uri:Null<DocumentUri>, onResolve:(result:Dynamic, ?debugInfo:String) -> Void, r:DisplayResult) {
 		clearDiagnostics(errorUri);
 		switch (r) {
 			case DCancelled:
@@ -192,6 +194,8 @@ class DiagnosticsManager {
 				} else {
 					removeOldDiagnostics(uri);
 				}
+
+				onResolve(data);
 		}
 	}
 
@@ -212,8 +216,9 @@ class DiagnosticsManager {
 		}
 		var doc:Null<TextDocument> = context.documents.get(uri);
 		if (doc != null) {
-			context.callDisplay("@diagnostics", [doc.uri.toFsPath() + "@0@diagnostics"], null, null, processDiagnosticsReply.bind(uri), processErrorReply
-				.bind(uri));
+			var onResolve = context.startTimer("@diagnostics");
+			context.callDisplay("@diagnostics", [doc.uri.toFsPath() + "@0@diagnostics"], null, null, processDiagnosticsReply.bind(uri, onResolve),
+				processErrorReply.bind(uri));
 		}
 	}
 
