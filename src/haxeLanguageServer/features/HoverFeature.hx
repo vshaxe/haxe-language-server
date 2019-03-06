@@ -39,7 +39,7 @@ class HoverFeature {
 	}
 
 	function printContent<T>(hover:HoverDisplayItemOccurence<T>):HoverContent {
-		var printer = new DisplayPrinter(true, null, {
+		var printer = new DisplayPrinter(true, Qualified, {
 			argumentTypeHints: true,
 			returnTypeHint: NonVoid,
 			explicitPublic: true,

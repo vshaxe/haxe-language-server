@@ -44,7 +44,7 @@ class CompletionFeature {
 		inline checkCapabilities();
 		expectedTypeCompletion = new ExpectedTypeCompletion(context);
 		postfixCompletion = new PostfixCompletion();
-		printer = new DisplayPrinter(false, null, {
+		printer = new DisplayPrinter(false, Qualified, {
 			argumentTypeHints: true,
 			returnTypeHint: NonVoid,
 			explicitPublic: true,

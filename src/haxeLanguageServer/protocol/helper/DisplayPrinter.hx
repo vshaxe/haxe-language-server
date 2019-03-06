@@ -36,12 +36,9 @@ class DisplayPrinter {
 	final functionFormatting:FunctionFormattingConfig;
 	var indent = "";
 
-	public function new(wrap:Bool = false, ?pathPrinting:PathPrinting, ?functionFormatting:FunctionFormattingConfig) {
+	public function new(wrap:Bool = false, pathPrinting:PathPrinting = Qualified, ?functionFormatting:FunctionFormattingConfig) {
 		this.wrap = wrap;
 		this.pathPrinting = pathPrinting;
-		if (this.pathPrinting == null) {
-			this.pathPrinting = Qualified;
-		}
 		this.functionFormatting = functionFormatting;
 		if (this.functionFormatting == null) {
 			this.functionFormatting = {
