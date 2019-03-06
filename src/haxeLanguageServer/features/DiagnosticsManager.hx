@@ -151,8 +151,14 @@ class DiagnosticsManager {
 					var uri = data.file.toUri();
 					var argumentsMap = diagnosticsArguments[uri] = new DiagnosticsMap();
 
+					var newDiagnostics = data.diagnostics;
+					// hide regular compiler errors while there's parser errors, they can be misleading
+					if (newDiagnostics.find(d -> d.kind == cast DKParserError) != null) {
+						newDiagnostics = newDiagnostics.filter(d -> d.kind != cast DKCompilerError);
+					}
+
 					var diagnostics = new Array<Diagnostic>();
-					for (hxDiag in data.diagnostics) {
+					for (hxDiag in newDiagnostics) {
 						if (hxDiag.range == null)
 							continue;
 						var kind:Int = hxDiag.kind;
