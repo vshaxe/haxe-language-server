@@ -228,6 +228,7 @@ class DiagnosticsManager {
 				case DKUnresolvedIdentifier: getUnresolvedIdentifierActions(params, d);
 				case DKCompilerError: getCompilerErrorActions(params, d);
 				case DKRemovableCode: getRemovableCodeActions(params, d);
+				case DKParserError: [];
 			});
 		}
 		actions = getOrganizeImportActions(params, actions).concat(actions);
@@ -425,6 +426,7 @@ private enum abstract DiagnosticKind<T>(Int) from Int to Int {
 	var DKUnresolvedIdentifier:DiagnosticKind<Array<{kind:UnresolvedIdentifierSuggestion, name:String}>>;
 	var DKCompilerError:DiagnosticKind<String>;
 	var DKRemovableCode:DiagnosticKind<{description:String, range:Range}>;
+	var DKParserError:DiagnosticKind<String>;
 
 	public inline function new(i:Int) {
 		this = i;
@@ -436,6 +438,7 @@ private enum abstract DiagnosticKind<T>(Int) from Int to Int {
 			case DKUnresolvedIdentifier: "Unresolved identifier";
 			case DKCompilerError: args;
 			case DKRemovableCode: args.description;
+			case DKParserError: args;
 		}
 	}
 }
