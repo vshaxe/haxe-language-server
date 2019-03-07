@@ -157,7 +157,11 @@ class DiagnosticsManager {
 
 					var newDiagnostics = data.diagnostics;
 					// hide regular compiler errors while there's parser errors, they can be misleading
-					if (newDiagnostics.find(d -> d.kind == cast DKParserError) != null) {
+					var hasProblematicParserErrors = newDiagnostics.find(d -> switch (d.kind : Int) {
+						case DKParserError: d.args != "Missing ;"; // don't be too strict
+						case _: false;
+					}) != null;
+					if (hasProblematicParserErrors) {
 						newDiagnostics = newDiagnostics.filter(d -> d.kind != cast DKCompilerError);
 					}
 
