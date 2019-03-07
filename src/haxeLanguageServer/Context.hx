@@ -22,6 +22,7 @@ import haxeLanguageServer.server.HaxeServer;
 import haxeLanguageServer.protocol.Protocol.HaxeRequestMethod;
 import haxeLanguageServer.protocol.Protocol.Response;
 import haxeLanguageServer.protocol.Protocol.Methods as HaxeMethods;
+import haxeLanguageServer.protocol.Protocol.HaxeResponseErrorData;
 import haxeLanguageServer.protocol.Server.ServerMethods;
 import haxeLanguageServer.protocol.Display.DisplayMethods;
 import haxeLanguageServer.LanguageServerMethods.HaxeMethodResult;
@@ -104,7 +105,10 @@ class Context {
 					var message:ResponseMessage = {
 						jsonrpc: Protocol.PROTOCOL_VERSION,
 						id: @:privateAccess haxeProtocol.nextRequestId - 1, // ew..
-						error: ResponseError.internalError(error)
+						error: new ResponseError(ResponseError.InternalError, "Compiler error", ([{
+							severity: Error,
+							message: error
+						}] : HaxeResponseErrorData))
 					}
 					message;
 				});
@@ -460,7 +464,10 @@ class Context {
 				response: response
 			};
 			protocol.sendNotification(LanguageServerMethods.DidRunHaxeMethod, methodResult);
-		}, errback);
+		}, function(error:ResponseErrorData) {
+			var data:HaxeResponseErrorData = error.data;
+			errback(data[0].message);
+		});
 	}
 
 	public function callDisplay(label:String, args:Array<String>, ?stdin:String, ?token:CancellationToken, callback:DisplayResult->Void,

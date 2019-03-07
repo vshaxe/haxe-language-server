@@ -58,5 +58,17 @@ typedef FileParams = {
 	var file:FsPath;
 }
 
-typedef HaxeRequestMethod<TParams, TResponse> = RequestMethod<TParams, TResponse, String>;
+typedef HaxeRequestMethod<TParams, TResponse> = RequestMethod<TParams, TResponse, ResponseErrorData>;
 typedef HaxeNotificationMethod<TParams> = NotificationMethod<TParams>;
+
+typedef HaxeResponseErrorData = Array<{
+	var severity:HaxeResponseErrorSeverity;
+	var ?location:Location;
+	var message:String;
+}>;
+
+enum abstract HaxeResponseErrorSeverity(Int) {
+	var Error = 1;
+	var Warning;
+	var Hint;
+}
