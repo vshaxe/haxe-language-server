@@ -2,6 +2,7 @@ package haxeLanguageServer.helper;
 
 import haxeLanguageServer.helper.TypeHelper.*;
 import haxeLanguageServer.helper.TypeHelper;
+import haxeLanguageServer.Configuration.FunctionFormattingConfig;
 
 class TypeHelperTest extends Test {
 	function testParseFunctionArgumentType() {
