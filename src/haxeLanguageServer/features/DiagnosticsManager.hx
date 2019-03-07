@@ -131,7 +131,7 @@ class DiagnosticsManager {
 	function publishDiagnostic(uri:DocumentUri, diag:Diagnostic, error:String) {
 		context.protocol.sendNotification(Methods.PublishDiagnostics, {uri: uri, diagnostics: [diag]});
 		var argumentsMap = diagnosticsArguments[uri] = new DiagnosticsMap();
-		argumentsMap.set({code: DKCompilerError, range: diag.range}, error);
+		argumentsMap.set({code: CompilerError, range: diag.range}, error);
 	}
 
 	function processDiagnosticsReply(uri:Null<DocumentUri>, onResolve:(result:Dynamic, ?debugInfo:String) -> Void, r:DisplayResult) {
@@ -158,11 +158,11 @@ class DiagnosticsManager {
 					var newDiagnostics = data.diagnostics;
 					// hide regular compiler errors while there's parser errors, they can be misleading
 					var hasProblematicParserErrors = newDiagnostics.find(d -> switch (d.kind : Int) {
-						case DKParserError: d.args != "Missing ;"; // don't be too strict
+						case ParserError: d.args != "Missing ;"; // don't be too strict
 						case _: false;
 					}) != null;
 					if (hasProblematicParserErrors) {
-						newDiagnostics = newDiagnostics.filter(d -> d.kind != cast DKCompilerError);
+						newDiagnostics = newDiagnostics.filter(d -> d.kind != cast CompilerError);
 					}
 
 					var diagnostics = new Array<Diagnostic>();
@@ -178,7 +178,7 @@ class DiagnosticsManager {
 							severity: hxDiag.severity,
 							message: hxDiag.kind.getMessage(hxDiag.args)
 						}
-						if (kind == DKRemovableCode || kind == DKUnusedImport || diag.message.indexOf("has no effect") != -1) {
+						if (kind == RemovableCode || kind == UnusedImport || diag.message.indexOf("has no effect") != -1) {
 							diag.severity = Hint;
 							// diag.tags = [Unnecessary];
 						}
@@ -241,11 +241,11 @@ class DiagnosticsManager {
 				continue;
 			var code = new DiagnosticKind<T>(d.code);
 			actions = actions.concat(switch (code) {
-				case DKUnusedImport: getUnusedImportActions(params, d);
-				case DKUnresolvedIdentifier: getUnresolvedIdentifierActions(params, d);
-				case DKCompilerError: getCompilerErrorActions(params, d);
-				case DKRemovableCode: getRemovableCodeActions(params, d);
-				case DKParserError: [];
+				case UnusedImport: getUnusedImportActions(params, d);
+				case UnresolvedIdentifier: getUnresolvedIdentifierActions(params, d);
+				case CompilerError: getCompilerErrorActions(params, d);
+				case RemovableCode: getRemovableCodeActions(params, d);
+				case ParserError: [];
 			});
 		}
 		actions = getOrganizeImportActions(params, actions).concat(actions);
@@ -266,11 +266,11 @@ class DiagnosticsManager {
 
 	function getUnresolvedIdentifierActions(params:CodeActionParams, d:Diagnostic):Array<CodeAction> {
 		var actions:Array<CodeAction> = [];
-		var args = getDiagnosticsArguments(params.textDocument.uri, DKUnresolvedIdentifier, d.range);
+		var args = getDiagnosticsArguments(params.textDocument.uri, UnresolvedIdentifier, d.range);
 		for (arg in args) {
 			actions = actions.concat(switch (arg.kind) {
-				case UISImport: getUnresolvedImportActions(params, d, arg);
-				case UISTypo: getTypoActions(params, d, arg);
+				case Import: getUnresolvedImportActions(params, d, arg);
+				case Typo: getTypoActions(params, d, arg);
 			});
 		}
 		return actions;
@@ -310,7 +310,7 @@ class DiagnosticsManager {
 
 	function getCompilerErrorActions(params:CodeActionParams, d:Diagnostic):Array<CodeAction> {
 		var actions:Array<CodeAction> = [];
-		var arg = getDiagnosticsArguments(params.textDocument.uri, DKCompilerError, d.range);
+		var arg = getDiagnosticsArguments(params.textDocument.uri, CompilerError, d.range);
 		var suggestionsRe = ~/\(Suggestions?: (.*)\)/;
 		if (suggestionsRe.match(arg)) {
 			var suggestions = suggestionsRe.matched(1).split(",");
@@ -350,7 +350,7 @@ class DiagnosticsManager {
 	}
 
 	function getRemovableCodeActions(params:CodeActionParams, d:Diagnostic):Array<CodeAction> {
-		var range = getDiagnosticsArguments(params.textDocument.uri, DKRemovableCode, d.range).range;
+		var range = getDiagnosticsArguments(params.textDocument.uri, RemovableCode, d.range).range;
 		if (range == null)
 			return [];
 		return [
@@ -368,7 +368,7 @@ class DiagnosticsManager {
 		var map = diagnosticsArguments[params.textDocument.uri];
 		var fixes = if (map == null) [] else [
 			for (key in map.keys())
-				if (key.code == DKUnusedImport)
+				if (key.code == UnusedImport)
 					{range: patchRange(doc, key.range), newText: ""}
 		];
 
@@ -430,20 +430,16 @@ class DiagnosticsManager {
 }
 
 private enum abstract UnresolvedIdentifierSuggestion(Int) {
-	var UISImport;
-	var UISTypo;
-
-	public inline function new(i:Int) {
-		this = i;
-	}
+	var Import;
+	var Typo;
 }
 
 private enum abstract DiagnosticKind<T>(Int) from Int to Int {
-	var DKUnusedImport:DiagnosticKind<Void>;
-	var DKUnresolvedIdentifier:DiagnosticKind<Array<{kind:UnresolvedIdentifierSuggestion, name:String}>>;
-	var DKCompilerError:DiagnosticKind<String>;
-	var DKRemovableCode:DiagnosticKind<{description:String, range:Range}>;
-	var DKParserError:DiagnosticKind<String>;
+	var UnusedImport:DiagnosticKind<Void>;
+	var UnresolvedIdentifier:DiagnosticKind<Array<{kind:UnresolvedIdentifierSuggestion, name:String}>>;
+	var CompilerError:DiagnosticKind<String>;
+	var RemovableCode:DiagnosticKind<{description:String, range:Range}>;
+	var ParserError:DiagnosticKind<String>;
 
 	public inline function new(i:Int) {
 		this = i;
@@ -451,11 +447,11 @@ private enum abstract DiagnosticKind<T>(Int) from Int to Int {
 
 	public function getMessage(args:T) {
 		return switch ((this : DiagnosticKind<T>)) {
-			case DKUnusedImport: "Unused import/using";
-			case DKUnresolvedIdentifier: "Unresolved identifier";
-			case DKCompilerError: args;
-			case DKRemovableCode: args.description;
-			case DKParserError: args;
+			case UnusedImport: "Unused import/using";
+			case UnresolvedIdentifier: "Unresolved identifier";
+			case CompilerError: args;
+			case RemovableCode: args.description;
+			case ParserError: args;
 		}
 	}
 }

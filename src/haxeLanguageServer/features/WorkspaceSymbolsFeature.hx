@@ -5,17 +5,17 @@ import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
 
 private enum abstract ModuleSymbolKind(Int) {
-	var MClass = 1;
-	var MInterface;
-	var MEnum;
-	var MTypedef;
-	var MAbstract;
-	var MField;
-	var MProperty;
-	var MMethod;
-	var MConstructor;
-	var MFunction;
-	var MVariable;
+	var Class = 1;
+	var Interface;
+	var Enum;
+	var Typedef;
+	var Abstract;
+	var Field;
+	var Property;
+	var Method;
+	var Constructor;
+	var Function;
+	var Variable;
 }
 
 private typedef ModuleSymbolEntry = {
@@ -83,15 +83,15 @@ class WorkspaceSymbolsFeature {
 		var result:SymbolInformation = {
 			name: entry.name,
 			kind: switch (entry.kind) {
-				case MClass | MAbstract: SymbolKind.Class;
-				case MInterface | MTypedef: SymbolKind.Interface;
-				case MEnum: SymbolKind.Enum;
-				case MConstructor: SymbolKind.Constructor;
-				case MField: SymbolKind.Field;
-				case MMethod: SymbolKind.Method;
-				case MFunction: SymbolKind.Function;
-				case MProperty: SymbolKind.Property;
-				case MVariable: SymbolKind.Variable;
+				case Class | Abstract: SymbolKind.Class;
+				case Interface | Typedef: SymbolKind.Interface;
+				case Enum: SymbolKind.Enum;
+				case Constructor: SymbolKind.Constructor;
+				case Field: SymbolKind.Field;
+				case Method: SymbolKind.Method;
+				case Function: SymbolKind.Function;
+				case Property: SymbolKind.Property;
+				case Variable: SymbolKind.Variable;
 			},
 			location: {
 				uri: uri,
