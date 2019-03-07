@@ -12,14 +12,7 @@ import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
 
-typedef CurrentSignature = {
-	var help(default, never):SignatureHelp;
-	var params(default, never):TextDocumentPositionParams;
-}
-
 class SignatureHelpFeature {
-	public var currentSignature(default, null):Null<CurrentSignature>;
-
 	final context:Context;
 
 	public function new(context:Context) {
@@ -98,13 +91,6 @@ class SignatureHelpFeature {
 						signature.label = addNamesToSignatureType(signature.label);
 					}
 					resolve(help);
-
-					if (currentSignature != null) {
-						var oldDoc = context.documents.get(currentSignature.params.textDocument.uri);
-						oldDoc.removeUpdateListener(onUpdateTextDocument);
-					}
-					currentSignature = {help: help, params: params};
-					doc.addUpdateListener(onUpdateTextDocument);
 			}
 		}, reject.handler());
 	}
@@ -117,30 +103,5 @@ class SignatureHelpFeature {
 			};
 		}
 		return null;
-	}
-
-	function onUpdateTextDocument(doc:TextDocument, events:Array<TextDocumentContentChangeEvent>, version:Int) {
-		// if there's any non-whitespace changes, consider us not to be in the signature anymore
-		// - otherwise, code actions might generate incorrect code
-		inline function hasNonWhitespace(s:String)
-			return s.trim().length > 0;
-
-		for (event in events) {
-			if (event.range == null)
-				continue;
-
-			if (event.range.start.isAfterOrEqual(event.range.end)) {
-				if (hasNonWhitespace(event.text)) {
-					currentSignature = null;
-					break;
-				}
-			} else { // removing text
-				var removedText = doc.getText(event.range);
-				if (hasNonWhitespace(removedText)) {
-					currentSignature = null;
-					break;
-				}
-			}
-		}
 	}
 }
