@@ -88,6 +88,7 @@ class Context {
 
 	public function new(protocol) {
 		this.protocol = protocol;
+
 		haxeProtocol = new Protocol(message -> {
 			callDisplay(Reflect.field(message, "method"), [Json.stringify(message)], null, function(result:DisplayResult) {
 				switch (result) {
@@ -96,7 +97,17 @@ class Context {
 					case DCancelled:
 				}
 			}, function(error) {
-				haxeProtocol.handleMessage(Json.parse(error));
+				haxeProtocol.handleMessage(try {
+					Json.parse(error);
+				} catch (_:Any) {
+					// pretend we got a proper JSON (HaxeFoundation/haxe#7955)
+					var message:ResponseMessage = {
+						jsonrpc: Protocol.PROTOCOL_VERSION,
+						id: @:privateAccess haxeProtocol.nextRequestId - 1, // ew..
+						error: ResponseError.internalError(error)
+					}
+					message;
+				});
 			});
 		});
 
