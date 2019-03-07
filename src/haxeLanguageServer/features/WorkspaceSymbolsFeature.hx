@@ -3,6 +3,7 @@ package haxeLanguageServer.features;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
+import haxeLanguageServer.helper.HaxePosition;
 
 private enum abstract ModuleSymbolKind(Int) {
 	var Class = 1;

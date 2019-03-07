@@ -4,6 +4,7 @@ import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
 import haxeLanguageServer.protocol.Display;
+import haxeLanguageServer.helper.HaxePosition;
 
 class GotoDefinitionFeature {
 	final context:Context;
