@@ -3,13 +3,40 @@ package haxeLanguageServer;
 import haxe.Json;
 import jsonrpc.Protocol;
 import haxe.extern.EitherType;
-import haxeLanguageServer.helper.ImportHelper.ImportStyle;
-import haxeLanguageServer.helper.FunctionFormattingConfig;
 import haxeLanguageServer.helper.StructDefaultsMacro;
+import haxeLanguageServer.protocol.Server.ConfigurePrintParams;
+
+typedef DisplayServerConfig = {
+	var ?path:String;
+	var ?env:haxe.DynamicAccess<String>;
+	var ?arguments:Array<String>;
+	var ?print:ConfigurePrintParams;
+}
+
+typedef FunctionFormattingConfig = {
+	var ?argumentTypeHints:Bool;
+	var ?returnTypeHint:ReturnTypeHintOption;
+	var ?useArrowSyntax:Bool;
+	var ?placeOpenBraceOnNewLine:Bool;
+	var ?explicitPublic:Bool;
+	var ?explicitPrivate:Bool;
+	var ?explicitNull:Bool;
+}
+
+enum abstract ReturnTypeHintOption(String) {
+	var Always = "always";
+	var Never = "never";
+	var NonVoid = "non-void";
+}
 
 private typedef FunctionGenerationConfig = {
 	var ?anonymous:FunctionFormattingConfig;
 	var ?field:FunctionFormattingConfig;
+}
+
+enum abstract ImportStyle(String) {
+	var Module = "module";
+	var Type = "type";
 }
 
 private typedef ImportGenerationConfig = {

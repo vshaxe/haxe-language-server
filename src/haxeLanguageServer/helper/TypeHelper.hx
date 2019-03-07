@@ -1,6 +1,7 @@
 package haxeLanguageServer.helper;
 
-import haxeLanguageServer.helper.FunctionFormattingConfig;
+import haxeLanguageServer.Configuration.ReturnTypeHintOption;
+import haxeLanguageServer.Configuration.FunctionFormattingConfig;
 
 class TypeHelper {
 	static final groupRegex = ~/\$(\d+)/g;

@@ -4,13 +4,10 @@ import haxe.Json;
 import haxe.display.JsonModuleTypes;
 import haxeLanguageServer.protocol.helper.DisplayPrinter;
 import haxeLanguageServer.TextDocument;
+import haxeLanguageServer.Configuration.ImportStyle;
+import haxeLanguageServer.Configuration.FunctionFormattingConfig;
 
 using Lambda;
-
-enum abstract ImportStyle(String) {
-	var Module = "module";
-	var Type = "type";
-}
 
 class ImportHelper {
 	static final rePackageDecl = ~/package\s*( [\w\.]*)?\s*;/;

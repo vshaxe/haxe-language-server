@@ -51,13 +51,13 @@ class HaxeServer {
 		inline function error(s)
 			context.sendShowMessage(Error, s);
 
+		var config = context.config.displayServer;
+
 		var env = new haxe.DynamicAccess();
 		for (key => value in js.Node.process.env)
 			env[key] = value;
-		for (key => value in context.config.displayServer.env)
+		for (key => value in config.env)
 			env[key] = value;
-
-		var config =  context.config.displayServer;
 
 		var haxePath = config.path;
 		var checkRun = ChildProcess.spawnSync(haxePath, ["-version"], {env: env});

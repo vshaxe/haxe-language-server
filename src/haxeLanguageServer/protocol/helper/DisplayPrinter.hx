@@ -3,7 +3,7 @@ package haxeLanguageServer.protocol.helper;
 import haxe.ds.Option;
 import haxe.display.JsonModuleTypes;
 import haxeLanguageServer.helper.IdentifierHelper;
-import haxeLanguageServer.helper.FunctionFormattingConfig;
+import haxeLanguageServer.Configuration.FunctionFormattingConfig;
 import haxeLanguageServer.protocol.Display;
 
 using Lambda;
