@@ -9,21 +9,21 @@ class Main {
 	static function main() {
 		var reader = new MessageReader(process.stdin);
 		var writer = new MessageWriter(process.stdout);
-		var protocol = new Protocol(writer.write);
-		protocol.logError = message -> protocol.sendNotification(Methods.LogMessage, {type: Warning, message: message});
-		setupTrace(protocol);
-		new Context(protocol);
-		reader.listen(protocol.handleMessage);
+		var languageServerProtocol = new Protocol(writer.write);
+		languageServerProtocol.logError = message -> languageServerProtocol.sendNotification(Methods.LogMessage, {type: Warning, message: message});
+		setupTrace(languageServerProtocol);
+		new Context(languageServerProtocol);
+		reader.listen(languageServerProtocol.handleMessage);
 	}
 
-	static function setupTrace(protocol:Protocol) {
+	static function setupTrace(languageServerProtocol:Protocol) {
 		haxe.Log.trace = function(v, ?i) {
 			var r = [Std.string(v)];
 			if (i != null && i.customParams != null) {
 				for (v in i.customParams)
 					r.push(Std.string(v));
 			}
-			protocol.sendNotification(Methods.LogMessage, {type: Log, message: r.join(" ")});
+			languageServerProtocol.sendNotification(Methods.LogMessage, {type: Log, message: r.join(" ")});
 		}
 	}
 }

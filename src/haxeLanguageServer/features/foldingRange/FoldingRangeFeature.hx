@@ -10,7 +10,7 @@ class FoldingRangeFeature {
 
 	public function new(context) {
 		this.context = context;
-		context.protocol.onRequest(FoldingRangeMethods.FoldingRange, onFoldingRange);
+		context.languageServerProtocol.onRequest(FoldingRangeMethods.FoldingRange, onFoldingRange);
 	}
 
 	function onFoldingRange(params:FoldingRangeParams, token:CancellationToken, resolve:Array<FoldingRange>->Void, reject:ResponseError<NoData>->Void) {

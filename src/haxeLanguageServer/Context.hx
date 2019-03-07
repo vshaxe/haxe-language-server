@@ -25,8 +25,8 @@ import languageServerProtocol.protocol.TypeDefinition.TypeDefinitionMethods;
 
 class Context {
 	public final config:Configuration;
-	public final protocol:Protocol;
-	public final haxeProtocol:Protocol;
+	public final languageServerProtocol:Protocol;
+	public final haxeDisplayProtocol:Protocol;
 	public var haxeServer(default, null):HaxeServer;
 	public var workspacePath(default, null):FsPath;
 	public var capabilities(default, null):ClientCapabilities;
@@ -40,25 +40,25 @@ class Context {
 	var initialized = false;
 	var progressId = 0;
 
-	public function new(protocol) {
-		config = new Configuration(protocol, kind -> restartServer('$kind configuration was changed'));
-		this.protocol = protocol;
+	public function new(languageServerProtocol) {
+		config = new Configuration(languageServerProtocol, kind -> restartServer('$kind configuration was changed'));
+		this.languageServerProtocol = languageServerProtocol;
 
-		haxeProtocol = new Protocol(message -> {
+		haxeDisplayProtocol = new Protocol(message -> {
 			callDisplay(Reflect.field(message, "method"), [Json.stringify(message)], null, function(result:DisplayResult) {
 				switch (result) {
 					case DResult(msg):
-						haxeProtocol.handleMessage(Json.parse(msg));
+						haxeDisplayProtocol.handleMessage(Json.parse(msg));
 					case DCancelled:
 				}
 			}, function(error) {
-				haxeProtocol.handleMessage(try {
+				haxeDisplayProtocol.handleMessage(try {
 					Json.parse(error);
 				} catch (_:Any) {
 					// pretend we got a proper JSON (HaxeFoundation/haxe#7955)
 					var message:ResponseMessage = {
 						jsonrpc: Protocol.PROTOCOL_VERSION,
-						id: @:privateAccess haxeProtocol.nextRequestId - 1, // ew..
+						id: @:privateAccess haxeDisplayProtocol.nextRequestId - 1, // ew..
 						error: new ResponseError(ResponseError.InternalError, "Compiler error", ([{
 							severity: Error,
 							message: error
@@ -71,32 +71,33 @@ class Context {
 
 		haxeServer = new HaxeServer(this);
 
-		protocol.onRequest(Methods.Initialize, onInitialize);
-		protocol.onRequest(Methods.Shutdown, onShutdown);
-		protocol.onNotification(Methods.Exit, onExit);
-		protocol.onNotification(Methods.DidOpenTextDocument, onDidOpenTextDocument);
-		protocol.onNotification(Methods.DidChangeTextDocument, onDidChangeTextDocument);
-		protocol.onNotification(Methods.DidCloseTextDocument, onDidCloseTextDocument);
-		protocol.onNotification(Methods.DidSaveTextDocument, onDidSaveTextDocument);
-		protocol.onNotification(Methods.DidChangeWatchedFiles, onDidChangeWatchedFiles);
-		protocol.onNotification(LanguageServerMethods.DidChangeActiveTextEditor, onDidChangeActiveTextEditor);
-		protocol.onRequest(LanguageServerMethods.RunMethod, runMethod);
+		languageServerProtocol.onRequest(Methods.Initialize, onInitialize);
+		languageServerProtocol.onRequest(Methods.Shutdown, onShutdown);
+		languageServerProtocol.onNotification(Methods.Exit, onExit);
+		languageServerProtocol.onNotification(Methods.DidOpenTextDocument, onDidOpenTextDocument);
+		languageServerProtocol.onNotification(Methods.DidChangeTextDocument, onDidChangeTextDocument);
+		languageServerProtocol.onNotification(Methods.DidCloseTextDocument, onDidCloseTextDocument);
+		languageServerProtocol.onNotification(Methods.DidSaveTextDocument, onDidSaveTextDocument);
+		languageServerProtocol.onNotification(Methods.DidChangeWatchedFiles, onDidChangeWatchedFiles);
+
+		languageServerProtocol.onNotification(LanguageServerMethods.DidChangeActiveTextEditor, onDidChangeActiveTextEditor);
+		languageServerProtocol.onRequest(LanguageServerMethods.RunMethod, runMethod);
 	}
 
 	public function startProgress(title:String):Void->Void {
 		var id = progressId++;
-		protocol.sendNotification(LanguageServerMethods.ProgressStart, {id: id, title: 'Haxe: $title...'});
+		languageServerProtocol.sendNotification(LanguageServerMethods.ProgressStart, {id: id, title: 'Haxe: $title...'});
 		return function() {
-			protocol.sendNotification(LanguageServerMethods.ProgressStop, {id: id});
+			languageServerProtocol.sendNotification(LanguageServerMethods.ProgressStop, {id: id});
 		};
 	}
 
 	public inline function sendShowMessage(type:MessageType, message:String) {
-		protocol.sendNotification(Methods.ShowMessage, {type: type, message: message});
+		languageServerProtocol.sendNotification(Methods.ShowMessage, {type: type, message: message});
 	}
 
 	public inline function sendLogMessage(type:MessageType, message:String) {
-		protocol.sendNotification(Methods.LogMessage, {type: type, message: message});
+		languageServerProtocol.sendNotification(Methods.LogMessage, {type: type, message: message});
 	}
 
 	function onInitialize(params:InitializeParams, _, resolve:InitializeResult->Void, _) {
@@ -106,7 +107,7 @@ class Context {
 		capabilities = params.capabilities;
 		config.onInitialize(params);
 
-		documents = new TextDocuments(protocol);
+		documents = new TextDocuments();
 		new DocumentSymbolsFeature(this);
 		new FoldingRangeFeature(this);
 		new DocumentFormattingFeature(this);
@@ -159,7 +160,7 @@ class Context {
 		displayOffsetConverter = DisplayOffsetConverter.create(haxeServer.version);
 
 		if (haxeServer.supports(DisplayMethods.GotoTypeDefinition)) {
-			protocol.sendRequest(Methods.RegisterCapability, {
+			languageServerProtocol.sendRequest(Methods.RegisterCapability, {
 				registrations: [
 					{
 						id: TypeDefinitionMethods.TypeDefinition,
@@ -168,7 +169,7 @@ class Context {
 				]
 			}, null, _ -> {}, error -> trace(error));
 		} else {
-			protocol.sendRequest(Methods.UnregisterCapability, {
+			languageServerProtocol.sendRequest(Methods.UnregisterCapability, {
 				unregisterations: [
 					{
 						id: TypeDefinitionMethods.TypeDefinition,
@@ -287,7 +288,7 @@ class Context {
 	public function callHaxeMethod<P, R>(method:HaxeRequestMethod<P, Response<R>>, ?params:P, ?token:CancellationToken, callback:(result:R) -> Null<String>,
 			errback:(error:String) -> Void) {
 		var beforeCallTime = Date.now().getTime();
-		haxeProtocol.sendRequest(method, params, token, function(response) {
+		haxeDisplayProtocol.sendRequest(method, params, token, function(response) {
 			var arrivalTime = Date.now().getTime();
 			if (!config.sendMethodResults) {
 				callback(response.result);
@@ -313,7 +314,7 @@ class Context {
 				},
 				response: response
 			};
-			protocol.sendNotification(LanguageServerMethods.DidRunHaxeMethod, methodResult);
+			languageServerProtocol.sendNotification(LanguageServerMethods.DidRunHaxeMethod, methodResult);
 		}, function(error:ResponseErrorData) {
 			var data:HaxeResponseErrorData = error.data;
 			errback(data[0].message);
@@ -344,7 +345,7 @@ class Context {
 		var startTime = Date.now().getTime();
 		return function(result:Dynamic, ?debugInfo:String) {
 			if (config.sendMethodResults) {
-				protocol.sendNotification(LanguageServerMethods.DidRunHaxeMethod, {
+				languageServerProtocol.sendNotification(LanguageServerMethods.DidRunHaxeMethod, {
 					method: method,
 					debugInfo: debugInfo,
 					response: {

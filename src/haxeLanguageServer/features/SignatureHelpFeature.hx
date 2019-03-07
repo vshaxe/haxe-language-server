@@ -17,7 +17,7 @@ class SignatureHelpFeature {
 
 	public function new(context:Context) {
 		this.context = context;
-		context.protocol.onRequest(Methods.SignatureHelp, onSignatureHelp);
+		context.languageServerProtocol.onRequest(Methods.SignatureHelp, onSignatureHelp);
 	}
 
 	function onSignatureHelp(params:TextDocumentPositionParams, token:CancellationToken, resolve:SignatureHelp->Void, reject:ResponseError<NoData>->Void) {

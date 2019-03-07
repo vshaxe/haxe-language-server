@@ -65,8 +65,8 @@ class CompletionFeature {
 
 		legacy = new CompletionFeatureLegacy(context, contextSupport, formatDocumentation);
 
-		context.protocol.onRequest(Methods.Completion, onCompletion);
-		context.protocol.onRequest(Methods.CompletionItemResolve, onCompletionItemResolve);
+		context.languageServerProtocol.onRequest(Methods.Completion, onCompletion);
+		context.languageServerProtocol.onRequest(Methods.CompletionItemResolve, onCompletionItemResolve);
 	}
 
 	function checkCapabilities() {

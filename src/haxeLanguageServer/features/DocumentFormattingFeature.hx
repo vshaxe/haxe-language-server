@@ -10,7 +10,7 @@ class DocumentFormattingFeature {
 
 	public function new(context) {
 		this.context = context;
-		context.protocol.onRequest(Methods.DocumentFormatting, onDocumentFormatting);
+		context.languageServerProtocol.onRequest(Methods.DocumentFormatting, onDocumentFormatting);
 	}
 
 	function onDocumentFormatting(params:DocumentFormattingParams, token:CancellationToken, resolve:Array<TextEdit>->Void,

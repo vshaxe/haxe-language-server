@@ -82,12 +82,12 @@ class Configuration {
 	public var displayArguments(default, null):Array<String>;
 	public var sendMethodResults(default, null):Bool = false;
 
-	public function new(protocol:Protocol, onDidChange:(kind:ConfigurationKind) -> Void) {
+	public function new(languageServerProtocol:Protocol, onDidChange:(kind:ConfigurationKind) -> Void) {
 		this.onDidChange = onDidChange;
 
-		protocol.onNotification(Methods.DidChangeConfiguration, onDidChangeConfiguration);
-		protocol.onNotification(LanguageServerMethods.DidChangeDisplayArguments, onDidChangeDisplayArguments);
-		protocol.onNotification(LanguageServerMethods.DidChangeDisplayServerConfig, onDidChangeDisplayServerConfig);
+		languageServerProtocol.onNotification(Methods.DidChangeConfiguration, onDidChangeConfiguration);
+		languageServerProtocol.onNotification(LanguageServerMethods.DidChangeDisplayArguments, onDidChangeDisplayArguments);
+		languageServerProtocol.onNotification(LanguageServerMethods.DidChangeDisplayServerConfig, onDidChangeDisplayServerConfig);
 	}
 
 	public function onInitialize(params:InitializeParams) {

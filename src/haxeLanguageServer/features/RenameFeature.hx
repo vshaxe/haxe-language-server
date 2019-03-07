@@ -10,7 +10,7 @@ class RenameFeature {
 
 	public function new(context:Context) {
 		this.context = context;
-		context.protocol.onRequest(Methods.Rename, onRename);
+		context.languageServerProtocol.onRequest(Methods.Rename, onRename);
 	}
 
 	function onRename(params:RenameParams, token:CancellationToken, resolve:WorkspaceEdit->Void, reject:ResponseError<NoData>->Void) {

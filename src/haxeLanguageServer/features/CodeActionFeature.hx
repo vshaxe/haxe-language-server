@@ -12,7 +12,7 @@ class CodeActionFeature {
 
 	public function new(context:Context) {
 		this.context = context;
-		context.protocol.onRequest(Methods.CodeAction, onCodeAction);
+		context.languageServerProtocol.onRequest(Methods.CodeAction, onCodeAction);
 	}
 
 	public function registerContributor(contributor:CodeActionContributor) {

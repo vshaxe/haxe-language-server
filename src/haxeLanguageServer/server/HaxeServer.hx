@@ -112,7 +112,7 @@ class HaxeServer {
 		stopProgressCallback = context.startProgress("Initializing Haxe/JSON-RPC protocol");
 		context.callHaxeMethod(Methods.Initialize, {supportsResolve: true}, null, result -> {
 			if (result.haxeVersion.major == 4 && result.haxeVersion.pre.startsWith("preview.")) {
-				context.protocol.sendNotification(LanguageServerMethods.DidDetectOldPreview, {preview: result.haxeVersion.pre});
+				context.languageServerProtocol.sendNotification(LanguageServerMethods.DidDetectOldPreview, {preview: result.haxeVersion.pre});
 			}
 			supportedMethods = result.methods;
 			configure();
@@ -123,7 +123,7 @@ class HaxeServer {
 			if (error.startsWith("Error: Invalid format")) {
 				trace("Haxe version does not support JSON-RPC, using legacy --display API.");
 				if (version.major == 4) {
-					context.protocol.sendNotification(LanguageServerMethods.DidDetectOldPreview);
+					context.languageServerProtocol.sendNotification(LanguageServerMethods.DidDetectOldPreview);
 				}
 			} else {
 				trace(error);
@@ -160,7 +160,7 @@ class HaxeServer {
 				trace("Done.");
 			}
 		}, function(error) {
-			context.protocol.sendNotification(LanguageServerMethods.CacheBuildFailed);
+			context.languageServerProtocol.sendNotification(LanguageServerMethods.CacheBuildFailed);
 			stopProgress();
 			trace("Failed - try fixing the error(s) and restarting the language server:\n\n" + error);
 		}));
@@ -243,7 +243,7 @@ class HaxeServer {
 		});
 		socketListener.listen(port, "localhost");
 		context.sendLogMessage(Log, 'Listening on port $port');
-		context.protocol.sendNotification(LanguageServerMethods.DidChangeDisplayPort, {port: port});
+		context.languageServerProtocol.sendNotification(LanguageServerMethods.DidChangeDisplayPort, {port: port});
 	}
 
 	public function stop() {
@@ -403,6 +403,6 @@ class HaxeServer {
 			queue.push(request.label);
 			request = request.next;
 		}
-		context.protocol.sendNotification(LanguageServerMethods.DidChangeRequestQueue, {queue: queue});
+		context.languageServerProtocol.sendNotification(LanguageServerMethods.DidChangeRequestQueue, {queue: queue});
 	}
 }

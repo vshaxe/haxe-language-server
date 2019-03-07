@@ -10,7 +10,7 @@ class CodeLensFeature {
 
 	public function new(context:Context) {
 		this.context = context;
-		context.protocol.onRequest(Methods.CodeLens, onCodeLens);
+		context.languageServerProtocol.onRequest(Methods.CodeLens, onCodeLens);
 	}
 
 	function getCodeLensFromStatistics(uri:DocumentUri, statistics:Array<StatisticsObject>) {

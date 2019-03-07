@@ -39,7 +39,7 @@ class DiagnosticsFeature {
 		ChildProcess.exec("haxelib config", (error, stdout, stderr) -> haxelibPath = new FsPath(stdout.trim()));
 
 		context.registerCodeActionContributor(getCodeActions);
-		context.protocol.onNotification(LanguageServerMethods.RunGlobalDiagnostics, onRunGlobalDiagnostics);
+		context.languageServerProtocol.onNotification(LanguageServerMethods.RunGlobalDiagnostics, onRunGlobalDiagnostics);
 	}
 
 	function onRunGlobalDiagnostics(_) {
@@ -48,7 +48,7 @@ class DiagnosticsFeature {
 
 		context.callDisplay("global diagnostics", ["diagnostics"], null, null, function(result) {
 			processDiagnosticsReply(null, onResolve, result);
-			context.protocol.sendNotification(LanguageServerMethods.DidRunRunGlobalDiagnostics);
+			context.languageServerProtocol.sendNotification(LanguageServerMethods.DidRunRunGlobalDiagnostics);
 			stopProgress();
 		}, function(error) {
 			processErrorReply(null, error);
@@ -129,7 +129,7 @@ class DiagnosticsFeature {
 	}
 
 	function publishDiagnostic(uri:DocumentUri, diag:Diagnostic, error:String) {
-		context.protocol.sendNotification(Methods.PublishDiagnostics, {uri: uri, diagnostics: [diag]});
+		context.languageServerProtocol.sendNotification(Methods.PublishDiagnostics, {uri: uri, diagnostics: [diag]});
 		var argumentsMap = diagnosticsArguments[uri] = new DiagnosticsMap();
 		argumentsMap.set({code: CompilerError, range: diag.range}, error);
 	}
@@ -185,7 +185,7 @@ class DiagnosticsFeature {
 						argumentsMap.set({code: kind, range: diag.range}, hxDiag.args);
 						diagnostics.push(diag);
 					}
-					context.protocol.sendNotification(Methods.PublishDiagnostics, {uri: uri, diagnostics: diagnostics});
+					context.languageServerProtocol.sendNotification(Methods.PublishDiagnostics, {uri: uri, diagnostics: diagnostics});
 					sent[uri] = true;
 				}
 
@@ -212,7 +212,7 @@ class DiagnosticsFeature {
 
 	public function clearDiagnostics(uri:DocumentUri) {
 		if (diagnosticsArguments.remove(uri))
-			context.protocol.sendNotification(Methods.PublishDiagnostics, {uri: uri, diagnostics: []});
+			context.languageServerProtocol.sendNotification(Methods.PublishDiagnostics, {uri: uri, diagnostics: []});
 	}
 
 	public function publishDiagnostics(uri:DocumentUri) {
