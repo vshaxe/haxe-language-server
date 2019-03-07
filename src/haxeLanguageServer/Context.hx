@@ -62,6 +62,7 @@ private typedef InitOptions = {
 
 class Context {
 	public final protocol:Protocol;
+	public final haxeProtocol:Protocol;
 	public var haxeServer(default, null):HaxeServer;
 	public var workspacePath(default, null):FsPath;
 	public var capabilities(default, null):ClientCapabilities;
@@ -87,6 +88,18 @@ class Context {
 
 	public function new(protocol) {
 		this.protocol = protocol;
+		haxeProtocol = new Protocol(message -> {
+			callDisplay(Reflect.field(message, "method"), [Json.stringify(message)], null, function(result:DisplayResult) {
+				switch (result) {
+					case DResult(msg):
+						haxeProtocol.handleMessage(Json.parse(msg));
+					case DCancelled:
+				}
+			}, function(error) {
+				haxeProtocol.handleMessage(Json.parse(error));
+			});
+		});
+
 		haxeServer = new HaxeServer(this);
 		defaultConfig = {
 			enableCodeLens: false,
@@ -406,68 +419,37 @@ class Context {
 		});
 	}
 
-	public function callHaxeMethod<P, R>(method:HaxeRequestMethod<P, Response<R>>, ?params:P, ?token:CancellationToken, callback:R->Null<String>,
+	public function callHaxeMethod<P, R>(method:HaxeRequestMethod<P, Response<R>>, ?params:P, ?token:CancellationToken, callback:(result:R) -> Null<String>,
 			errback:(error:String) -> Void) {
-		// TODO: avoid duplicating jsonrpc.Protocol logic
-		var id = nextRequestId++;
-		var request:RequestMessage = {
-			jsonrpc: @:privateAccess jsonrpc.Protocol.PROTOCOL_VERSION,
-			id: id,
-			method: method
-		};
-		if (params != null)
-			request.params = params;
-		var requestJson = Json.stringify(request);
-
 		var beforeCallTime = Date.now().getTime();
-		callDisplay(method, [requestJson], null, token, result -> {
+		haxeProtocol.sendRequest(method, params, token, function(response) {
 			var arrivalTime = Date.now().getTime();
-			switch (result) {
-				case DResult(data):
-					var response:ResponseMessage = try {
-						Json.parse(data);
-					} catch (e:Any) {
-						return errback(Std.string(e));
-					}
-					if (Reflect.hasField(response, "error"))
-						errback(response.error.message);
-					else
-						runHaxeMethodCallback(response, beforeCallTime, arrivalTime, callback, errback, method);
-				case DCancelled:
+			if (!sendMethodResults) {
+				callback(response.result);
+				return;
 			}
-		}, error -> {
-			// this should never happen (if on a Haxe version that supports JSON-RPC)
-			errback(error);
-		});
-	}
 
-	function runHaxeMethodCallback(response, beforeCallTime, arrivalTime, callback, errback:String->Void, method) {
-		var haxeResponse:Response<Dynamic> = response.result;
-		if (!sendMethodResults) {
-			callback(haxeResponse.result);
-			return;
-		}
-
-		var beforeProcessingTime = Date.now().getTime();
-		var debugInfo:Null<String> = try callback(haxeResponse.result) catch (e:Any) {
-			errback(e);
-			trace(e);
-			trace(CallStack.toString(CallStack.exceptionStack()));
-			null;
-		}
-		var afterProcessingTime = Date.now().getTime();
-		var methodResult:HaxeMethodResult = {
-			method: method,
-			debugInfo: debugInfo,
-			additionalTimes: {
-				beforeCall: beforeCallTime,
-				arrival: arrivalTime,
-				beforeProcessing: beforeProcessingTime,
-				afterProcessing: afterProcessingTime
-			},
-			response: haxeResponse
-		};
-		protocol.sendNotification(LanguageServerMethods.DidRunHaxeMethod, methodResult);
+			var beforeProcessingTime = Date.now().getTime();
+			var debugInfo:Null<String> = try callback(response.result) catch (e:Any) {
+				errback(e);
+				trace(e);
+				trace(CallStack.toString(CallStack.exceptionStack()));
+				null;
+			}
+			var afterProcessingTime = Date.now().getTime();
+			var methodResult:HaxeMethodResult = {
+				method: method,
+				debugInfo: debugInfo,
+				additionalTimes: {
+					beforeCall: beforeCallTime,
+					arrival: arrivalTime,
+					beforeProcessing: beforeProcessingTime,
+					afterProcessing: afterProcessingTime
+				},
+				response: response
+			};
+			protocol.sendNotification(LanguageServerMethods.DidRunHaxeMethod, methodResult);
+		}, errback);
 	}
 
 	public function callDisplay(label:String, args:Array<String>, ?stdin:String, ?token:CancellationToken, callback:DisplayResult->Void,
