@@ -34,7 +34,7 @@ class Context {
 	public var displayOffsetConverter(default, null):DisplayOffsetConverter;
 	public var gotoDefinition(default, null):GotoDefinitionFeature;
 
-	var diagnostics:DiagnosticsManager;
+	var diagnostics:DiagnosticsFeature;
 	var codeActions:CodeActionFeature;
 	var activeEditor:DocumentUri;
 	var initialized = false;
@@ -99,7 +99,7 @@ class Context {
 		protocol.sendNotification(Methods.LogMessage, {type: type, message: message});
 	}
 
-	function onInitialize(params:InitializeParams, token:CancellationToken, resolve:InitializeResult->Void, reject:ResponseError<InitializeError>->Void) {
+	function onInitialize(params:InitializeParams, _, resolve:InitializeResult->Void, _) {
 		if (params.rootUri != null) {
 			workspacePath = params.rootUri.toFsPath();
 		}
@@ -139,7 +139,7 @@ class Context {
 		});
 	}
 
-	function onShutdown(_, token:CancellationToken, resolve:NoData->Void, _) {
+	function onShutdown(_, _, resolve:NoData->Void, _) {
 		haxeServer.stop();
 		haxeServer = null;
 		return resolve(null);
@@ -193,7 +193,7 @@ class Context {
 				new FindReferencesFeature(this);
 				new DeterminePackageFeature(this);
 				new RenameFeature(this);
-				diagnostics = new DiagnosticsManager(this);
+				diagnostics = new DiagnosticsFeature(this);
 				new CodeLensFeature(this);
 				new CodeGenerationFeature(this);
 				new WorkspaceSymbolsFeature(this);

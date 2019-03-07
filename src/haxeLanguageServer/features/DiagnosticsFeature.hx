@@ -10,7 +10,7 @@ import js.node.ChildProcess;
 
 using Lambda;
 
-class DiagnosticsManager {
+class DiagnosticsFeature {
 	static inline var DiagnosticsSource = "diagnostics";
 	static inline var RemoveUnusedImportUsingTitle = "Remove unused import/using";
 	static inline var RemoveAllUnusedImportsUsingsTitle = "Remove all unused imports/usings";
