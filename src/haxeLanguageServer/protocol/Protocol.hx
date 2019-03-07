@@ -58,5 +58,5 @@ typedef FileParams = {
 	var file:FsPath;
 }
 
-typedef HaxeRequestMethod<TParams, TResponse> = RequestMethod<TParams, TResponse, NoData, NoData>;
-typedef HaxeNotificationMethod<TParams> = NotificationMethod<TParams, NoData>;
+typedef HaxeRequestMethod<TParams, TResponse> = RequestMethod<TParams, TResponse, NoData>;
+typedef HaxeNotificationMethod<TParams> = NotificationMethod<TParams>;
