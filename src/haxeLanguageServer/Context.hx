@@ -31,7 +31,6 @@ class Context {
 	public var workspacePath(default, null):FsPath;
 	public var capabilities(default, null):ClientCapabilities;
 	public var documents(default, null):TextDocuments;
-	public var signatureHelp(default, null):SignatureHelpFeature;
 	public var displayOffsetConverter(default, null):DisplayOffsetConverter;
 	public var gotoDefinition(default, null):GotoDefinitionFeature;
 
@@ -188,7 +187,7 @@ class Context {
 				codeActions = new CodeActionFeature(this);
 				new CompletionFeature(this);
 				new HoverFeature(this);
-				signatureHelp = new SignatureHelpFeature(this);
+				new SignatureHelpFeature(this);
 				gotoDefinition = new GotoDefinitionFeature(this);
 				new GotoTypeDefinitionFeature(this);
 				new FindReferencesFeature(this);
