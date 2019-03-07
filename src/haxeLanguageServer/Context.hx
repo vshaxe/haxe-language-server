@@ -326,10 +326,6 @@ class Context {
 	function onServerStarted() {
 		displayOffsetConverter = DisplayOffsetConverter.create(haxeServer.version);
 
-		var hasArrowFunctions = haxeServer.version >= new SemVer(4, 0, 0);
-		if (!hasArrowFunctions)
-			config.codeGeneration.functions.anonymous.useArrowSyntax = false;
-
 		if (haxeServer.supports(DisplayMethods.GotoTypeDefinition)) {
 			protocol.sendRequest(Methods.RegisterCapability, {
 				registrations: [
