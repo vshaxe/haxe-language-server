@@ -21,6 +21,6 @@ class FoldingRangeFeature {
 		}
 		var ranges = new FoldingRangeResolver(doc, context.capabilities.textDocument).resolve();
 		resolve(ranges);
-		onResolve(ranges);
+		onResolve(ranges, ranges.length + " ranges");
 	}
 }

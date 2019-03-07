@@ -68,7 +68,7 @@ class WorkspaceSymbolsFeature {
 				case DResult(data):
 					var result = processSymbolsReply(data, reject);
 					resolve(result);
-					onResolve(result);
+					onResolve(result, result.length + " symbols");
 			}
 		}, reject.handler());
 	}

@@ -145,8 +145,10 @@ class DiagnosticsManager {
 					return;
 				}
 
+				var count = 0;
 				var sent = new Map<DocumentUri, Bool>();
 				for (data in data) {
+					count += data.diagnostics.length;
 					if (isPathFiltered(data.file))
 						continue;
 
@@ -195,7 +197,7 @@ class DiagnosticsManager {
 					removeOldDiagnostics(uri);
 				}
 
-				onResolve(data);
+				onResolve(data, count + " diagnsotics");
 		}
 	}
 

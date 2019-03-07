@@ -5,6 +5,8 @@ import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
 
+using Lambda;
+
 class DocumentSymbolsFeature {
 	final context:Context;
 
@@ -22,6 +24,14 @@ class DocumentSymbolsFeature {
 		}
 		var symbols = new DocumentSymbolsResolver(doc).resolve();
 		resolve(symbols);
-		onResolve(symbols);
+		onResolve(symbols, countSymbols(symbols) + " symbols");
+	}
+
+	function countSymbols(symbols:Array<DocumentSymbol>):Int {
+		return if (symbols == null) {
+			0;
+		} else {
+			symbols.length + symbols.map(symbol -> countSymbols(symbol.children)).fold((a, b) -> a + b, 0);
+		}
 	}
 }
