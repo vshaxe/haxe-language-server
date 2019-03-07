@@ -54,7 +54,7 @@ class ImportHelper {
 
 	public static function createFunctionImportsEdit<T>(doc:TextDocument, position:Position, context:Context, type:JsonType<T>,
 			formatting:FunctionFormattingConfig):Array<TextEdit> {
-		var importConfig = context.config.codeGeneration.imports;
+		var importConfig = context.config.user.codeGeneration.imports;
 		if (!importConfig.enableAutoImports) {
 			return [];
 		}

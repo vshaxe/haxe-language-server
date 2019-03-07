@@ -206,7 +206,7 @@ class DiagnosticsManager {
 	}
 
 	function isPathFiltered(path:FsPath):Bool {
-		var pathFilter = PathHelper.preparePathFilter(context.config.diagnosticsPathFilter, haxelibPath, context.workspacePath);
+		var pathFilter = PathHelper.preparePathFilter(context.config.user.diagnosticsPathFilter, haxelibPath, context.workspacePath);
 		return !PathHelper.matches(path, pathFilter);
 	}
 
@@ -278,7 +278,7 @@ class DiagnosticsManager {
 
 	function getUnresolvedImportActions(params:CodeActionParams, d:Diagnostic, arg):Array<CodeAction> {
 		var doc = context.documents.get(params.textDocument.uri);
-		var importStyle = context.config.codeGeneration.imports.style;
+		var importStyle = context.config.user.codeGeneration.imports.style;
 		return [
 			{
 				title: "Import " + arg.name,

@@ -323,7 +323,7 @@ class CompletionFeature {
 		var occurrence:ClassFieldOccurrence<T> = item.args;
 		var concreteType = item.type;
 		var field = occurrence.field;
-		var importConfig = context.config.codeGeneration.imports;
+		var importConfig = context.config.user.codeGeneration.imports;
 
 		if (concreteType == null || concreteType.kind != TFun || field.isFinalField()) {
 			return null;
@@ -334,7 +334,7 @@ class CompletionFeature {
 			case _:
 		}
 
-		var fieldFormatting = context.config.codeGeneration.functions.field;
+		var fieldFormatting = context.config.user.codeGeneration.functions.field;
 		var printer = new DisplayPrinter(false, if (importConfig.enableAutoImports) Shadowed else Qualified, fieldFormatting);
 
 		var item:CompletionItem = {
@@ -430,7 +430,7 @@ class CompletionFeature {
 
 	function createTypeCompletionItem(type:DisplayModuleType, data:CompletionContextData):Null<CompletionItem> {
 		var isImportCompletion = data.mode.kind == Import || data.mode.kind == Using;
-		var importConfig = context.config.codeGeneration.imports;
+		var importConfig = context.config.user.codeGeneration.imports;
 		var autoImport = importConfig.enableAutoImports;
 		if (isImportCompletion || type.path.importStatus == Shadowed) {
 			autoImport = false; // need to insert the qualified name
@@ -633,7 +633,7 @@ class CompletionFeature {
 	}
 
 	function isExcluded(dotPath:String):Bool {
-		var excludes = context.config.exclude;
+		var excludes = context.config.user.exclude;
 		if (excludes == null) {
 			return false;
 		}

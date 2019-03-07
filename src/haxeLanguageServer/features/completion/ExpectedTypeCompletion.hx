@@ -43,7 +43,7 @@ class ExpectedTypeCompletion {
 	function createItemsForType<T>(concreteType:JsonType<T>, data:CompletionContextData):Array<CompletionItem> {
 		var items:Array<ExpectedTypeCompletionItem> = [];
 
-		var anonFormatting = context.config.codeGeneration.functions.anonymous;
+		var anonFormatting = context.config.user.codeGeneration.functions.anonymous;
 		var printer = new DisplayPrinter(false, Shadowed, anonFormatting);
 		switch (concreteType.kind) {
 			case TAnonymous:

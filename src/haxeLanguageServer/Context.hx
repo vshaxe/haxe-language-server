@@ -2,7 +2,6 @@ package haxeLanguageServer;
 
 import haxe.CallStack;
 import haxe.Json;
-import haxe.extern.EitherType;
 import js.Node.process;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
@@ -13,10 +12,6 @@ import haxeLanguageServer.features.completion.*;
 import haxeLanguageServer.features.documentSymbols.DocumentSymbolsFeature;
 import haxeLanguageServer.features.foldingRange.FoldingRangeFeature;
 import haxeLanguageServer.features.CodeActionFeature.CodeActionContributor;
-import haxeLanguageServer.helper.SemVer;
-import haxeLanguageServer.helper.FunctionFormattingConfig;
-import haxeLanguageServer.helper.ImportHelper;
-import haxeLanguageServer.helper.StructDefaultsMacro;
 import haxeLanguageServer.server.DisplayResult;
 import haxeLanguageServer.server.HaxeServer;
 import haxeLanguageServer.protocol.Protocol.HaxeRequestMethod;
@@ -28,66 +23,26 @@ import haxeLanguageServer.protocol.Display.DisplayMethods;
 import haxeLanguageServer.LanguageServerMethods.HaxeMethodResult;
 import languageServerProtocol.protocol.TypeDefinition.TypeDefinitionMethods;
 
-private typedef FunctionGenerationConfig = {
-	var ?anonymous:FunctionFormattingConfig;
-	var ?field:FunctionFormattingConfig;
-}
-
-private typedef ImportGenerationConfig = {
-	var ?enableAutoImports:Bool;
-	var ?style:ImportStyle;
-}
-
-private typedef CodeGenerationConfig = {
-	var ?functions:FunctionGenerationConfig;
-	var ?imports:ImportGenerationConfig;
-}
-
-private typedef Config = {
-	var ?enableCodeLens:Bool;
-	var ?enableDiagnostics:Bool;
-	var ?enableServerView:Bool;
-	var ?enableSignatureHelpDocumentation:Bool;
-	var ?diagnosticsPathFilter:String;
-	var ?displayPort:Null<EitherType<Int, String>>;
-	var ?buildCompletionCache:Bool;
-	var ?codeGeneration:CodeGenerationConfig;
-	var ?exclude:Array<String>;
-}
-
-private typedef InitOptions = {
-	var ?displayServerConfig:DisplayServerConfig;
-	var ?displayArguments:Array<String>;
-	var ?sendMethodResults:Bool;
-}
-
 class Context {
+	public final config:Configuration;
 	public final protocol:Protocol;
 	public final haxeProtocol:Protocol;
 	public var haxeServer(default, null):HaxeServer;
 	public var workspacePath(default, null):FsPath;
 	public var capabilities(default, null):ClientCapabilities;
-	public var displayArguments(default, null):Array<String>;
 	public var documents(default, null):TextDocuments;
 	public var signatureHelp(default, null):SignatureHelpFeature;
 	public var displayOffsetConverter(default, null):DisplayOffsetConverter;
 	public var gotoDefinition(default, null):GotoDefinitionFeature;
-	public var sendMethodResults(default, null):Bool = false;
 
 	var diagnostics:DiagnosticsManager;
 	var codeActions:CodeActionFeature;
 	var activeEditor:DocumentUri;
-
-	public var config(default, null):Config;
-
-	var unmodifiedConfig:Config;
-	final defaultConfig:Config;
-	@:allow(haxeLanguageServer.server.HaxeServer)
-	var displayServerConfig:DisplayServerConfig;
+	var initialized = false;
 	var progressId = 0;
-	var nextRequestId:Int = 0;
 
 	public function new(protocol) {
+		config = new Configuration(protocol, kind -> restartServer('$kind configuration was changed'));
 		this.protocol = protocol;
 
 		haxeProtocol = new Protocol(message -> {
@@ -116,56 +71,17 @@ class Context {
 		});
 
 		haxeServer = new HaxeServer(this);
-		defaultConfig = {
-			enableCodeLens: false,
-			enableDiagnostics: true,
-			enableServerView: false,
-			enableSignatureHelpDocumentation: true,
-			diagnosticsPathFilter: "${workspaceRoot}",
-			displayPort: null,
-			buildCompletionCache: true,
-			codeGeneration: {
-				functions: {
-					anonymous: {
-						returnTypeHint: Never,
-						argumentTypeHints: false,
-						useArrowSyntax: true,
-						explicitNull: false,
-					},
-					field: {
-						returnTypeHint: NonVoid,
-						argumentTypeHints: true,
-						placeOpenBraceOnNewLine: false,
-						explicitPublic: false,
-						explicitPrivate: false,
-						explicitNull: false,
-					}
-				},
-				imports: {
-					style: Type,
-					enableAutoImports: true
-				}
-			},
-			exclude: ["zpp_nape"]
-		};
 
 		protocol.onRequest(Methods.Initialize, onInitialize);
 		protocol.onRequest(Methods.Shutdown, onShutdown);
 		protocol.onNotification(Methods.Exit, onExit);
-		protocol.onNotification(Methods.DidChangeConfiguration, onDidChangeConfiguration);
 		protocol.onNotification(Methods.DidOpenTextDocument, onDidOpenTextDocument);
 		protocol.onNotification(Methods.DidChangeTextDocument, onDidChangeTextDocument);
 		protocol.onNotification(Methods.DidCloseTextDocument, onDidCloseTextDocument);
 		protocol.onNotification(Methods.DidSaveTextDocument, onDidSaveTextDocument);
 		protocol.onNotification(Methods.DidChangeWatchedFiles, onDidChangeWatchedFiles);
-		protocol.onNotification(LanguageServerMethods.DidChangeDisplayArguments, onDidChangeDisplayArguments);
-		protocol.onNotification(LanguageServerMethods.DidChangeDisplayServerConfig, onDidChangeDisplayServerConfig);
 		protocol.onNotification(LanguageServerMethods.DidChangeActiveTextEditor, onDidChangeActiveTextEditor);
 		protocol.onRequest(LanguageServerMethods.RunMethod, runMethod);
-	}
-
-	inline function isInitialized():Bool {
-		return config != null;
 	}
 
 	public function startProgress(title:String):Void->Void {
@@ -189,25 +105,7 @@ class Context {
 			workspacePath = params.rootUri.toFsPath();
 		}
 		capabilities = params.capabilities;
-
-		var options:InitOptions = params.initializationOptions;
-		var defaults:InitOptions = {
-			displayServerConfig: {
-				path: "haxe",
-				env: new haxe.DynamicAccess(),
-				arguments: [],
-				print: {
-					completion: false,
-					reusing: false
-				}
-			},
-			displayArguments: [],
-			sendMethodResults: false
-		};
-		StructDefaultsMacro.applyDefaults(options, defaults);
-		displayServerConfig = options.displayServerConfig;
-		displayArguments = options.displayArguments;
-		sendMethodResults = options.sendMethodResults;
+		config.onInitialize(params);
 
 		documents = new TextDocuments(protocol);
 		new DocumentSymbolsFeature(this);
@@ -242,16 +140,6 @@ class Context {
 		});
 	}
 
-	function onDidChangeDisplayArguments(params:{arguments:Array<String>}) {
-		displayArguments = params.arguments;
-		restartServer("display arguments changed");
-	}
-
-	function onDidChangeDisplayServerConfig(config:DisplayServerConfig) {
-		displayServerConfig = config;
-		restartServer("display server configuration changed");
-	}
-
 	function onShutdown(_, token:CancellationToken, resolve:NoData->Void, _) {
 		haxeServer.stop();
 		haxeServer = null;
@@ -266,61 +154,6 @@ class Context {
 		} else {
 			process.exit(0);
 		}
-	}
-
-	function onDidChangeConfiguration(newConfig:DidChangeConfigurationParams) {
-		var initialized = isInitialized();
-		var newHaxeConfig = newConfig.settings.haxe;
-		if (newHaxeConfig == null) {
-			newHaxeConfig = {};
-		}
-
-		var newConfigJson = Json.stringify(newHaxeConfig);
-		var configUnchanged = Json.stringify(unmodifiedConfig) == newConfigJson;
-		if (initialized && configUnchanged) {
-			return;
-		}
-		unmodifiedConfig = Json.parse(newConfigJson);
-
-		processSettings(newHaxeConfig);
-
-		if (!initialized) {
-			haxeServer.start(function() {
-				onServerStarted();
-
-				codeActions = new CodeActionFeature(this);
-				new CompletionFeature(this);
-				new HoverFeature(this);
-				signatureHelp = new SignatureHelpFeature(this);
-				gotoDefinition = new GotoDefinitionFeature(this);
-				new GotoTypeDefinitionFeature(this);
-				new FindReferencesFeature(this);
-				new DeterminePackageFeature(this);
-				new RenameFeature(this);
-				diagnostics = new DiagnosticsManager(this);
-				new CodeLensFeature(this);
-				new CodeGenerationFeature(this);
-				new WorkspaceSymbolsFeature(this);
-
-				for (doc in documents.getAll())
-					publishDiagnostics(doc.uri);
-			});
-		} else {
-			restartServer("configuration was changed");
-		}
-	}
-
-	function processSettings(newConfig:Dynamic) {
-		// this is a hacky way to completely ignore uninteresting config sections
-		// to do this properly, we need to make language server not watch the whole haxe.* section,
-		// but only what's interesting for us
-		Reflect.deleteField(newConfig, "displayServer");
-		Reflect.deleteField(newConfig, "displayConfigurations");
-		Reflect.deleteField(newConfig, "executable");
-
-		config = newConfig;
-
-		StructDefaultsMacro.applyDefaults(config, defaultConfig);
 	}
 
 	function onServerStarted() {
@@ -348,15 +181,37 @@ class Context {
 	}
 
 	function restartServer(reason:String) {
-		if (!isInitialized()) {
-			return;
+		if (!initialized) {
+			haxeServer.start(function() {
+				onServerStarted();
+
+				codeActions = new CodeActionFeature(this);
+				new CompletionFeature(this);
+				new HoverFeature(this);
+				signatureHelp = new SignatureHelpFeature(this);
+				gotoDefinition = new GotoDefinitionFeature(this);
+				new GotoTypeDefinitionFeature(this);
+				new FindReferencesFeature(this);
+				new DeterminePackageFeature(this);
+				new RenameFeature(this);
+				diagnostics = new DiagnosticsManager(this);
+				new CodeLensFeature(this);
+				new CodeGenerationFeature(this);
+				new WorkspaceSymbolsFeature(this);
+
+				for (doc in documents.getAll())
+					publishDiagnostics(doc.uri);
+
+				initialized = true;
+			});
+		} else {
+			haxeServer.restart(reason, function() {
+				onServerStarted();
+				if (activeEditor != null) {
+					publishDiagnostics(activeEditor);
+				}
+			});
 		}
-		haxeServer.restart(reason, function() {
-			onServerStarted();
-			if (activeEditor != null) {
-				publishDiagnostics(activeEditor);
-			}
-		});
 	}
 
 	function isUriSupported(uri:DocumentUri):Bool {
@@ -417,7 +272,7 @@ class Context {
 	}
 
 	function publishDiagnostics(uri:DocumentUri) {
-		if (diagnostics != null && config.enableDiagnostics)
+		if (diagnostics != null && config.user.enableDiagnostics)
 			diagnostics.publishDiagnostics(uri);
 	}
 
@@ -435,7 +290,7 @@ class Context {
 		var beforeCallTime = Date.now().getTime();
 		haxeProtocol.sendRequest(method, params, token, function(response) {
 			var arrivalTime = Date.now().getTime();
-			if (!sendMethodResults) {
+			if (!config.sendMethodResults) {
 				callback(response.result);
 				return;
 			}
@@ -469,12 +324,12 @@ class Context {
 	public function callDisplay(label:String, args:Array<String>, ?stdin:String, ?token:CancellationToken, callback:DisplayResult->Void,
 			errback:(error:String) -> Void) {
 		var actualArgs = ["--cwd", workspacePath.toString()]; // change cwd to workspace root
-		if (displayArguments != null)
-			actualArgs = actualArgs.concat(displayArguments); // add arguments from the workspace settings
+		if (config.displayArguments != null)
+			actualArgs = actualArgs.concat(config.displayArguments); // add arguments from the workspace settings
 		actualArgs = actualArgs.concat(["-D", "display-details", // get more details in completion results,
 			"--no-output", // prevent any generation
 		]);
-		if (haxeServer.supports(HaxeMethods.Initialize) && config.enableServerView) {
+		if (haxeServer.supports(HaxeMethods.Initialize) && config.user.enableServerView) {
 			actualArgs = actualArgs.concat(["--times", "-D", "macro-times"]);
 		}
 		actualArgs.push("--display");
@@ -489,7 +344,7 @@ class Context {
 	public function startTimer(method:String) {
 		var startTime = Date.now().getTime();
 		return function(result:Dynamic, ?debugInfo:String) {
-			if (sendMethodResults) {
+			if (config.sendMethodResults) {
 				protocol.sendNotification(LanguageServerMethods.DidRunHaxeMethod, {
 					method: method,
 					debugInfo: debugInfo,

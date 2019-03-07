@@ -96,7 +96,7 @@ class SignatureHelpFeature {
 	}
 
 	function getSignatureDocumentation(documentation:String):Null<EitherType<String, MarkupContent>> {
-		if (context.config.enableSignatureHelpDocumentation) {
+		if (context.config.user.enableSignatureHelpDocumentation) {
 			return {
 				kind: MarkupKind.MarkDown,
 				value: DocHelper.markdownFormat(documentation)

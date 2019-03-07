@@ -81,7 +81,7 @@ class CodeLensFeature {
 	}
 
 	function onCodeLens(params:CodeLensParams, token:CancellationToken, resolve:Array<CodeLens>->Void, reject:ResponseError<NoData>->Void) {
-		if (!context.config.enableCodeLens) {
+		if (!context.config.user.enableCodeLens) {
 			return resolve([]);
 		}
 		var uri = params.textDocument.uri;

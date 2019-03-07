@@ -15,7 +15,7 @@ class StructDefaultsMacro {
 	**/
 	public static macro function applyDefaults(struct:Expr, defaults:Expr):Expr {
 		inline function error(message:String)
-			Context.fatalError(message, (macro 0).pos);
+			Context.fatalError(message, struct.pos);
 
 		var structType = Context.typeof(struct);
 		var defaultsType = Context.typeof(defaults);

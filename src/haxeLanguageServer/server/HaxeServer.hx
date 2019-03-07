@@ -54,10 +54,12 @@ class HaxeServer {
 		var env = new haxe.DynamicAccess();
 		for (key => value in js.Node.process.env)
 			env[key] = value;
-		for (key => value in context.displayServerConfig.env)
+		for (key => value in context.config.displayServer.env)
 			env[key] = value;
 
-		var haxePath = context.displayServerConfig.path;
+		var config =  context.config.displayServer;
+
+		var haxePath = config.path;
 		var checkRun = ChildProcess.spawnSync(haxePath, ["-version"], {env: env});
 		if (checkRun.error != null) {
 			if (checkRun.error.message.indexOf("ENOENT") >= 0) {
@@ -92,7 +94,7 @@ class HaxeServer {
 		buffer = new MessageBuffer();
 		nextMessageLength = -1;
 
-		proc = ChildProcess.spawn(context.displayServerConfig.path, context.displayServerConfig.arguments.concat(["--wait", "stdio"]), {env: env});
+		proc = ChildProcess.spawn(haxePath, config.arguments.concat(["--wait", "stdio"]), {env: env});
 
 		proc.stdout.on(ReadableEvent.Data, function(buf:Buffer) {
 			context.sendLogMessage(Log, reTrailingNewline.replace(buf.toString(), ""));
@@ -129,7 +131,7 @@ class HaxeServer {
 			onInitComplete();
 		});
 
-		var displayPort = context.config.displayPort;
+		var displayPort = context.config.user.displayPort;
 		if (socketListener == null && displayPort != null) {
 			if (displayPort == "auto") {
 				getAvailablePort(6000).then(startSocketServer);
@@ -140,17 +142,17 @@ class HaxeServer {
 	}
 
 	function configure() {
-		context.callHaxeMethod(ServerMethods.Configure, {noModuleChecks: true, print: context.displayServerConfig.print}, null, _ -> null, error -> {
+		context.callHaxeMethod(ServerMethods.Configure, {noModuleChecks: true, print: context.config.displayServer.print}, null, _ -> null, error -> {
 			trace("Error during " + ServerMethods.Configure + " " + error);
 		});
 	}
 
 	function buildCompletionCache() {
-		if (!context.config.buildCompletionCache || context.displayArguments == null)
+		if (!context.config.user.buildCompletionCache || context.config.displayArguments == null)
 			return;
 
 		startCompletionInitializationProgress("Building Cache");
-		process("cache build", context.displayArguments.concat(["--no-output"]), null, true, null, Processed(function(_) {
+		process("cache build", context.config.displayArguments.concat(["--no-output"]), null, true, null, Processed(function(_) {
 			stopProgress();
 			if (supports(ServerMethods.ReadClassPaths)) {
 				readClassPaths();
@@ -392,7 +394,7 @@ class HaxeServer {
 	}
 
 	function updateRequestQueue() {
-		if (!context.sendMethodResults) {
+		if (!context.config.sendMethodResults) {
 			return;
 		}
 		var queue = [];
