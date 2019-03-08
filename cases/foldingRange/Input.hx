@@ -71,6 +71,13 @@ class Foo {
 
 		"";
 		[];
+
+		switch foo {
+			case bar:
+				trace(bar);
+			default:
+				trace("default");
+		}
 	}
 }
 

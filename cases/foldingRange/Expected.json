@@ -8,7 +8,7 @@
 	},
 	{
 		"startLine": 12,
-		"endLine": 73,
+		"endLine": 80,
 		"startCharacter": 10,
 		"endCharacter": 2
 	},
@@ -21,9 +21,9 @@
 	},
 	{
 		"startLine": 16,
-		"endLine": 72,
+		"endLine": 79,
 		"startCharacter": 16,
-		"endCharacter": 5
+		"endCharacter": 3
 	},
 	{
 		"startLine": 17,
@@ -104,36 +104,54 @@
 		"endCharacter": 19
 	},
 	{
+		"startLine": 74,
+		"endLine": 78,
+		"startCharacter": 13,
+		"endCharacter": 21
+	},
+	{
+		"startLine": 75,
+		"endLine": 76,
+		"startCharacter": 3,
+		"endCharacter": 15
+	},
+	{
 		"startLine": 77,
 		"endLine": 78,
+		"startCharacter": 3,
+		"endCharacter": 21
+	},
+	{
+		"startLine": 84,
+		"endLine": 85,
 		"startCharacter": 17,
 		"endCharacter": 15,
 		"kind": "region"
 	},
 	{
-		"startLine": 80,
-		"endLine": 81,
+		"startLine": 87,
+		"endLine": 88,
 		"startCharacter": 16,
 		"endCharacter": 14,
 		"kind": "region"
 	},
 	{
-		"startLine": 76,
-		"endLine": 82,
+		"startLine": 83,
+		"endLine": 89,
 		"startCharacter": 16,
 		"endCharacter": 14,
 		"kind": "region"
 	},
 	{
-		"startLine": 85,
-		"endLine": 86,
+		"startLine": 92,
+		"endLine": 93,
 		"startCharacter": 14,
 		"endCharacter": 13,
 		"kind": "region"
 	},
 	{
-		"startLine": 89,
-		"endLine": 90,
+		"startLine": 96,
+		"endLine": 97,
 		"startCharacter": 16,
 		"endCharacter": 14,
 		"kind": "region"

@@ -57,6 +57,9 @@ class FoldingRangeResolver {
 						add(start, end);
 					}
 
+				case Kwd(KwdCase), Kwd(KwdDefault):
+					addRange(tokens.getTreePos(token));
+
 				case Comment(_):
 					addRange(tokens.getTreePos(token), Comment);
 
