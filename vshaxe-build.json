@@ -34,13 +34,17 @@
 		{
 			"name": "json-rpc",
 			"installArgs": ["git", "json-rpc", "https://github.com/vshaxe/json-rpc"]
+		},
+		{
+			"name": "haxeserver",
+			"installArgs": ["git", "haxeserver", "https://github.com/simn/haxeserver"]
 		}
 	],
 	"targets": [
 		{
 			"name": "language-server",
 			"args": {
-				"haxelibs": ["haxe-hxparser", "hxparse", "haxeparser", "tokentree", "formatter", "json2object", "json-rpc"],
+				"haxelibs": ["haxe-hxparser", "hxparse", "haxeparser", "tokentree", "formatter", "json2object", "json-rpc", "haxeserver"],
 				"classPaths": [
 					"src",
 					"protocol/src"

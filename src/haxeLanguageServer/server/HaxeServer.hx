@@ -19,6 +19,7 @@ class HaxeServer {
 	var startRequest:Null<Void->Void>;
 	var crashes:Int = 0;
 	var supportedMethods:Array<String> = [];
+	var haxeServer:haxeserver.HaxeServerAsync;
 
 	public var version(default, null):Null<SemVer>;
 
@@ -75,6 +76,8 @@ class HaxeServer {
 		var isVersionSupported = version >= new SemVer(3, 4, 0);
 		if (!isVersionSupported)
 			return error('Unsupported Haxe version! Minimum required: 3.4.0. Found: $version.');
+
+		haxeServer = haxeserver.HaxeServerAsync.launch(config.arguments);
 
 		function onInitComplete() {
 			stopProgress();
@@ -250,6 +253,16 @@ class HaxeServer {
 	}
 
 	public function process(label:String, args:Array<String>, ?token:CancellationToken, cancellable:Bool, ?stdin:String, handler:ResultHandler) {
+		var stdin = stdin == null ? null : haxe.io.Bytes.ofString(stdin);
+		function callbackPatch(callback, result:Dynamic) {
+			callback(DisplayResult.DResult(result.stderr));
+		}
+		switch (handler) {
+			case Raw(callback):
+				haxeServer.rawRequest(args, stdin, callbackPatch.bind(callback), msg -> throw msg);
+			case Processed(callback, errback):
+				haxeServer.rawRequest(args, stdin, callbackPatch.bind(callback), errback);
+		}
 	}
 
 	public function supports<P, R>(method:HaxeRequestMethod<P, R>) {
