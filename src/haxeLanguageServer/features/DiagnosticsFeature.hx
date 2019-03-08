@@ -149,10 +149,16 @@ class DiagnosticsFeature {
 				var sent = new Map<DocumentUri, Bool>();
 				for (data in data) {
 					count += data.diagnostics.length;
-					if (isPathFiltered(data.file))
+
+					var file = data.file;
+					if (data.file == null) {
+						// LSP always needs a URI for now (https://github.com/Microsoft/language-server-protocol/issues/256)
+						file = errorUri.toFsPath();
+					}
+					if (isPathFiltered(file))
 						continue;
 
-					var uri = data.file.toUri();
+					var uri = file.toUri();
 					var argumentsMap = diagnosticsArguments[uri] = new DiagnosticsMap();
 
 					var newDiagnostics = data.diagnostics;
@@ -167,12 +173,18 @@ class DiagnosticsFeature {
 
 					var diagnostics = new Array<Diagnostic>();
 					for (hxDiag in newDiagnostics) {
-						if (hxDiag.range == null)
-							continue;
+						var range = hxDiag.range;
+						if (hxDiag.range == null) {
+							// range is not optional in the LSP yet
+							range = {
+								start: {line: 0, character: 0},
+								end: {line: 0, character: 0}
+							}
+						}
+
 						var kind:Int = hxDiag.kind;
 						var diag:Diagnostic = {
-							// range: doc.byteRangeToRange(hxDiag.range),
-							range: hxDiag.range,
+							range: range,
 							source: DiagnosticsSource,
 							code: kind,
 							severity: hxDiag.severity,
@@ -449,7 +461,7 @@ private enum abstract DiagnosticKind<T>(Int) from Int to Int {
 		return switch ((this : DiagnosticKind<T>)) {
 			case UnusedImport: "Unused import/using";
 			case UnresolvedIdentifier: "Unresolved identifier";
-			case CompilerError: args;
+			case CompilerError: args.trim();
 			case RemovableCode: args.description;
 			case ParserError: args;
 		}
@@ -458,13 +470,13 @@ private enum abstract DiagnosticKind<T>(Int) from Int to Int {
 
 private typedef HaxeDiagnostic<T> = {
 	var kind:DiagnosticKind<T>;
-	var range:Range;
+	var ?range:Range;
 	var severity:DiagnosticSeverity;
 	var args:T;
 }
 
 private typedef HaxeDiagnosticResponse<T> = {
-	var file:FsPath;
+	var ?file:FsPath;
 	var diagnostics:Array<HaxeDiagnostic<T>>;
 }
 

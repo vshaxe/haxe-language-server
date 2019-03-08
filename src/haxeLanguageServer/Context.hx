@@ -45,7 +45,11 @@ class Context {
 		this.languageServerProtocol = languageServerProtocol;
 
 		haxeDisplayProtocol = new Protocol(message -> {
-			callDisplay(Reflect.field(message, "method"), [Json.stringify(message)], null, function(result:DisplayResult) {
+			var method:String = Reflect.field(message, "method");
+			if (method == Protocol.CANCEL_METHOD) {
+				return; // don't send cancel notifications, not supported by Haxe
+			}
+			callDisplay(method, [Json.stringify(message)], null, function(result:DisplayResult) {
 				switch (result) {
 					case DResult(msg):
 						haxeDisplayProtocol.handleMessage(Json.parse(msg));
