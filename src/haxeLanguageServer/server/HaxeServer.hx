@@ -5,11 +5,8 @@ import js.Promise;
 import js.node.Net;
 import js.node.net.Socket;
 import js.node.net.Server;
-import js.node.child_process.ChildProcess as ChildProcessObject;
-import js.node.child_process.ChildProcess.ChildProcessEvent;
 import js.node.Buffer;
 import js.node.ChildProcess;
-import js.node.stream.Readable;
 import jsonrpc.CancellationToken;
 import haxeLanguageServer.helper.SemVer;
 import haxeLanguageServer.protocol.Server.ServerMethods;
@@ -17,12 +14,6 @@ import haxeLanguageServer.protocol.Protocol;
 
 class HaxeServer {
 	final context:Context;
-	var proc:Null<ChildProcessObject>;
-	var buffer:MessageBuffer;
-	var nextMessageLength:Int;
-	var requestsHead:Null<DisplayRequest>;
-	var requestsTail:Null<DisplayRequest>;
-	var currentRequest:Null<DisplayRequest>;
 	var socketListener:Null<js.node.net.Server>;
 	var stopProgressCallback:Null<Void->Void>;
 	var startRequest:Null<Void->Void>;
@@ -38,12 +29,6 @@ class HaxeServer {
 	static final reTrailingNewline = ~/\r?\n$/;
 
 	public function start(?callback:Void->Void) {
-		// we still have requests in our queue that are not cancelable, such as a build - try again later
-		if (hasNonCancellableRequests()) {
-			startRequest = callback;
-			return;
-		}
-
 		supportedMethods = [];
 		startRequest = null;
 		stop();
@@ -90,17 +75,6 @@ class HaxeServer {
 		var isVersionSupported = version >= new SemVer(3, 4, 0);
 		if (!isVersionSupported)
 			return error('Unsupported Haxe version! Minimum required: 3.4.0. Found: $version.');
-
-		buffer = new MessageBuffer();
-		nextMessageLength = -1;
-
-		proc = ChildProcess.spawn(haxePath, config.arguments.concat(["--wait", "stdio"]), {env: env});
-
-		proc.stdout.on(ReadableEvent.Data, function(buf:Buffer) {
-			context.sendLogMessage(Log, reTrailingNewline.replace(buf.toString(), ""));
-		});
-		proc.stderr.on(ReadableEvent.Data, onData);
-		proc.on(ChildProcessEvent.Exit, onExit);
 
 		function onInitComplete() {
 			stopProgress();
@@ -186,21 +160,6 @@ class HaxeServer {
 		trace(message + "...");
 	}
 
-	function hasNonCancellableRequests():Bool {
-		if (currentRequest != null && !currentRequest.cancellable)
-			return true;
-
-		var request = requestsHead;
-		while (request != null) {
-			if (!request.cancellable) {
-				return true;
-			}
-			request = request.next;
-		}
-
-		return false;
-	}
-
 	// https://gist.github.com/mikeal/1840641#gistcomment-2337132
 	function getAvailablePort(startingAt:Int):Promise<Int> {
 		function getNextAvailablePort(currentPort:Int, cb:Int->Void) {
@@ -247,23 +206,7 @@ class HaxeServer {
 	}
 
 	public function stop() {
-		if (proc != null) {
-			proc.removeAllListeners();
-			proc.kill();
-			proc = null;
-		}
-
 		stopProgress();
-
-		// cancel all callbacks
-		var request = requestsHead;
-		while (request != null) {
-			request.cancel();
-			request = request.next;
-		}
-
-		requestsHead = requestsTail = currentRequest = null;
-		updateRequestQueue();
 	}
 
 	function stopProgress() {
@@ -289,120 +232,27 @@ class HaxeServer {
 			return;
 		}
 
-		var haxeResponse = buffer.getContent();
+		// var haxeResponse = buffer.getContent();
 
-		// invalid compiler argument?
-		var invalidOptionRegex = ~/unknown option `(.*?)'./;
-		if (invalidOptionRegex.match(haxeResponse)) {
-			var option = invalidOptionRegex.matched(1);
-			context.sendShowMessage(Error, 'Invalid compiler argument \'$option\' detected. '
-				+ 'Please verify "haxe.displayConfigurations" and "haxe.displayServer.arguments".');
-			return;
-		}
+		// // invalid compiler argument?
+		// var invalidOptionRegex = ~/unknown option `(.*?)'./;
+		// if (invalidOptionRegex.match(haxeResponse)) {
+		// 	var option = invalidOptionRegex.matched(1);
+		// 	context.sendShowMessage(Error, 'Invalid compiler argument \'$option\' detected. '
+		// 		+ 'Please verify "haxe.displayConfigurations" and "haxe.displayServer.arguments".');
+		// 	return;
+		// }
 
-		context.sendShowMessage(Error,
-			"Haxe process has crashed 3 times, not attempting any more restarts. Please check the output channel for the full error.");
-		trace("\nError message from the compiler:\n");
-		trace(haxeResponse);
-	}
-
-	function onData(data:Buffer) {
-		buffer.append(data);
-		while (true) {
-			if (nextMessageLength == -1) {
-				var length = buffer.tryReadLength();
-				if (length == -1)
-					return;
-				nextMessageLength = length;
-			}
-			var msg = buffer.tryReadContent(nextMessageLength);
-			if (msg == null)
-				return;
-			nextMessageLength = -1;
-			if (currentRequest != null) {
-				var request = currentRequest;
-				currentRequest = null;
-				request.onData(msg);
-				updateRequestQueue();
-				checkQueue();
-			}
-		}
+		// context.sendShowMessage(Error,
+		// 	"Haxe process has crashed 3 times, not attempting any more restarts. Please check the output channel for the full error.");
+		// trace("\nError message from the compiler:\n");
+		// trace(haxeResponse);
 	}
 
 	public function process(label:String, args:Array<String>, ?token:CancellationToken, cancellable:Bool, ?stdin:String, handler:ResultHandler) {
-		// create a request object
-		var request = new DisplayRequest(label, args, token, cancellable, stdin, handler);
-
-		// if the request is cancellable, set a cancel callback to remove request from queue
-		if (token != null) {
-			token.setCallback(function() {
-				if (request == currentRequest)
-					return; // currently processing requests can't be canceled
-
-				// remove from the queue
-				if (request == requestsHead)
-					requestsHead = request.next;
-				if (request == requestsTail)
-					requestsTail = request.prev;
-				if (request.prev != null)
-					request.prev.next = request.next;
-				if (request.next != null)
-					request.next.prev = request.prev;
-
-				// notify about the cancellation
-				request.cancel();
-				updateRequestQueue();
-			});
-		}
-
-		// add to the queue
-		if (requestsHead == null) {
-			requestsHead = requestsTail = request;
-		} else {
-			requestsTail.next = request;
-			request.prev = requestsTail;
-			requestsTail = request;
-		}
-
-		// process the queue
-		checkQueue();
-		updateRequestQueue();
-	}
-
-	function checkQueue() {
-		// a restart has been requested
-		if (startRequest != null) {
-			start(startRequest);
-			return;
-		}
-
-		// there's a currently processing request, wait and don't send another one to Haxe
-		if (currentRequest != null)
-			return;
-
-		// pop the first request still in queue, set it as current and send to Haxe
-		if (requestsHead != null && proc != null) {
-			currentRequest = requestsHead;
-			requestsHead = currentRequest.next;
-			updateRequestQueue();
-			proc.stdin.write(currentRequest.prepareBody());
-		}
 	}
 
 	public function supports<P, R>(method:HaxeRequestMethod<P, R>) {
 		return supportedMethods.indexOf(method) != -1;
-	}
-
-	function updateRequestQueue() {
-		if (!context.config.sendMethodResults) {
-			return;
-		}
-		var queue = [];
-		var request = currentRequest;
-		while (request != null) {
-			queue.push(request.label);
-			request = request.next;
-		}
-		context.languageServerProtocol.sendNotification(LanguageServerMethods.DidChangeRequestQueue, {queue: queue});
 	}
 }
