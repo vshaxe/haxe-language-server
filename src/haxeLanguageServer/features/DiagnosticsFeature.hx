@@ -184,7 +184,7 @@ class DiagnosticsFeature {
 
 						var kind:Int = hxDiag.kind;
 						var diag:Diagnostic = {
-							range: hxDiag.range,
+							range: range,
 							source: DiagnosticsSource,
 							code: kind,
 							severity: hxDiag.severity,
