@@ -256,7 +256,10 @@ class HaxeServer {
 
 	public function process(label:String, args:Array<String>, ?token:CancellationToken, cancellable:Bool, ?stdin:String, handler:ResultHandler) {
 		var stdin = stdin == null ? null : haxe.io.Bytes.ofString(stdin);
-		function callbackPatch(callback, result:Dynamic) {
+		function callbackPatch(callback, result:haxeserver.HaxeServerRequestResult) {
+			if (result.stdout.length > 0) {
+				context.sendLogMessage(Log, reTrailingNewline.replace(result.stdout, ""));
+			}
 			callback(DisplayResult.DResult(result.stderr));
 		}
 		switch (handler) {
