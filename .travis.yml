@@ -6,6 +6,7 @@ haxe:
 
 install:
  - haxelib git vshaxe-build https://github.com/vshaxe/vshaxe-build
+ - haxelib git haxeserver https://github.com/simn/haxeserver
 
 script:
  - haxelib run vshaxe-build -t language-server -t language-server-tests -m both

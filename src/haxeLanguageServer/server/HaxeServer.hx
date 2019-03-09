@@ -1,5 +1,7 @@
 package haxeLanguageServer.server;
 
+import haxeserver.process.HaxeServerProcessNode;
+import haxeserver.HaxeServerAsync;
 import haxe.Json;
 import js.Promise;
 import js.node.Net;
@@ -77,7 +79,7 @@ class HaxeServer {
 		if (!isVersionSupported)
 			return error('Unsupported Haxe version! Minimum required: 3.4.0. Found: $version.');
 
-		haxeServer = haxeserver.HaxeServerAsync.launch(config.arguments);
+		haxeServer = new HaxeServerAsync(() -> new HaxeServerProcessNode(haxePath, config.arguments, {env: env}));
 
 		function onInitComplete() {
 			stopProgress();
