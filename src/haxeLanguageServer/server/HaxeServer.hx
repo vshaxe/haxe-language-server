@@ -1,5 +1,6 @@
 package haxeLanguageServer.server;
 
+import haxeserver.HaxeServerRequestResult;
 import haxeserver.process.HaxeServerProcessNode;
 import haxeserver.HaxeServerAsync;
 import haxe.Json;
@@ -256,17 +257,24 @@ class HaxeServer {
 
 	public function process(label:String, args:Array<String>, ?token:CancellationToken, cancellable:Bool, ?stdin:String, handler:ResultHandler) {
 		var stdin = stdin == null ? null : haxe.io.Bytes.ofString(stdin);
-		function callbackPatch(callback, result:haxeserver.HaxeServerRequestResult) {
-			if (result.stdout.length > 0) {
-				context.sendLogMessage(Log, reTrailingNewline.replace(result.stdout, ""));
+		function checkStdout(stdout:String) {
+			if (stdout.length > 0) {
+				context.sendLogMessage(Log, reTrailingNewline.replace(stdout, ""));
 			}
-			callback(DisplayResult.DResult(result.stderr));
 		}
 		switch (handler) {
 			case Raw(callback):
-				haxeServer.rawRequest(args, stdin, callbackPatch.bind(callback), msg -> throw msg);
+				function cb(result:HaxeServerRequestResult) {
+					checkStdout(result.stdout);
+					callback(DisplayResult.DResult(result.stderrRaw.getString(0, result.stderrRaw.length)));
+				}
+				haxeServer.rawRequest(args, stdin, cb, msg -> throw msg);
 			case Processed(callback, errback):
-				haxeServer.rawRequest(args, stdin, callbackPatch.bind(callback), errback);
+				function cb(result:HaxeServerRequestResult) {
+					checkStdout(result.stdout);
+					callback(DisplayResult.DResult(result.stderr));
+				}
+				haxeServer.rawRequest(args, stdin, cb, errback);
 		}
 	}
 
