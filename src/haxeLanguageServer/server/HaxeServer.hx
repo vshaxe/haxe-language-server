@@ -23,6 +23,7 @@ class HaxeServer {
 	var crashes:Int = 0;
 	var supportedMethods:Array<String> = [];
 	var haxeServer:haxeserver.HaxeServerAsync;
+	var haxeServerProcess:haxeserver.process.HaxeServerProcessNode;
 
 	public var version(default, null):Null<SemVer>;
 
@@ -80,7 +81,8 @@ class HaxeServer {
 		if (!isVersionSupported)
 			return error('Unsupported Haxe version! Minimum required: 3.4.0. Found: $version.');
 
-		haxeServer = new HaxeServerAsync(() -> new HaxeServerProcessNode(haxePath, config.arguments, {env: env}));
+		haxeServer = new HaxeServerAsync(() -> haxeServerProcess = new HaxeServerProcessNode(haxePath, config.arguments, {env: env}));
+		haxeServerProcess.onExit(onExit);
 
 		function onInitComplete() {
 			stopProgress();
@@ -231,28 +233,26 @@ class HaxeServer {
 		});
 	}
 
-	function onExit(_, _) {
+	function onExit(haxeResponse:String) {
 		crashes++;
 		if (crashes < 3) {
 			restart("Haxe process was killed");
 			return;
 		}
 
-		// var haxeResponse = buffer.getContent();
+		// invalid compiler argument?
+		var invalidOptionRegex = ~/unknown option `(.*?)'./;
+		if (invalidOptionRegex.match(haxeResponse)) {
+			var option = invalidOptionRegex.matched(1);
+			context.sendShowMessage(Error, 'Invalid compiler argument \'$option\' detected. '
+				+ 'Please verify "haxe.displayConfigurations" and "haxe.displayServer.arguments".');
+			return;
+		}
 
-		// // invalid compiler argument?
-		// var invalidOptionRegex = ~/unknown option `(.*?)'./;
-		// if (invalidOptionRegex.match(haxeResponse)) {
-		// 	var option = invalidOptionRegex.matched(1);
-		// 	context.sendShowMessage(Error, 'Invalid compiler argument \'$option\' detected. '
-		// 		+ 'Please verify "haxe.displayConfigurations" and "haxe.displayServer.arguments".');
-		// 	return;
-		// }
-
-		// context.sendShowMessage(Error,
-		// 	"Haxe process has crashed 3 times, not attempting any more restarts. Please check the output channel for the full error.");
-		// trace("\nError message from the compiler:\n");
-		// trace(haxeResponse);
+		context.sendShowMessage(Error,
+			"Haxe process has crashed 3 times, not attempting any more restarts. Please check the output channel for the full error.");
+		trace("\nError message from the compiler:\n");
+		trace(haxeResponse);
 	}
 
 	public function process(label:String, args:Array<String>, ?token:CancellationToken, cancellable:Bool, ?stdin:String, handler:ResultHandler) {
