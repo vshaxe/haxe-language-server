@@ -358,6 +358,16 @@ class DiagnosticsFeature {
 			});
 		}
 
+		if (context.haxeServer.version.major >= 4 // unsuitable error range before Haxe 4
+			&& arg.indexOf("should be declared with 'override' since it is inherited from superclass") != -1) {
+			actions.push({
+				title: "Add override keyword",
+				kind: QuickFix,
+				edit: WorkspaceEditHelper.create(context, params, [{range: d.range.start.toRange(), newText: "override "}]),
+				diagnostics: [d]
+			});
+		}
+
 		return actions;
 	}
 
