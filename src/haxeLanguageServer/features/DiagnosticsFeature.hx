@@ -192,7 +192,7 @@ class DiagnosticsFeature {
 						}
 						if (kind == RemovableCode || kind == UnusedImport || diag.message.indexOf("has no effect") != -1) {
 							diag.severity = Hint;
-							// diag.tags = [Unnecessary];
+							diag.tags = [Unnecessary];
 						}
 						argumentsMap.set({code: kind, range: diag.range}, hxDiag.args);
 						diagnostics.push(diag);
