@@ -150,16 +150,17 @@ class PostfixCompletion {
 					if (!~/(get)?(length|count|size)/i.match(field)) {
 						continue;
 					}
-					var type = switch (item.type.kind) {
+					var type = item.type.removeNulls().type;
+					type = switch (type.kind) {
 						case TFun:
 							field += "()";
-							var args:JsonFunctionSignature = item.type.args;
+							var args:JsonFunctionSignature = type.args;
 							if (args.args.length > 0) {
 								continue;
 							}
 							args.ret;
 						case _:
-							item.type;
+							type;
 					}
 					switch (type.getDotPath()) {
 						case "StdTypes.Int" | "UInt":
@@ -177,7 +178,7 @@ class PostfixCompletion {
 			moduleType = subject.moduleType;
 		}
 		if (moduleType == null) {
-			moduleType = subject.moduleTypeFollowed;
+			return null;
 		}
 
 		// switching on a concrete enum value _works_, but it's sort of pointless
