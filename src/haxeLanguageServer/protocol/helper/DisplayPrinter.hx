@@ -224,8 +224,10 @@ class DisplayPrinter {
 				var keyword = if (kind.args.write.kind == AccCtor || field.isFinalField()) "final" else "var";
 				var read = printAccessor(kind.args.read, true);
 				var write = printAccessor(kind.args.write, false);
-				var accessors = if ((read != null && write != null)
-					&& (read != "default" || write != "default")) '($read, $write)' else "";
+				var accessors = if ((read != null && write != null) && (read != "default" || write != "default"))
+					'($read, $write)'
+				else
+					"";
 				// structure fields get some special treatment
 				if (occurrence.origin.isStructure()) {
 					access = "";
@@ -457,17 +459,20 @@ class DisplayPrinter {
 		}
 	}
 
-	public function printSwitchOnEnum(subject:String, e:JsonEnum, snippets:Bool) {
+	public function printSwitchOnEnum(subject:String, e:JsonEnum, nullable:Bool, snippets:Bool) {
 		var fields = e.constructors.map(field -> printEnumField(field, field.type, false, false));
-		return printSwitch(subject, fields, snippets);
+		return printSwitch(subject, fields, nullable, snippets);
 	}
 
-	public function printSwitchOnEnumAbstract(subject:String, a:JsonAbstract, snippets:Bool) {
+	public function printSwitchOnEnumAbstract(subject:String, a:JsonAbstract, nullable:Bool, snippets:Bool) {
 		var fields = a.impl.statics.filter(Helper.isEnumAbstractField).map(field -> field.name);
-		return printSwitch(subject, fields, snippets);
+		return printSwitch(subject, fields, nullable, snippets);
 	}
 
-	function printSwitch(subject:String, fields:Array<String>, snippets:Bool) {
+	function printSwitch(subject:String, fields:Array<String>, nullable:Bool, snippets:Bool) {
+		if (nullable) {
+			fields.unshift("null");
+		}
 		for (i in 0...fields.length) {
 			var field = fields[i];
 			field = '\tcase $field:';

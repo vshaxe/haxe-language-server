@@ -358,6 +358,7 @@ typedef DisplayItemOccurrence<T> = {
 	var range:Range;
 	var item:DisplayItem<T>;
 	var ?moduleType:JsonModuleType<Dynamic>;
+	var ?moduleTypeFollowed:JsonModuleType<Dynamic>;
 }
 
 typedef FieldCompletionSubject<T> = DisplayItemOccurrence<T> & {

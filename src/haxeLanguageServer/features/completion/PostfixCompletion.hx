@@ -172,9 +172,12 @@ class PostfixCompletion {
 	}
 
 	function createSwitchItem<T>(subject:FieldCompletionSubject<T>, expr:String):Null<PostfixCompletionItem> {
-		var moduleType = subject.moduleType;
+		var moduleType = subject.moduleTypeFollowed;
 		if (moduleType == null) {
-			return null;
+			moduleType = subject.moduleType;
+		}
+		if (moduleType == null) {
+			moduleType = subject.moduleTypeFollowed;
 		}
 
 		// switching on a concrete enum value _works_, but it's sort of pointless
@@ -196,17 +199,18 @@ class PostfixCompletion {
 			};
 		}
 
+		var nullable = subject.item.type.removeNulls().optional;
 		var printer = new DisplayPrinter();
 		switch (moduleType.kind) {
 			case Enum:
 				var e:JsonEnum = moduleType.args;
 				if (e.constructors.length > 0) {
-					return make(printer.printSwitchOnEnum.bind(expr, e));
+					return make(printer.printSwitchOnEnum.bind(expr, e, nullable));
 				}
 			case Abstract if (moduleType.meta.hasMeta(Enum)):
 				var a:JsonAbstract = moduleType.args;
 				if (a.impl != null && a.impl.statics.exists(Helper.isEnumAbstractField)) {
-					return make(printer.printSwitchOnEnumAbstract.bind(expr, a));
+					return make(printer.printSwitchOnEnumAbstract.bind(expr, a, nullable));
 				}
 			case _:
 		}
