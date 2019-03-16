@@ -161,8 +161,9 @@ class PostfixCompletion {
 						case _:
 							item.type;
 					}
-					if (type.getDotPath() == "StdTypes.Int") {
-						make(field);
+					switch (type.getDotPath()) {
+						case "StdTypes.Int" | "UInt":
+							make(field);
 					}
 				case _:
 			}
