@@ -197,7 +197,7 @@ class CompletionFeature {
 					items.push(completionItem);
 				}
 			};
-			items = items.concat(postfixCompletion.createItems(data));
+			items = items.concat(postfixCompletion.createItems(data, result.items));
 			items = items.concat(expectedTypeCompletion.createItems(data));
 			resolve(items);
 			previousCompletionData = data;

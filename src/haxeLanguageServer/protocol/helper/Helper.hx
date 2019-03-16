@@ -1,5 +1,6 @@
 package haxeLanguageServer.protocol.helper;
 
+import haxeLanguageServer.protocol.helper.DisplayPrinter.PathPrinting;
 import haxeLanguageServer.helper.IdentifierHelper;
 import haxeLanguageServer.protocol.Display;
 import haxe.display.JsonModuleTypes;
@@ -124,14 +125,28 @@ class Helper {
 		return {type: type, optional: optional};
 	}
 
-	public static function guessName<T>(type:JsonType<T>):Null<String> {
+	public static function getTypePath<T>(type:JsonType<T>):JsonTypePathWithParams {
 		return switch (type.kind) {
 			case null: null;
-			case TInst | TEnum | TType | TAbstract:
-				var path:JsonTypePathWithParams = type.args;
-				IdentifierHelper.guessName(path.path.typeName);
+			case TInst | TEnum | TType | TAbstract: type.args;
 			case _: null;
 		}
+	}
+
+	public static function guessName<T>(type:JsonType<T>):Null<String> {
+		var path = type.getTypePath();
+		if (path == null) {
+			return null;
+		}
+		return IdentifierHelper.guessName(path.path.typeName);
+	}
+
+	public static function getDotPath<T>(type:JsonType<T>):Null<String> {
+		var path = type.getTypePath();
+		if (path == null) {
+			return null;
+		}
+		return new DisplayPrinter(PathPrinting.Always).printPath(path.path);
 	}
 
 	public static function hasMandatoryTypeParameters(type:DisplayModuleType):Bool {
