@@ -199,7 +199,7 @@ class PostfixCompletion {
 			};
 		}
 
-		var nullable = subject.item.type.removeNulls().optional;
+		var nullable = subject.item.type.removeNulls().nullable;
 		var printer = new DisplayPrinter();
 		switch (moduleType.kind) {
 			case Enum:

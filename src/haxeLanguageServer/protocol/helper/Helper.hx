@@ -111,7 +111,7 @@ class Helper {
 		return false;
 	}
 
-	public static function removeNulls<T>(type:JsonType<T>, optional:Bool = false):{type:JsonType<T>, optional:Bool} {
+	public static function removeNulls<T>(type:JsonType<T>, nullable:Bool = false):{type:JsonType<T>, nullable:Bool} {
 		switch (type.kind) {
 			case TAbstract:
 				var path:JsonTypePathWithParams = type.args;
@@ -122,7 +122,7 @@ class Helper {
 				}
 			case _:
 		}
-		return {type: type, optional: optional};
+		return {type: type, nullable: nullable};
 	}
 
 	public static function getTypePath<T>(type:JsonType<T>):JsonTypePathWithParams {
