@@ -1,5 +1,6 @@
 package haxeLanguageServer.features;
 
+import haxe.Json;
 import haxe.io.Path;
 import haxeLanguageServer.helper.TypeHelper;
 import haxeLanguageServer.Configuration;
@@ -263,6 +264,7 @@ class DiagnosticsFeature {
 			});
 		}
 		actions = getOrganizeImportActions(params, actions).concat(actions);
+		actions = actions.filterDuplicates((a1, a2) -> Json.stringify(a1) == Json.stringify(a2));
 		return actions;
 	}
 
