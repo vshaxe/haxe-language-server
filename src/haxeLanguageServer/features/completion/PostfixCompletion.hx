@@ -42,11 +42,12 @@ class PostfixCompletion {
 			items.push(createPostfixCompletionItem(item, data.doc, replaceRange));
 		}
 
+		var forBody = '{\n\t$0\n}';
 		function iterator(item:String = "item") {
 			add({
 				label: "for",
 				detail: "for (item in expr)",
-				insertText: 'for ($${1:$item} in $expr) ',
+				insertText: 'for ($${1:$item} in $expr) $forBody',
 				insertTextFormat: Snippet
 			});
 		}
@@ -54,16 +55,16 @@ class PostfixCompletion {
 			add({
 				label: "for k=>v",
 				detail: 'for ($key => value in expr)',
-				insertText: 'for ($key => value in $expr) ',
-				insertTextFormat: PlainText
+				insertText: 'for ($key => value in $expr) $forBody',
+				insertTextFormat: Snippet
 			});
 		}
 		function indexedIterator() {
 			add({
 				label: "fori",
 				detail: "for (i in 0...expr.length)",
-				insertText: 'for (i in 0...$expr.length) ',
-				insertTextFormat: PlainText
+				insertText: 'for (i in 0...$expr.length) $forBody',
+				insertTextFormat: Snippet
 			});
 		}
 
@@ -92,8 +93,8 @@ class PostfixCompletion {
 						add({
 							label: "fori",
 							detail: "for (i in 0...expr)",
-							insertText: 'for (i in 0...$expr) ',
-							insertTextFormat: PlainText
+							insertText: 'for (i in 0...$expr) $forBody',
+							insertTextFormat: Snippet
 						});
 					case "StdTypes.Float":
 						add({
