@@ -6,7 +6,6 @@ import haxeLanguageServer.protocol.Display;
 import languageServerProtocol.Types.CompletionItem;
 import haxeLanguageServer.protocol.helper.DisplayPrinter;
 import haxeLanguageServer.features.completion.CompletionFeature;
-import haxeLanguageServer.helper.IdentifierHelper;
 
 using Lambda;
 
@@ -43,53 +42,45 @@ class PostfixCompletion {
 			items.push(createPostfixCompletionItem(item, data.doc, replaceRange));
 		}
 
+		function iterator(item:String = "item") {
+			add({
+				label: "for",
+				detail: "for (item in expr)",
+				insertText: 'for ($${1:$item} in $expr) ',
+				insertTextFormat: Snippet
+			});
+		}
+		function keyValueIterator(key:String = "key") {
+			add({
+				label: "for k=>v",
+				detail: 'for ($key => value in expr)',
+				insertText: 'for ($key => value in $expr) ',
+				insertTextFormat: PlainText
+			});
+		}
+		function indexedIterator() {
+			add({
+				label: "fori",
+				detail: "for (i in 0...expr.length)",
+				insertText: 'for (i in 0...$expr.length) ',
+				insertTextFormat: PlainText
+			});
+		}
+
+		var hasIteratorApi = subject.iterator != null || subject.keyValueIterator != null;
+
+		if (subject.iterator != null) {
+			iterator(subject.iterator.type.guessName());
+		}
+		if (subject.keyValueIterator != null) {
+			keyValueIterator();
+		}
+
 		switch (type.kind) {
 			case TAbstract | TInst:
-				function iterator(itemType:JsonType<Dynamic>) {
-					var itemName = switch (itemType.kind) {
-						case TInst | TEnum | TType | TAbstract:
-							var path:JsonTypePath = itemType.args.path;
-							IdentifierHelper.guessName(path.typeName);
-						case TMono, _:
-							"item";
-					}
-					add({
-						label: "for",
-						detail: "for (item in expr)",
-						insertText: 'for ($${1:$itemName} in $expr) ',
-						insertTextFormat: Snippet
-					});
-				}
-				function keyValueIterator(key:String) {
-					add({
-						label: "for k=>v",
-						detail: 'for ($key => value in expr)',
-						insertText: 'for ($key => value in $expr) ',
-						insertTextFormat: PlainText
-					});
-				}
-				function indexedIterator() {
-					add({
-						label: "fori",
-						detail: "for (i in 0...expr.length)",
-						insertText: 'for (i in 0...$expr.length) ',
-						insertTextFormat: PlainText
-					});
-				}
-
 				var path = type.args;
 				var dotPath = new DisplayPrinter(PathPrinting.Always).printPath(path.path);
 				switch (dotPath) {
-					case "Array":
-						iterator(path.params[0]);
-						indexedIterator();
-					case "haxe.ds.Map":
-						keyValueIterator("key");
-						iterator(path.params[1]);
-					case "haxe.ds.List":
-						keyValueIterator("index");
-						iterator(path.params[0]);
-						indexedIterator();
 					case "StdTypes.Bool":
 						add({
 							label: "if",
@@ -111,6 +102,22 @@ class PostfixCompletion {
 							insertText: 'Std.int($expr)',
 							insertTextFormat: PlainText
 						});
+				}
+
+				// TODO: remove hardcoded iterator() / keyValueIterator() handling sometime after Haxe 4 releases
+				if (!hasIteratorApi) {
+					switch (dotPath) {
+						case "Array":
+							iterator(path.params[0].guessName());
+							indexedIterator();
+						case "haxe.ds.Map":
+							keyValueIterator();
+							iterator(path.params[1].guessName());
+						case "haxe.ds.List":
+							keyValueIterator("index");
+							iterator(path.params[0].guessName());
+							indexedIterator();
+					}
 				}
 			case _:
 		}

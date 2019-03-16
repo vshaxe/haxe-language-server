@@ -361,7 +361,13 @@ typedef DisplayItemOccurrence<T> = {
 }
 
 typedef FieldCompletionSubject<T> = DisplayItemOccurrence<T> & {
-	// var isIterable:Bool; TODO
+	var ?iterator:{
+		var type:JsonType<Dynamic>;
+	};
+	var ?keyValueIterator:{
+		var key:JsonType<Dynamic>;
+		var value:JsonType<Dynamic>;
+	};
 }
 
 typedef ToplevelCompletion<T> = {

@@ -1,5 +1,6 @@
 package haxeLanguageServer.protocol.helper;
 
+import haxeLanguageServer.helper.IdentifierHelper;
 import haxeLanguageServer.protocol.Display;
 import haxe.display.JsonModuleTypes;
 
@@ -121,6 +122,16 @@ class Helper {
 			case _:
 		}
 		return {type: type, optional: optional};
+	}
+
+	public static function guessName<T>(type:JsonType<T>):Null<String> {
+		return switch (type.kind) {
+			case null: null;
+			case TInst | TEnum | TType | TAbstract:
+				var path:JsonTypePathWithParams = type.args;
+				IdentifierHelper.guessName(path.path.typeName);
+			case _: null;
+		}
 	}
 
 	public static function hasMandatoryTypeParameters(type:DisplayModuleType):Bool {
