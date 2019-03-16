@@ -1,6 +1,8 @@
 package haxeLanguageServer.features;
 
 import haxe.io.Path;
+import haxeLanguageServer.helper.TypeHelper;
+import haxeLanguageServer.Configuration;
 import haxeLanguageServer.helper.PathHelper;
 import haxeLanguageServer.helper.ImportHelper;
 import haxeLanguageServer.server.DisplayResult;
@@ -290,16 +292,24 @@ class DiagnosticsFeature {
 
 	function getUnresolvedImportActions(params:CodeActionParams, d:Diagnostic, arg):Array<CodeAction> {
 		var doc = context.documents.get(params.textDocument.uri);
-		var importStyle = context.config.user.codeGeneration.imports.style;
-		return [
-			{
-				title: "Import " + arg.name,
+		var preferredStyle = context.config.user.codeGeneration.imports.style;
+		var secondaryStyle:ImportStyle = if (preferredStyle == Type) Module else Type;
+
+		var importPosition = ImportHelper.getImportPosition(doc);
+		function makeImportAction(style:ImportStyle):CodeAction {
+			var path = if (style == Module) TypeHelper.getModule(arg.name) else arg.name;
+			return {
+				title: "Import " + path,
 				kind: QuickFix,
 				edit: WorkspaceEditHelper.create(context, params, [
-					ImportHelper.createImportsEdit(doc, ImportHelper.getImportPosition(doc), [arg.name], importStyle)
+					ImportHelper.createImportsEdit(doc, importPosition, [arg.name], style)
 				]),
 				diagnostics: [d]
-			},
+			};
+		}
+		return [
+			makeImportAction(preferredStyle),
+			makeImportAction(secondaryStyle),
 			{
 				title: "Change to " + arg.name,
 				kind: QuickFix,
