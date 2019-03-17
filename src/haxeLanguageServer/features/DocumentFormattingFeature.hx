@@ -25,18 +25,13 @@ class DocumentFormattingFeature {
 		if (tokens == null) {
 			return reject.noTokens();
 		}
-		var formatter = new Formatter();
-		var result = formatter.formatFile({
-			name: if (doc.uri.isFile()) {
-				doc.uri.toFsPath().toString();
-			} else {
-				context.workspacePath + "/untitled.hx";
-			},
-			content: tokens.bytes
-		}, {
-			tokens: tokens.list,
-			tokenTree: tokens.tree
+
+		var config = Formatter.loadConfig(if (doc.uri.isFile()) {
+			doc.uri.toFsPath().toString();
+		} else {
+			context.workspacePath.toString();
 		});
+		var result = Formatter.format(Tokens(tokens.list, tokens.tree, tokens.bytes), config);
 		switch (result) {
 			case Success(formattedCode):
 				var fullRange = {
