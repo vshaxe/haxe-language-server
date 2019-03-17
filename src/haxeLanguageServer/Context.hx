@@ -111,7 +111,7 @@ class Context {
 		capabilities = params.capabilities;
 		config.onInitialize(params);
 
-		documents = new TextDocuments();
+		documents = new TextDocuments(this);
 		new DocumentSymbolsFeature(this);
 		new FoldingRangeFeature(this);
 		new DocumentFormattingFeature(this);
@@ -347,7 +347,7 @@ class Context {
 
 	public function startTimer(method:String) {
 		var startTime = Date.now().getTime();
-		return function(result:Dynamic, ?debugInfo:String) {
+		return function(?result:Dynamic, ?debugInfo:String) {
 			if (config.sendMethodResults) {
 				languageServerProtocol.sendNotification(LanguageServerMethods.DidRunHaxeMethod, {
 					method: method,

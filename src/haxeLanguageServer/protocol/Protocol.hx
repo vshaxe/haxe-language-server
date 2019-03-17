@@ -45,7 +45,7 @@ typedef Timer = {
 }
 
 typedef Response<T> = {
-	final result:T;
+	final ?result:T;
 
 	/** UNIX timestamp at the moment the data was sent. **/
 	final ?timestamp:Float;
