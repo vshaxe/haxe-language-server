@@ -147,7 +147,7 @@ class PostfixCompletion {
 			switch (item.kind) {
 				case ClassField:
 					var field = item.args.field.name;
-					if (!~/(get)?(length|count|size)/i.match(field)) {
+					if (!~/^(get)?(length|count|size)$/i.match(field)) {
 						continue;
 					}
 					var type = item.type.removeNulls().type;
