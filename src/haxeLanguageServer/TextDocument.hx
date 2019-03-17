@@ -16,14 +16,14 @@ class TextDocument {
 	public var parseTree(get, never):File;
 	public var tokens(get, never):Null<TokenTreeManager>;
 
-	final context:Context;
+	final context:Null<Context>;
 	var _parseTree:Null<File>;
 	var _tokens:Null<TokenTreeManager>;
 	@:allow(haxeLanguageServer.TextDocuments)
 	var lineOffsets:Array<Int>;
 	var onUpdateListeners:Array<OnTextDocumentChangeListener> = [];
 
-	public function new(context:Context, uri:DocumentUri, languageId:String, version:Int, content:String) {
+	public function new(?context:Context, uri:DocumentUri, languageId:String, version:Int, content:String) {
 		this.context = context;
 		this.uri = uri;
 		this.languageId = languageId;
@@ -180,13 +180,15 @@ class TextDocument {
 
 	function get_tokens() {
 		if (_tokens == null) {
-			var stopTimer = context.startTimer("TokenTreeManager.create()");
+			var stopTimer = if (context != null) context.startTimer("TokenTreeManager.create()") else null;
 			try {
 				_tokens = TokenTreeManager.create(content);
 			} catch (e:Any) {
 				trace('$uri: $e');
 			}
-			stopTimer();
+			if (stopTimer != null) {
+				stopTimer();
+			}
 		}
 		return _tokens;
 	}
