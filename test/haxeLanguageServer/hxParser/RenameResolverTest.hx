@@ -508,6 +508,7 @@ class Foo {
     }
 }");
 	}
+
 	// #136
 	/*function testForLoopConflict() {
 			check("

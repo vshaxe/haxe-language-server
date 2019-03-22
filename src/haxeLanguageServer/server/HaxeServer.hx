@@ -111,7 +111,8 @@ class HaxeServer {
 
 		stopProgressCallback = context.startProgress("Initializing Haxe/JSON-RPC protocol");
 		context.callHaxeMethod(Methods.Initialize, {supportsResolve: true}, null, result -> {
-			if (result.haxeVersion.major == 4 && result.haxeVersion.pre.startsWith("preview.")) {
+			var pre = result.haxeVersion.pre;
+			if (result.haxeVersion.major == 4 && (pre.startsWith("preview.") || pre == "rc.1")) {
 				context.languageServerProtocol.sendNotification(LanguageServerMethods.DidDetectOldPreview, {preview: result.haxeVersion.pre});
 			}
 			supportedMethods = result.methods;

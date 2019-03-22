@@ -303,9 +303,7 @@ class DiagnosticsFeature {
 			return {
 				title: "Import " + path,
 				kind: QuickFix,
-				edit: WorkspaceEditHelper.create(context, params, [
-					ImportHelper.createImportsEdit(doc, importPosition, [arg.name], style)
-				]),
+				edit: WorkspaceEditHelper.create(context, params, [ImportHelper.createImportsEdit(doc, importPosition, [arg.name], style)]),
 				diagnostics: [d]
 			};
 		}
