@@ -228,8 +228,12 @@ class PostfixCompletion {
 			insertTextFormat: data.insertTextFormat,
 			textEdit: {
 				newText: data.insertText,
-				range: replaceRange
+				range: replaceRange.end.toRange()
 			},
+			additionalTextEdits: [{
+				range: replaceRange,
+				newText: ""
+			}],
 			data: {
 				origin: CompletionItemOrigin.Custom
 			}
