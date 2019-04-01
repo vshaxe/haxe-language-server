@@ -116,6 +116,20 @@ class PostfixCompletion {
 				});
 		}
 
+		function createLocalItem(kind:String, sortText:String):PostfixCompletionItem {
+			return {
+				label: kind,
+				detail: '$kind name = $expr;',
+				insertText: '$kind $${1:name} = $expr;',
+				insertTextFormat: Snippet,
+				sortText: "~" + sortText + kind,
+				eat: ";"
+			};
+		}
+
+		add(createLocalItem("var", "1"));
+		add(createLocalItem("final", "2"));
+
 		for (item in createIndexedIterators(subject, items, expr)) {
 			add(item);
 		}
@@ -219,6 +233,13 @@ class PostfixCompletion {
 	}
 
 	function createPostfixCompletionItem(data:PostfixCompletionItem, doc:TextDocument, replaceRange:Range):CompletionItem {
+		if (data.eat != null) {
+			var pos = replaceRange.end;
+			var nextChar = doc.getText({start: pos, end: pos.translate(0, 1)});
+			if (data.eat == nextChar) {
+				replaceRange = {start: replaceRange.start, end: pos.translate(0, 1)};
+			}
+		};
 		var item:CompletionItem = {
 			label: data.label,
 			detail: data.detail,
@@ -257,4 +278,5 @@ private typedef PostfixCompletionItem = {
 	var insertTextFormat:InsertTextFormat;
 	var ?code:String;
 	var ?sortText:String;
+	var ?eat:String;
 }
