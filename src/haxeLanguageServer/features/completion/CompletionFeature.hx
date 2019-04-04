@@ -29,6 +29,7 @@ class CompletionFeature {
 	final legacy:CompletionFeatureLegacy;
 	final expectedTypeCompletion:ExpectedTypeCompletion;
 	final postfixCompletion:PostfixCompletion;
+	final snippetCompletion:SnippetCompletion;
 	final printer:DisplayPrinter;
 	final triggerSuggest:Command;
 	final triggerParameterHints:Command;
@@ -44,6 +45,7 @@ class CompletionFeature {
 		inline checkCapabilities();
 		expectedTypeCompletion = new ExpectedTypeCompletion(context);
 		postfixCompletion = new PostfixCompletion();
+		snippetCompletion = new SnippetCompletion();
 		printer = new DisplayPrinter(false, Qualified, {
 			argumentTypeHints: true,
 			returnTypeHint: NonVoid,
@@ -199,6 +201,9 @@ class CompletionFeature {
 			};
 			items = items.concat(postfixCompletion.createItems(data, result.items));
 			items = items.concat(expectedTypeCompletion.createItems(data));
+			if (snippetSupport) {
+				items = items.concat(snippetCompletion.createItems(data, result.items));
+			}
 			resolve(items);
 			previousCompletionData = data;
 			return items.length + " items";
