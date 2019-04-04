@@ -29,7 +29,7 @@
 		},
 		{
 			"name": "json2object",
-			"installArgs": ["install", "json2object"]
+			"installArgs": ["git", "json2object", "https://github.com/elnabo/json2object/", "--never"]
 		},
 		{
 			"name": "json-rpc",
