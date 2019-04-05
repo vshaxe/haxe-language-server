@@ -2,6 +2,7 @@ package haxeLanguageServer.features.completion;
 
 import haxe.display.JsonModuleTypes;
 import haxeLanguageServer.helper.DocHelper;
+import haxeLanguageServer.helper.SnippetHelper;
 import haxeLanguageServer.protocol.Display;
 import haxeLanguageServer.protocol.helper.DisplayPrinter;
 import haxeLanguageServer.features.completion.CompletionFeature;
@@ -101,12 +102,9 @@ class PostfixCompletion {
 					insertTextFormat: PlainText
 				});
 			case "StdTypes.Int":
-				add({
-					label: "fori",
-					detail: "for (i in 0...expr)",
-					insertText: 'for (i in 0...$expr) $forBody',
-					insertTextFormat: Snippet
-				});
+				for (item in createIndexedLoops(expr)) {
+					add(item);
+				}
 			case "StdTypes.Float":
 				add({
 					label: "int",
@@ -130,7 +128,7 @@ class PostfixCompletion {
 		add(createLocalItem("var", "1"));
 		add(createLocalItem("final", "2"));
 
-		for (item in createIndexedIterators(subject, items, expr)) {
+		for (item in createLengthIterators(subject, items, expr)) {
 			add(item);
 		}
 		var switchItem = createSwitchItem(subject, expr);
@@ -147,16 +145,9 @@ class PostfixCompletion {
 			- argument-less functions returning `Int`
 		as long as the field name indicates it's a length/count/size.
 	**/
-	function createIndexedIterators<T1, T2>(subject:FieldCompletionSubject<T1>, items:Array<DisplayItem<T2>>, expr:String):Array<PostfixCompletionItem> {
+	function createLengthIterators<T1, T2>(subject:FieldCompletionSubject<T1>, items:Array<DisplayItem<T2>>, expr:String):Array<PostfixCompletionItem> {
 		var result:Array<PostfixCompletionItem> = [];
-		function make(field:String) {
-			result.push({
-				label: 'for i...$field',
-				detail: 'for (i in 0...expr.$field)',
-				insertText: 'for (i in 0...$expr.$field) $forBody',
-				insertTextFormat: Snippet
-			});
-		}
+
 		for (item in items) {
 			switch (item.kind) {
 				case ClassField:
@@ -178,12 +169,44 @@ class PostfixCompletion {
 					}
 					switch (type.getDotPath()) {
 						case "StdTypes.Int" | "UInt":
-							make(field);
+							result = result.concat(createIndexedLoops('$expr.$field'));
 					}
 				case _:
 			}
 		}
 		return result;
+	}
+
+	function createIndexedLoops(field:String):Array<PostfixCompletionItem> {
+		var whileForward = 'var i = 0;
+while (i < $field) {
+	$0
+	i++;
+}';
+		var whileBackward = 'var i = $field;
+while (i-- > 0) {
+	$0
+}';
+		return [
+			{
+				label: 'for 0...$field',
+				detail: 'for (i in 0...$field)',
+				insertText: 'for (i in 0...$field) $forBody',
+				insertTextFormat: Snippet
+			},
+			{
+				label: 'while 0...$field',
+				detail: SnippetHelper.prettify(whileForward),
+				insertText: whileForward,
+				insertTextFormat: Snippet
+			},
+			{
+				label: 'while $field...0',
+				detail: SnippetHelper.prettify(whileBackward),
+				insertText: whileBackward,
+				insertTextFormat: Snippet
+			}
+		];
 	}
 
 	function createSwitchItem<T>(subject:FieldCompletionSubject<T>, expr:String):Null<PostfixCompletionItem> {

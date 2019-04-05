@@ -1,6 +1,7 @@
 package haxeLanguageServer.features.completion;
 
 import js.Promise;
+import haxeLanguageServer.helper.SnippetHelper;
 import haxeLanguageServer.helper.DocHelper;
 import haxeLanguageServer.protocol.Display;
 
@@ -47,8 +48,8 @@ class SnippetCompletion {
 					{label: "abstract", code: 'abstract $abstractName $body'},
 					{label: "enum abstract", code: 'enum abstract $abstractName $body'}
 				].map(function(item:{label:String, code:String}) {
-					return createItem(item.label + " " + moduleName, item.code, data.replaceRange);
-				});
+						return createItem(item.label + " " + moduleName, item.code, data.replaceRange);
+					});
 
 				if (isPackageLevel) {
 					context.determinePackage.onDeterminePackage({fsPath: fsPath}, null, result -> {
@@ -75,13 +76,8 @@ class SnippetCompletion {
 			insertTextFormat: Snippet,
 			documentation: {
 				kind: MarkDown,
-				value: DocHelper.printCodeBlock(prettifySnippet(code), Haxe)
+				value: DocHelper.printCodeBlock(SnippetHelper.prettify(code), Haxe)
 			}
 		}
-	}
-
-	function prettifySnippet(snippet:String):String {
-		snippet = ~/\$\{\d:(.*?)\}/g.replace(snippet, "$1");
-		return ~/\$\d/g.replace(snippet, "|");
 	}
 }
