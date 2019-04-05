@@ -8,6 +8,7 @@ import haxeLanguageServer.protocol.Display;
 import haxeLanguageServer.helper.DocHelper;
 import haxeLanguageServer.helper.ImportHelper;
 import haxeLanguageServer.protocol.helper.DisplayPrinter;
+import haxeLanguageServer.tokentree.PositionAnalyzer;
 import languageServerProtocol.protocol.Protocol.CompletionParams;
 import languageServerProtocol.Types.CompletionItem;
 import languageServerProtocol.Types.CompletionItemKind;
@@ -120,7 +121,7 @@ class CompletionFeature {
 		}
 		var offset = doc.offsetAt(params.position);
 		var textBefore = doc.content.substring(0, offset);
-		if (contextSupport && isInvalidCompletionPosition(params, textBefore)) {
+		if (contextSupport && isInvalidCompletionPosition(doc, params, textBefore)) {
 			return resolve([]);
 		}
 		var handle = if (context.haxeServer.supports(DisplayMethods.Completion)) handleJsonRpc else legacy.handle;
@@ -129,7 +130,7 @@ class CompletionFeature {
 
 	static final autoTriggerOnSpacePattern = ~/(\b(import|using|extends|implements|from|to|case|new|cast|override)|(->)) $/;
 
-	function isInvalidCompletionPosition(params:CompletionParams, text:String):Bool {
+	function isInvalidCompletionPosition(doc:TextDocument, params:CompletionParams, text:String):Bool {
 		if (params.context == null) {
 			return false;
 		}
@@ -137,12 +138,26 @@ class CompletionFeature {
 			case null: false;
 			case ">" if (!isAfterArrow(text)): true;
 			case " " if (!autoTriggerOnSpacePattern.match(text)): true;
+			case "$" if (!isInterpolationPosition(doc, params.position, text)): true;
 			case _: false;
 		}
 	}
 
 	inline function isAfterArrow(text:String):Bool {
 		return text.trim().endsWith("->");
+	}
+
+	static final dollarPattern = ~/(\$+)$/;
+
+	function isInterpolationPosition(doc, pos, text):Bool {
+		if (new PositionAnalyzer(doc).getStringKind(pos) != SingleQuote) {
+			return false;
+		}
+		if (!dollarPattern.match(text)) {
+			return false;
+		}
+		var escaped = dollarPattern.matched(1).length % 2 == 0;
+		return !escaped;
 	}
 
 	function onCompletionItemResolve(item:CompletionItem, token:CancellationToken, resolve:CompletionItem->Void, reject:ResponseError<NoData>->Void) {
@@ -160,7 +175,13 @@ class CompletionFeature {
 
 	function handleJsonRpc(params:CompletionParams, token:CancellationToken, resolve:Array<CompletionItem>->Void, reject:ResponseError<NoData>->Void,
 			doc:TextDocument, offset:Int, textBefore:String) {
-		var wasAutoTriggered = params.context == null ? true : params.context.triggerKind == TriggerCharacter;
+		var wasAutoTriggered = true;
+		if (params.context != null) {
+			wasAutoTriggered = params.context.triggerKind == TriggerCharacter;
+			if (params.context.triggerCharacter == "$") {
+				wasAutoTriggered = false;
+			}
+		}
 		var haxeParams = {
 			file: doc.uri.toFsPath(),
 			contents: doc.content,

@@ -34,7 +34,7 @@ class SnippetCompletion {
 						case _:
 							true;
 					}
-				case _: false;
+				case _: true;
 			};
 		});
 

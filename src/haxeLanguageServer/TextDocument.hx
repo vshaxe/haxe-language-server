@@ -77,6 +77,10 @@ class TextDocument {
 		};
 	}
 
+	public inline function rangeAt2(pos:haxe.macro.Expr.Position):Range {
+		return rangeAt(pos.min, pos.max);
+	}
+
 	public inline function byteRangeToRange(byteRange:Range, offsetConverter:DisplayOffsetConverter):Range {
 		return {
 			start: bytePositionToPosition(byteRange.start, offsetConverter),
@@ -121,6 +125,10 @@ class TextDocument {
 
 	public function getText(range:Range) {
 		return content.substring(offsetAt(range.start), offsetAt(range.end));
+	}
+
+	public inline function characterAt(pos:Position) {
+		return getText({start: pos, end: pos.translate(0, 1)});
 	}
 
 	public function addUpdateListener(listener:OnTextDocumentChangeListener) {
