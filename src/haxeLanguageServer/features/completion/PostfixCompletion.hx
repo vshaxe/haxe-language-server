@@ -190,21 +190,21 @@ while (i-- > 0) {
 		return [
 			{
 				label: 'for 0...$field',
-				detail: 'for (i in 0...$field)',
 				insertText: 'for (i in 0...$field) $forBody',
-				insertTextFormat: Snippet
+				insertTextFormat: Snippet,
+				showCode: true
 			},
 			{
 				label: 'while 0...$field',
-				detail: SnippetHelper.prettify(whileForward),
 				insertText: whileForward,
-				insertTextFormat: Snippet
+				insertTextFormat: Snippet,
+				showCode: true
 			},
 			{
 				label: 'while $field...0',
-				detail: SnippetHelper.prettify(whileBackward),
 				insertText: whileBackward,
-				insertTextFormat: Snippet
+				insertTextFormat: Snippet,
+				showCode: true
 			}
 		];
 	}
@@ -227,13 +227,13 @@ while (i-- > 0) {
 			case _:
 		}
 
-		function make(print:(snippets:Bool) -> String):PostfixCompletionItem {
+		function make(insertText:String):PostfixCompletionItem {
 			return {
 				label: "switch",
 				detail: "switch (expr) {cases...}",
-				insertText: print(true),
+				insertText: insertText,
 				insertTextFormat: Snippet,
-				code: print(false)
+				showCode: true
 			};
 		}
 
@@ -243,12 +243,12 @@ while (i-- > 0) {
 			case Enum:
 				var e:JsonEnum = moduleType.args;
 				if (e.constructors.length > 0) {
-					return make(printer.printSwitchOnEnum.bind(expr, e, nullable));
+					return make(printer.printSwitchOnEnum(expr, e, nullable, true));
 				}
 			case Abstract if (moduleType.meta.hasMeta(Enum)):
 				var a:JsonAbstract = moduleType.args;
 				if (a.impl != null && a.impl.statics.exists(Helper.isEnumAbstractField)) {
-					return make(printer.printSwitchOnEnumAbstract.bind(expr, a, nullable));
+					return make(printer.printSwitchOnEnumAbstract(expr, a, nullable, true));
 				}
 			case _:
 		}
@@ -265,9 +265,7 @@ while (i-- > 0) {
 		};
 		var item:CompletionItem = {
 			label: data.label,
-			detail: data.detail,
 			sortText: data.sortText,
-			filterText: doc.getText(replaceRange) + " " + data.label, // https://github.com/Microsoft/vscode/issues/38982
 			kind: Snippet,
 			insertTextFormat: data.insertTextFormat,
 			textEdit: {
@@ -282,24 +280,25 @@ while (i-- > 0) {
 				origin: CompletionItemOrigin.Custom
 			}
 		}
-
-		if (data.code != null) {
+		if (data.showCode) {
 			item.documentation = {
 				kind: MarkDown,
-				value: DocHelper.printCodeBlock(data.code, Haxe)
+				value: DocHelper.printCodeBlock(SnippetHelper.prettify(data.insertText), Haxe)
 			}
 		}
-
+		if (data.detail != null) {
+			item.detail = data.detail;
+		}
 		return item;
 	}
 }
 
 private typedef PostfixCompletionItem = {
 	var label:String;
-	var detail:String;
+	var ?detail:String;
 	var insertText:String;
 	var insertTextFormat:InsertTextFormat;
-	var ?code:String;
 	var ?sortText:String;
 	var ?eat:String;
+	var ?showCode:Bool;
 }
