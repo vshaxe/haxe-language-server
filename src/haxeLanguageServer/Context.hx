@@ -33,6 +33,7 @@ class Context {
 	public var documents(default, null):TextDocuments;
 	public var displayOffsetConverter(default, null):DisplayOffsetConverter;
 	public var gotoDefinition(default, null):GotoDefinitionFeature;
+	public var determinePackage(default, null):DeterminePackageFeature;
 
 	var diagnostics:DiagnosticsFeature;
 	var codeActions:CodeActionFeature;
@@ -196,7 +197,7 @@ class Context {
 				gotoDefinition = new GotoDefinitionFeature(this);
 				new GotoTypeDefinitionFeature(this);
 				new FindReferencesFeature(this);
-				new DeterminePackageFeature(this);
+				determinePackage = new DeterminePackageFeature(this);
 				new RenameFeature(this);
 				diagnostics = new DiagnosticsFeature(this);
 				new CodeLensFeature(this);

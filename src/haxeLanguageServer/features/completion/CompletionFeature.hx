@@ -45,7 +45,7 @@ class CompletionFeature {
 		inline checkCapabilities();
 		expectedTypeCompletion = new ExpectedTypeCompletion(context);
 		postfixCompletion = new PostfixCompletion();
-		snippetCompletion = new SnippetCompletion();
+		snippetCompletion = new SnippetCompletion(context);
 		printer = new DisplayPrinter(false, Qualified, {
 			argumentTypeHints: true,
 			returnTypeHint: NonVoid,
@@ -167,7 +167,7 @@ class CompletionFeature {
 			offset: offset,
 			wasAutoTriggered: wasAutoTriggered,
 		};
-		context.callHaxeMethod(DisplayMethods.Completion, haxeParams, token, result -> {
+		context.callHaxeMethod(DisplayMethods.Completion, haxeParams, token, function(result) {
 			if (result.mode.kind != TypeHint && wasAutoTriggered && isAfterArrow(textBefore)) {
 				resolve([]); // avoid auto-popup after -> in arrow functions
 				return null;
@@ -202,9 +202,10 @@ class CompletionFeature {
 			items = items.concat(postfixCompletion.createItems(data, result.items));
 			items = items.concat(expectedTypeCompletion.createItems(data));
 			if (snippetSupport) {
-				items = items.concat(snippetCompletion.createItems(data, result.items));
+				snippetCompletion.createItems(data, result.items).then(snippetItems -> resolve(items.concat(snippetItems)));
+			} else {
+				resolve(items);
 			}
-			resolve(items);
 			previousCompletionData = data;
 			return items.length + " items";
 		}, reject.handler());
