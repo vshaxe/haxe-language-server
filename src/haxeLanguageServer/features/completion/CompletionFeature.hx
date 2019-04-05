@@ -192,19 +192,28 @@ class CompletionFeature {
 				completionPosition: params.position,
 				importPosition: importPosition,
 			};
+			var displayItems = result.items;
 			var items = [];
-			for (i in 0...result.items.length) {
-				var completionItem = createCompletionItem(i, result.items[i], data);
-				if (completionItem != null) {
-					items.push(completionItem);
-				}
-			};
-			items = items.concat(postfixCompletion.createItems(data, result.items));
+			items = items.concat(postfixCompletion.createItems(data, displayItems));
 			items = items.concat(expectedTypeCompletion.createItems(data));
-			if (snippetSupport) {
-				snippetCompletion.createItems(data, result.items).then(snippetItems -> resolve(items.concat(snippetItems)));
-			} else {
+
+			function resolveItems() {
+				for (i in 0...displayItems.length) {
+					var completionItem = createCompletionItem(i, displayItems[i], data);
+					if (completionItem != null) {
+						items.push(completionItem);
+					}
+				}
 				resolve(items);
+			}
+			if (snippetSupport) {
+				snippetCompletion.createItems(data, displayItems).then(result -> {
+					items = items.concat(result.items);
+					displayItems = result.displayItems;
+					resolveItems();
+				});
+			} else {
+				resolveItems();
 			}
 			previousCompletionData = data;
 			return items.length + " items";

@@ -14,23 +14,33 @@ class SnippetCompletion {
 		this.context = context;
 	}
 
-	public function createItems<T1, T2>(data:CompletionContextData, items:Array<DisplayItem<T1>>):Promise<Array<CompletionItem>> {
+	public function createItems<T1, T2>(data:CompletionContextData,
+			displayItems:Array<DisplayItem<T1>>):Promise<{items:Array<CompletionItem>, displayItems:Array<DisplayItem<T1>>}> {
 		var isTypeLevel = false;
 		var isPackageLevel = false;
 		var fsPath = data.doc.uri.toFsPath().toString();
-		for (item in items) {
-			switch (item.kind) {
+
+		displayItems = displayItems.filter(item -> {
+			return switch (item.kind) {
 				case Keyword:
 					var kwd:KeywordKind = item.args.name;
 					switch (kwd) {
-						case Class:
+						case Class, Interface, Enum, Abstract, Typedef:
 							isTypeLevel = true;
+							false;
 						case Package:
 							isPackageLevel = true;
+							false;
 						case _:
+							true;
 					}
-				case _:
-			}
+				case _: false;
+			};
+		});
+
+		var items = [];
+		function result() {
+			return {items: items, displayItems: displayItems};
 		}
 
 		if (isTypeLevel) {
@@ -39,7 +49,7 @@ class SnippetCompletion {
 			var abstractName = name + '($${2:Type})';
 			var body = '{\n\t$0\n}';
 			return new Promise((resolve, reject) -> {
-				var items = [
+				items = [
 					{label: "class", code: 'class $name $body'},
 					{label: "interface", code: 'interface $name $body'},
 					{label: "enum", code: 'enum $name $body'},
@@ -52,17 +62,18 @@ class SnippetCompletion {
 					});
 
 				if (isPackageLevel) {
-					context.determinePackage.onDeterminePackage({fsPath: fsPath}, null, result -> {
-						var code = if (result.pack == "") "package;" else 'package ${result.pack};';
+					context.determinePackage.onDeterminePackage({fsPath: fsPath}, null, pack -> {
+						var code = if (pack.pack == "") "package;" else 'package ${pack.pack};';
 						items.push(createItem(code, code, data.replaceRange));
-						resolve(items);
-					}, error -> resolve(items));
+						resolve(result());
+					}, _ -> resolve(result()));
 				} else {
-					resolve(items);
+					resolve(result());
 				}
 			});
 		}
-		return Promise.resolve([]);
+
+		return Promise.resolve(result());
 	}
 
 	function createItem(label:String, code:String, replaceRange:Range):CompletionItem {
