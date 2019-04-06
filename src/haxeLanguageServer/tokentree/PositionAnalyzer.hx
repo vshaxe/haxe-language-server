@@ -33,8 +33,7 @@ class PositionAnalyzer {
 		return result;
 	}
 
-	public function getStringKind(pos:Position):StringKind {
-		var token = resolve(pos);
+	public static function getStringKind(token:Null<TokenTree>, document:TextDocument, pos:Position):StringKind {
 		if (token == null) {
 			return None;
 		}

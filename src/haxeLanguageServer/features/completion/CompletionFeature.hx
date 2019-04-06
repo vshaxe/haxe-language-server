@@ -15,6 +15,8 @@ import languageServerProtocol.Types.CompletionItemKind;
 import haxe.display.JsonModuleTypes;
 import haxe.extern.EitherType;
 
+using tokentree.TokenTreeAccessHelper;
+
 enum abstract CompletionItemOrigin(Int) {
 	var Haxe;
 	var Custom;
@@ -150,8 +152,12 @@ class CompletionFeature {
 	static final dollarPattern = ~/(\$+)$/;
 
 	function isInterpolationPosition(doc, pos, text):Bool {
-		if (new PositionAnalyzer(doc).getStringKind(pos) != SingleQuote) {
-			return false;
+		var token = new PositionAnalyzer(doc).resolve(pos);
+		var inMacroReification = token.access().findParent(t -> t.is(Kwd(KwdMacro)).exists()).exists();
+		var stringKind = PositionAnalyzer.getStringKind(token, doc, pos);
+
+		if (stringKind != SingleQuote) {
+			return inMacroReification;
 		}
 		if (!dollarPattern.match(text)) {
 			return false;
