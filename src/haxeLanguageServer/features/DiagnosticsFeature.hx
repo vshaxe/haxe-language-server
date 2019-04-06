@@ -164,16 +164,7 @@ class DiagnosticsFeature {
 					var uri = file.toUri();
 					var argumentsMap = diagnosticsArguments[uri] = new DiagnosticsMap();
 
-					var newDiagnostics = data.diagnostics;
-					// hide regular compiler errors while there's parser errors, they can be misleading
-					var hasProblematicParserErrors = newDiagnostics.find(d -> switch (d.kind : Int) {
-						case ParserError: d.args != "Missing ;"; // don't be too strict
-						case _: false;
-					}) != null;
-					if (hasProblematicParserErrors) {
-						newDiagnostics = newDiagnostics.filter(d -> d.kind != cast CompilerError);
-					}
-
+					var newDiagnostics = filterRelevantDiagnostics(data.diagnostics);
 					var diagnostics = new Array<Diagnostic>();
 					for (hxDiag in newDiagnostics) {
 						var range = hxDiag.range;
@@ -223,6 +214,28 @@ class DiagnosticsFeature {
 	function isPathFiltered(path:FsPath):Bool {
 		var pathFilter = PathHelper.preparePathFilter(context.config.user.diagnosticsPathFilter, haxelibPath, context.workspacePath);
 		return !PathHelper.matches(path, pathFilter);
+	}
+
+	function filterRelevantDiagnostics(diagnostics:Array<HaxeDiagnostic<Any>>):Array<HaxeDiagnostic<Any>> {
+		// hide regular compiler errors while there's parser errors, they can be misleading
+		var hasProblematicParserErrors = diagnostics.find(d -> switch (d.kind : Int) {
+			case ParserError: d.args != "Missing ;"; // don't be too strict
+			case _: false;
+		}) != null;
+		if (hasProblematicParserErrors) {
+			diagnostics = diagnostics.filter(d -> d.kind != cast CompilerError);
+		}
+
+		// hide unused import warnings while there's compiler errors (to avoid false positives)
+		var hasCompilerErrors = diagnostics.find(d -> switch (d.kind : Int) {
+			case CompilerError: true;
+			case _: false;
+		}) != null;
+		if (hasCompilerErrors) {
+			diagnostics = diagnostics.filter(d -> d.kind != cast UnusedImport);
+		}
+
+		return diagnostics;
 	}
 
 	public function clearDiagnostics(uri:DocumentUri) {
