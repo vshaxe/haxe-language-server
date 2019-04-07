@@ -59,13 +59,13 @@ class SnippetCompletion {
 					{label: "abstract", code: 'abstract $abstractName $body'},
 					{label: "enum abstract", code: 'enum abstract $abstractName $body'}
 				].map(function(item:{label:String, code:String}) {
-						return createItem(item.label + " " + moduleName, item.code, data.replaceRange);
+						return createItem(item.label, item.label + " " + moduleName, item.code, data.replaceRange);
 					});
 
 				if (isPackageLevel) {
 					context.determinePackage.onDeterminePackage({fsPath: fsPath}, null, pack -> {
 						var code = if (pack.pack == "") "package;" else 'package ${pack.pack};';
-						items.push(createItem(code, code, data.replaceRange));
+						items.push(createItem("package", code, code, data.replaceRange));
 						resolve(result());
 					}, _ -> resolve(result()));
 				} else {
@@ -77,10 +77,12 @@ class SnippetCompletion {
 		return Promise.resolve(result());
 	}
 
-	function createItem(label:String, code:String, replaceRange:Range):CompletionItem {
+	function createItem(label:String, detail:String, code:String, replaceRange:Range):CompletionItem {
 		return {
 			label: label,
+			detail: detail,
 			kind: Snippet,
+			sortText: "~", // sort to the end
 			textEdit: {
 				range: replaceRange,
 				newText: code
