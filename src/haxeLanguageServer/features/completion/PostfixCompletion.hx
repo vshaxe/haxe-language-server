@@ -178,7 +178,7 @@ class PostfixCompletion {
 			command: TriggerSuggest
 		});
 
-		// TODO: check if subject is nullable on current target?	
+		// TODO: check if subject is nullable on current target?
 		add({
 			label: "null",
 			detail: "if (expr == null)",
@@ -293,15 +293,6 @@ while (i-- > 0) {
 		}
 		if (moduleType == null) {
 			return null;
-		}
-
-		// switching on a concrete enum value _works_, but it's sort of pointless
-		switch (subject.item.kind) {
-			case EnumField:
-				return null;
-			case EnumAbstractField:
-				return null;
-			case _:
 		}
 
 		function make(insertText:String):PostfixCompletionItem {
