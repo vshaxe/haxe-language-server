@@ -198,7 +198,6 @@ class PostfixCompletion {
 				detail: '$kind name = $expr;',
 				insertText: '$kind $${1:name} = $expr;',
 				insertTextFormat: Snippet,
-				sortText: "~" + sortText + kind,
 				eat: ";"
 			};
 		}
@@ -343,7 +342,7 @@ while (i-- > 0) {
 		};
 		var item:CompletionItem = {
 			label: data.label,
-			sortText: data.sortText,
+			sortText: "~", // sort to the end
 			kind: Snippet,
 			insertTextFormat: data.insertTextFormat,
 			textEdit: {
@@ -379,7 +378,6 @@ private typedef PostfixCompletionItem = {
 	var ?detail:String;
 	var insertText:String;
 	var insertTextFormat:InsertTextFormat;
-	var ?sortText:String;
 	var ?eat:String;
 	var ?showCode:Bool;
 	var ?command:Command;
