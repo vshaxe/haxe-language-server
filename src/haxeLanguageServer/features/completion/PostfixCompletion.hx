@@ -142,6 +142,13 @@ class PostfixCompletion {
 			insertText: 'trace($${1:$expr});',
 			insertTextFormat: Snippet
 		});
+		// TODO: check if we're on a sys target
+		add({
+			label: "print",
+			detail: "Sys.println(expr);",
+			insertText: 'Sys.println($${1:$expr});',
+			insertTextFormat: Snippet
+		});
 
 		add({
 			label: "is",
@@ -169,6 +176,20 @@ class PostfixCompletion {
 			insertText: '($expr : $1)',
 			insertTextFormat: Snippet,
 			command: TriggerSuggest
+		});
+
+		// TODO: check if subject is nullable on current target?	
+		add({
+			label: "null",
+			detail: "if (expr == null)",
+			insertText: 'if ($expr == null) $block',
+			insertTextFormat: Snippet
+		});
+		add({
+			label: "not null",
+			detail: "if (expr != null)",
+			insertText: 'if ($expr != null) $block',
+			insertTextFormat: Snippet
 		});
 
 		function createLocalItem(kind:String, sortText:String):PostfixCompletionItem {
