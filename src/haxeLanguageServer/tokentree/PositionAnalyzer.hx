@@ -14,18 +14,21 @@ class PositionAnalyzer {
 		if (tokens == null) {
 			return null;
 		}
+		var found = false;
 		var result:Null<TokenTree> = null;
 		tokens.tree.filterCallback(function(token:TokenTree, _) {
-			if (result != null) {
+			if (found) {
 				return SKIP_SUBTREE;
 			}
 			var tokenPos = document.rangeAt2(tokens.getPos(token));
-			var tokenTreePos = document.rangeAt2(tokens.getTreePos(token));
 			if (tokenPos.containsPos(pos)) {
 				result = token;
+				found = true;
 				return SKIP_SUBTREE;
 			}
+			var tokenTreePos = document.rangeAt2(tokens.getTreePos(token));
 			if (tokenTreePos.containsPos(pos)) {
+				result = token;
 				return GO_DEEPER;
 			}
 			return SKIP_SUBTREE;

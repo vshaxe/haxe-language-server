@@ -1,5 +1,6 @@
 package haxeLanguageServer.features.completion;
 
+import tokentree.TokenTree;
 import haxe.ds.Option;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
@@ -131,6 +132,14 @@ class CompletionFeature {
 	static final autoTriggerOnSpacePattern = ~/(\b(import|using|extends|implements|from|to|case|new|cast|override)|(->)) $/;
 
 	function isInvalidCompletionPosition(doc:TextDocument, params:CompletionParams, text:String):Bool {
+		var token = new PositionAnalyzer(doc).resolve(params.position);
+		var inComment =  switch (token.tok) {
+			case Comment(_), CommentLine(_): true;
+			case _: false;
+		};
+		if (inComment) {
+			return true;
+		}
 		if (params.context == null) {
 			return false;
 		}
@@ -138,7 +147,7 @@ class CompletionFeature {
 			case null: false;
 			case ">" if (!isAfterArrow(text)): true;
 			case " " if (!autoTriggerOnSpacePattern.match(text)): true;
-			case "$" if (!isInterpolationPosition(doc, params.position, text)): true;
+			case "$" if (!isInterpolationPosition(token, doc, params.position, text)): true;
 			case _: false;
 		}
 	}
@@ -149,8 +158,7 @@ class CompletionFeature {
 
 	static final dollarPattern = ~/(\$+)$/;
 
-	function isInterpolationPosition(doc, pos, text):Bool {
-		var token = new PositionAnalyzer(doc).resolve(pos);
+	function isInterpolationPosition(token:TokenTree, doc, pos, text):Bool {
 		var inMacroReification = token.access().findParent(t -> t.is(Kwd(KwdMacro)).exists()).exists();
 		var stringKind = PositionAnalyzer.getStringKind(token, doc, pos);
 
