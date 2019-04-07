@@ -6,6 +6,7 @@ import haxeLanguageServer.helper.SnippetHelper;
 import haxeLanguageServer.protocol.Display;
 import haxeLanguageServer.protocol.helper.DisplayPrinter;
 import haxeLanguageServer.features.completion.CompletionFeature;
+import haxeLanguageServer.features.completion.CompletionFeature.TriggerSuggest;
 import languageServerProtocol.Types.CompletionItem;
 
 using Lambda;
@@ -113,6 +114,50 @@ class PostfixCompletion {
 					insertTextFormat: PlainText
 				});
 		}
+
+		if (dotPath != "String") {
+			add({
+				label: "string",
+				detail: "Std.string(expr)",
+				insertText: 'Std.string($expr)',
+				insertTextFormat: PlainText
+			});
+		}
+
+		add({
+			label: "trace",
+			detail: "trace(expr);",
+			insertText: 'trace($${1:$expr});',
+			insertTextFormat: Snippet
+		});
+
+		add({
+			label: "is",
+			detail: "Std.is(expr, T)",
+			insertText: 'Std.is($expr, $1)',
+			insertTextFormat: Snippet,
+			command: TriggerSuggest
+		});
+		add({
+			label: "unsafe cast",
+			detail: "cast expr",
+			insertText: 'cast $expr',
+			insertTextFormat: PlainText
+		});
+		add({
+			label: "safe cast",
+			detail: "cast(expr, T)",
+			insertText: 'cast($expr, $1)',
+			insertTextFormat: Snippet,
+			command: TriggerSuggest
+		});
+		add({
+			label: "type check",
+			detail: "(expr : T)",
+			insertText: '($expr : $1)',
+			insertTextFormat: Snippet,
+			command: TriggerSuggest
+		});
 
 		function createLocalItem(kind:String, sortText:String):PostfixCompletionItem {
 			return {
@@ -289,6 +334,9 @@ while (i-- > 0) {
 		if (data.detail != null) {
 			item.detail = data.detail;
 		}
+		if (data.command != null) {
+			item.command = data.command;
+		}
 		return item;
 	}
 }
@@ -301,4 +349,5 @@ private typedef PostfixCompletionItem = {
 	var ?sortText:String;
 	var ?eat:String;
 	var ?showCode:Bool;
+	var ?command:Command;
 }

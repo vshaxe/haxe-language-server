@@ -28,14 +28,23 @@ typedef CompletionItemData = {
 }
 
 class CompletionFeature {
+	public static final TriggerSuggest = {
+		title: "Trigger Suggest",
+		command: "editor.action.triggerSuggest",
+		arguments: []
+	};
+	public static final TriggerParameterHints = {
+		title: "Trigger Parameter Hints",
+		command: "editor.action.triggerParameterHints",
+		arguments: []
+	};
+
 	final context:Context;
 	final legacy:CompletionFeatureLegacy;
 	final expectedTypeCompletion:ExpectedTypeCompletion;
 	final postfixCompletion:PostfixCompletion;
 	final snippetCompletion:SnippetCompletion;
 	final printer:DisplayPrinter;
-	final triggerSuggest:Command;
-	final triggerParameterHints:Command;
 	var previousCompletionData:Null<CompletionContextData>;
 	var contextSupport:Bool;
 	var markdownSupport:Bool;
@@ -56,17 +65,6 @@ class CompletionFeature {
 			explicitPrivate: true,
 			explicitNull: true
 		});
-
-		triggerSuggest = {
-			title: "Trigger Suggest",
-			command: "editor.action.triggerSuggest",
-			arguments: []
-		};
-		triggerParameterHints = {
-			title: "Trigger Parameter Hints",
-			command: "editor.action.triggerParameterHints",
-			arguments: []
-		};
 
 		legacy = new CompletionFeatureLegacy(context, contextSupport, formatDocumentation);
 
@@ -464,7 +462,7 @@ class CompletionFeature {
 
 			result.textEdit.newText = field;
 			result.insertTextFormat = Snippet;
-			result.command = triggerParameterHints;
+			result.command = TriggerParameterHints;
 		}
 
 		return result;
@@ -582,7 +580,7 @@ class CompletionFeature {
 				newText: maybeInsert(text, ".", data.lineAfter),
 				range: data.replaceRange
 			},
-			command: triggerSuggest
+			command: TriggerSuggest
 		};
 	}
 
@@ -597,12 +595,12 @@ class CompletionFeature {
 		}
 
 		if (data.mode.kind == TypeRelation || keyword.name == New) {
-			item.command = triggerSuggest;
+			item.command = TriggerSuggest;
 		}
 		if (data.mode.kind == TypeDeclaration) {
 			switch (keyword.name) {
 				case Import | Using | Final | Extern | Private:
-					item.command = triggerSuggest;
+					item.command = TriggerSuggest;
 				case _:
 			}
 		}
