@@ -223,14 +223,14 @@ class DiagnosticsFeature {
 			case _: false;
 		}) != null;
 		if (hasProblematicParserErrors) {
-			diagnostics = diagnostics.filter(d -> d.kind != cast CompilerError);
+			diagnostics = diagnostics.filter(d -> switch (d.kind : Int) {
+				case CompilerError, UnresolvedIdentifier: false;
+				case _: true;
+			});
 		}
 
 		// hide unused import warnings while there's compiler errors (to avoid false positives)
-		var hasCompilerErrors = diagnostics.find(d -> switch (d.kind : Int) {
-			case CompilerError: true;
-			case _: false;
-		}) != null;
+		var hasCompilerErrors = diagnostics.find(d -> d.kind == cast CompilerError) != null;
 		if (hasCompilerErrors) {
 			diagnostics = diagnostics.filter(d -> d.kind != cast UnusedImport);
 		}
