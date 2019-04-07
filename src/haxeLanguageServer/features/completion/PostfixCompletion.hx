@@ -31,19 +31,25 @@ class PostfixCompletion {
 		}
 		var type = type.removeNulls().type;
 
-		var range = subject.range;
-		var replaceRange:Range = {
-			start: range.start,
-			end: data.completionPosition
-		};
-		var expr = data.doc.getText(range);
+		var expr = data.doc.getText(subject.range);
 		if (expr.startsWith("(") && expr.endsWith(")")) {
 			expr = expr.substring(1, expr.length - 1);
 		}
 
+		// scan back to the dot for `expr.postfi|`
+		var pos = data.completionPosition;
+		var textBefore = data.doc.getText({start: {line: pos.line, character: 0}, end: pos});
+		var wordPattern = ~/\w*$/;
+		wordPattern.match(textBefore);
+		var replaceRange:Range = {
+			start: data.completionPosition.translate(0, -wordPattern.matched(0).length),
+			end: data.completionPosition
+		};
+		var removeRange:Range = {start: subject.range.start, end: replaceRange.start};
+
 		var result:Array<CompletionItem> = [];
 		function add(item:PostfixCompletionItem) {
-			result.push(createPostfixCompletionItem(item, data.doc, replaceRange));
+			result.push(createPostfixCompletionItem(item, data.doc, removeRange, replaceRange));
 		}
 
 		function iterator(item:String = "item") {
@@ -323,7 +329,7 @@ while (i-- > 0) {
 		return null;
 	}
 
-	function createPostfixCompletionItem(data:PostfixCompletionItem, doc:TextDocument, replaceRange:Range):CompletionItem {
+	function createPostfixCompletionItem(data:PostfixCompletionItem, doc:TextDocument, removeRange:Range, replaceRange:Range):CompletionItem {
 		if (data.eat != null) {
 			var pos = replaceRange.end;
 			var nextChar = doc.getText({start: pos, end: pos.translate(0, 1)});
@@ -338,10 +344,10 @@ while (i-- > 0) {
 			insertTextFormat: data.insertTextFormat,
 			textEdit: {
 				newText: data.insertText,
-				range: replaceRange.end.toRange()
+				range: replaceRange
 			},
 			additionalTextEdits: [{
-				range: replaceRange,
+				range: removeRange,
 				newText: ""
 			}],
 			data: {
