@@ -4,6 +4,7 @@ import js.Promise;
 import haxeLanguageServer.helper.SnippetHelper;
 import haxeLanguageServer.helper.DocHelper;
 import haxeLanguageServer.protocol.Display;
+import haxeLanguageServer.features.completion.CompletionFeature.CompletionItemOrigin;
 
 using haxe.io.Path;
 
@@ -88,6 +89,9 @@ class SnippetCompletion {
 			documentation: {
 				kind: MarkDown,
 				value: DocHelper.printCodeBlock(SnippetHelper.prettify(code), Haxe)
+			},
+			data: {
+				origin: CompletionItemOrigin.Custom
 			}
 		}
 	}
