@@ -12,7 +12,7 @@ import languageServerProtocol.Types.CompletionItem;
 using Lambda;
 
 class PostfixCompletion {
-	static inline var forBody = '{\n\t$0\n}';
+	static inline var block = '{\n\t$0\n}';
 
 	public function new() {}
 
@@ -50,7 +50,7 @@ class PostfixCompletion {
 			add({
 				label: "for",
 				detail: "for (item in expr)",
-				insertText: 'for ($${1:$item} in $expr) $forBody',
+				insertText: 'for ($${1:$item} in $expr) $block',
 				insertTextFormat: Snippet
 			});
 		}
@@ -58,7 +58,7 @@ class PostfixCompletion {
 			add({
 				label: "for k=>v",
 				detail: 'for ($key => value in expr)',
-				insertText: 'for ($key => value in $expr) $forBody',
+				insertText: 'for ($key => value in $expr) $block',
 				insertTextFormat: Snippet
 			});
 		}
@@ -97,10 +97,22 @@ class PostfixCompletion {
 		switch (dotPath) {
 			case "StdTypes.Bool":
 				add({
+					label: "not",
+					detail: "!expr",
+					insertText: '!$expr',
+					insertTextFormat: PlainText
+				});
+				add({
 					label: "if",
 					detail: "if (expr)",
-					insertText: 'if ($expr) ',
-					insertTextFormat: PlainText
+					insertText: 'if ($expr) $block',
+					insertTextFormat: Snippet
+				});
+				add({
+					label: "else",
+					detail: "if (!expr)",
+					insertText: 'if (!$expr) $block',
+					insertTextFormat: Snippet
 				});
 			case "StdTypes.Int":
 				for (item in createIndexedLoops(expr)) {
@@ -235,7 +247,7 @@ while (i-- > 0) {
 		return [
 			{
 				label: 'for 0...$field',
-				insertText: 'for (i in 0...$field) $forBody',
+				insertText: 'for (i in 0...$field) $block',
 				insertTextFormat: Snippet,
 				showCode: true
 			},
