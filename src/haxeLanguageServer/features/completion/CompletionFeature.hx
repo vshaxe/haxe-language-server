@@ -122,7 +122,7 @@ class CompletionFeature {
 		}
 		var offset = doc.offsetAt(params.position);
 		var textBefore = doc.content.substring(0, offset);
-		if (contextSupport && isInvalidCompletionPosition(doc, params, textBefore)) {
+		if (contextSupport && !isValidCompletionPosition(doc, params, textBefore)) {
 			return resolve([]);
 		}
 		var handle = if (context.haxeServer.supports(DisplayMethods.Completion)) handleJsonRpc else legacy.handle;
@@ -131,24 +131,27 @@ class CompletionFeature {
 
 	static final autoTriggerOnSpacePattern = ~/(\b(import|using|extends|implements|from|to|case|new|cast|override)|(->)) $/;
 
-	function isInvalidCompletionPosition(doc:TextDocument, params:CompletionParams, text:String):Bool {
+	function isValidCompletionPosition(doc:TextDocument, params:CompletionParams, text:String):Bool {
 		var token = new PositionAnalyzer(doc).resolve(params.position);
+		if (token == null) {
+			return true;
+		}
 		var inComment =  switch (token.tok) {
 			case Comment(_), CommentLine(_): true;
 			case _: false;
 		};
 		if (inComment) {
-			return true;
-		}
-		if (params.context == null) {
 			return false;
 		}
+		if (params.context == null) {
+			return true;
+		}
 		return switch (params.context.triggerCharacter) {
-			case null: false;
-			case ">" if (!isAfterArrow(text)): true;
-			case " " if (!autoTriggerOnSpacePattern.match(text)): true;
-			case "$" if (!isInterpolationPosition(token, doc, params.position, text)): true;
-			case _: false;
+			case null: true;
+			case ">" if (!isAfterArrow(text)): false;
+			case " " if (!autoTriggerOnSpacePattern.match(text)): false;
+			case "$" if (!isInterpolationPosition(token, doc, params.position, text)): false;
+			case _: true;
 		}
 	}
 
@@ -158,7 +161,7 @@ class CompletionFeature {
 
 	static final dollarPattern = ~/(\$+)$/;
 
-	function isInterpolationPosition(token:TokenTree, doc, pos, text):Bool {
+	function isInterpolationPosition(token:Null<TokenTree>, doc, pos, text):Bool {
 		var inMacroReification = token.access().findParent(t -> t.is(Kwd(KwdMacro)).exists()).exists();
 		var stringKind = PositionAnalyzer.getStringKind(token, doc, pos);
 
