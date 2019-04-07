@@ -21,23 +21,23 @@ class SnippetCompletion {
 		var isPackageLevel = false;
 		var fsPath = data.doc.uri.toFsPath().toString();
 
-		displayItems = displayItems.filter(item -> {
-			return switch (item.kind) {
+		for (i in 0...displayItems.length) {
+			var item = displayItems[i];
+			switch (item.kind) {
 				case Keyword:
 					var kwd:KeywordKind = item.args.name;
 					switch (kwd) {
 						case Class, Interface, Enum, Abstract, Typedef:
 							isTypeLevel = true;
-							false;
+							displayItems[i] = null;
 						case Package:
 							isPackageLevel = true;
-							false;
+							displayItems[i] = null;
 						case _:
-							true;
 					}
-				case _: true;
+				case _:
 			};
-		});
+		}
 
 		var items = [];
 		function result() {

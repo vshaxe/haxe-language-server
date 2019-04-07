@@ -136,7 +136,7 @@ class CompletionFeature {
 		if (token == null) {
 			return true;
 		}
-		var inComment =  switch (token.tok) {
+		var inComment = switch (token.tok) {
 			case Comment(_), CommentLine(_): true;
 			case _: false;
 		};
@@ -240,6 +240,7 @@ class CompletionFeature {
 						items.push(completionItem);
 					}
 				}
+				items = items.filter(i -> i != null);
 				resolve(items);
 			}
 			if (snippetSupport) {
@@ -256,7 +257,10 @@ class CompletionFeature {
 		}, reject.handler());
 	}
 
-	function createCompletionItem<T>(index:Int, item:DisplayItem<T>, data:CompletionContextData):Null<CompletionItem> {
+	function createCompletionItem<T>(index:Int, item:Null<DisplayItem<T>>, data:CompletionContextData):Null<CompletionItem> {
+		if (item == null) {
+			return null;
+		}
 		var completionItem:CompletionItem = switch (item.kind) {
 			case ClassField | EnumAbstractField: createClassFieldCompletionItem(item, data);
 			case EnumField: createEnumFieldCompletionItem(item, data);
