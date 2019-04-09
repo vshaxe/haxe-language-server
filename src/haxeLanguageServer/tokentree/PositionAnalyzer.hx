@@ -1,6 +1,11 @@
 package haxeLanguageServer.tokentree;
 
+import haxeparser.Data.TokenDef;
+import haxeLanguageServer.tokentree.TokenContext;
+import tokentree.utils.TokenTreeCheckUtils;
 import tokentree.TokenTree;
+
+using tokentree.TokenTreeAccessHelper;
 
 class PositionAnalyzer {
 	final document:TextDocument;
@@ -51,6 +56,75 @@ class PositionAnalyzer {
 			case _:
 				None;
 		}
+	}
+
+	public static function getContext(token:Null<TokenTree>, document:TextDocument, completionPosition:Position):TokenContext {
+		inline function isType(tok:TokenDef) {
+			return tok.match(Kwd(KwdClass | KwdInterface | KwdAbstract | KwdEnum | KwdTypedef));
+		}
+		var typeToken = null;
+		var fieldToken = null;
+
+		var parent = token.access();
+		while (parent.exists() && parent.token.tok != null) {
+			switch (parent.token.tok) {
+				case tok if (isType(tok) && typeToken == null):
+					typeToken = parent.token;
+				case Kwd(KwdFunction | KwdVar | KwdFinal):
+					fieldToken = parent.token;
+				case _:
+			}
+			parent = parent.parent();
+		}
+
+		if (typeToken != null) {
+			return Type({
+				kind: if (typeToken != null) {
+					switch (typeToken.tok) {
+						case Kwd(KwdClass): if (TokenTreeCheckUtils.isTypeMacroClass(typeToken)) MacroClass else Class;
+						case Kwd(KwdInterface): Interface;
+						case Kwd(KwdAbstract): Abstract;
+						case Kwd(KwdEnum): if (TokenTreeCheckUtils.isTypeEnumAbstract(typeToken)) EnumAbstract else Enum;
+						case Kwd(KwdTypedef): Typedef;
+						case _: null;
+					}
+				} else {
+					null;
+				},
+				field: if (fieldToken != null) {
+					{
+						isStatic: fieldToken.access().child(0).firstOf(Kwd(KwdStatic)).exists(),
+						kind: switch (fieldToken.tok) {
+							case Kwd(KwdVar): Var;
+							case Kwd(KwdFinal): Final;
+							case Kwd(KwdFunction): Function;
+							case _: null;
+						}
+					}
+				} else {
+					null;
+				}
+			});
+		}
+
+		var pos = BeforePackage;
+		var root = document.tokens.tree;
+		for (child in root.children) {
+			var childPos = document.rangeAt2(document.tokens.getPos(child));
+			if (childPos.start.isAfter(completionPosition)) {
+				break;
+			}
+			switch (child.tok) {
+				case Kwd(KwdPackage):
+					pos = BeforeFirstImport;
+				case Kwd(KwdImport | KwdUsing):
+					pos = BeforeFirstType;
+				case tok if (isType(tok)):
+					pos = AfterFirstType;
+				case _:
+			}
+		}
+		return Root(pos);
 	}
 }
 

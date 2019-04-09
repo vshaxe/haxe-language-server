@@ -5,6 +5,7 @@ import haxeLanguageServer.helper.SnippetHelper;
 import haxeLanguageServer.helper.DocHelper;
 import haxeLanguageServer.protocol.Display;
 import haxeLanguageServer.features.completion.CompletionFeature.CompletionItemOrigin;
+import haxeLanguageServer.tokentree.PositionAnalyzer;
 
 using haxe.io.Path;
 
@@ -17,8 +18,6 @@ class SnippetCompletion {
 
 	public function createItems<T1, T2>(data:CompletionContextData,
 			displayItems:Array<DisplayItem<T1>>):Promise<{items:Array<CompletionItem>, displayItems:Array<DisplayItem<T1>>}> {
-		var isTypeLevel = false;
-		var isPackageLevel = false;
 		var fsPath = data.doc.uri.toFsPath().toString();
 
 		for (i in 0...displayItems.length) {
@@ -28,10 +27,8 @@ class SnippetCompletion {
 					var kwd:KeywordKind = item.args.name;
 					switch (kwd) {
 						case Class, Interface, Enum, Abstract, Typedef:
-							isTypeLevel = true;
 							displayItems[i] = null;
 						case Package:
-							isPackageLevel = true;
 							displayItems[i] = null;
 						case _:
 					}
@@ -44,34 +41,38 @@ class SnippetCompletion {
 			return {items: items, displayItems: displayItems};
 		}
 
-		if (isTypeLevel) {
-			var moduleName = fsPath.withoutDirectory().withoutExtension();
-			var name = '$${1:$moduleName}';
-			var abstractName = name + '($${2:T})';
-			var body = '{\n\t$0\n}';
-			return new Promise((resolve, reject) -> {
-				items = [
-					{label: "class", code: 'class $name $body'},
-					{label: "interface", code: 'interface $name $body'},
-					{label: "enum", code: 'enum $name $body'},
-					{label: "typedef", code: 'typedef $name = '},
-					{label: "struct", code: 'typedef $name = $body'},
-					{label: "abstract", code: 'abstract $abstractName $body'},
-					{label: "enum abstract", code: 'enum abstract $abstractName $body'}
-				].map(function(item:{label:String, code:String}) {
-						return createItem(item.label, item.label + " " + moduleName, item.code, data.replaceRange);
-					});
+		var tokenContext = PositionAnalyzer.getContext(data.token, data.doc, data.completionPosition);
+		switch (tokenContext) {
+			case Root(pos):
+				var moduleName = fsPath.withoutDirectory().withoutExtension();
+				var name = '$${1:$moduleName}';
+				var abstractName = name + '($${2:T})';
+				var body = '{\n\t$0\n}';
+				return new Promise((resolve, reject) -> {
+					items = [
+						{label: "class", code: 'class $name $body'},
+						{label: "interface", code: 'interface $name $body'},
+						{label: "enum", code: 'enum $name $body'},
+						{label: "typedef", code: 'typedef $name = '},
+						{label: "struct", code: 'typedef $name = $body'},
+						{label: "abstract", code: 'abstract $abstractName $body'},
+						{label: "enum abstract", code: 'enum abstract $abstractName $body'}
+					].map(function(item:{label:String, code:String}) {
+							return createItem(item.label, item.label + " " + moduleName, item.code, data.replaceRange);
+						});
 
-				if (isPackageLevel) {
-					context.determinePackage.onDeterminePackage({fsPath: fsPath}, null, pack -> {
-						var code = if (pack.pack == "") "package;" else 'package ${pack.pack};';
-						items.push(createItem("package", code, code, data.replaceRange));
+					if (pos == BeforePackage) {
+						context.determinePackage.onDeterminePackage({fsPath: fsPath}, null, pack -> {
+							var code = if (pack.pack == "") "package;" else 'package ${pack.pack};';
+							items.push(createItem("package", code, code, data.replaceRange));
+							resolve(result());
+						}, _ -> resolve(result()));
+					} else {
 						resolve(result());
-					}, _ -> resolve(result()));
-				} else {
-					resolve(result());
-				}
-			});
+					}
+				});
+
+			case Type(type):
 		}
 
 		return Promise.resolve(result());

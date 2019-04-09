@@ -1,5 +1,6 @@
 package haxeLanguageServer.features.completion;
 
+import tokentree.TokenTree;
 import haxeLanguageServer.protocol.Display.CompletionMode;
 
 typedef CompletionContextData = {
@@ -10,4 +11,5 @@ typedef CompletionContextData = {
 	var lineAfter:String;
 	var completionPosition:Position;
 	var importPosition:Position;
+	var token:TokenTree;
 }

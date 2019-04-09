@@ -20,7 +20,7 @@ class CompletionFeatureLegacy {
 	}
 
 	public function handle(params:CompletionParams, token:CancellationToken, resolve:Array<CompletionItem>->Void, reject:ResponseError<NoData>->Void,
-			doc:TextDocument, offset:Int, textBefore:String) {
+			doc:TextDocument, offset:Int, textBefore:String, _) {
 		if (contextSupport && isInvalidCompletionPosition(params.context, textBefore)) {
 			return resolve([]);
 		}
