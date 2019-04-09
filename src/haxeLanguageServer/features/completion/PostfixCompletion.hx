@@ -198,6 +198,13 @@ class PostfixCompletion {
 			insertTextFormat: Snippet
 		});
 
+		add({
+			label: "return",
+			detail: "return expr;",
+			insertText: 'return $expr;',
+			insertTextFormat: PlainText
+		});
+
 		function createLocalItem(kind:String, sortText:String):PostfixCompletionItem {
 			return {
 				label: kind,
