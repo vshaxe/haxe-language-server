@@ -47,7 +47,7 @@ class SnippetCompletion {
 		if (isTypeLevel) {
 			var moduleName = fsPath.withoutDirectory().withoutExtension();
 			var name = '$${1:$moduleName}';
-			var abstractName = name + '($${2:Type})';
+			var abstractName = name + '($${2:T})';
 			var body = '{\n\t$0\n}';
 			return new Promise((resolve, reject) -> {
 				items = [
