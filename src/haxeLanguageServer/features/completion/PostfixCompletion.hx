@@ -36,15 +36,10 @@ class PostfixCompletion {
 			expr = expr.substring(1, expr.length - 1);
 		}
 
-		// scan back to the dot for `expr.postfi|`
-		var pos = data.completionPosition;
-		var textBefore = data.doc.getText({start: {line: pos.line, character: 0}, end: pos});
-		var wordPattern = ~/\w*$/;
-		wordPattern.match(textBefore);
-		var replaceRange:Range = {
-			start: data.completionPosition.translate(0, -wordPattern.matched(0).length),
-			end: data.completionPosition
-		};
+		var replaceRange = data.replaceRange;
+		if (replaceRange == null) {
+			replaceRange = data.completionPosition.toRange();
+		}
 		var removeRange:Range = {start: subject.range.start, end: replaceRange.start};
 
 		var result:Array<CompletionItem> = [];
