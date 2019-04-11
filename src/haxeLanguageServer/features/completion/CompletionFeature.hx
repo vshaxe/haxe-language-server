@@ -254,7 +254,7 @@ class CompletionFeature {
 				resolveItems();
 			}
 			previousCompletionData = data;
-			return items.length + " items";
+			return displayItems.length + " items";
 		}, reject.handler());
 	}
 
