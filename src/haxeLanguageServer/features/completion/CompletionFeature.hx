@@ -309,7 +309,7 @@ class CompletionFeature {
 
 		if (commitCharactersSupport) {
 			var mode = data.mode.kind;
-			if ((item.type != null && item.type.kind == TFun && mode != Pattern) || mode == New || mode == Metadata) {
+			if ((item.type != null && item.type.kind == TFun && mode != Pattern) || mode == New) {
 				completionItem.commitCharacters = ["("];
 			}
 		}
@@ -317,7 +317,7 @@ class CompletionFeature {
 		if (completionItem.sortText == null) {
 			completionItem.sortText = "";
 		}
-		completionItem.sortText += StringTools.lpad(Std.string(index + 1), "0", 10);
+		completionItem.sortText += Std.string(index + 1).lpad("0", 10);
 
 		completionItem.data = {origin: Haxe, index: index};
 		return completionItem;
