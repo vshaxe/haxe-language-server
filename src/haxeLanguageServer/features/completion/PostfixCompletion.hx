@@ -326,6 +326,8 @@ while (i-- > 0) {
 				if (a.impl != null && a.impl.statics.exists(Helper.isEnumAbstractField)) {
 					return make(printer.printSwitchOnEnumAbstract(expr, a, nullable, true));
 				}
+			case Abstract if (moduleType.moduleName == "StdTypes" && moduleType.name == "Bool"):
+				return make(printer.printSwitch(expr, ["true", "false"], nullable, true));
 			case _:
 				var item = make('switch ($expr) {\n\tcase $0\n}');
 				item.command = TriggerSuggest;

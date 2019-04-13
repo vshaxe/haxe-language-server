@@ -469,7 +469,7 @@ class DisplayPrinter {
 		return printSwitch(subject, fields, nullable, snippets);
 	}
 
-	function printSwitch(subject:String, fields:Array<String>, nullable:Bool, snippets:Bool) {
+	public function printSwitch(subject:String, fields:Array<String>, nullable:Bool, snippets:Bool) {
 		if (nullable) {
 			fields.unshift("null");
 		}
