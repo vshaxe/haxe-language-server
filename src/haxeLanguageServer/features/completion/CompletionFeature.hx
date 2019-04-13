@@ -270,11 +270,7 @@ class CompletionFeature {
 			case Keyword: createKeywordCompletionItem(item.args, data);
 			case Local: createLocalCompletionItem(item, data);
 			case Module: createModuleCompletionItem(item.args, data);
-			case Literal: {
-					label: item.args.name,
-					kind: Keyword,
-					detail: printer.printType(item.type)
-				}
+			case Literal: createLiteralCompletionItem(item, data);
 			case Metadata:
 				if (item.args.internal) {
 					null;
@@ -407,8 +403,7 @@ class CompletionFeature {
 			},
 			documentation: {
 				kind: MarkDown,
-				value: DocHelper.printCodeBlock("override "
-					+ printer.printOverrideDefinition(field, concreteType, data.indent, false), Haxe)
+				value: DocHelper.printCodeBlock("override " + printer.printOverrideDefinition(field, concreteType, data.indent, false), Haxe)
 			},
 			additionalTextEdits: ImportHelper.createFunctionImportsEdit(data.doc, data.importPosition, context, concreteType, fieldFormatting)
 		}
@@ -471,11 +466,7 @@ class CompletionFeature {
 
 		if (data.mode.kind == Pattern) {
 			var field = printer.printEnumField(field, item.type, true, false);
-			var info:PatternCompletion<Dynamic> = data.mode.args;
-			if (info == null || info.isOutermostPattern) {
-				field = maybeInsert(field, ":", data.lineAfter);
-			}
-
+			field = maybeInsertPatternColon(field, data);
 			result.textEdit.newText = field;
 			result.insertTextFormat = Snippet;
 			result.command = TriggerParameterHints;
@@ -678,8 +669,34 @@ class CompletionFeature {
 		}
 	}
 
+	function createLiteralCompletionItem<T>(item:DisplayItem<Dynamic>, data:CompletionContextData):CompletionItem {
+		var literal:DisplayLiteral<T> = item.args;
+		var result:CompletionItem = {
+			label: literal.name,
+			kind: Keyword,
+			detail: printer.printType(item.type)
+		};
+		switch (literal.name) {
+			case "null" | "true" | "false":
+				result.textEdit = {
+					range: data.replaceRange,
+					newText: maybeInsertPatternColon(literal.name, data)
+				};
+			case _:
+		}
+		return result;
+	}
+
 	function maybeInsert(text:String, token:String, lineAfter:String):String {
 		return if (lineAfter.charAt(0) == token.charAt(0)) text else text + token;
+	}
+
+	function maybeInsertPatternColon(text:String, data:CompletionContextData):String {
+		var info:PatternCompletion<Dynamic> = data.mode.args;
+		if (info == null || info.isOutermostPattern) {
+			return maybeInsert(text, ":", data.lineAfter);
+		}
+		return text;
 	}
 
 	function handleDeprecated(item:CompletionItem, meta:JsonMetadata) {
