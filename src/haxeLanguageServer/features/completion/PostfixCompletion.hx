@@ -327,6 +327,9 @@ while (i-- > 0) {
 					return make(printer.printSwitchOnEnumAbstract(expr, a, nullable, true));
 				}
 			case _:
+				var item = make('switch ($expr) {\n\tcase $0\n}');
+				item.command = TriggerSuggest;
+				return item;
 		}
 		return null;
 	}
