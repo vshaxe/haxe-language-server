@@ -1,6 +1,6 @@
 package haxeLanguageServer.features.completion;
 
-import js.Promise;
+import js.lib.Promise;
 import haxeLanguageServer.helper.SnippetHelper;
 import haxeLanguageServer.helper.DocHelper;
 import haxeLanguageServer.protocol.Display;

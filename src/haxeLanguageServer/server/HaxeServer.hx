@@ -1,7 +1,7 @@
 package haxeLanguageServer.server;
 
 import haxe.Json;
-import js.Promise;
+import js.lib.Promise;
 import js.node.Net;
 import js.node.net.Socket;
 import js.node.net.Server;
