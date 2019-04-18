@@ -109,6 +109,9 @@ class PositionAnalyzer {
 
 		var pos = BeforePackage;
 		var root = document.tokens.tree;
+		if (root.children == null) {
+			return Root(pos);
+		}
 		for (child in root.children) {
 			var childPos = document.rangeAt2(document.tokens.getPos(child));
 			if (childPos.start.isAfter(completionPosition)) {
