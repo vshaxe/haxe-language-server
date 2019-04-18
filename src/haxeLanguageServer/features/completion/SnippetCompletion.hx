@@ -20,13 +20,16 @@ class SnippetCompletion {
 			displayItems:Array<DisplayItem<T1>>):Promise<{items:Array<CompletionItem>, displayItems:Array<DisplayItem<T1>>}> {
 		var fsPath = data.doc.uri.toFsPath().toString();
 
+		var pos = data.completionPosition;
+		var isRestOfLineEmpty = data.doc.lineAt(pos.line).substr(pos.character).trim().length == 0;
+
 		for (i in 0...displayItems.length) {
 			var item = displayItems[i];
 			switch (item.kind) {
 				case Keyword:
 					var kwd:KeywordKind = item.args.name;
 					switch (kwd) {
-						case Class, Interface, Enum, Abstract, Typedef:
+						case Class, Interface, Enum, Abstract, Typedef if (isRestOfLineEmpty):
 							displayItems[i] = null;
 						case Package:
 							displayItems[i] = null;
@@ -49,17 +52,19 @@ class SnippetCompletion {
 				var abstractName = name + '($${2:T})';
 				var body = '{\n\t$0\n}';
 				return new Promise((resolve, reject) -> {
-					items = [
-						{label: "class", code: 'class $name $body'},
-						{label: "interface", code: 'interface $name $body'},
-						{label: "enum", code: 'enum $name $body'},
-						{label: "typedef", code: 'typedef $name = '},
-						{label: "struct", code: 'typedef $name = $body'},
-						{label: "abstract", code: 'abstract $abstractName $body'},
-						{label: "enum abstract", code: 'enum abstract $abstractName $body'}
-					].map(function(item:{label:String, code:String}) {
-							return createItem(item.label, item.label + " " + moduleName, item.code, data.replaceRange);
-						});
+					if (isRestOfLineEmpty) {
+						items = [
+							{label: "class", code: 'class $name $body'},
+							{label: "interface", code: 'interface $name $body'},
+							{label: "enum", code: 'enum $name $body'},
+							{label: "typedef", code: 'typedef $name = '},
+							{label: "struct", code: 'typedef $name = $body'},
+							{label: "abstract", code: 'abstract $abstractName $body'},
+							{label: "enum abstract", code: 'enum abstract $abstractName $body'}
+						].map(function(item:{label:String, code:String}) {
+								return createItem(item.label, item.label + " " + moduleName, item.code, data.replaceRange);
+							});
+					}
 
 					if (pos == BeforePackage) {
 						context.determinePackage.onDeterminePackage({fsPath: fsPath}, null, pack -> {
