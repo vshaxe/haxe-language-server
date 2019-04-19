@@ -16,7 +16,7 @@ enum RootPosition {
 }
 
 typedef TypeContextData = {
-	final ?kind:TypeKind;
+	final kind:TypeKind;
 	final ?field:{
 		final isStatic:Bool;
 		final kind:FieldKind;
@@ -30,7 +30,7 @@ enum TypeKind {
 	EnumAbstract;
 	Abstract;
 	Typedef;
-	MacroClass;
+	MacroClass; // TODO: add argument for the containing type's context?
 }
 
 enum FieldKind {

@@ -255,7 +255,24 @@ class CompletionFeature {
 			}
 			previousCompletionData = data;
 			return displayItems.length + " items";
-		}, reject.handler());
+		}, function(error) {
+			// scan back to the dot for `expr.postfi|`
+			var wordPattern = ~/\w*$/;
+			wordPattern.match(textBefore);
+			var replaceRange = {
+				start: params.position.translate(0, -wordPattern.matched(0).length),
+				end: params.position
+			};
+
+			if (snippetSupport) {
+				snippetCompletion.createItems({
+					doc: doc,
+					token: currentToken,
+					completionPosition: params.position,
+					replaceRange: replaceRange
+				}, []).then(result -> resolve(result.items));
+			}
+		});
 	}
 
 	function createCompletionItem<T>(index:Int, item:Null<DisplayItem<T>>, data:CompletionContextData):Null<CompletionItem> {

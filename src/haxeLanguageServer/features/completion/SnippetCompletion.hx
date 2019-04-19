@@ -1,6 +1,7 @@
 package haxeLanguageServer.features.completion;
 
 import js.lib.Promise;
+import tokentree.TokenTree;
 import haxeLanguageServer.helper.SnippetHelper;
 import haxeLanguageServer.helper.DocHelper;
 import haxeLanguageServer.protocol.Display;
@@ -9,14 +10,23 @@ import haxeLanguageServer.tokentree.PositionAnalyzer;
 
 using haxe.io.Path;
 
+typedef SnippetCompletionContextData = {
+	var doc:TextDocument;
+	var completionPosition:Position;
+	var token:TokenTree;
+	var replaceRange:Range;
+}
+
 class SnippetCompletion {
+	static inline var block = '{\n\t$0\n}';
+
 	final context:Context;
 
 	public function new(context) {
 		this.context = context;
 	}
 
-	public function createItems<T1, T2>(data:CompletionContextData,
+	public function createItems<T1, T2>(data:SnippetCompletionContextData,
 			displayItems:Array<DisplayItem<T1>>):Promise<{items:Array<CompletionItem>, displayItems:Array<DisplayItem<T1>>}> {
 		var fsPath = data.doc.uri.toFsPath().toString();
 
@@ -78,6 +88,18 @@ class SnippetCompletion {
 				});
 
 			case Type(type):
+				var isClass = type.kind == Class || type.kind == MacroClass;
+				var isAbstract = type.kind == Abstract || type.kind == EnumAbstract;
+				var canInsertClassFields = type.field == null && (isClass || isAbstract);
+				if (canInsertClassFields) {
+					var constructor = "public function new";
+					items.push(createItem("new", '$constructor()', '$constructor($1) $block', data.replaceRange));
+
+					if (isClass) {
+						var main = "static function main()";
+						items.push(createItem("main", main, '$main $block', data.replaceRange));
+					}
+				}
 		}
 
 		return Promise.resolve(result());

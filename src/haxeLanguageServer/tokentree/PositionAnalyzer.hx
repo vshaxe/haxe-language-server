@@ -68,8 +68,9 @@ class PositionAnalyzer {
 		var parent = token.access();
 		while (parent.exists() && parent.token.tok != null) {
 			switch (parent.token.tok) {
-				case tok if (isType(tok) && typeToken == null):
+				case tok if (isType(tok)):
 					typeToken = parent.token;
+					break;
 				case Kwd(KwdFunction | KwdVar | KwdFinal):
 					fieldToken = parent.token;
 				case _:
