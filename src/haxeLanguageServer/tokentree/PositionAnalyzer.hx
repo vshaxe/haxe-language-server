@@ -64,11 +64,14 @@ class PositionAnalyzer {
 		}
 		var typeToken = null;
 		var fieldToken = null;
+		var hasBlockParent = false;
 
 		var parent = token.access();
 		while (parent.exists() && parent.token.tok != null) {
 			switch (parent.token.tok) {
-				case tok if (isType(tok)):
+				case BrOpen if (TokenTreeCheckUtils.getBrOpenType(parent.token) == BLOCK):
+					hasBlockParent = true;
+				case tok if (isType(tok) && hasBlockParent):
 					typeToken = parent.token;
 					break;
 				case Kwd(KwdFunction | KwdVar | KwdFinal) if (!TokenTreeCheckUtils.isModifier(token)):
