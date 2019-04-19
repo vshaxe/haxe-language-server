@@ -301,7 +301,10 @@ class CompletionFeature {
 					range: replaceRange
 				},
 				command: TriggerSuggest,
-				sortText: "~~~"
+				sortText: "~~~",
+				data: {
+					origin: Custom
+				}
 			}
 		}
 		var keywords:Array<KeywordKind> = [Public, Private, Extern, Final, Static, Dynamic, Override, Inline];
