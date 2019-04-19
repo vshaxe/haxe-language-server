@@ -204,6 +204,7 @@ class CompletionFeature {
 			offset: offset,
 			wasAutoTriggered: wasAutoTriggered,
 		};
+		var tokenContext = PositionAnalyzer.getContext(currentToken, doc, params.position);
 		context.callHaxeMethod(DisplayMethods.Completion, haxeParams, token, function(result) {
 			if (result.mode.kind != TypeHint && wasAutoTriggered && isAfterArrow(textBefore)) {
 				resolve([]); // avoid auto-popup after -> in arrow functions
@@ -228,7 +229,7 @@ class CompletionFeature {
 				lineAfter: lineAfter,
 				completionPosition: params.position,
 				importPosition: importPosition,
-				token: currentToken
+				tokenContext: tokenContext
 			};
 			var displayItems = result.items;
 			var items = [];
@@ -268,9 +269,9 @@ class CompletionFeature {
 			if (snippetSupport) {
 				snippetCompletion.createItems({
 					doc: doc,
-					token: currentToken,
 					completionPosition: params.position,
-					replaceRange: replaceRange
+					replaceRange: replaceRange,
+					tokenContext: tokenContext
 				}, []).then(result -> resolve(result.items));
 			}
 		});
@@ -421,7 +422,8 @@ class CompletionFeature {
 			},
 			documentation: {
 				kind: MarkDown,
-				value: DocHelper.printCodeBlock("override " + printer.printOverrideDefinition(field, concreteType, data.indent, false), Haxe)
+				value: DocHelper.printCodeBlock("override "
+					+ printer.printOverrideDefinition(field, concreteType, data.indent, false), Haxe)
 			},
 			additionalTextEdits: ImportHelper.createFunctionImportsEdit(data.doc, data.importPosition, context, concreteType, fieldFormatting)
 		}

@@ -1,20 +1,19 @@
 package haxeLanguageServer.features.completion;
 
 import js.lib.Promise;
-import tokentree.TokenTree;
 import haxeLanguageServer.helper.SnippetHelper;
 import haxeLanguageServer.helper.DocHelper;
 import haxeLanguageServer.protocol.Display;
 import haxeLanguageServer.features.completion.CompletionFeature.CompletionItemOrigin;
-import haxeLanguageServer.tokentree.PositionAnalyzer;
+import haxeLanguageServer.tokentree.TokenContext;
 
 using haxe.io.Path;
 
 typedef SnippetCompletionContextData = {
 	var doc:TextDocument;
 	var completionPosition:Position;
-	var token:TokenTree;
 	var replaceRange:Range;
+	var tokenContext:TokenContext;
 }
 
 class SnippetCompletion {
@@ -56,8 +55,7 @@ class SnippetCompletion {
 		}
 		var body = block(0);
 
-		var tokenContext = PositionAnalyzer.getContext(data.token, data.doc, data.completionPosition);
-		switch (tokenContext) {
+		switch (data.tokenContext) {
 			case Root(pos):
 				var moduleName = fsPath.withoutDirectory().withoutExtension();
 				var name = '$${1:$moduleName}';
@@ -100,7 +98,7 @@ class SnippetCompletion {
 					add("function", "function name()", 'function $${1:name}($$2) $body');
 
 					if (type.kind == EnumAbstract) {
-						add("var", "var name;", 'var $${1:Name}$$2;', "~");
+						add("var", "var Name;", 'var $${1:Name}$$2;', "~");
 					} else {
 						add("var", "var name:T;", 'var $${1:name}:$${2:T};');
 						add("final", "final name:T;", 'final $${1:name}:$${2:T};');
