@@ -98,17 +98,12 @@ class SnippetCompletion {
 					}
 
 					add("function", "function name()", 'function $${1:name}($$2) $body');
-					add("public function", "public function name()", 'public function $${1:name}($$2) $body');
 
 					if (type.kind == EnumAbstract) {
-						add("var", "var name;", 'var $${1:name}$$2;', "~");
+						add("var", "var name;", 'var $${1:Name}$$2;', "~");
 					} else {
 						add("var", "var name:T;", 'var $${1:name}:$${2:T};');
-						add("public var", "public var name:T;", 'public var $${1:name}:$${2:T};');
-
 						add("final", "final name:T;", 'final $${1:name}:$${2:T};');
-						add("public final", "public final name:T;", 'public final $${1:name}:$${2:T};');
-
 						add("readonly", "public var name(default, null):T;", 'public var $${1:name}(default, null):$${2:T};');
 					}
 
