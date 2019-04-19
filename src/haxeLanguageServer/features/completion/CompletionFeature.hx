@@ -207,6 +207,12 @@ class CompletionFeature {
 			wasAutoTriggered: wasAutoTriggered,
 		};
 		var tokenContext = PositionAnalyzer.getContext(currentToken, doc, params.position);
+		var position = params.position;
+		var lineAfter = doc.getText({
+			start: position,
+			end: position.translate(1, 0)
+		});
+
 		context.callHaxeMethod(DisplayMethods.Completion, haxeParams, token, function(result) {
 			if (result.mode.kind != TypeHint && wasAutoTriggered && isAfterArrow(textBefore)) {
 				resolve([]); // avoid auto-popup after -> in arrow functions
@@ -214,11 +220,7 @@ class CompletionFeature {
 			}
 			var importPosition = ImportHelper.getImportPosition(doc);
 			var indent = doc.indentAt(params.position.line);
-			var position = params.position;
-			var lineAfter = doc.getText({
-				start: position,
-				end: position.translate(1, 0)
-			});
+
 			var replaceRange = result.replaceRange;
 			if (replaceRange != null && replaceRange.start.line != replaceRange.end.line) {
 				replaceRange = null; // multi-line replace ranges are not allowed
@@ -237,7 +239,7 @@ class CompletionFeature {
 			var items = [];
 			items = items.concat(postfixCompletion.createItems(data, displayItems));
 			items = items.concat(expectedTypeCompletion.createItems(data));
-			items = items.concat(createFieldKeywordItems(tokenContext, replaceRange));
+			items = items.concat(createFieldKeywordItems(tokenContext, replaceRange, lineAfter));
 
 			function resolveItems() {
 				for (i in 0...displayItems.length) {
@@ -276,14 +278,14 @@ class CompletionFeature {
 					replaceRange: replaceRange,
 					tokenContext: tokenContext
 				}, []).then(result -> {
-					var keywords = createFieldKeywordItems(tokenContext, replaceRange);
+					var keywords = createFieldKeywordItems(tokenContext, replaceRange, lineAfter);
 					resolve(keywords.concat(result.items));
 				});
 			}
 		});
 	}
 
-	function createFieldKeywordItems(tokenContext:TokenContext, replaceRange:Range):Array<CompletionItem> {
+	function createFieldKeywordItems(tokenContext:TokenContext, replaceRange:Range, lineAfter:String):Array<CompletionItem> {
 		var isFieldLevel = switch (tokenContext) {
 			case Type(type) if (type.field == null): true;
 			case _: false;
@@ -297,7 +299,7 @@ class CompletionFeature {
 				label: keyword,
 				kind: Keyword,
 				textEdit: {
-					newText: keyword + " ",
+					newText: maybeInsert(keyword, " ", lineAfter),
 					range: replaceRange
 				},
 				command: TriggerSuggest,
