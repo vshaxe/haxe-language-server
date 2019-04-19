@@ -18,8 +18,6 @@ typedef SnippetCompletionContextData = {
 }
 
 class SnippetCompletion {
-	static inline var block = '{\n\t$0\n}';
-
 	final context:Context;
 
 	public function new(context) {
@@ -53,6 +51,10 @@ class SnippetCompletion {
 		function result() {
 			return {items: items, displayItems: displayItems};
 		}
+		inline function block(i:Int) {
+			return '{\n\t$$$i\n}';
+		}
+		var body = block(0);
 
 		var tokenContext = PositionAnalyzer.getContext(data.token, data.doc, data.completionPosition);
 		switch (tokenContext) {
@@ -60,7 +62,6 @@ class SnippetCompletion {
 				var moduleName = fsPath.withoutDirectory().withoutExtension();
 				var name = '$${1:$moduleName}';
 				var abstractName = name + '($${2:T})';
-				var body = '{\n\t$0\n}';
 				return new Promise((resolve, reject) -> {
 					if (isRestOfLineEmpty) {
 						items = [
@@ -92,12 +93,34 @@ class SnippetCompletion {
 				var isAbstract = type.kind == Abstract || type.kind == EnumAbstract;
 				var canInsertClassFields = type.field == null && (isClass || isAbstract);
 				if (canInsertClassFields) {
+					function add(label:String, detail:String, code:String) {
+						items.push(createItem(label, detail, code, data.replaceRange));
+					}
+
+					add("function", "function name()", 'function $${1:name}($$2) $body');
+					add("public function", "public function name()", 'public function $${1:name}($$2) $body');
+
+					add("var", "var name:T;", 'var $${1:name}:$${2:T};');
+					add("public var", "public var name:T;", 'public var $${1:name}:$${2:T};');
+
+					add("final", "final name:T;", 'final $${1:name}:$${2:T};');
+					add("public final", "public final name:T;", 'public final $${1:name}:$${2:T};');
+
+					add("readonly", "public var name(default, null):T;", 'public var $${1:name}(default, null):$${2:T};');
+
+					add("property", "public var name(get, set):T;", 'public var $${1:name}(get, set):$${2:T};
+
+function get_$${1:name}():$${2:T} ${block(3)}
+
+function set_$${1:name}($${1:name}:$${2:T}):$${2:T} $body
+');
+
 					var constructor = "public function new";
-					items.push(createItem("new", '$constructor()', '$constructor($1) $block', data.replaceRange));
+					add("new", '$constructor()', '$constructor($1) $body');
 
 					if (isClass) {
 						var main = "static function main()";
-						items.push(createItem("main", main, '$main $block', data.replaceRange));
+						add("main", main, '$main $body');
 					}
 				}
 		}
