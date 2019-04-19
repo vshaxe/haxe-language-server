@@ -58,7 +58,7 @@ class CompletionFeature {
 		this.context = context;
 		inline checkCapabilities();
 		expectedTypeCompletion = new ExpectedTypeCompletion(context);
-		postfixCompletion = new PostfixCompletion();
+		postfixCompletion = new PostfixCompletion(context);
 		snippetCompletion = new SnippetCompletion(context);
 		printer = new DisplayPrinter(false, Qualified, {
 			argumentTypeHints: true,

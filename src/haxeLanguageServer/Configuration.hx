@@ -49,6 +49,16 @@ private typedef CodeGenerationConfig = {
 	var ?imports:ImportGenerationConfig;
 }
 
+private typedef PostfixCompletionConfig = {
+	var ?level:PostfixCompletionLevel;
+}
+
+private enum abstract PostfixCompletionLevel(String) {
+	var Full = "full";
+	var Filtered = "filtered";
+	var Off = "off";
+}
+
 private typedef UserConfig = {
 	var ?enableCodeLens:Bool;
 	var ?enableDiagnostics:Bool;
@@ -59,6 +69,7 @@ private typedef UserConfig = {
 	var ?buildCompletionCache:Bool;
 	var ?codeGeneration:CodeGenerationConfig;
 	var ?exclude:Array<String>;
+	var ?postfixCompletion:PostfixCompletionConfig;
 }
 
 private typedef InitOptions = {
@@ -169,7 +180,10 @@ class Configuration {
 					enableAutoImports: true
 				}
 			},
-			exclude: ["zpp_nape"]
+			exclude: ["zpp_nape"],
+			postfixCompletion: {
+				level: Full
+			}
 		};
 		StructDefaultsMacro.applyDefaults(user, defaults);
 	}

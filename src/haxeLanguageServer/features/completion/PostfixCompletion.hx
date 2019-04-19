@@ -14,9 +14,18 @@ using Lambda;
 class PostfixCompletion {
 	static inline var block = '{\n\t$0\n}';
 
-	public function new() {}
+	final context:Context;
+
+	public function new(context) {
+		this.context = context;
+	}
 
 	public function createItems<T1, T2>(data:CompletionContextData, items:Array<DisplayItem<T1>>):Array<CompletionItem> {
+		var level = context.config.user.postfixCompletion.level;
+		if (level == Off) {
+			return [];
+		}
+
 		var subject:FieldCompletionSubject<T2>;
 		switch (data.mode.kind) {
 			case Field:
@@ -128,6 +137,22 @@ class PostfixCompletion {
 				});
 		}
 
+		if (level != Filtered) {
+			createNonFilteredItems(dotPath, expr, add);
+		}
+
+		for (item in createLengthIterators(subject, items, expr)) {
+			add(item);
+		}
+		var switchItem = createSwitchItem(subject, expr);
+		if (switchItem != null) {
+			add(switchItem);
+		}
+
+		return result;
+	}
+
+	function createNonFilteredItems(dotPath:String, expr:String, add:PostfixCompletionItem->Void) {
 		if (dotPath != "String") {
 			add({
 				label: "string",
@@ -212,16 +237,6 @@ class PostfixCompletion {
 
 		add(createLocalItem("var", "1"));
 		add(createLocalItem("final", "2"));
-
-		for (item in createLengthIterators(subject, items, expr)) {
-			add(item);
-		}
-		var switchItem = createSwitchItem(subject, expr);
-		if (switchItem != null) {
-			add(switchItem);
-		}
-
-		return result;
 	}
 
 	/**
