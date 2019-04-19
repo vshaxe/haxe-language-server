@@ -109,8 +109,7 @@ class SnippetCompletion {
 
 function get_$${1:name}():$${2:T} ${block(3)}
 
-function set_$${1:name}($${1:name}:$${2:T}):$${2:T} $body
-');
+function set_$${1:name}($${1:name}:$${2:T}):$${2:T} $body');
 
 					var constructor = "public function new";
 					add("new", '$constructor()', '$constructor($1) $body');
