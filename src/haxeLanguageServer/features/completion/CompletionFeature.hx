@@ -10,6 +10,7 @@ import haxeLanguageServer.helper.DocHelper;
 import haxeLanguageServer.helper.ImportHelper;
 import haxeLanguageServer.protocol.helper.DisplayPrinter;
 import haxeLanguageServer.tokentree.PositionAnalyzer;
+import haxeLanguageServer.tokentree.TokenContext;
 import languageServerProtocol.protocol.Protocol.CompletionParams;
 import languageServerProtocol.Types.CompletionItem;
 import languageServerProtocol.Types.CompletionItemKind;
@@ -235,6 +236,7 @@ class CompletionFeature {
 			var items = [];
 			items = items.concat(postfixCompletion.createItems(data, displayItems));
 			items = items.concat(expectedTypeCompletion.createItems(data));
+			items = items.concat(createFieldKeywordItems(tokenContext, replaceRange));
 
 			function resolveItems() {
 				for (i in 0...displayItems.length) {
@@ -272,9 +274,40 @@ class CompletionFeature {
 					completionPosition: params.position,
 					replaceRange: replaceRange,
 					tokenContext: tokenContext
-				}, []).then(result -> resolve(result.items));
+				}, []).then(result -> {
+					var keywords = createFieldKeywordItems(tokenContext, replaceRange);
+					resolve(keywords.concat(result.items));
+				});
 			}
 		});
+	}
+
+	function createFieldKeywordItems(tokenContext:TokenContext, replaceRange:Range):Array<CompletionItem> {
+		var isFieldLevel = switch (tokenContext) {
+			case Type(type) if (type.field == null): true;
+			case _: false;
+		}
+		if (!isFieldLevel) {
+			return [];
+		}
+		var results:Array<CompletionItem> = [];
+		function create(keyword:KeywordKind):CompletionItem {
+			return {
+				label: keyword,
+				kind: Keyword,
+				textEdit: {
+					newText: keyword + " ",
+					range: replaceRange
+				},
+				command: TriggerSuggest,
+				sortText: "~~~"
+			}
+		}
+		var keywords:Array<KeywordKind> = [Public, Private, Extern, Final, Static, Dynamic, Override, Inline];
+		for (keyword in keywords) {
+			results.push(create(keyword));
+		}
+		return results;
 	}
 
 	function createCompletionItem<T>(index:Int, item:Null<DisplayItem<T>>, data:CompletionContextData):Null<CompletionItem> {

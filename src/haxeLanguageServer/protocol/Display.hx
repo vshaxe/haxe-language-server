@@ -306,14 +306,19 @@ enum abstract KeywordKind(String) to String {
 	var Package = "package";
 	var Import = "import";
 	var Using = "using";
+	var Public = "public";
 	var Private = "private";
+	var Static = "static";
 	var Extern = "extern";
+	var Dynamic = "dynamic";
+	var Override = "override";
 	var Class = "class";
 	var Interface = "interface";
 	var Enum = "enum";
 	var Abstract = "abstract";
 	var Typedef = "typedef";
 	var Final = "final";
+	var Inline = "inline";
 }
 
 /* enum abstract PackageContentKind(Int) {
