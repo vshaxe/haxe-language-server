@@ -71,7 +71,7 @@ class PositionAnalyzer {
 				case tok if (isType(tok)):
 					typeToken = parent.token;
 					break;
-				case Kwd(KwdFunction | KwdVar | KwdFinal):
+				case Kwd(KwdFunction | KwdVar | KwdFinal) if (!TokenTreeCheckUtils.isModifier(token)):
 					fieldToken = parent.token;
 				case _:
 			}

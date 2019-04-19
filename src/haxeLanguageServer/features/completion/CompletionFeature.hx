@@ -124,7 +124,8 @@ class CompletionFeature {
 		}
 		var offset = doc.offsetAt(params.position);
 		var textBefore = doc.content.substring(0, offset);
-		var currentToken = new PositionAnalyzer(doc).resolve(params.position);
+		var whitespace = textBefore.length - textBefore.rtrim().length;
+		var currentToken = new PositionAnalyzer(doc).resolve(params.position.translate(0, -whitespace));
 		if (contextSupport && !isValidCompletionPosition(currentToken, doc, params, textBefore)) {
 			return resolve([]);
 		}
