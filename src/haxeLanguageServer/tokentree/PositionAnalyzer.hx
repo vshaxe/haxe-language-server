@@ -84,7 +84,7 @@ class PositionAnalyzer {
 					switch (typeToken.tok) {
 						case Kwd(KwdClass): if (TokenTreeCheckUtils.isTypeMacroClass(typeToken)) MacroClass else Class;
 						case Kwd(KwdInterface): Interface;
-						case Kwd(KwdAbstract): Abstract;
+						case Kwd(KwdAbstract): if (TokenTreeCheckUtils.isTypeEnumAbstract(typeToken)) EnumAbstract else Abstract;
 						case Kwd(KwdEnum): if (TokenTreeCheckUtils.isTypeEnumAbstract(typeToken)) EnumAbstract else Enum;
 						case Kwd(KwdTypedef): Typedef;
 						case _: null;

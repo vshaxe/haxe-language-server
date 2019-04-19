@@ -93,20 +93,24 @@ class SnippetCompletion {
 				var isAbstract = type.kind == Abstract || type.kind == EnumAbstract;
 				var canInsertClassFields = type.field == null && (isClass || isAbstract);
 				if (canInsertClassFields) {
-					function add(label:String, detail:String, code:String) {
-						items.push(createItem(label, detail, code, data.replaceRange));
+					function add(label:String, detail:String, code:String, ?sortText:String) {
+						items.push(createItem(label, detail, code, data.replaceRange, sortText));
 					}
 
 					add("function", "function name()", 'function $${1:name}($$2) $body');
 					add("public function", "public function name()", 'public function $${1:name}($$2) $body');
 
-					add("var", "var name:T;", 'var $${1:name}:$${2:T};');
-					add("public var", "public var name:T;", 'public var $${1:name}:$${2:T};');
+					if (type.kind == EnumAbstract) {
+						add("var", "var name;", 'var $${1:name}$$2;', "~");
+					} else {
+						add("var", "var name:T;", 'var $${1:name}:$${2:T};');
+						add("public var", "public var name:T;", 'public var $${1:name}:$${2:T};');
 
-					add("final", "final name:T;", 'final $${1:name}:$${2:T};');
-					add("public final", "public final name:T;", 'public final $${1:name}:$${2:T};');
+						add("final", "final name:T;", 'final $${1:name}:$${2:T};');
+						add("public final", "public final name:T;", 'public final $${1:name}:$${2:T};');
 
-					add("readonly", "public var name(default, null):T;", 'public var $${1:name}(default, null):$${2:T};');
+						add("readonly", "public var name(default, null):T;", 'public var $${1:name}(default, null):$${2:T};');
+					}
 
 					add("property", "public var name(get, set):T;", 'public var $${1:name}(get, set):$${2:T};
 
@@ -128,12 +132,12 @@ function set_$${1:name}($${1:name}:$${2:T}):$${2:T} $body
 		return Promise.resolve(result());
 	}
 
-	function createItem(label:String, detail:String, code:String, replaceRange:Range):CompletionItem {
+	function createItem(label:String, detail:String, code:String, replaceRange:Range, ?sortText:String):CompletionItem {
 		return {
 			label: label,
 			detail: detail,
 			kind: Snippet,
-			sortText: "~", // sort to the end
+			sortText: if (sortText == null) "~~" /*sort to the end*/ else sortText,
 			textEdit: {
 				range: replaceRange,
 				newText: code
