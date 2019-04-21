@@ -67,6 +67,7 @@ private typedef UserConfig = {
 	var ?diagnosticsPathFilter:String;
 	var ?displayPort:EitherType<Int, String>;
 	var ?buildCompletionCache:Bool;
+	var ?enableCompletionCacheWarning:Bool;
 	var ?codeGeneration:CodeGenerationConfig;
 	var ?exclude:Array<String>;
 	var ?postfixCompletion:PostfixCompletionConfig;
@@ -158,6 +159,7 @@ class Configuration {
 			diagnosticsPathFilter: "${workspaceRoot}",
 			displayPort: null,
 			buildCompletionCache: true,
+			enableCompletionCacheWarning: true,
 			codeGeneration: {
 				functions: {
 					anonymous: {
