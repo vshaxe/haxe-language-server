@@ -25,6 +25,9 @@ class PostfixCompletion {
 		if (level == Off) {
 			return [];
 		}
+		if (!data.textBefore.endsWith(".")) {
+			return [];
+		}
 
 		var subject:FieldCompletionSubject<T2>;
 		switch (data.mode.kind) {

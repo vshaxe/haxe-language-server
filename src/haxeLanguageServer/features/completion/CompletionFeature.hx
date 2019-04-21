@@ -230,6 +230,7 @@ class CompletionFeature {
 				mode: result.mode,
 				doc: doc,
 				indent: indent,
+				textBefore: textBefore,
 				lineAfter: lineAfter,
 				completionPosition: params.position,
 				importPosition: importPosition,

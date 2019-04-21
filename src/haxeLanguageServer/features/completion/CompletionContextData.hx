@@ -8,6 +8,7 @@ typedef CompletionContextData = {
 	var mode:CompletionMode<Dynamic>;
 	var doc:TextDocument;
 	var indent:String;
+	var textBefore:String;
 	var lineAfter:String;
 	var completionPosition:Position;
 	var importPosition:Position;
