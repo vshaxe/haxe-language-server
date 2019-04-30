@@ -186,6 +186,7 @@ class CompletionFeature {
 			|| (data != null && data.origin == Custom)) {
 			return resolve(item);
 		}
+		previousCompletionData.isResolve = true;
 		context.callHaxeMethod(DisplayMethods.CompletionItemResolve, {index: item.data.index}, token, result -> {
 			resolve(createCompletionItem(data.index, result.item, previousCompletionData));
 			return null;
@@ -236,7 +237,8 @@ class CompletionFeature {
 				lineAfter: lineAfter,
 				completionPosition: params.position,
 				importPosition: importPosition,
-				tokenContext: tokenContext
+				tokenContext: tokenContext,
+				isResolve: false
 			};
 			var displayItems = result.items;
 			var items = [];
@@ -538,7 +540,7 @@ class CompletionFeature {
 	}
 
 	function createTypeCompletionItem(type:DisplayModuleType, data:CompletionContextData):Null<CompletionItem> {
-		if (type.meta.hasMeta(Deprecated)) {
+		if (!data.isResolve && type.meta.hasMeta(Deprecated)) {
 			return null;
 		}
 

@@ -13,4 +13,5 @@ typedef CompletionContextData = {
 	var completionPosition:Position;
 	var importPosition:Position;
 	var tokenContext:TokenContext;
+	var isResolve:Bool;
 }
