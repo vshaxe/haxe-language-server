@@ -6,6 +6,7 @@ import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
 import haxeLanguageServer.protocol.Display;
+import haxeLanguageServer.protocol.Display.CompletionParams as HaxeCompletionParams;
 import haxeLanguageServer.helper.DocHelper;
 import haxeLanguageServer.helper.ImportHelper;
 import haxeLanguageServer.protocol.helper.DisplayPrinter;
@@ -200,11 +201,12 @@ class CompletionFeature {
 				wasAutoTriggered = false;
 			}
 		}
-		var haxeParams = {
+		var haxeParams:HaxeCompletionParams = {
 			file: doc.uri.toFsPath(),
 			contents: doc.content,
 			offset: offset,
 			wasAutoTriggered: wasAutoTriggered,
+			meta: [CompilerMetadata.Deprecated]
 		};
 		var tokenContext = PositionAnalyzer.getContext(currentToken, doc, params.position);
 		var position = params.position;
@@ -536,6 +538,10 @@ class CompletionFeature {
 	}
 
 	function createTypeCompletionItem(type:DisplayModuleType, data:CompletionContextData):Null<CompletionItem> {
+		if (type.meta.hasMeta(Deprecated)) {
+			return null;
+		}
+
 		var isImportCompletion = data.mode.kind == Import || data.mode.kind == Using;
 		var importConfig = context.config.user.codeGeneration.imports;
 		var autoImport = importConfig.enableAutoImports;

@@ -49,7 +49,7 @@ class DisplayMethods {
 	/**
 		The signature help request is sent from the client to Haxe to request signature information at a given cursor position.
 	**/
-	static inline var SignatureHelp = new HaxeRequestMethod<CompletionParams, SignatureHelpResult>("display/signatureHelp");
+	static inline var SignatureHelp = new HaxeRequestMethod<SignatureHelpParams, SignatureHelpResult>("display/signatureHelp");
 	/*
 		TODO:
 
@@ -60,7 +60,7 @@ class DisplayMethods {
 	 */
 }
 
-enum abstract CompilerMetadata(String) {
+enum abstract CompilerMetadata(String) to String {
 	var Op = ":op";
 	var Resolve = ":resolve";
 	var ArrayAccess = ":arrayAccess";
@@ -75,6 +75,9 @@ enum abstract CompilerMetadata(String) {
 /* Completion */
 typedef CompletionParams = PositionParams & {
 	var wasAutoTriggered:Bool;
+
+	/** list of metas to include in responses **/
+	var meta:Array<String>;
 }
 
 typedef FieldResolution = {
@@ -454,7 +457,11 @@ enum abstract HoverExpectedNameKind(Int) {
 /* DeterminePackage */
 typedef DeterminePackageResult = Response<Array<String>>;
 
-/* Signature */
+/* SignatureHelp */
+typedef SignatureHelpParams = PositionParams & {
+	var wasAutoTriggered:Bool;
+}
+
 typedef SignatureInformation = JsonFunctionSignature & {
 	var ?documentation:String;
 }
