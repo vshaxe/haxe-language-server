@@ -103,7 +103,7 @@ class DocHelper {
 	}
 
 	public static function printCodeBlock(content:String, languageId:LanguageId):String {
-		return '```$languageId\n$content```';
+		return '```$languageId\n$content\n```';
 	}
 }
 
