@@ -25,10 +25,13 @@ class ImportHelper {
 			range: result.position.toRange(),
 			newText: paths.map(path -> 'import $path;\n').join("")
 		};
-		if (result.insertLineBefore && doc.lineAt(result.position.line - 1).trim().length > 0) {
+		function isLineEmpty(delta:Int) {
+			return doc.lineAt(result.position.line - 1).trim().length == 0;
+		}
+		if (result.insertLineBefore && !isLineEmpty(-1)) {
 			importData.newText = "\n" + importData.newText;
 		}
-		if (result.insertLineAfter) {
+		if (result.insertLineAfter && !isLineEmpty(1)) {
 			importData.newText += "\n";
 		}
 		return importData;
@@ -104,10 +107,18 @@ class ImportHelper {
 						break;
 				}
 			} while (true);
-			{
-				position: document.positionAt(tokens.getPos(token).min),
-				insertLineBefore: token.access().previousSibling().exists(),
-				insertLineAfter: true
+			if (token.access().previousSibling().exists()) {
+				{
+					position: document.positionAt(tokens.getPos(token).min),
+					insertLineBefore: true,
+					insertLineAfter: true
+				}
+			} else {
+				{
+					position: {line: 0, character: 0},
+					insertLineBefore: false,
+					insertLineAfter: true
+				}
 			}
 		} else {
 			{

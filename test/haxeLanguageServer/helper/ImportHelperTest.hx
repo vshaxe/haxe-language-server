@@ -44,15 +44,16 @@ package;
 
 
 |import haxe.io.Path;";
-	var NoImport = "
-|class SomeClass {
+	var NoImport = "|
+
+class SomeClass {
 }";
 	var ComplexPackage = "
 package     test._underscore.____s   ;
 
 |import haxe.io.Path;";
-	var TypeWithDocComment = "
-|/**
+	var TypeWithDocComment = "|
+/**
     Some doc comment for this type.
 **/
 class Foo {";
