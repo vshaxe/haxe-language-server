@@ -64,19 +64,13 @@ class ImportHelper {
 			return null;
 		}
 		var firstImport = null;
-		var importCount = 0;
 		var firstType = null;
 
 		tokens.tree.filterCallback((tree, _) -> {
 			switch tree.tok {
 				case Kwd(KwdPackage):
 				// ignore
-				case Kwd(KwdImport | KwdUsing):
-					importCount++;
-					if (firstImport == null) {
-						firstImport = tree;
-					}
-				case Sharp("if") if (firstImport == null):
+				case Kwd(KwdImport | KwdUsing) | Sharp("if") if (firstImport == null):
 					firstImport = tree;
 				case Kwd(_) if (firstType == null):
 					firstType = tree;
