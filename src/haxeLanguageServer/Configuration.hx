@@ -193,7 +193,7 @@ class Configuration {
 					enableAutoImports: true
 				},
 				switch_: {
-					parentheses: true
+					parentheses: false
 				}
 			},
 			exclude: ["zpp_nape"],
