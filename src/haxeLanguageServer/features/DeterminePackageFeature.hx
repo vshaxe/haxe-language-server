@@ -15,18 +15,18 @@ class DeterminePackageFeature {
 
 	public function onDeterminePackage(params:{fsPath:String}, token:CancellationToken, resolve:{pack:String}->Void, reject:ResponseError<NoData>->Void) {
 		var handle = if (context.haxeServer.supports(DisplayMethods.DeterminePackage)) handleJsonRpc else handleLegacy;
-		handle(params, token, resolve, reject);
+		handle(new FsPath(params.fsPath), token, resolve, reject);
 	}
 
-	function handleJsonRpc(params:{fsPath:String}, token:CancellationToken, resolve:{pack:String}->Void, reject:ResponseError<NoData>->Void) {
-		context.callHaxeMethod(DisplayMethods.DeterminePackage, {file: new FsPath(params.fsPath)}, token, result -> {
+	function handleJsonRpc(path:FsPath, token:CancellationToken, resolve:{pack:String}->Void, reject:ResponseError<NoData>->Void) {
+		context.callHaxeMethod(DisplayMethods.DeterminePackage, {file: context.relativePath(path)}, token, result -> {
 			resolve({pack: result.join(".")});
 			return null;
 		}, reject.handler());
 	}
 
-	function handleLegacy(params:{fsPath:String}, token:CancellationToken, resolve:{pack:String}->Void, reject:ResponseError<NoData>->Void) {
-		var args = ['${params.fsPath}@0@package'];
+	function handleLegacy(path:FsPath, token:CancellationToken, resolve:{pack:String}->Void, reject:ResponseError<NoData>->Void) {
+		var args = ['${context.relativePath(path)}@0@package'];
 		context.callDisplay("@package", args, null, token, function(r) {
 			switch (r) {
 				case DCancelled:

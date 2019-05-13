@@ -26,4 +26,13 @@ class PathHelper {
 		}
 		return new FsPath(strPath);
 	}
+
+	public static function relativize(path:FsPath, cwd:FsPath):FsPath {
+		var path = Path.normalize(path.toString());
+		var cwd = Path.normalize(cwd.toString()) + "/";
+
+		var segments = path.split(cwd);
+		segments.shift();
+		return new FsPath(segments.join(cwd));
+	}
 }

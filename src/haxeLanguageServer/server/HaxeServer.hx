@@ -58,9 +58,10 @@ class HaxeServer {
 			env[key] = value;
 		for (key => value in config.env)
 			env[key] = value;
+		var spawnOptions = {env: env, cwd: context.workspacePath.toString()};
 
 		var haxePath = config.path;
-		var checkRun = ChildProcess.spawnSync(haxePath, ["-version"], {env: env});
+		var checkRun = ChildProcess.spawnSync(haxePath, ["-version"], spawnOptions);
 		if (checkRun.error != null) {
 			if (checkRun.error.message.indexOf("ENOENT") >= 0) {
 				if (haxePath == "haxe") // default
@@ -94,7 +95,7 @@ class HaxeServer {
 		buffer = new MessageBuffer();
 		nextMessageLength = -1;
 
-		proc = ChildProcess.spawn(haxePath, config.arguments.concat(["--wait", "stdio"]), {env: env});
+		proc = ChildProcess.spawn(haxePath, config.arguments.concat(["--wait", "stdio"]), spawnOptions);
 
 		proc.stdout.on(ReadableEvent.Data, function(buf:Buffer) {
 			context.sendLogMessage(Log, reTrailingNewline.replace(buf.toString(), ""));

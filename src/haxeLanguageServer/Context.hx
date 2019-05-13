@@ -12,6 +12,7 @@ import haxeLanguageServer.features.completion.*;
 import haxeLanguageServer.features.documentSymbols.DocumentSymbolsFeature;
 import haxeLanguageServer.features.foldingRange.FoldingRangeFeature;
 import haxeLanguageServer.features.CodeActionFeature.CodeActionContributor;
+import haxeLanguageServer.helper.PathHelper;
 import haxeLanguageServer.server.DisplayResult;
 import haxeLanguageServer.server.HaxeServer;
 import haxeLanguageServer.protocol.Protocol.HaxeRequestMethod;
@@ -328,7 +329,7 @@ class Context {
 
 	public function callDisplay(label:String, args:Array<String>, ?stdin:String, ?token:CancellationToken, callback:DisplayResult->Void,
 			errback:(error:String) -> Void) {
-		var actualArgs = ["--cwd", workspacePath.toString()]; // change cwd to workspace root
+		var actualArgs = [];
 		if (config.displayArguments != null)
 			actualArgs = actualArgs.concat(config.displayArguments); // add arguments from the workspace settings
 		actualArgs = actualArgs.concat(["-D", "display-details", // get more details in completion results,
@@ -364,5 +365,12 @@ class Context {
 				});
 			}
 		};
+	}
+
+	public function relativePath(path:FsPath):FsPath {
+		if (path.toString().startsWith(workspacePath.toString())) {
+			return PathHelper.relativize(path, workspacePath);
+		}
+		return path;
 	}
 }

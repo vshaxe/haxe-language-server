@@ -36,7 +36,7 @@ class SignatureHelpFeature {
 	function handleJsonRpc(params:TextDocumentPositionParams, token:CancellationToken, resolve:SignatureHelp->Void, reject:ResponseError<NoData>->Void,
 			doc:TextDocument) {
 		var params = {
-			file: doc.uri.toFsPath(),
+			file: context.relativePath(doc.uri.toFsPath()),
 			contents: doc.content,
 			offset: doc.offsetAt(params.position),
 			wasAutoTriggered: true // TODO: send this once the API supports it (https://github.com/Microsoft/vscode/issues/34737)

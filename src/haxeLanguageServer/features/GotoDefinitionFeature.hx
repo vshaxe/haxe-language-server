@@ -26,15 +26,16 @@ class GotoDefinitionFeature {
 
 	function handleJsonRpc(params:TextDocumentPositionParams, token:CancellationToken, resolve:Definition->Void, reject:ResponseError<NoData>->Void,
 			doc:TextDocument, offset:Int) {
-		context.callHaxeMethod(DisplayMethods.GotoDefinition, {file: doc.uri.toFsPath(), contents: doc.content, offset: offset}, token, locations -> {
-			resolve(locations.map(location -> {
-				{
-					uri: location.file.toUri(),
-					range: location.range
-				}
-			}));
-			return null;
-		}, reject.handler());
+		context.callHaxeMethod(DisplayMethods.GotoDefinition, {file: context.relativePath(doc.uri.toFsPath()), contents: doc.content, offset: offset}, token,
+			locations -> {
+				resolve(locations.map(location -> {
+					{
+						uri: location.file.toUri(),
+						range: location.range
+					}
+				}));
+				return null;
+			}, reject.handler());
 	}
 
 	function handleLegacy(params:TextDocumentPositionParams, token:CancellationToken, resolve:Definition->Void, reject:ResponseError<NoData>->Void,

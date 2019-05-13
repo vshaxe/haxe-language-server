@@ -92,7 +92,7 @@ class CodeLensFeature {
 		if (doc == null) {
 			return reject.documentNotFound(uri);
 		}
-		context.callDisplay("@statistics", [doc.uri.toFsPath() + "@0@statistics"], doc.content, token, function(r:DisplayResult) {
+		context.callDisplay("@statistics", [context.relativePath(doc.uri.toFsPath()) + "@0@statistics"], doc.content, token, function(r:DisplayResult) {
 			switch (r) {
 				case DCancelled:
 					resolve(null);
