@@ -66,7 +66,6 @@ class ImportHelper {
 		var firstImport = null;
 		var importCount = 0;
 		var firstType = null;
-		var lastComment = null;
 
 		tokens.tree.filterCallback((tree, _) -> {
 			switch tree.tok {
@@ -81,8 +80,6 @@ class ImportHelper {
 					firstImport = tree;
 				case Kwd(_) if (firstType == null):
 					firstType = tree;
-				case Comment(_) | CommentLine(_) if (firstType = null):
-					lastComment = tree;
 				case _:
 			}
 			return SKIP_SUBTREE;
