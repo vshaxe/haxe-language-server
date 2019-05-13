@@ -59,6 +59,9 @@ class PositionAnalyzer {
 	}
 
 	public static function getContext(token:Null<TokenTree>, document:TextDocument, completionPosition:Position):TokenContext {
+		if (token == null) {
+			return Root(BeforePackage);
+		}
 		inline function isType(tok:TokenDef) {
 			return tok.match(Kwd(KwdClass | KwdInterface | KwdAbstract | KwdEnum | KwdTypedef));
 		}

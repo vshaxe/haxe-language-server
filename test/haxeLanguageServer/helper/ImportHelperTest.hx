@@ -10,7 +10,7 @@ class ImportHelperTest extends Test {
 			var lines = (file : String).split("\n");
 			for (i in 0...lines.length) {
 				// | indicates the desired position
-				if (lines[i].indexOf("|") > 0) {
+				if (lines[i].contains("|")) {
 					line = i;
 					break;
 				}
@@ -20,51 +20,59 @@ class ImportHelperTest extends Test {
 			}
 
 			var doc = new TextDocument(new DocumentUri("file://dummy"), "", 0, file.replace("|", ""));
-			var importPos = ImportHelper.getImportPosition(doc);
+			var importPos = ImportHelper.getImportPosition(doc).position;
 			Assert.equals(0, importPos.character, pos);
 			Assert.equals(line, importPos.line, pos);
 		}
 
 		test(EmptyPackage);
-		test(EmptyPackageWithSpaces);
 		test(NoPackage);
 		test(NoImport);
 		test(ComplexPackage);
 		test(TypeWithDocComment);
+		test(LicenseHeader);
+		test(LicenseHeaderWithDocComment);
 	}
 }
 
 enum abstract TestFile(String) to String {
 	var EmptyPackage = "
-    package;
+package;
 
-    |import haxe.io.Path;
-    ";
-	var EmptyPackageWithSpaces = "
-    package   ;
-
-    |import haxe.io.Path;
-    ";
+|import haxe.io.Path;";
 	var NoPackage = "
 
 
-    |import haxe.io.Path;
-    ";
+|import haxe.io.Path;";
 	var NoImport = "
-    |class SomeClass {
-    }
-    ";
+|class SomeClass {
+}";
 	var ComplexPackage = "
+package     test._underscore.____s   ;
 
-
-    package     test._underscore.____s   ;
-
-    |import haxe.io.Path;
-    ";
+|import haxe.io.Path;";
 	var TypeWithDocComment = "
-    |/**
-        Some doc comment for this type.
-    **/
-    class Foo {
-    ";
+|/**
+    Some doc comment for this type.
+**/
+class Foo {";
+	var LicenseHeader = "
+/**
+	License
+**/
+
+|import Foo;
+
+class Foo {";
+	var LicenseHeaderWithDocComment = "
+/**
+	License
+**/
+
+|import Foo;
+
+/**
+	Docs
+**/
+class Foo {";
 }

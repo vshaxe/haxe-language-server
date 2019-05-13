@@ -7,49 +7,34 @@ import haxeLanguageServer.TextDocument;
 import haxeLanguageServer.Configuration.ImportStyle;
 import haxeLanguageServer.Configuration.FunctionFormattingConfig;
 
+using tokentree.TokenTreeAccessHelper;
 using Lambda;
 
-class ImportHelper {
-	static final rePackageDecl = ~/package\s*( [\w\.]*)?\s*;/;
-	static final reTypeDecl = ~/^\s*(class|interface|enum|abstract|typedef)/;
+typedef ImportPosition = {
+	final position:Position;
+	final insertLineBefore:Bool;
+	final insertLineAfter:Bool;
+}
 
-	public static function createImportsEdit(doc:TextDocument, position:Position, paths:Array<String>, style:ImportStyle):TextEdit {
+class ImportHelper {
+	public static function createImportsEdit(doc:TextDocument, result:ImportPosition, paths:Array<String>, style:ImportStyle):TextEdit {
 		if (style == Module) {
 			paths = paths.map(TypeHelper.getModule);
 		}
 		var importData = {
-			range: position.toRange(),
+			range: result.position.toRange(),
 			newText: paths.map(path -> 'import $path;\n').join("")
 		};
-
-		var nextLine = doc.lineAt(position.line);
-		var followedByTypeDecl = nextLine != null && reTypeDecl.match(nextLine);
-		if (followedByTypeDecl) {
+		if (result.insertLineBefore && doc.lineAt(result.position.line - 1).trim().length > 0) {
+			importData.newText = "\n" + importData.newText;
+		}
+		if (result.insertLineAfter) {
 			importData.newText += "\n";
 		}
-
 		return importData;
 	}
 
-	/**
-		Finds the the first non-empty line (excluding the package declaration if present),
-		which is where we want to insert imports.
-	**/
-	public static function getImportPosition(doc:TextDocument):Position {
-		var importLine = 0;
-		for (i in 0...doc.lineCount) {
-			var line = doc.lineAt(i);
-			var isPackageDecl = rePackageDecl.match(line);
-			var isNotEmpty = line.trim().length > 0;
-			if (!isPackageDecl && isNotEmpty) {
-				importLine = i;
-				break;
-			}
-		}
-		return {line: importLine, character: 0};
-	}
-
-	public static function createFunctionImportsEdit<T>(doc:TextDocument, position:Position, context:Context, type:JsonType<T>,
+	public static function createFunctionImportsEdit<T>(doc:TextDocument, result:ImportPosition, context:Context, type:JsonType<T>,
 			formatting:FunctionFormattingConfig):Array<TextEdit> {
 		var importConfig = context.config.user.codeGeneration.imports;
 		if (!importConfig.enableAutoImports) {
@@ -69,9 +54,76 @@ class ImportHelper {
 			return [];
 		} else {
 			var printer = new DisplayPrinter(false, Always);
-			return [
-				createImportsEdit(doc, position, paths.map(printer.printPath), importConfig.style)
-			];
+			return [createImportsEdit(doc, result, paths.map(printer.printPath), importConfig.style)];
+		}
+	}
+
+	public static function getImportPosition(document:TextDocument):ImportPosition {
+		var tokens = document.tokens;
+		if (tokens == null) {
+			return null;
+		}
+		var firstImport = null;
+		var importCount = 0;
+		var firstType = null;
+		var lastComment = null;
+
+		tokens.tree.filterCallback((tree, _) -> {
+			switch tree.tok {
+				case Kwd(KwdPackage):
+				// ignore
+				case Kwd(KwdImport | KwdUsing):
+					importCount++;
+					if (firstImport == null) {
+						firstImport = tree;
+					}
+				case Sharp("if") if (firstImport == null):
+					firstImport = tree;
+				case Kwd(_) if (firstType == null):
+					firstType = tree;
+				case Comment(_) | CommentLine(_) if (firstType = null):
+					lastComment = tree;
+				case _:
+			}
+			return SKIP_SUBTREE;
+		});
+
+		return if (firstImport != null) {
+			{
+				position: document.positionAt(tokens.getPos(firstImport).min),
+				insertLineBefore: false,
+				insertLineAfter: false
+			}
+		} else if (firstType != null) {
+			var token = firstType;
+			var previousSibling = null;
+			var docCommentSkipped = false;
+			do {
+				previousSibling = token.access().previousSibling();
+				if (!previousSibling.exists()) {
+					break;
+				}
+				switch previousSibling.token.tok {
+					case CommentLine(_):
+						token = previousSibling.token;
+					case Comment(_) if (!docCommentSkipped):
+						token = previousSibling.token;
+						docCommentSkipped = true;
+					case _:
+						break;
+				}
+			} while (true);
+			{
+				position: document.positionAt(tokens.getPos(token).min),
+				insertLineBefore: token.access().previousSibling().exists(),
+				insertLineAfter: true
+			}
+		} else {
+			{
+				position: {line: 0, character: 0},
+				insertLineAfter: false,
+				insertLineBefore: false
+			}
 		}
 	}
 }
