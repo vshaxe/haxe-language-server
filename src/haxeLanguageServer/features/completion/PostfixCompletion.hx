@@ -320,11 +320,13 @@ while (i-- > 0) {
 		if (moduleType == null) {
 			return null;
 		}
+		var printer = new DisplayPrinter();
+		var parentheses = context.config.user.codeGeneration.switch_.parentheses;
 
 		function make(insertText:String):PostfixCompletionItem {
 			return {
 				label: "switch",
-				detail: "switch (expr) {cases...}",
+				detail: printer.printSwitchSubject("expr", parentheses) + " {cases...}",
 				insertText: insertText,
 				insertTextFormat: Snippet,
 				showCode: true
@@ -332,22 +334,21 @@ while (i-- > 0) {
 		}
 
 		var nullable = subject.item.type.removeNulls().nullable;
-		var printer = new DisplayPrinter();
 		switch (moduleType.kind) {
 			case Enum:
 				var e:JsonEnum = moduleType.args;
 				if (e.constructors.length > 0) {
-					return make(printer.printSwitchOnEnum(expr, e, nullable, true));
+					return make(printer.printSwitchOnEnum(expr, e, nullable, true, parentheses));
 				}
 			case Abstract if (moduleType.meta.hasMeta(Enum)):
 				var a:JsonAbstract = moduleType.args;
 				if (a.impl != null && a.impl.statics.exists(Helper.isEnumAbstractField)) {
-					return make(printer.printSwitchOnEnumAbstract(expr, a, nullable, true));
+					return make(printer.printSwitchOnEnumAbstract(expr, a, nullable, true, parentheses));
 				}
 			case Abstract if (moduleType.moduleName == "StdTypes" && moduleType.name == "Bool"):
-				return make(printer.printSwitch(expr, ["true", "false"], nullable, true));
+				return make(printer.printSwitch(expr, ["true", "false"], nullable, true, parentheses));
 			case _:
-				var item = make('switch ($expr) {\n\tcase $0\n}');
+				var item = make(printer.printSwitchSubject(expr, parentheses) + ' {\n\tcase $0\n}');
 				item.command = TriggerSuggest;
 				return item;
 		}

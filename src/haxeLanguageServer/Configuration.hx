@@ -44,9 +44,14 @@ private typedef ImportGenerationConfig = {
 	var ?style:ImportStyle;
 }
 
+private typedef SwitchGenerationConfig = {
+	var ?parentheses:Bool;
+}
+
 private typedef CodeGenerationConfig = {
 	var ?functions:FunctionGenerationConfig;
 	var ?imports:ImportGenerationConfig;
+	var ?switch_:SwitchGenerationConfig;
 }
 
 private typedef PostfixCompletionConfig = {
@@ -151,6 +156,12 @@ class Configuration {
 
 		user = newConfig;
 
+		// work around `switch` being a keyword
+		if (newConfig.codeGeneration != null) {
+			newConfig.codeGeneration.switch_ = Reflect.field(newConfig.codeGeneration, "switch");
+			Reflect.deleteField(newConfig.codeGeneration, "switch");
+		}
+
 		var defaults:UserConfig = {
 			enableCodeLens: false,
 			enableDiagnostics: true,
@@ -180,6 +191,9 @@ class Configuration {
 				imports: {
 					style: Type,
 					enableAutoImports: true
+				},
+				switch_: {
+					parentheses: true
 				}
 			},
 			exclude: ["zpp_nape"],

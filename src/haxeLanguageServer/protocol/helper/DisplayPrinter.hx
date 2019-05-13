@@ -459,17 +459,21 @@ class DisplayPrinter {
 		}
 	}
 
-	public function printSwitchOnEnum(subject:String, e:JsonEnum, nullable:Bool, snippets:Bool) {
+	public function printSwitchSubject(subject:String, parentheses:Bool) {
+		return "switch " + (if (parentheses) '($subject)' else subject);
+	}
+
+	public function printSwitchOnEnum(subject:String, e:JsonEnum, nullable:Bool, snippets:Bool, parentheses:Bool) {
 		var fields = e.constructors.map(field -> printEnumField(field, field.type, false, false));
-		return printSwitch(subject, fields, nullable, snippets);
+		return printSwitch(subject, fields, nullable, snippets, parentheses);
 	}
 
-	public function printSwitchOnEnumAbstract(subject:String, a:JsonAbstract, nullable:Bool, snippets:Bool) {
+	public function printSwitchOnEnumAbstract(subject:String, a:JsonAbstract, nullable:Bool, snippets:Bool, parentheses:Bool) {
 		var fields = a.impl.statics.filter(Helper.isEnumAbstractField).map(field -> field.name);
-		return printSwitch(subject, fields, nullable, snippets);
+		return printSwitch(subject, fields, nullable, snippets, parentheses);
 	}
 
-	public function printSwitch(subject:String, fields:Array<String>, nullable:Bool, snippets:Bool) {
+	public function printSwitch(subject:String, fields:Array<String>, nullable:Bool, snippets:Bool, parentheses:Bool) {
 		if (nullable) {
 			fields.unshift("null");
 		}
@@ -481,7 +485,7 @@ class DisplayPrinter {
 			}
 			fields[i] = field;
 		}
-		return 'switch ($subject) {\n${fields.join("\n")}\n}';
+		return printSwitchSubject(subject, parentheses) + ' {\n${fields.join("\n")}\n}';
 	}
 
 	function printMetadataTarget(target:MetadataTarget):String {
