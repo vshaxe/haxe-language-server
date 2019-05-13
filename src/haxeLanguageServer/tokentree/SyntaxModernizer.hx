@@ -20,7 +20,7 @@ class SyntaxModernizer {
 			return actions;
 		}
 		tokens.tree.filterCallback(function(token:TokenTree, _) {
-			switch (token.tok) {
+			switch token.tok {
 				case Kwd(kwd) if (kwd == KwdEnum || kwd == KwdExtern || kwd == KwdFinal):
 					var dblDot = token.access().parent().is(DblDot).token;
 					var at = dblDot.access().parent().is(At).token;

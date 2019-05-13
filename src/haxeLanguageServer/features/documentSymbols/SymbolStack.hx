@@ -70,7 +70,7 @@ abstract SymbolStack(Array<{level:SymbolLevel, symbol:DocumentSymbol}>) {
 	public function getParentTypeKind():DisplayModuleTypeKind {
 		var i = depth;
 		while (i-- > 0) {
-			switch (this[i].level) {
+			switch this[i].level {
 				case Type(kind):
 					return kind;
 				case _:

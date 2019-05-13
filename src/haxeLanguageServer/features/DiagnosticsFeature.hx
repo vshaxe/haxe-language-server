@@ -268,7 +268,7 @@ class DiagnosticsFeature {
 			if (!(d.code is Int)) // our codes are int, so we don't handle other stuff
 				continue;
 			var code = new DiagnosticKind<T>(d.code);
-			actions = actions.concat(switch (code) {
+			actions = actions.concat(switch code {
 				case UnusedImport: getUnusedImportActions(params, d);
 				case UnresolvedIdentifier: getUnresolvedIdentifierActions(params, d);
 				case CompilerError: getCompilerErrorActions(params, d);
@@ -297,7 +297,7 @@ class DiagnosticsFeature {
 		var actions:Array<CodeAction> = [];
 		var args = getDiagnosticsArguments(params.textDocument.uri, UnresolvedIdentifier, d.range);
 		for (arg in args) {
-			actions = actions.concat(switch (arg.kind) {
+			actions = actions.concat(switch arg.kind {
 				case Import: getUnresolvedImportActions(params, d, arg);
 				case Typo: getTypoActions(params, d, arg);
 			});
@@ -491,7 +491,7 @@ private enum abstract DiagnosticKind<T>(Int) from Int to Int {
 	}
 
 	public function getMessage(args:T) {
-		return switch ((this : DiagnosticKind<T>)) {
+		return switch (this : DiagnosticKind<T>) {
 			case UnusedImport: "Unused import/using";
 			case UnresolvedIdentifier: "Unresolved identifier";
 			case CompilerError: args.trim();

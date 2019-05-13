@@ -12,7 +12,7 @@ class IdentifierHelper {
 		type = TypeHelper.unwrapNullable(type);
 		type = TypeHelper.getTypeWithoutParams(type);
 
-		return switch (type) {
+		return switch type {
 			case null, "": "unknown";
 			case "Int": "i";
 			case "Float": "f";

@@ -42,7 +42,7 @@ class FindReferencesFeature {
 		var bytePos = context.displayOffsetConverter.characterOffsetToByteOffset(doc.content, doc.offsetAt(params.position));
 		var args = ['${context.relativePath(doc.uri.toFsPath())}@$bytePos@usage'];
 		context.callDisplay("@usage", args, doc.content, token, function(r) {
-			switch (r) {
+			switch r {
 				case DCancelled:
 					resolve(null);
 				case DResult(data):

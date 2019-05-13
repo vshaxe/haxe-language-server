@@ -32,10 +32,10 @@ class SnippetCompletion {
 
 		for (i in 0...displayItems.length) {
 			var item = displayItems[i];
-			switch (item.kind) {
+			switch item.kind {
 				case Keyword:
 					var kwd:KeywordKind = item.args.name;
-					switch (kwd) {
+					switch kwd {
 						case Class, Interface, Enum, Abstract, Typedef if (isRestOfLineEmpty):
 							displayItems[i] = null;
 						case Package:
@@ -55,7 +55,7 @@ class SnippetCompletion {
 		}
 		var body = block(0);
 
-		switch (data.tokenContext) {
+		switch data.tokenContext {
 			case Root(pos):
 				var moduleName = fsPath.withoutDirectory().withoutExtension();
 				var name = '$${1:$moduleName}';

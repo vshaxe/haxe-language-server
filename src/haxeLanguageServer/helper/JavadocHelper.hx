@@ -12,7 +12,7 @@ class JavadocHelper {
 			var doc = e.matched(2);
 			var value:Null<String> = null;
 
-			switch (name) {
+			switch name {
 				case 'param', 'exception', 'throws', 'event':
 					var ereg = ~/([^\s]+)\s+([\s\S]*)/g;
 					if (ereg.match(doc)) {
@@ -38,7 +38,7 @@ class JavadocHelper {
 			tags: tags
 		};
 		for (tag in tags)
-			switch (tag.name) {
+			switch tag.name {
 				case 'param':
 					infos.params.push(tag);
 				case 'exception', 'throws':

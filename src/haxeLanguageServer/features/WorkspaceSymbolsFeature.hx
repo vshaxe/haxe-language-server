@@ -63,7 +63,7 @@ class WorkspaceSymbolsFeature {
 			reject:ResponseError<NoData>->Void) {
 		var onResolve = context.startTimer("@workspace-symbols");
 		context.callDisplay(label, args, doc == null ? null : doc.content, token, function(r) {
-			switch (r) {
+			switch r {
 				case DCancelled:
 					resolve(null);
 				case DResult(data):
@@ -83,7 +83,7 @@ class WorkspaceSymbolsFeature {
 	function moduleSymbolEntryToSymbolInformation(entry:ModuleSymbolEntry, uri:DocumentUri):SymbolInformation {
 		var result:SymbolInformation = {
 			name: entry.name,
-			kind: switch (entry.kind) {
+			kind: switch entry.kind {
 				case Class | Abstract: SymbolKind.Class;
 				case Interface | Typedef: SymbolKind.Interface;
 				case Enum: SymbolKind.Enum;

@@ -28,7 +28,7 @@ class DeterminePackageFeature {
 	function handleLegacy(path:FsPath, token:CancellationToken, resolve:{pack:String}->Void, reject:ResponseError<NoData>->Void) {
 		var args = ['${context.relativePath(path)}@0@package'];
 		context.callDisplay("@package", args, null, token, function(r) {
-			switch (r) {
+			switch r {
 				case DCancelled:
 					return resolve(null);
 				case DResult(data):

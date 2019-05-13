@@ -66,7 +66,7 @@ class PositionAwareWalker extends StackAwareWalker {
 	}
 
 	override function walkLiteral_PLiteralString(s:StringToken, stack:WalkStack) {
-		var string = switch (s) {
+		var string = switch s {
 			case DoubleQuote(token) | SingleQuote(token): token.text;
 		}
 		line += string.occurrences("\n");

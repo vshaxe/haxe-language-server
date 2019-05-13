@@ -13,7 +13,7 @@ class TypeHelper {
 	static final subtypePackageRegex = ~/\b[A-Z]\w*\.[A-Z]/;
 
 	static function getCloseChar(c:String):String {
-		return switch (c) {
+		return switch c {
 			case "(": ")";
 			case "<": ">";
 			case "{": "}";
@@ -22,7 +22,7 @@ class TypeHelper {
 	}
 
 	public static function prepareSignature(type:String):String {
-		return switch (parseDisplayType(type)) {
+		return switch parseDisplayType(type) {
 			case DTFunction(args, ret):
 				printFunctionSignature(args, ret, {argumentTypeHints: true, returnTypeHint: Always, useArrowSyntax: false});
 			case DTValue(type):
@@ -59,7 +59,7 @@ class TypeHelper {
 	private static function shouldPrintReturnType(ret:Null<String>, option:ReturnTypeHintOption):Bool {
 		if (ret == null)
 			return false;
-		return switch (option) {
+		return switch option {
 			case Always: true;
 			case Never: false;
 			case NonVoid: ret != "Void";

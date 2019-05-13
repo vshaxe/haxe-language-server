@@ -28,7 +28,7 @@ class CompletionFeatureLegacy {
 		var bytePos = context.displayOffsetConverter.characterOffsetToByteOffset(doc.content, r.pos);
 		var args = ['${doc.uri.toFsPath()}@$bytePos' + (if (r.toplevel) "@toplevel" else "")];
 		context.callDisplay(if (r.toplevel) "@toplevel" else "field completion", args, doc.content, token, function(result) {
-			switch (result) {
+			switch result {
 				case DCancelled:
 					resolve(null);
 				case DResult(data):
@@ -118,7 +118,7 @@ class CompletionFeatureLegacy {
 		function isFunction()
 			return type != null && parseDisplayType(type).match(DTFunction(_));
 
-		return switch (kind) {
+		return switch kind {
 			case "local": if (isFunction()) Method else Variable;
 			case "member" | "static": if (isFunction()) Method else Field;
 			case "enum" | "enumabstract": Enum;
@@ -151,7 +151,7 @@ class CompletionFeatureLegacy {
 			inline function getOrNull(s)
 				return if (s == "") null else s;
 			for (child in el.elements()) {
-				switch (child.nodeName) {
+				switch child.nodeName {
 					case "t":
 						type = getOrNull(child.firstChild().nodeValue);
 					case "d":
@@ -253,14 +253,14 @@ class CompletionFeatureLegacy {
 	}
 
 	static function formatType(type:String, name:String, kind:CompletionItemKind):String {
-		return switch (kind) {
+		return switch kind {
 			case Method: name + prepareSignature(type);
 			default: type;
 		}
 	}
 
 	static function fieldKindToCompletionItemKind(kind:String):CompletionItemKind {
-		return switch (kind) {
+		return switch kind {
 			case "var": Field;
 			case "method": Method;
 			case "type": Class;

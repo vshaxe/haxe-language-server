@@ -16,7 +16,7 @@ class ExpectedTypeCompletion {
 
 	public function createItems<T, TType>(data:CompletionContextData):Array<CompletionItem> {
 		var toplevel:ToplevelCompletion<TType>;
-		switch (data.mode.kind) {
+		switch data.mode.kind {
 			case Toplevel, Pattern:
 				toplevel = data.mode.args;
 			case _:
@@ -45,7 +45,7 @@ class ExpectedTypeCompletion {
 
 		var anonFormatting = context.config.user.codeGeneration.functions.anonymous;
 		var printer = new DisplayPrinter(false, Shadowed, anonFormatting);
-		switch (concreteType.kind) {
+		switch concreteType.kind {
 			case TAnonymous:
 				// TODO: support @:structInit
 				var anon = concreteType.args;

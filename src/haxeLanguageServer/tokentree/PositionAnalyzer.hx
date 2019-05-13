@@ -45,10 +45,10 @@ class PositionAnalyzer {
 		if (token == null) {
 			return None;
 		}
-		return switch (token.tok) {
+		return switch token.tok {
 			case Const(CString(_)):
 				var startPos = document.positionAt(document.tokens.getPos(token).min);
-				return switch (document.characterAt(startPos)) {
+				return switch document.characterAt(startPos) {
 					case "'": SingleQuote;
 					case '"': DoubleQuote;
 					case _: None;
@@ -68,7 +68,7 @@ class PositionAnalyzer {
 
 		var parent = token.access();
 		while (parent.exists() && parent.token.tok != null) {
-			switch (parent.token.tok) {
+			switch parent.token.tok {
 				case BrOpen if (TokenTreeCheckUtils.getBrOpenType(parent.token) == BLOCK):
 					hasBlockParent = true;
 				case tok if (isType(tok) && hasBlockParent):
@@ -84,7 +84,7 @@ class PositionAnalyzer {
 		if (typeToken != null) {
 			return Type({
 				kind: if (typeToken != null) {
-					switch (typeToken.tok) {
+					switch typeToken.tok {
 						case Kwd(KwdClass): if (TokenTreeCheckUtils.isTypeMacroClass(typeToken)) MacroClass else Class;
 						case Kwd(KwdInterface): Interface;
 						case Kwd(KwdAbstract): if (TokenTreeCheckUtils.isTypeEnumAbstract(typeToken)) EnumAbstract else Abstract;
@@ -98,7 +98,7 @@ class PositionAnalyzer {
 				field: if (fieldToken != null) {
 					{
 						isStatic: fieldToken.access().child(0).firstOf(Kwd(KwdStatic)).exists(),
-						kind: switch (fieldToken.tok) {
+						kind: switch fieldToken.tok {
 							case Kwd(KwdVar): Var;
 							case Kwd(KwdFinal): Final;
 							case Kwd(KwdFunction): Function;
@@ -121,7 +121,7 @@ class PositionAnalyzer {
 			if (childPos.start.isAfter(completionPosition)) {
 				break;
 			}
-			switch (child.tok) {
+			switch child.tok {
 				case Kwd(KwdPackage):
 					pos = BeforeFirstImport;
 				case Kwd(KwdImport | KwdUsing):

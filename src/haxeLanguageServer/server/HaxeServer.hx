@@ -230,7 +230,7 @@ class HaxeServer {
 				var split = s.split("\n");
 				split.pop(); // --connect passes extra \0
 				function callback(result:DisplayResult) {
-					switch (result) {
+					switch result {
 						case DResult(data):
 							socket.write(data);
 						case DCancelled:

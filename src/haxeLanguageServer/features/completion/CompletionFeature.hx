@@ -140,7 +140,7 @@ class CompletionFeature {
 		if (token == null) {
 			return true;
 		}
-		var inComment = switch (token.tok) {
+		var inComment = switch token.tok {
 			case Comment(_), CommentLine(_): true;
 			case _: false;
 		};
@@ -150,7 +150,7 @@ class CompletionFeature {
 		if (params.context == null) {
 			return true;
 		}
-		return switch (params.context.triggerCharacter) {
+		return switch params.context.triggerCharacter {
 			case null: true;
 			case ">" if (!isAfterArrow(text)): false;
 			case " " if (!autoTriggerOnSpacePattern.match(text)): false;
@@ -291,7 +291,7 @@ class CompletionFeature {
 	}
 
 	function createFieldKeywordItems(tokenContext:TokenContext, replaceRange:Range, lineAfter:String):Array<CompletionItem> {
-		var isFieldLevel = switch (tokenContext) {
+		var isFieldLevel = switch tokenContext {
 			case Type(type) if (type.field == null): true;
 			case _: false;
 		}
@@ -325,7 +325,7 @@ class CompletionFeature {
 		if (item == null) {
 			return null;
 		}
-		var completionItem:CompletionItem = switch (item.kind) {
+		var completionItem:CompletionItem = switch item.kind {
 			case ClassField | EnumAbstractField: createClassFieldCompletionItem(item, data);
 			case EnumField: createEnumFieldCompletionItem(item, data);
 			case Type: createTypeCompletionItem(item.args, data);
@@ -403,7 +403,7 @@ class CompletionFeature {
 					detail += ' (+$overloads overloads)';
 				}
 				var shadowed = if (!resolution.isQualified) " (shadowed)" else "";
-				switch (printedOrigin) {
+				switch printedOrigin {
 					case Some(v): detail + "\n" + v + shadowed;
 					case None: detail + "\n" + shadowed;
 				}
@@ -411,7 +411,7 @@ class CompletionFeature {
 			textEdit: {
 				newText: {
 					var qualifier = if (resolution.isQualified) "" else resolution.qualifier + ".";
-					qualifier + switch (data.mode.kind) {
+					qualifier + switch data.mode.kind {
 						case StructureField: maybeInsert(field.name, ": ", data.lineAfter);
 						case Pattern: maybeInsert(field.name, ":", data.lineAfter);
 						case _: field.name;
@@ -421,7 +421,7 @@ class CompletionFeature {
 			}
 		}
 
-		switch (data.mode.kind) {
+		switch data.mode.kind {
 			case StructureField:
 				if (field.meta.hasMeta(Optional)) {
 					item.label = "?" + field.name;
@@ -443,7 +443,7 @@ class CompletionFeature {
 		if (concreteType == null || concreteType.kind != TFun || field.isFinalField()) {
 			return null;
 		}
-		switch (field.kind.kind) {
+		switch field.kind.kind {
 			case FMethod if (field.kind.args == MethInline):
 				return null;
 			case _:
@@ -460,7 +460,7 @@ class CompletionFeature {
 				range: data.replaceRange
 			},
 			insertTextFormat: Snippet,
-			detail: "Auto-generate override" + switch (printedOrigin) {
+			detail: "Auto-generate override" + switch printedOrigin {
 				case Some(v): "\n" + v;
 				case None: "";
 			},
@@ -480,7 +480,7 @@ class CompletionFeature {
 			return EnumMember;
 		}
 		var fieldKind:JsonFieldKind<T> = field.kind;
-		return switch (fieldKind.kind) {
+		return switch fieldKind.kind {
 			case FVar:
 				if (field.isFinalField()) {
 					return Field;
@@ -500,7 +500,7 @@ class CompletionFeature {
 	}
 
 	function getKindForType<T>(type:JsonType<T>):CompletionItemKind {
-		return switch (type.kind) {
+		return switch type.kind {
 			case TFun: Function;
 			case _: Field;
 		}
@@ -516,7 +516,7 @@ class CompletionFeature {
 			detail: {
 				var definition = printer.printEnumFieldDefinition(field, item.type);
 				var origin = printer.printEnumFieldOrigin(occurrence.origin, "'");
-				switch (origin) {
+				switch origin {
 					case Some(v): definition += "\n" + v;
 					case None:
 				}
@@ -579,7 +579,7 @@ class CompletionFeature {
 		}
 
 		if (snippetSupport) {
-			switch (data.mode.kind) {
+			switch data.mode.kind {
 				case TypeHint | Extends | Implements | StructExtension if (type.hasMandatoryTypeParameters()):
 					item.textEdit.newText += "<$1>";
 					item.insertTextFormat = Snippet;
@@ -603,7 +603,7 @@ class CompletionFeature {
 	}
 
 	function getKindForModuleType(type:DisplayModuleType):CompletionItemKind {
-		return switch (type.kind) {
+		return switch type.kind {
 			case Class: Class;
 			case Interface: Interface;
 			case Enum: Enum;
@@ -629,7 +629,7 @@ class CompletionFeature {
 
 	function printTypeDetail(type:DisplayModuleType, containerName:String):String {
 		var detail = printer.printEmptyTypeDefinition(type) + "\n";
-		switch (type.path.importStatus) {
+		switch type.path.importStatus {
 			case Imported:
 				detail += "(imported)";
 			case Unimported:
@@ -673,7 +673,7 @@ class CompletionFeature {
 			item.command = TriggerSuggest;
 		}
 		if (data.mode.kind == TypeDeclaration) {
-			switch (keyword.name) {
+			switch keyword.name {
 				case Import | Using | Final | Extern | Private:
 					item.command = TriggerSuggest;
 				case _:
@@ -684,7 +684,7 @@ class CompletionFeature {
 			item.textEdit.newText = maybeInsert(item.textEdit.newText, " ", data.lineAfter);
 		}
 
-		switch (keyword.name) {
+		switch keyword.name {
 			case Extends | Implements:
 				item.textEdit.newText += " ";
 			// TODO: make it configurable for these, since not all code styles want spaces there

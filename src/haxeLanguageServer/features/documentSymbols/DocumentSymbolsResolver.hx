@@ -59,7 +59,7 @@ class DocumentSymbolsResolver {
 				stack.addSymbol(level, symbol, opensScope);
 			}
 
-			switch (token.tok) {
+			switch token.tok {
 				case Kwd(KwdClass):
 					var name = token.getNameToken().getName();
 					if (name == null && token.isTypeMacroClass()) {
@@ -90,11 +90,11 @@ class DocumentSymbolsResolver {
 					}
 
 				case Kwd(KwdFunction), Kwd(KwdVar), Kwd(KwdFinal):
-					var currentLevel = switch (stack.level) {
+					var currentLevel = switch stack.level {
 						case Root, Type(_): Field;
 						case Field, Expression: Expression;
 					};
-					switch (token.getFieldType(PRIVATE)) {
+					switch token.getFieldType(PRIVATE) {
 						case FUNCTION(name, _, _, _, _, _, _):
 							if (name == null) {
 								name = "<anonymous function>";
@@ -145,7 +145,7 @@ class DocumentSymbolsResolver {
 					}
 
 				case Const(CIdent(_)):
-					switch (stack.getParentTypeKind()) {
+					switch stack.getParentTypeKind() {
 						case null:
 						case Enum:
 							if (token.access().parent().is(BrOpen).exists()) {

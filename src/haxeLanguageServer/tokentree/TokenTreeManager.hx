@@ -97,7 +97,7 @@ class TokenTreeManager {
 		var offset = 0;
 		for (i in 0...list.length) {
 			var token = list[i];
-			offset += switch (token.tok) {
+			offset += switch token.tok {
 				// these should be the only places where Unicode characters can appear in Haxe
 				case Const(CString(s)), Const(CRegexp(s, _)), Comment(s), CommentLine(s):
 					s.length - Buffer.byteLength(s);

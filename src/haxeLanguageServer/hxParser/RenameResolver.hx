@@ -230,7 +230,7 @@ class RenameResolver extends PositionAwareWalker {
 	}
 
 	override function walkExpr_EIn(exprLeft:Expr, inKeyword:Token, exprRight:Expr, stack:WalkStack) {
-		switch (exprLeft) {
+		switch exprLeft {
 			case EConst(PConstIdent(variable)):
 				checkShadowing(variable, stack);
 			case _:

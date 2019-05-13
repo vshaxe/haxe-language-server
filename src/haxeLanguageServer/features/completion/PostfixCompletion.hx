@@ -30,7 +30,7 @@ class PostfixCompletion {
 		}
 
 		var subject:FieldCompletionSubject<T2>;
-		switch (data.mode.kind) {
+		switch data.mode.kind {
 			case Field:
 				subject = data.mode.args;
 			case _:
@@ -87,12 +87,12 @@ class PostfixCompletion {
 				keyValueIterator();
 			}
 		} else {
-			switch (type.kind) {
+			switch type.kind {
 				case TAbstract | TInst:
 					var path = type.args;
 					// TODO: remove hardcoded iterator() / keyValueIterator() handling sometime after Haxe 4 releases
 					if (!hasIteratorApi) {
-						switch (dotPath) {
+						switch dotPath {
 							case "Array":
 								iterator(path.params[0].guessName());
 							case "haxe.ds.Map":
@@ -107,7 +107,7 @@ class PostfixCompletion {
 			}
 		}
 
-		switch (dotPath) {
+		switch dotPath {
 			case "StdTypes.Bool":
 				add({
 					label: "not",
@@ -259,7 +259,7 @@ class PostfixCompletion {
 						continue;
 					}
 					var type = item.type.removeNulls().type;
-					type = switch (type.kind) {
+					type = switch type.kind {
 						case TFun:
 							field += "()";
 							var args:JsonFunctionSignature = type.args;
@@ -270,7 +270,7 @@ class PostfixCompletion {
 						case _:
 							type;
 					}
-					switch (type.getDotPath()) {
+					switch type.getDotPath() {
 						case "StdTypes.Int" | "UInt":
 							result = result.concat(createIndexedLoops('$expr.$field'));
 					}
@@ -334,7 +334,7 @@ while (i-- > 0) {
 		}
 
 		var nullable = subject.item.type.removeNulls().nullable;
-		switch (moduleType.kind) {
+		switch moduleType.kind {
 			case Enum:
 				var e:JsonEnum = moduleType.args;
 				if (e.constructors.length > 0) {

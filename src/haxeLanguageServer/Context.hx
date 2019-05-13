@@ -52,7 +52,7 @@ class Context {
 				return; // don't send cancel notifications, not supported by Haxe
 			}
 			callDisplay(method, [Json.stringify(message)], null, function(result:DisplayResult) {
-				switch (result) {
+				switch result {
 					case DResult(msg):
 						haxeDisplayProtocol.handleMessage(Json.parse(msg));
 					case DCancelled:

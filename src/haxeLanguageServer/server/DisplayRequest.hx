@@ -54,7 +54,7 @@ class DisplayRequest {
 	}
 
 	public inline function cancel() {
-		switch (handler) {
+		switch handler {
 			case Raw(callback) | Processed(callback, _):
 				callback(DCancelled);
 		}
@@ -64,7 +64,7 @@ class DisplayRequest {
 		if (token != null && token.canceled)
 			return cancel();
 
-		switch (handler) {
+		switch handler {
 			case Raw(callback):
 				callback(DResult(data));
 			case Processed(callback, errback):
@@ -76,7 +76,7 @@ class DisplayRequest {
 		var buf = new StringBuf();
 		var hasError = false;
 		for (line in data.split("\n")) {
-			switch (line.fastCodeAt(0)) {
+			switch line.fastCodeAt(0) {
 				case 0x01: // print
 					trace("Haxe print:\n" + line.substring(1).replace("\x01", "\n"));
 				case 0x02: // error

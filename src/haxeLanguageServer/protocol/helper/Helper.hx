@@ -9,7 +9,7 @@ using Lambda;
 
 class Helper {
 	public static function getDocumentation<T>(item:DisplayItem<T>):JsonDoc {
-		return switch (item.kind) {
+		return switch item.kind {
 			case ClassField | EnumAbstractField: item.args.field.doc;
 			case EnumField: item.args.field.doc;
 			case Type: item.args.doc;
@@ -19,7 +19,7 @@ class Helper {
 	}
 
 	public static function extractFunctionSignature<T>(type:JsonType<T>) {
-		return switch (type.kind) {
+		return switch type.kind {
 			case TFun: type.args;
 			case _: throw "function expected";
 		}
@@ -27,7 +27,7 @@ class Helper {
 
 	public static function resolveImports<T>(type:JsonType<T>):Array<JsonTypePath> {
 		function rec(type:JsonType<T>):Array<JsonTypePath> {
-			return switch (type.kind) {
+			return switch type.kind {
 				case TMono:
 					[];
 				case TInst | TEnum | TType | TAbstract:
@@ -58,7 +58,7 @@ class Helper {
 
 	// TODO: respect abstract implication conversions here somehow?
 	public static function resolveTypes<T>(type:JsonType<T>):Array<JsonType<T>> {
-		switch (type.kind) {
+		switch type.kind {
 			case TAbstract:
 				var typePath:JsonTypePathWithParams = type.args;
 				var path = typePath.path;
@@ -83,7 +83,7 @@ class Helper {
 	}
 
 	public static function isVoid<T>(type:JsonType<T>) {
-		return switch (type.kind) {
+		return switch type.kind {
 			case TAbstract if (type.args.path.typeName == "Void"): true;
 			case _: false;
 		}
@@ -93,13 +93,13 @@ class Helper {
 		if (origin == null) {
 			return false;
 		}
-		return switch (origin.kind) {
+		return switch origin.kind {
 			case Self | StaticImport | Parent | StaticExtension:
 				var moduleType:JsonModuleType<Dynamic> = origin.args;
 				if (moduleType == null) {
 					return false;
 				}
-				switch (moduleType.kind) {
+				switch moduleType.kind {
 					case Typedef:
 						var jsonTypedef:JsonTypedef = moduleType.args;
 						jsonTypedef.type.removeNulls().type.kind == TAnonymous;
@@ -112,7 +112,7 @@ class Helper {
 	}
 
 	public static function removeNulls<T>(type:JsonType<T>, nullable:Bool = false):{type:JsonType<T>, nullable:Bool} {
-		switch (type.kind) {
+		switch type.kind {
 			case TAbstract:
 				var path:JsonTypePathWithParams = type.args;
 				if (path.path.pack.length == 0 && path.path.typeName == "Null") {
@@ -126,7 +126,7 @@ class Helper {
 	}
 
 	public static function getTypePath<T>(type:JsonType<T>):JsonTypePathWithParams {
-		return switch (type.kind) {
+		return switch type.kind {
 			case null: null;
 			case TInst | TEnum | TType | TAbstract: type.args;
 			case _: null;

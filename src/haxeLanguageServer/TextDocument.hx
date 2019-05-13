@@ -167,7 +167,7 @@ class TextDocument {
 		return getLineOffsets().length;
 
 	function createParseTree() {
-		return try switch (hxParser.HxParser.parse(content)) {
+		return try switch hxParser.HxParser.parse(content) {
 			case Success(tree):
 				new hxParser.Converter(tree).convertResultToFile();
 			case Failure(error):

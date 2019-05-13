@@ -32,7 +32,7 @@ class DocumentFormattingFeature {
 			context.workspacePath.toString();
 		});
 		var result = Formatter.format(Tokens(tokens.list, tokens.tree, tokens.bytes), config);
-		switch (result) {
+		switch result {
 			case Success(formattedCode):
 				var fullRange = {
 					start: {line: 0, character: 0},

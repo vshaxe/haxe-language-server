@@ -59,7 +59,7 @@ class CodeLensFeature {
 				continue; // Shouldn't happen, but you never know
 			}
 			var range = statistic.range;
-			switch (statistic.kind) {
+			switch statistic.kind {
 				case ClassType:
 					addRelation("subclass", "es", range, statistic.subclasses);
 				case InterfaceType:
@@ -93,7 +93,7 @@ class CodeLensFeature {
 			return reject.documentNotFound(uri);
 		}
 		context.callDisplay("@statistics", [context.relativePath(doc.uri.toFsPath()) + "@0@statistics"], doc.content, token, function(r:DisplayResult) {
-			switch (r) {
+			switch r {
 				case DCancelled:
 					resolve(null);
 				case DResult(s):

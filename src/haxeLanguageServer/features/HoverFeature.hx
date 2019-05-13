@@ -55,7 +55,7 @@ class HoverFeature {
 
 	function format(code:String, entryPoint:TokenTreeEntryPoint):String {
 		return code;
-		/* return switch (Formatter.format(Code(code), formatterConfig)) {
+		/* return switch Formatter.format(Code(code), formatterConfig) {
 			case Success(formattedCode): formattedCode;
 			case _: code;
 		}*/
@@ -71,7 +71,7 @@ class HoverFeature {
 		});
 		var item = hover.item;
 		var concreteType = hover.item.type;
-		var result:HoverContent = switch (item.kind) {
+		var result:HoverContent = switch item.kind {
 			case Type:
 				var typeDefinition = printer.printEmptyTypeDefinition(hover.item.args);
 				typeDefinition = format(typeDefinition, TYPE_LEVEL);
@@ -89,7 +89,7 @@ class HoverFeature {
 				field = format(field, FIELD_LEVEL);
 				{
 					definition: printCodeBlock(field, Haxe),
-					origin: switch (printer.printClassFieldOrigin(item.args.origin, item.kind)) {
+					origin: switch printer.printClassFieldOrigin(item.args.origin, item.kind) {
 						case Some(v): v;
 						case None: null;
 					}
@@ -99,7 +99,7 @@ class HoverFeature {
 				field = format(field, FIELD_LEVEL);
 				{
 					definition: printCodeBlock(field, Haxe),
-					origin: switch (printer.printEnumFieldOrigin(item.args.origin)) {
+					origin: switch printer.printEnumFieldOrigin(item.args.origin) {
 						case Some(v): v;
 						case None: null;
 					}
@@ -133,7 +133,7 @@ class HoverFeature {
 		var bytePos = context.displayOffsetConverter.characterOffsetToByteOffset(doc.content, offset);
 		var args = ['${doc.uri.toFsPath()}@$bytePos@type'];
 		context.callDisplay("@type", args, doc.content, token, function(r) {
-			switch (r) {
+			switch r {
 				case DCancelled:
 					resolve(null);
 				case DResult(data):
@@ -142,7 +142,7 @@ class HoverFeature {
 						return reject.invalidXml(data);
 
 					var s = StringTools.trim(xml.firstChild().nodeValue);
-					switch (xml.nodeName) {
+					switch xml.nodeName {
 						case "metadata":
 							if (s.length == 0)
 								return reject(new ResponseError(0, "No metadata information"));
@@ -150,7 +150,7 @@ class HoverFeature {
 						case _:
 							if (s.length == 0)
 								return reject(new ResponseError(0, "No type information"));
-							var type = switch (parseDisplayType(s)) {
+							var type = switch parseDisplayType(s) {
 								case DTFunction(args, ret):
 									printFunctionType(args, ret);
 								case DTValue(type):

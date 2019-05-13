@@ -45,7 +45,7 @@ class StructDefaultsMacro {
 			});
 
 			// recurse
-			switch (field.type) {
+			switch field.type {
 				case TType(_, params) | TAbstract(_, params) if (params.length > 0):
 					var innerFields = getStructFields(params[0]);
 					if (innerFields != null)
@@ -57,9 +57,9 @@ class StructDefaultsMacro {
 	}
 
 	static function getStructFields(type:Type):Null<Array<ClassField>> {
-		return switch (type) {
+		return switch type {
 			case TType(t, _):
-				switch (t.get().type) {
+				switch t.get().type {
 					case TAnonymous(a): a.get().fields;
 					case _: null;
 				}

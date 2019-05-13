@@ -43,7 +43,7 @@ class GotoDefinitionFeature {
 		var bytePos = context.displayOffsetConverter.characterOffsetToByteOffset(doc.content, offset);
 		var args = ['${doc.uri.toFsPath()}@$bytePos@position'];
 		context.callDisplay("@position", args, doc.content, token, function(r) {
-			switch (r) {
+			switch r {
 				case DCancelled:
 					resolve(null);
 				case DResult(data):

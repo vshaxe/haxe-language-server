@@ -50,7 +50,7 @@ class DisplayPrinter {
 	}
 
 	public function printPath(path:JsonTypePath) {
-		var qualified = switch (pathPrinting) {
+		var qualified = switch pathPrinting {
 			case Always: true;
 			case Never: false;
 			case Qualified: path.importStatus != Imported;
@@ -83,7 +83,7 @@ class DisplayPrinter {
 	}
 
 	public function printType<T>(t:JsonType<T>) {
-		return switch (t.kind) {
+		return switch t.kind {
 			case TMono: "?";
 			case TInst | TEnum | TType | TAbstract: printPathWithParams(t.args);
 			case TDynamic:
@@ -107,7 +107,7 @@ class DisplayPrinter {
 				}
 				var args = t.args.args.map(printFunctionArgument);
 				var r = printTypeRec(t.args.ret);
-				switch (args.length) {
+				switch args.length {
 					case 0: '() -> $r';
 					case 1 if (hasNamed): '(${args[0]}) -> $r';
 					case 1: '${args[0]} -> $r';
@@ -208,7 +208,7 @@ class DisplayPrinter {
 
 	public function printClassFieldDefinition<T0, T1, T2>(occurrence:ClassFieldOccurrence<T0>, concreteType:JsonType<T1>, isEnumAbstractField:Bool) {
 		var field = occurrence.field;
-		switch (concreteType.kind) {
+		switch concreteType.kind {
 			case TMono:
 				concreteType = field.type;
 			case _:
@@ -218,7 +218,7 @@ class DisplayPrinter {
 		var kind:JsonFieldKind<T2> = field.kind;
 		var access = if (field.isPublic) "public " else "private ";
 		var staticKeyword = if (field.scope == Static) "static " else "";
-		return switch (kind.kind) {
+		return switch kind.kind {
 			case FVar:
 				var inlineKeyword = if (kind.args.write.kind == AccInline) "inline " else "";
 				var keyword = if (kind.args.write.kind == AccCtor || field.isFinalField()) "final" else "var";
@@ -248,7 +248,7 @@ class DisplayPrinter {
 				}
 				definition;
 			case FMethod:
-				var methodKind = switch (kind.args) {
+				var methodKind = switch kind.args {
 					case MethNormal: "";
 					case MethInline: "inline ";
 					case MethDynamic: "dynamic ";
@@ -261,7 +261,7 @@ class DisplayPrinter {
 	}
 
 	public function printAccessor<T>(access:JsonVarAccess<T>, isRead:Bool) {
-		return switch (access.kind) {
+		return switch access.kind {
 			case AccNormal: "default";
 			case AccNo: "null";
 			case AccNever: "never";
@@ -274,7 +274,7 @@ class DisplayPrinter {
 	}
 
 	public function printLocalDefinition<T1, T2>(local:DisplayLocal<T1>, concreteType:JsonType<T2>) {
-		return switch (local.origin) {
+		return switch local.origin {
 			case LocalFunction:
 				var inlineKeyword = if (local.isInline) "inline " else "";
 				inlineKeyword + printEmptyFunctionDefinition(local.name, concreteType.extractFunctionSignature(), if (local.extra == null) null else local.extra
@@ -304,7 +304,7 @@ class DisplayPrinter {
 			components.push("final");
 		if (type.isExtern)
 			components.push("extern");
-		components.push(switch (type.kind) {
+		components.push(switch type.kind {
 			case Class: "class";
 			case Interface: "interface";
 			case Enum: "enum";
@@ -328,7 +328,7 @@ class DisplayPrinter {
 			return None;
 		}
 		var q = quote;
-		return Some("from " + switch (origin.kind) {
+		return Some("from " + switch origin.kind {
 			case Self:
 				'$q${origin.args.name}$q';
 			case Parent:
@@ -350,7 +350,7 @@ class DisplayPrinter {
 		if (origin.args == null) {
 			return None;
 		}
-		return Some('from ' + switch (origin.kind) {
+		return Some('from ' + switch origin.kind {
 			case Self:
 				'$quote${origin.args.name}$quote';
 			case StaticImport:
@@ -359,7 +359,7 @@ class DisplayPrinter {
 	}
 
 	public function printLocalOrigin(origin:LocalOrigin):String {
-		return switch (origin) {
+		return switch origin {
 			case LocalVariable: "local variable";
 			case Argument: "argument";
 			case ForVariable: "for variable";
@@ -374,7 +374,7 @@ class DisplayPrinter {
 	}
 
 	public function printEnumField<T>(field:JsonEnumField, concreteType:JsonType<T>, snippets:Bool, typeHints:Bool) {
-		return switch (concreteType.kind) {
+		return switch concreteType.kind {
 			case TEnum: field.name;
 			case TFun:
 				var signature:JsonFunctionSignature = concreteType.args;
@@ -489,7 +489,7 @@ class DisplayPrinter {
 	}
 
 	function printMetadataTarget(target:MetadataTarget):String {
-		return switch (target) {
+		return switch target {
 			case Class: "classes";
 			case ClassField: "class fields";
 			case Abstract: "abstracts";
@@ -503,7 +503,7 @@ class DisplayPrinter {
 	}
 
 	function printPlatform(platform:Platform):String {
-		return switch (platform) {
+		return switch platform {
 			case Cross: "cross";
 			case Js: "JavaScript";
 			case Lua: "Lua";
