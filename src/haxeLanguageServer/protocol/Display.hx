@@ -77,7 +77,7 @@ typedef CompletionParams = PositionParams & {
 	var wasAutoTriggered:Bool;
 
 	/** list of metas to include in responses **/
-	var meta:Array<String>;
+	var ?meta:Array<String>;
 }
 
 typedef FieldResolution = {
