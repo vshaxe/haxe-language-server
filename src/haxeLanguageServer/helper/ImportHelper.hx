@@ -26,7 +26,7 @@ class ImportHelper {
 			newText: paths.map(path -> 'import $path;\n').join("")
 		};
 		function isLineEmpty(delta:Int) {
-			return doc.lineAt(result.position.line - 1).trim().length == 0;
+			return doc.lineAt(result.position.line + delta).trim().length == 0;
 		}
 		if (result.insertLineBefore && !isLineEmpty(-1)) {
 			importData.newText = "\n" + importData.newText;
