@@ -31,7 +31,7 @@ class ImportHelper {
 		if (result.insertLineBefore && !isLineEmpty(-1)) {
 			importData.newText = "\n" + importData.newText;
 		}
-		if (result.insertLineAfter && !isLineEmpty(1)) {
+		if (result.insertLineAfter && !isLineEmpty(0)) {
 			importData.newText += "\n";
 		}
 		return importData;

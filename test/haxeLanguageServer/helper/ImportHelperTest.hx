@@ -5,75 +5,154 @@ import haxe.PosInfos;
 
 class ImportHelperTest extends Test {
 	function testGetImportInsertPosition() {
-		function test(file:TestFile, ?pos:PosInfos) {
-			var line = -1;
-			var lines = (file : String).split("\n");
-			for (i in 0...lines.length) {
-				// | indicates the desired position
-				if (lines[i].contains("|")) {
-					line = i;
-					break;
-				}
-			}
-			if (line == -1) {
-				throw "test case is missing caret: " + file;
-			}
+		function test(testCase:{before:String, after:String}, ?pos:PosInfos) {
+			testCase.before = testCase.before.replace("\r", "");
+			testCase.after = testCase.after.replace("\r", "");
 
-			var doc = new TextDocument(new DocumentUri("file://dummy"), "", 0, file.replace("|", ""));
-			var importPos = ImportHelper.getImportPosition(doc).position;
-			Assert.equals(0, importPos.character, pos);
-			Assert.equals(line, importPos.line, pos);
+			var doc = new TextDocument(new DocumentUri("file://dummy"), "", 0, testCase.before);
+			var result = ImportHelper.getImportPosition(doc);
+			var edit = ImportHelper.createImportsEdit(doc, result, ["Test"], Type);
+
+			// TODO: apply the edit properly instead of this hack?
+			var lines = testCase.before.split("\n");
+			var insertLine = edit.range.start.line;
+			lines[insertLine] = edit.newText + lines[insertLine];
+
+			Assert.equals(testCase.after, lines.join("\n"), pos);
 		}
 
-		test(EmptyPackage);
-		test(NoPackage);
-		test(NoImport);
-		test(ComplexPackage);
-		test(TypeWithDocComment);
-		test(LicenseHeader);
-		test(LicenseHeaderWithDocComment);
-	}
-}
+		// package + import
+		test({
+			before: "package;
 
-enum abstract TestFile(String) to String {
-	var EmptyPackage = "
-package;
+import haxe.io.Path;",
 
-|import haxe.io.Path;";
-	var NoPackage = "
+			after: "package;
 
+import Test;
+import haxe.io.Path;"
+		});
 
-|import haxe.io.Path;";
-	var NoImport = "|
+		// package + import with conditional compilation
+		test({
+			before: "package;
 
-class SomeClass {
-}";
-	var ComplexPackage = "
-package     test._underscore.____s   ;
+#if false
+import haxe.io.Path;
+#end",
 
-|import haxe.io.Path;";
-	var TypeWithDocComment = "|
-/**
-    Some doc comment for this type.
-**/
-class Foo {";
-	var LicenseHeader = "
+			after: "package;
+
+import Test;
+#if false
+import haxe.io.Path;
+#end"
+		});
+
+		// only import
+		test({
+			before: "
+
+import haxe.io.Path;",
+
+			after: "
+
+import Test;
+import haxe.io.Path;"
+		});
+
+		// only type
+		test({
+			before: "class Foo {
+}",
+			after: "import Test;
+
+class Foo {
+}"
+		});
+
+		// type with empty line
+		test({
+			before: "
+class Foo {
+}",
+
+			after: "import Test;
+
+class Foo {
+}"
+		});
+
+		// License header
+		test({
+			before: "
 /**
 	License
 **/
 
-|import Foo;
+import Foo;",
 
-class Foo {";
-	var LicenseHeaderWithDocComment = "
+			after: "
 /**
 	License
 **/
 
-|import Foo;
+import Test;
+import Foo;"
+		});
+
+		// doc comment and license header
+		test({
+			before: "
+/**
+	License
+**/
 
 /**
 	Docs
 **/
-class Foo {";
+class Foo",
+
+			after: "
+/**
+	License
+**/
+
+import Test;
+
+/**
+	Docs
+**/
+class Foo"
+		});
+
+		// doc comment, line comments and license header
+		test({
+			before: "
+/**
+	License
+**/
+
+// TODO
+// TODO 2
+/**
+	Docs
+**/
+class Foo",
+
+			after: "
+/**
+	License
+**/
+
+import Test;
+
+// TODO
+// TODO 2
+/**
+	Docs
+**/
+class Foo"
+		});
+	}
 }
