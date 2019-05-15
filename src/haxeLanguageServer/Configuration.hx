@@ -152,6 +152,7 @@ class Configuration {
 		// but only what's interesting for us
 		Reflect.deleteField(newConfig, "displayServer");
 		Reflect.deleteField(newConfig, "displayConfigurations");
+		Reflect.deleteField(newConfig, "configurations");
 		Reflect.deleteField(newConfig, "executable");
 
 		user = newConfig;
