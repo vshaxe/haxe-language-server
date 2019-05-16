@@ -19,7 +19,6 @@ import haxe.display.JsonModuleTypes;
 import haxe.extern.EitherType;
 
 using tokentree.TokenTreeAccessHelper;
-using haxeLanguageServer.tokentree.TokenTreeAccessHelper2;
 
 enum abstract CompletionItemOrigin(Int) {
 	var Haxe;
