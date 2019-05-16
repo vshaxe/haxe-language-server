@@ -19,14 +19,14 @@ class DeterminePackageFeature {
 	}
 
 	function handleJsonRpc(path:FsPath, token:CancellationToken, resolve:{pack:String}->Void, reject:ResponseError<NoData>->Void) {
-		context.callHaxeMethod(DisplayMethods.DeterminePackage, {file: context.relativePath(path)}, token, result -> {
+		context.callHaxeMethod(DisplayMethods.DeterminePackage, {file: path}, token, result -> {
 			resolve({pack: result.join(".")});
 			return null;
 		}, reject.handler());
 	}
 
 	function handleLegacy(path:FsPath, token:CancellationToken, resolve:{pack:String}->Void, reject:ResponseError<NoData>->Void) {
-		var args = ['${context.relativePath(path)}@0@package'];
+		var args = ['$path@0@package'];
 		context.callDisplay("@package", args, null, token, function(r) {
 			switch r {
 				case DCancelled:

@@ -368,11 +368,4 @@ class Context {
 			}
 		};
 	}
-
-	public function relativePath(path:FsPath):FsPath {
-		if (path.toString().startsWith(workspacePath.toString())) {
-			return PathHelper.relativize(path, workspacePath);
-		}
-		return path;
-	}
 }

@@ -251,7 +251,7 @@ class DiagnosticsFeature {
 		var doc:Null<TextDocument> = context.documents.get(uri);
 		if (doc != null) {
 			var onResolve = context.startTimer("@diagnostics");
-			context.callDisplay("@diagnostics", [context.relativePath(doc.uri.toFsPath()) + "@0@diagnostics"], null, null,
+			context.callDisplay("@diagnostics", [doc.uri.toFsPath() + "@0@diagnostics"], null, null,
 				processDiagnosticsReply.bind(uri, onResolve), processErrorReply.bind(uri));
 		}
 	}

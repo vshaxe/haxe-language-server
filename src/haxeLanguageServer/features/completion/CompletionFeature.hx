@@ -203,7 +203,7 @@ class CompletionFeature {
 			}
 		}
 		var haxeParams:HaxeCompletionParams = {
-			file: context.relativePath(doc.uri.toFsPath()),
+			file: doc.uri.toFsPath(),
 			contents: doc.content,
 			offset: offset,
 			wasAutoTriggered: wasAutoTriggered,

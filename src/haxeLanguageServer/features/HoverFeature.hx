@@ -46,7 +46,7 @@ class HoverFeature {
 
 	function handleJsonRpc(params:TextDocumentPositionParams, token:CancellationToken, resolve:Hover->Void, reject:ResponseError<NoData>->Void,
 			doc:TextDocument, offset:Int) {
-		context.callHaxeMethod(DisplayMethods.Hover, {file: context.relativePath(doc.uri.toFsPath()), contents: doc.content, offset: offset}, token,
+		context.callHaxeMethod(DisplayMethods.Hover, {file: doc.uri.toFsPath(), contents: doc.content, offset: offset}, token,
 			hover -> {
 				resolve(createHover(printContent(hover), hover.item.getDocumentation(), hover.range));
 				return null;

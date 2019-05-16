@@ -39,7 +39,7 @@ class FindReferencesFeature {
 	function handleLegacy(params:TextDocumentPositionParams, token:CancellationToken, resolve:Definition->Void, reject:ResponseError<NoData>->Void,
 			doc:TextDocument, offset:Int) {
 		var bytePos = context.displayOffsetConverter.characterOffsetToByteOffset(doc.content, doc.offsetAt(params.position));
-		var args = ['${context.relativePath(doc.uri.toFsPath())}@$bytePos@usage'];
+		var args = ['${doc.uri.toFsPath()}@$bytePos@usage'];
 		context.callDisplay("@usage", args, doc.content, token, function(r) {
 			switch r {
 				case DCancelled:
