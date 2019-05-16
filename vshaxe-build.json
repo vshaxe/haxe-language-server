@@ -21,11 +21,11 @@
 		},
 		{
 			"name": "tokentree",
-			"installArgs": ["install", "tokentree"]
+			"installArgs": ["git", "tokentree", "https://github.com/HaxeCheckstyle/tokentree"]
 		},
 		{
 			"name": "formatter",
-			"installArgs": ["install", "formatter"]
+			"installArgs": ["git", "formatter", "https://github.com/HaxeCheckstyle/haxe-formatter"]
 		},
 		{
 			"name": "json2object",
