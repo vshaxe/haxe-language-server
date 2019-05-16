@@ -466,8 +466,7 @@ class CompletionFeature {
 			},
 			documentation: {
 				kind: MarkDown,
-				value: DocHelper.printCodeBlock("override "
-					+ printer.printOverrideDefinition(field, concreteType, data.indent, false), Haxe)
+				value: DocHelper.printCodeBlock("override " + printer.printOverrideDefinition(field, concreteType, data.indent, false), Haxe)
 			},
 			additionalTextEdits: ImportHelper.createFunctionImportsEdit(data.doc, data.importPosition, context, concreteType, fieldFormatting)
 		}

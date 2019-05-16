@@ -36,17 +36,20 @@ class TypeHelperTest extends Test {
 		assertPrintedEquals(parseFunctionArgumentType, "function(a:flixel.FlxObject, ?b:String):Void", "?Callback:Null<flixel.FlxObject -> ?String -> Void>",
 			{argumentTypeHints: true, returnTypeHint: Always, useArrowSyntax: false});
 
-		assertPrintedEquals(parseDisplayType, "function(a, b)", "String -> Bool -> Void>", {argumentTypeHints: false, returnTypeHint: Never, useArrowSyntax: false});
+		assertPrintedEquals(parseDisplayType, "function(a, b)", "String -> Bool -> Void>",
+			{argumentTypeHints: false, returnTypeHint: Never, useArrowSyntax: false});
 
 		assertPrintedEquals(parseDisplayType, "function(a:String, b:Bool)", "String -> Bool -> Void",
 			{argumentTypeHints: true, returnTypeHint: NonVoid, useArrowSyntax: false});
 
-		assertPrintedEquals(parseDisplayType, "function():String", "Void -> String", {argumentTypeHints: true, returnTypeHint: NonVoid, useArrowSyntax: false});
+		assertPrintedEquals(parseDisplayType, "function():String", "Void -> String",
+			{argumentTypeHints: true, returnTypeHint: NonVoid, useArrowSyntax: false});
 	}
 
 	function testPrintArrowFunctionDeclaration() {
 		function assert(expected, functionType, argumentTypeHints = false) {
-			assertPrintedEquals(parseDisplayType, expected, functionType, {argumentTypeHints: argumentTypeHints, returnTypeHint: Always, useArrowSyntax: true});
+			assertPrintedEquals(parseDisplayType, expected, functionType,
+				{argumentTypeHints: argumentTypeHints, returnTypeHint: Always, useArrowSyntax: true});
 		}
 
 		assert("() ->", "Void -> Void");
@@ -56,8 +59,7 @@ class TypeHelperTest extends Test {
 		assert("(a:String, b:Bool) ->", "String -> Bool -> Void", true);
 	}
 
-	function assertPrintedEquals(parser:String->DisplayType, expected:String, functionType:String,
-			formatting:FunctionFormattingConfig) {
+	function assertPrintedEquals(parser:String->DisplayType, expected:String, functionType:String, formatting:FunctionFormattingConfig) {
 		var parsed = parseFunctionArgumentType(functionType);
 		switch parsed {
 			case DisplayType.DTFunction(args, ret):

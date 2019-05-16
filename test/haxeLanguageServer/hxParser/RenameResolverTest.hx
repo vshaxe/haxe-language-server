@@ -420,8 +420,7 @@ class Foo {
         %bar%;
         newName;
     }
-}",
-			"
+}", "
 class Foo {
     function foo() {
         var newName;

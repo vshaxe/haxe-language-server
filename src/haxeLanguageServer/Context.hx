@@ -65,10 +65,12 @@ class Context {
 					var message:ResponseMessage = {
 						jsonrpc: Protocol.PROTOCOL_VERSION,
 						id: @:privateAccess haxeDisplayProtocol.nextRequestId - 1, // ew..
-						error: new ResponseError(ResponseError.InternalError, "Compiler error", ([{
-							severity: Error,
-							message: error
-						}] : HaxeResponseErrorData))
+						error: new ResponseError(ResponseError.InternalError, "Compiler error", ([
+							{
+								severity: Error,
+								message: error
+							}
+						] : HaxeResponseErrorData))
 					}
 					message;
 				});

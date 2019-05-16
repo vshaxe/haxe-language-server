@@ -372,10 +372,12 @@ while (i-- > 0) {
 				newText: data.insertText,
 				range: replaceRange
 			},
-			additionalTextEdits: [{
-				range: removeRange,
-				newText: ""
-			}],
+			additionalTextEdits: [
+				{
+					range: removeRange,
+					newText: ""
+				}
+			],
 			data: {
 				origin: CompletionItemOrigin.Custom
 			}

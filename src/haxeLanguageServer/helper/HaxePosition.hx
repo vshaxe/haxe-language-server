@@ -7,8 +7,7 @@ class HaxePosition {
 	static final properFileNameCaseCache = new Map<FsPath, FsPath>();
 	static final isWindows = (Sys.systemName() == "Windows");
 
-	public static function parse(pos:String, doc:TextDocument, cache:Map<FsPath, Array<String>>,
-			offsetConverter:DisplayOffsetConverter):Null<Location> {
+	public static function parse(pos:String, doc:TextDocument, cache:Map<FsPath, Array<String>>, offsetConverter:DisplayOffsetConverter):Null<Location> {
 		if (!positionRe.match(pos))
 			return null;
 

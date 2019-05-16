@@ -50,6 +50,7 @@ class DisplayMethods {
 		The signature help request is sent from the client to Haxe to request signature information at a given cursor position.
 	**/
 	static inline var SignatureHelp = new HaxeRequestMethod<SignatureHelpParams, SignatureHelpResult>("display/signatureHelp");
+
 	/*
 		TODO:
 
@@ -217,6 +218,7 @@ enum abstract DisplayModuleTypeKind(Int) {
 
 	/** A `typedef` that is an alias for an anonymous structure. **/
 	var Struct;
+
 	/** A type name introduced by `import as` / `import in` **/
 	// var ImportAlias;
 }
@@ -345,6 +347,7 @@ enum abstract DisplayItemKind<T>(String) {
 
 	/** Only for the enum values in enum abstracts, other fields use `ClassField`. **/
 	var EnumAbstractField:DisplayItemKind<ClassFieldOccurrence<Dynamic>>;
+
 	var Type:DisplayItemKind<DisplayModuleType>;
 	var Package:DisplayItemKind<Package>;
 	var Module:DisplayItemKind<Module>;
@@ -484,6 +487,7 @@ typedef SignatureHelpResult = Response<SignatureItem>;
 typedef PositionParams = FileParams & {
 	/** Unicode character offset in the file. **/
 	var offset:Int;
+
 	var ?contents:String;
 }
 

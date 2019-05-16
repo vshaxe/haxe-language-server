@@ -14,8 +14,7 @@ class FindReferencesFeature {
 		context.languageServerProtocol.onRequest(Methods.FindReferences, onFindReferences);
 	}
 
-	function onFindReferences(params:TextDocumentPositionParams, token:CancellationToken, resolve:Array<Location>->Void,
-			reject:ResponseError<NoData>->Void) {
+	function onFindReferences(params:TextDocumentPositionParams, token:CancellationToken, resolve:Array<Location>->Void, reject:ResponseError<NoData>->Void) {
 		var doc = context.documents.get(params.textDocument.uri);
 		if (!doc.uri.isFile()) {
 			return reject.notAFile();

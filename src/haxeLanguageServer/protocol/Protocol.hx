@@ -13,7 +13,7 @@ class Methods {
 /* Initialize */
 typedef InitializeParams = {
 	final ?supportsResolve:Bool;
-	
+
 	/** dot paths to exclude from readClassPaths / toplevel completion **/
 	final ?exclude:Array<String>;
 }

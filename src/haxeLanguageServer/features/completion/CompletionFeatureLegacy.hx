@@ -36,8 +36,8 @@ class CompletionFeatureLegacy {
 					if (xml == null)
 						return reject.invalidXml(data);
 
-					var items = if (r.toplevel) parseToplevelCompletion(xml, params.position, textBefore, doc) else parseFieldCompletion(xml, textBefore, params
-						.position);
+					var items = if (r.toplevel) parseToplevelCompletion(xml, params.position, textBefore,
+						doc) else parseFieldCompletion(xml, textBefore, params.position);
 					resolve(items);
 			}
 		}, reject.handler());

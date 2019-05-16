@@ -277,8 +277,8 @@ class DisplayPrinter {
 		return switch local.origin {
 			case LocalFunction:
 				var inlineKeyword = if (local.isInline) "inline " else "";
-				inlineKeyword + printEmptyFunctionDefinition(local.name, concreteType.extractFunctionSignature(), if (local.extra == null) null else local.extra
-					.params);
+				inlineKeyword + printEmptyFunctionDefinition(local.name, concreteType.extractFunctionSignature(),
+					if (local.extra == null) null else local.extra.params);
 			case other:
 				var keyword = if (local.isFinal) "final " else "var ";
 				var name = local.name;
