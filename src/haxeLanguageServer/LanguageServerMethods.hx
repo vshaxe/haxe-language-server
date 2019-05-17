@@ -78,6 +78,11 @@ class LanguageServerMethods {
 	static inline var CacheBuildFailed = new NotificationMethod<NoData>("haxe/cacheBuildFailed");
 
 	/**
+		This notification is sent from the server to the client to indicate that the Haxe process has crashed multiple times.
+	**/
+	static inline var HaxeKeepsCrashing = new NotificationMethod<NoData>("haxe/haxeKeepsCrashing");
+
+	/**
 		This notification is sent from the server to the client to indicate that an old Haxe 4 preview build is being used.
 	**/
 	static inline var DidDetectOldPreview = new NotificationMethod<Null<{preview:String}>>("haxe/didDetectOldPreview");

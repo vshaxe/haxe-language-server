@@ -304,8 +304,7 @@ class HaxeServer {
 			return;
 		}
 
-		context.sendShowMessage(Error,
-			"Haxe process has crashed 3 times, not attempting any more restarts. Please check the output channel for the full error.");
+		context.languageServerProtocol.sendNotification(LanguageServerMethods.HaxeKeepsCrashing);
 		trace("\nError message from the compiler:\n");
 		trace(haxeResponse);
 	}
