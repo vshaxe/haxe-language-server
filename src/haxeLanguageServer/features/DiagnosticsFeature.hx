@@ -39,7 +39,7 @@ class DiagnosticsFeature {
 		diagnosticsArguments = new Map();
 		errorUri = new FsPath(Path.join([context.workspacePath.toString(), "Error"])).toUri();
 
-		ChildProcess.exec("haxelib config", (error, stdout, stderr) -> haxelibPath = new FsPath(stdout.trim()));
+		ChildProcess.exec(context.config.haxelib.executable + " config", (error, stdout, stderr) -> haxelibPath = new FsPath(stdout.trim()));
 
 		context.registerCodeActionContributor(getCodeActions);
 		context.languageServerProtocol.onNotification(LanguageServerMethods.RunGlobalDiagnostics, onRunGlobalDiagnostics);

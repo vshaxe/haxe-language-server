@@ -12,7 +12,6 @@ import haxeLanguageServer.features.completion.*;
 import haxeLanguageServer.features.documentSymbols.DocumentSymbolsFeature;
 import haxeLanguageServer.features.foldingRange.FoldingRangeFeature;
 import haxeLanguageServer.features.CodeActionFeature.CodeActionContributor;
-import haxeLanguageServer.helper.PathHelper;
 import haxeLanguageServer.server.DisplayResult;
 import haxeLanguageServer.server.HaxeServer;
 import haxeLanguageServer.protocol.Protocol.HaxeRequestMethod;

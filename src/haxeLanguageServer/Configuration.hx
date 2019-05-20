@@ -13,6 +13,10 @@ typedef DisplayServerConfig = {
 	var ?print:ConfigurePrintParams;
 }
 
+typedef HaxelibConfig = {
+	var ?executable:String;
+}
+
 typedef FunctionFormattingConfig = {
 	var ?argumentTypeHints:Bool;
 	var ?returnTypeHint:ReturnTypeHintOption;
@@ -81,6 +85,7 @@ private typedef UserConfig = {
 private typedef InitOptions = {
 	var ?displayServerConfig:DisplayServerConfig;
 	var ?displayArguments:Array<String>;
+	var ?haxelibConfig:HaxelibConfig;
 	var ?sendMethodResults:Bool;
 }
 
@@ -97,6 +102,7 @@ class Configuration {
 	public var user(default, null):UserConfig;
 	public var displayServer(default, null):DisplayServerConfig;
 	public var displayArguments(default, null):Array<String>;
+	public var haxelib(default, null):HaxelibConfig;
 	public var sendMethodResults(default, null):Bool = false;
 
 	public function new(languageServerProtocol:Protocol, onDidChange:(kind:ConfigurationKind) -> Void) {
@@ -120,11 +126,15 @@ class Configuration {
 				}
 			},
 			displayArguments: [],
+			haxelibConfig: {
+				executable: "haxelib"
+			},
 			sendMethodResults: false
 		};
 		StructDefaultsMacro.applyDefaults(options, defaults);
 		displayServer = options.displayServerConfig;
 		displayArguments = options.displayArguments;
+		haxelib = options.haxelibConfig;
 		sendMethodResults = options.sendMethodResults;
 	}
 
