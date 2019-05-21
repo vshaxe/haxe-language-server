@@ -43,6 +43,9 @@
 	"targets": [
 		{
 			"name": "language-server",
+			"installCommands": [
+				["npm", "install"]
+			],
 			"args": {
 				"haxelibs": ["haxe-hxparser", "hxparse", "haxeparser", "tokentree", "formatter", "json2object", "json-rpc", "uglifyjs"],
 				"classPaths": [
