@@ -1,4 +1,5 @@
 bin/
 dump/
+node_modules/
 Actual.json
 .unittest
