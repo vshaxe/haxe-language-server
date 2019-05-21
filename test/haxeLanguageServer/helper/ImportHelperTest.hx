@@ -154,5 +154,22 @@ import Test;
 **/
 class Foo"
 		});
+
+		test({
+			before: "
+package;
+
+@:jsRequire('WebSocket')
+extern class WebSocket {}",
+
+			after: "
+package;
+
+import Test;
+
+@:jsRequire('WebSocket')
+extern class WebSocket {}",
+
+		});
 	}
 }

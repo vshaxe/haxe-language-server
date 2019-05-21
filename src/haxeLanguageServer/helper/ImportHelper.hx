@@ -109,7 +109,7 @@ class ImportHelper {
 			} while (true);
 			if (token.access().previousSibling().exists()) {
 				{
-					position: document.positionAt(tokens.getPos(token).min),
+					position: document.positionAt(tokens.getTreePos(token).min),
 					insertLineBefore: true,
 					insertLineAfter: true
 				}
