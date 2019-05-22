@@ -32,8 +32,8 @@
 			"installArgs": ["install", "json2object"]
 		},
 		{
-			"name": "json-rpc",
-			"installArgs": ["git", "json-rpc", "https://github.com/vshaxe/json-rpc"]
+			"name": "vscode-json-rpc",
+			"installArgs": ["git", "vscode-json-rpc", "https://github.com/vshaxe/vscode-json-rpc"]
 		},
 		{
 			"name": "uglifyjs",
@@ -47,7 +47,7 @@
 				["npm", "install"]
 			],
 			"args": {
-				"haxelibs": ["haxe-hxparser", "hxparse", "haxeparser", "tokentree", "formatter", "json2object", "json-rpc", "uglifyjs"],
+				"haxelibs": ["haxe-hxparser", "hxparse", "haxeparser", "tokentree", "formatter", "json2object", "vscode-json-rpc", "uglifyjs"],
 				"classPaths": [
 					"src",
 					"protocol/src"
@@ -70,7 +70,7 @@
 		{
 			"name": "language-server-tests",
 			"args": {
-				"haxelibs": ["haxe-hxparser", "hxparse", "haxeparser", "tokentree", "formatter", "json2object", "json-rpc", "utest"],
+				"haxelibs": ["haxe-hxparser", "hxparse", "haxeparser", "tokentree", "formatter", "json2object", "vscode-json-rpc", "utest"],
 				"classPaths": [
 					"src",
 					"test",
