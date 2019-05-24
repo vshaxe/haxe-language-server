@@ -581,6 +581,7 @@ class CompletionFeature {
 				case TypeHint | Extends | Implements | StructExtension if (type.hasMandatoryTypeParameters()):
 					item.textEdit.newText += "<$1>";
 					item.insertTextFormat = Snippet;
+					item.command = TriggerSuggest;
 				case _:
 			}
 		}
