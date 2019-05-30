@@ -668,7 +668,7 @@ class CompletionFeature {
 			}
 		}
 
-		if (data.mode.kind == TypeRelation || keyword.name == New) {
+		if (data.mode.kind == TypeRelation || keyword.name == New || keyword.name == Inline) {
 			item.command = TriggerSuggest;
 		}
 		if (data.mode.kind == TypeDeclaration) {
