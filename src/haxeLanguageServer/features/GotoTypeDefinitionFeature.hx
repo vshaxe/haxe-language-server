@@ -20,8 +20,8 @@ class GotoTypeDefinitionFeature {
 		if (!doc.uri.isFile()) {
 			return reject.notAFile();
 		}
-		context.callHaxeMethod(DisplayMethods.GotoTypeDefinition,
-			{file: doc.uri.toFsPath(), contents: doc.content, offset: doc.offsetAt(params.position)}, token, locations -> {
+		context.callHaxeMethod(DisplayMethods.GotoTypeDefinition, {file: doc.uri.toFsPath(), contents: doc.content, offset: doc.offsetAt(params.position)},
+			token, locations -> {
 			resolve(locations.map(location -> {
 				{
 					uri: location.file.toUri(),

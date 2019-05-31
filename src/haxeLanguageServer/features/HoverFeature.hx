@@ -46,11 +46,10 @@ class HoverFeature {
 
 	function handleJsonRpc(params:TextDocumentPositionParams, token:CancellationToken, resolve:Hover->Void, reject:ResponseError<NoData>->Void,
 			doc:TextDocument, offset:Int) {
-		context.callHaxeMethod(DisplayMethods.Hover, {file: doc.uri.toFsPath(), contents: doc.content, offset: offset}, token,
-			hover -> {
-				resolve(createHover(printContent(hover), hover.item.getDocumentation(), hover.range));
-				return null;
-			}, reject.handler());
+		context.callHaxeMethod(DisplayMethods.Hover, {file: doc.uri.toFsPath(), contents: doc.content, offset: offset}, token, hover -> {
+			resolve(createHover(printContent(hover), hover.item.getDocumentation(), hover.range));
+			return null;
+		}, reject.handler());
 	}
 
 	function format(code:String, entryPoint:TokenTreeEntryPoint):String {
