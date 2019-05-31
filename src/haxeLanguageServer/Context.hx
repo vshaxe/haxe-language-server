@@ -73,7 +73,7 @@ class Context {
 					}
 					message;
 				});
-			});
+			}, method.startsWith("display/"));
 		});
 
 		haxeServer = new HaxeServer(this);
@@ -329,13 +329,16 @@ class Context {
 	}
 
 	public function callDisplay(label:String, args:Array<String>, ?stdin:String, ?token:CancellationToken, callback:DisplayResult->Void,
-			errback:(error:String) -> Void) {
-		var actualArgs = ["--cwd", workspacePath.toString()];
-		if (config.displayArguments != null)
-			actualArgs = actualArgs.concat(config.displayArguments); // add arguments from the workspace settings
-		actualArgs = actualArgs.concat(["-D", "display-details", // get more details in completion results,
-			"--no-output", // prevent any generation
-		]);
+			errback:(error:String) -> Void, includeDisplayArguments:Bool = true) {
+		var actualArgs = [];
+		if (includeDisplayArguments) {
+			actualArgs = actualArgs.concat(["--cwd", workspacePath.toString()]);
+			if (config.displayArguments != null)
+				actualArgs = actualArgs.concat(config.displayArguments); // add arguments from the workspace settings
+			actualArgs = actualArgs.concat(["-D", "display-details", // get more details in completion results,
+				"--no-output", // prevent any generation
+			]);
+		}
 		if (haxeServer.supports(HaxeMethods.Initialize) && config.user.enableServerView) {
 			actualArgs = actualArgs.concat(["--times", "-D", "macro-times"]);
 		}
