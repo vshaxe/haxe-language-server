@@ -66,7 +66,7 @@ class DiagnosticsFeature {
 			}
 			clearDiagnostics(errorUri);
 		}
-		context.sendLogMessage(Log, error);
+		trace(error);
 	}
 
 	function extractDiagnosticsFromHaxeError(uri:Null<DocumentUri>, error:String):Bool {

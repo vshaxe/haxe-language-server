@@ -98,7 +98,7 @@ class HaxeServer {
 		proc = ChildProcess.spawn(haxePath, config.arguments.concat(["--wait", "stdio"]), spawnOptions);
 
 		proc.stdout.on(ReadableEvent.Data, function(buf:Buffer) {
-			context.sendLogMessage(Log, reTrailingNewline.replace(buf.toString(), ""));
+			trace(reTrailingNewline.replace(buf.toString(), ""));
 		});
 		proc.stderr.on(ReadableEvent.Data, onData);
 		proc.on(ChildProcessEvent.Exit, onExit);
@@ -246,7 +246,7 @@ class HaxeServer {
 			});
 		});
 		socketListener.listen(port, "localhost");
-		context.sendLogMessage(Log, 'Listening on port $port');
+		trace('Listening on port $port');
 		context.languageServerProtocol.sendNotification(LanguageServerMethods.DidChangeDisplayPort, {port: port});
 	}
 
@@ -278,9 +278,9 @@ class HaxeServer {
 	}
 
 	public function restart(reason:String, ?callback:Void->Void) {
-		context.sendLogMessage(Log, 'Haxe server restart requested: $reason');
+		trace('Haxe server restart requested: $reason');
 		start(function() {
-			context.sendLogMessage(Log, 'Restarted Haxe server: $reason');
+			trace('Restarted Haxe server: $reason');
 			if (callback != null)
 				callback();
 		});
