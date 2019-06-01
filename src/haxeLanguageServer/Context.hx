@@ -50,6 +50,9 @@ class Context {
 			if (method == Protocol.CANCEL_METHOD) {
 				return; // don't send cancel notifications, not supported by Haxe
 			}
+			var includeDisplayArguments = method.startsWith("display/")
+				|| method == ServerMethods.ReadClassPaths
+				|| method == ServerMethods.Invalidate;
 			callDisplay(method, [Json.stringify(message)], token, function(result:DisplayResult) {
 				switch result {
 					case DResult(msg):
@@ -73,7 +76,7 @@ class Context {
 					}
 					message;
 				});
-			}, method.startsWith("display/"));
+			}, includeDisplayArguments);
 		});
 
 		haxeServer = new HaxeServer(this);
