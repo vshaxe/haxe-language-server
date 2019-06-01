@@ -50,9 +50,7 @@ class Context {
 			if (method == Protocol.CANCEL_METHOD) {
 				return; // don't send cancel notifications, not supported by Haxe
 			}
-			var includeDisplayArguments = method.startsWith("display/")
-				|| method == ServerMethods.ReadClassPaths
-				|| method == ServerMethods.Invalidate;
+			var includeDisplayArguments = method.startsWith("display/") || method == ServerMethods.ReadClassPaths;
 			callDisplay(method, [Json.stringify(message)], token, function(result:DisplayResult) {
 				switch result {
 					case DResult(msg):
