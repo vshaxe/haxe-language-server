@@ -122,7 +122,13 @@ class Context {
 
 		return resolve({
 			capabilities: {
-				textDocumentSync: TextDocuments.syncKind,
+				textDocumentSync: {
+					openClose: true,
+					change: TextDocuments.syncKind,
+					save: {
+						includeText: false
+					}
+				},
 				completionProvider: {
 					triggerCharacters: [".", "@", ":", " ", ">", "$"],
 					resolveProvider: true
