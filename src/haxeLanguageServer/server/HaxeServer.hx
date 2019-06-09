@@ -24,6 +24,7 @@ class HaxeServer {
 	var requestsTail:Null<DisplayRequest>;
 	var currentRequest:Null<DisplayRequest>;
 	var socketListener:Null<js.node.net.Server>;
+	var startingSocketListener:Bool = false;
 	var stopProgressCallback:Null<Void->Void>;
 	var startRequest:Null<Void->Void>;
 	var crashes:Int = 0;
@@ -39,7 +40,7 @@ class HaxeServer {
 
 	public function start(?callback:Void->Void) {
 		// we still have requests in our queue that are not cancelable, such as a build - try again later
-		if (hasNonCancellableRequests()) {
+		if (hasNonCancellableRequests() || startingSocketListener) {
 			startRequest = callback;
 			return;
 		}
@@ -135,6 +136,7 @@ class HaxeServer {
 
 		var displayPort = context.config.user.displayPort;
 		if (socketListener == null && displayPort != null) {
+			startingSocketListener = true;
 			if (displayPort == "auto") {
 				getAvailablePort(6000).then(startSocketServer);
 			} else {
@@ -248,6 +250,9 @@ class HaxeServer {
 		socketListener.listen(port, "localhost");
 		trace('Listening on port $port');
 		context.languageServerProtocol.sendNotification(LanguageServerMethods.DidChangeDisplayPort, {port: port});
+
+		startingSocketListener = false;
+		checkRestart();
 	}
 
 	public function stop() {
@@ -299,8 +304,8 @@ class HaxeServer {
 		var invalidOptionRegex = ~/unknown option `(.*?)'./;
 		if (invalidOptionRegex.match(haxeResponse)) {
 			var option = invalidOptionRegex.matched(1);
-			context.sendShowMessage(Error, 'Invalid compiler argument \'$option\' detected. '
-				+ 'Please verify "haxe.configurations" and "haxe.displayServer.arguments".');
+			context.sendShowMessage(Error,
+				'Invalid compiler argument \'$option\' detected. Please verify "haxe.configurations" and "haxe.displayServer.arguments".');
 			return;
 		}
 
@@ -372,12 +377,15 @@ class HaxeServer {
 		updateRequestQueue();
 	}
 
-	function checkQueue() {
-		// a restart has been requested
+	function checkRestart() {
 		if (startRequest != null) {
 			start(startRequest);
 			return;
 		}
+	}
+
+	function checkQueue() {
+		checkRestart();
 
 		// there's a currently processing request, wait and don't send another one to Haxe
 		if (currentRequest != null)
