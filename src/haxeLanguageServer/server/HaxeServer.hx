@@ -38,30 +38,12 @@ class HaxeServer {
 
 	static final reTrailingNewline = ~/\r?\n$/;
 
-	public function start(?callback:Void->Void) {
-		// we still have requests in our queue that are not cancelable, such as a build - try again later
-		if (hasNonCancellableRequests() || startingSocketListener) {
-			startRequest = callback;
-			return;
+	function checkHaxeVersion(haxePath, spawnOptions) {
+		inline function error(s) {
+			context.sendShowMessage(Error, s);
+			return false;
 		}
 
-		supportedMethods = [];
-		startRequest = null;
-		stop();
-
-		inline function error(s)
-			context.sendShowMessage(Error, s);
-
-		var config = context.config.displayServer;
-
-		var env = new haxe.DynamicAccess();
-		for (key => value in js.Node.process.env)
-			env[key] = value;
-		for (key => value in config.env)
-			env[key] = value;
-		var spawnOptions = {env: env, cwd: context.workspacePath.toString()};
-
-		var haxePath = config.path;
 		var checkRun = ChildProcess.spawnSync(haxePath, ["-version"], spawnOptions);
 		if (checkRun.error != null) {
 			if (checkRun.error.message.indexOf("ENOENT") >= 0) {
@@ -87,16 +69,42 @@ class HaxeServer {
 
 		version = SemVer.parse(output);
 		if (version == null)
-			return error("Error parsing Haxe version " + haxe.Json.stringify(output));
+			return error("Error parsing Haxe version " + Json.stringify(output));
 
 		var isVersionSupported = version >= new SemVer(3, 4, 0);
 		if (!isVersionSupported)
 			return error('Unsupported Haxe version! Minimum required: 3.4.0. Found: $version.');
+		return true;
+	}
+
+	public function start(?callback:Void->Void) {
+		// we still have requests in our queue that are not cancelable, such as a build - try again later
+		if (hasNonCancellableRequests() || startingSocketListener) {
+			startRequest = callback;
+			return;
+		}
+
+		supportedMethods = [];
+		startRequest = null;
+		stop();
+
+		var config = context.config.displayServer;
+
+		var env = new haxe.DynamicAccess();
+		for (key => value in js.Node.process.env)
+			env[key] = value;
+		for (key => value in config.env)
+			env[key] = value;
+		var spawnOptions = {env: env, cwd: context.workspacePath.toString()};
+
+		if (!checkHaxeVersion(config.path, spawnOptions)) {
+			return;
+		}
 
 		buffer = new MessageBuffer();
 		nextMessageLength = -1;
 
-		proc = ChildProcess.spawn(haxePath, config.arguments.concat(["--wait", "stdio"]), spawnOptions);
+		proc = ChildProcess.spawn(config.path, config.arguments.concat(["--wait", "stdio"]), spawnOptions);
 
 		proc.stdout.on(ReadableEvent.Data, function(buf:Buffer) {
 			trace(reTrailingNewline.replace(buf.toString(), ""));
