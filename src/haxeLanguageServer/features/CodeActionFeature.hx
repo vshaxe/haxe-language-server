@@ -12,6 +12,14 @@ class CodeActionFeature {
 
 	public function new(context:Context) {
 		this.context = context;
+
+		context.registerCapability({
+			id: Methods.CodeAction,
+			method: Methods.CodeAction,
+			registerOptions: {
+				codeActionKinds: [QuickFix, SourceOrganizeImports]
+			}
+		});
 		context.languageServerProtocol.onRequest(Methods.CodeAction, onCodeAction);
 	}
 

@@ -141,9 +141,6 @@ class Context {
 				referencesProvider: true,
 				documentSymbolProvider: true,
 				workspaceSymbolProvider: true,
-				codeActionProvider: {
-					codeActionKinds: [QuickFix, SourceOrganizeImports]
-				},
 				documentFormattingProvider: true,
 				renameProvider: true,
 				foldingRangeProvider: true
