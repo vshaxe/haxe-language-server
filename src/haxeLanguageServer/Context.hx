@@ -145,9 +145,6 @@ class Context {
 					codeActionKinds: [QuickFix, SourceOrganizeImports]
 				},
 				documentFormattingProvider: true,
-				codeLensProvider: {
-					resolveProvider: true
-				},
 				renameProvider: true,
 				foldingRangeProvider: true
 			}
@@ -174,24 +171,28 @@ class Context {
 		displayOffsetConverter = DisplayOffsetConverter.create(haxeServer.version);
 
 		if (haxeServer.supports(DisplayMethods.GotoTypeDefinition)) {
-			languageServerProtocol.sendRequest(Methods.RegisterCapability, {
-				registrations: [
-					{
-						id: TypeDefinitionMethods.TypeDefinition,
-						method: TypeDefinitionMethods.TypeDefinition
-					}
-				]
-			}, null, _ -> {}, error -> trace(error));
+			registerCapability({
+				id: TypeDefinitionMethods.TypeDefinition,
+				method: TypeDefinitionMethods.TypeDefinition
+			});
 		} else {
-			languageServerProtocol.sendRequest(Methods.UnregisterCapability, {
-				unregisterations: [
-					{
-						id: TypeDefinitionMethods.TypeDefinition,
-						method: TypeDefinitionMethods.TypeDefinition
-					}
-				]
-			}, null, _ -> {}, error -> trace(error));
+			unregisterCapability({
+				id: TypeDefinitionMethods.TypeDefinition,
+				method: TypeDefinitionMethods.TypeDefinition
+			});
 		}
+	}
+
+	public function registerCapability(registration:Registration) {
+		languageServerProtocol.sendRequest(Methods.RegisterCapability, {
+			registrations: [registration]
+		}, null, _ -> {}, error -> trace(error));
+	}
+
+	public function unregisterCapability(unregistration:Unregistration) {
+		languageServerProtocol.sendRequest(Methods.UnregisterCapability, {
+			unregisterations: [unregistration]
+		}, null, _ -> {}, error -> trace(error));
 	}
 
 	function restartServer(reason:String) {
@@ -342,7 +343,9 @@ class Context {
 			actualArgs = actualArgs.concat(["--cwd", workspacePath.toString()]);
 			if (config.displayArguments != null)
 				actualArgs = actualArgs.concat(config.displayArguments); // add arguments from the workspace settings
-			actualArgs = actualArgs.concat(["-D", "display-details", // get more details in completion results,
+			actualArgs = actualArgs.concat([
+				"-D",
+				"display-details", // get more details in completion results,
 				"--no-output", // prevent any generation
 			]);
 		}

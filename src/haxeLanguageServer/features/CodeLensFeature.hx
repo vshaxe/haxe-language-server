@@ -10,6 +10,11 @@ class CodeLensFeature {
 
 	public function new(context:Context) {
 		this.context = context;
+
+		context.registerCapability({
+			id: Methods.CodeLens,
+			method: Methods.CodeLens
+		});
 		context.languageServerProtocol.onRequest(Methods.CodeLens, onCodeLens);
 	}
 
