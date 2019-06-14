@@ -1,51 +1,9 @@
 {
 	"inherit": "vshaxe-node",
 	"mainTarget": "language-server",
-	"haxelibs": [
-		{
-			"name": "haxe-hxparser",
-			"installArgs": ["git", "haxe-hxparser", "https://github.com/vshaxe/haxe-hxparser"],
-			"includeProjectFile": true
-		},
-		{
-			"name": "utest",
-			"installArgs": ["install", "utest"]
-		},
-		{
-			"name": "hxparse",
-			"installArgs": ["git", "hxparse", "https://github.com/Simn/hxparse", "--never"]
-		},
-		{
-			"name": "haxeparser",
-			"installArgs": ["git", "haxeparser", "https://github.com/Simn/haxeparser", "--never"]
-		},
-		{
-			"name": "tokentree",
-			"installArgs": ["git", "tokentree", "https://github.com/HaxeCheckstyle/tokentree"]
-		},
-		{
-			"name": "formatter",
-			"installArgs": ["git", "formatter", "https://github.com/HaxeCheckstyle/haxe-formatter"]
-		},
-		{
-			"name": "json2object",
-			"installArgs": ["install", "json2object"]
-		},
-		{
-			"name": "vscode-json-rpc",
-			"installArgs": ["git", "vscode-json-rpc", "https://github.com/vshaxe/vscode-json-rpc"]
-		},
-		{
-			"name": "uglifyjs",
-			"installArgs": ["install", "uglifyjs"]
-		}
-	],
 	"targets": [
 		{
 			"name": "language-server",
-			"installCommands": [
-				["npm", "install"]
-			],
 			"args": {
 				"haxelibs": ["haxe-hxparser", "hxparse", "haxeparser", "tokentree", "formatter", "json2object", "vscode-json-rpc", "uglifyjs"],
 				"classPaths": [

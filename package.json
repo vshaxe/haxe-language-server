@@ -1,5 +1,9 @@
 {
 	"devDependencies": {
+		"lix": "^15.4.1",
 		"uglify-es": "^3.3.9"
+	},
+	"scripts": {
+		"postinstall": "npx lix download"
 	}
 }
