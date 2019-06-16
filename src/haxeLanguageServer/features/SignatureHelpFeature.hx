@@ -14,9 +14,11 @@ import jsonrpc.Types.NoData;
 
 class SignatureHelpFeature {
 	final context:Context;
+	final labelOffsetSupport:Bool;
 
 	public function new(context:Context) {
 		this.context = context;
+		labelOffsetSupport = context.capabilities.textDocument!.signatureHelp!.signatureInformation!.parameterInformation!.labelOffsetSupport;
 		context.languageServerProtocol.onRequest(Methods.SignatureHelp, onSignatureHelp);
 	}
 
@@ -49,9 +51,20 @@ class SignatureHelpFeature {
 
 	function createSignatureHelp(item:HaxeSignatureItem):SignatureHelp {
 		var printer = new DisplayPrinter();
+		var labelOffset = 1; // ( or [
 		function createSignatureParameter(arg:JsonFunctionArgument):ParameterInformation {
 			return {
-				label: printer.printFunctionArgument(arg)
+				label: {
+					var printed = printer.printFunctionArgument(arg);
+					if (labelOffsetSupport) {
+						var range = [labelOffset, labelOffset + printed.length];
+						labelOffset += printed.length;
+						labelOffset += 2; // comma and space
+						range;
+					} else {
+						printed;
+					}
+				}
 			}
 		}
 		function createSignatureInformation(info:HaxeSignatureInformation):SignatureInformation {
