@@ -17,14 +17,14 @@ class DocumentSymbolsFeature {
 
 	function onDocumentSymbols(params:DocumentSymbolParams, token:CancellationToken, resolve:Array<EitherType<SymbolInformation, DocumentSymbol>>->Void,
 			reject:ResponseError<NoData>->Void) {
-		var onResolve = context.startTimer(Methods.DocumentSymbols);
+		var onResolve = context.startTimer("haxe/documentSymbol");
 		var doc = context.documents.get(params.textDocument.uri);
 		if (doc.tokens == null) {
 			return reject.noTokens();
 		}
 		var symbols = new DocumentSymbolsResolver(doc).resolve();
 		resolve(symbols);
-		onResolve(symbols, countSymbols(symbols) + " symbols");
+		onResolve(null, countSymbols(symbols) + " symbols");
 	}
 
 	function countSymbols(symbols:Array<DocumentSymbol>):Int {

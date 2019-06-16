@@ -15,7 +15,7 @@ class DocumentFormattingFeature {
 
 	function onDocumentFormatting(params:DocumentFormattingParams, token:CancellationToken, resolve:Array<TextEdit>->Void,
 			reject:ResponseError<NoData>->Void) {
-		var onResolve = context.startTimer(Methods.DocumentFormatting);
+		var onResolve = context.startTimer("haxe/formatting");
 		var uri = params.textDocument.uri;
 		var doc:Null<TextDocument> = context.documents.get(uri);
 		if (doc == null) {
@@ -40,7 +40,7 @@ class DocumentFormattingFeature {
 				}
 				var edits = [{range: fullRange, newText: formattedCode}];
 				resolve(edits);
-				onResolve(edits);
+				onResolve();
 			case Failure(errorMessage):
 				reject(ResponseError.internalError(errorMessage));
 			case Disabled:

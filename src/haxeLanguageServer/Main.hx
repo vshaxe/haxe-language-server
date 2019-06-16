@@ -12,8 +12,23 @@ class Main {
 		var languageServerProtocol = new Protocol(writer.write);
 		languageServerProtocol.logError = message -> languageServerProtocol.sendNotification(Methods.LogMessage, {type: Warning, message: message});
 		setupTrace(languageServerProtocol);
-		new Context(languageServerProtocol);
+		var context = new Context(languageServerProtocol);
 		reader.listen(languageServerProtocol.handleMessage);
+
+		languageServerProtocol.didRespondToRequest = function(request, response) {
+			if (context.config.sendMethodResults) {
+				languageServerProtocol.sendNotification(LanguageServerMethods.DidRunHaxeMethod, {
+					method: request.method,
+					debugInfo: null,
+					response: {
+						result: {
+							request: request,
+							response: response
+						}
+					}
+				});
+			}
+		};
 	}
 
 	static function setupTrace(languageServerProtocol:Protocol) {
