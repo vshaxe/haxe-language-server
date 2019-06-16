@@ -40,4 +40,8 @@ class ArrayHelper {
 	public static inline function unique<T>(array:Array<T>):Array<T> {
 		return filterDuplicates(array, (e1, e2) -> e1 == e2);
 	}
+
+	public static inline function contains<T>(array:Array<T>, element:T):Bool {
+		return array.indexOf(element) != -1;
+	}
 }

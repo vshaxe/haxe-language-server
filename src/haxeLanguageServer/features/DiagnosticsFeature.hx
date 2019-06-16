@@ -22,20 +22,12 @@ class DiagnosticsFeature {
 	final tagSupport:Bool;
 	final diagnosticsArguments:Map<DocumentUri, DiagnosticsMap<Any>>;
 	final errorUri:DocumentUri;
+
 	var haxelibPath:Null<FsPath>;
 
 	public function new(context:Context) {
 		this.context = context;
-
-		tagSupport = false;
-		var textDocument = context.capabilities.textDocument;
-		if (textDocument != null) {
-			var diagnostics = textDocument.publishDiagnostics;
-			if (diagnostics != null && diagnostics.tagSupport) {
-				tagSupport = true;
-			}
-		}
-
+		tagSupport = context.capabilities.textDocument!.publishDiagnostics!.tagSupport == true;
 		diagnosticsArguments = new Map();
 		errorUri = new FsPath(Path.join([context.workspacePath.toString(), "Error"])).toUri();
 

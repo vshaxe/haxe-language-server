@@ -5,7 +5,7 @@
 		{
 			"name": "language-server",
 			"args": {
-				"haxelibs": ["haxe-hxparser", "hxparse", "haxeparser", "tokentree", "formatter", "json2object", "vscode-json-rpc", "uglifyjs"],
+				"haxelibs": ["haxe-hxparser", "hxparse", "haxeparser", "tokentree", "formatter", "json2object", "vscode-json-rpc", "uglifyjs", "safety"],
 				"classPaths": [
 					"src",
 					"protocol/src"
@@ -19,7 +19,8 @@
 					"path": "bin/server.js"
 				},
 				"macros": [
-					"haxeLanguageServer.Init.run()"
+					"haxeLanguageServer.Init.run()",
+					"Safety.safeNavigation('haxeLanguageServer.features')"
 				],
 				"deadCodeElimination": "full",
 				"main": "haxeLanguageServer.Main"

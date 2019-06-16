@@ -19,6 +19,7 @@ import haxe.display.JsonModuleTypes;
 import haxe.extern.EitherType;
 
 using tokentree.TokenTreeAccessHelper;
+using Safety;
 
 enum abstract CompletionItemOrigin(Int) {
 	var Haxe;
@@ -49,6 +50,7 @@ class CompletionFeature {
 	final snippetCompletion:SnippetCompletion;
 	final printer:DisplayPrinter;
 	var previousCompletionData:Null<CompletionContextData>;
+
 	var contextSupport:Bool;
 	var markdownSupport:Bool;
 	var snippetSupport:Bool;
@@ -76,41 +78,12 @@ class CompletionFeature {
 	}
 
 	function checkCapabilities() {
-		contextSupport = false;
-		markdownSupport = false;
-		snippetSupport = false;
-		commitCharactersSupport = false;
-		deprecatedSupport = false;
-
-		var textDocument = context.capabilities.textDocument;
-		if (textDocument == null)
-			return;
-		var completion = textDocument.completion;
-		if (completion == null)
-			return;
-
-		contextSupport = completion.contextSupport == true;
-
-		var completionItem = completion.completionItem;
-		if (completionItem == null)
-			return;
-
-		var documentationFormat = completionItem.documentationFormat;
-		if (documentationFormat != null) {
-			markdownSupport = documentationFormat.indexOf(MarkDown) != -1;
-		}
-
-		if (completionItem.snippetSupport == true) {
-			snippetSupport = true;
-		}
-
-		if (completionItem.commitCharactersSupport == true) {
-			commitCharactersSupport = true;
-		}
-
-		if (completionItem.deprecatedSupport == true) {
-			deprecatedSupport = true;
-		}
+		var completion = context.capabilities.textDocument!.completion;
+		contextSupport = completion!.contextSupport == true;
+		markdownSupport = completion!.completionItem!.documentationFormat.let(kinds -> kinds.contains(MarkDown));
+		snippetSupport = completion!.completionItem!.snippetSupport == true;
+		commitCharactersSupport = completion!.completionItem!.commitCharactersSupport == true;
+		deprecatedSupport = completion!.completionItem!.deprecatedSupport == true;
 	}
 
 	function onCompletion(params:CompletionParams, token:CancellationToken, resolve:Array<CompletionItem>->Void, reject:ResponseError<NoData>->Void) {

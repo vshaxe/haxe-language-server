@@ -12,11 +12,9 @@ class FoldingRangeResolver {
 	final document:TextDocument;
 	final lineFoldingOnly:Bool;
 
-	public function new(document:TextDocument, capabilities:FoldingRangeClientCapabilities) {
+	public function new(document:TextDocument, capabilities:Null<FoldingRangeClientCapabilities>) {
 		this.document = document;
-		if (capabilities != null && capabilities.foldingRange != null) {
-			lineFoldingOnly = capabilities.foldingRange.lineFoldingOnly;
-		}
+		lineFoldingOnly = capabilities!.foldingRange!.lineFoldingOnly;
 	}
 
 	public function resolve():Array<FoldingRange> {
