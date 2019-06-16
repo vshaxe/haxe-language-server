@@ -80,7 +80,7 @@ class CompletionFeature {
 	function checkCapabilities() {
 		var completion = context.capabilities.textDocument!.completion;
 		contextSupport = completion!.contextSupport == true;
-		markdownSupport = completion!.completionItem!.documentationFormat.let(kinds -> kinds.contains(MarkDown));
+		markdownSupport = completion!.completionItem!.documentationFormat.let(kinds -> kinds.contains(MarkDown)).or(false);
 		snippetSupport = completion!.completionItem!.snippetSupport == true;
 		commitCharactersSupport = completion!.completionItem!.commitCharactersSupport == true;
 		deprecatedSupport = completion!.completionItem!.deprecatedSupport == true;

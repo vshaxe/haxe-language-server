@@ -29,7 +29,7 @@
 		{
 			"name": "language-server-tests",
 			"args": {
-				"haxelibs": ["haxe-hxparser", "hxparse", "haxeparser", "tokentree", "formatter", "json2object", "vscode-json-rpc", "utest"],
+				"haxelibs": ["haxe-hxparser", "hxparse", "haxeparser", "tokentree", "formatter", "json2object", "vscode-json-rpc", "safety", "utest"],
 				"classPaths": [
 					"src",
 					"test",
@@ -39,6 +39,9 @@
 					"target": "js",
 					"path": "bin/test.js"
 				},
+				"macros": [
+					"Safety.safeNavigation('haxeLanguageServer.features')"
+				],
 				"deadCodeElimination": "full",
 				"main": "TestMain",
 				"debug": true
