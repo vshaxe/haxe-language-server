@@ -46,7 +46,7 @@ class HaxeServer {
 
 		var checkRun = ChildProcess.spawnSync(haxePath, ["-version"], spawnOptions);
 		if (checkRun.error != null) {
-			if (checkRun.error.message.indexOf("ENOENT") >= 0) {
+			if (checkRun.error.message.contains("ENOENT")) {
 				if (haxePath == "haxe") // default
 					return error("Could not find Haxe in PATH. Is it installed?");
 				else
@@ -409,7 +409,7 @@ class HaxeServer {
 	}
 
 	public function supports<P, R>(method:HaxeRequestMethod<P, R>) {
-		return supportedMethods.indexOf(method) != -1;
+		return supportedMethods.contains(method);
 	}
 
 	function updateRequestQueue() {

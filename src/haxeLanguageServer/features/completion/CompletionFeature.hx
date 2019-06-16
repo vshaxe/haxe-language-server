@@ -527,7 +527,7 @@ class CompletionFeature {
 			return null;
 		}
 		var unqualifiedName = type.path.typeName; // Foo | SubType
-		var containerName = if (dotPath.indexOf(".") == -1) "" else dotPath.untilLastDot(); // pack | pack.Foo
+		var containerName = if (dotPath.contains(".")) dotPath.untilLastDot() else ""; // pack | pack.Foo
 
 		var pathPrinting = if (isImportCompletion) Always else Qualified;
 		var qualifiedName = new DisplayPrinter(pathPrinting).printPath(type.path); // unqualifiedName or dotPath depending on importStatus

@@ -176,7 +176,7 @@ class DiagnosticsFeature {
 							severity: hxDiag.severity,
 							message: hxDiag.kind.getMessage(hxDiag.args)
 						}
-						if (kind == RemovableCode || kind == UnusedImport || diag.message.indexOf("has no effect") != -1) {
+						if (kind == RemovableCode || kind == UnusedImport || diag.message.contains("has no effect")) {
 							diag.severity = Hint;
 							diag.tags = [Unnecessary];
 						}
@@ -374,7 +374,7 @@ class DiagnosticsFeature {
 		}
 
 		if (context.haxeServer.version.major >= 4 // unsuitable error range before Haxe 4
-			&& arg.indexOf("should be declared with 'override' since it is inherited from superclass") != -1) {
+			&& arg.contains("should be declared with 'override' since it is inherited from superclass")) {
 			actions.push({
 				title: "Add override keyword",
 				kind: QuickFix,
