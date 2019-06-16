@@ -60,7 +60,7 @@ class LanguageServerMethods {
 	/**
 		This notification is sent from the server to the client when a Haxe JSON-RPC method was executed.
 	**/
-	static inline var DidRunHaxeMethod = new NotificationMethod<HaxeMethodResult>("haxe/didRunHaxeMethod");
+	static inline var DidRunMethod = new NotificationMethod<MethodResult>("haxe/didRunHaxeMethod");
 
 	/**
 		This notification is sent from the server to the client when the request queue has changed.
@@ -88,11 +88,17 @@ class LanguageServerMethods {
 	static inline var DidDetectOldPreview = new NotificationMethod<Null<{preview:String}>>("haxe/didDetectOldPreview");
 }
 
-typedef HaxeMethodResult = {
+typedef MethodResult = {
+	final kind:MethodResultKind;
 	final method:String;
 	final debugInfo:String;
 	final response:Response<Dynamic>;
 	final ?additionalTimes:AdditionalTimes;
+}
+
+enum abstract MethodResultKind(String) {
+	var Haxe;
+	var Lsp;
 }
 
 typedef AdditionalTimes = {

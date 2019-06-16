@@ -20,7 +20,7 @@ import haxeLanguageServer.protocol.Protocol.Methods as HaxeMethods;
 import haxeLanguageServer.protocol.Protocol.HaxeResponseErrorData;
 import haxeLanguageServer.protocol.Server.ServerMethods;
 import haxeLanguageServer.protocol.Display.DisplayMethods;
-import haxeLanguageServer.LanguageServerMethods.HaxeMethodResult;
+import haxeLanguageServer.LanguageServerMethods.MethodResult;
 import languageServerProtocol.protocol.TypeDefinition.TypeDefinitionMethods;
 
 class Context {
@@ -315,7 +315,8 @@ class Context {
 				null;
 			}
 			var afterProcessingTime = Date.now().getTime();
-			var methodResult:HaxeMethodResult = {
+			var methodResult:MethodResult = {
+				kind: Haxe,
 				method: method,
 				debugInfo: debugInfo,
 				additionalTimes: {
@@ -326,7 +327,7 @@ class Context {
 				},
 				response: response
 			};
-			languageServerProtocol.sendNotification(LanguageServerMethods.DidRunHaxeMethod, methodResult);
+			languageServerProtocol.sendNotification(LanguageServerMethods.DidRunMethod, methodResult);
 		}, function(error:ResponseErrorData) {
 			var data:HaxeResponseErrorData = error.data;
 			errback(data[0].message);
@@ -362,7 +363,8 @@ class Context {
 		var startTime = Date.now().getTime();
 		return function(?result:Dynamic, ?debugInfo:String) {
 			if (config.sendMethodResults) {
-				languageServerProtocol.sendNotification(LanguageServerMethods.DidRunHaxeMethod, {
+				languageServerProtocol.sendNotification(LanguageServerMethods.DidRunMethod, {
+					kind: Haxe,
 					method: method,
 					debugInfo: debugInfo,
 					response: {

@@ -17,7 +17,8 @@ class Main {
 
 		languageServerProtocol.didRespondToRequest = function(request, response) {
 			if (context.config.sendMethodResults) {
-				languageServerProtocol.sendNotification(LanguageServerMethods.DidRunHaxeMethod, {
+				languageServerProtocol.sendNotification(LanguageServerMethods.DidRunMethod, {
+					kind: Lsp,
 					method: request.method,
 					debugInfo: null,
 					response: {
