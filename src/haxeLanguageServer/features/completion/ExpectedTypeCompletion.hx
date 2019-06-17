@@ -89,7 +89,7 @@ class ExpectedTypeCompletion {
 			case _:
 		}
 
-		return items.map(createExpectedTypeCompletionItem.bind(_, data.completionPosition));
+		return items.map(createExpectedTypeCompletionItem.bind(_, data.params.position));
 	}
 
 	function createExpectedTypeCompletionItem(data:ExpectedTypeCompletionItem, position:Position):CompletionItem {

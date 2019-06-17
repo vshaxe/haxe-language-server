@@ -25,7 +25,8 @@ class PostfixCompletion {
 		if (level == Off) {
 			return [];
 		}
-		if (!data.textBefore.endsWith(".")) {
+		var context = data.params.context;
+		if (context!.triggerKind == TriggerCharacter && context!.triggerCharacter != ".") {
 			return [];
 		}
 
@@ -50,7 +51,7 @@ class PostfixCompletion {
 
 		var replaceRange = data.replaceRange;
 		if (replaceRange == null) {
-			replaceRange = data.completionPosition.toRange();
+			replaceRange = data.params.position.toRange();
 		}
 		var removeRange:Range = {start: subject.range.start, end: replaceRange.start};
 

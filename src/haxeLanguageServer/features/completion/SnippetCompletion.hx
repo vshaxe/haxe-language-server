@@ -6,12 +6,13 @@ import haxeLanguageServer.helper.DocHelper;
 import haxeLanguageServer.protocol.Display;
 import haxeLanguageServer.features.completion.CompletionFeature.CompletionItemOrigin;
 import haxeLanguageServer.tokentree.TokenContext;
+import languageServerProtocol.protocol.Protocol.CompletionParams;
 
 using haxe.io.Path;
 
 typedef SnippetCompletionContextData = {
 	var doc:TextDocument;
-	var completionPosition:Position;
+	var params:CompletionParams;
 	var replaceRange:Range;
 	var tokenContext:TokenContext;
 }
@@ -27,7 +28,7 @@ class SnippetCompletion {
 			displayItems:Array<DisplayItem<T1>>):Promise<{items:Array<CompletionItem>, displayItems:Array<DisplayItem<T1>>}> {
 		var fsPath = data.doc.uri.toFsPath().toString();
 
-		var pos = data.completionPosition;
+		var pos = data.params.position;
 		var isRestOfLineEmpty = data.doc.lineAt(pos.line).substr(pos.character).trim().length == 0;
 
 		for (i in 0...displayItems.length) {

@@ -207,9 +207,8 @@ class CompletionFeature {
 				mode: result.mode,
 				doc: doc,
 				indent: indent,
-				textBefore: textBefore,
 				lineAfter: lineAfter,
-				completionPosition: params.position,
+				params: params,
 				importPosition: importPosition,
 				tokenContext: tokenContext,
 				isResolve: false
@@ -245,7 +244,7 @@ class CompletionFeature {
 			if (snippetSupport) {
 				snippetCompletion.createItems({
 					doc: doc,
-					completionPosition: params.position,
+					params: params,
 					replaceRange: replaceRange,
 					tokenContext: tokenContext
 				}, []).then(result -> {
