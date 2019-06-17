@@ -187,7 +187,14 @@ class CompletionFeature {
 			start: position,
 			end: position.translate(1, 0)
 		});
-
+		// scan back to the dot for `expr.ident|` manually - we ignore replaceRanges sent by Haxe
+		// because of a bug in rc.3 and generally inconsistent results (sometimes replaceRange is null)
+		var wordPattern = ~/\w*$/;
+		wordPattern.match(textBefore);
+		var replaceRange = {
+			start: params.position.translate(0, -wordPattern.matched(0).length),
+			end: params.position
+		};
 		context.callHaxeMethod(DisplayMethods.Completion, haxeParams, token, function(result) {
 			if (result.mode.kind != TypeHint && wasAutoTriggered && isAfterArrow(textBefore)) {
 				resolve([]); // avoid auto-popup after -> in arrow functions
@@ -195,11 +202,6 @@ class CompletionFeature {
 			}
 			var importPosition = ImportHelper.getImportPosition(doc);
 			var indent = doc.indentAt(params.position.line);
-
-			var replaceRange = result.replaceRange;
-			if (replaceRange != null && replaceRange.start.line != replaceRange.end.line) {
-				replaceRange = null; // multi-line replace ranges are not allowed
-			}
 			var data:CompletionContextData = {
 				replaceRange: replaceRange,
 				mode: result.mode,
@@ -240,14 +242,6 @@ class CompletionFeature {
 			previousCompletionData = data;
 			return displayItems.length + " items";
 		}, function(error) {
-			// scan back to the dot for `expr.postfi|`
-			var wordPattern = ~/\w*$/;
-			wordPattern.match(textBefore);
-			var replaceRange = {
-				start: params.position.translate(0, -wordPattern.matched(0).length),
-				end: params.position
-			};
-
 			if (snippetSupport) {
 				snippetCompletion.createItems({
 					doc: doc,
