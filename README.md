@@ -12,3 +12,18 @@ Note that any issues should be reported to [vshaxe](https://github.com/vshaxe/vs
 
 **IMPORTANT**: This requires Haxe 3.4.0 or newer due to usage of [`-D display-stdin`](https://github.com/HaxeFoundation/haxe/pull/5120),
 [`--wait stdio`](https://github.com/HaxeFoundation/haxe/pull/5188) and tons of other fixes and additions related to IDE support.
+
+### Building From Source
+
+The easiest way to work on the language server is probably to build it as part of the vshaxe VSCode extension as instructed [here](https://github.com/vshaxe/vshaxe/wiki/Installation#from-source) (even if you ultimately want to use it outside of VSCode), which allows for easy debugging.
+
+However, you can also build it as a standalone project like so:
+
+```
+git clone https://github.com/vshaxe/haxe-language-server
+cd haxe-language-server
+npm install
+npx lix run vshaxe-build -t language-server
+```
+
+This creates a `bin/server.js` that can be started with `node server.js`.
