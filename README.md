@@ -6,7 +6,7 @@ This is a language server implementing [Language Server Protocol](https://github
 
 The goal of this project is to encapsulate haxe's completion API with all its quirks behind a solid and easy-to-use protocol that can be used by any editor/IDE.
 
-Used by the [Visual Studio Code Haxe Extension](https://github.com/vshaxe/vshaxe). It [has also successfully been used in Neovim and Sublime Text](https://github.com/vshaxe/vshaxe/issues/171), but no official extensions exist at this time.
+Used by the [Visual Studio Code Haxe Extension](https://github.com/vshaxe/vshaxe). It has also successfully been used in Neovim and Sublime Text<sup>[[1]](https://github.com/vshaxe/vshaxe/issues/171)</sup><sup>[[2]](https://github.com/vshaxe/vshaxe/issues/328)</sup>, but no official extensions exist at this time.
 
 Note that any issues should be reported to [vshaxe](https://github.com/vshaxe/vshaxe) directly (this is also the reason why the issue tracker is disabled). Pull requests are welcome however!
 
