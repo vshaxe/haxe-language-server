@@ -215,9 +215,9 @@ class CompletionFeature {
 				tokenContext: tokenContext,
 				isResolve: false
 			};
-			var displayItems = if (result == null) [] else result.items;
+			var displayItems = if (hasResult) result.items else [];
 			var items = [];
-			if (result != null) {
+			if (hasResult) {
 				items = items.concat(postfixCompletion.createItems(data, displayItems));
 				items = items.concat(expectedTypeCompletion.createItems(data));
 			}
