@@ -73,7 +73,7 @@ enum abstract CompilerMetadata(String) to String {
 	// TODO
 }
 
-/* Completion */
+/** Completion **/
 typedef CompletionParams = PositionParams & {
 	var wasAutoTriggered:Bool;
 
@@ -424,9 +424,9 @@ typedef CompletionResponse<T1, T2> = {
 	var ?replaceRange:Range;
 }
 
-typedef CompletionResult = Response<CompletionResponse<Dynamic, Dynamic>>;
+typedef CompletionResult = Response<Null<CompletionResponse<Dynamic, Dynamic>>>;
 
-/* CompletionItem Resolve */
+/** CompletionItem Resolve **/
 typedef CompletionItemResolveParams = {
 	var index:Int;
 };
@@ -435,12 +435,14 @@ typedef CompletionItemResolveResult = Response<{
 	var item:DisplayItem<Dynamic>;
 }>;
 
-/* GotoDefinition */
+/** GotoDefinition **/
 typedef GotoDefinitionResult = Response<Array<Location>>;
-/* GotoTypeDefinition */
+
+/** GotoTypeDefinition **/
 typedef GotoTypeDefinitionResult = Response<Array<Location>>;
-/* Hover */
-typedef HoverResult = Response<HoverDisplayItemOccurence<Dynamic>>;
+
+/** Hover **/
+typedef HoverResult = Response<Null<HoverDisplayItemOccurence<Dynamic>>>;
 
 typedef HoverDisplayItemOccurence<T> = DisplayItemOccurrence<T> & {
 	var ?expected:{
@@ -457,10 +459,10 @@ enum abstract HoverExpectedNameKind(Int) {
 	var StructureField;
 }
 
-/* DeterminePackage */
+/** DeterminePackage **/
 typedef DeterminePackageResult = Response<Array<String>>;
 
-/* SignatureHelp */
+/** SignatureHelp **/
 typedef SignatureHelpParams = PositionParams & {
 	var wasAutoTriggered:Bool;
 }
@@ -481,9 +483,9 @@ typedef SignatureItem = {
 	var kind:SignatureItemKind;
 }
 
-typedef SignatureHelpResult = Response<SignatureItem>;
+typedef SignatureHelpResult = Response<Null<SignatureItem>>;
 
-/* General types */
+/** General types **/
 typedef PositionParams = FileParams & {
 	/** Unicode character offset in the file. **/
 	var offset:Int;

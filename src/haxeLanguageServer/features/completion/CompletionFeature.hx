@@ -196,15 +196,17 @@ class CompletionFeature {
 			end: params.position
 		};
 		context.callHaxeMethod(DisplayMethods.Completion, haxeParams, token, function(result) {
-			if (result.mode.kind != TypeHint && wasAutoTriggered && isAfterArrow(textBefore)) {
+			var hasResult = result != null;
+			var mode = if (hasResult) result.mode.kind else null;
+			if (mode != TypeHint && wasAutoTriggered && isAfterArrow(textBefore)) {
 				resolve([]); // avoid auto-popup after -> in arrow functions
 				return null;
 			}
 			var importPosition = ImportHelper.getImportPosition(doc);
 			var indent = doc.indentAt(params.position.line);
 			var data:CompletionContextData = {
-				replaceRange: if (result.mode.kind == Metadata) result.replaceRange else replaceRange,
-				mode: result.mode,
+				replaceRange: if (mode == Metadata) result.replaceRange else replaceRange,
+				mode: if (hasResult) result.mode else null,
 				doc: doc,
 				indent: indent,
 				lineAfter: lineAfter,
@@ -213,10 +215,12 @@ class CompletionFeature {
 				tokenContext: tokenContext,
 				isResolve: false
 			};
-			var displayItems = result.items;
+			var displayItems = if (result == null) [] else result.items;
 			var items = [];
-			items = items.concat(postfixCompletion.createItems(data, displayItems));
-			items = items.concat(expectedTypeCompletion.createItems(data));
+			if (result != null) {
+				items = items.concat(postfixCompletion.createItems(data, displayItems));
+				items = items.concat(expectedTypeCompletion.createItems(data));
+			}
 			items = items.concat(createFieldKeywordItems(tokenContext, replaceRange, lineAfter));
 
 			function resolveItems() {

@@ -22,7 +22,8 @@ class SignatureHelpFeature {
 		context.languageServerProtocol.onRequest(Methods.SignatureHelp, onSignatureHelp);
 	}
 
-	function onSignatureHelp(params:TextDocumentPositionParams, token:CancellationToken, resolve:SignatureHelp->Void, reject:ResponseError<NoData>->Void) {
+	function onSignatureHelp(params:TextDocumentPositionParams, token:CancellationToken, resolve:Null<SignatureHelp>->Void,
+			reject:ResponseError<NoData>->Void) {
 		var uri = params.textDocument.uri;
 		var doc:Null<TextDocument> = context.documents.get(uri);
 		if (doc == null) {
@@ -35,7 +36,7 @@ class SignatureHelpFeature {
 		handle(params, token, resolve, reject, doc);
 	}
 
-	function handleJsonRpc(params:TextDocumentPositionParams, token:CancellationToken, resolve:SignatureHelp->Void, reject:ResponseError<NoData>->Void,
+	function handleJsonRpc(params:TextDocumentPositionParams, token:CancellationToken, resolve:Null<SignatureHelp>->Void, reject:ResponseError<NoData>->Void,
 			doc:TextDocument) {
 		var params = {
 			file: doc.uri.toFsPath(),
@@ -43,8 +44,12 @@ class SignatureHelpFeature {
 			offset: doc.offsetAt(params.position),
 			wasAutoTriggered: true // TODO: send this once the API supports it (https://github.com/Microsoft/vscode/issues/34737)
 		}
-		context.callHaxeMethod(DisplayMethods.SignatureHelp, params, token, result -> {
-			resolve(createSignatureHelp(result));
+		context.callHaxeMethod(DisplayMethods.SignatureHelp, params, token, function(result) {
+			if (result == null) {
+				resolve(null);
+			} else {
+				resolve(createSignatureHelp(result));
+			}
 			return null;
 		}, reject.handler());
 	}
@@ -86,7 +91,7 @@ class SignatureHelpFeature {
 		};
 	}
 
-	function handleLegacy(params:TextDocumentPositionParams, token:CancellationToken, resolve:SignatureHelp->Void, reject:ResponseError<NoData>->Void,
+	function handleLegacy(params:TextDocumentPositionParams, token:CancellationToken, resolve:Null<SignatureHelp>->Void, reject:ResponseError<NoData>->Void,
 			doc:TextDocument) {
 		var bytePos = context.displayOffsetConverter.characterOffsetToByteOffset(doc.content, doc.offsetAt(params.position));
 		var args = ['${doc.uri.toFsPath()}@$bytePos@signature'];
