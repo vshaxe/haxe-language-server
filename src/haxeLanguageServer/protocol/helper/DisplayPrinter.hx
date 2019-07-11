@@ -537,6 +537,9 @@ class DisplayPrinter {
 		if (metadata.targets != null) {
 			details += printList("Can be uesd on", metadata.targets.map(printMetadataTarget));
 		}
+		if (metadata.links != null && metadata.links.length > 0) {
+			details += metadata.links.map(link -> '- $link').join("\n");
+		}
 		return details;
 	}
 
