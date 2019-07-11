@@ -283,7 +283,7 @@ class CompletionFeature {
 				}
 			}
 		}
-		var keywords:Array<KeywordKind> = [Public, Private, Extern, Final, Static, Dynamic, Override, Inline];
+		var keywords:Array<KeywordKind> = [Public, Private, Extern, Final, Static, Dynamic, Override, Inline, Macro];
 		for (keyword in keywords) {
 			results.push(create(keyword));
 		}
