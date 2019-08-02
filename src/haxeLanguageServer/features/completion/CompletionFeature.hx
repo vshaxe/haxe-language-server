@@ -205,7 +205,7 @@ class CompletionFeature {
 			var importPosition = ImportHelper.getImportPosition(doc);
 			var indent = doc.indentAt(params.position.line);
 			var data:CompletionContextData = {
-				replaceRange: if (mode == Metadata) result.replaceRange else replaceRange,
+				replaceRange: if (mode == Metadata || mode == Toplevel) result.replaceRange else replaceRange,
 				mode: if (hasResult) result.mode else null,
 				doc: doc,
 				indent: indent,
