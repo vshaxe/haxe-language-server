@@ -233,7 +233,7 @@ class CompletionFeature {
 				items = items.filter(i -> i != null);
 				resolve(items);
 			}
-			if (snippetSupport) {
+			if (snippetSupport && mode != Import && mode != Field) {
 				snippetCompletion.createItems(data, displayItems).then(result -> {
 					items = items.concat(result.items);
 					displayItems = result.displayItems;
