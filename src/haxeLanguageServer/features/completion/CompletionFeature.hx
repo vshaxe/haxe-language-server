@@ -187,7 +187,7 @@ class CompletionFeature {
 			start: position,
 			end: position.translate(1, 0)
 		});
-		// scan back to the dot for `expr.ident|` manually - we ignore replaceRanges sent by Haxe
+		// scan back to the dot for `expr.ident|` manually - we ignore replaceRanges sent by Haxe in most cases
 		// because of a bug in rc.3 and generally inconsistent results (sometimes replaceRange is null)
 		var wordPattern = ~/\w*$/;
 		wordPattern.match(textBefore);
@@ -205,7 +205,7 @@ class CompletionFeature {
 			var importPosition = ImportHelper.getImportPosition(doc);
 			var indent = doc.indentAt(params.position.line);
 			var data:CompletionContextData = {
-				replaceRange: if (mode == Metadata || mode == Toplevel) result.replaceRange else replaceRange,
+				replaceRange: if (mode == Metadata || mode == Toplevel || mode == TypeHint) result.replaceRange else replaceRange,
 				mode: if (hasResult) result.mode else null,
 				doc: doc,
 				indent: indent,
