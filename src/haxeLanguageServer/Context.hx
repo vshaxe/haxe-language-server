@@ -242,11 +242,7 @@ class Context {
 	function onDidChangeTextDocument(event:DidChangeTextDocumentParams) {
 		var uri = event.textDocument.uri;
 		if (isUriSupported(uri)) {
-			if (uri.isFile() && haxeServer.supports(ServerMethods.Invalidate)) {
-				callHaxeMethod(ServerMethods.Invalidate, {file: uri.toFsPath()}, null, _ -> null, error -> {
-					trace("Error during " + ServerMethods.Invalidate + " " + error);
-				});
-			}
+			callFileParamsMethod(uri, ServerMethods.Invalidate);
 			documents.onDidChangeTextDocument(event);
 		}
 	}
@@ -266,9 +262,22 @@ class Context {
 
 	function onDidChangeWatchedFiles(event:DidChangeWatchedFilesParams) {
 		for (change in event.changes) {
-			if (change.type == Deleted) {
-				diagnostics.clearDiagnostics(change.uri);
+			switch change.type {
+				case Created:
+					callFileParamsMethod(change.uri, ServerMethods.ModuleCreated);
+				case Deleted:
+					diagnostics.clearDiagnostics(change.uri);
+					callFileParamsMethod(change.uri, ServerMethods.Invalidate);
+				case _:
 			}
+		}
+	}
+
+	function callFileParamsMethod(uri:DocumentUri, method) {
+		if (uri.isFile() && haxeServer.supports(method)) {
+			callHaxeMethod(method, {file: uri.toFsPath()}, null, _ -> null, error -> {
+				trace("Error during " + method + " " + error);
+			});
 		}
 	}
 

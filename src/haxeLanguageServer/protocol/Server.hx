@@ -13,6 +13,7 @@ class ServerMethods {
 
 	static inline var Configure = new HaxeRequestMethod<ConfigureParams, Response<NoData>>("server/configure");
 	static inline var Invalidate = new HaxeRequestMethod<FileParams, Response<NoData>>("server/invalidate");
+	static inline var ModuleCreated = new HaxeRequestMethod<FileParams, Response<NoData>>("server/moduleCreated");
 	static inline var Contexts = new HaxeRequestMethod<NoData, Response<Array<HaxeServerContext>>>("server/contexts");
 	static inline var Memory = new HaxeRequestMethod<NoData, Response<HaxeMemoryResult>>("server/memory");
 	static inline var Modules = new HaxeRequestMethod<ContextParams, Response<Array<String>>>("server/modules");
