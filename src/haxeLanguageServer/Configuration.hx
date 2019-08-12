@@ -4,7 +4,7 @@ import haxe.Json;
 import jsonrpc.Protocol;
 import haxe.extern.EitherType;
 import haxeLanguageServer.helper.StructDefaultsMacro;
-import haxeLanguageServer.protocol.Server.ConfigurePrintParams;
+import haxe.display.Server.ConfigurePrintParams;
 
 typedef DisplayServerConfig = {
 	var ?path:String;

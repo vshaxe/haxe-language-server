@@ -2,7 +2,7 @@ package haxeLanguageServer.helper;
 
 import haxe.Json;
 import haxe.display.JsonModuleTypes;
-import haxeLanguageServer.protocol.helper.DisplayPrinter;
+import haxeLanguageServer.protocol.DisplayPrinter;
 import haxeLanguageServer.TextDocument;
 import haxeLanguageServer.Configuration.ImportStyle;
 import haxeLanguageServer.Configuration.FunctionFormattingConfig;

@@ -1,15 +1,11 @@
 package haxeLanguageServer.helper;
 
-abstract FsPath(String) {
+class FsPathHelper {
 	static final upperCaseDriveRe = ~/^(\/)?([A-Z]:)/;
 
-	public inline function new(path:String) {
-		this = path;
-	}
-
 	/** ported from VSCode sources **/
-	public function toUri():DocumentUri {
-		var path = this;
+	public static function toUri(path:FsPath):DocumentUri {
+		var path = path.toString();
 		path = path.replace("\\", "/");
 		if (path.fastCodeAt(0) != "/".code)
 			path = "/" + path;
@@ -31,10 +27,6 @@ abstract FsPath(String) {
 			lastIdx = idx + 1;
 		}
 		return new DocumentUri(parts.join(""));
-	}
-
-	public inline function toString():String {
-		return this;
 	}
 }
 

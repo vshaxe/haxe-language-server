@@ -1,9 +1,9 @@
 package haxeLanguageServer.features.completion;
 
 import js.lib.Promise;
+import haxe.display.Display;
 import haxeLanguageServer.helper.SnippetHelper;
 import haxeLanguageServer.helper.DocHelper;
-import haxeLanguageServer.protocol.Display;
 import haxeLanguageServer.features.completion.CompletionFeature.CompletionItemOrigin;
 import haxeLanguageServer.tokentree.TokenContext;
 import languageServerProtocol.protocol.Protocol.CompletionParams;

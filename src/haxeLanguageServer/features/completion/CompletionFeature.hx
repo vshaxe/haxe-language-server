@@ -1,22 +1,23 @@
 package haxeLanguageServer.features.completion;
 
-import tokentree.TokenTree;
 import haxe.ds.Option;
+import haxe.display.Display;
+import haxe.display.Display.CompletionParams as HaxeCompletionParams;
+import haxe.display.JsonModuleTypes;
+import haxe.extern.EitherType;
+import tokentree.TokenTree;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
-import haxeLanguageServer.protocol.Display;
-import haxeLanguageServer.protocol.Display.CompletionParams as HaxeCompletionParams;
 import haxeLanguageServer.helper.DocHelper;
 import haxeLanguageServer.helper.ImportHelper;
-import haxeLanguageServer.protocol.helper.DisplayPrinter;
+import haxeLanguageServer.protocol.DisplayPrinter;
+import haxeLanguageServer.protocol.CompilerMetadata;
 import haxeLanguageServer.tokentree.PositionAnalyzer;
 import haxeLanguageServer.tokentree.TokenContext;
 import languageServerProtocol.protocol.Protocol.CompletionParams;
 import languageServerProtocol.Types.CompletionItem;
 import languageServerProtocol.Types.CompletionItemKind;
-import haxe.display.JsonModuleTypes;
-import haxe.extern.EitherType;
 
 using tokentree.TokenTreeAccessHelper;
 using Safety;

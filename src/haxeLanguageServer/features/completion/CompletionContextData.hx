@@ -1,8 +1,8 @@
 package haxeLanguageServer.features.completion;
 
+import haxe.display.Display.CompletionMode;
 import haxeLanguageServer.helper.ImportHelper.ImportPosition;
 import haxeLanguageServer.tokentree.TokenContext;
-import haxeLanguageServer.protocol.Display.CompletionMode;
 
 typedef CompletionContextData = {
 	var replaceRange:Range;

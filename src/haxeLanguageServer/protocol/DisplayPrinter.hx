@@ -1,10 +1,10 @@
-package haxeLanguageServer.protocol.helper;
+package haxeLanguageServer.protocol;
 
 import haxe.ds.Option;
 import haxe.display.JsonModuleTypes;
+import haxe.display.Display;
 import haxeLanguageServer.helper.IdentifierHelper;
 import haxeLanguageServer.Configuration.FunctionFormattingConfig;
-import haxeLanguageServer.protocol.Display;
 
 using Lambda;
 

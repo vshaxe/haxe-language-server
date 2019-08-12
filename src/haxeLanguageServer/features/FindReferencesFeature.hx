@@ -1,6 +1,6 @@
 package haxeLanguageServer.features;
 
-import haxeLanguageServer.protocol.Display.DisplayMethods;
+import haxe.display.Display.DisplayMethods;
 import haxeLanguageServer.helper.HaxePosition;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;

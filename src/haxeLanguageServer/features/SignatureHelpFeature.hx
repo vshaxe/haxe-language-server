@@ -2,12 +2,12 @@ package haxeLanguageServer.features;
 
 import haxe.extern.EitherType;
 import haxe.display.JsonModuleTypes.JsonFunctionArgument;
+import haxe.display.Display.DisplayMethods;
+import haxe.display.Display.SignatureItem as HaxeSignatureItem;
+import haxe.display.Display.SignatureInformation as HaxeSignatureInformation;
 import haxeLanguageServer.helper.IdentifierHelper.addNamesToSignatureType;
 import haxeLanguageServer.helper.DocHelper;
-import haxeLanguageServer.protocol.helper.DisplayPrinter;
-import haxeLanguageServer.protocol.Display.DisplayMethods;
-import haxeLanguageServer.protocol.Display.SignatureItem as HaxeSignatureItem;
-import haxeLanguageServer.protocol.Display.SignatureInformation as HaxeSignatureInformation;
+import haxeLanguageServer.protocol.DisplayPrinter;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;

@@ -1,6 +1,8 @@
 package haxeLanguageServer.server;
 
 import haxe.Json;
+import haxe.display.Server.ServerMethods;
+import haxe.display.Protocol;
 import js.lib.Promise;
 import js.node.Net;
 import js.node.net.Socket;
@@ -12,8 +14,6 @@ import js.node.ChildProcess;
 import js.node.stream.Readable;
 import jsonrpc.CancellationToken;
 import haxeLanguageServer.helper.SemVer;
-import haxeLanguageServer.protocol.Server.ServerMethods;
-import haxeLanguageServer.protocol.Protocol;
 
 class HaxeServer {
 	final context:Context;

@@ -2,6 +2,12 @@ package haxeLanguageServer;
 
 import haxe.CallStack;
 import haxe.Json;
+import haxe.display.Protocol.HaxeRequestMethod;
+import haxe.display.Protocol.Response;
+import haxe.display.Protocol.Methods as HaxeMethods;
+import haxe.display.Protocol.HaxeResponseErrorData;
+import haxe.display.Server.ServerMethods;
+import haxe.display.Display.DisplayMethods;
 import js.Node.process;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
@@ -14,12 +20,6 @@ import haxeLanguageServer.features.foldingRange.FoldingRangeFeature;
 import haxeLanguageServer.features.CodeActionFeature.CodeActionContributor;
 import haxeLanguageServer.server.DisplayResult;
 import haxeLanguageServer.server.HaxeServer;
-import haxeLanguageServer.protocol.Protocol.HaxeRequestMethod;
-import haxeLanguageServer.protocol.Protocol.Response;
-import haxeLanguageServer.protocol.Protocol.Methods as HaxeMethods;
-import haxeLanguageServer.protocol.Protocol.HaxeResponseErrorData;
-import haxeLanguageServer.protocol.Server.ServerMethods;
-import haxeLanguageServer.protocol.Display.DisplayMethods;
 import haxeLanguageServer.LanguageServerMethods.MethodResult;
 import languageServerProtocol.protocol.TypeDefinition.TypeDefinitionMethods;
 
@@ -309,7 +309,7 @@ class Context {
 	public function callHaxeMethod<P, R>(method:HaxeRequestMethod<P, Response<R>>, ?params:P, ?token:CancellationToken, callback:(result:R) -> Null<String>,
 			errback:(error:String) -> Void) {
 		var beforeCallTime = Date.now().getTime();
-		haxeDisplayProtocol.sendRequest(method, params, token, function(response) {
+		haxeDisplayProtocol.sendRequest(cast method, params, token, function(response) {
 			var arrivalTime = Date.now().getTime();
 			if (!config.sendMethodResults) {
 				callback(response.result);
@@ -334,7 +334,7 @@ class Context {
 					beforeProcessing: beforeProcessingTime,
 					afterProcessing: afterProcessingTime
 				},
-				response: response
+				response: cast response
 			};
 			languageServerProtocol.sendNotification(LanguageServerMethods.DidRunMethod, methodResult);
 		}, function(error:ResponseErrorData) {

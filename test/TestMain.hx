@@ -4,7 +4,7 @@ import utest.UTest;
 import haxeLanguageServer.helper.*;
 import haxeLanguageServer.hxParser.*;
 import haxeLanguageServer.tokentree.*;
-import haxeLanguageServer.protocol.helper.*;
+import haxeLanguageServer.protocol.*;
 
 class TestMain {
 	static function main() {

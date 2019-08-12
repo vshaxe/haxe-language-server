@@ -1,4 +1,4 @@
-package haxeLanguageServer.protocol.helper;
+package haxeLanguageServer.protocol;
 
 import haxe.display.JsonModuleTypes.ImportStatus;
 

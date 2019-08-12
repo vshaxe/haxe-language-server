@@ -1,9 +1,9 @@
-package haxeLanguageServer.protocol.helper;
+package haxeLanguageServer.protocol;
 
-import haxeLanguageServer.protocol.helper.DisplayPrinter.PathPrinting;
+import haxeLanguageServer.protocol.DisplayPrinter.PathPrinting;
 import haxeLanguageServer.helper.IdentifierHelper;
-import haxeLanguageServer.protocol.Display;
 import haxe.display.JsonModuleTypes;
+import haxe.display.Display;
 
 using Lambda;
 

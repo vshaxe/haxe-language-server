@@ -1,7 +1,7 @@
 package haxeLanguageServer;
 
 import jsonrpc.Types;
-import haxeLanguageServer.protocol.Protocol.Response;
+import haxe.display.Protocol.Response;
 import haxeLanguageServer.Configuration.DisplayServerConfig;
 
 /**

@@ -3,7 +3,7 @@ package haxeLanguageServer.features;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
-import haxeLanguageServer.protocol.Display;
+import haxe.display.Display;
 import haxeLanguageServer.helper.HaxePosition;
 
 class GotoDefinitionFeature {
