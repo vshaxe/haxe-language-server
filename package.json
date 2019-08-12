@@ -2,7 +2,7 @@
 	"name": "haxe-language-server",
 	"version": "0.0.0",
 	"devDependencies": {
-		"lix": "^15.4.1",
+		"lix": "^15.5.3",
 		"uglify-es": "^3.3.9"
 	},
 	"scripts": {
