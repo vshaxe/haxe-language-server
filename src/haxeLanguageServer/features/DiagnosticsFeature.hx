@@ -265,7 +265,7 @@ class DiagnosticsFeature {
 				case UnresolvedIdentifier: getUnresolvedIdentifierActions(params, d);
 				case CompilerError: getCompilerErrorActions(params, d);
 				case RemovableCode: getRemovableCodeActions(params, d);
-				case ParserError: [];
+				case _: [];
 			});
 		}
 		actions = getOrganizeImportActions(params, actions).concat(actions);
@@ -477,6 +477,7 @@ private enum abstract DiagnosticKind<T>(Int) from Int to Int {
 	var CompilerError:DiagnosticKind<String>;
 	var RemovableCode:DiagnosticKind<{description:String, range:Range}>;
 	var ParserError:DiagnosticKind<String>;
+	var DeprecationWarning:DiagnosticKind<String>;
 
 	public inline function new(i:Int) {
 		this = i;
@@ -489,6 +490,7 @@ private enum abstract DiagnosticKind<T>(Int) from Int to Int {
 			case CompilerError: args.trim();
 			case RemovableCode: args.description;
 			case ParserError: args;
+			case DeprecationWarning: args;
 		}
 	}
 }
