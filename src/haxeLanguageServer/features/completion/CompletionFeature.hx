@@ -87,7 +87,7 @@ class CompletionFeature {
 		deprecatedSupport = completion!.completionItem!.deprecatedSupport == true;
 	}
 
-	function onCompletion(params:CompletionParams, token:CancellationToken, resolve:Array<CompletionItem>->Void, reject:ResponseError<NoData>->Void) {
+	function onCompletion(params:CompletionParams, token:CancellationToken, resolve:CompletionList->Void, reject:ResponseError<NoData>->Void) {
 		var uri = params.textDocument.uri;
 		if (!uri.isFile()) {
 			return reject.notAFile();
@@ -101,7 +101,7 @@ class CompletionFeature {
 		var whitespace = textBefore.length - textBefore.rtrim().length;
 		var currentToken = new PositionAnalyzer(doc).resolve(params.position.translate(0, -whitespace));
 		if (contextSupport && !isValidCompletionPosition(currentToken, doc, params, textBefore)) {
-			return resolve([]);
+			return resolve({items: [], isIncomplete: false});
 		}
 		var handle = if (context.haxeServer.supports(DisplayMethods.Completion)) handleJsonRpc else legacy.handle;
 		handle(params, token, resolve, reject, doc, offset, textBefore, currentToken);
@@ -166,7 +166,7 @@ class CompletionFeature {
 		}, reject.handler());
 	}
 
-	function handleJsonRpc(params:CompletionParams, token:CancellationToken, resolve:Array<CompletionItem>->Void, reject:ResponseError<NoData>->Void,
+	function handleJsonRpc(params:CompletionParams, token:CancellationToken, resolve:CompletionList->Void, reject:ResponseError<NoData>->Void,
 			doc:TextDocument, offset:Int, textBefore:String, currentToken:TokenTree) {
 		var wasAutoTriggered = true;
 		if (params.context != null) {
@@ -200,7 +200,7 @@ class CompletionFeature {
 			var hasResult = result != null;
 			var mode = if (hasResult) result.mode.kind else null;
 			if (mode != TypeHint && wasAutoTriggered && isAfterArrow(textBefore)) {
-				resolve([]); // avoid auto-popup after -> in arrow functions
+				resolve({items: [], isIncomplete: false}); // avoid auto-popup after -> in arrow functions
 				return null;
 			}
 			var importPosition = ImportHelper.getImportPosition(doc);
@@ -225,14 +225,14 @@ class CompletionFeature {
 			items = items.concat(createFieldKeywordItems(tokenContext, replaceRange, lineAfter));
 
 			function resolveItems() {
-				for (i in 0...displayItems.length) {
-					var completionItem = createCompletionItem(i, displayItems[i], data);
+				for (item in displayItems) {
+					var completionItem = createCompletionItem(item.index, item, data);
 					if (completionItem != null) {
 						items.push(completionItem);
 					}
 				}
 				items = items.filter(i -> i != null);
-				resolve(items);
+				resolve({items: items, isIncomplete: result.isIncomplete});
 			}
 			if (snippetSupport && mode != Import && mode != Field) {
 				snippetCompletion.createItems(data, displayItems).then(result -> {
@@ -254,7 +254,7 @@ class CompletionFeature {
 					tokenContext: tokenContext
 				}, []).then(result -> {
 					var keywords = createFieldKeywordItems(tokenContext, replaceRange, lineAfter);
-					resolve(keywords.concat(result.items));
+					resolve({items: keywords.concat(result.items), isIncomplete: false});
 				});
 			}
 		});

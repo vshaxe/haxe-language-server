@@ -19,10 +19,10 @@ class CompletionFeatureLegacy {
 		this.formatDocumentation = formatDocumentation;
 	}
 
-	public function handle(params:CompletionParams, token:CancellationToken, resolve:Array<CompletionItem>->Void, reject:ResponseError<NoData>->Void,
+	public function handle(params:CompletionParams, token:CancellationToken, resolve:CompletionList->Void, reject:ResponseError<NoData>->Void,
 			doc:TextDocument, offset:Int, textBefore:String, _) {
 		if (contextSupport && isInvalidCompletionPosition(params.context, textBefore)) {
-			return resolve([]);
+			return resolve({items: [], isIncomplete: false});
 		}
 		var r = calculateCompletionPosition(textBefore, offset);
 		var bytePos = context.displayOffsetConverter.characterOffsetToByteOffset(doc.content, r.pos);
@@ -38,7 +38,7 @@ class CompletionFeatureLegacy {
 
 					var items = if (r.toplevel) parseToplevelCompletion(xml, params.position, textBefore,
 						doc) else parseFieldCompletion(xml, textBefore, params.position);
-					resolve(items);
+					resolve({items: items, isIncomplete: false});
 			}
 		}, reject.handler());
 	}
