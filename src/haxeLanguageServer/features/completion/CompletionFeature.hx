@@ -227,7 +227,7 @@ class CompletionFeature {
 			function resolveItems() {
 				for (i in 0...displayItems.length) {
 					var displayItem = displayItems[i];
-					var index = if (displayItem.index == null) i else displayItem.index;
+					var index = if (displayItem!.index == null) i else displayItem.index;
 					var completionItem = createCompletionItem(index, displayItem, data);
 					if (completionItem != null) {
 						items.push(completionItem);
@@ -236,7 +236,7 @@ class CompletionFeature {
 				items = items.filter(i -> i != null);
 				resolve({
 					items: items,
-					isIncomplete: if (result.isIncomplete == null) false else result.isIncomplete
+					isIncomplete: if (result!.isIncomplete == null) false else result.isIncomplete
 				});
 			}
 			if (snippetSupport && mode != Import && mode != Field) {
