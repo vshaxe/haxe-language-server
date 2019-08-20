@@ -20,7 +20,7 @@ The easiest way to work on the language server is probably to build it as part o
 However, you can also build it as a standalone project like so:
 
 ```
-git clone https://github.com/vshaxe/haxe-language-server
+git clone --recursive https://github.com/vshaxe/haxe-language-server
 cd haxe-language-server
 npm install
 npx lix run vshaxe-build -t language-server
