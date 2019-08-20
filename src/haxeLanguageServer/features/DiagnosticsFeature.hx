@@ -199,7 +199,7 @@ class DiagnosticsFeature {
 					removeOldDiagnostics(uri);
 				}
 
-				onResolve(data, count + " diagnsotics");
+				onResolve(data, count + " diagnostics");
 		}
 	}
 
