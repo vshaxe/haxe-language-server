@@ -495,7 +495,7 @@ private enum abstract DiagnosticKind<T>(Int) from Int to Int {
 			case RemovableCode: args.description;
 			case ParserError: args;
 			case DeprecationWarning: args;
-			case InactiveBlock: "Inactive block";
+			case InactiveBlock: "Inactive conditional compilation block";
 		}
 	}
 }
