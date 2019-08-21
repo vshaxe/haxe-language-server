@@ -12,6 +12,13 @@ class StringHelper {
 		return s.substring(0, dotIndex);
 	}
 
+	public static function untilFirstDot(s:String) {
+		var dotIndex = s.indexOf(".");
+		if (dotIndex == -1)
+			return s;
+		return s.substring(0, dotIndex);
+	}
+
 	public static function afterLastDot(s:String) {
 		var dotIndex = s.lastIndexOf(".");
 		if (dotIndex == -1)

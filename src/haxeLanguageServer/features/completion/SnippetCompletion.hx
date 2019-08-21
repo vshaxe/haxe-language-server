@@ -58,7 +58,7 @@ class SnippetCompletion {
 
 		switch data.tokenContext {
 			case Root(pos):
-				var moduleName = fsPath.withoutDirectory().withoutExtension();
+				var moduleName = fsPath.withoutDirectory().untilFirstDot();
 				var name = '$${1:$moduleName}';
 				var abstractName = name + '($${2:T})';
 				return new Promise((resolve, reject) -> {
