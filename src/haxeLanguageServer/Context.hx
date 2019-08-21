@@ -165,7 +165,7 @@ class Context {
 	}
 
 	function onServerStarted() {
-		displayOffsetConverter = DisplayOffsetConverter.create(haxeServer.version);
+		displayOffsetConverter = DisplayOffsetConverter.create(haxeServer.haxeVersion);
 
 		if (haxeServer.supports(DisplayMethods.GotoTypeDefinition)) {
 			registerCapability({

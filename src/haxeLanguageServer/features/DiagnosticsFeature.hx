@@ -373,7 +373,7 @@ class DiagnosticsFeature {
 			});
 		}
 
-		if (context.haxeServer.version.major >= 4 // unsuitable error range before Haxe 4
+		if (context.haxeServer.haxeVersion.major >= 4 // unsuitable error range before Haxe 4
 			&& arg.contains("should be declared with 'override' since it is inherited from superclass")) {
 			actions.push({
 				title: "Add override keyword",

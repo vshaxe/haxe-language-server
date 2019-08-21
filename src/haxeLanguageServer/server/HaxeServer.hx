@@ -30,7 +30,8 @@ class HaxeServer {
 	var crashes:Int = 0;
 	var supportedMethods:Array<String> = [];
 
-	public var version(default, null):Null<SemVer>;
+	public var haxeVersion(default, null):Null<SemVer>;
+	public var protocolVersion(default, null):Null<SemVer>;
 
 	public function new(context:Context) {
 		this.context = context;
@@ -67,13 +68,13 @@ class HaxeServer {
 			});
 		}
 
-		version = SemVer.parse(output);
-		if (version == null)
+		haxeVersion = SemVer.parse(output);
+		if (haxeVersion == null)
 			return error("Error parsing Haxe version " + Json.stringify(output));
 
-		var isVersionSupported = version >= new SemVer(3, 4, 0);
+		var isVersionSupported = haxeVersion >= new SemVer(3, 4, 0);
 		if (!isVersionSupported)
-			return error('Unsupported Haxe version! Minimum required: 3.4.0. Found: $version.');
+			return error('Unsupported Haxe version! Minimum required: 3.4.0. Found: $haxeVersion.');
 		return true;
 	}
 
@@ -125,6 +126,7 @@ class HaxeServer {
 			if (result.haxeVersion.major == 4 && (pre.startsWith("preview.") || pre == "rc.1" || pre == "rc.2")) {
 				context.languageServerProtocol.sendNotification(LanguageServerMethods.DidDetectOldPreview, {preview: result.haxeVersion.pre});
 			}
+			protocolVersion = result.protocolVersion;
 			supportedMethods = result.methods;
 			configure();
 			onInitComplete();
@@ -133,7 +135,7 @@ class HaxeServer {
 			// the "invalid format" error is expected for Haxe versions <= 4.0.0-preview.3
 			if (error.startsWith("Error: Invalid format")) {
 				trace("Haxe version does not support JSON-RPC, using legacy --display API.");
-				if (version.major == 4) {
+				if (haxeVersion.major == 4) {
 					context.languageServerProtocol.sendNotification(LanguageServerMethods.DidDetectOldPreview);
 				}
 			} else {
