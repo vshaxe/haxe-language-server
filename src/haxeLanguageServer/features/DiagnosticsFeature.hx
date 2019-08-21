@@ -176,7 +176,10 @@ class DiagnosticsFeature {
 							severity: hxDiag.severity,
 							message: hxDiag.kind.getMessage(hxDiag.args)
 						}
-						if (kind == RemovableCode || kind == UnusedImport || diag.message.contains("has no effect")) {
+						if (kind == RemovableCode
+							|| kind == UnusedImport
+							|| diag.message.contains("has no effect")
+							|| kind == InactiveBlock) {
 							diag.severity = Hint;
 							diag.tags = [Unnecessary];
 						}
@@ -478,6 +481,7 @@ private enum abstract DiagnosticKind<T>(Int) from Int to Int {
 	var RemovableCode:DiagnosticKind<{description:String, range:Range}>;
 	var ParserError:DiagnosticKind<String>;
 	var DeprecationWarning:DiagnosticKind<String>;
+	var InactiveBlock:DiagnosticKind<Void>;
 
 	public inline function new(i:Int) {
 		this = i;
@@ -491,6 +495,7 @@ private enum abstract DiagnosticKind<T>(Int) from Int to Int {
 			case RemovableCode: args.description;
 			case ParserError: args;
 			case DeprecationWarning: args;
+			case InactiveBlock: "Inactive block";
 		}
 	}
 }
