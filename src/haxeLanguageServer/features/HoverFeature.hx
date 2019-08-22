@@ -114,7 +114,7 @@ class HoverFeature {
 				{definition: printCodeBlock(name, Haxe)};
 			case Define:
 				var value = item.args.value;
-				{definition: if (value == null) "_not defined_" else printCodeBlock(value, Haxe)};
+				{definition: if (value == null) "_not defined_" else printCodeBlock('"$value"', Haxe)};
 			case _:
 				var type = printer.printType(concreteType);
 				type = format(type, TYPE_LEVEL);
