@@ -113,7 +113,8 @@ class HoverFeature {
 					name = "@" + name; // backward compatibility with preview 4
 				{definition: printCodeBlock(name, Haxe)};
 			case Define:
-				{definition: printCodeBlock("-D " + item.args.name + "=" + item.args.value, Haxe)};
+				var value = item.args.value;
+				{definition: if (value == null) "_not defined_" else printCodeBlock(value, Haxe)};
 			case _:
 				var type = printer.printType(concreteType);
 				type = format(type, TYPE_LEVEL);
