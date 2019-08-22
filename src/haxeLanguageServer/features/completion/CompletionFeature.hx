@@ -327,6 +327,7 @@ class CompletionFeature {
 				}
 			// these never appear during `display/completion` right now
 			case Expression: null;
+			case Define: null;
 			case AnonymousStructure: null;
 		}
 
