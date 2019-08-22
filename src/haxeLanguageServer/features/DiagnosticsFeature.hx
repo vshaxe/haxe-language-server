@@ -230,6 +230,9 @@ class DiagnosticsFeature {
 			diagnostics = diagnostics.filter(d -> d.kind != cast UnusedImport);
 		}
 
+		// hide inactive blocks that are contained within other inactive blocks
+		diagnostics = diagnostics.filter(a -> !diagnostics.exists(b -> a != b && b.range.contains(a.range)));
+
 		return diagnostics;
 	}
 
