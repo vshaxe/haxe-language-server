@@ -10,7 +10,7 @@ class Main {
 		var reader = new MessageReader(process.stdin);
 		var writer = new MessageWriter(process.stdout);
 		var languageServerProtocol = new Protocol(writer.write);
-		languageServerProtocol.logError = message -> languageServerProtocol.sendNotification(Methods.LogMessage, {type: Warning, message: message});
+		languageServerProtocol.logError = message -> languageServerProtocol.sendNotification(LogMessageNotification.type, {type: Warning, message: message});
 		setupTrace(languageServerProtocol);
 		var context = new Context(languageServerProtocol);
 		reader.listen(languageServerProtocol.handleMessage);
@@ -39,7 +39,7 @@ class Main {
 				for (v in i.customParams)
 					r.push(Std.string(v));
 			}
-			languageServerProtocol.sendNotification(Methods.LogMessage, {type: Log, message: r.join(" ")});
+			languageServerProtocol.sendNotification(LogMessageNotification.type, {type: Log, message: r.join(" ")});
 		}
 	}
 }

@@ -124,7 +124,7 @@ class DiagnosticsFeature {
 	}
 
 	function publishDiagnostic(uri:DocumentUri, diag:Diagnostic, error:String) {
-		context.languageServerProtocol.sendNotification(Methods.PublishDiagnostics, {uri: uri, diagnostics: [diag]});
+		context.languageServerProtocol.sendNotification(PublishDiagnosticsNotification.type, {uri: uri, diagnostics: [diag]});
 		var argumentsMap = diagnosticsArguments[uri] = new DiagnosticsMap();
 		argumentsMap.set({code: CompilerError, range: diag.range}, error);
 	}
@@ -186,7 +186,7 @@ class DiagnosticsFeature {
 						argumentsMap.set({code: kind, range: diag.range}, hxDiag.args);
 						diagnostics.push(diag);
 					}
-					context.languageServerProtocol.sendNotification(Methods.PublishDiagnostics, {uri: uri, diagnostics: diagnostics});
+					context.languageServerProtocol.sendNotification(PublishDiagnosticsNotification.type, {uri: uri, diagnostics: diagnostics});
 					sent[uri] = true;
 				}
 
@@ -238,7 +238,7 @@ class DiagnosticsFeature {
 
 	public function clearDiagnostics(uri:DocumentUri) {
 		if (diagnosticsArguments.remove(uri))
-			context.languageServerProtocol.sendNotification(Methods.PublishDiagnostics, {uri: uri, diagnostics: []});
+			context.languageServerProtocol.sendNotification(PublishDiagnosticsNotification.type, {uri: uri, diagnostics: []});
 	}
 
 	public function publishDiagnostics(uri:DocumentUri) {

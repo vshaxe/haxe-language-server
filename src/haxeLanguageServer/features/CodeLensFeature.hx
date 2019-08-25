@@ -12,10 +12,10 @@ class CodeLensFeature {
 		this.context = context;
 
 		context.registerCapability({
-			id: Methods.CodeLens,
-			method: Methods.CodeLens
+			id: CodeLensRequest.type,
+			method: CodeLensRequest.type
 		});
-		context.languageServerProtocol.onRequest(Methods.CodeLens, onCodeLens);
+		context.languageServerProtocol.onRequest(CodeLensRequest.type, onCodeLens);
 	}
 
 	function getCodeLensFromStatistics(uri:DocumentUri, statistics:Array<StatisticsObject>) {

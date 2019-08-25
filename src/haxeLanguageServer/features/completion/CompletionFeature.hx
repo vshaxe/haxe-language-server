@@ -74,8 +74,8 @@ class CompletionFeature {
 
 		legacy = new CompletionFeatureLegacy(context, contextSupport, formatDocumentation);
 
-		context.languageServerProtocol.onRequest(Methods.Completion, onCompletion);
-		context.languageServerProtocol.onRequest(Methods.CompletionItemResolve, onCompletionItemResolve);
+		context.languageServerProtocol.onRequest(CompletionRequest.type, onCompletion);
+		context.languageServerProtocol.onRequest(CompletionResolveRequest.type, onCompletionResolve);
 	}
 
 	function checkCapabilities() {
@@ -152,7 +152,7 @@ class CompletionFeature {
 		return !escaped;
 	}
 
-	function onCompletionItemResolve(item:CompletionItem, token:CancellationToken, resolve:CompletionItem->Void, reject:ResponseError<NoData>->Void) {
+	function onCompletionResolve(item:CompletionItem, token:CancellationToken, resolve:CompletionItem->Void, reject:ResponseError<NoData>->Void) {
 		var data:Null<CompletionItemData> = item.data;
 		if (!context.haxeServer.supports(DisplayMethods.CompletionItemResolve)
 			|| previousCompletionData == null

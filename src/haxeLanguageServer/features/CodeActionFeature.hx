@@ -14,13 +14,13 @@ class CodeActionFeature {
 		this.context = context;
 
 		context.registerCapability({
-			id: Methods.CodeAction,
-			method: Methods.CodeAction,
+			id: CodeActionRequest.type,
+			method: CodeActionRequest.type,
 			registerOptions: {
 				codeActionKinds: [QuickFix, SourceOrganizeImports]
 			}
 		});
-		context.languageServerProtocol.onRequest(Methods.CodeAction, onCodeAction);
+		context.languageServerProtocol.onRequest(CodeActionRequest.type, onCodeAction);
 	}
 
 	public function registerContributor(contributor:CodeActionContributor) {

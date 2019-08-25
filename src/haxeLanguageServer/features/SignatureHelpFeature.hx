@@ -19,7 +19,7 @@ class SignatureHelpFeature {
 	public function new(context:Context) {
 		this.context = context;
 		labelOffsetSupport = context.capabilities.textDocument!.signatureHelp!.signatureInformation!.parameterInformation!.labelOffsetSupport;
-		context.languageServerProtocol.onRequest(Methods.SignatureHelp, onSignatureHelp);
+		context.languageServerProtocol.onRequest(SignatureHelpRequest.type, onSignatureHelp);
 	}
 
 	function onSignatureHelp(params:TextDocumentPositionParams, token:CancellationToken, resolve:Null<SignatureHelp>->Void,

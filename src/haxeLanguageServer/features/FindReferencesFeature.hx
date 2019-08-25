@@ -11,7 +11,7 @@ class FindReferencesFeature {
 
 	public function new(context) {
 		this.context = context;
-		context.languageServerProtocol.onRequest(Methods.FindReferences, onFindReferences);
+		context.languageServerProtocol.onRequest(ReferencesRequest.type, onFindReferences);
 	}
 
 	function onFindReferences(params:TextDocumentPositionParams, token:CancellationToken, resolve:Array<Location>->Void, reject:ResponseError<NoData>->Void) {

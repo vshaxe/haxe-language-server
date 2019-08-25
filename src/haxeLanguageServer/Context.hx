@@ -21,7 +21,7 @@ import haxeLanguageServer.features.CodeActionFeature.CodeActionContributor;
 import haxeLanguageServer.server.DisplayResult;
 import haxeLanguageServer.server.HaxeServer;
 import haxeLanguageServer.LanguageServerMethods.MethodResult;
-import languageServerProtocol.protocol.TypeDefinition.TypeDefinitionMethods;
+import languageServerProtocol.protocol.TypeDefinition.TypeDefinitionRequest;
 
 class Context {
 	public final config:Configuration;
@@ -47,7 +47,7 @@ class Context {
 
 		haxeDisplayProtocol = new Protocol((message, token) -> {
 			var method:String = Reflect.field(message, "method");
-			if (method == Protocol.CANCEL_METHOD) {
+			if (method == CancelNotification.type) {
 				return; // don't send cancel notifications, not supported by Haxe
 			}
 			var includeDisplayArguments = method.startsWith("display/") || method == ServerMethods.ReadClassPaths;
@@ -79,14 +79,14 @@ class Context {
 
 		haxeServer = new HaxeServer(this);
 
-		languageServerProtocol.onRequest(Methods.Initialize, onInitialize);
-		languageServerProtocol.onRequest(Methods.Shutdown, onShutdown);
-		languageServerProtocol.onNotification(Methods.Exit, onExit);
-		languageServerProtocol.onNotification(Methods.DidOpenTextDocument, onDidOpenTextDocument);
-		languageServerProtocol.onNotification(Methods.DidChangeTextDocument, onDidChangeTextDocument);
-		languageServerProtocol.onNotification(Methods.DidCloseTextDocument, onDidCloseTextDocument);
-		languageServerProtocol.onNotification(Methods.DidSaveTextDocument, onDidSaveTextDocument);
-		languageServerProtocol.onNotification(Methods.DidChangeWatchedFiles, onDidChangeWatchedFiles);
+		languageServerProtocol.onRequest(InitializeRequest.type, onInitialize);
+		languageServerProtocol.onRequest(ShutdownRequest.type, onShutdown);
+		languageServerProtocol.onNotification(ExitNotification.type, onExit);
+		languageServerProtocol.onNotification(DidOpenTextDocumentNotification.type, onDidOpenTextDocument);
+		languageServerProtocol.onNotification(DidChangeTextDocumentNotification.type, onDidChangeTextDocument);
+		languageServerProtocol.onNotification(DidCloseTextDocumentNotification.type, onDidCloseTextDocument);
+		languageServerProtocol.onNotification(DidSaveTextDocumentNotification.type, onDidSaveTextDocument);
+		languageServerProtocol.onNotification(DidChangeWatchedFilesNotification.type, onDidChangeWatchedFiles);
 
 		languageServerProtocol.onNotification(LanguageServerMethods.DidChangeActiveTextEditor, onDidChangeActiveTextEditor);
 		languageServerProtocol.onRequest(LanguageServerMethods.RunMethod, runMethod);
@@ -101,11 +101,11 @@ class Context {
 	}
 
 	public inline function sendShowMessage(type:MessageType, message:String) {
-		languageServerProtocol.sendNotification(Methods.ShowMessage, {type: type, message: message});
+		languageServerProtocol.sendNotification(ShowMessageNotification.type, {type: type, message: message});
 	}
 
 	public inline function sendLogMessage(type:MessageType, message:String) {
-		languageServerProtocol.sendNotification(Methods.LogMessage, {type: type, message: message});
+		languageServerProtocol.sendNotification(LogMessageNotification.type, {type: type, message: message});
 	}
 
 	function onInitialize(params:InitializeParams, _, resolve:InitializeResult->Void, _) {
@@ -169,25 +169,25 @@ class Context {
 
 		if (haxeServer.supports(DisplayMethods.GotoTypeDefinition)) {
 			registerCapability({
-				id: TypeDefinitionMethods.TypeDefinition,
-				method: TypeDefinitionMethods.TypeDefinition
+				id: TypeDefinitionRequest.type,
+				method: TypeDefinitionRequest.type
 			});
 		} else {
 			unregisterCapability({
-				id: TypeDefinitionMethods.TypeDefinition,
-				method: TypeDefinitionMethods.TypeDefinition
+				id: TypeDefinitionRequest.type,
+				method: TypeDefinitionRequest.type
 			});
 		}
 	}
 
 	public function registerCapability(registration:Registration) {
-		languageServerProtocol.sendRequest(Methods.RegisterCapability, {
+		languageServerProtocol.sendRequest(RegistrationRequest.type, {
 			registrations: [registration]
 		}, null, _ -> {}, error -> trace(error));
 	}
 
 	public function unregisterCapability(unregistration:Unregistration) {
-		languageServerProtocol.sendRequest(Methods.UnregisterCapability, {
+		languageServerProtocol.sendRequest(UnregistrationRequest.type, {
 			unregisterations: [unregistration]
 		}, null, _ -> {}, error -> trace(error));
 	}

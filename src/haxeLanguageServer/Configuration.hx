@@ -108,7 +108,7 @@ class Configuration {
 	public function new(languageServerProtocol:Protocol, onDidChange:(kind:ConfigurationKind) -> Void) {
 		this.onDidChange = onDidChange;
 
-		languageServerProtocol.onNotification(Methods.DidChangeConfiguration, onDidChangeConfiguration);
+		languageServerProtocol.onNotification(DidChangeConfigurationNotification.type, onDidChangeConfiguration);
 		languageServerProtocol.onNotification(LanguageServerMethods.DidChangeDisplayArguments, onDidChangeDisplayArguments);
 		languageServerProtocol.onNotification(LanguageServerMethods.DidChangeDisplayServerConfig, onDidChangeDisplayServerConfig);
 	}

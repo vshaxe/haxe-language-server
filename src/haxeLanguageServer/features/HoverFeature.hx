@@ -19,7 +19,7 @@ class HoverFeature {
 
 	public function new(context) {
 		this.context = context;
-		context.languageServerProtocol.onRequest(Methods.Hover, onHover);
+		context.languageServerProtocol.onRequest(HoverRequest.type, onHover);
 
 		formatterConfig = new Config();
 		formatterConfig.wrapping.maxLineLength = 100;

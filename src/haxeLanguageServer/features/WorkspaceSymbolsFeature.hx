@@ -36,7 +36,7 @@ class WorkspaceSymbolsFeature {
 
 	public function new(context) {
 		this.context = context;
-		context.languageServerProtocol.onRequest(Methods.WorkspaceSymbols, onWorkspaceSymbols);
+		context.languageServerProtocol.onRequest(WorkspaceSymbolRequest.type, onWorkspaceSymbols);
 	}
 
 	function processSymbolsReply(data:String, reject:ResponseError<NoData>->Void) {
