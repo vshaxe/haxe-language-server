@@ -1,6 +1,5 @@
 package haxeLanguageServer.features;
 
-import formatter.Formatter;
 import formatter.config.Config;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
@@ -147,7 +146,7 @@ class HoverFeature {
 					if (xml == null)
 						return reject.invalidXml(data);
 
-					var s = StringTools.trim(xml.firstChild().nodeValue);
+					var s = xml.firstChild().nodeValue.trim();
 					switch xml.nodeName {
 						case "metadata":
 							if (s.length == 0)
