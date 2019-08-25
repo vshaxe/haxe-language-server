@@ -183,6 +183,9 @@ class DiagnosticsFeature {
 							diag.severity = Hint;
 							diag.tags = [Unnecessary];
 						}
+						if (kind == DeprecationWarning) {
+							diag.tags = [Deprecated];
+						}
 						argumentsMap.set({code: kind, range: diag.range}, hxDiag.args);
 						diagnostics.push(diag);
 					}
