@@ -203,9 +203,8 @@ class CompletionFeature {
 			}
 			var importPosition = ImportHelper.getImportPosition(doc);
 			var indent = doc.indentAt(params.position.line);
-			// the replaceRanges sent by Haxe only became reliable sometime after rc.3 - before they were often `null` or incorrect,
-			// so we only trusted them for a few specific completion modes were our simple scanback-logic doesn't work
-			if (context.haxeServer.protocolVersion.minor >= 3 || (mode == Metadata || mode == Toplevel || mode == TypeHint)) {
+			// the replaceRanges sent by Haxe are only trustworthy in some cases (https://github.com/HaxeFoundation/haxe/issues/8669)
+			if (mode == Metadata || mode == Toplevel || mode == TypeHint) {
 				if (hasResult) {
 					replaceRange = result.replaceRange;
 				}
