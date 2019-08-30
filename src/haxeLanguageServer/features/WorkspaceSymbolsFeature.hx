@@ -24,6 +24,8 @@ private typedef ModuleSymbolEntry = {
 	var kind:ModuleSymbolKind;
 	var range:Range;
 	var ?containerName:String;
+	// TODO: use this once VSCode supports it (https://github.com/microsoft/vscode/issues/23927)
+	var ?isDeprecated:Bool;
 }
 
 private typedef SymbolReply = {
