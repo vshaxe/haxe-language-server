@@ -39,12 +39,7 @@ class WorkspaceSymbolsFeature {
 		context.languageServerProtocol.onRequest(WorkspaceSymbolRequest.type, onWorkspaceSymbols);
 	}
 
-	function processSymbolsReply(data:String, reject:ResponseError<NoData>->Void) {
-		var data:Array<SymbolReply> = try haxe.Json.parse(data) catch (e:Any) {
-			reject(ResponseError.internalError("Error parsing document symbol response: " + Std.string(e)));
-			return [];
-		}
-
+	function processSymbolsReply(data:Array<SymbolReply>, reject:ResponseError<NoData>->Void) {
 		var result = [];
 		for (file in data) {
 			var uri = HaxePosition.getProperFileNameCase(file.file).toUri();
@@ -67,9 +62,15 @@ class WorkspaceSymbolsFeature {
 				case DCancelled:
 					resolve(null);
 				case DResult(data):
+					var data:Array<SymbolReply> = try {
+						haxe.Json.parse(data);
+					} catch (e:Any) {
+						reject(ResponseError.internalError("Error parsing document symbol response: " + Std.string(e)));
+						return;
+					}
 					var result = processSymbolsReply(data, reject);
 					resolve(result);
-					onResolve(result, result.length + " symbols");
+					onResolve(data, data.length + " symbols");
 			}
 		}, reject.handler());
 	}
