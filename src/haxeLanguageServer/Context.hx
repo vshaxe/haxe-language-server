@@ -248,8 +248,10 @@ class Context {
 	}
 
 	function onDidCloseTextDocument(event:DidCloseTextDocumentParams) {
-		if (isUriSupported(event.textDocument.uri)) {
+		var uri = event.textDocument.uri;
+		if (isUriSupported(uri)) {
 			documents.onDidCloseTextDocument(event);
+			diagnostics.clearDiagnostics(uri);
 		}
 	}
 
