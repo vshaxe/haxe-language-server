@@ -49,7 +49,7 @@ class HoverFeature {
 			if (hover == null) {
 				resolve(null);
 			} else {
-				resolve(createHover(printContent(hover), hover.item.getDocumentation(), hover.range));
+				resolve(createHover(printContent(doc, hover), hover.item.getDocumentation(), hover.range));
 			}
 			return null;
 		}, reject.handler());
@@ -63,7 +63,7 @@ class HoverFeature {
 		}*/
 	}
 
-	function printContent<T>(hover:HoverDisplayItemOccurence<T>):HoverContent {
+	function printContent<T>(doc:TextDocument, hover:HoverDisplayItemOccurence<T>):HoverContent {
 		var printer = new DisplayPrinter(true, Qualified, {
 			argumentTypeHints: true,
 			returnTypeHint: NonVoid,
@@ -73,6 +73,11 @@ class HoverFeature {
 		});
 		var item = hover.item;
 		var concreteType = hover.item.type;
+		function printType():HoverContent {
+			var type = printer.printType(concreteType);
+			type = format(type, TYPE_LEVEL);
+			return {definition: printCodeBlock(type, HaxeType)};
+		}
 		var result:HoverContent = switch item.kind {
 			case Type:
 				var typeDefinition = printer.printEmptyTypeDefinition(hover.item.args);
@@ -114,10 +119,16 @@ class HoverFeature {
 			case Define:
 				var value = item.args.value;
 				{definition: if (value == null) "_not defined_" else printCodeBlock('"$value"', Haxe)};
+			case Literal:
+				var value = item.args.name;
+				var sourceText = doc.getText(hover.range);
+				if (value != sourceText && item.type.getDotPath() != "String") {
+					return {definition: printCodeBlock(value, Haxe)};
+				} else {
+					printType();
+				}
 			case _:
-				var type = printer.printType(concreteType);
-				type = format(type, TYPE_LEVEL);
-				{definition: printCodeBlock(type, HaxeType)};
+				printType();
 		}
 
 		var expected = hover.expected;
