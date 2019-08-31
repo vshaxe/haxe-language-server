@@ -12,12 +12,14 @@ import js.node.child_process.ChildProcess.ChildProcessEvent;
 import js.node.Buffer;
 import js.node.ChildProcess;
 import js.node.stream.Readable;
+import js.node.stream.Writable;
 import jsonrpc.CancellationToken;
 import haxeLanguageServer.helper.SemVer;
 
 class HaxeServer {
 	final context:Context;
 	var proc:Null<ChildProcessObject>;
+	var commandInput:IWritable;
 	var buffer:MessageBuffer;
 	var nextMessageLength:Int;
 	var requestsHead:Null<DisplayRequest>;
@@ -105,54 +107,63 @@ class HaxeServer {
 		buffer = new MessageBuffer();
 		nextMessageLength = -1;
 
-		proc = ChildProcess.spawn(config.path, config.arguments.concat(["--wait", "stdio"]), spawnOptions);
+		function onConnected(socket:Socket) {
+			trace("Haxe connected!");
 
-		proc.stdout.on(ReadableEvent.Data, function(buf:Buffer) {
-			trace(reTrailingNewline.replace(buf.toString(), ""));
-		});
-		proc.stderr.on(ReadableEvent.Data, onData);
-		proc.on(ChildProcessEvent.Exit, onExit);
+			socket.on(ReadableEvent.Data, onData);
+			commandInput = socket;
 
-		function onInitComplete() {
-			stopProgress();
-			buildCompletionCache();
-			if (callback != null)
-				callback();
-		}
-
-		stopProgressCallback = context.startProgress("Initializing Haxe/JSON-RPC protocol");
-		context.callHaxeMethod(Methods.Initialize, {supportsResolve: true, exclude: context.config.user.exclude, maxCompletionItems: 1000}, null, result -> {
-			var pre = result.haxeVersion.pre;
-			if (result.haxeVersion.major == 4 && (pre.startsWith("preview.") || pre == "rc.1" || pre == "rc.2")) {
-				context.languageServerProtocol.sendNotification(LanguageServerMethods.DidDetectOldPreview, {preview: result.haxeVersion.pre});
+			function onInitComplete() {
+				stopProgress();
+				buildCompletionCache();
+				if (callback != null)
+					callback();
 			}
-			protocolVersion = result.protocolVersion;
-			supportedMethods = result.methods;
-			configure();
-			onInitComplete();
-			return null;
-		}, error -> {
-			// the "invalid format" error is expected for Haxe versions <= 4.0.0-preview.3
-			if (error.startsWith("Error: Invalid format")) {
-				trace("Haxe version does not support JSON-RPC, using legacy --display API.");
-				if (haxeVersion.major == 4) {
-					context.languageServerProtocol.sendNotification(LanguageServerMethods.DidDetectOldPreview);
+
+			stopProgressCallback = context.startProgress("Initializing Haxe/JSON-RPC protocol");
+			context.callHaxeMethod(Methods.Initialize, {supportsResolve: true, exclude: context.config.user.exclude, maxCompletionItems: 1000}, null,
+				result -> {
+					var pre = result.haxeVersion.pre;
+					if (result.haxeVersion.major == 4 && (pre.startsWith("preview.") || pre == "rc.1" || pre == "rc.2")) {
+						context.languageServerProtocol.sendNotification(LanguageServerMethods.DidDetectOldPreview, {preview: result.haxeVersion.pre});
+					}
+					protocolVersion = result.protocolVersion;
+					supportedMethods = result.methods;
+					configure();
+					onInitComplete();
+					return null;
+				}, error -> {
+				// the "invalid format" error is expected for Haxe versions <= 4.0.0-preview.3
+				if (error.startsWith("Error: Invalid format")) {
+					trace("Haxe version does not support JSON-RPC, using legacy --display API.");
+					if (haxeVersion.major == 4) {
+						context.languageServerProtocol.sendNotification(LanguageServerMethods.DidDetectOldPreview);
+					}
+				} else {
+					trace(error);
 				}
-			} else {
-				trace(error);
-			}
-			onInitComplete();
-		});
+				onInitComplete();
+			});
 
-		var displayPort = context.config.user.displayPort;
-		if (socketListener == null && displayPort != null) {
-			startingSocketListener = true;
-			if (displayPort == "auto") {
-				getAvailablePort(6000).then(startSocketServer);
-			} else {
-				startSocketServer(displayPort);
+			var displayPort = context.config.user.displayPort;
+			if (socketListener == null && displayPort != null) {
+				startingSocketListener = true;
+				if (displayPort == "auto") {
+					getAvailablePort(6000).then(startSocketServer);
+				} else {
+					startSocketServer(displayPort);
+				}
 			}
 		}
+
+		var server = Net.createServer(onConnected);
+		server.listen(0, function() {
+			var port = server.address().port;
+			proc = ChildProcess.spawn(config.path, config.arguments.concat(["--wait-connect", '127.0.0.1:$port']), spawnOptions);
+			proc.stdout.on(ReadableEvent.Data, onStdout);
+			proc.stderr.on(ReadableEvent.Data, onStdout);
+			proc.on(ChildProcessEvent.Exit, onExit);
+		});
 	}
 
 	function configure() {
@@ -324,6 +335,10 @@ class HaxeServer {
 		trace(haxeResponse);
 	}
 
+	function onStdout(buf:Buffer) {
+		trace(reTrailingNewline.replace(buf.toString(), ""));
+	}
+
 	function onData(data:Buffer) {
 		buffer.append(data);
 		while (true) {
@@ -406,7 +421,7 @@ class HaxeServer {
 			currentRequest = requestsHead;
 			requestsHead = currentRequest.next;
 			updateRequestQueue();
-			proc.stdin.write(currentRequest.prepareBody());
+			commandInput.write(currentRequest.prepareBody());
 		}
 	}
 
