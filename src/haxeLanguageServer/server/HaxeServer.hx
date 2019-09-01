@@ -159,7 +159,7 @@ class HaxeServer {
 		var server = Net.createServer(onConnected);
 		server.listen(0, function() {
 			var port = server.address().port;
-			proc = ChildProcess.spawn(config.path, config.arguments.concat(["--wait-connect", '127.0.0.1:$port']), spawnOptions);
+			proc = ChildProcess.spawn(config.path, config.arguments.concat(["--server-connect", '127.0.0.1:$port']), spawnOptions);
 			proc.stdout.on(ReadableEvent.Data, onStdout);
 			proc.stderr.on(ReadableEvent.Data, onStdout);
 			proc.on(ChildProcessEvent.Exit, onExit);
