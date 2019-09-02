@@ -311,7 +311,7 @@ class HaxeServer {
 		var haxeResponse = buffer.getContent();
 
 		// invalid compiler argument?
-		var invalidOptionRegex = ~/unknown option `(.*?)'./;
+		var invalidOptionRegex = ~/unknown option [`'](.*?)'./;
 		if (invalidOptionRegex.match(haxeResponse)) {
 			var option = invalidOptionRegex.matched(1);
 			context.sendShowMessage(Error,
