@@ -156,9 +156,11 @@ class HaxeServer {
 	}
 
 	function configure() {
-		context.callHaxeMethod(ServerMethods.Configure, {noModuleChecks: true, print: context.config.displayServer.print}, null, _ -> null, error -> {
-			trace("Error during " + ServerMethods.Configure + " " + error);
-		});
+		context.callHaxeMethod(ServerMethods.Configure,
+			{noModuleChecks: true, print: context.config.displayServer.print, legacyCompletion: context.config.user.useLegacyCompletion}, null, _ -> null,
+			error -> {
+				trace("Error during " + ServerMethods.Configure + " " + error);
+			});
 	}
 
 	function buildCompletionCache() {
