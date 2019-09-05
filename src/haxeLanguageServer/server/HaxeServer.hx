@@ -124,7 +124,7 @@ class HaxeServer {
 			context.callHaxeMethod(Methods.Initialize, {supportsResolve: true, exclude: context.config.user.exclude, maxCompletionItems: 1000}, null,
 				result -> {
 					var pre = result.haxeVersion.pre;
-					if (result.haxeVersion.major == 4 && (pre.startsWith("preview.") || pre == "rc.1" || pre == "rc.2")) {
+					if (result.haxeVersion.major == 4 && (pre.startsWith("preview.") || pre == "rc.1" || pre == "rc.2" || pre == "rc.3")) {
 						context.languageServerProtocol.sendNotification(LanguageServerMethods.DidDetectOldPreview, {preview: result.haxeVersion.pre});
 					}
 					protocolVersion = result.protocolVersion;
@@ -167,9 +167,11 @@ class HaxeServer {
 	}
 
 	function configure() {
-		context.callHaxeMethod(ServerMethods.Configure, {noModuleChecks: true, print: context.config.displayServer.print}, null, _ -> null, error -> {
-			trace("Error during " + ServerMethods.Configure + " " + error);
-		});
+		context.callHaxeMethod(ServerMethods.Configure,
+			{noModuleChecks: true, print: context.config.displayServer.print, legacyCompletion: context.config.user.useLegacyCompletion}, null, _ -> null,
+			error -> {
+				trace("Error during " + ServerMethods.Configure + " " + error);
+			});
 	}
 
 	function buildCompletionCache() {
@@ -322,7 +324,7 @@ class HaxeServer {
 		var haxeResponse = buffer.getContent();
 
 		// invalid compiler argument?
-		var invalidOptionRegex = ~/unknown option `(.*?)'./;
+		var invalidOptionRegex = ~/unknown option [`'](.*?)'./;
 		if (invalidOptionRegex.match(haxeResponse)) {
 			var option = invalidOptionRegex.matched(1);
 			context.sendShowMessage(Error,

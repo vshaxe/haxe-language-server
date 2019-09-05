@@ -77,6 +77,7 @@ private typedef UserConfig = {
 	var ?displayPort:EitherType<Int, String>;
 	var ?buildCompletionCache:Bool;
 	var ?enableCompletionCacheWarning:Bool;
+	var ?useLegacyCompletion:Bool;
 	var ?codeGeneration:CodeGenerationConfig;
 	var ?exclude:Array<String>;
 	var ?postfixCompletion:PostfixCompletionConfig;
@@ -182,6 +183,7 @@ class Configuration {
 			displayPort: null,
 			buildCompletionCache: true,
 			enableCompletionCacheWarning: true,
+			useLegacyCompletion: false,
 			codeGeneration: {
 				functions: {
 					anonymous: {
