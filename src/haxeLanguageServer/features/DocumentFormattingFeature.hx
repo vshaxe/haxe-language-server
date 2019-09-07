@@ -1,6 +1,7 @@
 package haxeLanguageServer.features;
 
 import formatter.Formatter;
+import formatter.codedata.FormatterInputData.FormatterInputRange;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
@@ -11,12 +12,21 @@ class DocumentFormattingFeature {
 	public function new(context) {
 		this.context = context;
 		context.languageServerProtocol.onRequest(DocumentFormattingRequest.type, onDocumentFormatting);
+		context.languageServerProtocol.onRequest(DocumentRangeFormattingRequest.type, onDocumentRangeFormatting);
 	}
 
 	function onDocumentFormatting(params:DocumentFormattingParams, token:CancellationToken, resolve:Array<TextEdit>->Void,
 			reject:ResponseError<NoData>->Void) {
+		format(params.textDocument.uri, null, resolve, reject);
+	}
+
+	function onDocumentRangeFormatting(params:DocumentRangeFormattingParams, token:CancellationToken, resolve:Array<TextEdit>->Void,
+			reject:ResponseError<NoData>->Void) {
+		format(params.textDocument.uri, params.range, resolve, reject);
+	}
+
+	function format(uri:DocumentUri, range:Null<Range>, resolve:Array<TextEdit>->Void, reject:ResponseError<NoData>->Void) {
 		var onResolve = context.startTimer("haxe/formatting");
-		var uri = params.textDocument.uri;
 		var doc:Null<TextDocument> = context.documents.get(uri);
 		if (doc == null) {
 			return reject.documentNotFound(uri);
@@ -31,14 +41,30 @@ class DocumentFormattingFeature {
 		} else {
 			context.workspacePath.toString();
 		});
-		var result = Formatter.format(Tokens(tokens.list, tokens.tree, tokens.bytes), config);
+		var inputRange:FormatterInputRange = null;
+		if (range != null) {
+			range.start.character = 0;
+			var converter = context.displayOffsetConverter;
+			function convert(position) {
+				return converter.characterOffsetToByteOffset(doc.content, doc.offsetAt(position));
+			}
+			inputRange = {
+				startPos: convert(range.start),
+				endPos: convert(range.end)
+			}
+		}
+		var result = Formatter.format(Tokens(tokens.list, tokens.tree, tokens.bytes), config, inputRange);
 		switch result {
 			case Success(formattedCode):
-				var fullRange = {
-					start: {line: 0, character: 0},
-					end: {line: doc.lineCount - 1, character: doc.lineAt(doc.lineCount - 1).length}
+				if (range == null) {
+					range = {
+						start: {line: 0, character: 0},
+						end: {line: doc.lineCount - 1, character: doc.lineAt(doc.lineCount - 1).length}
+					}
+				} else {
+					formattedCode = formattedCode.rtrim();
 				}
-				var edits = [{range: fullRange, newText: formattedCode}];
+				var edits = [{range: range, newText: formattedCode}];
 				resolve(edits);
 				onResolve();
 			case Failure(errorMessage):

@@ -142,6 +142,7 @@ class Context {
 				documentSymbolProvider: true,
 				workspaceSymbolProvider: true,
 				documentFormattingProvider: true,
+				documentRangeFormattingProvider: true,
 				renameProvider: true,
 				foldingRangeProvider: true
 			}
