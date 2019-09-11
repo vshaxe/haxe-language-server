@@ -351,17 +351,23 @@ class Context {
 		var actualArgs = [];
 		if (includeDisplayArguments) {
 			actualArgs = actualArgs.concat(["--cwd", workspacePath.toString()]);
-			if (config.displayArguments != null)
-				actualArgs = actualArgs.concat(config.displayArguments); // add arguments from the workspace settings
 			actualArgs = actualArgs.concat([
 				"-D",
 				"display-details", // get more details in completion results,
 				"--no-output", // prevent any generation
 			]);
 		}
+
+		// to avoid issues with --next we must
 		if (haxeServer.supports(HaxeMethods.Initialize) && config.user.enableServerView) {
-			actualArgs = actualArgs.concat(["--times", "-D", "macro-times"]);
+			actualArgs = ["--times", "-D", "macro-times"].concat(actualArgs);
 		}
+
+		// this must be the final argument before --display to avoid issues with --next
+		// see haxe issue #8795
+		if (includeDisplayArguments && config.displayArguments != null)
+			actualArgs = actualArgs.concat(config.displayArguments); // add arguments from the workspace settings
+
 		actualArgs.push("--display");
 		actualArgs = actualArgs.concat(args); // finally, add given query args
 		haxeServer.process(label, actualArgs, token, true, stdin, Processed(callback, errback));

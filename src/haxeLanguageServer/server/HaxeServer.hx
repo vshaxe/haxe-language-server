@@ -168,7 +168,9 @@ class HaxeServer {
 			return;
 
 		startCompletionInitializationProgress("Building Cache");
-		process("cache build", context.config.displayArguments.concat(["--no-output"]), null, true, null, Processed(function(_) {
+		// displayArguments must always be at the end of the argument list to avoid issues with --next
+		// see haxe issue #8795
+		process("cache build", ["--no-output"].concat(context.config.displayArguments), null, true, null, Processed(function(_) {
 			stopProgress();
 			if (supports(ServerMethods.ReadClassPaths)) {
 				readClassPaths();
