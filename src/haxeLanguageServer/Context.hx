@@ -359,7 +359,7 @@ class Context {
 		}
 
 		if (haxeServer.supports(HaxeMethods.Initialize) && config.user.enableServerView) {
-			actualArgs = ["--times", "-D", "macro-times"].concat(actualArgs);
+			actualArgs = actualArgs.concat(["--times", "-D", "macro-times"]);
 		}
 
 		// this must be the final argument before --display to avoid issues with --next
