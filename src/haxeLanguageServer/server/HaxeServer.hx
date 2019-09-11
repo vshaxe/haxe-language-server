@@ -169,13 +169,7 @@ class HaxeServer {
 
 		startCompletionInitializationProgress("Building Cache");
 
-		/**
-			The following pattern may look like a mistake but it's a necessary trick for avoiding issues with hxmls that use --next.
-			The first `--no-output --each` will apply `--no-output` to all the `--next` blocks, **unless** the user hxml itself include `--each`, in that case, the first `--no-output --each` will be ignored and replaced by the user's `--each` flags, so we need a second `--no-output` that gets added to the user's --eachh
-
-			See HaxeFoundation/haxe#8795
-		**/
-
+		// see vshaxe/haxe-language-server#44 for explanation
 		var leadingArgs = ["--no-output", "--each", "--no-output"];
 
 		process("cache build", leadingArgs.concat(context.config.displayArguments), null, true, null, Processed(function(_) {
