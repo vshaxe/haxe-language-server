@@ -357,7 +357,6 @@ class Context {
 				"--no-output", // prevent any generation
 			]);
 		}
-
 		if (haxeServer.supports(HaxeMethods.Initialize) && config.user.enableServerView) {
 			actualArgs = actualArgs.concat(["--times", "-D", "macro-times"]);
 		}
