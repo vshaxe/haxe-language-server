@@ -358,7 +358,6 @@ class Context {
 			]);
 		}
 
-		// to avoid issues with --next we must
 		if (haxeServer.supports(HaxeMethods.Initialize) && config.user.enableServerView) {
 			actualArgs = ["--times", "-D", "macro-times"].concat(actualArgs);
 		}
