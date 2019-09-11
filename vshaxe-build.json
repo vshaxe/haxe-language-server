@@ -5,10 +5,20 @@
 		{
 			"name": "language-server",
 			"args": {
-				"haxelibs": ["haxe-hxparser", "hxparse", "haxeparser", "tokentree", "formatter", "json2object", "vscode-json-rpc", "uglifyjs", "safety"],
+				"haxelibs": [
+					"haxe-hxparser",
+					"hxparse",
+					"haxeparser",
+					"tokentree",
+					"formatter",
+					"json2object",
+					"language-server-protocol",
+					"vscode-json-rpc",
+					"uglifyjs",
+					"safety"
+				],
 				"classPaths": [
-					"src",
-					"protocol/src"
+					"src"
 				],
 				"defines": [
 					"JSTACK_FORMAT=vscode",
@@ -29,11 +39,21 @@
 		{
 			"name": "language-server-tests",
 			"args": {
-				"haxelibs": ["haxe-hxparser", "hxparse", "haxeparser", "tokentree", "formatter", "json2object", "vscode-json-rpc", "safety", "utest"],
+				"haxelibs": [
+					"haxe-hxparser",
+					"hxparse",
+					"haxeparser",
+					"tokentree",
+					"formatter",
+					"json2object",
+					"language-server-protocol",
+					"vscode-json-rpc",
+					"safety",
+					"utest"
+				],
 				"classPaths": [
 					"src",
-					"test",
-					"protocol/src"
+					"test"
 				],
 				"output": {
 					"target": "js",
