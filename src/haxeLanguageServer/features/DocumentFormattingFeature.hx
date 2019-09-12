@@ -44,7 +44,7 @@ class DocumentFormattingFeature {
 		var inputRange:FormatterInputRange = null;
 		if (range != null) {
 			range.start.character = 0;
-			var converter = context.displayOffsetConverter;
+			var converter = new Haxe3DisplayOffsetConverter();
 			function convert(position) {
 				return converter.characterOffsetToByteOffset(doc.content, doc.offsetAt(position));
 			}
