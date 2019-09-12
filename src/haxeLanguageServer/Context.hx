@@ -350,8 +350,9 @@ class Context {
 			errback:(error:String) -> Void, includeDisplayArguments:Bool = true) {
 		var actualArgs = [];
 		if (includeDisplayArguments) {
-			actualArgs = actualArgs.concat(["--cwd", workspacePath.toString()]);
 			actualArgs = actualArgs.concat([
+				"--cwd",
+				workspacePath.toString(),
 				"-D",
 				"display-details", // get more details in completion results,
 				"--no-output", // prevent any generation
