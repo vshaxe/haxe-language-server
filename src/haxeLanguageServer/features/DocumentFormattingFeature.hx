@@ -61,8 +61,6 @@ class DocumentFormattingFeature {
 						start: {line: 0, character: 0},
 						end: {line: doc.lineCount - 1, character: doc.lineAt(doc.lineCount - 1).length}
 					}
-				} else {
-					formattedCode = formattedCode.rtrim();
 				}
 				var edits = [{range: range, newText: formattedCode}];
 				resolve(edits);
