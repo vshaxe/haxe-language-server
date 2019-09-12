@@ -89,6 +89,9 @@ class CompletionFeature {
 
 	function onCompletion(params:CompletionParams, token:CancellationToken, resolve:CompletionList->Void, reject:ResponseError<NoData>->Void) {
 		var uri = params.textDocument.uri;
+		if (!uri.isFile()) {
+			return reject.notAFile();
+		}
 		var doc:Null<TextDocument> = context.documents.get(uri);
 		if (doc == null) {
 			return reject.documentNotFound(uri);
@@ -173,7 +176,7 @@ class CompletionFeature {
 			}
 		}
 		var haxeParams:HaxeCompletionParams = {
-			file: if (doc.uri.isUntitled()) null else doc.uri.toFsPath(),
+			file: doc.uri.toFsPath(),
 			contents: doc.content,
 			offset: offset,
 			wasAutoTriggered: wasAutoTriggered,
