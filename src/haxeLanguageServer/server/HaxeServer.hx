@@ -168,7 +168,11 @@ class HaxeServer {
 			return;
 
 		startCompletionInitializationProgress("Building Cache");
-		process("cache build", context.config.displayArguments.concat(["--no-output"]), null, true, null, Processed(function(_) {
+
+		// see vshaxe/haxe-language-server#44 for explanation
+		var leadingArgs = ["--no-output", "--each", "--no-output"];
+
+		process("cache build", leadingArgs.concat(context.config.displayArguments), null, true, null, Processed(function(_) {
 			stopProgress();
 			if (supports(ServerMethods.ReadClassPaths)) {
 				readClassPaths();
