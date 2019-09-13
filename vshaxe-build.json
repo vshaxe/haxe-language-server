@@ -15,7 +15,8 @@
 					"language-server-protocol",
 					"vscode-json-rpc",
 					"uglifyjs",
-					"safety"
+					"safety",
+					"thx.semver"
 				],
 				"classPaths": [
 					"src"
@@ -49,6 +50,7 @@
 					"language-server-protocol",
 					"vscode-json-rpc",
 					"safety",
+					"thx.semver",
 					"utest"
 				],
 				"classPaths": [

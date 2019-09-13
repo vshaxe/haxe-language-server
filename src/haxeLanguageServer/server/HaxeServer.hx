@@ -13,7 +13,7 @@ import js.node.Buffer;
 import js.node.ChildProcess;
 import js.node.stream.Readable;
 import jsonrpc.CancellationToken;
-import haxeLanguageServer.helper.SemVer;
+import thx.semver.Version;
 
 class HaxeServer {
 	final context:Context;
@@ -30,8 +30,8 @@ class HaxeServer {
 	var crashes:Int = 0;
 	var supportedMethods:Array<String> = [];
 
-	public var haxeVersion(default, null):Null<SemVer>;
-	public var protocolVersion(default, null):Null<SemVer>;
+	public var haxeVersion(default, null):Version = "0.0.0";
+	public var protocolVersion(default, null):Version = "0.0.0";
 
 	public function new(context:Context) {
 		this.context = context;
@@ -68,11 +68,13 @@ class HaxeServer {
 			});
 		}
 
-		haxeVersion = SemVer.parse(output);
-		if (haxeVersion == null)
+		try {
+			haxeVersion = Version.stringToVersion(output);
+		} catch (e:Any) {
 			return error("Error parsing Haxe version " + Json.stringify(output));
+		}
 
-		var isVersionSupported = haxeVersion >= new SemVer(3, 4, 0);
+		var isVersionSupported = haxeVersion >= "3.4.0";
 		if (!isVersionSupported)
 			return error('Unsupported Haxe version! Minimum required: 3.4.0. Found: $haxeVersion.');
 		return true;
@@ -121,18 +123,18 @@ class HaxeServer {
 		}
 
 		stopProgressCallback = context.startProgress("Initializing Haxe/JSON-RPC protocol");
-		context.callHaxeMethod(Methods.Initialize, {supportsResolve: true, exclude: context.config.user.exclude, maxCompletionItems: 1000}, null, result -> {
-			var pre = result.haxeVersion.pre;
-			if (result.haxeVersion.major == 4
-				&& (pre.startsWith("preview.") || pre == "rc.1" || pre == "rc.2" || pre == "rc.3" || pre == "rc.4")) {
-				context.languageServerProtocol.sendNotification(LanguageServerMethods.DidDetectOldPreview, {preview: result.haxeVersion.pre});
+		context.callHaxeMethod(Methods.Initialize, {supportsResolve: true, exclude: context.config.user.exclude, maxCompletionItems: 1000}, null,
+		function(result) {
+			var haxeVersion:Version = result.haxeVersion.toString();
+			if (haxeVersion.major == 4 && haxeVersion < "4.0.0-rc.5") {
+				context.languageServerProtocol.sendNotification(LanguageServerMethods.DidDetectOldPreview, {preview: haxeVersion.pre});
 			}
-			protocolVersion = result.protocolVersion;
+			protocolVersion = result.protocolVersion.toString();
 			supportedMethods = result.methods;
 			configure();
 			onInitComplete();
 			return null;
-		}, error -> {
+		}, function(error) {
 			// the "invalid format" error is expected for Haxe versions <= 4.0.0-preview.3
 			if (error.startsWith("Error: Invalid format")) {
 				trace("Haxe version does not support JSON-RPC, using legacy --display API.");

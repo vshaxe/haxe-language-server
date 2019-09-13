@@ -3,6 +3,7 @@ package haxeLanguageServer;
 import haxe.Timer;
 import hxParser.ParseTree;
 import haxeLanguageServer.tokentree.TokenTreeManager;
+import haxeLanguageServer.helper.DisplayOffsetConverter;
 
 typedef OnTextDocumentChangeListener = TextDocument->Array<TextDocumentContentChangeEvent>->Int->Void;
 

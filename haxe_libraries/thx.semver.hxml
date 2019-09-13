@@ -1,0 +1,4 @@
+-D thx.semver=0.2.2
+# @install: lix --silent download "gh://github.com/fponticelli/thx.semver#6295654ad9848b2655753ae5028d707a7a850794" into thx.semver/0.2.2/github/6295654ad9848b2655753ae5028d707a7a850794
+-cp ${HAXE_LIBCACHE}/thx.semver/0.2.2/github/6295654ad9848b2655753ae5028d707a7a850794/src
+-D thx_semver

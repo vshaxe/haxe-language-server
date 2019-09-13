@@ -1,6 +1,7 @@
 package haxeLanguageServer.helper;
 
 import js.node.Buffer;
+import thx.semver.Version;
 
 /**
 	This is a helper that provides completion between character and bytes offsets.
@@ -10,8 +11,8 @@ import js.node.Buffer;
 	Haxe version.
 **/
 class DisplayOffsetConverter {
-	public static function create(haxeVersion:SemVer):DisplayOffsetConverter {
-		if (haxeVersion >= new SemVer(4, 0, 0))
+	public static function create(haxeVersion:Version):DisplayOffsetConverter {
+		if (haxeVersion.major >= 4)
 			return new Haxe4DisplayOffsetConverter();
 		else
 			return new Haxe3DisplayOffsetConverter();

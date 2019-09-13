@@ -22,6 +22,7 @@ import haxeLanguageServer.server.DisplayResult;
 import haxeLanguageServer.server.HaxeServer;
 import haxeLanguageServer.LanguageServerMethods.MethodResult;
 import languageServerProtocol.protocol.TypeDefinition.TypeDefinitionRequest;
+import haxeLanguageServer.helper.DisplayOffsetConverter;
 
 class Context {
 	public final config:Configuration;

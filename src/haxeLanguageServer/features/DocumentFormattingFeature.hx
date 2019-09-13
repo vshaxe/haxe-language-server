@@ -5,6 +5,7 @@ import formatter.codedata.FormatterInputData.FormatterInputRange;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
+import haxeLanguageServer.helper.DisplayOffsetConverter;
 
 class DocumentFormattingFeature {
 	final context:Context;
