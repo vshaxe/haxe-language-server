@@ -1,7 +1,6 @@
 package haxeLanguageServer.features.foldingRange;
 
 import tokentree.TokenTree;
-import languageServerProtocol.protocol.FoldingRange.FoldingRangeClientCapabilities;
 
 using tokentree.TokenTreeAccessHelper;
 
@@ -12,7 +11,7 @@ class FoldingRangeResolver {
 	final document:TextDocument;
 	final lineFoldingOnly:Bool;
 
-	public function new(document:TextDocument, capabilities:Null<FoldingRangeClientCapabilities>) {
+	public function new(document:TextDocument, capabilities:Null<TextDocumentClientCapabilities>) {
 		this.document = document;
 		lineFoldingOnly = capabilities!.foldingRange!.lineFoldingOnly;
 	}

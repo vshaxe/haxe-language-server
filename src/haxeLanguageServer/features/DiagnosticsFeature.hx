@@ -19,7 +19,6 @@ class DiagnosticsFeature {
 	static inline var RemoveAllUnusedImportsUsingsTitle = "Remove all unused imports/usings";
 
 	final context:Context;
-	final tagSupport:Bool;
 	final diagnosticsArguments:Map<DocumentUri, DiagnosticsMap<Any>>;
 	final errorUri:DocumentUri;
 
@@ -27,7 +26,6 @@ class DiagnosticsFeature {
 
 	public function new(context:Context) {
 		this.context = context;
-		tagSupport = context.capabilities.textDocument!.publishDiagnostics!.tagSupport == true;
 		diagnosticsArguments = new Map();
 		errorUri = new FsPath(Path.join([context.workspacePath.toString(), "Error"])).toUri();
 
