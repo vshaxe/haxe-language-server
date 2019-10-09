@@ -17,7 +17,7 @@ class CodeActionFeature {
 			id: CodeActionRequest.type,
 			method: CodeActionRequest.type,
 			registerOptions: {
-				codeActionKinds: [QuickFix, SourceOrganizeImports]
+				codeActionKinds: [QuickFix, SourceOrganizeImports, #if debug RefactorExtract #end]
 			}
 		});
 		context.languageServerProtocol.onRequest(CodeActionRequest.type, onCodeAction);

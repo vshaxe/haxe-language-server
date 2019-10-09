@@ -211,6 +211,7 @@ class Context {
 				new CodeLensFeature(this);
 				new CodeGenerationFeature(this);
 				new WorkspaceSymbolsFeature(this);
+				new ExtractTypeFeature(this);
 
 				for (doc in documents.getAll())
 					publishDiagnostics(doc.uri);
