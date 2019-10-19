@@ -73,13 +73,17 @@ class ExtractTypeFeature {
 				if (FileSystem.exists(newFileName))
 					continue;
 
-				var pos = type.getPos();
+				var pos = doc.tokens.getTreePos(type);
 				var docComment:Null<TokenTree> = TokenTreeCheckUtils.getDocComment(type);
 				if (docComment != null) {
 					// expand pos.min to capture doc comment
 					pos.min = docComment.pos.min;
 				}
 				var typeRange = rangeAt(doc, pos);
+				if (params.range.intersection(typeRange) == null) {
+					// no overlap between selection / cursor pos and Haxe type
+					continue;
+				}
 
 				// remove code from current file
 				var removeOld:TextDocumentEdit = WorkspaceEditHelper.textDocumentEdit(params.textDocument.uri, [WorkspaceEditHelper.removeText(typeRange)]);
