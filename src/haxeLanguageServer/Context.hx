@@ -212,6 +212,7 @@ class Context {
 				new CodeGenerationFeature(this);
 				new WorkspaceSymbolsFeature(this);
 				new ExtractTypeFeature(this);
+				new ExtractConstantFeature(this);
 
 				for (doc in documents.getAll())
 					publishDiagnostics(doc.uri);
