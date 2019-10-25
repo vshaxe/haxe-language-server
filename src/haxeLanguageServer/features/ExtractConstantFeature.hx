@@ -90,7 +90,7 @@ class ExtractConstantFeature {
 
 		// insert const into type body
 		var prefix:String = doc.getText({start: {line: constInsertPos.line, character: 0}, end: constInsertPos});
-		var newConstText:String = 'public static inline final $name:String = "$text";\n$prefix';
+		var newConstText:String = 'public static inline var $name:String = "$text";\n$prefix';
 		edits.push(WorkspaceEditHelper.insertText(constInsertPos, newConstText));
 
 		// replace all occurrences with const name
@@ -105,7 +105,7 @@ class ExtractConstantFeature {
 		};
 
 		return {
-			title: 'Extract constant',
+			title: "Extract constant",
 			kind: RefactorInline,
 			edit: edit
 		};

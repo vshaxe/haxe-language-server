@@ -213,6 +213,7 @@ class Context {
 				new WorkspaceSymbolsFeature(this);
 				new ExtractTypeFeature(this);
 				new ExtractConstantFeature(this);
+				new ExtractFunctionFeature(this);
 
 				for (doc in documents.getAll())
 					publishDiagnostics(doc.uri);
