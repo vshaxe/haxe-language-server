@@ -120,7 +120,7 @@ class ExtractFunctionFeature {
 		};
 		return {
 			title: "Extract function",
-			kind: RefactorInline,
+			kind: RefactorExtract,
 			edit: edit
 		}
 	}
