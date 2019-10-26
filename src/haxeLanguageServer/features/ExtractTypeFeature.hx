@@ -49,7 +49,7 @@ class ExtractTypeFeature {
 				var pos = lastImport.getPos();
 				pos.min = 0;
 
-				var range = rangeAt(doc, pos);
+				var range = doc.rangeAt2(pos);
 				range.end.line++;
 				range.end.character = 0;
 				fileHeader = doc.getText(range) + "\n";
@@ -79,7 +79,7 @@ class ExtractTypeFeature {
 					// expand pos.min to capture doc comment
 					pos.min = docComment.pos.min;
 				}
-				var typeRange = rangeAt(doc, pos);
+				var typeRange = doc.rangeAt2(pos);
 				if (params.range.intersection(typeRange) == null) {
 					// no overlap between selection / cursor pos and Haxe type
 					continue;
@@ -140,9 +140,5 @@ class ExtractTypeFeature {
 			parent = parent.parent;
 		}
 		return false;
-	}
-
-	inline function rangeAt(document:TextDocument, pos:haxe.macro.Expr.Position):Range {
-		return document.rangeAt(pos.min, pos.max);
 	}
 }

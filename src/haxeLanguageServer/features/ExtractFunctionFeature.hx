@@ -15,11 +15,11 @@ class ExtractFunctionFeature {
 	public function new(context:Context) {
 		this.context = context;
 		#if debug
-		context.registerCodeActionContributor(extractConstant);
+		context.registerCodeActionContributor(extractFunction);
 		#end
 	}
 
-	function extractConstant(params:CodeActionParams):Array<CodeAction> {
+	function extractFunction(params:CodeActionParams):Array<CodeAction> {
 		var doc = context.documents.get(params.textDocument.uri);
 		try {
 			var fsPath:FsPath = params.textDocument.uri.toFsPath();

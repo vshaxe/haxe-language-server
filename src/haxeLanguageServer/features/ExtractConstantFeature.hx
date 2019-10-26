@@ -53,12 +53,12 @@ class ExtractConstantFeature {
 			return null;
 
 		// skip string literals with interpolation
-		var fullText:String = doc.getText(rangeAt(doc, token.pos));
+		var fullText:String = doc.getText(doc.rangeAt2(token.pos));
 		if ((fullText.startsWith("'")) && (~/[$]/g.match(text)))
 			return null;
 
 		// generate a const name
-		var name:String = ~/[^A-Za-z0-9]/g.replace(text, "$_");
+		var name:String = ~/[^A-Za-z0-9]/g.replace(text, "_");
 		name = ~/^[0-9]/g.replace(name, "_");
 		name = ~/_+/g.replace(name, "_");
 		name = name.toUpperCase();
@@ -122,9 +122,5 @@ class ExtractConstantFeature {
 			parent = parent.parent;
 		}
 		return null;
-	}
-
-	inline function rangeAt(document:TextDocument, pos:haxe.macro.Expr.Position):Range {
-		return document.rangeAt(pos.min, pos.max);
 	}
 }
