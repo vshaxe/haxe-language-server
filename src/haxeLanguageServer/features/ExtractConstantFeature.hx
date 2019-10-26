@@ -106,7 +106,7 @@ class ExtractConstantFeature {
 
 		return {
 			title: "Extract constant",
-			kind: RefactorInline,
+			kind: RefactorExtract,
 			edit: edit
 		};
 	}
