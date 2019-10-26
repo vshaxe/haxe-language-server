@@ -61,10 +61,10 @@ class ExtractFunctionFeature {
 					return SKIP_SUBTREE;
 				switch (token.tok) {
 					case Const(CIdent(s)):
-						if ((token.index >= tokenStart.index) && (token.index <= tokenEnd.index) && (rangeIdents.indexOf(s) < 0))
+						if ((token.index >= tokenStart.index) && (token.index <= tokenEnd.index) && (!rangeIdents.contains(s)))
 							rangeIdents.push(s);
 					case Dollar(s):
-						if ((token.index >= tokenStart.index) && (token.index <= tokenEnd.index) && (rangeIdents.indexOf(s) < 0))
+						if ((token.index >= tokenStart.index) && (token.index <= tokenEnd.index) && (!rangeIdents.contains(s)))
 							rangeIdents.push("$" + s);
 					case Kwd(KwdReturn):
 						if ((token.index >= tokenStart.index) && (token.index <= tokenEnd.index))
@@ -83,11 +83,13 @@ class ExtractFunctionFeature {
 			if (hasReturn) {
 				returnSpec = makeReturnSpec(parentOfStart);
 			}
+			var isStatic:Bool = isStaticFunction(parentOfStart);
 
 			var newParams:Array<NewFunctionParameter> = copyParentFunctionParameters(parentOfStart, text, rangeIdents);
 			newParams = newParams.concat(localVarsToParameter(varTokens, text, rangeIdents));
 
-			var action:Null<CodeAction> = makeExtractFunctionChanges(doc, doc.uri, params, text, newParams, returnSpec, doc.positionAt(lastToken.pos.max + 1));
+			var action:Null<CodeAction> = makeExtractFunctionChanges(doc, doc.uri, params, text, isStatic, newParams, returnSpec,
+				doc.positionAt(lastToken.pos.max + 1));
 			if (action == null)
 				return [];
 			return [action];
@@ -95,8 +97,8 @@ class ExtractFunctionFeature {
 		return [];
 	}
 
-	function makeExtractFunctionChanges(doc:TextDocument, uri:DocumentUri, params:CodeActionParams, text:String, newParams:Array<NewFunctionParameter>,
-			returnSpec:String, newFuncPos:Position):CodeAction {
+	function makeExtractFunctionChanges(doc:TextDocument, uri:DocumentUri, params:CodeActionParams, text:String, isStatic:Bool,
+			newParams:Array<NewFunctionParameter>, returnSpec:String, newFuncPos:Position):CodeAction {
 		var callParams:String = newParams.map(s -> s.call).join(", ");
 		var funcParams:String = newParams.map(s -> s.param).join(", ");
 
@@ -108,6 +110,8 @@ class ExtractFunctionFeature {
 		}
 
 		var func:String = 'function $funcName($funcParams)$returnSpec {\n$text\n}\n';
+		if (isStatic)
+			func = 'static $func';
 
 		var edits:Array<TextEdit> = [];
 
@@ -148,6 +152,12 @@ class ExtractFunctionFeature {
 		return varToString(returnHint);
 	}
 
+	function isStaticFunction(functionToken:TokenTree):Bool {
+		if (functionToken.access().firstChild().isCIdent().firstOf(Kwd(KwdStatic)).exists())
+			return true;
+		return false;
+	}
+
 	function copyParentFunctionParameters(functionToken:TokenTree, text:String, rangeIdents:Array<String>):Array<NewFunctionParameter> {
 		var paramterList:Null<TokenTree> = functionToken.access().firstChild().isCIdent().firstOf(POpen).token;
 		// anon function
@@ -172,7 +182,7 @@ class ExtractFunctionFeature {
 						default:
 					}
 				case Dollar(s):
-					if (rangeIdents.indexOf("$" + s) < 0)
+					if (!rangeIdents.contains("$" + s))
 						continue;
 					newFuncParameter.push({
 						call: s,
@@ -188,12 +198,12 @@ class ExtractFunctionFeature {
 	}
 
 	function checkAndAddIdentifier(token:TokenTree, identifier:String, text:String, rangeIdents:Array<String>, newFuncParameter:Array<NewFunctionParameter>) {
-		if (rangeIdents.indexOf(identifier) >= 0)
+		if (rangeIdents.contains(identifier))
 			newFuncParameter.push({
 				call: identifier,
 				param: varToString(token)
 			});
-		if (text.indexOf("$" + identifier) >= 0)
+		if (text.contains("$" + identifier))
 			newFuncParameter.push({
 				call: identifier,
 				param: varToString(token)
@@ -210,7 +220,7 @@ class ExtractFunctionFeature {
 					case Const(CIdent(s)):
 						checkAndAddIdentifier(child, s, text, rangeIdents, newFuncParameter);
 					case Dollar(s):
-						if (rangeIdents.indexOf("$" + s) < 0)
+						if (!rangeIdents.contains("$" + s))
 							continue;
 						newFuncParameter.push({
 							call: s,
