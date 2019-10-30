@@ -214,6 +214,7 @@ class Context {
 				new ExtractTypeFeature(this);
 				new ExtractConstantFeature(this);
 				new ExtractFunctionFeature(this);
+				new OrganizeImportsFeature(this);
 
 				for (doc in documents.getAll())
 					publishDiagnostics(doc.uri);

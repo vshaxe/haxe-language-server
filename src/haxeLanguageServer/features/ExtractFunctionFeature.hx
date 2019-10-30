@@ -1,5 +1,6 @@
 package haxeLanguageServer.features;
 
+import haxeLanguageServer.helper.FormatterHelper;
 import haxeLanguageServer.helper.StructDefaultsMacro;
 import haxe.io.Path;
 import sys.FileSystem;
@@ -113,6 +114,9 @@ class ExtractFunctionFeature {
 		if (isStatic)
 			func = 'static $func';
 
+		// TODO correct indentation
+		call = FormatterHelper.formatText(doc, context, call);
+		func = FormatterHelper.formatText(doc, context, func);
 		var edits:Array<TextEdit> = [];
 
 		edits.push(WorkspaceEditHelper.insertText(newFuncPos, func));
