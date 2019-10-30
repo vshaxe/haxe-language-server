@@ -4,6 +4,7 @@ import haxe.ds.ArraySort;
 import haxeLanguageServer.helper.FormatterHelper;
 import haxeLanguageServer.helper.WorkspaceEditHelper;
 import tokentree.TokenTree;
+import tokentree.TokenTreeBuilder;
 
 class OrganizeImportsFeature {
 	public static function organizeImports(doc:TextDocument, context:Context, unusedRanges:Array<Range>):Array<TextEdit> {
@@ -81,7 +82,7 @@ class OrganizeImportsFeature {
 		ArraySort.sort(importGroup.usings, sortImports);
 		var newUsings:String = importGroup.usings.map(i -> i.text).join("\n");
 
-		var newText:String = FormatterHelper.formatText(doc, context, newImports + "\n" + newUsings);
+		var newText:String = FormatterHelper.formatText(doc, context, newImports + "\n" + newUsings, TokenTreeEntryPoint.TYPE_LEVEL);
 
 		var edits:Array<TextEdit> = [];
 
@@ -94,7 +95,7 @@ class OrganizeImportsFeature {
 
 		// insert sorted imports/usings at startOffset
 		var importInsertPos:Position = doc.positionAt(importGroup.startOffset);
-		edits.push(WorkspaceEditHelper.insertText(importInsertPos, newText));
+		edits.push(WorkspaceEditHelper.insertText(importInsertPos, newText + "\n"));
 
 		return edits;
 	}

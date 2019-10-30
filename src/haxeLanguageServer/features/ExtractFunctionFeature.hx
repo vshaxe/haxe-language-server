@@ -1,11 +1,10 @@
 package haxeLanguageServer.features;
 
-import haxeLanguageServer.helper.FormatterHelper;
-import haxeLanguageServer.helper.StructDefaultsMacro;
 import haxe.io.Path;
-import sys.FileSystem;
+import haxeLanguageServer.helper.FormatterHelper;
 import haxeLanguageServer.helper.WorkspaceEditHelper;
 import tokentree.TokenTree;
+import tokentree.TokenTreeBuilder;
 import tokentree.utils.TokenTreeCheckUtils;
 
 using tokentree.TokenTreeAccessHelper;
@@ -115,8 +114,8 @@ class ExtractFunctionFeature {
 			func = 'static $func';
 
 		// TODO correct indentation
-		call = FormatterHelper.formatText(doc, context, call);
-		func = FormatterHelper.formatText(doc, context, func);
+		call = FormatterHelper.formatText(doc, context, call, TokenTreeEntryPoint.FIELD_LEVEL);
+		func = FormatterHelper.formatText(doc, context, func, TokenTreeEntryPoint.FIELD_LEVEL);
 		var edits:Array<TextEdit> = [];
 
 		edits.push(WorkspaceEditHelper.insertText(newFuncPos, func));
