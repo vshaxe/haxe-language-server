@@ -1,20 +1,40 @@
 package haxeLanguageServer.features;
 
 import haxe.ds.ArraySort;
-import haxeLanguageServer.helper.FormatterHelper;
-import haxeLanguageServer.helper.WorkspaceEditHelper;
 import tokentree.TokenTree;
 import tokentree.TokenTreeBuilder;
+import haxeLanguageServer.helper.FormatterHelper;
+import haxeLanguageServer.helper.WorkspaceEditHelper;
 
 class OrganizeImportsFeature {
+	static final stdLibPackages:Array<String> = [
+		"cpp", "cs", "eval", "flash", "haxe", "hl", "java", "js", "lua", "neko", "php", "python", "sys", "Any", "Array", "ArrayAccess", "BaseString", "Bool",
+		"Class", "Date", "DateTools", "Dynamic", "EReg", "Enum", "EnumValue", "Float", "Int", "IntIterator", "Iterable", "Iterator", "KeyValueIterable",
+		"KeyValueIterator", "Lambda", "List", "Map", "Math", "Null", "Reflect", "Single", "Std", "String", "StringBuf", "StringTools", "Sys", "SysError",
+		"Type", "UInt", "UnicodeString", "ValueType", "Void", "Xml", "XmlType"
+	];
+
 	public static function organizeImports(doc:TextDocument, context:Context, unusedRanges:Array<Range>):Array<TextEdit> {
 		if ((doc.tokens == null) || (doc.tokens.tree == null))
 			return [];
 		try {
+			var packageName:Null<String> = null;
 			var imports:Array<TokenTree> = doc.tokens.tree.filterCallback(function(token:TokenTree, index:Int):FilterResult {
 				switch (token.tok) {
 					case Kwd(KwdImport), Kwd(KwdUsing):
 						return FOUND_SKIP_SUBTREE;
+					case Kwd(KwdPackage):
+						var child = token.getFirstChild();
+						if (child == null)
+							return SKIP_SUBTREE;
+						switch (child.tok) {
+							case Kwd(_):
+								packageName = '$child';
+							case Const(CIdent(s)):
+								packageName = s;
+							default:
+						}
+						return SKIP_SUBTREE;
 					default:
 				}
 				return GO_DEEPER;
@@ -47,16 +67,20 @@ class OrganizeImportsFeature {
 				if (isUnused)
 					continue;
 
+				var type:ImportType = determineImportType(i, packageName);
+
 				switch (i.tok) {
 					case Kwd(KwdImport):
 						group.imports.push({
 							token: i,
-							text: doc.getText(range)
+							text: doc.getText(range),
+							type: type
 						});
 					case Kwd(KwdUsing):
 						group.usings.push({
 							token: i,
-							text: doc.getText(range)
+							text: doc.getText(range),
+							type: type
 						});
 					default:
 				}
@@ -64,6 +88,28 @@ class OrganizeImportsFeature {
 			return organizeImportGroups(doc, context, importGroups);
 		} catch (e:Any) {}
 		return [];
+	}
+
+	static function determineImportType(token:TokenTree, packageName:Null<String>):ImportType {
+		var child:Null<TokenTree> = token.getFirstChild();
+		if (child == null)
+			return Project;
+		var topLevelPack:String;
+		switch (child.tok) {
+			case Kwd(_):
+				topLevelPack = '$child';
+			case Const(CIdent(s)):
+				topLevelPack = s;
+			default:
+				return Project;
+		}
+		if (stdLibPackages.contains(topLevelPack))
+			return StdLib;
+		if (packageName == null)
+			return Project;
+		if (topLevelPack == packageName)
+			return Project;
+		return Library;
 	}
 
 	static function organizeImportGroups(doc:TextDocument, context:Context, importGroups:Map<Int, ImportGroup>):Array<TextEdit> {
@@ -110,6 +156,10 @@ class OrganizeImportsFeature {
 	}
 
 	static function sortImports(a:ImportInfo, b:ImportInfo):Int {
+		if (a.type < b.type)
+			return -1;
+		if (a.type > b.type)
+			return 1;
 		if (a.text < b.text)
 			return -1;
 		if (a.text > b.text)
@@ -132,4 +182,17 @@ typedef ImportGroup = {
 typedef ImportInfo = {
 	var token:TokenTree;
 	var text:String;
+	var type:ImportType;
+}
+
+enum abstract ImportType(Int) {
+	var StdLib;
+	var Library;
+	var Project;
+
+	@:op(a < b)
+	public function opLt(val:ImportType):Bool;
+
+	@:op(a > b)
+	public function opLt(val:ImportType):Bool;
 }
