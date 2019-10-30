@@ -6,17 +6,7 @@ import haxeLanguageServer.helper.WorkspaceEditHelper;
 import tokentree.TokenTree;
 
 class OrganizeImportsFeature {
-	final context:Context;
-
-	public function new(context:Context) {
-		this.context = context;
-		#if debug
-		context.registerCodeActionContributor(organizeImports);
-		#end
-	}
-
-	function organizeImports(params:CodeActionParams):Array<CodeAction> {
-		var doc = context.documents.get(params.textDocument.uri);
+	public static function organizeImports(doc:TextDocument, context:Context, unusedRanges:Array<Range>):Array<TextEdit> {
 		if ((doc.tokens == null) || (doc.tokens.tree == null))
 			return [];
 		try {
@@ -45,47 +35,46 @@ class OrganizeImportsFeature {
 					}
 					importGroups.set(id, group);
 				}
+				var range:Range = doc.rangeAt2(i.getPos());
+				var isUnused:Bool = false;
+				for (r in unusedRanges) {
+					if (r.contains(range)) {
+						isUnused = true;
+						break;
+					}
+				}
+				if (isUnused)
+					continue;
+
 				switch (i.tok) {
 					case Kwd(KwdImport):
 						group.imports.push({
 							token: i,
-							text: doc.getText(doc.rangeAt2(i.getPos()))
+							text: doc.getText(range)
 						});
 					case Kwd(KwdUsing):
 						group.usings.push({
 							token: i,
-							text: doc.getText(doc.rangeAt2(i.getPos()))
+							text: doc.getText(range)
 						});
 					default:
 				}
 			}
-			return organizeImportGroups(doc, importGroups);
+			return organizeImportGroups(doc, context, importGroups);
 		} catch (e:Any) {}
 		return [];
 	}
 
-	function organizeImportGroups(doc:TextDocument, importGroups:Map<Int, ImportGroup>):Array<CodeAction> {
+	static function organizeImportGroups(doc:TextDocument, context:Context, importGroups:Map<Int, ImportGroup>):Array<TextEdit> {
 		var edits:Array<TextEdit> = [];
 
-		var actions:Array<CodeAction> = [];
 		for (group in importGroups)
-			edits = edits.concat(organizeImportGroup(doc, group));
+			edits = edits.concat(organizeImportGroup(doc, context, group));
 
-		if (edits.length > 0) {
-			var textEdit:TextDocumentEdit = WorkspaceEditHelper.textDocumentEdit(doc.uri, edits);
-			actions.push({
-				title: "Organize imports",
-				kind: SourceOrganizeImports,
-				edit: {
-					documentChanges: [textEdit]
-				}
-			});
-		}
-
-		return actions;
+		return edits;
 	}
 
-	function organizeImportGroup(doc:TextDocument, importGroup:ImportGroup):Array<TextEdit> {
+	static function organizeImportGroup(doc:TextDocument, context:Context, importGroup:ImportGroup):Array<TextEdit> {
 		ArraySort.sort(importGroup.imports, sortImports);
 		var newImports:String = importGroup.imports.map(i -> i.text).join("\n");
 
@@ -96,10 +85,6 @@ class OrganizeImportsFeature {
 
 		var edits:Array<TextEdit> = [];
 
-		// insert sorted imports/usings at startOffset
-		var importInsertPos:Position = doc.positionAt(importGroup.startOffset);
-		edits.push(WorkspaceEditHelper.insertText(importInsertPos, newText));
-
 		// remove all existing imports/usings from group
 		for (i in importGroup.imports)
 			edits.push(makeImportEdit(doc, i.token));
@@ -107,10 +92,14 @@ class OrganizeImportsFeature {
 		for (i in importGroup.usings)
 			edits.push(makeImportEdit(doc, i.token));
 
+		// insert sorted imports/usings at startOffset
+		var importInsertPos:Position = doc.positionAt(importGroup.startOffset);
+		edits.push(WorkspaceEditHelper.insertText(importInsertPos, newText));
+
 		return edits;
 	}
 
-	function makeImportEdit(doc:TextDocument, token:TokenTree):TextEdit {
+	static function makeImportEdit(doc:TextDocument, token:TokenTree):TextEdit {
 		var range:Range = doc.rangeAt2(token.getPos());
 		// TODO move marker to beginning of next line assumes imports are one line each
 		// maybe look at document whitespace and remove all trailing?
@@ -119,7 +108,7 @@ class OrganizeImportsFeature {
 		return WorkspaceEditHelper.removeText(range);
 	}
 
-	function sortImports(a:ImportInfo, b:ImportInfo):Int {
+	static function sortImports(a:ImportInfo, b:ImportInfo):Int {
 		if (a.text < b.text)
 			return -1;
 		if (a.text > b.text)
@@ -127,7 +116,7 @@ class OrganizeImportsFeature {
 		return 0;
 	}
 
-	function determineStartPos(token:TokenTree):Int {
+	static function determineStartPos(token:TokenTree):Int {
 		return token.pos.min;
 	}
 }

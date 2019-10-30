@@ -1,6 +1,9 @@
 package haxeLanguageServer.helper;
 
 class DocHelper {
+	static final reEndsWithWhitespace = ~/\s*$/;
+	static final reStartsWhitespace = ~/^\s*/;
+
 	/** Stolen from dox **/
 	public static function trim(doc:String) {
 		if (doc == null)
@@ -104,6 +107,29 @@ class DocHelper {
 
 	public static function printCodeBlock(content:String, languageId:LanguageId):String {
 		return '```$languageId\n$content\n```';
+	}
+
+	public static function patchRange(doc:TextDocument, range:Range) {
+		var startLine = doc.lineAt(range.start.line);
+		if (reStartsWhitespace.match(startLine.substring(0, range.start.character)))
+			range = {
+				start: {
+					line: range.start.line,
+					character: 0
+				},
+				end: range.end
+			};
+
+		var endLine = if (range.start.line == range.end.line) startLine else doc.lineAt(range.end.line);
+		if (reEndsWithWhitespace.match(endLine.substring(range.end.character)))
+			range = {
+				start: range.start,
+				end: {
+					line: range.end.line + 1,
+					character: 0
+				}
+			};
+		return range;
 	}
 }
 

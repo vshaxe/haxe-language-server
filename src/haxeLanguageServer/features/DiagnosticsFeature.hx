@@ -2,13 +2,14 @@ package haxeLanguageServer.features;
 
 import haxe.Json;
 import haxe.io.Path;
-import haxeLanguageServer.helper.TypeHelper;
 import haxeLanguageServer.Configuration;
-import haxeLanguageServer.helper.PathHelper;
-import haxeLanguageServer.helper.ImportHelper;
-import haxeLanguageServer.server.DisplayResult;
-import haxeLanguageServer.helper.WorkspaceEditHelper;
 import haxeLanguageServer.LanguageServerMethods;
+import haxeLanguageServer.helper.DocHelper;
+import haxeLanguageServer.helper.ImportHelper;
+import haxeLanguageServer.helper.PathHelper;
+import haxeLanguageServer.helper.TypeHelper;
+import haxeLanguageServer.helper.WorkspaceEditHelper;
+import haxeLanguageServer.server.DisplayResult;
 import js.node.ChildProcess;
 
 using Lambda;
@@ -16,7 +17,11 @@ using Lambda;
 class DiagnosticsFeature {
 	static inline var DiagnosticsSource = "diagnostics";
 	static inline var RemoveUnusedImportUsingTitle = "Remove unused import/using";
+	#if debug
+	static inline var RemoveAllUnusedImportsUsingsTitle = "Organize imports/usings";
+	#else
 	static inline var RemoveAllUnusedImportsUsingsTitle = "Remove all unused imports/usings";
+	#end
 
 	final context:Context;
 	final diagnosticsArguments:Map<DocumentUri, DiagnosticsMap<Any>>;
@@ -255,9 +260,6 @@ class DiagnosticsFeature {
 		}
 	}
 
-	static final reEndsWithWhitespace = ~/\s*$/;
-	static final reStartsWhitespace = ~/^\s*/;
-
 	function getCodeActions<T>(params:CodeActionParams) {
 		if (!params.textDocument.uri.isFile()) {
 			return [];
@@ -286,7 +288,7 @@ class DiagnosticsFeature {
 			{
 				title: RemoveUnusedImportUsingTitle,
 				kind: QuickFix,
-				edit: WorkspaceEditHelper.create(context, params, [{range: patchRange(doc, d.range), newText: ""}]),
+				edit: WorkspaceEditHelper.create(context, params, [{range: DocHelper.patchRange(doc, d.range), newText: ""}]),
 				diagnostics: [d]
 			}
 		];
@@ -413,10 +415,15 @@ class DiagnosticsFeature {
 		var fixes = if (map == null) [] else [
 			for (key in map.keys())
 				if (key.code == UnusedImport)
-					{range: patchRange(doc, key.range), newText: ""}
+					WorkspaceEditHelper.removeText(DocHelper.patchRange(doc, key.range))
 		];
 
+		#if debug
+		var unusedRanges:Array<Range> = fixes.map(edit -> edit.range);
+		fixes = fixes.concat(OrganizeImportsFeature.organizeImports(doc, context, unusedRanges));
+		#end
 		var edit = WorkspaceEditHelper.create(context, params, fixes);
+
 		var diagnostics = existingActions.filter(action -> action.title == RemoveUnusedImportUsingTitle)
 			.map(action -> action.diagnostics)
 			.flatten()
@@ -440,29 +447,6 @@ class DiagnosticsFeature {
 		}
 
 		return actions;
-	}
-
-	function patchRange(doc:TextDocument, range:Range) {
-		var startLine = doc.lineAt(range.start.line);
-		if (reStartsWhitespace.match(startLine.substring(0, range.start.character)))
-			range = {
-				start: {
-					line: range.start.line,
-					character: 0
-				},
-				end: range.end
-			};
-
-		var endLine = if (range.start.line == range.end.line) startLine else doc.lineAt(range.end.line);
-		if (reEndsWithWhitespace.match(endLine.substring(range.end.character)))
-			range = {
-				start: range.start,
-				end: {
-					line: range.end.line + 1,
-					character: 0
-				}
-			};
-		return range;
 	}
 
 	inline function getDiagnosticsArguments<T>(uri:DocumentUri, kind:DiagnosticKind<T>, range:Range):T {
