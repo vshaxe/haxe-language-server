@@ -112,8 +112,8 @@ class DocHelper {
 	/**
 		expands range to encompass full lines when range has leading or trailing whitespace in first and / or last line
 
-		@param doc
-		@param range
+		@param doc referenced document
+		@param range selected range inside document
 	**/
 	public static function untrimRange(doc:TextDocument, range:Range) {
 		var startLine = doc.lineAt(range.start.line);
