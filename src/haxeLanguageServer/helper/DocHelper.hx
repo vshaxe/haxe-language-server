@@ -1,8 +1,8 @@
 package haxeLanguageServer.helper;
 
 class DocHelper {
-	static final reEndsWithWhitespace = ~/\s*$/;
 	static final reStartsWhitespace = ~/^\s*/;
+	static final reEndsWithWhitespace = ~/\s*$/;
 
 	/** Stolen from dox **/
 	public static function trim(doc:String) {
@@ -109,7 +109,13 @@ class DocHelper {
 		return '```$languageId\n$content\n```';
 	}
 
-	public static function patchRange(doc:TextDocument, range:Range) {
+	/**
+		expands range to encompass full lines when range has leading or trailing whitespace in first and / or last line
+
+		@param doc
+		@param range
+	**/
+	public static function untrimRange(doc:TextDocument, range:Range) {
 		var startLine = doc.lineAt(range.start.line);
 		if (reStartsWhitespace.match(startLine.substring(0, range.start.character)))
 			range = {

@@ -288,7 +288,7 @@ class DiagnosticsFeature {
 			{
 				title: RemoveUnusedImportUsingTitle,
 				kind: QuickFix,
-				edit: WorkspaceEditHelper.create(context, params, [{range: DocHelper.patchRange(doc, d.range), newText: ""}]),
+				edit: WorkspaceEditHelper.create(context, params, [{range: DocHelper.untrimRange(doc, d.range), newText: ""}]),
 				diagnostics: [d]
 			}
 		];
@@ -415,7 +415,7 @@ class DiagnosticsFeature {
 		var fixes = if (map == null) [] else [
 			for (key in map.keys())
 				if (key.code == UnusedImport)
-					WorkspaceEditHelper.removeText(DocHelper.patchRange(doc, key.range))
+					WorkspaceEditHelper.removeText(DocHelper.untrimRange(doc, key.range))
 		];
 
 		#if debug
