@@ -152,6 +152,18 @@ class OrganizeImportsFeature {
 		// maybe look at document whitespace and remove all trailing?
 		range.end.line++;
 		range.end.character = 0;
+
+		var nextLineRange:Range = {
+			start: range.end,
+			end: {
+				line: range.end.line + 1,
+				character: 0
+			}
+		};
+		var lineAfter:String = doc.getText(nextLineRange).trim();
+		if (lineAfter.length <= 0)
+			range.end.line++;
+
 		return WorkspaceEditHelper.removeText(range);
 	}
 
