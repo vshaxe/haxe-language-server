@@ -16,12 +16,9 @@ using Lambda;
 
 class DiagnosticsFeature {
 	static inline var DiagnosticsSource = "diagnostics";
+	static inline var OrganizeImportsUsingsTitle = "Organize imports/usings";
 	static inline var RemoveUnusedImportUsingTitle = "Remove unused import/using";
-	#if debug
-	static inline var RemoveAllUnusedImportsUsingsTitle = "Organize imports/usings";
-	#else
 	static inline var RemoveAllUnusedImportsUsingsTitle = "Remove all unused imports/usings";
-	#end
 
 	final context:Context;
 	final diagnosticsArguments:Map<DocumentUri, DiagnosticsMap<Any>>;
@@ -418,6 +415,8 @@ class DiagnosticsFeature {
 					WorkspaceEditHelper.removeText(DocHelper.untrimRange(doc, key.range))
 		];
 
+		var quickFixEdit = WorkspaceEditHelper.create(context, params, fixes);
+
 		#if debug
 		var unusedRanges:Array<Range> = fixes.map(edit -> edit.range);
 		fixes = fixes.concat(OrganizeImportsFeature.organizeImports(doc, context, unusedRanges));
@@ -430,7 +429,7 @@ class DiagnosticsFeature {
 			.array();
 		var actions = [
 			{
-				title: RemoveAllUnusedImportsUsingsTitle,
+				title: #if debug OrganizeImportsUsingsTitle #else RemoveAllUnusedImportsUsingsTitle #end,
 				kind: SourceOrganizeImports,
 				edit: edit,
 				diagnostics: diagnostics
@@ -441,7 +440,7 @@ class DiagnosticsFeature {
 			actions.push({
 				title: RemoveAllUnusedImportsUsingsTitle,
 				kind: QuickFix,
-				edit: edit,
+				edit: quickFixEdit,
 				diagnostics: diagnostics
 			});
 		}
