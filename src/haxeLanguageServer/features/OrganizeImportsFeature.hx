@@ -18,8 +18,6 @@ class OrganizeImportsFeature {
 		if ((doc.tokens == null) || (doc.tokens.tree == null))
 			return [];
 		try {
-			if (context.config.user.organizeImportsSortOrder == Off)
-				return [];
 			var packageName:Null<String> = null;
 			var imports:Array<TokenTree> = doc.tokens.tree.filterCallback(function(token:TokenTree, index:Int):FilterResult {
 				switch (token.tok) {
@@ -152,12 +150,8 @@ class OrganizeImportsFeature {
 		return edits;
 	}
 
-	static function determineSortFunction(context:Context):Null<ImportSortFuntion> {
-		return switch (context.config.user.organizeImportsSortOrder) {
-			case null:
-				sortImportsAllAlpha;
-			case Off:
-				null;
+	static function determineSortFunction(context:Context):ImportSortFuntion {
+		return switch (context.config.user.importsSortOrder) {
 			case AllAlphabetical:
 				sortImportsAllAlpha;
 			case StdlibThenLibsThenProject:
@@ -221,20 +215,20 @@ class OrganizeImportsFeature {
 	}
 }
 
-typedef ImportGroup = {
+private typedef ImportGroup = {
 	var id:Int;
 	var startOffset:Int;
 	var imports:Array<ImportInfo>;
 	var usings:Array<ImportInfo>;
 }
 
-typedef ImportInfo = {
+private typedef ImportInfo = {
 	var token:TokenTree;
 	var text:String;
 	var type:ImportType;
 }
 
-enum abstract ImportType(Int) {
+private enum abstract ImportType(Int) {
 	var StdLib;
 	var Library;
 	var Project;
@@ -246,4 +240,4 @@ enum abstract ImportType(Int) {
 	public function opLt(val:ImportType):Bool;
 }
 
-typedef ImportSortFuntion = (a:ImportInfo, b:ImportInfo) -> Int;
+private typedef ImportSortFuntion = (a:ImportInfo, b:ImportInfo) -> Int;
