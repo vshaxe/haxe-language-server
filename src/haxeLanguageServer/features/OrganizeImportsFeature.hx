@@ -8,8 +8,8 @@ import tokentree.TokenTreeBuilder;
 
 class OrganizeImportsFeature {
 	static final stdLibPackages:Array<String> = [
-		"cpp", "cs", "eval", "flash", "haxe", "hl", "java", "js", "lua", "neko", "php", "python", "sys", "Any", "Array", "ArrayAccess", "BaseString", "Bool",
-		"Class", "Date", "DateTools", "Dynamic", "EReg", "Enum", "EnumValue", "Float", "Int", "IntIterator", "Iterable", "Iterator", "KeyValueIterable",
+		"cpp", "cs", "eval", "flash", "haxe", "hl", "java", "js", "lua", "neko", "php", "python", "sys", "Any", "Array", "ArrayAccess", "Bool", "Class",
+		"Date", "DateTools", "Dynamic", "EReg", "Enum", "EnumValue", "Float", "Int", "IntIterator", "Iterable", "Iterator", "KeyValueIterable",
 		"KeyValueIterator", "Lambda", "List", "Map", "Math", "Null", "Reflect", "Single", "Std", "String", "StringBuf", "StringTools", "Sys", "SysError",
 		"Type", "UInt", "UnicodeString", "ValueType", "Void", "Xml", "XmlType"
 	];
