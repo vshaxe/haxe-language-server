@@ -1,10 +1,9 @@
 package haxeLanguageServer.features;
 
+import haxeLanguageServer.helper.FormatterHelper;
 import haxe.io.Path;
-import sys.FileSystem;
-import haxeLanguageServer.helper.WorkspaceEditHelper;
 import tokentree.TokenTree;
-import tokentree.utils.TokenTreeCheckUtils;
+import haxeLanguageServer.helper.WorkspaceEditHelper;
 
 using tokentree.TokenTreeAccessHelper;
 
@@ -21,11 +20,6 @@ class ExtractConstantFeature {
 	function extractConstant(params:CodeActionParams):Array<CodeAction> {
 		var doc = context.documents.get(params.textDocument.uri);
 		try {
-			var fsPath:FsPath = params.textDocument.uri.toFsPath();
-			var path:Path = new Path(fsPath.toString());
-			if (path.ext != "hx")
-				return [];
-
 			if ((doc.tokens == null) || (doc.tokens.tree == null))
 				return [];
 
@@ -90,7 +84,7 @@ class ExtractConstantFeature {
 
 		// insert const into type body
 		var prefix:String = doc.getText({start: {line: constInsertPos.line, character: 0}, end: constInsertPos});
-		var newConstText:String = 'public static inline var $name:String = "$text";\n$prefix';
+		var newConstText:String = FormatterHelper.formatText(doc, context, 'public static inline var $name:String = "$text";', FIELD_LEVEL) + '\n$prefix';
 		edits.push(WorkspaceEditHelper.insertText(constInsertPos, newConstText));
 
 		// replace all occurrences with const name

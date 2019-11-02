@@ -1,11 +1,11 @@
 package haxeLanguageServer.features;
 
 import haxe.io.Path;
-import haxeLanguageServer.helper.FormatterHelper;
-import haxeLanguageServer.helper.WorkspaceEditHelper;
 import tokentree.TokenTree;
 import tokentree.TokenTreeBuilder;
 import tokentree.utils.TokenTreeCheckUtils;
+import haxeLanguageServer.helper.FormatterHelper;
+import haxeLanguageServer.helper.WorkspaceEditHelper;
 
 using tokentree.TokenTreeAccessHelper;
 
@@ -22,11 +22,6 @@ class ExtractFunctionFeature {
 	function extractFunction(params:CodeActionParams):Array<CodeAction> {
 		var doc = context.documents.get(params.textDocument.uri);
 		try {
-			var fsPath:FsPath = params.textDocument.uri.toFsPath();
-			var path:Path = new Path(fsPath.toString());
-			if (path.ext != "hx")
-				return [];
-
 			if ((doc.tokens == null) || (doc.tokens.tree == null))
 				return [];
 

@@ -2,9 +2,9 @@ package haxeLanguageServer.features;
 
 import haxe.io.Path;
 import sys.FileSystem;
-import haxeLanguageServer.helper.WorkspaceEditHelper;
 import tokentree.TokenTree;
 import tokentree.utils.TokenTreeCheckUtils;
+import haxeLanguageServer.helper.WorkspaceEditHelper;
 
 using tokentree.TokenTreeAccessHelper;
 
@@ -23,8 +23,6 @@ class ExtractTypeFeature {
 		try {
 			var fsPath:FsPath = params.textDocument.uri.toFsPath();
 			var path:Path = new Path(fsPath.toString());
-			if (path.ext != "hx")
-				return [];
 
 			if ((doc.tokens == null) || (doc.tokens.tree == null))
 				return [];
@@ -41,19 +39,9 @@ class ExtractTypeFeature {
 			if (isInsideConditional(lastImport))
 				return [];
 
-			var fileHeader = "";
-
 			// copy all imports from current file
 			// TODO reduce imports
-			if (lastImport != null) {
-				var pos = lastImport.getPos();
-				pos.min = 0;
-
-				var range = doc.rangeAt2(pos);
-				range.end.line++;
-				range.end.character = 0;
-				fileHeader = doc.getText(range) + "\n";
-			}
+			var fileHeader = copyImports(doc, path.file, lastImport);
 
 			var actions = [];
 			for (type in types) {
@@ -112,6 +100,42 @@ class ExtractTypeFeature {
 			return actions;
 		} catch (e:Any) {}
 		return [];
+	}
+
+	function copyImports(doc:TextDocument, fileName:String, lastImport:Null<TokenTree>):String {
+		if (lastImport == null)
+			return "";
+
+		var pos = lastImport.getPos();
+		pos.min = 0;
+
+		var range = doc.rangeAt2(pos);
+		range.end.line++;
+		range.end.character = 0;
+		var fileHeader:String = doc.getText(range);
+
+		var pack:Null<TokenTree>;
+		doc.tokens.tree.filterCallback(function(token:TokenTree, index:Int):FilterResult {
+			switch (token.tok) {
+				case Kwd(KwdPackage):
+					pack = token;
+					return SKIP_SUBTREE;
+				default:
+					return SKIP_SUBTREE;
+			}
+		});
+		if (pack == null)
+			return fileHeader + "\n";
+
+		var packText:String = doc.getText(doc.rangeAt2(pack.getPos()));
+		packText = packText.replace("package ", "");
+		packText = packText.replace(";", "").trim();
+		if (packText.length <= 0)
+			packText = '${fileName}';
+		else
+			packText += '.${fileName}';
+
+		return fileHeader + 'import $packText;\n\n';
 	}
 
 	function getLastImportToken(doc:TextDocument):Null<TokenTree> {
