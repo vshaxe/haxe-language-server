@@ -70,8 +70,8 @@ private enum abstract PostfixCompletionLevel(String) {
 
 private enum abstract ImportsSortOrderConfig(String) {
 	var AllAlphabetical = "all-alphabetical";
-	var StdlibThenLibsThenProject = "stdlib->libs->project";
-	var NonProjectThenProject = "non-project->project";
+	var StdlibThenLibsThenProject = "stdlib -> libs -> project";
+	var NonProjectThenProject = "non-project -> project";
 }
 
 private typedef UserConfig = {
