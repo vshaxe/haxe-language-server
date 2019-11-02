@@ -1,10 +1,10 @@
 package haxeLanguageServer.features;
 
 import haxe.ds.ArraySort;
-import tokentree.TokenTree;
-import tokentree.TokenTreeBuilder;
 import haxeLanguageServer.helper.FormatterHelper;
 import haxeLanguageServer.helper.WorkspaceEditHelper;
+import tokentree.TokenTree;
+import tokentree.TokenTreeBuilder;
 
 class OrganizeImportsFeature {
 	static final stdLibPackages:Array<String> = [
@@ -18,6 +18,8 @@ class OrganizeImportsFeature {
 		if ((doc.tokens == null) || (doc.tokens.tree == null))
 			return [];
 		try {
+			if (context.config.user.organizeImportsSortOrder == Off)
+				return [];
 			var packageName:Null<String> = null;
 			var imports:Array<TokenTree> = doc.tokens.tree.filterCallback(function(token:TokenTree, index:Int):FilterResult {
 				switch (token.tok) {
@@ -122,10 +124,14 @@ class OrganizeImportsFeature {
 	}
 
 	static function organizeImportGroup(doc:TextDocument, context:Context, importGroup:ImportGroup):Array<TextEdit> {
-		ArraySort.sort(importGroup.imports, sortImports);
+		var sortFunc:Null<ImportSortFuntion> = determineSortFunction(context);
+		if (sortFunc == null)
+			return [];
+
+		ArraySort.sort(importGroup.imports, sortFunc);
 		var newImports:String = importGroup.imports.map(i -> i.text).join("\n");
 
-		ArraySort.sort(importGroup.usings, sortImports);
+		ArraySort.sort(importGroup.usings, sortFunc);
 		var newUsings:String = importGroup.usings.map(i -> i.text).join("\n");
 
 		var newText:String = FormatterHelper.formatText(doc, context, newImports + "\n" + newUsings, TokenTreeEntryPoint.TYPE_LEVEL);
@@ -144,6 +150,21 @@ class OrganizeImportsFeature {
 		edits.push(WorkspaceEditHelper.insertText(importInsertPos, newText + "\n"));
 
 		return edits;
+	}
+
+	static function determineSortFunction(context:Context):Null<ImportSortFuntion> {
+		return switch (context.config.user.organizeImportsSortOrder) {
+			case null:
+				sortImportsAllAlpha;
+			case Off:
+				null;
+			case AllAlphabetical:
+				sortImportsAllAlpha;
+			case StdlibThenLibsThenProject:
+				sortImportsStdlibThenLibsThenProject;
+			case NonProjectThenProject:
+				sortImportsNonProjectThenProject;
+		}
 	}
 
 	static function makeImportEdit(doc:TextDocument, token:TokenTree):TextEdit {
@@ -167,7 +188,15 @@ class OrganizeImportsFeature {
 		return WorkspaceEditHelper.removeText(range);
 	}
 
-	static function sortImports(a:ImportInfo, b:ImportInfo):Int {
+	static function sortImportsAllAlpha(a:ImportInfo, b:ImportInfo):Int {
+		if (a.text < b.text)
+			return -1;
+		if (a.text > b.text)
+			return 1;
+		return 0;
+	}
+
+	static function sortImportsStdlibThenLibsThenProject(a:ImportInfo, b:ImportInfo):Int {
 		if (a.type < b.type)
 			return -1;
 		if (a.type > b.type)
@@ -177,6 +206,14 @@ class OrganizeImportsFeature {
 		if (a.text > b.text)
 			return 1;
 		return 0;
+	}
+
+	static function sortImportsNonProjectThenProject(a:ImportInfo, b:ImportInfo):Int {
+		if (a.type == StdLib)
+			a.type = Library;
+		if (b.type == StdLib)
+			b.type = Library;
+		return sortImportsStdlibThenLibsThenProject(a, b);
 	}
 
 	static function determineStartPos(token:TokenTree):Int {
@@ -208,3 +245,5 @@ enum abstract ImportType(Int) {
 	@:op(a > b)
 	public function opLt(val:ImportType):Bool;
 }
+
+typedef ImportSortFuntion = (a:ImportInfo, b:ImportInfo) -> Int;
