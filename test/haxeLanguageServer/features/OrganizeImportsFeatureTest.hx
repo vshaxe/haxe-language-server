@@ -3,6 +3,7 @@ package haxeLanguageServer.features;
 import haxe.Json;
 import haxeLanguageServer.Configuration;
 import jsonrpc.Protocol;
+import testcases.TestTextEditHelper;
 
 class OrganizeImportsFeatureTest extends Test implements IOrganizeImportsFeatureTestCases {
 	function goldCheck(fileName:String, input:String, gold:String, config:String) {
@@ -15,22 +16,7 @@ class OrganizeImportsFeatureTest extends Test implements IOrganizeImportsFeature
 		var goldEdit:TextDocumentEdit = Json.parse(gold);
 
 		Assert.notNull(goldEdit);
-		Assert.notNull(goldEdit.edits);
-		Assert.equals(goldEdit.edits.length, edits.length);
-
-		for (index in 0...goldEdit.edits.length) {
-			var expectedEdit:TextEdit = goldEdit.edits[index];
-			var actualEdit:TextEdit = edits[index];
-
-			Assert.equals(expectedEdit.newText, actualEdit.newText);
-
-			if (expectedEdit.range != null) {
-				Assert.equals(expectedEdit.range.start.line, actualEdit.range.start.line);
-				Assert.equals(expectedEdit.range.start.character, actualEdit.range.start.character);
-				Assert.equals(expectedEdit.range.end.line, actualEdit.range.end.line);
-				Assert.equals(expectedEdit.range.end.character, actualEdit.range.end.character);
-			}
-		}
+		TestTextEditHelper.compareTextEdits(goldEdit.edits, edits);
 	}
 
 	@:access(haxeLanguageServer.Configuration)
@@ -39,10 +25,10 @@ class OrganizeImportsFeatureTest extends Test implements IOrganizeImportsFeature
 		context.config.user = {
 			importsSortOrder: importsSortOrder
 		};
-		var doc = new TextDocument(context, new DocumentUri("file://" + fileName + ".hxtest"), "haxe", 4, content);
+		var doc = new TextDocument(context, new DocumentUri("file://" + fileName + ".edittest"), "haxe", 4, content);
 		return OrganizeImportsFeature.organizeImports(doc, context, []);
 	}
 }
 
-@:autoBuild(EditTestCaseMacro.build("test/testcases/organizeImports"))
+@:autoBuild(testcases.EditTestCaseMacro.build("test/testcases/organizeImports"))
 private interface IOrganizeImportsFeatureTestCases {}

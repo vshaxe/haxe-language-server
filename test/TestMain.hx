@@ -20,7 +20,7 @@ class TestMain {
 			new TypeHelperTest(),
 			new RenameResolverTest(), 
 			new HelperTest(),
-			new TokenTreeTest(),
+			new ExtractConstantFeatureTest(),
 			new OrganizeImportsFeatureTest()
 		]);
 		// @formatter:on

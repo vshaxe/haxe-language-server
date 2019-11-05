@@ -19,19 +19,23 @@ class ExtractConstantFeature {
 
 	function extractConstant(params:CodeActionParams):Array<CodeAction> {
 		var doc = context.documents.get(params.textDocument.uri);
+		return internalExtractConstant(doc, params.textDocument.uri, params.range);
+	}
+
+	function internalExtractConstant(doc:TextDocument, uri:DocumentUri, range:Range):Array<CodeAction> {
 		try {
 			if ((doc.tokens == null) || (doc.tokens.tree == null))
 				return [];
 
 			// only look at token at range start
-			var token:Null<TokenTree> = doc.tokens.getTokenAtOffset(doc.offsetAt(params.range.start));
+			var token:Null<TokenTree> = doc.tokens.getTokenAtOffset(doc.offsetAt(range.start));
 			if (token == null)
 				return [];
 
 			// must be a Const(CString(_))
 			switch (token.tok) {
 				case Const(CString(s)):
-					var action:Null<CodeAction> = makeExtractConstAction(doc, params.textDocument.uri, token, s);
+					var action:Null<CodeAction> = makeExtractConstAction(doc, uri, token, s);
 					if (action == null)
 						return [];
 					return [action];
