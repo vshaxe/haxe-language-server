@@ -122,7 +122,7 @@ class OrganizeImportsFeature {
 	}
 
 	static function organizeImportGroup(doc:TextDocument, context:Context, importGroup:ImportGroup):Array<TextEdit> {
-		var sortFunc:Null<ImportSortFuntion> = determineSortFunction(context);
+		var sortFunc:Null<ImportSortFunction> = determineSortFunction(context);
 		if (sortFunc == null)
 			return [];
 
@@ -150,7 +150,7 @@ class OrganizeImportsFeature {
 		return edits;
 	}
 
-	static function determineSortFunction(context:Context):ImportSortFuntion {
+	static function determineSortFunction(context:Context):ImportSortFunction {
 		return switch (context.config.user.importsSortOrder) {
 			case AllAlphabetical:
 				sortImportsAllAlpha;
