@@ -5,7 +5,7 @@ import haxeLanguageServer.Configuration;
 import jsonrpc.Protocol;
 import testcases.IFileBasedEditTestCases;
 
-class OrganizeImportsFeatureTest extends Test implements IFileBasedEditTestCases {
+class OrganizeImportsFeatureTest extends Test implements IOrganizeImportsFeatureTestCases {
 	function goldCheck(fileName:String, input:String, gold:String, config:String) {
 		var userConfig:UserConfig = Json.parse(config);
 		var importsSortOrder:ImportsSortOrderConfig = AllAlphabetical;
@@ -44,3 +44,6 @@ class OrganizeImportsFeatureTest extends Test implements IFileBasedEditTestCases
 		return OrganizeImportsFeature.organizeImports(doc, context, []);
 	}
 }
+
+@:autoBuild(EditTestCaseMacro.build("test/testcases/organizeImports"))
+private interface IOrganizeImportsFeatureTestCases {}
