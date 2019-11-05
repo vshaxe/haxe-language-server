@@ -68,13 +68,13 @@ private enum abstract PostfixCompletionLevel(String) {
 	var Off = "off";
 }
 
-private enum abstract ImportsSortOrderConfig(String) {
+enum abstract ImportsSortOrderConfig(String) {
 	var AllAlphabetical = "all-alphabetical";
 	var StdlibThenLibsThenProject = "stdlib -> libs -> project";
 	var NonProjectThenProject = "non-project -> project";
 }
 
-private typedef UserConfig = {
+typedef UserConfig = {
 	var ?enableCodeLens:Bool;
 	var ?enableDiagnostics:Bool;
 	var ?enableServerView:Bool;
