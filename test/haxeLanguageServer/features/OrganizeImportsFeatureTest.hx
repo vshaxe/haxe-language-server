@@ -3,7 +3,6 @@ package haxeLanguageServer.features;
 import haxe.Json;
 import haxeLanguageServer.Configuration;
 import jsonrpc.Protocol;
-import testcases.IFileBasedEditTestCases;
 
 class OrganizeImportsFeatureTest extends Test implements IOrganizeImportsFeatureTestCases {
 	function goldCheck(fileName:String, input:String, gold:String, config:String) {
