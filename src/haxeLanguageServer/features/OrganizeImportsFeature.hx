@@ -50,13 +50,14 @@ class OrganizeImportsFeature {
 				if (group == null) {
 					group = {
 						id: id,
-						startOffset: determineStartPos(i),
+						startOffset: determineStartPos(doc, i),
 						imports: [],
 						usings: []
 					}
 					importGroups.set(id, group);
 				}
-				var range:Range = doc.rangeAt2(i.getPos());
+
+				var range:Range = doc.rangeAt2(doc.tokens.getTreePos(i));
 				var isUnused:Bool = false;
 				for (r in unusedRanges) {
 					if (r.contains(range)) {
@@ -162,7 +163,7 @@ class OrganizeImportsFeature {
 	}
 
 	static function makeImportEdit(doc:TextDocument, token:TokenTree):TextEdit {
-		var range:Range = doc.rangeAt2(token.getPos());
+		var range:Range = doc.rangeAt2(doc.tokens.getTreePos(token));
 		// TODO move marker to beginning of next line assumes imports are one line each
 		// maybe look at document whitespace and remove all trailing?
 		range.end.line++;
@@ -210,8 +211,8 @@ class OrganizeImportsFeature {
 		return sortImportsStdlibThenLibsThenProject(a, b);
 	}
 
-	static function determineStartPos(token:TokenTree):Int {
-		return token.pos.min;
+	static function determineStartPos(doc:TextDocument, token:TokenTree):Int {
+		return doc.tokens.getPos(token).min;
 	}
 }
 

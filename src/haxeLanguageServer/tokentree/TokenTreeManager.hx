@@ -102,18 +102,31 @@ class TokenTreeManager {
 		if (tree == null)
 			return null;
 
-		return findTokenAtOffset(tree, off);
+		inline createTokenCharacterRanges();
+
+		for (index in 0...list.length) {
+			var range = tokenCharacterRanges[index];
+			if (range == null) {
+				range = list[index].pos;
+			}
+			if (range.max < off)
+				continue;
+			if (off < range.min)
+				return null;
+			return findTokenAtIndex(tree, index);
+		}
+		return null;
 	}
 
-	function findTokenAtOffset(parent:TokenTree, off:Int):Null<TokenTree> {
+	function findTokenAtIndex(parent:TokenTree, index:Int):Null<TokenTree> {
 		if (parent.children == null) {
 			return null;
 		}
 		for (child in parent.children) {
-			if ((child.pos.min <= off) && (child.pos.max >= off))
+			if (child.index == index)
 				return child;
 
-			var token:Null<TokenTree> = findTokenAtOffset(child, off);
+			var token:Null<TokenTree> = findTokenAtIndex(child, index);
 			if (token != null)
 				return token;
 		}

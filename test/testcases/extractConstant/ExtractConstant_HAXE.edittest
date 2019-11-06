@@ -1,13 +1,13 @@
 {
     "start": {
         "line": 4,
-        "character": 48
+        "character": 44
     }
 }
 
 ---
 
-class Main
+class Main {
 	function makeEdits(content:String, fileName:String, range:Range):Array<TextEdit> {
 		var context:Context = new Context(new Protocol(null));
 		var uri:DocumentUri = new DocumentUri("file://" + fileName + ".edittest");

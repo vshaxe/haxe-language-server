@@ -65,7 +65,7 @@ class ExtractTypeFeature {
 				var docComment:Null<TokenTree> = TokenTreeCheckUtils.getDocComment(type);
 				if (docComment != null) {
 					// expand pos.min to capture doc comment
-					pos.min = docComment.pos.min;
+					pos.min = doc.tokens.getPos(docComment).min;
 				}
 				var typeRange = doc.rangeAt2(pos);
 				if (params.range.intersection(typeRange) == null) {
@@ -106,7 +106,7 @@ class ExtractTypeFeature {
 		if (lastImport == null)
 			return "";
 
-		var pos = lastImport.getPos();
+		var pos = doc.tokens.getTreePos(lastImport);
 		pos.min = 0;
 
 		var range = doc.rangeAt2(pos);
@@ -127,7 +127,7 @@ class ExtractTypeFeature {
 		if (pack == null)
 			return fileHeader + "\n";
 
-		var packText:String = doc.getText(doc.rangeAt2(pack.getPos()));
+		var packText:String = doc.getText(doc.rangeAt2(doc.tokens.getTreePos(pack)));
 		packText = packText.replace("package ", "");
 		packText = packText.replace(";", "").trim();
 		if (packText.length <= 0)

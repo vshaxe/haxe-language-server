@@ -1,0 +1,30 @@
+{
+    "start": {
+        "line": 2,
+        "character": 36
+    }
+}
+
+---
+
+class Main {
+	function init() {
+		new JQuery ("#id1").removeClass ("disabled");
+		new JQuery ("#id1").prop ("readonly", false);
+
+		new JQuery ("#id2").removeClass ("disabled");
+		new JQuery ("#id2").prop ("readonly", false);
+	}
+}
+
+---
+
+{
+	"edits": [{
+            "newText": "public static inline var DISABLED:String = \"disabled\";\n\n\t"
+        },{
+            "newText": "DISABLED"
+        },{
+            "newText": "DISABLED"
+        }]
+}

@@ -1,0 +1,31 @@
+{
+    "start": {
+        "line": 6,
+        "character": 44
+    }
+}
+
+---
+
+// öäüßł€µ”„¢«»æſðđŋħ̣ĸħĸĸ̣
+class Main {
+	function init() {
+		new JQuery ("#id1").removeClass ("disabled");
+		new JQuery ("#id1").prop ("readonly", false);
+        // öäüßł€µ”„¢«»æſðđŋħ̣ĸħĸĸ̣
+		new JQuery ("#id2").removeClass ("disabled");
+		new JQuery ("#id2").prop ("readonly", false);
+	}
+}
+
+---
+
+{
+	"edits": [{
+            "newText": "public static inline var DISABLED:String = \"disabled\";\n\n\t"
+        },{
+            "newText": "DISABLED"
+        },{
+            "newText": "DISABLED"
+        }]
+}

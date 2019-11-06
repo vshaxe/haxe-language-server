@@ -51,7 +51,7 @@ class ExtractConstantFeature {
 			return null;
 
 		// skip string literals with interpolation
-		var fullText:String = doc.getText(doc.rangeAt2(token.pos));
+		var fullText:String = doc.getText(doc.rangeAt2(doc.tokens.getPos(token)));
 		if ((fullText.startsWith("'")) && (~/[$]/g.match(text)))
 			return null;
 
@@ -70,7 +70,7 @@ class ExtractConstantFeature {
 		var firstToken:Null<TokenTree> = type.access().firstChild().isCIdent().firstOf(BrOpen).firstChild().token;
 		if (firstToken == null)
 			return null;
-		var constInsertPos:Position = doc.positionAt(firstToken.getPos().min);
+		var constInsertPos:Position = doc.positionAt(doc.tokens.getTreePos(firstToken).min);
 
 		// find all occurrences of string constant
 		var occurrences:Array<TokenTree> = type.filterCallback(function(token:TokenTree, index:Int):FilterResult {
@@ -93,7 +93,7 @@ class ExtractConstantFeature {
 
 		// replace all occurrences with const name
 		for (occurrence in occurrences) {
-			edits.push(WorkspaceEditHelper.replaceText(doc.rangeAt(occurrence.pos.min, occurrence.pos.max), name));
+			edits.push(WorkspaceEditHelper.replaceText(doc.rangeAt2(doc.tokens.getPos(occurrence)), name));
 		}
 
 		var textEdit:TextDocumentEdit = WorkspaceEditHelper.textDocumentEdit(uri, edits);
