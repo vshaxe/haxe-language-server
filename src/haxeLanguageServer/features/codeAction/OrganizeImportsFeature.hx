@@ -1,4 +1,4 @@
-package haxeLanguageServer.features;
+package haxeLanguageServer.features.codeAction;
 
 import haxe.ds.ArraySort;
 import haxeLanguageServer.helper.FormatterHelper;

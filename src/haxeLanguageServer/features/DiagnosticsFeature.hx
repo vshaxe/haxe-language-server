@@ -4,6 +4,7 @@ import haxe.Json;
 import haxe.io.Path;
 import haxeLanguageServer.Configuration;
 import haxeLanguageServer.LanguageServerMethods;
+import haxeLanguageServer.features.codeAction.OrganizeImportsFeature;
 import haxeLanguageServer.helper.DocHelper;
 import haxeLanguageServer.helper.ImportHelper;
 import haxeLanguageServer.helper.PathHelper;

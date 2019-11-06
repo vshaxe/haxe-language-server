@@ -1,6 +1,6 @@
 package haxeLanguageServer;
 
-import haxeLanguageServer.features.CodeActionFeature.CodeActionContributor;
+import haxeLanguageServer.features.codeAction.CodeActionFeature.CodeActionContributor;
 
 class TestContext extends Context {
 	public function new(languageServerProtocol) {

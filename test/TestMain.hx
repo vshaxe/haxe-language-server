@@ -1,10 +1,9 @@
 package;
 
-import haxeLanguageServer.features.*;
+import haxeLanguageServer.features.codeAction.*;
 import haxeLanguageServer.helper.*;
 import haxeLanguageServer.hxParser.*;
 import haxeLanguageServer.protocol.*;
-import haxeLanguageServer.tokentree.*;
 import utest.UTest;
 
 class TestMain {

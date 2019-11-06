@@ -1,4 +1,4 @@
-package haxeLanguageServer.features;
+package haxeLanguageServer.features.codeAction;
 
 import haxeLanguageServer.helper.FormatterHelper;
 import haxe.io.Path;
