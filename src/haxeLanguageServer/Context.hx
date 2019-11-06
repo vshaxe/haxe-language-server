@@ -14,10 +14,11 @@ import jsonrpc.ResponseError;
 import jsonrpc.Types;
 import jsonrpc.Protocol;
 import haxeLanguageServer.features.*;
+import haxeLanguageServer.features.codeAction.*;
 import haxeLanguageServer.features.completion.*;
 import haxeLanguageServer.features.documentSymbols.DocumentSymbolsFeature;
 import haxeLanguageServer.features.foldingRange.FoldingRangeFeature;
-import haxeLanguageServer.features.CodeActionFeature.CodeActionContributor;
+import haxeLanguageServer.features.codeAction.CodeActionFeature.CodeActionContributor;
 import haxeLanguageServer.server.DisplayResult;
 import haxeLanguageServer.server.HaxeServer;
 import haxeLanguageServer.LanguageServerMethods.MethodResult;
@@ -211,6 +212,9 @@ class Context {
 				new CodeLensFeature(this);
 				new CodeGenerationFeature(this);
 				new WorkspaceSymbolsFeature(this);
+				new ExtractTypeFeature(this);
+				new ExtractConstantFeature(this);
+				new ExtractFunctionFeature(this);
 
 				for (doc in documents.getAll())
 					publishDiagnostics(doc.uri);

@@ -68,7 +68,13 @@ private enum abstract PostfixCompletionLevel(String) {
 	var Off = "off";
 }
 
-private typedef UserConfig = {
+enum abstract ImportsSortOrderConfig(String) {
+	var AllAlphabetical = "all-alphabetical";
+	var StdlibThenLibsThenProject = "stdlib -> libs -> project";
+	var NonProjectThenProject = "non-project -> project";
+}
+
+typedef UserConfig = {
 	var ?enableCodeLens:Bool;
 	var ?enableDiagnostics:Bool;
 	var ?enableServerView:Bool;
@@ -81,6 +87,7 @@ private typedef UserConfig = {
 	var ?codeGeneration:CodeGenerationConfig;
 	var ?exclude:Array<String>;
 	var ?postfixCompletion:PostfixCompletionConfig;
+	var ?importsSortOrder:ImportsSortOrderConfig;
 }
 
 private typedef InitOptions = {
@@ -212,7 +219,8 @@ class Configuration {
 			exclude: ["zpp_nape"],
 			postfixCompletion: {
 				level: Full
-			}
+			},
+			importsSortOrder: AllAlphabetical
 		};
 		StructDefaultsMacro.applyDefaults(user, defaults);
 	}

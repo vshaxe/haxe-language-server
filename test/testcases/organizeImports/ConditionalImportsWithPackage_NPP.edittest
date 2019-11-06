@@ -1,0 +1,83 @@
+{
+    "importsSortOrder": "non-project -> project"
+}
+
+---
+
+// öäüßł€µ”„¢«»æſðđŋħ̣ĸħĸĸ̣
+package haxeLanguageServer.features;
+
+import haxeLanguageServer.helper.FormatterHelper;
+import tokentree.TokenTreeBuilder;
+import haxe.ds.ArraySort;
+import tokentree.TokenTree;
+import formatter.Main;
+import haxeLanguageServer.helper.WorkspaceEditHelper;
+
+#if js 
+import haxeLanguageServer.helper.FormatterHelper;
+import tokentree.TokenTreeBuilder;
+import haxe.ds.ArraySort;
+import tokentree.TokenTree;
+import formatter.Main;
+import haxeLanguageServer.helper.WorkspaceEditHelper;
+#else
+import haxeLanguageServer.helper.FormatterHelper;
+import tokentree.TokenTreeBuilder;
+import haxe.ds.ArraySort;
+import tokentree.TokenTree;
+import formatter.Main;
+import haxeLanguageServer.helper.WorkspaceEditHelper;
+#end
+
+---
+
+{
+	"edits": [{
+            "newText": ""
+        },{
+            "newText": ""
+        },{
+            "newText": ""
+        },{
+            "newText": ""
+        },{
+            "newText": ""
+        },{
+            "newText": ""
+        },{
+            "newText": "import formatter.Main;\nimport haxe.ds.ArraySort;\nimport tokentree.TokenTree;\nimport tokentree.TokenTreeBuilder;\nimport haxeLanguageServer.helper.FormatterHelper;\nimport haxeLanguageServer.helper.WorkspaceEditHelper;\n\n"
+        },{
+            "newText": ""
+        },{
+            "newText": ""
+        },{
+            "newText": ""
+        },{
+            "newText": ""
+        },{
+            "newText": ""
+        },{
+            "newText": ""
+        },{
+            "newText": "import formatter.Main;\nimport haxe.ds.ArraySort;\nimport tokentree.TokenTree;\nimport tokentree.TokenTreeBuilder;\nimport haxeLanguageServer.helper.FormatterHelper;\nimport haxeLanguageServer.helper.WorkspaceEditHelper;\n\n"
+        },{
+            "newText": ""
+        },{
+            "newText": ""
+        },{
+            "newText": ""
+        },{
+            "newText": ""
+        },{
+            "newText": ""
+        },{
+            "newText": ""
+        },{
+            "range": {
+                "start": { "line": 3, "character": 0 },
+                "end": { "line": 3, "character": 0 }
+            },
+            "newText": "import formatter.Main;\nimport haxe.ds.ArraySort;\nimport tokentree.TokenTree;\nimport tokentree.TokenTreeBuilder;\nimport haxeLanguageServer.helper.FormatterHelper;\nimport haxeLanguageServer.helper.WorkspaceEditHelper;\n\n"
+        }]
+}

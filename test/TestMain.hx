@@ -1,10 +1,10 @@
 package;
 
-import utest.UTest;
+import haxeLanguageServer.features.codeAction.*;
 import haxeLanguageServer.helper.*;
 import haxeLanguageServer.hxParser.*;
-import haxeLanguageServer.tokentree.*;
 import haxeLanguageServer.protocol.*;
+import utest.UTest;
 
 class TestMain {
 	static function main() {
@@ -19,7 +19,8 @@ class TestMain {
 			new TypeHelperTest(),
 			new RenameResolverTest(), 
 			new HelperTest(),
-			new TokenTreeTest()
+			new ExtractConstantFeatureTest(),
+			new OrganizeImportsFeatureTest()
 		]);
 		// @formatter:on
 	}

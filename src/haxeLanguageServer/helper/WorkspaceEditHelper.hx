@@ -11,4 +11,37 @@ class WorkspaceEditHelper {
 		changes[doc.uri.toString()] = edits;
 		return {changes: changes};
 	}
+
+	public static function createNewFile(uri:DocumentUri, overwrite:Bool, ignoreIfExists:Bool):CreateFile {
+		return {
+			kind: CreateFileKind.Create,
+			uri: uri,
+			options: {
+				overwrite: overwrite,
+				ignoreIfExists: ignoreIfExists
+			}
+		}
+	}
+
+	public static function textDocumentEdit(uri:DocumentUri, edits:Array<TextEdit>):TextDocumentEdit {
+		return {
+			textDocument: {
+				uri: uri,
+				version: null
+			},
+			edits: edits
+		}
+	}
+
+	public static function insertText(pos:Position, newText:String):TextEdit {
+		return {range: {start: pos, end: pos}, newText: newText};
+	}
+
+	public static function replaceText(range:Range, newText:String):TextEdit {
+		return {range: range, newText: newText};
+	}
+
+	public static function removeText(range:Range):TextEdit {
+		return {range: range, newText: ""};
+	}
 }

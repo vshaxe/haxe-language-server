@@ -2,5 +2,18 @@
 	"[haxe]": {
 		"editor.formatOnSave": true,
 		"editor.formatOnPaste": true
-	}
+	},
+	"haxe.importsSortOrder": "all-alphabetical",
+	"haxeTestExplorer.testCommand": [
+		"npx",
+		"lix",
+		"run", 
+		"vshaxe-build", 
+		"--target", 
+		"language-server-tests", 
+		"--debug",
+		"--",
+		"-lib",
+		"test-adapter"
+	]
 }
