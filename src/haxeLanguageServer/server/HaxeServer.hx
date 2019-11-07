@@ -26,7 +26,7 @@ private class HaxeConnection {
 	function new(process, onMessage, onExit) {
 		this.process = process;
 		this.onMessage = onMessage;
-		process.on(ChildProcessEvent.Exit, (_, _) -> onExit());
+		process.on(ChildProcessEvent.Exit, (_, _) -> onExit(this));
 	}
 
 	public function send(data:Buffer) {}
@@ -77,30 +77,40 @@ private class StdioConnection extends HaxeConnection {
 		return buffer.getContent();
 	}
 
-	public static function start(path:String, arguments:Array<String>, spawnOptions:ChildProcessSpawnOptions, onMessage:String->Void, onExit:() -> Void,
-			callback:HaxeConnection->Void) {
+	public static function start(path:String, arguments:Array<String>, spawnOptions:ChildProcessSpawnOptions, onMessage:String->Void,
+			onExit:HaxeConnection->Void, callback:HaxeConnection->Void) {
 		var process = ChildProcess.spawn(path, arguments.concat(["--wait", "stdio"]), spawnOptions);
 		callback(new StdioConnection(process, onMessage, onExit));
 	}
 }
 
 private class SocketConnection extends HaxeConnection {
-	final socket:Socket;
+	var socket:Null<Socket>;
 	var lastErrorOutput:String = "";
 
-	function new(process, socket, onMessage, onExit) {
+	function new(process, onMessage, onExit) {
 		super(process, onMessage, onExit);
+		process.stdout.on(ReadableEvent.Data, onStdout);
+		process.stderr.on(ReadableEvent.Data, onStderr);
+	}
+
+	function setup(socket:Socket) {
 		this.socket = socket;
 		socket.on(ReadableEvent.Data, onData);
-		process.stdout.on(ReadableEvent.Data, onStdout);
-		process.stderr.on(ReadableEvent.Data, onStdout);
 	}
 
 	override function send(data:Buffer) {
 		socket.write(data);
 	}
 
-	override function onStdout(buf:Buffer) {
+	override function kill() {
+		if (socket != null) {
+			socket.end();
+		}
+		super.kill();
+	}
+
+	function onStderr(buf:Buffer) {
 		lastErrorOutput = buf.toString();
 		trace(HaxeConnection.reTrailingNewline.replace(lastErrorOutput, ""));
 	}
@@ -109,15 +119,18 @@ private class SocketConnection extends HaxeConnection {
 		return lastErrorOutput;
 	}
 
-	public static function start(path:String, arguments:Array<String>, spawnOptions:ChildProcessSpawnOptions, onMessage:String->Void, onExit:() -> Void,
-			callback:HaxeConnection->Void) {
+	public static function start(path:String, arguments:Array<String>, spawnOptions:ChildProcessSpawnOptions, onMessage:String->Void,
+			onExit:HaxeConnection->Void, callback:HaxeConnection->Void) {
 		var server = Net.createServer();
 		server.listen(0, function() {
 			var port = server.address().port;
 			var process = ChildProcess.spawn(path, arguments.concat(["--server-connect", '127.0.0.1:$port']), spawnOptions);
+			var connection = new SocketConnection(process, onMessage, onExit);
 			server.on(ServerEvent.Connection, function(socket) {
 				trace("Haxe connected!");
-				callback(new SocketConnection(process, socket, onMessage, onExit));
+				server.close();
+				connection.setup(socket);
+				callback(connection);
 			});
 		});
 	}
@@ -407,14 +420,14 @@ class HaxeServer {
 		});
 	}
 
-	function onExit() {
+	function onExit(connection:HaxeConnection) {
 		crashes++;
 		if (crashes < 3) {
 			restart("Haxe process was killed");
 			return;
 		}
 
-		var haxeResponse = haxeConnection.getLastErrorOutput();
+		var haxeResponse = connection.getLastErrorOutput();
 
 		// invalid compiler argument?
 		var invalidOptionRegex = ~/unknown option [`'](.*?)'./;
