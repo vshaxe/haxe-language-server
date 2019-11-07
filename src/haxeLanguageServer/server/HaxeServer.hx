@@ -79,6 +79,7 @@ private class StdioConnection extends HaxeConnection {
 
 	public static function start(path:String, arguments:Array<String>, spawnOptions:ChildProcessSpawnOptions, onMessage:String->Void,
 			onExit:HaxeConnection->Void, callback:HaxeConnection->Void) {
+		trace("Using --wait stdio");
 		var process = ChildProcess.spawn(path, arguments.concat(["--wait", "stdio"]), spawnOptions);
 		callback(new StdioConnection(process, onMessage, onExit));
 	}
@@ -121,6 +122,7 @@ private class SocketConnection extends HaxeConnection {
 
 	public static function start(path:String, arguments:Array<String>, spawnOptions:ChildProcessSpawnOptions, onMessage:String->Void,
 			onExit:HaxeConnection->Void, callback:HaxeConnection->Void) {
+		trace("Using --server-connect");
 		var server = Net.createServer();
 		server.listen(0, function() {
 			var port = server.address().port;
