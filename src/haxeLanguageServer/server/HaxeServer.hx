@@ -106,7 +106,8 @@ private class SocketConnection extends HaxeConnection {
 
 	override function kill() {
 		if (socket != null) {
-			socket.end();
+			// the socket will get ECONNRESET and nodejs will throw if we don't handle it as an event
+			socket.on(ReadableEvent.Error, function(_) {});
 		}
 		super.kill();
 	}
