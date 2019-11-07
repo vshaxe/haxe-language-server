@@ -84,6 +84,45 @@ private class StdioConnection extends HaxeConnection {
 	}
 }
 
+private class SocketConnection extends HaxeConnection {
+	final socket:Socket;
+	var lastErrorOutput:String = "";
+
+	function new(process, socket, onMessage, onExit) {
+		super(process, onMessage, onExit);
+		this.socket = socket;
+		socket.on(ReadableEvent.Data, onData);
+		process.stdout.on(ReadableEvent.Data, onStdout);
+		process.stderr.on(ReadableEvent.Data, onStdout);
+	}
+
+	override function send(data:Buffer) {
+		socket.write(data);
+	}
+
+	override function onStdout(buf:Buffer) {
+		lastErrorOutput = buf.toString();
+		trace(HaxeConnection.reTrailingNewline.replace(lastErrorOutput, ""));
+	}
+
+	override function getLastErrorOutput():String {
+		return lastErrorOutput;
+	}
+
+	public static function start(path:String, arguments:Array<String>, spawnOptions:ChildProcessSpawnOptions, onMessage:String->Void, onExit:() -> Void,
+			callback:HaxeConnection->Void) {
+		var server = Net.createServer();
+		server.listen(0, function() {
+			var port = server.address().port;
+			var process = ChildProcess.spawn(path, arguments.concat(["--server-connect", '127.0.0.1:$port']), spawnOptions);
+			server.on(ServerEvent.Connection, function(socket) {
+				trace("Haxe connected!");
+				callback(new SocketConnection(process, socket, onMessage, onExit));
+			});
+		});
+	}
+}
+
 class HaxeServer {
 	final context:Context;
 	var haxeConnection:Null<HaxeConnection>;
@@ -214,6 +253,7 @@ class HaxeServer {
 		}
 
 		StdioConnection.start(config.path, config.arguments, spawnOptions, onMessage, onExit, onHaxeStarted);
+		// SocketConnection.start(config.path, config.arguments, spawnOptions, onMessage, onExit, onHaxeStarted);
 	}
 
 	function configure() {
