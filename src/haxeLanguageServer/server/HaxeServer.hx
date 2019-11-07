@@ -265,8 +265,8 @@ class HaxeServer {
 			}
 		}
 
-		StdioConnection.start(config.path, config.arguments, spawnOptions, onMessage, onExit, onHaxeStarted);
-		// SocketConnection.start(config.path, config.arguments, spawnOptions, onMessage, onExit, onHaxeStarted);
+		var startConnection = if (config.useSocket) SocketConnection.start else StdioConnection.start;
+		startConnection(config.path, config.arguments, spawnOptions, onMessage, onExit, onHaxeStarted);
 	}
 
 	function configure() {

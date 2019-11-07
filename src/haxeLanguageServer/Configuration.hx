@@ -11,6 +11,7 @@ typedef DisplayServerConfig = {
 	var ?env:haxe.DynamicAccess<String>;
 	var ?arguments:Array<String>;
 	var ?print:ConfigurePrintParams;
+	var ?useSocket:Bool;
 }
 
 typedef HaxelibConfig = {
@@ -131,7 +132,8 @@ class Configuration {
 				print: {
 					completion: false,
 					reusing: false
-				}
+				},
+				useSocket: false,
 			},
 			displayArguments: [],
 			haxelibConfig: {
