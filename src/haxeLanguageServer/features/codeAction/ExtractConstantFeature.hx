@@ -1,9 +1,8 @@
 package haxeLanguageServer.features.codeAction;
 
 import haxeLanguageServer.helper.FormatterHelper;
-import haxe.io.Path;
-import tokentree.TokenTree;
 import haxeLanguageServer.helper.WorkspaceEditHelper;
+import tokentree.TokenTree;
 
 using tokentree.TokenTreeAccessHelper;
 
@@ -48,6 +47,9 @@ class ExtractConstantFeature {
 
 	function makeExtractConstAction(doc:TextDocument, uri:DocumentUri, token:TokenTree, text:String):Null<CodeAction> {
 		if ((text == null) || (text == ""))
+			return null;
+
+		if (shouldSkipToken(token))
 			return null;
 
 		// skip string literals with interpolation
@@ -107,6 +109,35 @@ class ExtractConstantFeature {
 			kind: RefactorExtract,
 			edit: edit
 		};
+	}
+
+	function shouldSkipToken(token:TokenTree):Bool {
+		// prevent const extraction inside metadata
+		var atToken:Null<TokenTree> = token.access().parent().is(POpen).parent().isCIdent().parent().token;
+		if (atToken != null) {
+			if (atToken.access().is(At).exists())
+				return true;
+			if (atToken.access().is(DblDot).parent().is(At).exists())
+				return true;
+			return false;
+		}
+		// prevent const extraction from class fields
+		var varToken:Null<TokenTree> = token.access().parent().is(Binop(OpAssign)).parent().isCIdent().parent().token;
+		if (varToken != null) {
+			switch varToken.tok {
+				case Kwd(KwdVar) | Kwd(KwdFinal):
+					return varToken.access()
+						.parent()
+						.is(BrOpen)
+						.parent()
+						.isCIdent()
+						.parent()
+						.is(Kwd(KwdClass))
+						.exists();
+				default:
+			}
+		}
+		return false;
 	}
 
 	function findParentType(token:TokenTree):Null<TokenTree> {
