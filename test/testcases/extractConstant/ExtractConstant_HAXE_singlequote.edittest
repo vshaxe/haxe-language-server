@@ -1,0 +1,34 @@
+{
+    "start": {
+        "line": 4,
+        "character": 44
+    }
+}
+
+---
+
+class Main {
+	function makeEdits(content:String, fileName:String, range:Range):Array<TextEdit> {
+		var context:Context = new Context(new Protocol(null));
+		var uri:DocumentUri = new DocumentUri("file://" + fileName + ".edittest");
+		var doc = new TextDocument(context, uri, 'haxe', 4, content);
+
+		var extractConst:ExtractConstantFeature = new ExtractConstantFeature(context);
+
+		var actions:Array<CodeAction> = extractConst.internalExtractConstant(doc, uri, range);
+		Assert.equals(1, actions.length);
+
+		var docEdit:TextDocumentEdit = cast actions[0].edit.documentChanges[0];
+		return docEdit.edits;
+	}
+}
+
+---
+
+{
+	"edits": [{
+            "newText": "public static inline var HAXE:String = 'haxe';\n\n\t"
+        },{
+            "newText": "HAXE"
+        }]
+}
