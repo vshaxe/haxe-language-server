@@ -236,7 +236,7 @@ class HaxeServer {
 			context.callHaxeMethod(Methods.Initialize, {supportsResolve: true, exclude: context.config.user.exclude, maxCompletionItems: 1000}, null,
 				result -> {
 					var pre = result.haxeVersion.pre;
-					if (result.haxeVersion.major == 4 && pre != null) {
+					if (result.haxeVersion.major == 4 && result.haxeVersion.minor == 0 && pre != null) {
 						context.languageServerProtocol.sendNotification(LanguageServerMethods.DidDetectOldPreview, {preview: result.haxeVersion.pre});
 					}
 					protocolVersion = result.protocolVersion;
