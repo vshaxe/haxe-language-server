@@ -11,9 +11,7 @@ class ExtractConstantFeature {
 
 	public function new(context:Context) {
 		this.context = context;
-		#if debug
 		context.registerCodeActionContributor(extractConstant);
-		#end
 	}
 
 	function extractConstant(params:CodeActionParams):Array<CodeAction> {

@@ -79,11 +79,12 @@ class ExtractFunctionFeature {
 				returnSpec = makeReturnSpec(parentOfStart);
 			}
 			var isStatic:Bool = isStaticFunction(parentOfStart);
+			var indent:String = detectIndent(doc, parentOfStart);
 
 			var newParams:Array<NewFunctionParameter> = copyParentFunctionParameters(parentOfStart, text, rangeIdents);
 			newParams = newParams.concat(localVarsToParameter(varTokens, text, rangeIdents));
 
-			var action:Null<CodeAction> = makeExtractFunctionChanges(doc, doc.uri, params, text, isStatic, newParams, returnSpec,
+			var action:Null<CodeAction> = makeExtractFunctionChanges(doc, doc.uri, params, text, isStatic, newParams, returnSpec, indent,
 				doc.positionAt(lastToken.pos.max + 1));
 			if (action == null)
 				return [];
@@ -93,7 +94,7 @@ class ExtractFunctionFeature {
 	}
 
 	function makeExtractFunctionChanges(doc:TextDocument, uri:DocumentUri, params:CodeActionParams, text:String, isStatic:Bool,
-			newParams:Array<NewFunctionParameter>, returnSpec:String, newFuncPos:Position):CodeAction {
+			newParams:Array<NewFunctionParameter>, returnSpec:String, indent:String, newFuncPos:Position):CodeAction {
 		var callParams:String = newParams.map(s -> s.call).join(", ");
 		var funcParams:String = newParams.map(s -> s.param).join(", ");
 
@@ -108,9 +109,9 @@ class ExtractFunctionFeature {
 		if (isStatic)
 			func = 'static $func';
 
-		// TODO correct indentation
 		call = FormatterHelper.formatText(doc, context, call, TokenTreeEntryPoint.FIELD_LEVEL);
 		func = FormatterHelper.formatText(doc, context, func, TokenTreeEntryPoint.FIELD_LEVEL);
+		func = func.split("\n").map(s -> indent + s).join("\n");
 		var edits:Array<TextEdit> = [];
 
 		edits.push(WorkspaceEditHelper.insertText(newFuncPos, func));
@@ -154,6 +155,18 @@ class ExtractFunctionFeature {
 		if (functionToken.access().firstChild().isCIdent().firstOf(Kwd(KwdStatic)).exists())
 			return true;
 		return false;
+	}
+
+	function detectIndent(doc:TextDocument, functionToken:TokenTree):String {
+		var functionRange:Range = doc.rangeAt2(functionToken.pos);
+		functionRange.start.character = 0;
+
+		var text:String = doc.getText(functionRange);
+		var whitespace:EReg = ~/^([ \t]+)/;
+		if (!whitespace.match(text))
+			return "";
+
+		return whitespace.matched(1);
 	}
 
 	function copyParentFunctionParameters(functionToken:TokenTree, text:String, rangeIdents:Array<String>):Array<NewFunctionParameter> {

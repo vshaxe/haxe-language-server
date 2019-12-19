@@ -418,10 +418,8 @@ class DiagnosticsFeature {
 
 		var quickFixEdit = WorkspaceEditHelper.create(context, params, fixes);
 
-		#if debug
 		var unusedRanges:Array<Range> = fixes.map(edit -> edit.range);
 		fixes = fixes.concat(OrganizeImportsFeature.organizeImports(doc, context, unusedRanges));
-		#end
 		var edit = WorkspaceEditHelper.create(context, params, fixes);
 
 		var diagnostics = existingActions.filter(action -> action.title == RemoveUnusedImportUsingTitle)
