@@ -362,7 +362,7 @@ class DisplayPrinter {
 		return switch origin {
 			case LocalVariable: "local variable";
 			case Argument: "argument";
-			case ForVariable: "for variable";
+			case ForVariable: "for loop variable";
 			case PatternVariable: "pattern variable";
 			case CatchVariable: "catch variable";
 			case LocalFunction: "local function";
