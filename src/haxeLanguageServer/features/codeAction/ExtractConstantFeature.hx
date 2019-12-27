@@ -88,7 +88,7 @@ class ExtractConstantFeature {
 
 		// insert const into type body
 		var prefix:String = doc.getText({start: {line: constInsertPos.line, character: 0}, end: constInsertPos});
-		var newConstText:String = FormatterHelper.formatText(doc, context, 'public static inline var $name:String = $fullText;', FIELD_LEVEL) + '\n$prefix';
+		var newConstText:String = FormatterHelper.formatText(doc, context, 'static inline var $name = $fullText;', FIELD_LEVEL) + '\n$prefix';
 		edits.push(WorkspaceEditHelper.insertText(constInsertPos, newConstText));
 
 		// replace all occurrences with const name
@@ -97,15 +97,12 @@ class ExtractConstantFeature {
 		}
 
 		var textEdit:TextDocumentEdit = WorkspaceEditHelper.textDocumentEdit(uri, edits);
-
-		var edit:WorkspaceEdit = {
-			documentChanges: [textEdit]
-		};
-
 		return {
 			title: "Extract constant",
 			kind: RefactorExtract,
-			edit: edit
+			edit: {
+				documentChanges: [textEdit]
+			}
 		};
 	}
 
