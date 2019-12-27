@@ -79,7 +79,7 @@ class ExtractConstantFeature {
 				case Const(CString(s)):
 					if (s == text)
 						return FOUND_SKIP_SUBTREE;
-					return SKIP_SUBTREE;
+					return GO_DEEPER;
 				default:
 					return GO_DEEPER;
 			}
@@ -108,30 +108,45 @@ class ExtractConstantFeature {
 	}
 
 	function shouldSkipToken(token:TokenTree):Bool {
-		// prevent const extraction inside metadata
-		var atToken:Null<TokenTree> = token.access().parent().is(POpen).parent().isCIdent().parent().token;
-		if (atToken != null) {
-			if (atToken.access().is(At).exists())
-				return true;
-			if (atToken.access().is(DblDot).parent().is(At).exists())
-				return true;
-			return false;
+		var parent:Null<TokenTree> = token.parent;
+		if (parent == null || parent.tok == null) {
+			return true;
 		}
-		// prevent const extraction from class fields
-		var varToken:Null<TokenTree> = token.access().parent().is(Binop(OpAssign)).parent().isCIdent().parent().token;
-		if (varToken != null) {
-			switch varToken.tok {
-				case Kwd(KwdVar) | Kwd(KwdFinal):
-					return varToken.access()
-						.parent()
-						.is(BrOpen)
-						.parent()
-						.isCIdent()
-						.parent()
-						.is(Kwd(KwdClass))
-						.exists();
-				default:
-			}
+		switch (parent.tok) {
+			case BrOpen:
+				return true;
+			case POpen:
+				// prevent const extraction inside metadata
+				var atToken:Null<TokenTree> = parent.access().parent().isCIdent().parent().token;
+				if (atToken == null) {
+					return false;
+				}
+				switch (atToken.tok) {
+					case At:
+						return true;
+					case DblDot:
+						return atToken.access().parent().is(At).exists();
+					default:
+						return false;
+				}
+			case Binop(OpAssign):
+				// prevent const extraction from class fields
+				var varToken:Null<TokenTree> = parent.access().parent().isCIdent().parent().token;
+				if (varToken != null) {
+					switch (varToken.tok) {
+						case Kwd(KwdVar) | Kwd(KwdFinal):
+							return varToken.access()
+								.parent()
+								.is(BrOpen)
+								.parent()
+								.isCIdent()
+								.parent()
+								.is(Kwd(KwdClass))
+								.exists();
+						default:
+					}
+				}
+			default:
 		}
 		return false;
 	}
