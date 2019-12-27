@@ -137,14 +137,16 @@ class ExtractConstantFeature {
 				if (varToken != null) {
 					switch (varToken.tok) {
 						case Kwd(KwdVar) | Kwd(KwdFinal):
-							return varToken.access()
-								.parent()
-								.is(BrOpen)
-								.parent()
-								.isCIdent()
-								.parent()
-								.is(Kwd(KwdClass))
-								.exists();
+							var typeToken:Null<TokenTree> = varToken.access().parent().is(BrOpen).parent().isCIdent().parent().token;
+							if (typeToken == null) {
+								return false;
+							}
+							switch (typeToken.tok) {
+								case Kwd(KwdClass), Kwd(KwdAbstract):
+									return true;
+								default:
+									return false;
+							}
 						default:
 					}
 				}
