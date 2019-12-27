@@ -22,6 +22,7 @@ class EditTestCaseMacro {
 	}
 
 	static function buildTestCaseField(fileName:String):Field {
+		Context.registerModuleDependency(Context.getLocalModule(), fileName);
 		var content:String = sys.io.File.getContent(fileName);
 		var nl = "\r?\n";
 		var reg = new EReg('$nl$nl---$nl$nl', "g");
