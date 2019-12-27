@@ -34,6 +34,6 @@ import haxeLanguageServer.helper.WorkspaceEditHelper;
                 "start": { "line": 3, "character": 0 },
                 "end": { "line": 3, "character": 0 }
             },
-            "newText": "import haxe.ds.ArraySort;\nimport formatter.Main;\nimport tokentree.TokenTree;\nimport tokentree.TokenTreeBuilder;\nimport haxeLanguageServer.helper.FormatterHelper;\nimport haxeLanguageServer.helper.WorkspaceEditHelper;\n\n"
+            "newText": "import haxe.ds.ArraySort;\nimport formatter.Main;\nimport tokentree.TokenTree;\nimport tokentree.TokenTreeBuilder;\nimport haxeLanguageServer.helper.FormatterHelper;\nimport haxeLanguageServer.helper.WorkspaceEditHelper;\n"
         }]
 }

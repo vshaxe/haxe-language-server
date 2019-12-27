@@ -46,7 +46,7 @@ import haxeLanguageServer.helper.WorkspaceEditHelper;
         },{
             "newText": ""
         },{
-            "newText": "import formatter.Main;\nimport haxe.ds.ArraySort;\nimport tokentree.TokenTree;\nimport tokentree.TokenTreeBuilder;\nimport haxeLanguageServer.helper.FormatterHelper;\nimport haxeLanguageServer.helper.WorkspaceEditHelper;\n\n"
+            "newText": "import formatter.Main;\nimport haxe.ds.ArraySort;\nimport tokentree.TokenTree;\nimport tokentree.TokenTreeBuilder;\nimport haxeLanguageServer.helper.FormatterHelper;\nimport haxeLanguageServer.helper.WorkspaceEditHelper;\n"
         },{
             "newText": ""
         },{
@@ -60,7 +60,7 @@ import haxeLanguageServer.helper.WorkspaceEditHelper;
         },{
             "newText": ""
         },{
-            "newText": "import formatter.Main;\nimport haxe.ds.ArraySort;\nimport tokentree.TokenTree;\nimport tokentree.TokenTreeBuilder;\nimport haxeLanguageServer.helper.FormatterHelper;\nimport haxeLanguageServer.helper.WorkspaceEditHelper;\n\n"
+            "newText": "import formatter.Main;\nimport haxe.ds.ArraySort;\nimport tokentree.TokenTree;\nimport tokentree.TokenTreeBuilder;\nimport haxeLanguageServer.helper.FormatterHelper;\nimport haxeLanguageServer.helper.WorkspaceEditHelper;\n"
         },{
             "newText": ""
         },{
@@ -78,6 +78,6 @@ import haxeLanguageServer.helper.WorkspaceEditHelper;
                 "start": { "line": 3, "character": 0 },
                 "end": { "line": 3, "character": 0 }
             },
-            "newText": "import formatter.Main;\nimport haxe.ds.ArraySort;\nimport tokentree.TokenTree;\nimport tokentree.TokenTreeBuilder;\nimport haxeLanguageServer.helper.FormatterHelper;\nimport haxeLanguageServer.helper.WorkspaceEditHelper;\n\n"
+            "newText": "import formatter.Main;\nimport haxe.ds.ArraySort;\nimport tokentree.TokenTree;\nimport tokentree.TokenTreeBuilder;\nimport haxeLanguageServer.helper.FormatterHelper;\nimport haxeLanguageServer.helper.WorkspaceEditHelper;\n"
         }]
 }

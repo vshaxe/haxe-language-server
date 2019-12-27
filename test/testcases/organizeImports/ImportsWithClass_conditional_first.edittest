@@ -3,8 +3,11 @@
 
 ---
 
-// öäüßł€µ”„¢«»æſðđŋħ̣ĸħĸĸ̣
 package haxeLanguageServer.features;
+
+#if something
+import haxe.Json;
+#end
 
 import haxeLanguageServer.helper.FormatterHelper;
 import tokentree.TokenTreeBuilder;
@@ -13,10 +16,20 @@ import tokentree.TokenTree;
 import formatter.Main;
 import haxeLanguageServer.helper.WorkspaceEditHelper;
 
+class Main {}
+
 ---
 
 {
 	"edits": [{
+            "newText": ""
+        },{
+            "range": {
+                "start": { "line": 3, "character": 0 },
+                "end": { "line": 3, "character": 0 }
+            },
+            "newText": "import haxe.Json;\n"
+        },{
             "newText": ""
         },{
             "newText": ""
@@ -30,8 +43,8 @@ import haxeLanguageServer.helper.WorkspaceEditHelper;
             "newText": ""
         },{
             "range": {
-                "start": { "line": 3, "character": 0 },
-                "end": { "line": 3, "character": 0 }
+                "start": { "line": 6, "character": 0 },
+                "end": { "line": 6, "character": 0 }
             },
             "newText": "import formatter.Main;\nimport haxe.ds.ArraySort;\nimport haxeLanguageServer.helper.FormatterHelper;\nimport haxeLanguageServer.helper.WorkspaceEditHelper;\nimport tokentree.TokenTree;\nimport tokentree.TokenTreeBuilder;\n"
         }]

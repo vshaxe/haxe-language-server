@@ -27,6 +27,6 @@ import haxeLanguageServer.helper.WorkspaceEditHelper;
         },{
             "newText": ""
         },{
-            "newText": "import haxe.ds.ArraySort;\nimport formatter.Main;\nimport haxeLanguageServer.helper.FormatterHelper;\nimport haxeLanguageServer.helper.WorkspaceEditHelper;\nimport tokentree.TokenTree;\nimport tokentree.TokenTreeBuilder;\n\n"
+            "newText": "import haxe.ds.ArraySort;\nimport formatter.Main;\nimport haxeLanguageServer.helper.FormatterHelper;\nimport haxeLanguageServer.helper.WorkspaceEditHelper;\nimport tokentree.TokenTree;\nimport tokentree.TokenTreeBuilder;\n"
         }]
 }

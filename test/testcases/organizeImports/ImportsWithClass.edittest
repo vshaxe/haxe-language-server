@@ -3,7 +3,6 @@
 
 ---
 
-// öäüßł€µ”„¢«»æſðđŋħ̣ĸħĸĸ̣
 package haxeLanguageServer.features;
 
 import haxeLanguageServer.helper.FormatterHelper;
@@ -12,6 +11,8 @@ import haxe.ds.ArraySort;
 import tokentree.TokenTree;
 import formatter.Main;
 import haxeLanguageServer.helper.WorkspaceEditHelper;
+
+class Main {}
 
 ---
 
@@ -30,8 +31,8 @@ import haxeLanguageServer.helper.WorkspaceEditHelper;
             "newText": ""
         },{
             "range": {
-                "start": { "line": 3, "character": 0 },
-                "end": { "line": 3, "character": 0 }
+                "start": { "line": 2, "character": 0 },
+                "end": { "line": 2, "character": 0 }
             },
             "newText": "import formatter.Main;\nimport haxe.ds.ArraySort;\nimport haxeLanguageServer.helper.FormatterHelper;\nimport haxeLanguageServer.helper.WorkspaceEditHelper;\nimport tokentree.TokenTree;\nimport tokentree.TokenTreeBuilder;\n"
         }]
