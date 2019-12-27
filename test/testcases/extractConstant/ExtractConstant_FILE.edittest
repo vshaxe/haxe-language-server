@@ -27,8 +27,8 @@ class Main {
 
 {
 	"edits": [{
-            "newText": "static inline var FILE_ = \"file://\";\n\n\t"
+            "newText": "static inline var FILE = \"file://\";\n\n\t"
         },{
-            "newText": "FILE_"
+            "newText": "FILE"
         }]
 }

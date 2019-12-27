@@ -59,6 +59,7 @@ class ExtractConstantFeature {
 		var name:String = ~/[^A-Za-z0-9]/g.replace(text, "_");
 		name = ~/^[0-9]/g.replace(name, "_");
 		name = ~/_+/g.replace(name, "_");
+		name = ~/(^_|_$)/g.replace(name, "");
 		name = name.toUpperCase();
 		if (name.length <= 0)
 			return null;
