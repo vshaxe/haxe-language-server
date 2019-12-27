@@ -129,6 +129,8 @@ class ExtractConstantFeature {
 					default:
 						return false;
 				}
+			case Binop(OpLt):
+				return true;
 			case Binop(OpAssign):
 				// prevent const extraction from class fields
 				var varToken:Null<TokenTree> = parent.access().parent().isCIdent().parent().token;
