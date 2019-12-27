@@ -27,7 +27,7 @@ class Main {
 
 {
 	"edits": [{
-            "newText": "public static inline var HAXE:String = 'haxe';\n\n\t"
+            "newText": "static inline var HAXE = 'haxe';\n\n\t"
         },{
             "newText": "HAXE"
         }]

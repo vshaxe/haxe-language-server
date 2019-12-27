@@ -21,7 +21,7 @@ class Main {
 
 {
 	"edits": [{
-            "newText": "public static inline var DISABLED:String = \"disabled\";\n\n\t"
+            "newText": "static inline var DISABLED = \"disabled\";\n\n\t"
         },{
             "newText": "DISABLED"
         },{
