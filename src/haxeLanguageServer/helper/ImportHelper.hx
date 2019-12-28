@@ -2,13 +2,13 @@ package haxeLanguageServer.helper;
 
 import haxe.Json;
 import haxe.display.JsonModuleTypes;
-import haxeLanguageServer.protocol.DisplayPrinter;
-import haxeLanguageServer.TextDocument;
-import haxeLanguageServer.Configuration.ImportStyle;
 import haxeLanguageServer.Configuration.FunctionFormattingConfig;
+import haxeLanguageServer.Configuration.ImportStyle;
+import haxeLanguageServer.TextDocument;
+import haxeLanguageServer.protocol.DisplayPrinter;
 
-using tokentree.TokenTreeAccessHelper;
 using Lambda;
+using tokentree.TokenTreeAccessHelper;
 
 typedef ImportPosition = {
 	final position:Position;

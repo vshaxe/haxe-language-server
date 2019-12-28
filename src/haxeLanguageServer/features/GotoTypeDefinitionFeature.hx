@@ -1,9 +1,9 @@
 package haxeLanguageServer.features;
 
+import haxe.display.Display;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
-import haxe.display.Display;
 import languageServerProtocol.protocol.TypeDefinition;
 
 class GotoTypeDefinitionFeature {

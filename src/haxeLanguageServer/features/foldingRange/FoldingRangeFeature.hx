@@ -1,9 +1,9 @@
 package haxeLanguageServer.features.foldingRange;
 
-import languageServerProtocol.protocol.FoldingRange;
+import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
-import jsonrpc.CancellationToken;
+import languageServerProtocol.protocol.FoldingRange;
 
 class FoldingRangeFeature {
 	final context:Context;

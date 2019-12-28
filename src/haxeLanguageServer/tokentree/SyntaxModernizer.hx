@@ -1,7 +1,7 @@
 package haxeLanguageServer.tokentree;
 
-import haxeparser.Data.KeywordPrinter;
 import haxeLanguageServer.helper.WorkspaceEditHelper;
+import haxeparser.Data.KeywordPrinter;
 import tokentree.TokenTree;
 
 using tokentree.TokenTreeAccessHelper;

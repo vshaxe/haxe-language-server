@@ -1,12 +1,12 @@
 package haxeLanguageServer.features.completion;
 
+import String.fromCharCode;
+import haxe.extern.EitherType;
+import haxeLanguageServer.helper.TypeHelper.parseDisplayType;
+import haxeLanguageServer.helper.TypeHelper.prepareSignature;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
-import haxeLanguageServer.helper.TypeHelper.prepareSignature;
-import haxeLanguageServer.helper.TypeHelper.parseDisplayType;
-import haxe.extern.EitherType;
-import String.fromCharCode;
 
 class CompletionFeatureLegacy {
 	final context:Context;

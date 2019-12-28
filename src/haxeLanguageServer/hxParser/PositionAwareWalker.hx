@@ -1,8 +1,8 @@
 package haxeLanguageServer.hxParser;
 
-import hxParser.WalkStack;
 import hxParser.ParseTree;
 import hxParser.StackAwareWalker;
+import hxParser.WalkStack;
 
 @:forward(push, pop)
 abstract Scope(Array<Token>) {

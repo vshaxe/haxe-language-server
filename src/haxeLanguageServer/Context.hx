@@ -2,26 +2,26 @@ package haxeLanguageServer;
 
 import haxe.CallStack;
 import haxe.Json;
-import haxe.display.Protocol.HaxeRequestMethod;
-import haxe.display.Protocol.Response;
-import haxe.display.Protocol.Methods as HaxeMethods;
-import haxe.display.Protocol.HaxeResponseErrorData;
-import haxe.display.Server.ServerMethods;
 import haxe.display.Display.DisplayMethods;
-import js.Node.process;
-import jsonrpc.CancellationToken;
-import jsonrpc.ResponseError;
-import jsonrpc.Types;
-import jsonrpc.Protocol;
+import haxe.display.Protocol.HaxeRequestMethod;
+import haxe.display.Protocol.HaxeResponseErrorData;
+import haxe.display.Protocol.Methods as HaxeMethods;
+import haxe.display.Protocol.Response;
+import haxe.display.Server.ServerMethods;
+import haxeLanguageServer.LanguageServerMethods.MethodResult;
 import haxeLanguageServer.features.*;
 import haxeLanguageServer.features.codeAction.*;
+import haxeLanguageServer.features.codeAction.CodeActionFeature.CodeActionContributor;
 import haxeLanguageServer.features.completion.*;
 import haxeLanguageServer.features.documentSymbols.DocumentSymbolsFeature;
 import haxeLanguageServer.features.foldingRange.FoldingRangeFeature;
-import haxeLanguageServer.features.codeAction.CodeActionFeature.CodeActionContributor;
 import haxeLanguageServer.server.DisplayResult;
 import haxeLanguageServer.server.HaxeServer;
-import haxeLanguageServer.LanguageServerMethods.MethodResult;
+import js.Node.process;
+import jsonrpc.CancellationToken;
+import jsonrpc.Protocol;
+import jsonrpc.ResponseError;
+import jsonrpc.Types;
 import languageServerProtocol.protocol.TypeDefinition.TypeDefinitionRequest;
 
 class Context {

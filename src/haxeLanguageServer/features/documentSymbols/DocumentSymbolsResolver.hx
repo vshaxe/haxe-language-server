@@ -1,11 +1,11 @@
 package haxeLanguageServer.features.documentSymbols;
 
-import tokentree.TokenTree;
 import haxeLanguageServer.features.documentSymbols.SymbolStack;
+import tokentree.TokenTree;
 
 using tokentree.TokenTreeAccessHelper;
-using tokentree.utils.TokenTreeCheckUtils;
 using tokentree.utils.FieldUtils;
+using tokentree.utils.TokenTreeCheckUtils;
 
 class DocumentSymbolsResolver {
 	final document:TextDocument;

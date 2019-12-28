@@ -1,9 +1,9 @@
 package haxeLanguageServer;
 
 import js.Node.process;
+import jsonrpc.Protocol;
 import jsonrpc.node.MessageReader;
 import jsonrpc.node.MessageWriter;
-import jsonrpc.Protocol;
 
 class Main {
 	static function main() {

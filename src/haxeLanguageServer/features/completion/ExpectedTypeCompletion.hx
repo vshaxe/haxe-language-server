@@ -1,11 +1,11 @@
 package haxeLanguageServer.features.completion;
 
-import haxeLanguageServer.helper.ImportHelper;
-import haxeLanguageServer.helper.DocHelper;
-import haxeLanguageServer.features.completion.CompletionFeature;
-import haxeLanguageServer.protocol.DisplayPrinter;
 import haxe.display.Display.ToplevelCompletion;
 import haxe.display.JsonModuleTypes.JsonType;
+import haxeLanguageServer.features.completion.CompletionFeature;
+import haxeLanguageServer.helper.DocHelper;
+import haxeLanguageServer.helper.ImportHelper;
+import haxeLanguageServer.protocol.DisplayPrinter;
 
 class ExpectedTypeCompletion {
 	final context:Context;

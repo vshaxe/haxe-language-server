@@ -1,7 +1,7 @@
 package haxeLanguageServer.helper;
 
-import jsonrpc.Types.NoData;
 import jsonrpc.ResponseError;
+import jsonrpc.Types.NoData;
 
 class ResponseErrorHelper {
 	public static function handler(reject:ResponseError<NoData>->Void) {

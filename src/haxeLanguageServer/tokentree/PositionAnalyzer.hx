@@ -1,9 +1,9 @@
 package haxeLanguageServer.tokentree;
 
-import haxeparser.Data.TokenDef;
 import haxeLanguageServer.tokentree.TokenContext;
-import tokentree.utils.TokenTreeCheckUtils;
+import haxeparser.Data.TokenDef;
 import tokentree.TokenTree;
+import tokentree.utils.TokenTreeCheckUtils;
 
 using tokentree.TokenTreeAccessHelper;
 

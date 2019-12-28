@@ -1,15 +1,15 @@
 package haxeLanguageServer.features;
 
 import formatter.config.Config;
-import jsonrpc.CancellationToken;
-import jsonrpc.ResponseError;
-import jsonrpc.Types.NoData;
 import haxe.display.Display;
-import haxeLanguageServer.helper.DocHelper;
 import haxeLanguageServer.helper.DocHelper.printCodeBlock;
+import haxeLanguageServer.helper.DocHelper;
 import haxeLanguageServer.helper.HaxePosition;
 import haxeLanguageServer.helper.TypeHelper.*;
 import haxeLanguageServer.protocol.DisplayPrinter;
+import jsonrpc.CancellationToken;
+import jsonrpc.ResponseError;
+import jsonrpc.Types.NoData;
 import tokentree.TokenTreeBuilder.TokenTreeEntryPoint;
 
 class HoverFeature {

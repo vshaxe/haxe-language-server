@@ -1,7 +1,7 @@
 package haxeLanguageServer.helper;
 
-import haxeLanguageServer.TextDocument;
 import haxe.PosInfos;
+import haxeLanguageServer.TextDocument;
 
 class ImportHelperTest extends Test {
 	function testGetImportInsertPosition() {

@@ -1,8 +1,8 @@
 package haxeLanguageServer;
 
 import haxe.Timer;
-import hxParser.ParseTree;
 import haxeLanguageServer.tokentree.TokenTreeManager;
+import hxParser.ParseTree;
 
 typedef OnTextDocumentChangeListener = TextDocument->Array<TextDocumentContentChangeEvent>->Int->Void;
 

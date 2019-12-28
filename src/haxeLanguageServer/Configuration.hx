@@ -1,10 +1,10 @@
 package haxeLanguageServer;
 
 import haxe.Json;
-import jsonrpc.Protocol;
+import haxe.display.Server.ConfigurePrintParams;
 import haxe.extern.EitherType;
 import haxeLanguageServer.helper.StructDefaultsMacro;
-import haxe.display.Server.ConfigurePrintParams;
+import jsonrpc.Protocol;
 
 typedef DisplayServerConfig = {
 	var ?path:String;

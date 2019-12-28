@@ -1,10 +1,10 @@
 package haxeLanguageServer.features.codeAction;
 
 import haxe.io.Path;
+import haxeLanguageServer.helper.WorkspaceEditHelper;
 import sys.FileSystem;
 import tokentree.TokenTree;
 import tokentree.utils.TokenTreeCheckUtils;
-import haxeLanguageServer.helper.WorkspaceEditHelper;
 
 using tokentree.TokenTreeAccessHelper;
 

@@ -1,14 +1,14 @@
 package haxeLanguageServer.tokentree;
 
-import js.node.Buffer;
 import byte.ByteData;
 import haxe.io.Bytes;
-import tokentree.TokenStream;
-import tokentree.TokenTreeBuilder;
-import tokentree.TokenTree;
-import haxeparser.HaxeLexer;
-import haxeparser.Data.Token;
 import haxe.macro.Expr.Position;
+import haxeparser.Data.Token;
+import haxeparser.HaxeLexer;
+import js.node.Buffer;
+import tokentree.TokenStream;
+import tokentree.TokenTree;
+import tokentree.TokenTreeBuilder;
 
 class TokenTreeManager {
 	public static function create(content:String):TokenTreeManager {

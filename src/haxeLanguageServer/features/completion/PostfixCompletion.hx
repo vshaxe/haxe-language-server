@@ -2,11 +2,11 @@ package haxeLanguageServer.features.completion;
 
 import haxe.display.Display;
 import haxe.display.JsonModuleTypes;
+import haxeLanguageServer.features.completion.CompletionFeature.TriggerSuggest;
+import haxeLanguageServer.features.completion.CompletionFeature;
 import haxeLanguageServer.helper.DocHelper;
 import haxeLanguageServer.helper.SnippetHelper;
 import haxeLanguageServer.protocol.DisplayPrinter;
-import haxeLanguageServer.features.completion.CompletionFeature;
-import haxeLanguageServer.features.completion.CompletionFeature.TriggerSuggest;
 import languageServerProtocol.Types.CompletionItem;
 
 using Lambda;

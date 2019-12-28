@@ -1,10 +1,10 @@
 package testcases;
 
-import haxe.macro.Expr;
-import haxe.macro.Context;
 import haxe.io.Path;
-import sys.io.File;
+import haxe.macro.Context;
+import haxe.macro.Expr;
 import sys.FileSystem;
+import sys.io.File;
 
 class EditTestCaseMacro {
 	#if macro

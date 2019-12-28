@@ -1,26 +1,26 @@
 package haxeLanguageServer.features.completion;
 
-import haxe.ds.Option;
-import haxe.display.Display;
 import haxe.display.Display.CompletionParams as HaxeCompletionParams;
+import haxe.display.Display;
 import haxe.display.JsonModuleTypes;
+import haxe.ds.Option;
 import haxe.extern.EitherType;
-import tokentree.TokenTree;
+import haxeLanguageServer.helper.DocHelper;
+import haxeLanguageServer.helper.ImportHelper;
+import haxeLanguageServer.protocol.CompilerMetadata;
+import haxeLanguageServer.protocol.DisplayPrinter;
+import haxeLanguageServer.tokentree.PositionAnalyzer;
+import haxeLanguageServer.tokentree.TokenContext;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
-import haxeLanguageServer.helper.DocHelper;
-import haxeLanguageServer.helper.ImportHelper;
-import haxeLanguageServer.protocol.DisplayPrinter;
-import haxeLanguageServer.protocol.CompilerMetadata;
-import haxeLanguageServer.tokentree.PositionAnalyzer;
-import haxeLanguageServer.tokentree.TokenContext;
-import languageServerProtocol.protocol.Protocol.CompletionParams;
 import languageServerProtocol.Types.CompletionItem;
 import languageServerProtocol.Types.CompletionItemKind;
+import languageServerProtocol.protocol.Protocol.CompletionParams;
+import tokentree.TokenTree;
 
-using tokentree.TokenTreeAccessHelper;
 using Safety;
+using tokentree.TokenTreeAccessHelper;
 
 enum abstract CompletionItemOrigin(Int) {
 	var Haxe;

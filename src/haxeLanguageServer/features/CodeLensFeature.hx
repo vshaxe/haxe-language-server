@@ -1,9 +1,9 @@
 package haxeLanguageServer.features;
 
+import haxeLanguageServer.server.DisplayResult;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
-import haxeLanguageServer.server.DisplayResult;
 
 class CodeLensFeature {
 	final context:Context;

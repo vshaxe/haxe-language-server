@@ -1,10 +1,10 @@
 package haxeLanguageServer.features;
 
+import haxe.display.Display;
+import haxeLanguageServer.helper.HaxePosition;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
-import haxe.display.Display;
-import haxeLanguageServer.helper.HaxePosition;
 
 class GotoDefinitionFeature {
 	final context:Context;
