@@ -7,6 +7,8 @@ import jsonrpc.Types.NoData;
 typedef CodeActionContributor = CodeActionParams->Array<CodeAction>;
 
 class CodeActionFeature {
+	public static inline var SourceSortImports = "source.sortImports";
+
 	final context:Context;
 	final contributors:Array<CodeActionContributor> = [];
 
@@ -17,7 +19,7 @@ class CodeActionFeature {
 			id: CodeActionRequest.type,
 			method: CodeActionRequest.type,
 			registerOptions: {
-				codeActionKinds: [QuickFix, SourceOrganizeImports, RefactorExtract]
+				codeActionKinds: [QuickFix, SourceOrganizeImports, SourceSortImports, RefactorExtract]
 			}
 		});
 		context.languageServerProtocol.onRequest(CodeActionRequest.type, onCodeAction);

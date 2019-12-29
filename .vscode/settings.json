@@ -1,7 +1,10 @@
 {
 	"[haxe]": {
 		"editor.formatOnSave": true,
-		"editor.formatOnPaste": true
+		"editor.formatOnPaste": true,
+		"editor.codeActionsOnSave": {
+			"source.sortImports": true
+		}
 	},
 	"haxe.importsSortOrder": "all-alphabetical",
 	"haxeTestExplorer.testCommand": [

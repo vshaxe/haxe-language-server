@@ -4,6 +4,7 @@ import haxe.Json;
 import haxe.io.Path;
 import haxeLanguageServer.Configuration;
 import haxeLanguageServer.LanguageServerMethods;
+import haxeLanguageServer.features.codeAction.CodeActionFeature;
 import haxeLanguageServer.features.codeAction.OrganizeImportsFeature;
 import haxeLanguageServer.helper.DocHelper;
 import haxeLanguageServer.helper.ImportHelper;
@@ -17,6 +18,7 @@ using Lambda;
 
 class DiagnosticsFeature {
 	static inline var DiagnosticsSource = "diagnostics";
+	static inline var SortImportsUsingsTitle = "Sort imports/usings";
 	static inline var OrganizeImportsUsingsTitle = "Organize imports/usings";
 	static inline var RemoveUnusedImportUsingTitle = "Remove unused import/using";
 	static inline var RemoveAllUnusedImportsUsingsTitle = "Remove all unused imports/usings";
@@ -410,36 +412,40 @@ class DiagnosticsFeature {
 	function getOrganizeImportActions(params:CodeActionParams, existingActions:Array<CodeAction>):Array<CodeAction> {
 		var doc = context.documents.get(params.textDocument.uri);
 		var map = diagnosticsArguments[params.textDocument.uri];
-		var fixes = if (map == null) [] else [
+		var removeUnusedFixes = if (map == null) [] else [
 			for (key in map.keys())
 				if (key.code == UnusedImport)
 					WorkspaceEditHelper.removeText(DocHelper.untrimRange(doc, key.range))
 		];
 
-		var quickFixEdit = WorkspaceEditHelper.create(context, params, fixes);
+		var sortFixes = OrganizeImportsFeature.organizeImports(doc, context, []);
 
-		var unusedRanges:Array<Range> = fixes.map(edit -> edit.range);
-		fixes = fixes.concat(OrganizeImportsFeature.organizeImports(doc, context, unusedRanges));
-		var edit = WorkspaceEditHelper.create(context, params, fixes);
+		var unusedRanges:Array<Range> = removeUnusedFixes.map(edit -> edit.range);
+		var organizeFixes = removeUnusedFixes.concat(OrganizeImportsFeature.organizeImports(doc, context, unusedRanges));
 
 		var diagnostics = existingActions.filter(action -> action.title == RemoveUnusedImportUsingTitle)
 			.map(action -> action.diagnostics)
 			.flatten()
 			.array();
-		var actions = [
+		var actions:Array<CodeAction> = [
+			{
+				title: SortImportsUsingsTitle,
+				kind: CodeActionFeature.SourceSortImports,
+				edit: WorkspaceEditHelper.create(context, params, sortFixes)
+			},
 			{
 				title: OrganizeImportsUsingsTitle,
 				kind: SourceOrganizeImports,
-				edit: edit,
+				edit: WorkspaceEditHelper.create(context, params, organizeFixes),
 				diagnostics: diagnostics
 			}
 		];
 
-		if (diagnostics.length > 0 && fixes.length > 1) {
+		if (diagnostics.length > 0 && removeUnusedFixes.length > 1) {
 			actions.push({
 				title: RemoveAllUnusedImportsUsingsTitle,
 				kind: QuickFix,
-				edit: quickFixEdit,
+				edit: WorkspaceEditHelper.create(context, params, removeUnusedFixes),
 				diagnostics: diagnostics
 			});
 		}
