@@ -22,7 +22,7 @@ class OrganizeImportsFeature {
 			var packageName:Null<String> = null;
 			var imports:Array<TokenTree> = doc.tokens.tree.filterCallback(function(token:TokenTree, index:Int):FilterResult {
 				switch (token.tok) {
-					case Kwd(KwdImport), Kwd(KwdUsing):
+					case Kwd(KwdImport) | Kwd(KwdUsing):
 						return FOUND_SKIP_SUBTREE;
 					case Kwd(KwdPackage):
 						var child = token.getFirstChild();
