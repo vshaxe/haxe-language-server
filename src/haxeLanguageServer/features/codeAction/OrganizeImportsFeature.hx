@@ -37,11 +37,11 @@ class OrganizeImportsFeature {
 							default:
 						}
 						return SKIP_SUBTREE;
-					case Kwd(KwdAbstract) | Kwd(KwdClass) | Kwd(KwdEnum) | Kwd(KwdInterface) | Kwd(KwdTypedef):
-						return SKIP_SUBTREE;
+					case Sharp(_):
+						return GO_DEEPER;
 					default:
+						return SKIP_SUBTREE;
 				}
-				return GO_DEEPER;
 			});
 
 			var importGroups:Map<Int, ImportGroup> = new Map<Int, ImportGroup>();
