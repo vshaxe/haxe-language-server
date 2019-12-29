@@ -37,6 +37,8 @@ class OrganizeImportsFeature {
 							default:
 						}
 						return SKIP_SUBTREE;
+					case Kwd(KwdAbstract) | Kwd(KwdClass) | Kwd(KwdEnum) | Kwd(KwdInterface) | Kwd(KwdTypedef):
+						return SKIP_SUBTREE;
 					default:
 				}
 				return GO_DEEPER;
