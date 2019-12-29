@@ -428,7 +428,7 @@ class DiagnosticsFeature {
 			.array();
 		var actions = [
 			{
-				title: #if debug OrganizeImportsUsingsTitle #else RemoveAllUnusedImportsUsingsTitle #end,
+				title: OrganizeImportsUsingsTitle,
 				kind: SourceOrganizeImports,
 				edit: edit,
 				diagnostics: diagnostics
