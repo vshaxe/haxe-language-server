@@ -56,7 +56,8 @@ class OrganizeImportsFeature {
 						id: id,
 						startOffset: determineStartPos(doc, i),
 						imports: [],
-						usings: []
+						usings: [],
+						lastIndex: i.index
 					}
 					importGroups.set(id, group);
 					groupCount++;
@@ -80,14 +81,18 @@ class OrganizeImportsFeature {
 						group.imports.push({
 							token: i,
 							text: doc.getText(range),
-							type: type
+							type: type,
+							range: range
 						});
+						group.lastIndex = i.index;
 					case Kwd(KwdUsing):
 						group.usings.push({
 							token: i,
 							text: doc.getText(range),
-							type: type
+							type: type,
+							range: range
 						});
+						group.lastIndex = i.index;
 					default:
 				}
 			}
@@ -148,10 +153,10 @@ class OrganizeImportsFeature {
 
 		// remove all existing imports/usings from group
 		for (i in importGroup.imports) {
-			edits.push(makeImportEdit(doc, i.token));
+			edits.push(makeImportEdit(doc, i.range, i.token.index == importGroup.lastIndex));
 		}
 		for (i in importGroup.usings) {
-			edits.push(makeImportEdit(doc, i.token));
+			edits.push(makeImportEdit(doc, i.range, i.token.index == importGroup.lastIndex));
 		}
 
 		// insert sorted imports/usings at startOffset
@@ -172,8 +177,7 @@ class OrganizeImportsFeature {
 		}
 	}
 
-	static function makeImportEdit(doc:TextDocument, token:TokenTree):TextEdit {
-		var range:Range = doc.rangeAt2(doc.tokens.getTreePos(token));
+	static function makeImportEdit(doc:TextDocument, range:Range, isLast:Bool):TextEdit {
 		// TODO move marker to beginning of next line assumes imports are one line each
 		// maybe look at document whitespace and remove all trailing?
 		range.end.line++;
@@ -187,8 +191,8 @@ class OrganizeImportsFeature {
 			}
 		};
 		var lineAfter:String = doc.getText(nextLineRange).trim();
-		if (lineAfter.length <= 0) {
-			// range.end.line++;
+		if (lineAfter.length <= 0 && !isLast) {
+			range.end.line++;
 		}
 		return WorkspaceEditHelper.removeText(range);
 	}
@@ -239,12 +243,14 @@ private typedef ImportGroup = {
 	var startOffset:Int;
 	var imports:Array<ImportInfo>;
 	var usings:Array<ImportInfo>;
+	var lastIndex:Int;
 }
 
 private typedef ImportInfo = {
 	var token:TokenTree;
 	var text:String;
 	var type:ImportType;
+	var range:Range;
 }
 
 private enum abstract ImportType(Int) {

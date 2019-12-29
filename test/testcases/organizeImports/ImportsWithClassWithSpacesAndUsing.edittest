@@ -1,0 +1,46 @@
+{
+}
+
+---
+
+package haxeLanguageServer.features;
+
+import haxeLanguageServer.helper.FormatterHelper;
+
+import tokentree.TokenTreeBuilder;
+import haxe.ds.ArraySort;
+
+import tokentree.TokenTree;
+import formatter.Main;
+
+using haxe.Json;
+
+import haxeLanguageServer.helper.WorkspaceEditHelper;
+
+class Main {}
+
+---
+
+{
+	"edits": [{
+            "newText": ""
+        },{
+            "newText": ""
+        },{
+            "newText": ""
+        },{
+            "newText": ""
+        },{
+            "newText": ""
+        },{
+            "newText": ""
+        },{
+            "newText": ""
+        },{
+            "range": {
+                "start": { "line": 2, "character": 0 },
+                "end": { "line": 2, "character": 0 }
+            },
+            "newText": "import formatter.Main;\nimport haxe.ds.ArraySort;\nimport haxeLanguageServer.helper.FormatterHelper;\nimport haxeLanguageServer.helper.WorkspaceEditHelper;\nimport tokentree.TokenTree;\nimport tokentree.TokenTreeBuilder;\n\nusing haxe.Json;\n"
+        }]
+}
