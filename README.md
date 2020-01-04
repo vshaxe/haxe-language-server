@@ -27,3 +27,28 @@ npx lix run vshaxe-build -t language-server
 ```
 
 This creates a `bin/server.js` that can be started with `node server.js`.
+
+### Usage with (Neo)vim
+
+There's a large amount of language client plugins for (Neo)vim, but the best choice currently seems to be [coc.nvim](https://github.com/neoclide/coc.nvim). A `coc-settings.json` that is known to work with haxe-language-server looks like this:
+
+```haxe
+{
+    "languageserver": {
+        "haxe": {
+            "command": "node",
+            "args": ["<path-to-server.js>"],
+            "filetypes": ["haxe"],
+            "trace.server": "verbose",
+            "initializationOptions": {
+                "displayArguments": ["build.hxml"]
+            },
+            "settings": {
+                "haxe.executable": "haxe"
+            }
+        }
+    }
+}
+```
+
+Where `<path-to-server.js>` can either be a `server.js` you built from source or simply downloaded as part of the Haxe Visual Studio Code extension (`"/<you-home-folder>/.vscode/extensions/nadako.vshaxe-<version>/bin/server.js"`).
