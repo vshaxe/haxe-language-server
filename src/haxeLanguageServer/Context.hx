@@ -22,6 +22,7 @@ import jsonrpc.CancellationToken;
 import jsonrpc.Protocol;
 import jsonrpc.ResponseError;
 import jsonrpc.Types;
+import languageServerProtocol.protocol.Implementation;
 import languageServerProtocol.protocol.TypeDefinition.TypeDefinitionRequest;
 
 class Context {
@@ -178,6 +179,19 @@ class Context {
 			unregisterCapability({
 				id: TypeDefinitionRequest.type,
 				method: TypeDefinitionRequest.type
+			});
+		}
+
+		if (haxeServer.supports(DisplayMethods.GotoImplementation)) {
+			new GotoImplementationFeature(this);
+			registerCapability({
+				id: ImplementationRequest.type,
+				method: ImplementationRequest.type
+			});
+		} else {
+			unregisterCapability({
+				id: ImplementationRequest.type,
+				method: ImplementationRequest.type
 			});
 		}
 	}
