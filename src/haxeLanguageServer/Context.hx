@@ -183,7 +183,6 @@ class Context {
 		}
 
 		if (haxeServer.supports(DisplayMethods.GotoImplementation)) {
-			new GotoImplementationFeature(this);
 			registerCapability({
 				id: ImplementationRequest.type,
 				method: ImplementationRequest.type
@@ -218,6 +217,7 @@ class Context {
 				new HoverFeature(this);
 				new SignatureHelpFeature(this);
 				gotoDefinition = new GotoDefinitionFeature(this);
+				new GotoImplementationFeature(this);
 				new GotoTypeDefinitionFeature(this);
 				new FindReferencesFeature(this);
 				determinePackage = new DeterminePackageFeature(this);
