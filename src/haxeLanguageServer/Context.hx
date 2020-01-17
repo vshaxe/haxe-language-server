@@ -170,40 +170,38 @@ class Context {
 	function onServerStarted() {
 		displayOffsetConverter = DisplayOffsetConverter.create(haxeServer.haxeVersion);
 
-		if (haxeServer.supports(DisplayMethods.GotoTypeDefinition)) {
-			registerCapability({
-				id: TypeDefinitionRequest.type,
-				method: TypeDefinitionRequest.type
-			});
-		} else {
-			unregisterCapability({
-				id: TypeDefinitionRequest.type,
-				method: TypeDefinitionRequest.type
-			});
+		function handleRegistration<P, R>(displayMethod:HaxeRequestMethod<P, R>, lspMethod:String) {
+			if (haxeServer.supports(displayMethod)) {
+				registerCapability(lspMethod);
+			} else {
+				unregisterCapability(lspMethod);
+			}
 		}
-
-		if (haxeServer.supports(DisplayMethods.GotoImplementation)) {
-			registerCapability({
-				id: ImplementationRequest.type,
-				method: ImplementationRequest.type
-			});
-		} else {
-			unregisterCapability({
-				id: ImplementationRequest.type,
-				method: ImplementationRequest.type
-			});
-		}
+		handleRegistration(DisplayMethods.GotoTypeDefinition, TypeDefinitionRequest.type);
+		handleRegistration(DisplayMethods.GotoImplementation, ImplementationRequest.type);
 	}
 
-	public function registerCapability(registration:Registration) {
+	public function registerCapability(method:String, ?registerOptions:Dynamic) {
+		var params:Registration = {
+			id: method,
+			method: method
+		};
+		if (registerOptions != null) {
+			params.registerOptions = registerOptions;
+		}
 		languageServerProtocol.sendRequest(RegistrationRequest.type, {
-			registrations: [registration]
+			registrations: [params]
 		}, null, _ -> {}, error -> trace(error));
 	}
 
-	public function unregisterCapability(unregistration:Unregistration) {
+	public function unregisterCapability(method:String) {
 		languageServerProtocol.sendRequest(UnregistrationRequest.type, {
-			unregisterations: [unregistration]
+			unregisterations: [
+				{
+					id: method,
+					method: method
+				}
+			]
 		}, null, _ -> {}, error -> trace(error));
 	}
 

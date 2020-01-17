@@ -15,12 +15,8 @@ class CodeActionFeature {
 	public function new(context:Context) {
 		this.context = context;
 
-		context.registerCapability({
-			id: CodeActionRequest.type,
-			method: CodeActionRequest.type,
-			registerOptions: {
-				codeActionKinds: [QuickFix, SourceOrganizeImports, SourceSortImports, RefactorExtract]
-			}
+		context.registerCapability(CodeActionRequest.type, {
+			codeActionKinds: [QuickFix, SourceOrganizeImports, SourceSortImports, RefactorExtract]
 		});
 		context.languageServerProtocol.onRequest(CodeActionRequest.type, onCodeAction);
 	}
@@ -31,8 +27,9 @@ class CodeActionFeature {
 
 	function onCodeAction(params:CodeActionParams, token:CancellationToken, resolve:Array<CodeAction>->Void, reject:ResponseError<NoData>->Void) {
 		var codeActions = [];
-		for (contributor in contributors)
+		for (contributor in contributors) {
 			codeActions = codeActions.concat(contributor(params));
+		}
 		resolve(codeActions);
 	}
 }
