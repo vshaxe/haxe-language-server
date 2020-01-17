@@ -19,8 +19,8 @@ class Helper {
 	}
 
 	public static function extractFunctionSignature<T>(type:JsonType<T>) {
-		return switch type.kind {
-			case TFun: type.args;
+		return switch removeNulls(type).type {
+			case {kind: TFun, args: args}: args;
 			case _: throw "function expected";
 		}
 	}
