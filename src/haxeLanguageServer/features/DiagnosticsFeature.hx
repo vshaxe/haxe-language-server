@@ -186,6 +186,9 @@ class DiagnosticsFeature {
 							diag.severity = Hint;
 							diag.tags = [Unnecessary];
 						}
+						if (diag.message == "This case is unused") {
+							diag.tags = [Unnecessary];
+						}
 						if (kind == DeprecationWarning) {
 							diag.tags = [Deprecated];
 						}
