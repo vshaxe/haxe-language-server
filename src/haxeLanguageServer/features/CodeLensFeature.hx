@@ -38,7 +38,10 @@ class CodeLensFeature {
 				var args:Array<Dynamic> = [
 					uri,
 					range.start,
-					relations.map(function(c) {
+					relations.filter(function(c) {
+						// HaxeFoundation/haxe#9092
+						return c.range != null;
+					}).map(function(c) {
 						var cRange = c.range;
 						// multi-line ranges are not useful, VSCode navigates to the end of them
 						if (c.range.start.line != c.range.end.line) {
