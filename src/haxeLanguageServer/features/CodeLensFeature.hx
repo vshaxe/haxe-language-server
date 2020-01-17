@@ -97,17 +97,23 @@ class CodeLensFeature {
 		if (doc == null) {
 			return reject.documentNotFound(uri);
 		}
+		var onResolve = context.startTimer("@statistics");
 		context.callDisplay("@statistics", [doc.uri.toFsPath() + "@0@statistics"], doc.content, token, function(r:DisplayResult) {
 			switch r {
 				case DCancelled:
 					resolve(null);
 				case DResult(s):
-					var data:Array<Statistics> = try haxe.Json.parse(s) catch (e:Any) return reject(ResponseError.internalError("Error parsing stats response: "
-						+ Std.string(e)));
+					var data:Array<Statistics> = try {
+						haxe.Json.parse(s);
+					} catch (e:Any) {
+						return reject(ResponseError.internalError('Error parsing stats response'));
+					}
+					onResolve(data);
 					for (statistics in data) {
 						var currentUri = statistics.file.toUri();
 						if (currentUri == uri) {
-							return resolve(getCodeLensFromStatistics(uri, statistics.statistics));
+							var codeLens = getCodeLensFromStatistics(uri, statistics.statistics);
+							resolve(codeLens);
 						}
 					}
 			}
