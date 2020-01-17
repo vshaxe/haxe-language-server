@@ -69,20 +69,26 @@ class CodeLensFeature {
 			var range = statistic.range;
 			switch statistic.kind {
 				case ClassType:
-					addRelation("subclass", "es", range, statistic.subclasses);
+					if (statistic.subclasses != null) {
+						addRelation("subclass", "es", range, statistic.subclasses);
+					}
 				case InterfaceType:
 					addRelation("implementer", "s", range, statistic.implementers);
-					addRelation("subinterface", "s", range, statistic.subclasses);
+					if (statistic.subclasses != null) {
+						addRelation("subinterface", "s", range, statistic.subclasses);
+					}
 				case EnumType:
 					addRelation("reference", "s", range, statistic.references);
 				case EnumField:
 					addRelation("reference", "s", range, statistic.references);
 				case ClassField:
-					if (statistic.overrides != null)
+					if (statistic.overrides != null) {
 						addRelation("override", "s", range, statistic.overrides);
+					}
 					addRelation("reference", "s", range, statistic.references);
-					if (statistic.implementers != null)
+					if (statistic.implementers != null) {
 						addRelation("implementation", "s", range, statistic.implementers);
+					}
 			}
 		}
 		return actions;
