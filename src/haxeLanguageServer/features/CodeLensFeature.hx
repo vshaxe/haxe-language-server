@@ -70,7 +70,7 @@ class CodeLensFeature {
 						addRelation("subclass", "es", range, statistic.subclasses);
 					}
 				case InterfaceType:
-					addRelation("implementer", "s", range, statistic.implementers);
+					addRelation("implementation", "s", range, statistic.implementers);
 					if (statistic.subclasses != null) {
 						addRelation("subinterface", "s", range, statistic.subclasses);
 					}
