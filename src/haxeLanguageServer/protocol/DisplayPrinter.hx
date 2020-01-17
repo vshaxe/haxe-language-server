@@ -255,7 +255,11 @@ class DisplayPrinter {
 					case MethMacro: "macro ";
 				}
 				var finalKeyword = if (field.isFinalField()) "final " else "";
-				var definition = printEmptyFunctionDefinition(field.name, concreteType.extractFunctionSignature(), field.params);
+				if (occurrence.origin.isStructure() && field.meta.hasMeta(Optional)) {
+					name = "?" + name;
+				}
+				var methodSignature = concreteType.extractFunctionSignature();
+				var definition = printEmptyFunctionDefinition(name, methodSignature, field.params);
 				'$access$staticKeyword$finalKeyword$methodKind$definition';
 		};
 	}
