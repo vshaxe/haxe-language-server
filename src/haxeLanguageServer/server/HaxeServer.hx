@@ -107,18 +107,21 @@ class HaxeServer {
 			}
 
 			stopProgressCallback = context.startProgress("Initializing Haxe/JSON-RPC protocol");
-			context.callHaxeMethod(Methods.Initialize, {supportsResolve: true, exclude: context.config.user.exclude, maxCompletionItems: 1000}, null,
-				result -> {
-					var pre = result.haxeVersion.pre;
-					if (result.haxeVersion.major == 4 && result.haxeVersion.minor == 0 && pre != null) {
-						context.languageServerProtocol.sendNotification(LanguageServerMethods.DidDetectOldPreview, {preview: result.haxeVersion.pre});
-					}
-					protocolVersion = result.protocolVersion;
-					supportedMethods = result.methods;
-					configure();
-					onInitComplete();
-					return null;
-				}, error -> {
+			context.callHaxeMethod(Methods.Initialize, {
+				supportsResolve: true,
+				exclude: context.config.user.exclude,
+				maxCompletionItems: context.config.user.maxCompletionItems
+			}, null, function(result) {
+				var pre = result.haxeVersion.pre;
+				if (result.haxeVersion.major == 4 && result.haxeVersion.minor == 0 && pre != null) {
+					context.languageServerProtocol.sendNotification(LanguageServerMethods.DidDetectOldPreview, {preview: result.haxeVersion.pre});
+				}
+				protocolVersion = result.protocolVersion;
+				supportedMethods = result.methods;
+				configure();
+				onInitComplete();
+				return null;
+			}, function(error) {
 				// the "invalid format" error is expected for Haxe versions <= 4.0.0-preview.3
 				if (error.startsWith("Error: Invalid format")) {
 					trace("Haxe version does not support JSON-RPC, using legacy --display API.");
@@ -147,11 +150,13 @@ class HaxeServer {
 	}
 
 	function configure() {
-		context.callHaxeMethod(ServerMethods.Configure,
-			{noModuleChecks: true, print: context.config.displayServer.print, legacyCompletion: context.config.user.useLegacyCompletion}, null, _ -> null,
-			error -> {
-				trace("Error during " + ServerMethods.Configure + " " + error);
-			});
+		context.callHaxeMethod(ServerMethods.Configure, {
+			noModuleChecks: true,
+			print: context.config.displayServer.print,
+			legacyCompletion: context.config.user.useLegacyCompletion
+		}, null, _ -> null, function(error) {
+			trace("Error during " + ServerMethods.Configure + " " + error);
+		});
 	}
 
 	function buildCompletionCache() {

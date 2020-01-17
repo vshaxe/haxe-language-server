@@ -89,6 +89,7 @@ typedef UserConfig = {
 	var ?exclude:Array<String>;
 	var ?postfixCompletion:PostfixCompletionConfig;
 	var ?importsSortOrder:ImportsSortOrderConfig;
+	var ?maxCompletionItems:Int;
 }
 
 private typedef InitOptions = {
@@ -222,7 +223,8 @@ class Configuration {
 			postfixCompletion: {
 				level: Full
 			},
-			importsSortOrder: AllAlphabetical
+			importsSortOrder: AllAlphabetical,
+			maxCompletionItems: 1000
 		};
 		StructDefaultsMacro.applyDefaults(user, defaults);
 	}
