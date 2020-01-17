@@ -24,7 +24,7 @@ class ArrayHelper {
 		return true;
 	}
 
-	public static function filterDuplicates<T>(array:Array<T>, filter:T->T->Bool):Array<T> {
+	public static function filterDuplicates<T>(array:Array<T>, filter:(a:T, b:T) -> Bool):Array<T> {
 		var unique:Array<T> = [];
 		for (element in array) {
 			var present = false;

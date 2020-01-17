@@ -21,8 +21,8 @@ class HaxeServer {
 	var currentRequest:Null<DisplayRequest>;
 	var socketListener:Null<js.node.net.Server>;
 	var startingSocketListener:Bool = false;
-	var stopProgressCallback:Null<Void->Void>;
-	var startRequest:Null<Void->Void>;
+	var stopProgressCallback:Null<() -> Void>;
+	var startRequest:Null<() -> Void>;
 	var crashes:Int = 0;
 	var supportedMethods:Array<String> = [];
 
@@ -72,7 +72,7 @@ class HaxeServer {
 		return true;
 	}
 
-	public function start(?callback:Void->Void) {
+	public function start(?callback:() -> Void) {
 		// we still have requests in our queue that are not cancelable, such as a build - try again later
 		if (hasNonCancellableRequests() || startingSocketListener) {
 			startRequest = callback;
@@ -288,7 +288,7 @@ class HaxeServer {
 		stopProgressCallback = null;
 	}
 
-	public function restart(reason:String, ?callback:Void->Void) {
+	public function restart(reason:String, ?callback:() -> Void) {
 		trace('Haxe server restart requested: $reason');
 		start(function() {
 			trace('Restarted Haxe server: $reason');

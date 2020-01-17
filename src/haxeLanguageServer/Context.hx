@@ -94,7 +94,7 @@ class Context {
 		languageServerProtocol.onRequest(LanguageServerMethods.RunMethod, runMethod);
 	}
 
-	public function startProgress(title:String):Void->Void {
+	public function startProgress(title:String):() -> Void {
 		var id = progressId++;
 		languageServerProtocol.sendNotification(LanguageServerMethods.ProgressStart, {id: id, title: 'Haxe: $title...'});
 		return function() {
