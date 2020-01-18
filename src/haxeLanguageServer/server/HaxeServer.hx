@@ -42,17 +42,19 @@ class HaxeServer {
 		var checkRun = ChildProcess.spawnSync(haxePath, ["-version"], spawnOptions);
 		if (checkRun.error != null) {
 			if (checkRun.error.message.contains("ENOENT")) {
-				if (haxePath == "haxe") // default
+				if (haxePath == "haxe") { // default
 					return error("Could not find Haxe in PATH. Is it installed?");
-				else
+				} else {
 					return error('Path to Haxe executable is not valid: \'$haxePath\'. Please check your settings.');
+				}
 			}
 			return error('Error starting Haxe server: ${checkRun.error}');
 		}
 
 		var output = (checkRun.stderr : Buffer).toString().trim();
-		if (output == "")
+		if (output == "") {
 			output = (checkRun.stdout : Buffer).toString().trim(); // haxe 4.0 prints -version output to stdout instead
+		}
 
 		if (checkRun.status != 0) {
 			return error(if (output == "") {
@@ -63,12 +65,13 @@ class HaxeServer {
 		}
 
 		haxeVersion = SemVer.parse(output);
-		if (haxeVersion == null)
+		if (haxeVersion == null) {
 			return error("Error parsing Haxe version " + Json.stringify(output));
-
+		}
 		var isVersionSupported = haxeVersion >= new SemVer(3, 4, 0);
-		if (!isVersionSupported)
+		if (!isVersionSupported) {
 			return error('Unsupported Haxe version! Minimum required: 3.4.0. Found: $haxeVersion.');
+		}
 		return true;
 	}
 
@@ -86,10 +89,12 @@ class HaxeServer {
 		var config = context.config.displayServer;
 
 		var env = new haxe.DynamicAccess();
-		for (key => value in js.Node.process.env)
+		for (key => value in js.Node.process.env) {
 			env[key] = value;
-		for (key => value in config.env)
+		}
+		for (key => value in config.env) {
 			env[key] = value;
+		}
 		var spawnOptions = {env: env, cwd: context.workspacePath.toString()};
 
 		if (!checkHaxeVersion(config.path, spawnOptions)) {
@@ -102,8 +107,9 @@ class HaxeServer {
 			function onInitComplete() {
 				stopProgress();
 				buildCompletionCache();
-				if (callback != null)
+				if (callback != null) {
 					callback();
+				}
 			}
 
 			stopProgressCallback = context.startProgress("Initializing Haxe/JSON-RPC protocol");
@@ -114,7 +120,10 @@ class HaxeServer {
 			}, null, function(result) {
 				var pre = result.haxeVersion.pre;
 				if (result.haxeVersion.major == 4 && result.haxeVersion.minor == 0 && pre != null) {
-					context.languageServerProtocol.sendNotification(LanguageServerMethods.DidDetectOldPreview, {preview: result.haxeVersion.pre});
+					context.languageServerProtocol.sendNotification(LanguageServerMethods.DidDetectOldHaxeVersion, {
+						haxe4Preview: true,
+						version: haxeVersion.toString()
+					});
 				}
 				protocolVersion = result.protocolVersion;
 				supportedMethods = result.methods;
@@ -125,9 +134,10 @@ class HaxeServer {
 				// the "invalid format" error is expected for Haxe versions <= 4.0.0-preview.3
 				if (error.startsWith("Error: Invalid format")) {
 					trace("Haxe version does not support JSON-RPC, using legacy --display API.");
-					if (haxeVersion.major == 4) {
-						context.languageServerProtocol.sendNotification(LanguageServerMethods.DidDetectOldPreview);
-					}
+					context.languageServerProtocol.sendNotification(LanguageServerMethods.DidDetectOldHaxeVersion, {
+						haxe4Preview: haxeVersion.major == 4,
+						version: haxeVersion.toString()
+					});
 				} else {
 					trace(error);
 				}

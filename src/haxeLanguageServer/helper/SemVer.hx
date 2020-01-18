@@ -56,7 +56,7 @@ abstract SemVer(Version) from Version {
 		return major == other.major && minor == other.minor && patch == other.patch;
 	}
 
-	function toString() {
+	public function toString() {
 		return '$major.$minor.$patch';
 	}
 }

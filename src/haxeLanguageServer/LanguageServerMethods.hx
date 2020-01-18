@@ -83,9 +83,9 @@ class LanguageServerMethods {
 	static inline var HaxeKeepsCrashing = new NotificationType<NoData>("haxe/haxeKeepsCrashing");
 
 	/**
-		This notification is sent from the server to the client to indicate that an old Haxe 4 preview build is being used.
+		This notification is sent from the server to the client to indicate that an old Haxe version is being used.
 	**/
-	static inline var DidDetectOldPreview = new NotificationType<Null<{preview:String}>>("haxe/didDetectOldPreview");
+	static inline var DidDetectOldHaxeVersion = new NotificationType<{haxe4Preview:Bool, version:String}>("haxe/didDetectOldHaxeVersion");
 }
 
 typedef MethodResult = {
