@@ -7,6 +7,7 @@ import jsonrpc.Types.NoData;
 
 class CodeLensFeature {
 	final context:Context;
+	final cache = new Map<DocumentUri, Array<CodeLens>>();
 
 	public function new(context:Context) {
 		this.context = context;
@@ -119,11 +120,19 @@ class CodeLensFeature {
 						var currentUri = statistics.file.toUri();
 						if (currentUri == uri) {
 							var codeLens = getCodeLensFromStatistics(uri, statistics.statistics);
+							cache[uri] = codeLens;
 							resolve(codeLens);
 						}
 					}
 			}
-		}, reject.handler());
+		}, function(error) {
+			if (cache.exists(uri)) {
+				resolve(cache[uri]);
+				trace('Reusing cached code lens - failed with:\n\t$error');
+			} else {
+				reject(ResponseError.internalError(error));
+			}
+		});
 	}
 }
 
