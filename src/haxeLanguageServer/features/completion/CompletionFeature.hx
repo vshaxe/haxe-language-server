@@ -369,6 +369,9 @@ class CompletionFeature {
 		var resolution = occurrence.resolution;
 		var printedOrigin = printer.printClassFieldOrigin(occurrence.origin, item.kind, "'");
 
+		if (field.meta.hasMeta(NoCompletion)) {
+			return null;
+		}
 		if (data.mode.kind == Override) {
 			return createOverrideCompletionItem(item, data, printedOrigin);
 		}

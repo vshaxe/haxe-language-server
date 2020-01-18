@@ -9,5 +9,6 @@ enum abstract CompilerMetadata(String) to String {
 	var Enum = ":enum";
 	var Value = ":value";
 	var Deprecated = ":deprecated";
+	var NoCompletion = ":noCompletion";
 	// TODO
 }
