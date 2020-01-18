@@ -1,5 +1,6 @@
 package haxeLanguageServer.server;
 
+import haxe.DynamicAccess;
 import haxe.Json;
 import haxe.display.Protocol;
 import haxe.display.Server.ServerMethods;
@@ -33,7 +34,7 @@ class HaxeServer {
 		this.context = context;
 	}
 
-	function checkHaxeVersion(haxePath, spawnOptions) {
+	function checkHaxeVersion(haxePath:String, spawnOptions:ChildProcessSpawnSyncOptions) {
 		inline function error(s) {
 			context.sendShowMessage(Error, s);
 			return false;
@@ -75,6 +76,15 @@ class HaxeServer {
 		return true;
 	}
 
+	function mergeEnvs(from:DynamicAccess<String>, to:DynamicAccess<String>) {
+		for (key => value in from) {
+			if (Sys.systemName() == "Windows") {
+				key = key.toLowerCase();
+			}
+			to[key] = value;
+		}
+	}
+
 	public function start(?callback:() -> Void) {
 		// we still have requests in our queue that are not cancelable, such as a build - try again later
 		if (hasNonCancellableRequests() || startingSocketListener) {
@@ -88,13 +98,10 @@ class HaxeServer {
 
 		var config = context.config.displayServer;
 
-		var env = new haxe.DynamicAccess();
-		for (key => value in js.Node.process.env) {
-			env[key] = value;
-		}
-		for (key => value in config.env) {
-			env[key] = value;
-		}
+		var env = new DynamicAccess();
+		mergeEnvs(js.Node.process.env, env);
+		mergeEnvs(config.env, env);
+
 		var spawnOptions = {env: env, cwd: context.workspacePath.toString()};
 
 		if (!checkHaxeVersion(config.path, spawnOptions)) {
