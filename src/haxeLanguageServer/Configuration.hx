@@ -1,6 +1,7 @@
 package haxeLanguageServer;
 
 import haxe.Json;
+import haxe.DynamicAccess;
 import haxe.display.Server.ConfigurePrintParams;
 import haxe.extern.EitherType;
 import haxeLanguageServer.helper.StructDefaultsMacro;
@@ -8,7 +9,7 @@ import jsonrpc.Protocol;
 
 typedef DisplayServerConfig = {
 	var ?path:String;
-	var ?env:haxe.DynamicAccess<String>;
+	var ?env:DynamicAccess<String>;
 	var ?arguments:Array<String>;
 	var ?print:ConfigurePrintParams;
 	var ?useSocket:Bool;
@@ -128,13 +129,13 @@ class Configuration {
 		var defaults:InitOptions = {
 			displayServerConfig: {
 				path: "haxe",
-				env: new haxe.DynamicAccess(),
+				env: new DynamicAccess(),
 				arguments: [],
 				print: {
 					completion: false,
 					reusing: false
 				},
-				useSocket: false,
+				useSocket: true
 			},
 			displayArguments: [],
 			haxelibConfig: {

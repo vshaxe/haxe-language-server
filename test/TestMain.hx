@@ -20,7 +20,8 @@ class TestMain {
 			new RenameResolverTest(), 
 			new HelperTest(),
 			new ExtractConstantFeatureTest(),
-			new OrganizeImportsFeatureTest()
+			new OrganizeImportsFeatureTest(),
+			new SemVerTest()
 		]);
 		// @formatter:on
 	}

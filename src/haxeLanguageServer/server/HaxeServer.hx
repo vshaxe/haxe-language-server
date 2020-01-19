@@ -1,9 +1,11 @@
 package haxeLanguageServer.server;
 
+import sys.FileSystem;
 import haxe.DynamicAccess;
 import haxe.Json;
 import haxe.display.Protocol;
 import haxe.display.Server.ServerMethods;
+import haxe.io.Path;
 import haxeLanguageServer.helper.SemVer;
 import haxeLanguageServer.server.HaxeConnection;
 import js.lib.Promise;
@@ -162,7 +164,17 @@ class HaxeServer {
 			}
 		}
 
-		var startConnection = if (config.useSocket) SocketConnection.start else StdioConnection.start;
+		var useSocket = config.useSocket;
+		if (haxeVersion.major < 4) {
+			useSocket = false;
+		}
+		if (haxeVersion.major == 4 && haxeVersion.minor == 0 && haxeVersion.pre != null) {
+			useSocket = false;
+		}
+		if (FileSystem.exists(Path.join([context.workspacePath.toString(), ".haxerc"]))) {
+			useSocket = false; // waiting on lix-pm/haxeshim#49
+		}
+		var startConnection = if (useSocket) SocketConnection.start else StdioConnection.start;
 		startConnection(config.path, config.arguments, spawnOptions, onMessage, onExit, onHaxeStarted);
 	}
 
@@ -203,14 +215,14 @@ class HaxeServer {
 
 	function readClassPaths() {
 		startCompletionInitializationProgress("Parsing Classpaths");
-		context.callHaxeMethod(ServerMethods.ReadClassPaths, null, null, result -> {
+		context.callHaxeMethod(ServerMethods.ReadClassPaths, null, null, function(result) {
 			stopProgress();
 			trace("Done.");
 			if (result.files == null) {
 				return null;
 			}
 			return result.files + " files";
-		}, error -> {
+		}, function(error) {
 			stopProgress();
 			trace("Failed - " + error);
 		});
@@ -246,7 +258,6 @@ class HaxeServer {
 			});
 			server.on(ServerEvent.Error, _ -> getNextAvailablePort(currentPort + 1, cb));
 		}
-
 		return new Promise((resolve, reject) -> getNextAvailablePort(startingAt, resolve));
 	}
 
