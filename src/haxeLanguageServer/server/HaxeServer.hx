@@ -1,6 +1,5 @@
 package haxeLanguageServer.server;
 
-import sys.FileSystem;
 import haxe.DynamicAccess;
 import haxe.Json;
 import haxe.display.Protocol;
@@ -15,6 +14,7 @@ import js.node.Net;
 import js.node.net.Server;
 import js.node.net.Socket.SocketEvent;
 import jsonrpc.CancellationToken;
+import sys.FileSystem;
 
 class HaxeServer {
 	final context:Context;
@@ -121,7 +121,6 @@ class HaxeServer {
 				}
 			}
 
-			stopProgressCallback = context.startProgress("Initializing Haxe/JSON-RPC protocol");
 			context.callHaxeMethod(Methods.Initialize, {
 				supportsResolve: true,
 				exclude: context.config.user.exclude,
@@ -189,10 +188,10 @@ class HaxeServer {
 	}
 
 	function buildCompletionCache() {
-		if (!context.config.user.buildCompletionCache || context.config.displayArguments == null)
+		if (!context.config.user.buildCompletionCache || context.config.displayArguments == null) {
 			return;
-
-		startCompletionInitializationProgress("Building Cache");
+		}
+		startProgress("Building Cache");
 
 		// see vshaxe/haxe-language-server#44 for explanation
 		var leadingArgs = ["--no-output", "--each", "--no-output"];
@@ -214,7 +213,7 @@ class HaxeServer {
 	}
 
 	function readClassPaths() {
-		startCompletionInitializationProgress("Parsing Classpaths");
+		startProgress("Parsing Classpaths");
 		context.callHaxeMethod(ServerMethods.ReadClassPaths, null, null, function(result) {
 			stopProgress();
 			trace("Done.");
@@ -226,11 +225,6 @@ class HaxeServer {
 			stopProgress();
 			trace("Failed - " + error);
 		});
-	}
-
-	function startCompletionInitializationProgress(message:String) {
-		stopProgressCallback = context.startProgress(message);
-		trace(message + "...");
 	}
 
 	function hasNonCancellableRequests():Bool {
@@ -314,6 +308,11 @@ class HaxeServer {
 		updateRequestQueue();
 	}
 
+	function startProgress(title:String) {
+		stopProgress();
+		stopProgressCallback = context.startProgress(title);
+	}
+
 	function stopProgress() {
 		if (stopProgressCallback != null) {
 			stopProgressCallback();
@@ -325,8 +324,9 @@ class HaxeServer {
 		trace('Haxe server restart requested: $reason');
 		start(function() {
 			trace('Restarted Haxe server: $reason');
-			if (callback != null)
+			if (callback != null) {
 				callback();
+			}
 		});
 	}
 
