@@ -95,7 +95,12 @@ class DisplayPrinter {
 				}
 			case TAnonymous:
 				var fields = t.args.fields;
-				var s = [for (field in fields) '${field.name}:${printTypeRec(field.type)}'].join(", ");
+				var s = [
+					for (field in fields) {
+						var prefix = if (field.meta.hasMeta(Optional)) "?" else "";
+						'$prefix${field.name}:${printTypeRec(field.type)}';
+					}
+				].join(", ");
 				'{$s}';
 			case TFun:
 				var hasNamed = false;
