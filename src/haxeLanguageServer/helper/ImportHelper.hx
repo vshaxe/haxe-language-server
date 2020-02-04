@@ -67,8 +67,15 @@ class ImportHelper {
 			return null;
 		}
 
-		var packageStatement = null;
 		var firstImport = null;
+		var packageStatement = null;
+
+		// if the first token in the file is a comment, we should add the import after this
+		var firstComment = if (tokens.list[0].tok.match(Comment(_) | CommentLine(_))) {
+			tokens.list[0];
+		} else {
+			null;
+		}
 
 		tokens.tree.filterCallback((tree, _) -> {
 			switch tree.tok {
@@ -97,11 +104,20 @@ class ImportHelper {
 				insertLineAfter: true,
 				insertLineBefore: true
 			}
+		} else if (firstComment != null) {
+			var pos = document.positionAt(firstComment.pos.max);
+			pos.line += 1;
+			pos.character = 0;
+			{
+				position: pos,
+				insertLineAfter: true,
+				insertLineBefore: true
+			}
 		} else {
 			{
 				position: {line: 0, character: 0},
-				insertLineAfter: false,
-				insertLineBefore: false
+				insertLineAfter: true,
+				insertLineBefore: true
 			}
 		}
 	}
