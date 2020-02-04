@@ -66,17 +66,16 @@ class ImportHelper {
 		if (tokens == null) {
 			return null;
 		}
+
+		var packageStatement = null;
 		var firstImport = null;
-		var firstType = null;
 
 		tokens.tree.filterCallback((tree, _) -> {
 			switch tree.tok {
 				case Kwd(KwdPackage):
-				// ignore
+					packageStatement = tree;
 				case Kwd(KwdImport | KwdUsing) | Sharp("if") if (firstImport == null):
 					firstImport = tree;
-				case Kwd(_) if (firstType == null):
-					firstType = tree;
 				case _:
 			}
 			return SKIP_SUBTREE;
@@ -88,37 +87,15 @@ class ImportHelper {
 				insertLineBefore: false,
 				insertLineAfter: false
 			}
-		} else if (firstType != null) {
-			var token = firstType;
-			var previousSibling = null;
-			var docCommentSkipped = false;
-			do {
-				previousSibling = token.access().previousSibling();
-				if (!previousSibling.exists()) {
-					break;
-				}
-				switch previousSibling.token.tok {
-					case CommentLine(_):
-						token = previousSibling.token;
-					case Comment(_) if (!docCommentSkipped):
-						token = previousSibling.token;
-						docCommentSkipped = true;
-					case _:
-						break;
-				}
-			} while (true);
-			if (token.access().previousSibling().exists()) {
-				{
-					position: document.positionAt(tokens.getTreePos(token).min),
-					insertLineBefore: true,
-					insertLineAfter: true
-				}
-			} else {
-				{
-					position: {line: 0, character: 0},
-					insertLineBefore: false,
-					insertLineAfter: true
-				}
+		} else if (packageStatement != null) {
+			var lastChild = packageStatement.getLastChild();
+			var pos = document.positionAt(tokens.getPos(lastChild != null ? lastChild : packageStatement).max);
+			pos.line += 1;
+			pos.character = 0;
+			{
+				position: pos,
+				insertLineAfter: true,
+				insertLineBefore: true
 			}
 		} else {
 			{
