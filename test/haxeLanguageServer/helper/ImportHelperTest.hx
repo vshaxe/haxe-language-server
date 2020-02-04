@@ -171,5 +171,32 @@ import Test;
 extern class WebSocket {}",
 
 		});
+
+		// issue #414 https://github.com/vshaxe/vshaxe/issues/414
+		// first import + meta with comment
+		test({
+			before: "
+package;
+
+@:keep // comment seems to affect this bug
+class Main {
+    static function main() {
+        
+    }
+}",
+
+			after: "
+package;
+
+import Test;
+
+@:keep // comment seems to affect this bug
+class Main {
+    static function main() {
+        
+    }
+}",
+
+		});
 	}
 }
