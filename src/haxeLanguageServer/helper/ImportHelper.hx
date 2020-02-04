@@ -71,7 +71,7 @@ class ImportHelper {
 		var packageStatement = null;
 
 		// if the first token in the file is a comment, we should add the import after this
-		var firstComment = if (tokens.list[0].tok.match(Comment(_) | CommentLine(_))) {
+		var firstComment = if (tokens.list[0].tok.match(Comment(_))) {
 			tokens.list[0];
 		} else {
 			null;
