@@ -88,10 +88,10 @@ class DiagnosticsFeature {
 		var column = getInt(4);
 		var endColumn = getInt(5);
 
-		function makePosition(line:Int, character:Int) {
+		function makePosition(line:Int, character:Null<Int>) {
 			return {
 				line: line - 1,
-				character: context.displayOffsetConverter.positionCharToZeroBasedColumn(character)
+				character: if (character == null) 0 else context.displayOffsetConverter.positionCharToZeroBasedColumn(character)
 			}
 		}
 
