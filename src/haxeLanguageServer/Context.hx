@@ -336,7 +336,9 @@ class Context {
 			}
 
 			var beforeProcessingTime = Date.now().getTime();
-			var debugInfo:Null<String> = try callback(response.result) catch (e:Any) {
+			var debugInfo:Null<String> = try {
+				callback(response.result);
+			} catch (e:Any) {
 				errback(e);
 				trace(e);
 				trace(CallStack.toString(CallStack.exceptionStack()));

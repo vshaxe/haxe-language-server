@@ -15,21 +15,29 @@ class Main {
 		var context = new Context(languageServerProtocol);
 		reader.listen(languageServerProtocol.handleMessage);
 
-		languageServerProtocol.didRespondToRequest = function(request, response) {
+		function log(method:String, data:Dynamic) {
 			if (context.config.sendMethodResults) {
 				languageServerProtocol.sendNotification(LanguageServerMethods.DidRunMethod, {
 					kind: Lsp,
-					method: request.method,
+					method: method,
 					debugInfo: null,
 					response: {
-						result: {
-							request: request,
-							response: response
-						}
+						result: data
 					}
 				});
 			}
-		};
+		}
+		languageServerProtocol.didRespondToRequest = function(request, response) {
+			log(request.method, {
+				request: request,
+				response: response
+			});
+		}
+		languageServerProtocol.didSendNotification = function(notification) {
+			if (notification.method != LogMessageNotification.type && !notification.method.startsWith("haxe/")) {
+				log(notification.method, notification);
+			}
+		}
 	}
 
 	static function setupTrace(languageServerProtocol:Protocol) {

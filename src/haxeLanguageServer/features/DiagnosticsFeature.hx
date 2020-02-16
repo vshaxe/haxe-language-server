@@ -135,10 +135,10 @@ class DiagnosticsFeature {
 	function processDiagnosticsReply(uri:Null<DocumentUri>, onResolve:(result:Dynamic, ?debugInfo:String) -> Void, r:DisplayResult) {
 		clearDiagnostics(errorUri);
 		switch (r) {
-			case DCancelled:
-			// nothing to do \o/
 			case DResult(s):
-				var data:Array<HaxeDiagnosticResponse<Any>> = try haxe.Json.parse(s) catch (e:Any) {
+				var data:Array<HaxeDiagnosticResponse<Any>> = try {
+					haxe.Json.parse(s);
+				} catch (e:Any) {
 					trace("Error parsing diagnostics response: " + Std.string(e));
 					return;
 				}
@@ -212,6 +212,8 @@ class DiagnosticsFeature {
 				}
 
 				onResolve(data, count + " diagnostics");
+
+			case DCancelled:
 		}
 	}
 
