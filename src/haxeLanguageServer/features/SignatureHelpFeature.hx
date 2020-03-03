@@ -7,6 +7,7 @@ import haxe.display.JsonModuleTypes.JsonFunctionArgument;
 import haxe.extern.EitherType;
 import haxeLanguageServer.helper.DocHelper;
 import haxeLanguageServer.helper.IdentifierHelper.addNamesToSignatureType;
+import haxeLanguageServer.helper.SemVer;
 import haxeLanguageServer.protocol.DisplayPrinter;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
@@ -22,8 +23,7 @@ class SignatureHelpFeature {
 		context.languageServerProtocol.onRequest(SignatureHelpRequest.type, onSignatureHelp);
 	}
 
-	function onSignatureHelp(params:TextDocumentPositionParams, token:CancellationToken, resolve:Null<SignatureHelp>->Void,
-			reject:ResponseError<NoData>->Void) {
+	function onSignatureHelp(params:SignatureHelpParams, token:CancellationToken, resolve:Null<SignatureHelp>->Void, reject:ResponseError<NoData>->Void) {
 		var uri = params.textDocument.uri;
 		var doc:Null<TextDocument> = context.documents.get(uri);
 		if (doc == null) {
@@ -36,13 +36,22 @@ class SignatureHelpFeature {
 		handle(params, token, resolve, reject, doc);
 	}
 
-	function handleJsonRpc(params:TextDocumentPositionParams, token:CancellationToken, resolve:Null<SignatureHelp>->Void, reject:ResponseError<NoData>->Void,
+	function handleJsonRpc(params:SignatureHelpParams, token:CancellationToken, resolve:Null<SignatureHelp>->Void, reject:ResponseError<NoData>->Void,
 			doc:TextDocument) {
+		var wasAutoTriggered = true;
+		if (context.haxeServer.haxeVersion >= new SemVer(4, 1, 0)) {
+			var triggerKind = params!.context!.triggerKind;
+			wasAutoTriggered = switch triggerKind {
+				case null: false; // err on the side of showing too often for LSP clients that don't support triggerKind
+				case ContentChange | TriggerCharacter: true;
+				case Invoked: false;
+			}
+		}
 		var params = {
 			file: doc.uri.toFsPath(),
 			contents: doc.content,
 			offset: doc.offsetAt(params.position),
-			wasAutoTriggered: true // TODO: send this once the API supports it (https://github.com/Microsoft/vscode/issues/34737)
+			wasAutoTriggered: wasAutoTriggered
 		}
 		context.callHaxeMethod(DisplayMethods.SignatureHelp, params, token, function(result) {
 			if (result == null) {
@@ -91,7 +100,7 @@ class SignatureHelpFeature {
 		};
 	}
 
-	function handleLegacy(params:TextDocumentPositionParams, token:CancellationToken, resolve:Null<SignatureHelp>->Void, reject:ResponseError<NoData>->Void,
+	function handleLegacy(params:SignatureHelpParams, token:CancellationToken, resolve:Null<SignatureHelp>->Void, reject:ResponseError<NoData>->Void,
 			doc:TextDocument) {
 		var bytePos = context.displayOffsetConverter.characterOffsetToByteOffset(doc.content, doc.offsetAt(params.position));
 		var args = ['${doc.uri.toFsPath()}@$bytePos@signature'];
