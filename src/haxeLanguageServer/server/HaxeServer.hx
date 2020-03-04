@@ -174,6 +174,8 @@ class HaxeServer {
 			useSocket = false; // waiting on lix-pm/haxeshim#49
 		}
 		var startConnection = if (useSocket) SocketConnection.start else StdioConnection.start;
+
+		spawnOptions.env["HAXE_COMPLETION_SERVER"] = "1";
 		startConnection(config.path, config.arguments, spawnOptions, onMessage, onExit, onHaxeStarted);
 	}
 
