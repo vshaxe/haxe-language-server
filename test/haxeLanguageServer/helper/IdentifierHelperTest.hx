@@ -70,7 +70,7 @@ class IdentifierHelperTest extends Test {
 		// hopefully this is never needed...
 		var letterOverflow = '(${[for (i in 0...30) ":Int"].join(", ")}):Void';
 		var fixedSignature = addNamesToSignatureType(letterOverflow);
-		Assert.equals(-1, fixedSignature.indexOf("{:")); // { comes after z in ascii
+		Assert.isFalse(fixedSignature.contains("{:")); // { comes after z in ascii
 		Assert.equals(2, fixedSignature.split(" b:").length); // arg names must be unique
 	}
 }
