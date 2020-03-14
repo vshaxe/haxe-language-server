@@ -140,9 +140,8 @@ class DisplayPrinter {
 	public function printFunctionArgument<T>(arg:JsonFunctionArgument) {
 		var nullRemoval = arg.t.removeNulls();
 		var concreteType = if (functionFormatting.explicitNull) arg.t else nullRemoval.type;
-		var optional = nullRemoval.nullable;
 
-		var argument = (if (optional) "?" else "") + arg.name;
+		var argument = (if (arg.opt) "?" else "") + arg.name;
 		if (functionFormatting.argumentTypeHints && (concreteType.kind != TMono || arg.name == "")) {
 			argument += (arg.name == "" ? "" : ":") + printTypeRec(concreteType);
 		}
