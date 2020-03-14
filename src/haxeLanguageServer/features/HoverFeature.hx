@@ -1,6 +1,5 @@
 package haxeLanguageServer.features;
 
-import formatter.config.Config;
 import haxe.display.Display;
 import haxeLanguageServer.helper.DocHelper.printCodeBlock;
 import haxeLanguageServer.helper.DocHelper;
@@ -10,24 +9,13 @@ import haxeLanguageServer.protocol.DisplayPrinter;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
-import tokentree.TokenTreeBuilder.TokenTreeEntryPoint;
 
 class HoverFeature {
 	final context:Context;
-	final formatterConfig:Config;
 
 	public function new(context) {
 		this.context = context;
 		context.languageServerProtocol.onRequest(HoverRequest.type, onHover);
-
-		formatterConfig = new Config();
-		formatterConfig.wrapping.maxLineLength = 100;
-
-		var functionSignature = formatterConfig.wrapping.functionSignature;
-		functionSignature.defaultAdditionalIndent = 0;
-		for (rule in functionSignature.rules) {
-			rule.additionalIndent = 0;
-		}
 	}
 
 	function onHover(params:TextDocumentPositionParams, token:CancellationToken, resolve:Hover->Void, reject:ResponseError<NoData>->Void) {
@@ -55,14 +43,6 @@ class HoverFeature {
 		}, reject.handler());
 	}
 
-	function format(code:String, entryPoint:TokenTreeEntryPoint):String {
-		return code;
-		/* return switch Formatter.format(Code(code), formatterConfig) {
-			case Success(formattedCode): formattedCode;
-			case _: code;
-		}*/
-	}
-
 	function printContent<T>(doc:TextDocument, hover:HoverDisplayItemOccurence<T>):HoverContent {
 		var printer = new DisplayPrinter(true, Qualified, {
 			argumentTypeHints: true,
@@ -75,25 +55,21 @@ class HoverFeature {
 		var concreteType = hover.item.type;
 		function printType():HoverContent {
 			var type = printer.printType(concreteType);
-			type = format(type, TYPE_LEVEL);
 			return {definition: printCodeBlock(type, HaxeType)};
 		}
 		var result:HoverContent = switch item.kind {
 			case Type:
 				var typeDefinition = printer.printEmptyTypeDefinition(hover.item.args);
-				typeDefinition = format(typeDefinition, TYPE_LEVEL);
 				{definition: printCodeBlock(typeDefinition, Haxe)}
 			case Local:
 				var languageId = if (item.args.origin == Argument) HaxeArgument else Haxe;
 				var local = printer.printLocalDefinition(hover.item.args, concreteType);
-				local = format(local, EXPRESSION_LEVEL);
 				{
 					definition: printCodeBlock(local, languageId),
 					origin: printer.printLocalOrigin(item.args.origin)
 				}
 			case ClassField:
 				var field = printer.printClassFieldDefinition(item.args, concreteType, item.kind == EnumAbstractField);
-				field = format(field, FIELD_LEVEL);
 				{
 					definition: printCodeBlock(field, Haxe),
 					origin: switch printer.printClassFieldOrigin(item.args.origin, item.kind) {
@@ -103,7 +79,6 @@ class HoverFeature {
 				}
 			case EnumField:
 				var field = printer.printEnumFieldDefinition(item.args.field, item.type);
-				field = format(field, FIELD_LEVEL);
 				{
 					definition: printCodeBlock(field, Haxe),
 					origin: switch printer.printEnumFieldOrigin(item.args.origin) {
