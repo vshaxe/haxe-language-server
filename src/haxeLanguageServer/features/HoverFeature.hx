@@ -167,7 +167,10 @@ class HoverFeature {
 		if (content.additionalContents == null)
 			content.additionalContents = [];
 		var hover:Hover = {
-			contents: [content.definition, documentation].concat(content.additionalContents)
+			contents: {
+				kind: MarkDown,
+				value: [content.definition, documentation].concat(content.additionalContents).join("\n---\n")
+			}
 		};
 		if (range != null)
 			hover.range = range;
