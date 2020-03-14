@@ -41,18 +41,6 @@ class LanguageServerMethods {
 	static inline var DidChangeActiveTextEditor = new NotificationType<{uri:DocumentUri}>("haxe/didChangeActiveTextEditor");
 
 	/**
-		This notification is sent from the server to the client when some long-running process is started.
-		Client may display this somehow in the UI. The `id` is used later for sending `ProgressStop` notification.
-	**/
-	static inline var ProgressStart = new NotificationType<{id:Int, title:String}>("haxe/progressStart");
-
-	/**
-		This notification is sent from the server to the client when some long-running process is stopped.
-		If client used `ProgressStart` to display an UI element, it can now hide it using the given `id`.
-	**/
-	static inline var ProgressStop = new NotificationType<{id:Int}>("haxe/progressStop");
-
-	/**
 		This notification is sent from the server to the client when the display port has changed.
 	**/
 	static inline var DidChangeDisplayPort = new NotificationType<{port:Int}>("haxe/didChangeDisplayPort");

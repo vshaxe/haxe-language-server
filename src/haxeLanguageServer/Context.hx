@@ -23,6 +23,7 @@ import jsonrpc.Protocol;
 import jsonrpc.ResponseError;
 import jsonrpc.Types;
 import languageServerProtocol.protocol.Implementation;
+import languageServerProtocol.protocol.Progress;
 import languageServerProtocol.protocol.TypeDefinition.TypeDefinitionRequest;
 
 class Context {
@@ -95,10 +96,14 @@ class Context {
 	}
 
 	public function startProgress(title:String):() -> Void {
+		if (capabilities.window!.workDoneProgress == false) {
+			return function() {};
+		}
 		var id = progressId++;
-		languageServerProtocol.sendNotification(LanguageServerMethods.ProgressStart, {id: id, title: 'Haxe: $title...'});
+		languageServerProtocol.sendRequest(WorkDoneProgressCreateRequest.type, {token: id});
+		languageServerProtocol.sendProgress(WorkDoneProgress.type, id, {kind: Begin, title: 'Haxe: $title...'});
 		return function() {
-			languageServerProtocol.sendNotification(LanguageServerMethods.ProgressStop, {id: id});
+			languageServerProtocol.sendProgress(WorkDoneProgress.type, id, ({kind: End} : WorkDoneProgressEnd));
 		};
 	}
 
