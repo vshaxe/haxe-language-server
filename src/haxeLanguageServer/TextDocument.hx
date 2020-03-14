@@ -38,12 +38,11 @@ class TextDocument {
 
 		this.version = version;
 		for (event in events) {
-			if (event.range == null || event.rangeLength == null) {
+			if (event.range == null) {
 				content = event.text;
 			} else {
-				var offset = offsetAt(event.range.start);
-				var before = content.substring(0, offset);
-				var after = content.substring(offset + event.rangeLength);
+				var before = content.substring(0, offsetAt(event.range.start));
+				var after = content.substring(offsetAt(event.range.end));
 				content = before + event.text + after;
 			}
 		}
