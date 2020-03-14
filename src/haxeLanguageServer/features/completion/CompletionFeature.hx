@@ -84,7 +84,7 @@ class CompletionFeature {
 		markdownSupport = completion!.completionItem!.documentationFormat.let(kinds -> kinds.contains(MarkDown)).or(false);
 		snippetSupport = completion!.completionItem!.snippetSupport == true;
 		commitCharactersSupport = completion!.completionItem!.commitCharactersSupport == true;
-		deprecatedSupport = completion!.completionItem!.deprecatedSupport == true;
+		deprecatedSupport = completion!.completionItem!.tagSupport!.valueSet.let(tags -> tags.contains(Deprecated)).or(false);
 	}
 
 	function onCompletion(params:CompletionParams, token:CancellationToken, resolve:CompletionList->Void, reject:ResponseError<NoData>->Void) {
@@ -752,7 +752,10 @@ class CompletionFeature {
 
 	function handleDeprecated(item:CompletionItem, meta:JsonMetadata) {
 		if (deprecatedSupport && meta.hasMeta(Deprecated)) {
-			item.deprecated = true;
+			if (item.tags == null) {
+				item.tags = [];
+			}
+			item.tags.push(Deprecated);
 		}
 	}
 
