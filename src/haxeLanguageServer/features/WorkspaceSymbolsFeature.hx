@@ -24,7 +24,6 @@ private typedef ModuleSymbolEntry = {
 	var kind:ModuleSymbolKind;
 	var range:Range;
 	var ?containerName:String;
-	// TODO: use this once VSCode supports it (https://github.com/microsoft/vscode/issues/23927)
 	var ?isDeprecated:Bool;
 }
 
@@ -102,8 +101,12 @@ class WorkspaceSymbolsFeature {
 				range: entry.range
 			}
 		};
-		if (entry.containerName != null)
+		if (entry.containerName != null) {
 			result.containerName = entry.containerName;
+		}
+		if (entry.isDeprecated != null) {
+			result.deprecated = entry.isDeprecated;
+		}
 		return result;
 	}
 }
