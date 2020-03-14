@@ -113,7 +113,7 @@ class HoverFeature {
 				var printer = new DisplayPrinter(PathPrinting.Never);
 				argument += ":" + printer.printType(expected.type);
 			}
-			result.additionalContents = ['*for argument `$argument`*'];
+			result.additionalSections = ['*for argument `$argument`*'];
 		}
 
 		return result;
@@ -160,20 +160,32 @@ class HoverFeature {
 	}
 
 	function createHover(content:HoverContent, ?documentation:String, ?range:Range):Hover {
-		documentation = if (documentation == null) "" else "\n" + DocHelper.markdownFormat(documentation);
+		if (documentation != null) {
+			documentation = "\n" + DocHelper.markdownFormat(documentation);
+		}
 		if (content.origin != null) {
+			if (documentation == null) {
+				documentation = "";
+			}
 			documentation = '*${content.origin}*\n' + documentation;
 		}
-		if (content.additionalContents == null)
-			content.additionalContents = [];
+
+		var sections = [content.definition];
+		if (documentation != null) {
+			sections.push(documentation);
+		}
+		if (content.additionalSections != null) {
+			sections = sections.concat(content.additionalSections);
+		}
 		var hover:Hover = {
 			contents: {
 				kind: MarkDown,
-				value: [content.definition, documentation].concat(content.additionalContents).join("\n---\n")
+				value: sections.join("\n---\n")
 			}
 		};
-		if (range != null)
+		if (range != null) {
 			hover.range = range;
+		}
 		return hover;
 	}
 }
@@ -181,5 +193,5 @@ class HoverFeature {
 private typedef HoverContent = {
 	definition:String,
 	?origin:String,
-	?additionalContents:Array<String>
+	?additionalSections:Array<String>
 }
