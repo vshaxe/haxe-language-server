@@ -68,7 +68,7 @@ class HoverFeature {
 					definition: printCodeBlock(local, languageId),
 					origin: printer.printLocalOrigin(item.args.origin)
 				}
-			case ClassField:
+			case ClassField | EnumAbstractField:
 				var field = printer.printClassFieldDefinition(item.args, concreteType, item.kind == EnumAbstractField);
 				{
 					definition: printCodeBlock(field, Haxe),
