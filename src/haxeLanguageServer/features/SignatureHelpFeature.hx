@@ -43,8 +43,8 @@ class SignatureHelpFeature {
 			var triggerKind = params!.context!.triggerKind;
 			wasAutoTriggered = switch triggerKind {
 				case null: false; // err on the side of showing too often for LSP clients that don't support triggerKind
-				case ContentChange | TriggerCharacter: true;
-				case Invoked: false;
+				case TriggerCharacter: true;
+				case ContentChange | Invoked: false;
 			}
 		}
 		var params = {
