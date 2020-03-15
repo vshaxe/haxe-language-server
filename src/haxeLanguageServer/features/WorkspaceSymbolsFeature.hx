@@ -9,7 +9,7 @@ private enum abstract ModuleSymbolKind(Int) {
 	var Class = 1;
 	var Interface;
 	var Enum;
-	var Typedef;
+	var TypeAlias;
 	var Abstract;
 	var Field;
 	var Property;
@@ -17,6 +17,11 @@ private enum abstract ModuleSymbolKind(Int) {
 	var Constructor;
 	var Function;
 	var Variable;
+	var Struct;
+	var EnumAbstract;
+	var Operator;
+	var EnumMember;
+	var Constant;
 }
 
 private typedef ModuleSymbolEntry = {
@@ -87,7 +92,7 @@ class WorkspaceSymbolsFeature {
 			name: entry.name,
 			kind: switch entry.kind {
 				case Class | Abstract: SymbolKind.Class;
-				case Interface | Typedef: SymbolKind.Interface;
+				case Interface | TypeAlias: SymbolKind.Interface;
 				case Enum: SymbolKind.Enum;
 				case Constructor: SymbolKind.Constructor;
 				case Field: SymbolKind.Field;
@@ -95,6 +100,11 @@ class WorkspaceSymbolsFeature {
 				case Function: SymbolKind.Function;
 				case Property: SymbolKind.Property;
 				case Variable: SymbolKind.Variable;
+				case Struct: SymbolKind.Struct;
+				case EnumAbstract: SymbolKind.Enum;
+				case Operator: SymbolKind.Operator;
+				case EnumMember: SymbolKind.EnumMember;
+				case Constant: SymbolKind.Constant;
 			},
 			location: {
 				uri: uri,
