@@ -426,8 +426,9 @@ class CompletionFeature {
 		if (concreteType == null || concreteType.kind != TFun || field.isFinalField()) {
 			return null;
 		}
+		var kind = field.kind.args;
 		switch field.kind.kind {
-			case FMethod if (field.kind.args == MethInline):
+			case FMethod if (kind == MethInline || kind == MethMacro):
 				return null;
 			case _:
 		}
