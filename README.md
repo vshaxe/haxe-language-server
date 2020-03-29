@@ -1,6 +1,6 @@
 # Haxe Language Server
 
-[![Build Status](https://travis-ci.org/vshaxe/haxe-language-server.svg?branch=master)](https://travis-ci.org/vshaxe/haxe-language-server)
+[![CI](https://img.shields.io/github/workflow/status/vshaxe/haxe-language-server/CI.svg?logo=github)](https://github.com/vshaxe/haxe-language-server/actions?query=workflow%3ACI)
 
 This is a language server implementing [Language Server Protocol](https://github.com/Microsoft/language-server-protocol) for the [Haxe](http://haxe.org/) language.
 
