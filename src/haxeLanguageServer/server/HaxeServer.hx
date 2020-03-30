@@ -333,6 +333,7 @@ class HaxeServer {
 	}
 
 	function onExit(connection:HaxeConnection) {
+		stopProgress();
 		crashes++;
 		if (crashes < 3) {
 			restart("Haxe process was killed");
