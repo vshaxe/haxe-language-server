@@ -175,6 +175,7 @@ class HaxeServer {
 		}
 		var startConnection = if (useSocket) SocketConnection.start else StdioConnection.start;
 
+		trace("Haxe Path: " + config.path);
 		spawnOptions.env["HAXE_COMPLETION_SERVER"] = "1";
 		startConnection(config.path, config.arguments, spawnOptions, onMessage, onExit, onHaxeStarted);
 	}
