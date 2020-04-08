@@ -23,7 +23,7 @@ class HaxeServer {
 	var requestsTail:Null<DisplayRequest>;
 	var currentRequest:Null<DisplayRequest>;
 	var socketListener:Null<js.node.net.Server>;
-	var startingSocketListener:Bool = false;
+	var starting:Bool = false;
 	var stopProgressCallback:Null<() -> Void>;
 	var startRequest:Null<() -> Void>;
 	var crashes:Int = 0;
@@ -89,7 +89,7 @@ class HaxeServer {
 
 	public function start(?callback:() -> Void) {
 		// we still have requests in our queue that are not cancelable, such as a build - try again later
-		if (hasNonCancellableRequests() || startingSocketListener) {
+		if (hasNonCancellableRequests() || starting) {
 			startRequest = callback;
 			return;
 		}
@@ -109,6 +109,7 @@ class HaxeServer {
 		if (!checkHaxeVersion(config.path, spawnOptions)) {
 			return;
 		}
+		starting = true;
 
 		function onHaxeStarted(connection) {
 			haxeConnection = connection;
@@ -154,12 +155,14 @@ class HaxeServer {
 
 			var displayPort = context.config.user.displayPort;
 			if (socketListener == null && displayPort != null) {
-				startingSocketListener = true;
 				if (displayPort == "auto") {
 					getAvailablePort(6000).then(startSocketServer);
 				} else {
 					startSocketServer(displayPort);
 				}
+			} else {
+				starting = false;
+				checkRestart();
 			}
 		}
 
@@ -173,8 +176,8 @@ class HaxeServer {
 		if (FileSystem.exists(Path.join([context.workspacePath.toString(), ".haxerc"]))) {
 			useSocket = false; // waiting on lix-pm/haxeshim#49
 		}
-		var startConnection = if (useSocket) SocketConnection.start else StdioConnection.start;
 
+		var startConnection = if (useSocket) SocketConnection.start else StdioConnection.start;
 		trace("Haxe Path: " + config.path);
 		spawnOptions.env["HAXE_COMPLETION_SERVER"] = "1";
 		startConnection(config.path, config.arguments, spawnOptions, onMessage, onExit, onHaxeStarted);
@@ -288,7 +291,7 @@ class HaxeServer {
 		trace('Listening on port $port');
 		context.languageServerProtocol.sendNotification(LanguageServerMethods.DidChangeDisplayPort, {port: port});
 
-		startingSocketListener = false;
+		starting = false;
 		checkRestart();
 	}
 
