@@ -116,7 +116,9 @@ class Context {
 	}
 
 	function onInitialize(params:InitializeParams, _, resolve:InitializeResult->Void, _) {
-		workspacePath = params.workspaceFolders[0].uri.toFsPath();
+		if (params.rootUri != null) {
+			workspacePath = params.rootUri.toFsPath();
+		}
 		capabilities = params.capabilities;
 		config.onInitialize(params);
 
