@@ -419,8 +419,7 @@ class DiagnosticsFeature {
 		var map = diagnosticsArguments[params.textDocument.uri];
 		var removeUnusedFixes = if (map == null) [] else [
 			for (key in map.keys())
-				if (key.code == UnusedImport)
-					WorkspaceEditHelper.removeText(DocHelper.untrimRange(doc, key.range))
+				if (key.code == UnusedImport) WorkspaceEditHelper.removeText(DocHelper.untrimRange(doc, key.range))
 		];
 
 		var sortFixes = OrganizeImportsFeature.organizeImports(doc, context, []);

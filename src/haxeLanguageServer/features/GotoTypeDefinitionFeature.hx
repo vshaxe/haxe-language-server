@@ -22,13 +22,13 @@ class GotoTypeDefinitionFeature {
 		}
 		context.callHaxeMethod(DisplayMethods.GotoTypeDefinition, {file: doc.uri.toFsPath(), contents: doc.content, offset: doc.offsetAt(params.position)},
 			token, locations -> {
-			resolve(locations.map(location -> {
-				{
-					uri: location.file.toUri(),
-					range: location.range
-				}
-			}));
-			return null;
-		}, reject.handler());
+				resolve(locations.map(location -> {
+					{
+						uri: location.file.toUri(),
+						range: location.range
+					}
+				}));
+				return null;
+			}, reject.handler());
 	}
 }

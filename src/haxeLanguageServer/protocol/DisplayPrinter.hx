@@ -228,10 +228,8 @@ class DisplayPrinter {
 				var keyword = if (kind.args.write.kind == AccCtor || field.isFinalField()) "final" else "var";
 				var read = printAccessor(kind.args.read, true);
 				var write = printAccessor(kind.args.write, false);
-				var accessors = if ((read != null && write != null) && (read != "default" || write != "default"))
-					'($read, $write)'
-				else
-					"";
+				var accessors = if ((read != null && write != null)
+					&& (read != "default" || write != "default")) '($read, $write)' else "";
 				// structure fields get some special treatment
 				if (occurrence.origin.isStructure()) {
 					access = "";

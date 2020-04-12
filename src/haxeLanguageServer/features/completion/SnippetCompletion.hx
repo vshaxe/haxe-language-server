@@ -72,8 +72,8 @@ class SnippetCompletion {
 							{label: "abstract", code: 'abstract $abstractName $body'},
 							{label: "enum abstract", code: 'enum abstract $abstractName $body'}
 						].map(function(item:{label:String, code:String}) {
-								return createItem(item.label, item.label + " " + moduleName, item.code, data.replaceRange);
-							});
+							return createItem(item.label, item.label + " " + moduleName, item.code, data.replaceRange);
+						});
 					}
 
 					if (pos == BeforePackage) {
