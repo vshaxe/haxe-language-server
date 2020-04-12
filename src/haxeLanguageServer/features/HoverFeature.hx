@@ -161,7 +161,10 @@ class HoverFeature {
 
 	function createHover(content:HoverContent, ?documentation:String, ?range:Range):Hover {
 		if (documentation != null) {
-			documentation = "\n" + DocHelper.markdownFormat(documentation);
+			documentation = DocHelper.markdownFormat(documentation).trim();
+			if (documentation != "") {
+				documentation = "\n" + documentation;
+			}
 		}
 		if (content.origin != null) {
 			if (documentation == null) {
@@ -171,7 +174,7 @@ class HoverFeature {
 		}
 
 		var sections = [content.definition];
-		if (documentation != null) {
+		if (documentation != null && documentation != "") {
 			sections.push(documentation);
 		}
 		if (content.additionalSections != null) {
