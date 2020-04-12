@@ -543,6 +543,9 @@ class DisplayPrinter {
 		if (metadata.links != null && metadata.links.length > 0) {
 			details += metadata.links.map(link -> '- $link').join("\n");
 		}
+		if (metadata.internal) {
+			details += "\n_compiler-internal_";
+		}
 		return details;
 	}
 
