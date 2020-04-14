@@ -44,6 +44,7 @@ class TextDocument {
 				var before = content.substring(0, offsetAt(event.range.start));
 				var after = content.substring(offsetAt(event.range.end));
 				content = before + event.text + after;
+				lineOffsets = null;
 			}
 		}
 		_parseTree = null;
