@@ -523,10 +523,6 @@ class CompletionFeature {
 	}
 
 	function createTypeCompletionItem(type:DisplayModuleType, data:CompletionContextData):Null<CompletionItem> {
-		if (!data.isResolve && type.meta.hasMeta(Deprecated)) {
-			return null;
-		}
-
 		var isImportCompletion = data.mode.kind == Import || data.mode.kind == Using;
 		var importConfig = context.config.user.codeGeneration.imports;
 		var autoImport = importConfig.enableAutoImports;
