@@ -99,7 +99,7 @@ class OrganizeImportsFeature {
 				}
 			}
 			return organizeImportGroups(doc, context, importGroups);
-		} catch (e:Any) {}
+		} catch (e) {}
 		return [];
 	}
 

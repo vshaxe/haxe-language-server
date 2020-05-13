@@ -173,7 +173,7 @@ class TextDocument {
 			case Failure(error):
 				trace('hxparser failed to parse $uri with: \'$error\'');
 				null;
-		} catch (e:Any) {
+		} catch (e) {
 			trace('hxParser.Converter failed on $uri with: \'$e\'');
 			null;
 		}
@@ -191,7 +191,7 @@ class TextDocument {
 			var stopTimer = if (context != null) context.startTimer("TokenTreeManager.create()") else null;
 			try {
 				_tokens = TokenTreeManager.create(content);
-			} catch (e:Any) {
+			} catch (e) {
 				trace('$uri: $e');
 			}
 			if (stopTimer != null) {

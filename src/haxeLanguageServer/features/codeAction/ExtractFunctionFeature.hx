@@ -88,7 +88,7 @@ class ExtractFunctionFeature {
 			if (action == null)
 				return [];
 			return [action];
-		} catch (e:Any) {}
+		} catch (e) {}
 		return [];
 	}
 

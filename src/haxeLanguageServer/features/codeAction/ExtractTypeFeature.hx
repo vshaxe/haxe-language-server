@@ -98,7 +98,7 @@ class ExtractTypeFeature {
 				});
 			}
 			return actions;
-		} catch (e:Any) {}
+		} catch (e) {}
 		return [];
 	}
 

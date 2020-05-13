@@ -70,7 +70,7 @@ class WorkspaceSymbolsFeature {
 				case DResult(data):
 					var data:Array<SymbolReply> = try {
 						haxe.Json.parse(data);
-					} catch (e:Any) {
+					} catch (e) {
 						reject(ResponseError.internalError("Error parsing document symbol response: " + Std.string(e)));
 						return;
 					}

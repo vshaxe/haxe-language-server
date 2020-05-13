@@ -138,7 +138,7 @@ class DiagnosticsFeature {
 			case DResult(s):
 				var data:Array<HaxeDiagnosticResponse<Any>> = try {
 					haxe.Json.parse(s);
-				} catch (e:Any) {
+				} catch (e) {
 					trace("Error parsing diagnostics response: " + Std.string(e));
 					return;
 				}

@@ -39,7 +39,7 @@ class ExtractConstantFeature {
 				default:
 					return [];
 			}
-		} catch (e:Any) {}
+		} catch (e) {}
 		return [];
 	}
 

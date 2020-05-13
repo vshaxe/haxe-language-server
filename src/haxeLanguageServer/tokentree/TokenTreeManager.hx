@@ -28,7 +28,7 @@ class TokenTreeManager {
 				t = lexer.token(haxeparser.HaxeLexer.tok);
 			}
 			return tokens;
-		} catch (e:Any) {
+		} catch (e) {
 			throw 'failed to create tokens: $e';
 		}
 	}
@@ -37,7 +37,7 @@ class TokenTreeManager {
 		try {
 			TokenStream.MODE = RELAXED;
 			return TokenTreeBuilder.buildTokenTree(tokens, ByteData.ofBytes(bytes));
-		} catch (e:Any) {
+		} catch (e) {
 			throw 'failed to create token tree: $e';
 		}
 	}

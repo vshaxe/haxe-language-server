@@ -16,7 +16,7 @@ class CodeGenerationFeature {
 		var doc = context.documents.get(params.textDocument.uri);
 		try {
 			return new SyntaxModernizer(doc).resolve();
-		} catch (e:Any) {
+		} catch (e) {
 			return [];
 		}
 	}

@@ -223,7 +223,7 @@ class CompletionFeatureLegacy {
 			timeRegex.match(time);
 			seconds = Std.parseFloat(timeRegex.matched(1));
 			percentage = timeRegex.matched(2);
-		} catch (e:Dynamic) {}
+		} catch (e) {}
 
 		var doc = null;
 		if (name.startsWith("@TIME @TOTAL")) {

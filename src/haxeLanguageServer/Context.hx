@@ -1,6 +1,5 @@
 package haxeLanguageServer;
 
-import haxe.CallStack;
 import haxe.Json;
 import haxe.display.Display.DisplayMethods;
 import haxe.display.Protocol.HaxeRequestMethod;
@@ -343,10 +342,10 @@ class Context {
 			var beforeProcessingTime = Date.now().getTime();
 			var debugInfo:Null<String> = try {
 				callback(response.result);
-			} catch (e:Any) {
-				errback(e);
+			} catch (e) {
+				errback(e.toString());
 				trace(e);
-				trace(CallStack.toString(CallStack.exceptionStack()));
+				trace(e.stack);
 				null;
 			}
 			var afterProcessingTime = Date.now().getTime();

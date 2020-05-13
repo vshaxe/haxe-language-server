@@ -112,7 +112,7 @@ class CodeLensFeature {
 				case DResult(s):
 					var data:Array<Statistics> = try {
 						haxe.Json.parse(s);
-					} catch (e:Any) {
+					} catch (e) {
 						return reject(ResponseError.internalError('Error parsing stats response'));
 					}
 					onResolve(data);

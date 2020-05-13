@@ -94,7 +94,7 @@ class DisplayRequest {
 
 		try {
 			callback(DResult(data));
-		} catch (e:Any) {
+		} catch (e) {
 			errback(jsonrpc.ErrorUtils.errorToString(e, "Exception while handling Haxe completion response: "));
 		}
 	}
