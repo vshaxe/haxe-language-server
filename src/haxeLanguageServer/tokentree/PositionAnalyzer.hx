@@ -84,6 +84,15 @@ class PositionAnalyzer {
 			parent = parent.parent();
 		}
 
+		function getFieldKind():FieldKind {
+			return switch fieldToken.tok {
+				case Kwd(KwdVar): Var;
+				case Kwd(KwdFinal): Final;
+				case Kwd(KwdFunction): Function;
+				case _: null;
+			}
+		}
+
 		if (typeToken != null) {
 			return Type({
 				kind: if (typeToken != null) {
@@ -99,19 +108,16 @@ class PositionAnalyzer {
 					null;
 				},
 				field: if (fieldToken != null) {
-					{
-						isStatic: fieldToken.access().child(0).firstOf(Kwd(KwdStatic)).exists(),
-						kind: switch fieldToken.tok {
-							case Kwd(KwdVar): Var;
-							case Kwd(KwdFinal): Final;
-							case Kwd(KwdFunction): Function;
-							case _: null;
-						}
-					}
+					isStatic: fieldToken.access().child(0).firstOf(Kwd(KwdStatic)).exists(),
+					kind: getFieldKind()
 				} else {
 					null;
 				}
 			});
+		}
+
+		if (typeToken == null && fieldToken != null) {
+			return ModuleLevelStatic(getFieldKind());
 		}
 
 		var pos = BeforePackage;

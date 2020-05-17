@@ -120,6 +120,9 @@ function set_$${1:name}($${1:name}:$${2:T}):$${2:T} $body');
 						add("main", main, '$main $body');
 					}
 				}
+			
+			case ModuleLevelStatic(field):
+				// TODO
 		}
 
 		return Promise.resolve(result());

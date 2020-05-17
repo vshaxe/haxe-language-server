@@ -5,7 +5,10 @@ enum TokenContext {
 	Root(pos:RootPosition);
 
 	/** we're in a type **/
-	Type(type:TypeContextData);
+	Type(type:TypeContext);
+
+	/** we're in a module-level field **/
+	ModuleLevelStatic(kind:FieldKind);
 }
 
 enum RootPosition {
@@ -15,7 +18,7 @@ enum RootPosition {
 	AfterFirstType;
 }
 
-typedef TypeContextData = {
+typedef TypeContext = {
 	final kind:TypeKind;
 	final ?field:{
 		final isStatic:Bool;
