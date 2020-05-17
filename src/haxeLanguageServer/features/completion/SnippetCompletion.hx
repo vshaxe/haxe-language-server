@@ -3,6 +3,7 @@ package haxeLanguageServer.features.completion;
 import haxe.display.Display;
 import haxeLanguageServer.features.completion.CompletionFeature.CompletionItemOrigin;
 import haxeLanguageServer.helper.DocHelper;
+import haxeLanguageServer.helper.SemVer;
 import haxeLanguageServer.helper.SnippetHelper;
 import haxeLanguageServer.tokentree.TokenContext;
 import js.lib.Promise;
@@ -56,6 +57,36 @@ class SnippetCompletion {
 		}
 		var body = block(0);
 
+		function add(label:String, detail:String, code:String, ?sortText:String) {
+			items.push(createItem(label, detail, code, data.replaceRange, sortText));
+		}
+
+		final addVar = add.bind("var", "var name:T;", 'var $${1:name}:$${2:T};');
+		final addFinal = add.bind("final", "final name:T;", 'final $${1:name}:$${2:T};');
+
+		function addReadonly(isDefaultPrivate:Bool) {
+			var prefix = if (isDefaultPrivate) "public " else "";
+			add("readonly", prefix + "var name(default, null):T;", prefix + 'var $${1:name}(default, null):$${2:T};');
+		}
+		function addProperty(isDefaultPrivate:Bool) {
+			var propertyPrefix = if (isDefaultPrivate) "public " else "";
+			var accessorPrefix = if (isDefaultPrivate) "" else "private ";
+			add("property", propertyPrefix
+				+ "var name(get, set):T;", propertyPrefix
+				+ 'var $${1:name}(get, set):$${2:T};
+
+${accessorPrefix}function get_$${1:name}():$${2:T} ${block(3)}
+
+${accessorPrefix}function set_$${1:name}($${1:name}:$${2:T}):$${2:T} $body');
+
+		}
+		function addMain(explicitStatic:Bool) {
+			var main = (if (explicitStatic) "static " else "") + "function main()";
+			add("main", main, '$main $body');
+		}
+
+		final supportsModuleLevelStatics = context.haxeServer.haxeVersion >= new SemVer(4, 2, 0);
+
 		switch data.tokenContext {
 			case Root(pos):
 				var moduleName = fsPath.withoutDirectory().untilFirstDot();
@@ -76,10 +107,18 @@ class SnippetCompletion {
 						});
 					}
 
+					if (supportsModuleLevelStatics) {
+						addVar();
+						addFinal();
+						addReadonly(false);
+						addProperty(false);
+						addMain(false);
+					}
+
 					if (pos == BeforePackage) {
 						context.determinePackage.onDeterminePackage({fsPath: fsPath}, null, pack -> {
 							var code = if (pack.pack == "") "package;" else 'package ${pack.pack};';
-							items.push(createItem("package", code, code, data.replaceRange));
+							add("package", code, code);
 							resolve(result());
 						}, _ -> resolve(result()));
 					} else {
@@ -92,35 +131,26 @@ class SnippetCompletion {
 				var isAbstract = type.kind == Abstract || type.kind == EnumAbstract;
 				var canInsertClassFields = type.field == null && (isClass || isAbstract);
 				if (canInsertClassFields) {
-					function add(label:String, detail:String, code:String, ?sortText:String) {
-						items.push(createItem(label, detail, code, data.replaceRange, sortText));
-					}
-
 					add("function", "function name()", 'function $${1:name}($$2) $body');
 
 					if (type.kind == EnumAbstract) {
 						add("var", "var Name;", 'var $${1:Name}$$2;', "~");
 					} else {
-						add("var", "var name:T;", 'var $${1:name}:$${2:T};');
-						add("final", "final name:T;", 'final $${1:name}:$${2:T};');
-						add("readonly", "public var name(default, null):T;", 'public var $${1:name}(default, null):$${2:T};');
+						addVar();
+						addFinal();
+						addReadonly(true);
 					}
 
-					add("property", "public var name(get, set):T;", 'public var $${1:name}(get, set):$${2:T};
-
-function get_$${1:name}():$${2:T} ${block(3)}
-
-function set_$${1:name}($${1:name}:$${2:T}):$${2:T} $body');
+					addProperty(true);
 
 					var constructor = "public function new";
 					add("new", '$constructor()', '$constructor($1) $body');
 
 					if (isClass) {
-						var main = "static function main()";
-						add("main", main, '$main $body');
+						addMain(true);
 					}
 				}
-			
+
 			case ModuleLevelStatic(field):
 				// TODO
 		}
