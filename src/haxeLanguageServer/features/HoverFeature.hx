@@ -183,7 +183,7 @@ class HoverFeature {
 		var hover:Hover = {
 			contents: {
 				kind: MarkDown,
-				value: sections.join("\n---\n")
+				value: sections.join("\n\n---\n")
 			}
 		};
 		if (range != null) {
