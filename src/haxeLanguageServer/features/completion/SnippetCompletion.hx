@@ -40,7 +40,7 @@ class SnippetCompletion {
 					switch kwd {
 						case Class, Interface, Enum, Abstract, Typedef if (isRestOfLineEmpty):
 							displayItems[i] = null;
-						case Package:
+						case Package, Var, Final, Function:
 							displayItems[i] = null;
 						case _:
 					}
@@ -63,6 +63,7 @@ class SnippetCompletion {
 
 		final addVar = add.bind("var", "var name:T;", 'var $${1:name}:$${2:T};');
 		final addFinal = add.bind("final", "final name:T;", 'final $${1:name}:$${2:T};');
+		final addFunction = add.bind("function", "function name()", 'function $${1:name}($$2) $body');
 
 		function addReadonly(isDefaultPrivate:Bool) {
 			var prefix = if (isDefaultPrivate) "public " else "";
@@ -131,8 +132,6 @@ ${accessorPrefix}function set_$${1:name}($${1:name}:$${2:T}):$${2:T} $body');
 				var isAbstract = type.kind == Abstract || type.kind == EnumAbstract;
 				var canInsertClassFields = type.field == null && (isClass || isAbstract);
 				if (canInsertClassFields) {
-					add("function", "function name()", 'function $${1:name}($$2) $body');
-
 					if (type.kind == EnumAbstract) {
 						add("var", "var Name;", 'var $${1:Name}$$2;', "~");
 					} else {
@@ -141,6 +140,7 @@ ${accessorPrefix}function set_$${1:name}($${1:name}:$${2:T}):$${2:T} $body');
 						addReadonly(true);
 					}
 
+					addFunction();
 					addProperty(true);
 
 					var constructor = "public function new";
@@ -151,8 +151,16 @@ ${accessorPrefix}function set_$${1:name}($${1:name}:$${2:T}):$${2:T} $body');
 					}
 				}
 
-			case ModuleLevelStatic(field):
-				// TODO
+				if (type.field != null) {
+					addVar();
+					addFinal();
+					addFunction();
+				}
+
+			case ModuleLevelStatic(_):
+				addVar();
+				addFinal();
+				addFunction();
 		}
 
 		return Promise.resolve(result());
