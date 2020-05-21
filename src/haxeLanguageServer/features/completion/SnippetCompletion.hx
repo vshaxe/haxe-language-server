@@ -135,6 +135,7 @@ ${accessorPrefix}function set_$${1:name}($${1:name}:$${2:T}):$${2:T} $body');
 				if (canInsertClassFields) {
 					if (type.kind == EnumAbstract) {
 						add("var", "var Name;", 'var $${1:Name}$$2;', "~");
+						add("final", "final Name;", 'final $${1:Name}$$2;', "~");
 					} else {
 						addVar();
 						addFinal();
