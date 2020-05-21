@@ -94,7 +94,27 @@ class Helper {
 		}
 	}
 
-	public static function isStructure<T>(?origin:ClassFieldOrigin<T>) {
+	public static function isModuleLevel<T>(origin:Null<ClassFieldOrigin<T>>) {
+		if (origin == null) {
+			return false;
+		}
+		return switch (origin.kind) {
+			case Self:
+				var moduleType:JsonModuleType<Dynamic> = origin.args;
+				if (moduleType == null) {
+					return false;
+				}
+				switch moduleType.kind {
+					case Class:
+						final cl:JsonClass = moduleType.args;
+						cl.kind.kind == cast "KModuleStatics";
+					case _: false;
+				}
+			case _: false;
+		}
+	}
+
+	public static function isStructure<T>(origin:Null<ClassFieldOrigin<T>>) {
 		if (origin == null) {
 			return false;
 		}

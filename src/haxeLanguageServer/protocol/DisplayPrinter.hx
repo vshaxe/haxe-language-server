@@ -327,7 +327,6 @@ class DisplayPrinter {
 		if (kind == EnumAbstractField || origin.kind == cast Unknown) {
 			return None;
 		}
-
 		if (origin.args == null && origin.kind != cast BuiltIn) {
 			return None;
 		}
@@ -343,7 +342,10 @@ class DisplayPrinter {
 		return Some("from " + switch origin.kind {
 			case Self:
 				var type = origin.args;
-				'${printTypeKind(type)} $q${type.name}$q';
+				var moduleLevel = origin.isModuleLevel();
+				var kind = if (moduleLevel) "module" else printTypeKind(type);
+				var name = if (moduleLevel) type.moduleName else type.name;
+				'$kind $q$name$q';
 			case Parent:
 				var type = origin.args;
 				'parent ${printTypeKind(type)} $q${type.name}$q';
