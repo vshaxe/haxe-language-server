@@ -113,6 +113,7 @@ ${accessorPrefix}function set_$${1:name}($${1:name}:$${2:T}):$${2:T} $body');
 						addFinal();
 						addReadonly(false);
 						addProperty(false);
+						addFunction();
 						addMain(false);
 					}
 
