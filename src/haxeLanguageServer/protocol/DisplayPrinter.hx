@@ -327,15 +327,26 @@ class DisplayPrinter {
 		if (kind == EnumAbstractField || origin.kind == cast Unknown) {
 			return None;
 		}
+
 		if (origin.args == null && origin.kind != cast BuiltIn) {
 			return None;
+		}
+		function printTypeKind(type:JsonModuleType<Dynamic>) {
+			return switch type.kind {
+				case Class: if (type.args.isInterface) "interface" else "class";
+				case Enum: "enum";
+				case Typedef: "typedef";
+				case Abstract: if (type.meta.hasMeta(Enum)) "enum abstract" else "abstract";
+			}
 		}
 		var q = quote;
 		return Some("from " + switch origin.kind {
 			case Self:
-				'$q${origin.args.name}$q';
+				var type = origin.args;
+				'${printTypeKind(type)} $q${type.name}$q';
 			case Parent:
-				'parent type $q${origin.args.name}$q';
+				var type = origin.args;
+				'parent ${printTypeKind(type)} $q${type.name}$q';
 			case StaticExtension:
 				'$q${origin.args.name}$q (static extension method)';
 			case StaticImport:
@@ -353,7 +364,7 @@ class DisplayPrinter {
 		if (origin.args == null) {
 			return None;
 		}
-		return Some('from ' + switch origin.kind {
+		return Some('from enum ' + switch origin.kind {
 			case Self:
 				'$quote${origin.args.name}$quote';
 			case StaticImport:
