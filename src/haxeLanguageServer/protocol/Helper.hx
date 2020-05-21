@@ -79,7 +79,12 @@ class Helper {
 	}
 
 	public static function isEnumAbstractField(field:JsonClassField) {
-		return field.meta.hasMeta(Enum) && field.meta.hasMeta(Value);
+		return field.meta.hasMeta(Enum) && switch field.kind.kind {
+			case FVar:
+				final writeAccess:JsonVarAccess<Dynamic> = field.kind.args.write;
+				writeAccess.kind == AccNever;
+			case FMethod: false;
+		};
 	}
 
 	public static function isVoid<T>(type:JsonType<T>) {
