@@ -221,7 +221,7 @@ class DisplayPrinter {
 		var name = field.name;
 		var kind:JsonFieldKind<T2> = field.kind;
 		var access = if (field.isPublic) "public " else "private ";
-		var staticKeyword = if (field.scope == Static) "static " else "";
+		var staticKeyword = if (field.scope == Static && !occurrence.origin.isModuleLevel()) "static " else "";
 		return switch kind.kind {
 			case FVar:
 				var inlineKeyword = if (kind.args.write.kind == AccInline) "inline " else "";
