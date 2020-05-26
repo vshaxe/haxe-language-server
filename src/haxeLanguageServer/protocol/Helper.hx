@@ -107,7 +107,7 @@ class Helper {
 				switch moduleType.kind {
 					case Class:
 						final cl:JsonClass = moduleType.args;
-						cl.kind.kind == cast "KModuleStatics";
+						cl.kind.kind == KModuleFields;
 					case _: false;
 				}
 			case _: false;
