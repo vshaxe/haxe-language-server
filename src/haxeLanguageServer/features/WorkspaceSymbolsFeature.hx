@@ -22,6 +22,7 @@ private enum abstract ModuleSymbolKind(Int) {
 	var Operator;
 	var EnumMember;
 	var Constant;
+	var Module;
 }
 
 private typedef ModuleSymbolEntry = {
@@ -105,6 +106,7 @@ class WorkspaceSymbolsFeature {
 				case Operator: SymbolKind.Operator;
 				case EnumMember: SymbolKind.EnumMember;
 				case Constant: SymbolKind.Constant;
+				case Module: SymbolKind.Module;
 			},
 			location: {
 				uri: uri,
