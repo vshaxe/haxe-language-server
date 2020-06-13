@@ -338,21 +338,20 @@ class DisplayPrinter {
 				case Abstract: if (type.meta.hasMeta(Enum)) "enum abstract" else "abstract";
 			}
 		}
-		var q = quote;
+		function printTypeInfo(type:JsonModuleType<Dynamic>) {
+			final kind = if (origin.isModuleLevel()) "module" else printTypeKind(type);
+			final name = quote + (if (origin.isModuleLevel()) type.moduleName else type.name) + quote;
+			return kind + " " + name;
+		}
 		return Some("from " + switch origin.kind {
 			case Self:
-				var type = origin.args;
-				var moduleLevel = origin.isModuleLevel();
-				var kind = if (moduleLevel) "module" else printTypeKind(type);
-				var name = if (moduleLevel) type.moduleName else type.name;
-				'$kind $q$name$q';
+				printTypeInfo(origin.args);
 			case Parent:
-				var type = origin.args;
-				'parent ${printTypeKind(type)} $q${type.name}$q';
+				'parent ' + printTypeInfo(origin.args);
 			case StaticExtension:
-				'$q${origin.args.name}$q (static extension method)';
+				printTypeInfo(origin.args) + ' (static extension method)';
 			case StaticImport:
-				'$q${origin.args.name}$q (statically imported)';
+				printTypeInfo(origin.args) + ' (statically imported)';
 			case AnonymousStructure:
 				'anonymous structure';
 			case BuiltIn:
