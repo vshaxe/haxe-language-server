@@ -70,10 +70,14 @@ class PostfixCompletion {
 			});
 		}
 		if (subject.keyValueIterator != null) {
+			var key = "key";
+			if (subject.keyValueIterator.key.getDotPath() == "StdTypes.Int") {
+				key = "index";
+			}
 			add({
 				label: "for k=>v",
-				detail: 'for (key => value in expr)',
-				insertText: 'for (key => value in $expr) $block',
+				detail: 'for ($key => value in expr)',
+				insertText: 'for ($key => value in $expr) $block',
 				insertTextFormat: Snippet
 			});
 		}
