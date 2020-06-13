@@ -60,10 +60,8 @@ class Helper {
 	public static function resolveTypes<T>(type:JsonType<T>):Array<JsonType<T>> {
 		switch type.kind {
 			case TAbstract:
-				var typePath:JsonTypePathWithParams = type.args;
-				var path = typePath.path;
-				if (path.typeName == "EitherType" && path.pack.join(".") == "haxe.extern") {
-					return typePath.params.map(resolveTypes).flatten().array();
+				if (type.getDotPath() == "haxe.extern.EitherType") {
+					return (type.args : JsonTypePathWithParams).params.map(resolveTypes).flatten().array();
 				}
 			case _:
 		}
