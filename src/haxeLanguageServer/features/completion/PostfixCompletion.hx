@@ -318,7 +318,7 @@ while (i-- > 0) {
 				}
 			case Abstract if (moduleType.meta.hasMeta(Enum)):
 				var a:JsonAbstract = moduleType.args;
-				if (a.impl != null && a.impl.statics.exists(Helper.isEnumAbstractField)) {
+				if (a.impl != null && a.impl.statics.exists(f -> f.isEnumAbstractField())) {
 					return make(printer.printSwitchOnEnumAbstract(expr, a, nullable, true, parentheses));
 				}
 			case Abstract if (moduleType.moduleName == "StdTypes" && moduleType.name == "Bool"):
