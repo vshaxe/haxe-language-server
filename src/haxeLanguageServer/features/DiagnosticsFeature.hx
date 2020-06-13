@@ -1,6 +1,7 @@
 package haxeLanguageServer.features;
 
 import haxe.Json;
+import haxe.ds.BalancedTree;
 import haxe.io.Path;
 import haxeLanguageServer.Configuration;
 import haxeLanguageServer.LanguageServerMethods;
@@ -293,8 +294,14 @@ class DiagnosticsFeature {
 			{
 				title: RemoveUnusedImportUsingTitle,
 				kind: QuickFix,
-				edit: WorkspaceEditHelper.create(context, params, [{range: DocHelper.untrimRange(doc, d.range), newText: ""}]),
-				diagnostics: [d]
+				edit: WorkspaceEditHelper.create(context, params, [
+					{
+						range: DocHelper.untrimRange(doc, d.range),
+						newText: ""
+					}
+				]),
+				diagnostics: [d],
+				isPreferred: true
 			}
 		];
 	}
@@ -302,16 +309,17 @@ class DiagnosticsFeature {
 	function getUnresolvedIdentifierActions(params:CodeActionParams, d:Diagnostic):Array<CodeAction> {
 		var actions:Array<CodeAction> = [];
 		var args = getDiagnosticsArguments(params.textDocument.uri, UnresolvedIdentifier, d.range);
+		var importCount = args.count(a -> a.kind == Import);
 		for (arg in args) {
 			actions = actions.concat(switch arg.kind {
-				case Import: getUnresolvedImportActions(params, d, arg);
+				case Import: getUnresolvedImportActions(params, d, arg, importCount);
 				case Typo: getTypoActions(params, d, arg);
 			});
 		}
 		return actions;
 	}
 
-	function getUnresolvedImportActions(params:CodeActionParams, d:Diagnostic, arg):Array<CodeAction> {
+	function getUnresolvedImportActions(params:CodeActionParams, d:Diagnostic, arg, importCount:Int):Array<CodeAction> {
 		var doc = context.documents.get(params.textDocument.uri);
 		var preferredStyle = context.config.user.codeGeneration.imports.style;
 		var secondaryStyle:ImportStyle = if (preferredStyle == Type) Module else Type;
@@ -326,16 +334,19 @@ class DiagnosticsFeature {
 				diagnostics: [d]
 			};
 		}
-		return [
-			makeImportAction(preferredStyle),
-			makeImportAction(secondaryStyle),
-			{
-				title: "Change to " + arg.name,
-				kind: QuickFix,
-				edit: WorkspaceEditHelper.create(context, params, [{range: d.range, newText: arg.name}]),
-				diagnostics: [d]
-			}
-		];
+
+		final preferred = makeImportAction(preferredStyle);
+		if (importCount == 1) {
+			preferred.isPreferred = true;
+		}
+		final secondary = makeImportAction(secondaryStyle);
+		final changeTo = {
+			title: "Change to " + arg.name,
+			kind: QuickFix,
+			edit: WorkspaceEditHelper.create(context, params, [{range: d.range, newText: arg.name}]),
+			diagnostics: [d]
+		};
+		return [preferred, secondary, changeTo];
 	}
 
 	function getTypoActions(params:CodeActionParams, d:Diagnostic, arg):Array<CodeAction> {
@@ -383,7 +394,8 @@ class DiagnosticsFeature {
 				title: "Change to " + replacement,
 				kind: QuickFix,
 				edit: WorkspaceEditHelper.create(context, params, [{range: d.range, newText: replacement}]),
-				diagnostics: [d]
+				diagnostics: [d],
+				isPreferred: true
 			});
 		}
 
@@ -393,7 +405,8 @@ class DiagnosticsFeature {
 				title: "Add override keyword",
 				kind: QuickFix,
 				edit: WorkspaceEditHelper.create(context, params, [{range: d.range.start.toRange(), newText: "override "}]),
-				diagnostics: [d]
+				diagnostics: [d],
+				isPreferred: true
 			});
 		}
 
@@ -402,14 +415,16 @@ class DiagnosticsFeature {
 
 	function getRemovableCodeActions(params:CodeActionParams, d:Diagnostic):Array<CodeAction> {
 		var range = getDiagnosticsArguments(params.textDocument.uri, RemovableCode, d.range).range;
-		if (range == null)
+		if (range == null) {
 			return [];
+		}
 		return [
 			{
 				title: "Remove",
 				kind: QuickFix,
 				edit: WorkspaceEditHelper.create(context, params, [{range: range, newText: ""}]),
-				diagnostics: [d]
+				diagnostics: [d],
+				isPreferred: true
 			}
 		];
 	}
@@ -418,8 +433,11 @@ class DiagnosticsFeature {
 		var doc = context.documents.get(params.textDocument.uri);
 		var map = diagnosticsArguments[params.textDocument.uri];
 		var removeUnusedFixes = if (map == null) [] else [
-			for (key in map.keys())
-				if (key.code == UnusedImport) WorkspaceEditHelper.removeText(DocHelper.untrimRange(doc, key.range))
+			for (key in map.keys()) {
+				if (key.code == UnusedImport) {
+					WorkspaceEditHelper.removeText(DocHelper.untrimRange(doc, key.range));
+				}
+			}
 		];
 
 		var sortFixes = OrganizeImportsFeature.organizeImports(doc, context, []);
@@ -459,9 +477,7 @@ class DiagnosticsFeature {
 
 	inline function getDiagnosticsArguments<T>(uri:DocumentUri, kind:DiagnosticKind<T>, range:Range):T {
 		var map = diagnosticsArguments[uri];
-		if (map == null)
-			return null;
-		return map.get({code: kind, range: range});
+		return if (map == null) null else map.get({code: kind, range: range});
 	}
 }
 
@@ -510,14 +526,15 @@ private typedef HaxeDiagnosticResponse<T> = {
 
 private typedef DiagnosticsMapKey = {code:Int, range:Range};
 
-private class DiagnosticsMap<T> extends haxe.ds.BalancedTree<DiagnosticsMapKey, T> {
+private class DiagnosticsMap<T> extends BalancedTree<DiagnosticsMapKey, T> {
 	override function compare(k1:DiagnosticsMapKey, k2:DiagnosticsMapKey) {
 		var start1 = k1.range.start;
 		var start2 = k2.range.start;
 		var end1 = k1.range.end;
 		var end2 = k2.range.end;
-		inline function compare(i1, i2, e)
+		inline function compare(i1, i2, e) {
 			return i1 < i2 ? -1 : i1 > i2 ? 1 : e;
+		}
 		return compare(k1.code, k2.code,
 			compare(start1.line, start2.line,
 				compare(start1.character, start2.character, compare(end1.line, end2.line, compare(end1.character, end2.character, 0)))));
