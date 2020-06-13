@@ -77,7 +77,7 @@ class ExtractTypeFeature {
 				var removeOld:TextDocumentEdit = WorkspaceEditHelper.textDocumentEdit(params.textDocument.uri, [WorkspaceEditHelper.removeText(typeRange)]);
 
 				// create new file
-				var newUri:DocumentUri = FsPathHelper.toUri(new FsPath(newFileName));
+				var newUri:DocumentUri = new FsPath(newFileName).toUri();
 				var createFile:CreateFile = WorkspaceEditHelper.createNewFile(newUri, false, true);
 
 				// copy file header, type and doc comment into new file

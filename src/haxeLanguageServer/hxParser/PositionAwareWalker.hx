@@ -29,7 +29,7 @@ abstract Scope(Array<Token>) {
 
 	public function equals(scope:Scope):Bool {
 		var other:Array<Token> = cast scope;
-		return ArrayHelper.equals(this, other);
+		return this.equals(other);
 	}
 
 	public function toString():String {
