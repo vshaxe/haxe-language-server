@@ -60,7 +60,8 @@ class PostfixCompletion {
 			result.push(createPostfixCompletionItem(item, data.doc, removeRange, replaceRange));
 		}
 
-		function iterator(item:String = "item") {
+		if (subject.iterator != null) {
+			final item = subject.iterator.type.guessName();
 			add({
 				label: "for",
 				detail: "for (item in expr)",
@@ -68,46 +69,16 @@ class PostfixCompletion {
 				insertTextFormat: Snippet
 			});
 		}
-		function keyValueIterator(key:String = "key") {
+		if (subject.keyValueIterator != null) {
 			add({
 				label: "for k=>v",
-				detail: 'for ($key => value in expr)',
-				insertText: 'for ($key => value in $expr) $block',
+				detail: 'for (key => value in expr)',
+				insertText: 'for (key => value in $expr) $block',
 				insertTextFormat: Snippet
 			});
 		}
 
 		var dotPath = type.getDotPath();
-
-		var hasIteratorApi = subject.iterator != null || subject.keyValueIterator != null;
-		if (hasIteratorApi) {
-			if (subject.iterator != null) {
-				iterator(subject.iterator.type.guessName());
-			}
-			if (subject.keyValueIterator != null) {
-				keyValueIterator();
-			}
-		} else {
-			switch type.kind {
-				case TAbstract | TInst:
-					var path = type.args;
-					// TODO: remove hardcoded iterator() / keyValueIterator() handling sometime after Haxe 4 releases
-					if (!hasIteratorApi) {
-						switch dotPath {
-							case "Array":
-								iterator(path.params[0].guessName());
-							case "haxe.ds.Map":
-								keyValueIterator();
-								iterator(path.params[1].guessName());
-							case "haxe.ds.List":
-								keyValueIterator("index");
-								iterator(path.params[0].guessName());
-						}
-					}
-				case _:
-			}
-		}
-
 		switch dotPath {
 			case "StdTypes.Bool":
 				add({

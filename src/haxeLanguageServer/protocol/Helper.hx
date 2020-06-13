@@ -158,10 +158,10 @@ class Helper {
 		}
 	}
 
-	public static function guessName<T>(type:JsonType<T>):Null<String> {
+	public static function guessName<T>(type:JsonType<T>):String {
 		var path = type.getTypePath();
 		if (path == null) {
-			return null;
+			return "unknown";
 		}
 		return IdentifierHelper.guessName(path.path.typeName);
 	}
