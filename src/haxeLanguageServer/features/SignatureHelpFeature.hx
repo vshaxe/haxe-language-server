@@ -25,19 +25,16 @@ class SignatureHelpFeature {
 
 	function onSignatureHelp(params:SignatureHelpParams, token:CancellationToken, resolve:Null<SignatureHelp>->Void, reject:ResponseError<NoData>->Void) {
 		var uri = params.textDocument.uri;
-		var doc:Null<TextDocument> = context.documents.get(uri);
-		if (doc == null) {
-			return reject.documentNotFound(uri);
-		}
-		if (!uri.isFile()) {
-			return reject.notAFile();
+		var doc:Null<HaxeDocument> = context.documents.getHaxe(uri);
+		if (doc == null || !uri.isFile()) {
+			return reject.noFittingDocument(uri);
 		}
 		var handle = if (context.haxeServer.supports(DisplayMethods.SignatureHelp)) handleJsonRpc else handleLegacy;
 		handle(params, token, resolve, reject, doc);
 	}
 
 	function handleJsonRpc(params:SignatureHelpParams, token:CancellationToken, resolve:Null<SignatureHelp>->Void, reject:ResponseError<NoData>->Void,
-			doc:TextDocument) {
+			doc:HaxeDocument) {
 		var wasAutoTriggered = true;
 		if (context.haxeServer.haxeVersion >= new SemVer(4, 1, 0)) {
 			var triggerKind = params!.context!.triggerKind;
@@ -101,7 +98,7 @@ class SignatureHelpFeature {
 	}
 
 	function handleLegacy(params:SignatureHelpParams, token:CancellationToken, resolve:Null<SignatureHelp>->Void, reject:ResponseError<NoData>->Void,
-			doc:TextDocument) {
+			doc:HaxeDocument) {
 		var bytePos = context.displayOffsetConverter.characterOffsetToByteOffset(doc.content, doc.offsetAt(params.position));
 		var args = ['${doc.uri.toFsPath()}@$bytePos@signature'];
 		context.callDisplay("@signature", args, doc.content, token, function(r) {

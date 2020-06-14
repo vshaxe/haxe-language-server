@@ -1,6 +1,6 @@
 package haxeLanguageServer.hxParser;
 
-import haxeLanguageServer.documents.TextDocument;
+import haxeLanguageServer.documents.HaxeDocument;
 
 class RenameResolverTest extends Test {
 	function check(code:String, ?expected:String) {
@@ -13,7 +13,7 @@ class RenameResolverTest extends Test {
 
 		var newName = "newName";
 		var resolver = new RenameResolver(declaration, newName);
-		var parseTree = new TextDocument(new DocumentUri("file:///c:/"), "haxe", 0, code).parseTree;
+		var parseTree = new HaxeDocument(new DocumentUri("file:///c:/"), "haxe", 0, code).parseTree;
 		resolver.walkFile(parseTree, Root);
 
 		if (expected == null) {

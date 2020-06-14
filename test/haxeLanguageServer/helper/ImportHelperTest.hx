@@ -1,7 +1,7 @@
 package haxeLanguageServer.helper;
 
 import haxe.PosInfos;
-import haxeLanguageServer.documents.TextDocument;
+import haxeLanguageServer.documents.HaxeDocument;
 
 class ImportHelperTest extends Test {
 	function testGetImportInsertPosition() {
@@ -9,7 +9,7 @@ class ImportHelperTest extends Test {
 			testCase.before = testCase.before.replace("\r", "");
 			testCase.after = testCase.after.replace("\r", "");
 
-			var doc = new TextDocument(new DocumentUri("file://dummy"), "", 0, testCase.before);
+			var doc = new HaxeDocument(new DocumentUri("file://dummy"), "", 0, testCase.before);
 			var result = ImportHelper.getImportPosition(doc);
 			var edit = ImportHelper.createImportsEdit(doc, result, ["Test"], Type);
 

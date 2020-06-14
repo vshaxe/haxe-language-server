@@ -1,5 +1,6 @@
 package haxeLanguageServer.features;
 
+import haxe.DynamicAccess;
 import haxeLanguageServer.hxParser.RenameResolver;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
@@ -14,8 +15,10 @@ class RenameFeature {
 	}
 
 	function onRename(params:RenameParams, token:CancellationToken, resolve:WorkspaceEdit->Void, reject:ResponseError<NoData>->Void) {
-		if (!params.textDocument.uri.isFile()) {
-			return reject.notAFile();
+		var uri = params.textDocument.uri;
+		var doc = context.documents.getHaxe(uri);
+		if (doc == null || !uri.isFile()) {
+			return reject.noFittingDocument(uri);
 		}
 
 		if (!~/[_A-Za-z]\w*/.match(params.newName)) {
@@ -27,12 +30,11 @@ class RenameFeature {
 		}
 
 		context.gotoDefinition.onGotoDefinition(params, token, locations -> {
-			var doc = context.documents.get(params.textDocument.uri);
 			var declaration = locations[0];
 			if (declaration == null) {
 				return reject(ResponseError.internalError("No declaration found."));
 			}
-			if (declaration.uri != params.textDocument.uri) {
+			if (declaration.uri != uri) {
 				return invalidRename();
 			}
 
@@ -43,7 +45,7 @@ class RenameFeature {
 			}
 
 			var changes = new haxe.DynamicAccess();
-			changes[params.textDocument.uri.toString()] = resolver.edits;
+			changes[uri.toString()] = resolver.edits;
 			resolve({changes: changes});
 		}, _ -> invalidRename());
 	}

@@ -19,11 +19,10 @@ class ExtractFunctionFeature {
 	}
 
 	function extractFunction(params:CodeActionParams):Array<CodeAction> {
-		var doc = context.documents.get(params.textDocument.uri);
+		var doc = context.documents.getHaxe(params.textDocument.uri);
+		if (doc == null || doc.tokens == null || doc.tokens.tree == null)
+			return [];
 		try {
-			if ((doc.tokens == null) || (doc.tokens.tree == null))
-				return [];
-
 			var text:String = doc.getText(params.range);
 			var leftOffset:Int = text.length - text.ltrim().length;
 			var rightOffset:Int = text.length - text.rtrim().length;
@@ -31,7 +30,7 @@ class ExtractFunctionFeature {
 
 			var tokenStart:Null<TokenTree> = doc.tokens.getTokenAtOffset(doc.offsetAt(params.range.start) + leftOffset);
 			var tokenEnd:Null<TokenTree> = doc.tokens.getTokenAtOffset(doc.offsetAt(params.range.end) - rightOffset);
-			if ((tokenStart == null) || (tokenEnd == null))
+			if (tokenStart == null || tokenEnd == null)
 				return [];
 			if (tokenStart.index == tokenEnd.index)
 				return [];
@@ -41,7 +40,7 @@ class ExtractFunctionFeature {
 
 			var parentOfStart:Null<TokenTree> = findParentFunction(tokenStart);
 			var parentOfEnd:Null<TokenTree> = findParentFunction(tokenEnd);
-			if ((parentOfStart == null) || (parentOfEnd == null))
+			if (parentOfStart == null || parentOfEnd == null)
 				return [];
 			if (parentOfStart.index != parentOfEnd.index)
 				return [];
@@ -92,7 +91,7 @@ class ExtractFunctionFeature {
 		return [];
 	}
 
-	function makeExtractFunctionChanges(doc:TextDocument, uri:DocumentUri, params:CodeActionParams, text:String, isStatic:Bool,
+	function makeExtractFunctionChanges(doc:HaxeDocument, uri:DocumentUri, params:CodeActionParams, text:String, isStatic:Bool,
 			newParams:Array<NewFunctionParameter>, returnSpec:String, indent:String, newFuncPos:Position):CodeAction {
 		var callParams:String = newParams.map(s -> s.call).join(", ");
 		var funcParams:String = newParams.map(s -> s.param).join(", ");
@@ -129,7 +128,7 @@ class ExtractFunctionFeature {
 
 	function findParentFunction(token:TokenTree):Null<TokenTree> {
 		var parent:Null<TokenTree> = token.parent;
-		while ((parent != null) && (parent.tok != null)) {
+		while (parent != null && parent.tok != null) {
 			switch (parent.tok) {
 				case Kwd(KwdFunction):
 					return parent;
@@ -145,7 +144,7 @@ class ExtractFunctionFeature {
 		// anon function
 		if (returnHint == null)
 			returnHint = functionToken.access().firstOf(DblDot).token;
-		if ((returnHint == null) || (returnHint.children == null))
+		if (returnHint == null || returnHint.children == null)
 			return "";
 		return varToString(returnHint);
 	}
@@ -156,7 +155,7 @@ class ExtractFunctionFeature {
 		return false;
 	}
 
-	function detectIndent(doc:TextDocument, functionToken:TokenTree):String {
+	function detectIndent(doc:HaxeDocument, functionToken:TokenTree):String {
 		var functionRange:Range = doc.rangeAt2(functionToken.pos);
 		functionRange.start.character = 0;
 
@@ -174,7 +173,7 @@ class ExtractFunctionFeature {
 		if (paramterList == null)
 			paramterList = functionToken.access().firstOf(POpen).token;
 
-		if ((paramterList == null) || (paramterList.children == null))
+		if (paramterList == null || paramterList.children == null)
 			return [];
 
 		var newFuncParameter:Array<NewFunctionParameter> = [];
@@ -250,9 +249,9 @@ class ExtractFunctionFeature {
 			return result;
 		for (child in token.children) {
 			switch (child.tok) {
-				case Kwd(k):
+				case Kwd(_):
 					result += varToString(child);
-				case Const(c):
+				case Const(_):
 					result += varToString(child);
 				case Dot:
 					result += varToString(child);
@@ -260,7 +259,7 @@ class ExtractFunctionFeature {
 					result += varToString(child);
 				case Arrow:
 					result += varToString(child);
-				case Dollar(s):
+				case Dollar(_):
 					result += varToString(child);
 				case Binop(OpLt):
 					result += ltGtToString(child);

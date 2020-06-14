@@ -60,7 +60,7 @@ class ImportHelper {
 		}
 	}
 
-	public static function getImportPosition(document:TextDocument):ImportPosition {
+	public static function getImportPosition(document:HaxeDocument):ImportPosition {
 		var tokens = document.tokens;
 		if (tokens == null) {
 			return null;

@@ -89,12 +89,9 @@ class CompletionFeature {
 
 	function onCompletion(params:CompletionParams, token:CancellationToken, resolve:CompletionList->Void, reject:ResponseError<NoData>->Void) {
 		var uri = params.textDocument.uri;
-		if (!uri.isFile()) {
-			return reject.notAFile();
-		}
-		var doc:Null<TextDocument> = context.documents.get(uri);
-		if (doc == null) {
-			return reject.documentNotFound(uri);
+		var doc:Null<HaxeDocument> = context.documents.getHaxe(uri);
+		if (doc == null || !uri.isFile()) {
+			return reject.noFittingDocument(uri);
 		}
 		var offset = doc.offsetAt(params.position);
 		var textBefore = doc.content.substring(0, offset);
@@ -109,7 +106,7 @@ class CompletionFeature {
 
 	static final autoTriggerOnSpacePattern = ~/(\b(import|using|extends|implements|from|to|case|new|cast|override)|(->)) $/;
 
-	function isValidCompletionPosition(token:TokenTree, doc:TextDocument, params:CompletionParams, text:String):Bool {
+	function isValidCompletionPosition(token:TokenTree, doc:HaxeDocument, params:CompletionParams, text:String):Bool {
 		if (token == null) {
 			return true;
 		}
@@ -167,7 +164,7 @@ class CompletionFeature {
 	}
 
 	function handleJsonRpc(params:CompletionParams, token:CancellationToken, resolve:CompletionList->Void, reject:ResponseError<NoData>->Void,
-			doc:TextDocument, offset:Int, textBefore:String, currentToken:TokenTree) {
+			doc:HaxeDocument, offset:Int, textBefore:String, currentToken:TokenTree) {
 		var wasAutoTriggered = true;
 		if (params.context != null) {
 			wasAutoTriggered = params.context.triggerKind == TriggerCharacter;

@@ -27,9 +27,9 @@ class DocumentFormattingFeature {
 
 	function format(uri:DocumentUri, range:Null<Range>, resolve:Array<TextEdit>->Void, reject:ResponseError<NoData>->Void) {
 		var onResolve = context.startTimer("haxe/formatting");
-		var doc:Null<TextDocument> = context.documents.get(uri);
+		var doc:Null<HaxeDocument> = context.documents.getHaxe(uri);
 		if (doc == null) {
-			return reject.documentNotFound(uri);
+			return reject.noFittingDocument(uri);
 		}
 		var tokens = doc.tokens;
 		if (tokens == null) {

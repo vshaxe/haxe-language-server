@@ -19,13 +19,13 @@ class ExtractTypeFeature {
 	}
 
 	function extractType(params:CodeActionParams):Array<CodeAction> {
-		var doc = context.documents.get(params.textDocument.uri);
+		var doc = context.documents.getHaxe(params.textDocument.uri);
+		if (doc == null || doc.tokens == null || doc.tokens.tree == null) {
+			return [];
+		}
 		try {
 			var fsPath:FsPath = params.textDocument.uri.toFsPath();
-			var path:Path = new Path(fsPath.toString());
-
-			if ((doc.tokens == null) || (doc.tokens.tree == null))
-				return [];
+			var path = new Path(fsPath.toString());
 
 			var types:Array<TokenTree> = doc.tokens.tree.filterCallback(function(token:TokenTree, index:Int):FilterResult {
 				switch (token.tok) {
@@ -98,11 +98,12 @@ class ExtractTypeFeature {
 				});
 			}
 			return actions;
-		} catch (e) {}
-		return [];
+		} catch (e) {
+			return [];
+		}
 	}
 
-	function copyImports(doc:TextDocument, fileName:String, lastImport:Null<TokenTree>):String {
+	function copyImports(doc:HaxeDocument, fileName:String, lastImport:Null<TokenTree>):String {
 		if (lastImport == null)
 			return "";
 
@@ -138,7 +139,7 @@ class ExtractTypeFeature {
 		return fileHeader + 'import $packText;\n\n';
 	}
 
-	function getLastImportToken(doc:TextDocument):Null<TokenTree> {
+	function getLastImportToken(doc:HaxeDocument):Null<TokenTree> {
 		var imports:Array<TokenTree> = doc.tokens.tree.filterCallback(function(token:TokenTree, index:Int):FilterResult {
 			switch (token.tok) {
 				case Kwd(KwdImport), Kwd(KwdUsing):

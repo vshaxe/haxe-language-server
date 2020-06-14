@@ -8,9 +8,9 @@ using tokentree.utils.FieldUtils;
 using tokentree.utils.TokenTreeCheckUtils;
 
 class DocumentSymbolsResolver {
-	final document:TextDocument;
+	final document:HaxeDocument;
 
-	public function new(document:TextDocument) {
+	public function new(document:HaxeDocument) {
 		this.document = document;
 	}
 

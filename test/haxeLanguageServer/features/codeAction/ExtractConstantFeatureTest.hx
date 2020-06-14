@@ -1,7 +1,7 @@
 package haxeLanguageServer.features.codeAction;
 
 import haxe.Json;
-import haxeLanguageServer.documents.TextDocument;
+import haxeLanguageServer.documents.HaxeDocument;
 import jsonrpc.Protocol;
 import testcases.TestTextEditHelper;
 
@@ -21,7 +21,7 @@ class ExtractConstantFeatureTest extends Test implements IExtractConstantFeature
 	function makeEdits(content:String, fileName:String, range:Range):Array<TextEdit> {
 		var context = new TestContext(new Protocol(null));
 		var uri = new DocumentUri("file://" + fileName + ".edittest");
-		var doc = new TextDocument(context, uri, "haxe", 4, content);
+		var doc = new HaxeDocument(context, uri, "haxe", 4, content);
 
 		var extractConst:ExtractConstantFeature = new ExtractConstantFeature(context);
 

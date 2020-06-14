@@ -8,10 +8,10 @@ class FoldingRangeResolver {
 	static final regionStartPattern = ~/^\s*[#{]?\s*region\b/;
 	static final regionEndPattern = ~/^\s*[#}]?\s*end ?region\b/;
 
-	final document:TextDocument;
+	final document:HaxeDocument;
 	final lineFoldingOnly:Bool;
 
-	public function new(document:TextDocument, capabilities:Null<TextDocumentClientCapabilities>) {
+	public function new(document:HaxeDocument, capabilities:Null<TextDocumentClientCapabilities>) {
 		this.document = document;
 		lineFoldingOnly = capabilities!.foldingRange!.lineFoldingOnly;
 	}

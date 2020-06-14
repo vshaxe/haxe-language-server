@@ -2,7 +2,7 @@ package haxeLanguageServer.features.codeAction;
 
 import haxe.Json;
 import haxeLanguageServer.Configuration;
-import haxeLanguageServer.documents.TextDocument;
+import haxeLanguageServer.documents.HaxeDocument;
 import jsonrpc.Protocol;
 import testcases.TestTextEditHelper;
 
@@ -26,7 +26,7 @@ class OrganizeImportsFeatureTest extends Test implements IOrganizeImportsFeature
 		context.config.user = {
 			importsSortOrder: importsSortOrder
 		};
-		var doc = new TextDocument(context, new DocumentUri("file://" + fileName + ".edittest"), "haxe", 4, content);
+		var doc = new HaxeDocument(context, new DocumentUri("file://" + fileName + ".edittest"), "haxe", 4, content);
 		return OrganizeImportsFeature.organizeImports(doc, context, []);
 	}
 }

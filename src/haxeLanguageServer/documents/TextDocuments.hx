@@ -12,17 +12,28 @@ class TextDocuments {
 		documents = new Map();
 	}
 
-	public inline function getAll():Iterator<TextDocument> {
+	public inline function iterator():Iterator<TextDocument> {
 		return documents.iterator();
 	}
 
-	public inline function get(uri:DocumentUri):TextDocument {
-		return documents[uri];
+	public inline function getHaxe(uri:DocumentUri):Null<HaxeDocument> {
+		return Std.downcast(documents[uri], HaxeDocument);
+	}
+
+	public inline function getHxml(uri:DocumentUri):Null<HxmlDocument> {
+		return Std.downcast(documents[uri], HxmlDocument);
 	}
 
 	function onDidOpenTextDocument(event:DidOpenTextDocumentParams) {
-		var td = event.textDocument;
-		documents[td.uri] = new TextDocument(context, td.uri, td.languageId, td.version, td.text);
+		final td = event.textDocument;
+		final uri = td.uri.toString();
+		if (uri.endsWith(".hx")) {
+			documents[td.uri] = new HaxeDocument(context, td.uri, td.languageId, td.version, td.text);
+		} else if (uri.endsWith(".hxml")) {
+			documents[td.uri] = new HxmlDocument(context, td.uri, td.languageId, td.version, td.text);
+		} else {
+			throw uri + " has unsupported file type (must be .hx or .hxml)";
+		}
 	}
 
 	function onDidChangeTextDocument(event:DidChangeTextDocumentParams) {

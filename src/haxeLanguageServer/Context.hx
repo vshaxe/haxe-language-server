@@ -232,7 +232,7 @@ class Context {
 				new ExtractConstantFeature(this);
 				new ExtractFunctionFeature(this);
 
-				for (doc in documents.getAll())
+				for (doc in documents)
 					publishDiagnostics(doc.uri);
 
 				initialized = true;
@@ -306,7 +306,7 @@ class Context {
 
 	function onDidChangeActiveTextEditor(params:{uri:DocumentUri}) {
 		activeEditor = params.uri;
-		var document = documents.get(params.uri);
+		var document = documents.getHaxe(params.uri);
 		if (document == null)
 			return;
 		// avoid running diagnostics twice when the document is initially opened (open + activate event)

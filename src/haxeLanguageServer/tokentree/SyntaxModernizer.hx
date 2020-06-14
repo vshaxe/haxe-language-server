@@ -7,9 +7,9 @@ import tokentree.TokenTree;
 using tokentree.TokenTreeAccessHelper;
 
 class SyntaxModernizer {
-	final document:TextDocument;
+	final document:HaxeDocument;
 
-	public function new(document:TextDocument) {
+	public function new(document:HaxeDocument) {
 		this.document = document;
 	}
 

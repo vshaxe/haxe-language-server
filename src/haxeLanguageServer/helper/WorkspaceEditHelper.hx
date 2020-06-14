@@ -2,7 +2,7 @@ package haxeLanguageServer.helper;
 
 class WorkspaceEditHelper {
 	public static function create(context:Context, params:CodeActionParams, edits:Array<TextEdit>):WorkspaceEdit {
-		var doc = context.documents.get(params.textDocument.uri);
+		var doc = context.documents.getHaxe(params.textDocument.uri);
 		return _create(doc, edits);
 	}
 

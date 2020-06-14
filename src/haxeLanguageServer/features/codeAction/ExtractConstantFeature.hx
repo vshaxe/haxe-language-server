@@ -15,36 +15,35 @@ class ExtractConstantFeature {
 	}
 
 	function extractConstant(params:CodeActionParams):Array<CodeAction> {
-		var doc = context.documents.get(params.textDocument.uri);
-		return internalExtractConstant(doc, params.textDocument.uri, params.range);
+		final uri = params.textDocument.uri;
+		final doc = context.documents.getHaxe(uri);
+		return internalExtractConstant(doc, uri, params.range);
 	}
 
-	function internalExtractConstant(doc:TextDocument, uri:DocumentUri, range:Range):Array<CodeAction> {
+	function internalExtractConstant(doc:HaxeDocument, uri:DocumentUri, range:Range):Array<CodeAction> {
+		if (doc == null || doc.tokens == null || doc.tokens.tree == null) {
+			return [];
+		}
 		try {
-			if ((doc.tokens == null) || (doc.tokens.tree == null))
-				return [];
-
 			// only look at token at range start
 			var token:Null<TokenTree> = doc.tokens.getTokenAtOffset(doc.offsetAt(range.start));
 			if (token == null)
 				return [];
 
 			// must be a Const(CString(_))
-			switch (token.tok) {
+			return switch (token.tok) {
 				case Const(CString(s)):
 					var action:Null<CodeAction> = makeExtractConstAction(doc, uri, token, s);
-					if (action == null)
-						return [];
-					return [action];
-				default:
-					return [];
+					if (action == null) [] else [action];
+				default: [];
 			}
-		} catch (e) {}
-		return [];
+		} catch (e) {
+			return [];
+		}
 	}
 
-	function makeExtractConstAction(doc:TextDocument, uri:DocumentUri, token:TokenTree, text:String):Null<CodeAction> {
-		if ((text == null) || (text == ""))
+	function makeExtractConstAction(doc:HaxeDocument, uri:DocumentUri, token:TokenTree, text:String):Null<CodeAction> {
+		if (text == null || text == "")
 			return null;
 
 		if (shouldSkipToken(token))
@@ -52,7 +51,7 @@ class ExtractConstantFeature {
 
 		// skip string literals with interpolation
 		var fullText:String = doc.getText(doc.rangeAt2(doc.tokens.getPos(token)));
-		if ((fullText.startsWith("'")) && (~/[$]/g.match(text)))
+		if (fullText.startsWith("'") && ~/[$]/g.match(text))
 			return null;
 
 		// generate a const name

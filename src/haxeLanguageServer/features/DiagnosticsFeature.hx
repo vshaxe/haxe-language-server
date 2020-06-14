@@ -258,7 +258,7 @@ class DiagnosticsFeature {
 			clearDiagnostics(uri);
 			return;
 		}
-		var doc:Null<TextDocument> = context.documents.get(uri);
+		var doc:Null<HaxeDocument> = context.documents.getHaxe(uri);
 		if (doc != null) {
 			var onResolve = context.startTimer("@diagnostics");
 			context.callDisplay("@diagnostics", [doc.uri.toFsPath() + "@0@diagnostics"], null, null, processDiagnosticsReply.bind(uri, onResolve),
@@ -289,7 +289,10 @@ class DiagnosticsFeature {
 	}
 
 	function getUnusedImportActions(params:CodeActionParams, d:Diagnostic):Array<CodeAction> {
-		var doc = context.documents.get(params.textDocument.uri);
+		var doc = context.documents.getHaxe(params.textDocument.uri);
+		if (doc == null) {
+			return [];
+		}
 		return [
 			{
 				title: RemoveUnusedImportUsingTitle,
@@ -320,7 +323,10 @@ class DiagnosticsFeature {
 	}
 
 	function getUnresolvedImportActions(params:CodeActionParams, d:Diagnostic, arg, importCount:Int):Array<CodeAction> {
-		var doc = context.documents.get(params.textDocument.uri);
+		var doc = context.documents.getHaxe(params.textDocument.uri);
+		if (doc == null) {
+			return [];
+		}
 		var preferredStyle = context.config.user.codeGeneration.imports.style;
 		var secondaryStyle:ImportStyle = if (preferredStyle == Type) Module else Type;
 
@@ -388,7 +394,7 @@ class DiagnosticsFeature {
 		if (invalidPackageRe.match(arg)) {
 			var is = invalidPackageRe.matched(1);
 			var shouldBe = invalidPackageRe.matched(2);
-			var text = context.documents.get(params.textDocument.uri).getText(d.range);
+			var text = context.documents.getHaxe(params.textDocument.uri)!.getText(d.range);
 			var replacement = text.replace(is, shouldBe);
 			actions.push({
 				title: "Change to " + replacement,
@@ -430,8 +436,12 @@ class DiagnosticsFeature {
 	}
 
 	function getOrganizeImportActions(params:CodeActionParams, existingActions:Array<CodeAction>):Array<CodeAction> {
-		var doc = context.documents.get(params.textDocument.uri);
-		var map = diagnosticsArguments[params.textDocument.uri];
+		var uri = params.textDocument.uri;
+		var doc = context.documents.getHaxe(uri);
+		if (doc == null) {
+			return null;
+		}
+		var map = diagnosticsArguments[uri];
 		var removeUnusedFixes = if (map == null) [] else [
 			for (key in map.keys()) {
 				if (key.code == UnusedImport) {

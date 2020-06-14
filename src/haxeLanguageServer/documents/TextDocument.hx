@@ -1,8 +1,6 @@
 package haxeLanguageServer.documents;
 
 import haxe.Timer;
-import haxeLanguageServer.tokentree.TokenTreeManager;
-import hxParser.ParseTree;
 
 typedef OnTextDocumentChangeListener = TextDocument->Array<TextDocumentContentChangeEvent>->Int->Void;
 
@@ -13,12 +11,9 @@ class TextDocument {
 	public var version:Int;
 	public var content:String;
 	public var lineCount(get, never):Int;
-	public var parseTree(get, never):File;
-	public var tokens(get, never):Null<TokenTreeManager>;
 
 	final context:Null<Context>;
-	var _parseTree:Null<File>;
-	var _tokens:Null<TokenTreeManager>;
+
 	var lineOffsets:Array<Int>;
 	var onUpdateListeners:Array<OnTextDocumentChangeListener> = [];
 
@@ -46,8 +41,6 @@ class TextDocument {
 				lineOffsets = null;
 			}
 		}
-		_parseTree = null;
-		_tokens = null;
 		lineOffsets = null;
 	}
 
@@ -78,21 +71,6 @@ class TextDocument {
 
 	public inline function rangeAt2(pos:haxe.macro.Expr.Position):Range {
 		return rangeAt(pos.min, pos.max);
-	}
-
-	public inline function byteRangeToRange(byteRange:Range, offsetConverter:DisplayOffsetConverter):Range {
-		return {
-			start: bytePositionToPosition(byteRange.start, offsetConverter),
-			end: bytePositionToPosition(byteRange.end, offsetConverter),
-		};
-	}
-
-	inline function bytePositionToPosition(bytePosition:Position, offsetConverter:DisplayOffsetConverter):Position {
-		var line = lineAt(bytePosition.line);
-		return {
-			line: bytePosition.line,
-			character: offsetConverter.byteOffsetToCharacterOffset(line, bytePosition.character)
-		};
 	}
 
 	public function lineAt(line:Int):String {
@@ -164,39 +142,4 @@ class TextDocument {
 
 	inline function get_lineCount()
 		return getLineOffsets().length;
-
-	function createParseTree() {
-		return try switch hxParser.HxParser.parse(content) {
-			case Success(tree):
-				new hxParser.Converter(tree).convertResultToFile();
-			case Failure(error):
-				trace('hxparser failed to parse $uri with: \'$error\'');
-				null;
-		} catch (e) {
-			trace('hxParser.Converter failed on $uri with: \'$e\'');
-			null;
-		}
-	}
-
-	function get_parseTree() {
-		if (_parseTree == null) {
-			_parseTree = createParseTree();
-		}
-		return _parseTree;
-	}
-
-	function get_tokens() {
-		if (_tokens == null) {
-			var stopTimer = if (context != null) context.startTimer("TokenTreeManager.create()") else null;
-			try {
-				_tokens = TokenTreeManager.create(content);
-			} catch (e) {
-				trace('$uri: $e');
-			}
-			if (stopTimer != null) {
-				stopTimer();
-			}
-		}
-		return _tokens;
-	}
 }

@@ -97,12 +97,9 @@ class CodeLensFeature {
 			return resolve([]);
 		}
 		var uri = params.textDocument.uri;
-		if (!uri.isFile()) {
-			return reject.notAFile();
-		}
-		var doc:Null<TextDocument> = context.documents.get(uri);
-		if (doc == null) {
-			return reject.documentNotFound(uri);
+		var doc:Null<HaxeDocument> = context.documents.getHaxe(uri);
+		if (doc == null || !uri.isFile()) {
+			return reject.noFittingDocument(uri);
 		}
 		var onResolve = context.startTimer("@statistics");
 		context.callDisplay("@statistics", [doc.uri.toFsPath() + "@0@statistics"], doc.content, token, function(r:DisplayResult) {

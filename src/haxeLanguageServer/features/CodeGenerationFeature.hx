@@ -13,11 +13,14 @@ class CodeGenerationFeature {
 	}
 
 	function modernizeSyntax(params:CodeActionParams):Array<CodeAction> {
-		var doc = context.documents.get(params.textDocument.uri);
-		try {
-			return new SyntaxModernizer(doc).resolve();
-		} catch (e) {
+		var doc = context.documents.getHaxe(params.textDocument.uri);
+		if (doc == null) {
 			return [];
+		}
+		return try {
+			new SyntaxModernizer(doc).resolve();
+		} catch (e) {
+			[];
 		}
 	}
 }

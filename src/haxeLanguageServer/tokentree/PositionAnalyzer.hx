@@ -8,9 +8,9 @@ import tokentree.utils.TokenTreeCheckUtils;
 using tokentree.TokenTreeAccessHelper;
 
 class PositionAnalyzer {
-	final document:TextDocument;
+	final document:HaxeDocument;
 
-	public function new(document:TextDocument) {
+	public function new(document:HaxeDocument) {
 		this.document = document;
 	}
 
@@ -41,7 +41,7 @@ class PositionAnalyzer {
 		return result;
 	}
 
-	public static function getStringKind(token:Null<TokenTree>, document:TextDocument, pos:Position):StringKind {
+	public static function getStringKind(token:Null<TokenTree>, document:HaxeDocument, pos:Position):StringKind {
 		if (token == null) {
 			return None;
 		}
@@ -58,7 +58,7 @@ class PositionAnalyzer {
 		}
 	}
 
-	public static function getContext(token:Null<TokenTree>, document:TextDocument, completionPosition:Position):TokenContext {
+	public static function getContext(token:Null<TokenTree>, document:HaxeDocument, completionPosition:Position):TokenContext {
 		if (token == null) {
 			return Root(BeforePackage);
 		}

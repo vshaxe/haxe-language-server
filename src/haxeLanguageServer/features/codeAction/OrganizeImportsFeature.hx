@@ -14,7 +14,7 @@ class OrganizeImportsFeature {
 		"Type", "UInt", "UnicodeString", "ValueType", "Void", "Xml", "XmlType"
 	];
 
-	public static function organizeImports(doc:TextDocument, context:Context, unusedRanges:Array<Range>):Array<TextEdit> {
+	public static function organizeImports(doc:HaxeDocument, context:Context, unusedRanges:Array<Range>):Array<TextEdit> {
 		if ((doc.tokens == null) || (doc.tokens.tree == null)) {
 			return [];
 		}
@@ -44,7 +44,7 @@ class OrganizeImportsFeature {
 				}
 			});
 
-			var importGroups:Map<Int, ImportGroup> = new Map<Int, ImportGroup>();
+			var importGroups = new Map<Int, ImportGroup>();
 			var groupCount:Int = 0;
 			for (i in imports) {
 				var id:Int = -1;
@@ -235,7 +235,7 @@ class OrganizeImportsFeature {
 		return sortImportsStdlibThenLibsThenProject(a, b);
 	}
 
-	static function determineStartPos(doc:TextDocument, token:TokenTree):Int {
+	static function determineStartPos(doc:HaxeDocument, token:TokenTree):Int {
 		return doc.tokens.getPos(token).min;
 	}
 }
