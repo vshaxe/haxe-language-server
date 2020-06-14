@@ -37,21 +37,20 @@ class CompletionFeature {
 				case [flag, _]:
 					createArgumentCompletionItems(range, flag);
 				case _:
-					// no completion after the first argument
-					[];
+					[]; // no completion after the first argument
 			}
 		});
 	}
 
 	function createFlagCompletionItems(range:Range):Array<CompletionItem> {
 		final items = [];
-		function addFlag(flag:HxmlFlag) {
+		function addFlag(flag:HxmlFlag, name:String) {
 			final item:CompletionItem = {
-				label: flag.name,
+				label: name,
 				kind: Function,
 				textEdit: {
 					range: range,
-					newText: flag.name
+					newText: name
 				},
 				documentation: {
 					kind: MarkDown,
@@ -74,7 +73,10 @@ class CompletionFeature {
 			items.push(item);
 		}
 		for (flag in HxmlFlags.flatten()) {
-			addFlag(flag);
+			addFlag(flag, flag.name);
+			if (flag.shortName != null) {
+				addFlag(flag, flag.shortName);
+			}
 		}
 		return items;
 	}
