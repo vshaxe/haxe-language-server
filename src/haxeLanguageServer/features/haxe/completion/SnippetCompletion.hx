@@ -154,8 +154,8 @@ ${accessorPrefix}function set_$${1:name}($${1:name}:$${2:T}):$${2:T} $body');
 				}
 
 				if (type.field != null) {
-					addVar();
-					addFinal();
+					add("final", "final name", "final ${1:name}");
+					add("var", "var name", "var ${1:name}");
 					addFunction();
 				}
 

@@ -254,7 +254,6 @@ class Context {
 			capabilities.foldingRangeProvider = true;
 		}
 
-		trace(Json.stringify(registrations), "\t");
 		resolve({capabilities: capabilities});
 		languageServerProtocol.sendRequest(RegistrationRequest.type, {registrations: registrations}, null, _ -> {}, error -> trace(error));
 	}
