@@ -16,6 +16,7 @@ class CodeActionFeature {
 		this.context = context;
 
 		context.registerCapability(CodeActionRequest.type, {
+			documentSelector: Context.haxeSelector,
 			codeActionKinds: [QuickFix, SourceOrganizeImports, SourceSortImports, RefactorExtract]
 		});
 		context.languageServerProtocol.onRequest(CodeActionRequest.type, onCodeAction);

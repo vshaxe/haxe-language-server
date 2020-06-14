@@ -21,14 +21,20 @@ import jsonrpc.CancellationToken;
 import jsonrpc.Protocol;
 import jsonrpc.ResponseError;
 import jsonrpc.Types;
+import languageServerProtocol.protocol.FoldingRange.FoldingRangeRequest;
 import languageServerProtocol.protocol.Implementation;
+import languageServerProtocol.protocol.Messages.ProtocolRequestType;
 import languageServerProtocol.protocol.Progress;
 import languageServerProtocol.protocol.TypeDefinition.TypeDefinitionRequest;
 
 class Context {
+	public static final haxeSelector:DocumentSelector = [{language: "haxe", scheme: "file"}, {language: "haxe", scheme: "untitled"}];
+	public static final hxmlSelector:DocumentSelector = [{language: "hxml", scheme: "file"}, {language: "hxml", scheme: "untitled"}];
+
 	public final config:Configuration;
 	public final languageServerProtocol:Protocol;
 	public final haxeDisplayProtocol:Protocol;
+
 	public var haxeServer(default, null):HaxeServer;
 	public var workspacePath(default, null):FsPath;
 	public var capabilities(default, null):ClientCapabilities;
@@ -126,33 +132,109 @@ class Context {
 		new FoldingRangeFeature(this);
 		new DocumentFormattingFeature(this);
 
-		return resolve({
-			capabilities: {
-				textDocumentSync: {
-					openClose: true,
-					change: TextDocuments.syncKind,
-					save: {
-						includeText: false
-					}
-				},
-				completionProvider: {
-					triggerCharacters: [".", "@", ":", " ", ">", "$"],
-					resolveProvider: true
-				},
-				signatureHelpProvider: {
-					triggerCharacters: ["(", ","]
-				},
-				definitionProvider: true,
-				hoverProvider: true,
-				referencesProvider: true,
-				documentSymbolProvider: true,
-				workspaceSymbolProvider: true,
-				documentFormattingProvider: true,
-				documentRangeFormattingProvider: true,
-				renameProvider: true,
-				foldingRangeProvider: true
+		final textDocument = capabilities!.textDocument;
+		final workspace = capabilities!.workspace;
+		final registrations = new Array<Registration>();
+		function register<P, R, PR, E, RO>(method:ProtocolRequestType<P, R, PR, E, RO>, ?selector:DocumentSelector, ?registerOptions:RO) {
+			if (registerOptions == null) {
+				registerOptions = cast {documentSelector: selector};
 			}
-		});
+			registrations.push({id: method, method: method, registerOptions: registerOptions});
+		}
+
+		final capabilities:ServerCapabilities = {
+			textDocumentSync: {
+				openClose: true,
+				change: TextDocuments.syncKind,
+				save: {
+					includeText: false
+				}
+			}
+		};
+
+		final completionTriggerCharacters = [".", "@", ":", " ", ">", "$"];
+		if (textDocument!.completion!.dynamicRegistration == true) {
+			register(CompletionRequest.type, {
+				documentSelector: haxeSelector,
+				triggerCharacters: completionTriggerCharacters,
+				resolveProvider: true
+			});
+		} else {
+			capabilities.completionProvider = {
+				triggerCharacters: completionTriggerCharacters,
+				resolveProvider: true
+			}
+		}
+
+		final signatureHelpTriggerCharacters = ["(", ","];
+		if (textDocument!.signatureHelp!.dynamicRegistration == true) {
+			register(SignatureHelpRequest.type, {
+				documentSelector: haxeSelector,
+				triggerCharacters: signatureHelpTriggerCharacters
+			});
+		} else {
+			capabilities.signatureHelpProvider = {
+				triggerCharacters: signatureHelpTriggerCharacters
+			}
+		}
+
+		if (textDocument!.definition!.dynamicRegistration == true) {
+			register(DefinitionRequest.type, haxeSelector);
+		} else {
+			capabilities.definitionProvider = true;
+		}
+
+		if (textDocument!.hover!.dynamicRegistration == true) {
+			register(HoverRequest.type, haxeSelector);
+		} else {
+			capabilities.hoverProvider = true;
+		}
+
+		if (textDocument!.references!.dynamicRegistration == true) {
+			register(ReferencesRequest.type, haxeSelector);
+		} else {
+			capabilities.referencesProvider = true;
+		}
+
+		if (textDocument!.documentSymbol!.dynamicRegistration == true) {
+			register(DocumentSymbolRequest.type, haxeSelector);
+		} else {
+			capabilities.documentSymbolProvider = true;
+		}
+
+		if (workspace!.symbol!.dynamicRegistration == true) {
+			register(WorkspaceSymbolRequest.type, haxeSelector);
+		} else {
+			capabilities.workspaceSymbolProvider = true;
+		}
+
+		if (textDocument!.formatting!.dynamicRegistration == true) {
+			register(DocumentFormattingRequest.type, haxeSelector);
+		} else {
+			capabilities.documentFormattingProvider = true;
+		}
+
+		if (textDocument!.rangeFormatting!.dynamicRegistration == true) {
+			register(DocumentRangeFormattingRequest.type, haxeSelector);
+		} else {
+			capabilities.documentRangeFormattingProvider = true;
+		}
+
+		if (textDocument!.rename!.dynamicRegistration == true) {
+			register(RenameRequest.type, haxeSelector);
+		} else {
+			capabilities.renameProvider = true;
+		}
+
+		if (textDocument!.foldingRange!.dynamicRegistration == true) {
+			register(FoldingRangeRequest.type, haxeSelector);
+		} else {
+			capabilities.foldingRangeProvider = true;
+		}
+
+		trace(Json.stringify(registrations), "\t");
+		resolve({capabilities: capabilities});
+		languageServerProtocol.sendRequest(RegistrationRequest.type, {registrations: registrations}, null, _ -> {}, error -> trace(error));
 	}
 
 	function onShutdown(_, _, resolve:NoData->Void, _) {
@@ -173,28 +255,28 @@ class Context {
 
 	function onServerStarted() {
 		displayOffsetConverter = DisplayOffsetConverter.create(haxeServer.haxeVersion);
-
-		function handleRegistration<P, R>(displayMethod:HaxeRequestMethod<P, R>, lspMethod:String) {
-			if (haxeServer.supports(displayMethod)) {
-				registerCapability(lspMethod);
-			} else {
-				unregisterCapability(lspMethod);
-			}
-		}
-		handleRegistration(DisplayMethods.GotoTypeDefinition, TypeDefinitionRequest.type);
-		handleRegistration(DisplayMethods.GotoImplementation, ImplementationRequest.type);
+		handleRegistration(DisplayMethods.GotoTypeDefinition, TypeDefinitionRequest.type, {documentSelector: haxeSelector});
+		handleRegistration(DisplayMethods.GotoImplementation, ImplementationRequest.type, {documentSelector: haxeSelector});
 	}
 
-	public function registerCapability(method:String, ?registerOptions:Dynamic) {
-		var params:Registration = {
-			id: method,
-			method: method
-		};
-		if (registerOptions != null) {
-			params.registerOptions = registerOptions;
+	function handleRegistration<HP, HR, P, R, PR, E, RO>(displayMethod:HaxeRequestMethod<HP, HR>, lspMethod:ProtocolRequestType<P, R, PR, E, RO>,
+			registerOptions:RO) {
+		if (haxeServer.supports(displayMethod)) {
+			registerCapability(lspMethod, registerOptions);
+		} else {
+			unregisterCapability(lspMethod);
 		}
+	}
+
+	public function registerCapability<P, R, PR, E, RO>(method:ProtocolRequestType<P, R, PR, E, RO>, registerOptions:RO) {
 		languageServerProtocol.sendRequest(RegistrationRequest.type, {
-			registrations: [params]
+			registrations: [
+				{
+					id: method,
+					method: method,
+					registerOptions: registerOptions
+				}
+			]
 		}, null, _ -> {}, error -> trace(error));
 	}
 
@@ -232,9 +314,9 @@ class Context {
 				new ExtractConstantFeature(this);
 				new ExtractFunctionFeature(this);
 
-				for (doc in documents)
+				for (doc in documents) {
 					publishDiagnostics(doc.uri);
-
+				}
 				initialized = true;
 			});
 		} else {
@@ -307,17 +389,20 @@ class Context {
 	function onDidChangeActiveTextEditor(params:{uri:DocumentUri}) {
 		activeEditor = params.uri;
 		var document = documents.getHaxe(params.uri);
-		if (document == null)
+		if (document == null) {
 			return;
+		}
 		// avoid running diagnostics twice when the document is initially opened (open + activate event)
 		var timeSinceOpened = haxe.Timer.stamp() - document.openTimestamp;
-		if (timeSinceOpened > 0.1)
+		if (timeSinceOpened > 0.1) {
 			publishDiagnostics(params.uri);
+		}
 	}
 
 	function publishDiagnostics(uri:DocumentUri) {
-		if (diagnostics != null && config.user.enableDiagnostics)
+		if (diagnostics != null && config.user.enableDiagnostics) {
 			diagnostics.publishDiagnostics(uri);
+		}
 	}
 
 	function runMethod(params:{method:String, params:Any}, token:CancellationToken, resolve:Dynamic->Void, reject:ResponseError<NoData>->Void) {
@@ -386,9 +471,9 @@ class Context {
 
 		// this must be the final argument before --display to avoid issues with --next
 		// see haxe issue #8795
-		if (includeDisplayArguments && config.displayArguments != null)
+		if (includeDisplayArguments && config.displayArguments != null) {
 			actualArgs = actualArgs.concat(config.displayArguments); // add arguments from the workspace settings
-
+		}
 		actualArgs.push("--display");
 		actualArgs = actualArgs.concat(args); // finally, add given query args
 		haxeServer.process(label, actualArgs, token, true, stdin, Processed(callback, errback));

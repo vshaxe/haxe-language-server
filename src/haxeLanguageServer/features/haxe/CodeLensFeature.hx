@@ -12,7 +12,7 @@ class CodeLensFeature {
 	public function new(context:Context) {
 		this.context = context;
 
-		context.registerCapability(CodeLensRequest.type);
+		context.registerCapability(CodeLensRequest.type, {documentSelector: Context.haxeSelector});
 		context.languageServerProtocol.onRequest(CodeLensRequest.type, onCodeLens);
 	}
 
