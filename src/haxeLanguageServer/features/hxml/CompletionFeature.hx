@@ -1,7 +1,9 @@
 package haxeLanguageServer.features.hxml;
 
+import haxeLanguageServer.features.hxml.Defines;
 import haxeLanguageServer.features.hxml.HxmlFlags;
 import haxeLanguageServer.helper.VscodeCommands;
+import haxeLanguageServer.protocol.DisplayPrinter;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
@@ -33,17 +35,14 @@ class CompletionFeature {
 		resolve({
 			isIncomplete: false,
 			items: switch parts {
-				case [] | [_]:
-					createFlagCompletionItems(range);
-				case [flag, _]:
-					createArgumentCompletionItems(range, flag);
-				case _:
-					[]; // no completion after the first argument
+				case [] | [_]: createFlagCompletion(range);
+				case [flag, arg]: createArgumentCompletion(range, flag, arg);
+				case _: []; // no completion after the first argument
 			}
 		});
 	}
 
-	function createFlagCompletionItems(range:Range):Array<CompletionItem> {
+	function createFlagCompletion(range:Range):Array<CompletionItem> {
 		final items = [];
 		function addFlag(flag:HxmlFlag, name:String) {
 			final item:CompletionItem = {
@@ -86,7 +85,7 @@ class CompletionFeature {
 		return items;
 	}
 
-	function createArgumentCompletionItems(range:Range, flag:String):Array<CompletionItem> {
+	function createArgumentCompletion(range:Range, flag:String, arg:String):Array<CompletionItem> {
 		final flag = HxmlFlags.flatten().find(f -> f.name == flag || f.shortName == flag || f.deprecatedNames!.contains(flag));
 		return switch flag!.argument!.completion {
 			case null:
@@ -99,6 +98,48 @@ class CompletionFeature {
 						documentation: value.description
 					}
 				});
+			case Define:
+				switch arg.split("=") {
+					case [] | [_]: createDefineCompletion(flag);
+					case [define, _]: createDefineArgumentCompletion(define);
+					case _: [];
+				}
 		}
+	}
+
+	function createDefineCompletion(flag:HxmlFlag):Array<CompletionItem> {
+		final displayPrinter = new DisplayPrinter();
+		return Defines.map(define -> {
+			final name = define.define.replace("_", "-");
+			final item:CompletionItem = {
+				label: name,
+				kind: Constant,
+				documentation: {
+					kind: MarkDown,
+					value: displayPrinter.printMetadataDetails({
+						name: name,
+						doc: define.doc,
+						links: cast define.links,
+						platforms: cast define.platforms,
+						parameters: cast define.params,
+						targets: [],
+						internal: false
+					})
+				}
+			}
+			if (define.params != null) {
+				item.insertText = item.label + "=";
+				item.command = TriggerSuggest;
+			}
+			return item;
+		});
+	}
+
+	function createDefineArgumentCompletion(define:String):Array<CompletionItem> {
+		final define = Defines.find(d -> d.define == define);
+		if (define == null) {
+			return [];
+		}
+		return [];
 	}
 }

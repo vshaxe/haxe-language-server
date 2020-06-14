@@ -177,7 +177,7 @@ class Context {
 			});
 			register(CompletionRequest.type, {
 				documentSelector: hxmlSelector,
-				triggerCharacters: ["-"],
+				triggerCharacters: ["-", "/", "\\", "=", " "],
 				resolveProvider: true
 			});
 		} else {

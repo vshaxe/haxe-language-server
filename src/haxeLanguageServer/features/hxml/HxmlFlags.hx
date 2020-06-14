@@ -5,7 +5,7 @@ import haxe.ds.ReadOnlyArray;
 typedef HxmlFlag = {
 	final name:String;
 	final ?shortName:String;
-	final ?deprecatedNames:Array<String>;
+	final ?deprecatedNames:ReadOnlyArray<String>;
 	final ?argument:{
 		final name:String;
 		final ?insertion:String;
@@ -16,6 +16,7 @@ typedef HxmlFlag = {
 
 enum CompletionKind {
 	Enum(values:ReadOnlyArray<{name:String, ?description:String}>);
+	Define;
 }
 
 enum Category {
@@ -190,7 +191,7 @@ final HxmlFlags:Map<Category, ReadOnlyArray<HxmlFlag>> = [
 			shortName: "-D",
 			argument: {
 				name: "<var[=value]>",
-				insertion: "var"
+				completion: Define
 			},
 			description: "define a conditional compilation flag"
 		},
