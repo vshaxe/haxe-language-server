@@ -2,6 +2,7 @@ package haxeLanguageServer.features.codeAction;
 
 import haxe.Json;
 import haxeLanguageServer.Configuration;
+import haxeLanguageServer.documents.TextDocument;
 import jsonrpc.Protocol;
 import testcases.TestTextEditHelper;
 
@@ -9,7 +10,7 @@ class OrganizeImportsFeatureTest extends Test implements IOrganizeImportsFeature
 	function goldCheck(fileName:String, input:String, gold:String, config:String) {
 		var userConfig:UserConfig = Json.parse(config);
 		var importsSortOrder:ImportsSortOrderConfig = AllAlphabetical;
-		if ((userConfig != null) && (userConfig.importsSortOrder != null))
+		if (userConfig != null && userConfig.importsSortOrder != null)
 			importsSortOrder = userConfig.importsSortOrder;
 
 		var edits:Array<TextEdit> = makeEdits(input, fileName, importsSortOrder);
@@ -21,7 +22,7 @@ class OrganizeImportsFeatureTest extends Test implements IOrganizeImportsFeature
 
 	@:access(haxeLanguageServer.Configuration)
 	function makeEdits(content:String, fileName:String, importsSortOrder:ImportsSortOrderConfig):Array<TextEdit> {
-		var context:Context = new Context(new Protocol(null));
+		var context = new Context(new Protocol(null));
 		context.config.user = {
 			importsSortOrder: importsSortOrder
 		};

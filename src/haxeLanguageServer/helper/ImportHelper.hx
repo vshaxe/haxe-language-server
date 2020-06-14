@@ -4,7 +4,6 @@ import haxe.Json;
 import haxe.display.JsonModuleTypes;
 import haxeLanguageServer.Configuration.FunctionFormattingConfig;
 import haxeLanguageServer.Configuration.ImportStyle;
-import haxeLanguageServer.TextDocument;
 import haxeLanguageServer.protocol.DisplayPrinter;
 
 using Lambda;

@@ -1,6 +1,6 @@
 package haxeLanguageServer.hxParser;
 
-import haxeLanguageServer.TextDocument;
+import haxeLanguageServer.documents.TextDocument;
 
 class RenameResolverTest extends Test {
 	function check(code:String, ?expected:String) {

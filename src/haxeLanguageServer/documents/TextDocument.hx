@@ -1,4 +1,4 @@
-package haxeLanguageServer;
+package haxeLanguageServer.documents;
 
 import haxe.Timer;
 import haxeLanguageServer.tokentree.TokenTreeManager;
@@ -19,7 +19,6 @@ class TextDocument {
 	final context:Null<Context>;
 	var _parseTree:Null<File>;
 	var _tokens:Null<TokenTreeManager>;
-	@:allow(haxeLanguageServer.TextDocuments)
 	var lineOffsets:Array<Int>;
 	var onUpdateListeners:Array<OnTextDocumentChangeListener> = [];
 

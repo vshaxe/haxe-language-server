@@ -1,4 +1,4 @@
-package haxeLanguageServer;
+package haxeLanguageServer.documents;
 
 @:allow(haxeLanguageServer.Context)
 class TextDocuments {

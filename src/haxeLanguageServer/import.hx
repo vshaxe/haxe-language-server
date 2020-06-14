@@ -1,4 +1,5 @@
 import haxe.display.FsPath;
+import haxeLanguageServer.documents.*;
 import languageServerProtocol.Types;
 import languageServerProtocol.protocol.Protocol;
 
