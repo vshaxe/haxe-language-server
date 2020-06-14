@@ -4,7 +4,9 @@ import haxeLanguageServer.features.hxml.HxmlFlags;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
+
 using Lambda;
+
 class CompletionFeature {
 	final context:Context;
 
@@ -18,30 +20,37 @@ class CompletionFeature {
 		if (doc == null) {
 			reject.noFittingDocument(uri);
 		}
-		function complete(items:Array<CompletionItem>) {
-			resolve({
-				isIncomplete: false,
-				items: items
-			});
-		}
-		var pos = params.position;
+		final pos = params.position;
 		final line = doc.lineAt(pos.line);
 		final textBefore = line.substring(0, pos.character);
 		final wordPattern = ~/[-\w]+$/;
+		final range = {start: pos, end: pos};
 		if (wordPattern.match(textBefore)) {
-			pos = pos.translate(0, -wordPattern.matched(0).length);
+			range.start = pos.translate(0, -wordPattern.matched(0).length);
 		}
-		final parts = textBefore.trim().split(" ");
-		if (parts.length > 1 || (parts.length == 1 && textBefore.last() == " ")) {
-			// we're not completing the flag, but after it
-			return complete([]);
-		}
-		complete(HxmlFlags.flatten().map(function(flag) {
+		final parts = ~/\s+/.replace(textBefore.ltrim(), " ").split(" ");
+		resolve({
+			isIncomplete: false,
+			items: switch parts {
+				case [] | [_]:
+					createFlagCompletionItems(range);
+				case [flag, _]:
+					createArgumentCompletionItems(range, flag);
+				case _:
+					// no completion after the first argument
+					[];
+			}
+		});
+	}
+
+	function createFlagCompletionItems(range:Range):Array<CompletionItem> {
+		final items = [];
+		function addFlag(flag:HxmlFlag) {
 			final item:CompletionItem = {
 				label: flag.name,
 				kind: Function,
 				textEdit: {
-					range: pos.toRange(),
+					range: range,
 					newText: flag.name
 				},
 				documentation: {
@@ -62,7 +71,15 @@ class CompletionFeature {
 					item.textEdit.newText += insertion;
 				}
 			}
-			return item;
-		}));
+			items.push(item);
+		}
+		for (flag in HxmlFlags.flatten()) {
+			addFlag(flag);
+		}
+		return items;
+	}
+
+	function createArgumentCompletionItems(range:Range, flag:String):Array<CompletionItem> {
+		return [];
 	}
 }
