@@ -47,6 +47,7 @@ class CompletionFeature {
 		function addFlag(flag:HxmlFlag, name:String) {
 			final item:CompletionItem = {
 				label: name,
+				filterText: name,
 				kind: Function,
 				textEdit: {
 					range: range,
