@@ -28,3 +28,7 @@ function afterLastDot(s:String) {
 function last(s:String):String {
 	return s.charAt(s.length - 1);
 }
+
+function capitalize(s:String):String {
+	return s.charAt(0).toUpperCase() + s.substr(1);
+}

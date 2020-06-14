@@ -55,7 +55,7 @@ class CompletionFeature {
 				},
 				documentation: {
 					kind: MarkDown,
-					value: flag.description
+					value: flag.description.capitalize() + "."
 				},
 				insertTextFormat: Snippet
 			}
