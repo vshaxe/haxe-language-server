@@ -24,3 +24,7 @@ function afterLastDot(s:String) {
 		return s;
 	return s.substr(dotIndex + 1);
 }
+
+function last(s:String):String {
+	return s.charAt(s.length - 1);
+}
