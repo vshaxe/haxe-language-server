@@ -1,6 +1,7 @@
 package haxeLanguageServer.features.hxml;
 
 import haxeLanguageServer.features.hxml.HxmlFlags;
+import haxeLanguageServer.helper.VscodeCommands;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
@@ -70,6 +71,9 @@ class CompletionFeature {
 					}
 					item.textEdit.newText += insertion;
 				}
+				if (arg.completion != null) {
+					item.command = TriggerSuggest;
+				}
 			}
 			items.push(item);
 		}
@@ -83,6 +87,18 @@ class CompletionFeature {
 	}
 
 	function createArgumentCompletionItems(range:Range, flag:String):Array<CompletionItem> {
-		return [];
+		final flag = HxmlFlags.flatten().find(f -> f.name == flag || f.shortName == flag || f.deprecatedNames!.contains(flag));
+		return switch flag!.argument!.completion {
+			case null:
+				[];
+			case Enum(values):
+				values.map(function(value):CompletionItem {
+					return {
+						label: value.name,
+						kind: EnumMember,
+						documentation: value.description
+					}
+				});
+		}
 	}
 }

@@ -1,5 +1,7 @@
 package haxeLanguageServer.features.hxml;
 
+import haxe.ds.ReadOnlyArray;
+
 typedef HxmlFlag = {
 	final name:String;
 	final ?shortName:String;
@@ -7,8 +9,13 @@ typedef HxmlFlag = {
 	final ?argument:{
 		final name:String;
 		final ?insertion:String;
+		final ?completion:CompletionKind;
 	};
 	final description:String;
+}
+
+enum CompletionKind {
+	Enum(values:ReadOnlyArray<{name:String, ?description:String}>);
 }
 
 enum Category {
@@ -23,7 +30,7 @@ enum Category {
 	Miscellaneous;
 }
 
-final HxmlFlags:Map<Category, Array<HxmlFlag>> = [
+final HxmlFlags:Map<Category, ReadOnlyArray<HxmlFlag>> = [
 	Target => [
 		{
 			name: "--js",
@@ -240,7 +247,20 @@ final HxmlFlags:Map<Category, Array<HxmlFlag>> = [
 			deprecatedNames: ["-dce"],
 			argument: {
 				name: "[std|full|no]",
-				insertion: "full"
+				completion: Enum([
+					{
+						name: "std",
+						description: "Only apply dead code elimination to the standard library."
+					},
+					{
+						name: "full",
+						description: "Apply dead code elimination to all code."
+					},
+					{
+						name: "no",
+						description: "Disable dead code elimination."
+					}
+				])
 			},
 			description: "set the dead code elimination mode (default `std`)"
 		},
@@ -324,7 +344,13 @@ final HxmlFlags:Map<Category, Array<HxmlFlag>> = [
 			name: "--swf-version",
 			argument: {
 				name: "<version>",
-				insertion: "version"
+				completion: Enum([
+					9., 10., 10.1, 10.2, 10.3, 11., 11.1, 11.2, 11.3, 11.4, 11.5, 11.6, 11.7, 11.8, 11.9, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 19.0, 20.0,
+					21.0, 22.0, 23.0, 24.0, 25.0, 26.0, 27.0, 28.0, 29.0, 31.0, 32.0
+				].map(version -> {
+						name: Std.string(version),
+						description: null
+					}))
 			},
 			description: "change the SWF version"
 		},

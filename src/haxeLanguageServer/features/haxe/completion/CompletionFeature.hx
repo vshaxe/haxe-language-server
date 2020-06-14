@@ -7,6 +7,7 @@ import haxe.ds.Option;
 import haxe.extern.EitherType;
 import haxeLanguageServer.helper.DocHelper;
 import haxeLanguageServer.helper.ImportHelper;
+import haxeLanguageServer.helper.VscodeCommands;
 import haxeLanguageServer.protocol.CompilerMetadata;
 import haxeLanguageServer.protocol.DisplayPrinter;
 import haxeLanguageServer.tokentree.PositionAnalyzer;
@@ -33,17 +34,6 @@ typedef CompletionItemData = {
 }
 
 class CompletionFeature {
-	public static final TriggerSuggest = {
-		title: "Trigger Suggest",
-		command: "editor.action.triggerSuggest",
-		arguments: []
-	};
-	public static final TriggerParameterHints = {
-		title: "Trigger Parameter Hints",
-		command: "editor.action.triggerParameterHints",
-		arguments: []
-	};
-
 	final context:Context;
 	final legacy:CompletionFeatureLegacy;
 	final expectedTypeCompletion:ExpectedTypeCompletion;

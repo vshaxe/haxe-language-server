@@ -2,10 +2,10 @@ package haxeLanguageServer.features.haxe.completion;
 
 import haxe.display.Display;
 import haxe.display.JsonModuleTypes;
-import haxeLanguageServer.features.haxe.completion.CompletionFeature.TriggerSuggest;
 import haxeLanguageServer.features.haxe.completion.CompletionFeature;
 import haxeLanguageServer.helper.DocHelper;
 import haxeLanguageServer.helper.SnippetHelper;
+import haxeLanguageServer.helper.VscodeCommands;
 import haxeLanguageServer.protocol.DisplayPrinter;
 import languageServerProtocol.Types.CompletionItem;
 
