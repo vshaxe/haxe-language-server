@@ -15,10 +15,9 @@ class HoverFeature {
 
 	public function new(context) {
 		this.context = context;
-		context.languageServerProtocol.onRequest(HoverRequest.type, onHover);
 	}
 
-	function onHover(params:TextDocumentPositionParams, token:CancellationToken, resolve:Hover->Void, reject:ResponseError<NoData>->Void) {
+	public function onHover(params:TextDocumentPositionParams, token:CancellationToken, resolve:Null<Hover>->Void, reject:ResponseError<NoData>->Void) {
 		var uri = params.textDocument.uri;
 		var doc:Null<HaxeDocument> = context.documents.getHaxe(uri);
 		if (doc == null || !uri.isFile()) {

@@ -8,10 +8,26 @@ import haxe.display.Protocol.Methods as HaxeMethods;
 import haxe.display.Protocol.Response;
 import haxe.display.Server.ServerMethods;
 import haxeLanguageServer.LanguageServerMethods.MethodResult;
-import haxeLanguageServer.features.haxe.*;
-import haxeLanguageServer.features.haxe.codeAction.*;
+import haxeLanguageServer.features.CompletionFeature;
+import haxeLanguageServer.features.HoverFeature;
+import haxeLanguageServer.features.haxe.CodeGenerationFeature;
+import haxeLanguageServer.features.haxe.CodeLensFeature;
+import haxeLanguageServer.features.haxe.DeterminePackageFeature;
+import haxeLanguageServer.features.haxe.DiagnosticsFeature;
+import haxeLanguageServer.features.haxe.DocumentFormattingFeature;
+import haxeLanguageServer.features.haxe.FindReferencesFeature;
+import haxeLanguageServer.features.haxe.GotoDefinitionFeature;
+import haxeLanguageServer.features.haxe.GotoImplementationFeature;
+import haxeLanguageServer.features.haxe.GotoTypeDefinitionFeature;
+import haxeLanguageServer.features.haxe.RenameFeature;
+import haxeLanguageServer.features.haxe.SignatureHelpFeature;
+import haxeLanguageServer.features.haxe.WorkspaceSymbolsFeature;
 import haxeLanguageServer.features.haxe.codeAction.CodeActionFeature.CodeActionContributor;
-import haxeLanguageServer.features.haxe.completion.*;
+import haxeLanguageServer.features.haxe.codeAction.CodeActionFeature;
+import haxeLanguageServer.features.haxe.codeAction.ExtractConstantFeature;
+import haxeLanguageServer.features.haxe.codeAction.ExtractFunctionFeature;
+import haxeLanguageServer.features.haxe.codeAction.ExtractTypeFeature;
+import haxeLanguageServer.features.haxe.codeAction.ExtractTypeFeature;
 import haxeLanguageServer.features.haxe.documentSymbols.DocumentSymbolsFeature;
 import haxeLanguageServer.features.haxe.foldingRange.FoldingRangeFeature;
 import haxeLanguageServer.server.DisplayResult;
@@ -159,6 +175,11 @@ class Context {
 				triggerCharacters: completionTriggerCharacters,
 				resolveProvider: true
 			});
+			register(CompletionRequest.type, {
+				documentSelector: hxmlSelector,
+				triggerCharacters: ["-"],
+				resolveProvider: true
+			});
 		} else {
 			capabilities.completionProvider = {
 				triggerCharacters: completionTriggerCharacters,
@@ -186,6 +207,7 @@ class Context {
 
 		if (textDocument!.hover!.dynamicRegistration == true) {
 			register(HoverRequest.type, haxeSelector);
+			register(HoverRequest.type, hxmlSelector);
 		} else {
 			capabilities.hoverProvider = true;
 		}

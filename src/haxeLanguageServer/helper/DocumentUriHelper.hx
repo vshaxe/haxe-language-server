@@ -22,3 +22,11 @@ function isFile(uri:DocumentUri):Bool {
 function isUntitled(uri:DocumentUri):Bool {
 	return uri.toString().startsWith("untitled:");
 }
+
+function isHaxeFile(uri:DocumentUri):Bool {
+	return uri.toString().endsWith(".hx");
+}
+
+function isHxmlFile(uri:DocumentUri):Bool {
+	return uri.toString().endsWith(".hxml");
+}

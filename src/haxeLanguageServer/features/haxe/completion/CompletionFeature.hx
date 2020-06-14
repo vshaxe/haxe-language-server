@@ -73,9 +73,6 @@ class CompletionFeature {
 		});
 
 		legacy = new CompletionFeatureLegacy(context, contextSupport, formatDocumentation);
-
-		context.languageServerProtocol.onRequest(CompletionRequest.type, onCompletion);
-		context.languageServerProtocol.onRequest(CompletionResolveRequest.type, onCompletionResolve);
 	}
 
 	function checkCapabilities() {
@@ -87,7 +84,7 @@ class CompletionFeature {
 		deprecatedSupport = completion!.completionItem!.tagSupport!.valueSet.let(tags -> tags.contains(Deprecated)).or(false);
 	}
 
-	function onCompletion(params:CompletionParams, token:CancellationToken, resolve:CompletionList->Void, reject:ResponseError<NoData>->Void) {
+	public function onCompletion(params:CompletionParams, token:CancellationToken, resolve:CompletionList->Void, reject:ResponseError<NoData>->Void) {
 		var uri = params.textDocument.uri;
 		var doc:Null<HaxeDocument> = context.documents.getHaxe(uri);
 		if (doc == null || !uri.isFile()) {
@@ -149,7 +146,7 @@ class CompletionFeature {
 		return !escaped;
 	}
 
-	function onCompletionResolve(item:CompletionItem, token:CancellationToken, resolve:CompletionItem->Void, reject:ResponseError<NoData>->Void) {
+	public function onCompletionResolve(item:CompletionItem, token:CancellationToken, resolve:CompletionItem->Void, reject:ResponseError<NoData>->Void) {
 		var data:Null<CompletionItemData> = item.data;
 		if (!context.haxeServer.supports(DisplayMethods.CompletionItemResolve)
 			|| previousCompletionData == null

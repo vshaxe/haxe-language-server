@@ -26,10 +26,10 @@ class TextDocuments {
 
 	function onDidOpenTextDocument(event:DidOpenTextDocumentParams) {
 		final td = event.textDocument;
-		final uri = td.uri.toString();
-		if (uri.endsWith(".hx")) {
+		final uri = td.uri;
+		if (uri.isHaxeFile()) {
 			documents[td.uri] = new HaxeDocument(context, td.uri, td.languageId, td.version, td.text);
-		} else if (uri.endsWith(".hxml")) {
+		} else if (uri.isHxmlFile()) {
 			documents[td.uri] = new HxmlDocument(context, td.uri, td.languageId, td.version, td.text);
 		} else {
 			throw uri + " has unsupported file type (must be .hx or .hxml)";
