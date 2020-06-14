@@ -400,7 +400,7 @@ class Context {
 	}
 
 	function callFileParamsMethod(uri:DocumentUri, method) {
-		if (uri.isFile() && haxeServer.supports(method)) {
+		if (uri.isFile() && uri.isHaxeFile() && haxeServer.supports(method)) {
 			callHaxeMethod(method, {file: uri.toFsPath()}, null, _ -> null, error -> {
 				trace("Error during " + method + " " + error);
 			});
