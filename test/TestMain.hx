@@ -1,6 +1,6 @@
 package;
 
-import haxeLanguageServer.features.codeAction.*;
+import haxeLanguageServer.features.haxe.codeAction.*;
 import haxeLanguageServer.helper.*;
 import haxeLanguageServer.hxParser.*;
 import haxeLanguageServer.protocol.*;

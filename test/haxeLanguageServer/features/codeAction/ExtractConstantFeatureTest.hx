@@ -1,4 +1,4 @@
-package haxeLanguageServer.features.codeAction;
+package haxeLanguageServer.features.haxe.codeAction;
 
 import haxe.Json;
 import haxeLanguageServer.documents.HaxeDocument;
@@ -17,7 +17,7 @@ class ExtractConstantFeatureTest extends Test implements IExtractConstantFeature
 		TestTextEditHelper.compareTextEdits(goldEdit.edits, edits);
 	}
 
-	@:access(haxeLanguageServer.features.codeAction.ExtractConstantFeature)
+	@:access(haxeLanguageServer.features.haxe.codeAction.ExtractConstantFeature)
 	function makeEdits(content:String, fileName:String, range:Range):Array<TextEdit> {
 		var context = new TestContext(new Protocol(null));
 		var uri = new DocumentUri("file://" + fileName + ".edittest");

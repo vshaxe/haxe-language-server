@@ -1,4 +1,4 @@
-package haxeLanguageServer.features.codeAction;
+package haxeLanguageServer.features.haxe.codeAction;
 
 import haxe.Json;
 import haxeLanguageServer.Configuration;
