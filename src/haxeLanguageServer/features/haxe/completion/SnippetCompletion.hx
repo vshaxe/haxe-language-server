@@ -86,6 +86,12 @@ ${accessorPrefix}function set_$${1:name}($${1:name}:$${2:T}):$${2:T} $body');
 			add("main", main, '$main $body');
 		}
 
+		function addExprLevel() {
+			add("final", "final name", "final ${1:name}");
+			add("var", "var name", "var ${1:name}");
+			addFunction();
+		}
+
 		final supportsModuleLevelStatics = context.haxeServer.haxeVersion >= new SemVer(4, 2, 0);
 
 		switch data.tokenContext {
@@ -154,15 +160,11 @@ ${accessorPrefix}function set_$${1:name}($${1:name}:$${2:T}):$${2:T} $body');
 				}
 
 				if (type.field != null) {
-					add("final", "final name", "final ${1:name}");
-					add("var", "var name", "var ${1:name}");
-					addFunction();
+					addExprLevel();
 				}
 
 			case ModuleLevelStatic(_):
-				addVar();
-				addFinal();
-				addFunction();
+				addExprLevel();
 		}
 
 		return Promise.resolve(result());
