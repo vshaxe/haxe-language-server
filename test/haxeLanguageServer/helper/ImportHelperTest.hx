@@ -10,7 +10,7 @@ class ImportHelperTest extends Test {
 			testCase.after = testCase.after.replace("\r", "");
 
 			var doc = new HaxeDocument(new DocumentUri("file://dummy"), "", 0, testCase.before);
-			var result = ImportHelper.getImportPosition(doc);
+			var result = ImportHelper.determineImportPosition(doc);
 			var edit = ImportHelper.createImportsEdit(doc, result, ["Test"], Type);
 
 			// TODO: apply the edit properly instead of this hack?

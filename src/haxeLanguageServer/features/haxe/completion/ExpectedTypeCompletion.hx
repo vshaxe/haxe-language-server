@@ -84,7 +84,7 @@ class ExpectedTypeCompletion {
 					detail: "Auto-generate anonymous function",
 					insertText: definition,
 					insertTextFormat: PlainText,
-					additionalTextEdits: ImportHelper.createFunctionImportsEdit(data.doc, data.importPosition, context, concreteType, anonFormatting)
+					additionalTextEdits: createFunctionImportsEdit(data.doc, data.importPosition, context, concreteType, anonFormatting)
 				});
 			case _:
 		}

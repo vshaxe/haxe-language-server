@@ -330,13 +330,13 @@ class DiagnosticsFeature {
 		var preferredStyle = context.config.user.codeGeneration.imports.style;
 		var secondaryStyle:ImportStyle = if (preferredStyle == Type) Module else Type;
 
-		var importPosition = ImportHelper.getImportPosition(doc);
+		var importPosition = determineImportPosition(doc);
 		function makeImportAction(style:ImportStyle):CodeAction {
 			var path = if (style == Module) TypeHelper.getModule(arg.name) else arg.name;
 			return {
 				title: "Import " + path,
 				kind: QuickFix,
-				edit: WorkspaceEditHelper.create(context, params, [ImportHelper.createImportsEdit(doc, importPosition, [arg.name], style)]),
+				edit: WorkspaceEditHelper.create(context, params, [createImportsEdit(doc, importPosition, [arg.name], style)]),
 				diagnostics: [d]
 			};
 		}

@@ -185,7 +185,7 @@ class CompletionFeature {
 				resolve({items: [], isIncomplete: false}); // avoid auto-popup after -> in arrow functions
 				return null;
 			}
-			var importPosition = ImportHelper.getImportPosition(doc);
+			var importPosition = determineImportPosition(doc);
 			var indent = doc.indentAt(params.position.line);
 			// the replaceRanges sent by Haxe are only trustworthy in some cases (https://github.com/HaxeFoundation/haxe/issues/8669)
 			if (mode == Metadata || mode == Toplevel || mode == TypeHint) {
@@ -436,7 +436,7 @@ class CompletionFeature {
 				kind: MarkDown,
 				value: DocHelper.printCodeBlock("override " + printer.printOverrideDefinition(field, concreteType, data.indent, false), Haxe)
 			},
-			additionalTextEdits: ImportHelper.createFunctionImportsEdit(data.doc, data.importPosition, context, concreteType, fieldFormatting)
+			additionalTextEdits: createFunctionImportsEdit(data.doc, data.importPosition, context, concreteType, fieldFormatting)
 		}
 		handleDeprecated(item, field.meta);
 		return item;
@@ -537,7 +537,7 @@ class CompletionFeature {
 		if (isImportCompletion) {
 			item.textEdit.newText = maybeInsert(item.textEdit.newText, ";", data.lineAfter);
 		} else if (importConfig.enableAutoImports && type.path.importStatus == Unimported) {
-			var edit = ImportHelper.createImportsEdit(data.doc, data.importPosition, [dotPath], importConfig.style);
+			var edit = createImportsEdit(data.doc, data.importPosition, [dotPath], importConfig.style);
 			item.additionalTextEdits = [edit];
 		}
 
