@@ -345,14 +345,21 @@ class DiagnosticsFeature {
 		if (importCount == 1) {
 			preferred.isPreferred = true;
 		}
+		final actions = [preferred];
+
 		final secondary = makeImportAction(secondaryStyle);
-		final changeTo = {
+		if (preferred.title != secondary.title) {
+			actions.push(secondary);
+		}
+
+		actions.push({
 			title: "Change to " + arg.name,
 			kind: QuickFix,
 			edit: WorkspaceEditHelper.create(context, params, [{range: d.range, newText: arg.name}]),
 			diagnostics: [d]
-		};
-		return [preferred, secondary, changeTo];
+		});
+
+		return actions;
 	}
 
 	function getTypoActions(params:CodeActionParams, d:Diagnostic, arg):Array<CodeAction> {
