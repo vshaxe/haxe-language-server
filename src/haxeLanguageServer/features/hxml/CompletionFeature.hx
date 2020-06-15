@@ -1,6 +1,7 @@
 package haxeLanguageServer.features.hxml;
 
 import haxeLanguageServer.features.hxml.Defines;
+import haxeLanguageServer.features.hxml.HxmlContextAnalyzer;
 import haxeLanguageServer.features.hxml.HxmlFlags;
 import haxeLanguageServer.helper.VscodeCommands;
 import haxeLanguageServer.protocol.DisplayPrinter;
@@ -25,19 +26,28 @@ class CompletionFeature {
 		}
 		final pos = params.position;
 		final line = doc.lineAt(pos.line);
-		final textBefore = line.substring(0, pos.character);
-		final wordPattern = ~/[-\w]+$/;
-		final range = {start: pos, end: pos};
-		if (wordPattern.match(textBefore)) {
-			range.start = pos.translate(0, -wordPattern.matched(0).length);
-		}
-		final parts = ~/\s+/.replace(textBefore.ltrim(), " ").split(" ");
+		final hxmlContext = analyzeHxmlContext(line, pos);
 		resolve({
 			isIncomplete: false,
-			items: switch parts {
-				case [] | [_]: createFlagCompletion(range);
-				case [flag, arg]: createArgumentCompletion(range, flag, arg);
-				case _: []; // no completion after the first argument
+			items: switch hxmlContext.element {
+				case Flag(_): createFlagCompletion(hxmlContext.range);
+				case EnumValue(_, values):
+					[
+						for (name => value in values)
+							{
+								label: name,
+								kind: EnumMember,
+								documentation: value.description
+							}
+					];
+				case Define(): createDefineCompletion();
+				case DefineValue(define, value):
+					[
+						{
+							label: "value"
+						}
+					];
+				case Unknown: [];
 			}
 		});
 	}
@@ -70,7 +80,7 @@ class CompletionFeature {
 					}
 					item.textEdit.newText += insertion;
 				}
-				if (arg.completion != null) {
+				if (arg.kind != null) {
 					item.command = TriggerSuggest;
 				}
 			}
@@ -85,29 +95,7 @@ class CompletionFeature {
 		return items;
 	}
 
-	function createArgumentCompletion(range:Range, flag:String, arg:String):Array<CompletionItem> {
-		final flag = HxmlFlags.flatten().find(f -> f.name == flag || f.shortName == flag || f.deprecatedNames!.contains(flag));
-		return switch flag!.argument!.completion {
-			case null:
-				[];
-			case Enum(values):
-				values.map(function(value):CompletionItem {
-					return {
-						label: value.name,
-						kind: EnumMember,
-						documentation: value.description
-					}
-				});
-			case Define:
-				switch arg.split("=") {
-					case [] | [_]: createDefineCompletion(flag);
-					case [define, _]: createDefineArgumentCompletion(define);
-					case _: [];
-				}
-		}
-	}
-
-	function createDefineCompletion(flag:HxmlFlag):Array<CompletionItem> {
+	function createDefineCompletion():Array<CompletionItem> {
 		final displayPrinter = new DisplayPrinter();
 		return Defines.map(define -> {
 			final name = define.define.replace("_", "-");
@@ -133,13 +121,5 @@ class CompletionFeature {
 			}
 			return item;
 		});
-	}
-
-	function createDefineArgumentCompletion(define:String):Array<CompletionItem> {
-		final define = Defines.find(d -> d.define == define);
-		if (define == null) {
-			return [];
-		}
-		return [];
 	}
 }
