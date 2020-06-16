@@ -35,9 +35,9 @@ class CompletionFeature {
 				case Flag(_): createFlagCompletion(hxmlContext.range, textAfter);
 				case EnumValue(_, values):
 					[
-						for (name => value in values)
+						for (value in values)
 							{
-								label: name,
+								label: value.name,
 								kind: EnumMember,
 								documentation: value.description
 							}
@@ -67,14 +67,13 @@ class CompletionFeature {
 				},
 				documentation: {
 					kind: MarkDown,
-					value: flag.description.capitalize() + "."
+					value: flag.description
 				},
 				insertTextFormat: Snippet
 			}
 			final arg = flag.argument;
 			if (arg != null) {
 				item.label += " " + arg.name;
-				trace(textAfter.charAt(0));
 				if (textAfter.charAt(0) != " ") {
 					item.textEdit.newText += " ";
 				}
@@ -101,26 +100,16 @@ class CompletionFeature {
 	}
 
 	function createDefineCompletion():Array<CompletionItem> {
-		final displayPrinter = new DisplayPrinter();
 		return Defines.map(define -> {
-			final name = define.define.replace("_", "-");
 			final item:CompletionItem = {
-				label: name,
+				label: define.getRealName(),
 				kind: Constant,
 				documentation: {
 					kind: MarkDown,
-					value: displayPrinter.printMetadataDetails({
-						name: name,
-						doc: define.doc,
-						links: cast define.links,
-						platforms: cast define.platforms,
-						parameters: cast define.params,
-						targets: [],
-						internal: false
-					})
+					value: define.printDetails()
 				}
 			}
-			if (define.params != null) {
+			if (define.hasParams()) {
 				item.insertText = item.label + "=";
 				item.command = TriggerSuggest;
 			}

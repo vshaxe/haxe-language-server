@@ -20,6 +20,7 @@ enum HxmlElement {
 
 function analyzeHxmlContext(line:String, pos:Position):HxmlContext {
 	final range = findWordRange(line, pos.character);
+	line = line.substring(0, range.end);
 	final parts = ~/\s+/.replace(line.ltrim(), " ").split(" ");
 	function findFlag(word) {
 		return HxmlFlags.flatten().find(f -> f.name == word || f.shortName == word || f.deprecatedNames!.contains(word));
@@ -32,10 +33,10 @@ function analyzeHxmlContext(line:String, pos:Position):HxmlContext {
 				final flag = findFlag(flag);
 				switch flag!.argument!.kind {
 					case null: Unknown;
-					case Enum(values): EnumValue(values[arg], values);
+					case Enum(values): EnumValue(values.find(v -> v.name == arg), values);
 					case Define:
 						function findDefine(define) {
-							return Defines.find(d -> d.define == define);
+							return Defines.find(d -> d.matches(define));
 						}
 						switch arg.split("=") {
 							case []: Define();
@@ -55,17 +56,21 @@ function analyzeHxmlContext(line:String, pos:Position):HxmlContext {
 }
 
 private function findWordRange(s:String, index:Int) {
+	function isWordBoundary(c:String):Bool {
+		return c.isSpace(0) || c == "=" || c == ":";
+	}
 	var start = 0;
-	var end = s.length - 1;
+	var end = 0;
 	var inWord = false;
 	for (i in 0...s.length) {
 		final c = s.charAt(i);
-		if (c.isSpace(0)) {
+		if (isWordBoundary(c)) {
 			if (inWord) {
 				inWord = false;
-				end = i - 1;
+				end = i;
 				if (start <= index && end >= index) {
-					break;
+					// "Te|xt"
+					return {start: start, end: end};
 				}
 			}
 		} else {
@@ -75,5 +80,10 @@ private function findWordRange(s:String, index:Int) {
 			}
 		}
 	}
-	return {start: start, end: end};
+	// "Text|"
+	if (inWord) {
+		return {start: start, end: s.length};
+	}
+	// "Text |"
+	return {start: index, end: index};
 }

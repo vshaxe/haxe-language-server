@@ -1,8 +1,39 @@
 package haxeLanguageServer.features.hxml;
 
 import haxe.ds.ReadOnlyArray;
+import haxeLanguageServer.protocol.DisplayPrinter;
 
-typedef Define = {
+abstract Define(DefineData) from DefineData {
+	public function printDetails():String {
+		return new DisplayPrinter().printMetadataDetails({
+			name: getRealName(),
+			doc: this.doc,
+			links: cast this.links,
+			platforms: cast this.platforms,
+			parameters: cast this.params,
+			targets: [],
+			internal: false
+		});
+	}
+
+	static function normalizeName(name:String) {
+		return name.replace("_", "-");
+	}
+
+	public function getRealName():String {
+		return normalizeName(this.define);
+	}
+
+	public function matches(name:String):Bool {
+		return normalizeName(name) == normalizeName(this.define);
+	}
+
+	public function hasParams():Bool {
+		return this.params != null;
+	}
+}
+
+typedef DefineData = {
 	final ?devcomment:String;
 	final name:String;
 	final define:String;

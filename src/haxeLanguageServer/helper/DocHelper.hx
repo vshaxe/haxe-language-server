@@ -143,4 +143,5 @@ enum abstract LanguageId(String) to String {
 	var Haxe = "haxe";
 	var HaxeType = "haxe.type";
 	var HaxeArgument = "haxe.argument";
+	var Hxml = "hxml";
 }
