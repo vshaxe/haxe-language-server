@@ -1,6 +1,5 @@
 package haxeLanguageServer.features.hxml.data;
 
-import haxe.ds.ReadOnlyArray;
 import haxeLanguageServer.features.hxml.data.Shared;
 
 using Lambda;
