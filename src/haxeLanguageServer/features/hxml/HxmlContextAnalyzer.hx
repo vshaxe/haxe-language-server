@@ -1,7 +1,8 @@
 package haxeLanguageServer.features.hxml;
 
-import haxeLanguageServer.features.hxml.Defines;
-import haxeLanguageServer.features.hxml.HxmlFlags;
+import haxeLanguageServer.features.hxml.data.Defines;
+import haxeLanguageServer.features.hxml.data.Flags;
+import haxeLanguageServer.features.hxml.data.Shared;
 
 using Lambda;
 
@@ -11,7 +12,7 @@ typedef HxmlContext = {
 }
 
 enum HxmlElement {
-	Flag(?flag:HxmlFlag);
+	Flag(?flag:Flag);
 	EnumValue(?value:EnumValue, values:EnumValues);
 	Define(?define:Define);
 	DefineValue(?define:Define, value:String);

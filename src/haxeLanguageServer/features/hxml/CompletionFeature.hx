@@ -1,8 +1,8 @@
 package haxeLanguageServer.features.hxml;
 
-import haxeLanguageServer.features.hxml.Defines;
 import haxeLanguageServer.features.hxml.HxmlContextAnalyzer;
-import haxeLanguageServer.features.hxml.HxmlFlags;
+import haxeLanguageServer.features.hxml.data.Defines;
+import haxeLanguageServer.features.hxml.data.Flags;
 import haxeLanguageServer.helper.VscodeCommands;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
@@ -55,7 +55,7 @@ class CompletionFeature {
 
 	function createFlagCompletion(range:Range, textAfter:String):Array<CompletionItem> {
 		final items = [];
-		function addFlag(flag:HxmlFlag, name:String) {
+		function addFlag(flag:Flag, name:String) {
 			final item:CompletionItem = {
 				label: name,
 				filterText: name,

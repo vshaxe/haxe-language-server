@@ -1,4 +1,4 @@
-package haxeLanguageServer.features.hxml;
+package haxeLanguageServer.features.hxml.data;
 
 import haxe.ds.ReadOnlyArray;
 import haxeLanguageServer.protocol.DisplayPrinter;
@@ -33,7 +33,7 @@ abstract Define(DefineData) from DefineData {
 	}
 }
 
-typedef DefineData = {
+private typedef DefineData = {
 	final ?devcomment:String;
 	final name:String;
 	final define:String;

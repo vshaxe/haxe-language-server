@@ -1,10 +1,11 @@
-package haxeLanguageServer.features.hxml;
+package haxeLanguageServer.features.hxml.data;
 
 import haxe.ds.ReadOnlyArray;
+import haxeLanguageServer.features.hxml.data.Shared;
 
 using Lambda;
 
-typedef HxmlFlag = {
+typedef Flag = {
 	final name:String;
 	final ?shortName:String;
 	final ?deprecatedNames:ReadOnlyArray<String>;
@@ -15,13 +16,6 @@ typedef HxmlFlag = {
 	};
 	var description:String;
 }
-
-typedef EnumValue = {
-	final name:String;
-	final ?description:String;
-}
-
-typedef EnumValues = Array<EnumValue>;
 
 enum ArgumentKind {
 	Enum(values:EnumValues);
@@ -41,7 +35,7 @@ enum Category {
 }
 
 final HxmlFlags = {
-	final flags:Map<Category, ReadOnlyArray<HxmlFlag>> = [
+	final flags:Map<Category, ReadOnlyArray<Flag>> = [
 		Target => [
 			{
 				name: "--js",
