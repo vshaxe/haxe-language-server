@@ -18,7 +18,7 @@ function analyzeHxmlContext(line:String, pos:Position):HxmlContext {
 	}
 	return {
 		element: switch parts {
-			case []: Flag(null);
+			case []: Flag();
 			case [flag]: Flag(findFlag(flag));
 			case [flag, arg]:
 				final flag = findFlag(flag);
@@ -30,7 +30,7 @@ function analyzeHxmlContext(line:String, pos:Position):HxmlContext {
 							return Defines.find(d -> d.define == define);
 						}
 						switch arg.split("=") {
-							case []: Define(null);
+							case []: Define();
 							case [define]: Define(findDefine(define));
 							case [define, value]: DefineValue(findDefine(define), value);
 							case _: Unknown;
