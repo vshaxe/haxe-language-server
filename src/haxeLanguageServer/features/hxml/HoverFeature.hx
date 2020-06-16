@@ -16,7 +16,7 @@ class HoverFeature {
 
 	public function onHover(params:TextDocumentPositionParams, token:CancellationToken, resolve:Null<Hover>->Void, reject:ResponseError<NoData>->Void) {
 		final uri = params.textDocument.uri;
-		final doc = context.documents.getHxml(params.textDocument.uri);
+		final doc = context.documents.getHxml(uri);
 		if (doc == null) {
 			return reject.noFittingDocument(uri);
 		}

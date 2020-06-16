@@ -19,12 +19,13 @@ class ExtractTypeFeature {
 	}
 
 	function extractType(params:CodeActionParams):Array<CodeAction> {
-		var doc = context.documents.getHaxe(params.textDocument.uri);
+		final uri = params.textDocument.uri;
+		var doc = context.documents.getHaxe(uri);
 		if (doc == null || doc.tokens == null || doc.tokens.tree == null) {
 			return [];
 		}
 		try {
-			var fsPath:FsPath = params.textDocument.uri.toFsPath();
+			var fsPath:FsPath = uri.toFsPath();
 			var path = new Path(fsPath.toString());
 
 			var types:Array<TokenTree> = doc.tokens.tree.filterCallback(function(token:TokenTree, index:Int):FilterResult {
@@ -74,7 +75,7 @@ class ExtractTypeFeature {
 				}
 
 				// remove code from current file
-				var removeOld:TextDocumentEdit = WorkspaceEditHelper.textDocumentEdit(params.textDocument.uri, [WorkspaceEditHelper.removeText(typeRange)]);
+				var removeOld:TextDocumentEdit = WorkspaceEditHelper.textDocumentEdit(uri, [WorkspaceEditHelper.removeText(typeRange)]);
 
 				// create new file
 				var newUri:DocumentUri = new FsPath(newFileName).toUri();

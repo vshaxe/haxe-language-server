@@ -446,7 +446,7 @@ class DiagnosticsFeature {
 		var uri = params.textDocument.uri;
 		var doc = context.documents.getHaxe(uri);
 		if (doc == null) {
-			return null;
+			return [];
 		}
 		var map = diagnosticsArguments[uri];
 		var removeUnusedFixes = if (map == null) [] else [

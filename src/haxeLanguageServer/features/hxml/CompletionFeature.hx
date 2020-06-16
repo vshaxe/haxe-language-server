@@ -4,7 +4,6 @@ import haxeLanguageServer.features.hxml.Defines;
 import haxeLanguageServer.features.hxml.HxmlContextAnalyzer;
 import haxeLanguageServer.features.hxml.HxmlFlags;
 import haxeLanguageServer.helper.VscodeCommands;
-import haxeLanguageServer.protocol.DisplayPrinter;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
@@ -20,7 +19,7 @@ class CompletionFeature {
 
 	public function onCompletion(params:CompletionParams, token:CancellationToken, resolve:CompletionList->Void, reject:ResponseError<NoData>->Void) {
 		final uri = params.textDocument.uri;
-		final doc = context.documents.getHxml(params.textDocument.uri);
+		final doc = context.documents.getHxml(uri);
 		if (doc == null) {
 			return reject.noFittingDocument(uri);
 		}
