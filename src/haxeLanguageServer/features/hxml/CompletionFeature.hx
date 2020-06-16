@@ -22,16 +22,17 @@ class CompletionFeature {
 		final uri = params.textDocument.uri;
 		final doc = context.documents.getHxml(params.textDocument.uri);
 		if (doc == null) {
-			reject.noFittingDocument(uri);
+			return reject.noFittingDocument(uri);
 		}
 		final pos = params.position;
 		final line = doc.lineAt(pos.line);
 		final textBefore = line.substr(0, pos.character);
+		final textAfter = line.substr(pos.character);
 		final hxmlContext = analyzeHxmlContext(textBefore, pos);
 		resolve({
 			isIncomplete: false,
 			items: switch hxmlContext.element {
-				case Flag(_): createFlagCompletion(hxmlContext.range);
+				case Flag(_): createFlagCompletion(hxmlContext.range, textAfter);
 				case EnumValue(_, values):
 					[
 						for (name => value in values)
@@ -53,7 +54,7 @@ class CompletionFeature {
 		});
 	}
 
-	function createFlagCompletion(range:Range):Array<CompletionItem> {
+	function createFlagCompletion(range:Range, textAfter:String):Array<CompletionItem> {
 		final items = [];
 		function addFlag(flag:HxmlFlag, name:String) {
 			final item:CompletionItem = {
@@ -73,7 +74,10 @@ class CompletionFeature {
 			final arg = flag.argument;
 			if (arg != null) {
 				item.label += " " + arg.name;
-				item.textEdit.newText += " ";
+				trace(textAfter.charAt(0));
+				if (textAfter.charAt(0) != " ") {
+					item.textEdit.newText += " ";
+				}
 				if (arg.insertion != null) {
 					var insertion = arg.insertion;
 					if (!insertion.contains("$")) {
