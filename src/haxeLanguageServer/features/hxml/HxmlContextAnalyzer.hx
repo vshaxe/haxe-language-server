@@ -5,14 +5,22 @@ import haxeLanguageServer.features.hxml.HxmlFlags;
 
 using Lambda;
 
+typedef HxmlContext = {
+	final element:HxmlElement;
+	final range:Range;
+}
+
+enum HxmlElement {
+	Flag(?flag:HxmlFlag);
+	EnumValue(?value:EnumValue, values:EnumValues);
+	Define(?define:Define);
+	DefineValue(?define:Define, value:String);
+	Unknown;
+}
+
 function analyzeHxmlContext(line:String, pos:Position):HxmlContext {
-	final textBefore = line.substring(0, pos.character);
-	final wordPattern = ~/[-\w]+$/;
-	final range = {start: pos, end: pos};
-	if (wordPattern.match(textBefore)) {
-		range.start = pos.translate(0, -wordPattern.matched(0).length);
-	}
-	final parts = ~/\s+/.replace(textBefore.ltrim(), " ").split(" ");
+	final range = findWordRange(line, pos.character);
+	final parts = ~/\s+/.replace(line.ltrim(), " ").split(" ");
 	function findFlag(word) {
 		return HxmlFlags.flatten().find(f -> f.name == word || f.shortName == word || f.deprecatedNames!.contains(word));
 	}
@@ -39,19 +47,33 @@ function analyzeHxmlContext(line:String, pos:Position):HxmlContext {
 			case _:
 				Unknown; // no completion after the first argument
 		},
-		range: range
+		range: {
+			start: {line: pos.line, character: range.start},
+			end: {line: pos.line, character: range.end}
+		}
 	};
 }
 
-typedef HxmlContext = {
-	final element:HxmlElement;
-	final range:Range;
-}
-
-enum HxmlElement {
-	Flag(?flag:HxmlFlag);
-	EnumValue(?value:EnumValue, values:EnumValues);
-	Define(?define:Define);
-	DefineValue(?define:Define, value:String);
-	Unknown;
+private function findWordRange(s:String, index:Int) {
+	var start = 0;
+	var end = s.length - 1;
+	var inWord = false;
+	for (i in 0...s.length) {
+		final c = s.charAt(i);
+		if (c.isSpace(0)) {
+			if (inWord) {
+				inWord = false;
+				end = i - 1;
+				if (start <= index && end >= index) {
+					break;
+				}
+			}
+		} else {
+			if (!inWord) {
+				inWord = true;
+				start = i;
+			}
+		}
+	}
+	return {start: start, end: end};
 }

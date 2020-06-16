@@ -26,7 +26,8 @@ class CompletionFeature {
 		}
 		final pos = params.position;
 		final line = doc.lineAt(pos.line);
-		final hxmlContext = analyzeHxmlContext(line, pos);
+		final textBefore = line.substr(0, pos.character);
+		final hxmlContext = analyzeHxmlContext(textBefore, pos);
 		resolve({
 			isIncomplete: false,
 			items: switch hxmlContext.element {
