@@ -1,4 +1,4 @@
-package haxeLanguageServer.helper;
+package haxeLanguageServer.extensions;
 
 class PositionStatics {
 	public static function Min(pos1:Position, pos2:Position) {

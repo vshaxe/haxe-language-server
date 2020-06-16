@@ -1,4 +1,4 @@
-package haxeLanguageServer.helper;
+package haxeLanguageServer.extensions;
 
 inline function occurrences(s:String, of:String) {
 	return s.length - s.replace(of, "").length;

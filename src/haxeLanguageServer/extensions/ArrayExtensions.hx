@@ -1,4 +1,4 @@
-package haxeLanguageServer.helper;
+package haxeLanguageServer.extensions;
 
 function occurrences<T>(a:Array<T>, element:T):Int {
 	var occurrences = 0;

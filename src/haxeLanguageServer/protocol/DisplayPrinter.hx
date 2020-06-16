@@ -173,7 +173,7 @@ class DisplayPrinter {
 		if (signature.ret.kind == TMono) {
 			return "";
 		}
-		return if (functionFormatting.printReturn(signature)) {
+		return if (functionFormatting.shouldPrintReturn(signature)) {
 			":" + printTypeRec(signature.ret);
 		} else {
 			"";
@@ -484,7 +484,7 @@ class DisplayPrinter {
 	}
 
 	public function printSwitchOnEnumAbstract(subject:String, a:JsonAbstract, nullable:Bool, snippets:Bool, parentheses:Bool) {
-		var fields = a.impl.statics.filter(Helper.isEnumAbstractField).map(field -> field.name);
+		var fields = a.impl.statics.filter(f -> f.isEnumAbstractField()).map(field -> field.name);
 		return printSwitch(subject, fields, nullable, snippets, parentheses);
 	}
 

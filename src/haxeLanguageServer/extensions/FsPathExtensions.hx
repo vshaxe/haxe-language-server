@@ -1,4 +1,4 @@
-package haxeLanguageServer.helper;
+package haxeLanguageServer.extensions;
 
 private final upperCaseDriveRe = ~/^(\/)?([A-Z]:)/;
 

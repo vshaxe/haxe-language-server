@@ -4,9 +4,9 @@ import haxe.display.JsonModuleTypes.ImportStatus;
 
 using Lambda;
 
-class HelperTest extends Test {
+class ExtensionsTest extends Test {
 	function testResolveImports() {
-		var imports = Helper.resolveImports({
+		var imports = Extensions.resolveImports({
 			kind: TInst,
 			args: {
 				path: {

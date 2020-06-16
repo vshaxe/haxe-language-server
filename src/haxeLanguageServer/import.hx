@@ -5,15 +5,15 @@ import languageServerProtocol.Types;
 import languageServerProtocol.protocol.Protocol;
 
 using StringTools;
-using haxeLanguageServer.helper.ArrayHelper;
-using haxeLanguageServer.helper.DocumentUriHelper;
-using haxeLanguageServer.helper.FsPathHelper;
-using haxeLanguageServer.helper.FunctionFormattingConfigHelper;
-using haxeLanguageServer.helper.PositionHelper;
-using haxeLanguageServer.helper.RangeHelper;
-using haxeLanguageServer.helper.ResponseErrorHelper;
-using haxeLanguageServer.helper.StringHelper;
-using haxeLanguageServer.protocol.Helper;
+using haxeLanguageServer.extensions.ArrayExtensions;
+using haxeLanguageServer.extensions.DocumentUriExtensions;
+using haxeLanguageServer.extensions.FsPathExtensions;
+using haxeLanguageServer.extensions.FunctionFormattingConfigExtensions;
+using haxeLanguageServer.extensions.PositionExtensions;
+using haxeLanguageServer.extensions.RangeExtensions;
+using haxeLanguageServer.extensions.ResponseErrorExtensions;
+using haxeLanguageServer.extensions.StringExtensions;
+using haxeLanguageServer.protocol.Extensions;
 
 #if !macro
 import haxeLanguageServer.helper.DisplayOffsetConverter;

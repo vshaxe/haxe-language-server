@@ -18,7 +18,7 @@ class TestMain {
 			new RangeHelperTest(),
 			new TypeHelperTest(),
 			new RenameResolverTest(), 
-			new HelperTest(),
+			new ExtensionsTest(),
 			new ExtractConstantFeatureTest(),
 			new OrganizeImportsFeatureTest(),
 			new SemVerTest()

@@ -1,4 +1,4 @@
-package haxeLanguageServer.helper;
+package haxeLanguageServer.extensions;
 
 /**
  * Extends `languageServerProtocol.Types.Range` with the

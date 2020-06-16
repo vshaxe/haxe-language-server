@@ -1,12 +1,13 @@
+import haxe.display.FsPath;
 import languageServerProtocol.Types;
 import languageServerProtocol.protocol.Protocol;
-import haxe.display.FsPath;
 import utest.Assert;
 import utest.Test;
 
 using StringTools;
-using haxeLanguageServer.helper.RangeHelper;
-using haxeLanguageServer.helper.PositionHelper;
-using haxeLanguageServer.helper.ArrayHelper;
-using haxeLanguageServer.helper.DocumentUriHelper;
-using haxeLanguageServer.helper.FsPathHelper;
+using haxeLanguageServer.extensions.ArrayExtensions;
+using haxeLanguageServer.extensions.DocumentUriExtensions;
+using haxeLanguageServer.extensions.FsPathExtensions;
+using haxeLanguageServer.extensions.PositionExtensions;
+using haxeLanguageServer.extensions.RangeExtensions;
+using haxeLanguageServer.extensions.StringExtensions;

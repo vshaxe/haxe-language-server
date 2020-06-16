@@ -46,7 +46,7 @@ function createFunctionImportsEdit<T>(doc:TextDocument, result:ImportPosition, c
 	if (formatting.argumentTypeHints && (!formatting.useArrowSyntax || signature.args.length != 1)) {
 		paths = paths.concat(signature.args.map(arg -> arg.t.resolveImports()).flatten().array());
 	}
-	if (formatting.printReturn(signature)) {
+	if (formatting.shouldPrintReturn(signature)) {
 		paths = paths.concat(signature.ret.resolveImports());
 	}
 	paths = paths.filterDuplicates((e1, e2) -> Json.stringify(e1) == Json.stringify(e2));

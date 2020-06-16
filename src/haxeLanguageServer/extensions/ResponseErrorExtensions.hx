@@ -1,4 +1,4 @@
-package haxeLanguageServer.helper;
+package haxeLanguageServer.extensions;
 
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
