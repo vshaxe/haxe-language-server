@@ -133,9 +133,9 @@ class DiagnosticsFeature {
 		argumentsMap.set({code: CompilerError, range: diag.range}, error);
 	}
 
-	function processDiagnosticsReply(uri:Null<DocumentUri>, onResolve:(result:Dynamic, ?debugInfo:String) -> Void, r:DisplayResult) {
+	function processDiagnosticsReply(uri:Null<DocumentUri>, onResolve:(result:Dynamic, ?debugInfo:String) -> Void, result:DisplayResult) {
 		clearDiagnostics(errorUri);
-		switch (r) {
+		switch result {
 			case DResult(s):
 				var data:Array<HaxeDiagnosticResponse<Any>> = try {
 					haxe.Json.parse(s);
@@ -284,7 +284,7 @@ class DiagnosticsFeature {
 			});
 		}
 		actions = getOrganizeImportActions(params, actions).concat(actions);
-		actions = actions.filterDuplicates((a1, a2) -> Json.stringify(a1) == Json.stringify(a2));
+		actions = actions.filterDuplicates((a1, a2) -> a1.title == a2.title);
 		return actions;
 	}
 
@@ -342,15 +342,11 @@ class DiagnosticsFeature {
 		}
 
 		final preferred = makeImportAction(preferredStyle);
+		final secondary = makeImportAction(secondaryStyle);
 		if (importCount == 1) {
 			preferred.isPreferred = true;
 		}
-		final actions = [preferred];
-
-		final secondary = makeImportAction(secondaryStyle);
-		if (preferred.title != secondary.title) {
-			actions.push(secondary);
-		}
+		final actions = [preferred, secondary];
 
 		actions.push({
 			title: "Change to " + arg.name,
