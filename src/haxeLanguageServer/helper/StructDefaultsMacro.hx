@@ -46,8 +46,8 @@ class StructDefaultsMacro {
 
 			// recurse
 			switch field.type {
-				case TType(_, params) | TAbstract(_, params) if (params.length > 0):
-					final innerFields = getStructFields(params[0]);
+				case TType(_, _):
+					final innerFields = getStructFields(field.type);
 					if (innerFields != null)
 						assignments = assignments.concat(generateAssignments(innerFields, macro {$struct.$name;}, macro {$defaults.$name;}));
 				case _:

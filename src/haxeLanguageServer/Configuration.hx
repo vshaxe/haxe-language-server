@@ -98,6 +98,24 @@ enum ConfigurationKind {
 }
 
 class Configuration {
+	static final DefaultInitOptions:InitOptions = {
+		displayServerConfig: {
+			path: "haxe",
+			env: new DynamicAccess(),
+			arguments: [],
+			print: {
+				completion: false,
+				reusing: false
+			},
+			useSocket: true
+		},
+		displayArguments: [],
+		haxelibConfig: {
+			executable: "haxelib"
+		},
+		sendMethodResults: false
+	};
+
 	static final DefaultUserSettings:UserConfig = {
 		enableCodeLens: false,
 		enableDiagnostics: true,
@@ -164,24 +182,7 @@ class Configuration {
 
 	public function onInitialize(params:InitializeParams) {
 		var options:Null<InitOptions> = params.initializationOptions;
-		var defaults:InitOptions = {
-			displayServerConfig: {
-				path: "haxe",
-				env: new DynamicAccess(),
-				arguments: [],
-				print: {
-					completion: false,
-					reusing: false
-				},
-				useSocket: true
-			},
-			displayArguments: [],
-			haxelibConfig: {
-				executable: "haxelib"
-			},
-			sendMethodResults: false
-		};
-		StructDefaultsMacro.applyDefaults(options, defaults);
+		StructDefaultsMacro.applyDefaults(options, DefaultInitOptions);
 		displayServer = options.displayServerConfig;
 		displayArguments = options.displayArguments;
 		haxelib = options.haxelibConfig;
