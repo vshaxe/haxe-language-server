@@ -98,6 +98,53 @@ enum ConfigurationKind {
 }
 
 class Configuration {
+	static final DefaultUserSettings:UserConfig = {
+		enableCodeLens: false,
+		enableDiagnostics: true,
+		enableServerView: false,
+		enableSignatureHelpDocumentation: true,
+		diagnosticsPathFilter: "${workspaceRoot}",
+		displayPort: null,
+		buildCompletionCache: true,
+		enableCompletionCacheWarning: true,
+		useLegacyCompletion: false,
+		codeGeneration: {
+			functions: {
+				anonymous: {
+					argumentTypeHints: false,
+					returnTypeHint: Never,
+					useArrowSyntax: true,
+					placeOpenBraceOnNewLine: false,
+					explicitPublic: false,
+					explicitPrivate: false,
+					explicitNull: false
+				},
+				field: {
+					argumentTypeHints: true,
+					returnTypeHint: NonVoid,
+					useArrowSyntax: false,
+					placeOpenBraceOnNewLine: false,
+					explicitPublic: false,
+					explicitPrivate: false,
+					explicitNull: false,
+				}
+			},
+			imports: {
+				style: Type,
+				enableAutoImports: true
+			},
+			switch_: {
+				parentheses: false
+			}
+		},
+		exclude: ["zpp_nape"],
+		postfixCompletion: {
+			level: Full
+		},
+		importsSortOrder: AllAlphabetical,
+		maxCompletionItems: 1000
+	};
+
 	final onDidChange:(kind:ConfigurationKind) -> Void;
 	var unmodifiedUserConfig:Null<UserConfig>;
 
@@ -176,53 +223,7 @@ class Configuration {
 			Reflect.deleteField(newConfig.codeGeneration, "switch");
 		}
 
-		var defaults:UserConfig = {
-			enableCodeLens: false,
-			enableDiagnostics: true,
-			enableServerView: false,
-			enableSignatureHelpDocumentation: true,
-			diagnosticsPathFilter: "${workspaceRoot}",
-			displayPort: null,
-			buildCompletionCache: true,
-			enableCompletionCacheWarning: true,
-			useLegacyCompletion: false,
-			codeGeneration: {
-				functions: {
-					anonymous: {
-						argumentTypeHints: false,
-						returnTypeHint: Never,
-						useArrowSyntax: true,
-						placeOpenBraceOnNewLine: false,
-						explicitPublic: false,
-						explicitPrivate: false,
-						explicitNull: false
-					},
-					field: {
-						argumentTypeHints: true,
-						returnTypeHint: NonVoid,
-						useArrowSyntax: false,
-						placeOpenBraceOnNewLine: false,
-						explicitPublic: false,
-						explicitPrivate: false,
-						explicitNull: false,
-					}
-				},
-				imports: {
-					style: Type,
-					enableAutoImports: true
-				},
-				switch_: {
-					parentheses: false
-				}
-			},
-			exclude: ["zpp_nape"],
-			postfixCompletion: {
-				level: Full
-			},
-			importsSortOrder: AllAlphabetical,
-			maxCompletionItems: 1000
-		};
-		StructDefaultsMacro.applyDefaults(user, defaults);
+		StructDefaultsMacro.applyDefaults(user, DefaultUserSettings);
 	}
 
 	function onDidChangeDisplayArguments(params:{arguments:Array<String>}) {

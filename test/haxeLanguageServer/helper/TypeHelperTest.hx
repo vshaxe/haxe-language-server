@@ -59,15 +59,27 @@ class TypeHelperTest extends Test {
 		assert("(a:String, b:Bool) ->", "String -> Bool -> Void", true);
 	}
 
-	function assertPrintedEquals(parser:String->DisplayType, expected:String, functionType:String, formatting:FunctionFormattingConfig) {
+	function assertPrintedEquals(parser:String->DisplayType, expected:String, functionType:String, formatting) {
 		final parsed = parseFunctionArgumentType(functionType);
 		switch parsed {
 			case DisplayType.DTFunction(args, ret):
-				final decl = printFunctionDeclaration(args, ret, formatting);
+				final decl = printFunctionDeclaration(args, ret, makeConfig(formatting));
 				Assert.equals(expected, decl);
 			case _:
 				Assert.fail();
 		}
+	}
+
+	function makeConfig(config):FunctionFormattingConfig {
+		return {
+			argumentTypeHints: config.argumentTypeHints,
+			returnTypeHint: config.returnTypeHint,
+			useArrowSyntax: config.useArrowSyntax,
+			placeOpenBraceOnNewLine: false,
+			explicitPublic: false,
+			explicitPrivate: false,
+			explicitNull: false
+		};
 	}
 
 	function testGetModule() {

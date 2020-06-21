@@ -401,10 +401,9 @@ class HaxeServer {
 
 		// add to the queue
 		if (requestsHead == null) {
-			requestsHead = request;
-			requestsTail = request;
-			requestsTail.next = request;
+			requestsHead = requestsTail = request; 
 		} else {
+			requestsTail.next = request;
 			request.prev = requestsTail;
 			requestsTail = request;
 		}
