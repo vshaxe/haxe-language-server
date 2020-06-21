@@ -99,18 +99,22 @@ class CompletionFeature {
 	}
 
 	function createDefineCompletion():Array<CompletionItem> {
+		final haxeVersion = context.haxeServer.haxeVersion;
 		return Defines.map(define -> {
 			final item:CompletionItem = {
 				label: define.getRealName(),
 				kind: Constant,
 				documentation: {
 					kind: MarkDown,
-					value: define.printDetails()
+					value: define.printDetails(haxeVersion)
 				}
 			}
 			if (define.hasParams()) {
 				item.insertText = item.label + "=";
 				item.command = TriggerSuggest;
+			}
+			if (!define.isAvailable(haxeVersion)) {
+				item.tags = [Deprecated];
 			}
 			return item;
 		});

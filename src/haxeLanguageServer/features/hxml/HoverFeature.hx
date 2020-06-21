@@ -42,7 +42,10 @@ class HoverFeature {
 			case EnumValue(value, _) if (value != null):
 				makeHover([printCodeBlock(value.name, Hxml), value.description]);
 			case Define(define) if (define != null):
-				makeHover([printCodeBlock(define.getRealName(), Hxml), define.printDetails()]);
+				makeHover([
+					printCodeBlock(define.getRealName(), Hxml),
+					define.printDetails(context.haxeServer.haxeVersion)
+				]);
 			case DefineValue(define, value): null;
 			case _: null;
 		});

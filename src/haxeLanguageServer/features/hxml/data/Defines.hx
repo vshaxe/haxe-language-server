@@ -1,10 +1,11 @@
 package haxeLanguageServer.features.hxml.data;
 
+import haxeLanguageServer.helper.SemVer;
 import haxeLanguageServer.protocol.DisplayPrinter;
 
 abstract Define(DefineData) from DefineData {
-	public function printDetails():String {
-		return new DisplayPrinter().printMetadataDetails({
+	public function printDetails(haxeVersion:SemVer):String {
+		var details = new DisplayPrinter().printMetadataDetails({
 			name: getRealName(),
 			doc: this.doc,
 			links: cast this.links,
@@ -13,6 +14,20 @@ abstract Define(DefineData) from DefineData {
 			targets: [],
 			internal: false
 		});
+		final info = DefineVersions[this.name];
+		final since = info!.since;
+		final until = info!.until;
+		function youAreUsing() {
+			return if (isAvailable(haxeVersion)) '' else ' (you are using $haxeVersion)';
+		}
+		if (since != null && until != null) {
+			details += '\n_Available from Haxe ${since} to ${until}${youAreUsing()}_';
+		} else if (since != null) {
+			details += '\n_Available since Haxe ${since}${youAreUsing()}_';
+		} else if (until != null) {
+			details += '\n_Available until Haxe ${until}${youAreUsing()}_';
+		}
+		return details;
 	}
 
 	static function normalizeName(name:String) {
@@ -30,6 +45,20 @@ abstract Define(DefineData) from DefineData {
 	public function hasParams():Bool {
 		return this.params != null;
 	}
+
+	public function isAvailable(haxeVersion:SemVer):Bool {
+		final info = DefineVersions[this.name];
+		if (info == null) {
+			return true;
+		}
+		if (info.since != null && info.since > haxeVersion) {
+			return false;
+		}
+		if (info.until != null && haxeVersion > info.until) {
+			return false;
+		}
+		return true;
+	}
 }
 
 private typedef DefineData = {
@@ -42,7 +71,15 @@ private typedef DefineData = {
 	final ?links:ReadOnlyArray<String>;
 }
 
+typedef VersionInfo = {
+	final ?since:SemVer;
+	final ?until:SemVer;
+}
+
+private final DefineVersions:Map<String, Null<VersionInfo>> = ["JarLegacyLoader" => {since: new SemVer(4, 2, 0)}];
+
 // from https://github.com/HaxeFoundation/haxe/blob/development/src-json/define.json
+
 final Defines:ReadOnlyArray<Define> = [
 	{
 		"name": "AbsolutePath",
@@ -324,6 +361,12 @@ final Defines:ReadOnlyArray<Define> = [
 		"name": "Interp",
 		"define": "interp",
 		"doc": "The code is compiled to be run with `--interp`."
+	},
+	{
+		"name": "JarLegacyLoader",
+		"define": "jar-legacy-loader",
+		"doc": "Use the legacy loader to load .jar files on the JVM target.",
+		"platforms": ["java"]
 	},
 	{
 		"name": "JavaVer",
