@@ -83,11 +83,8 @@ function isEnumAbstractField(field:JsonClassField) {
 	};
 }
 
-function isVoid<T>(type:JsonType<T>) {
-	return switch type.kind {
-		case TAbstract if (type.args.path.typeName == "Void"): true;
-		case _: false;
-	}
+inline function isVoid<T>(type:JsonType<T>) {
+	return type.getDotPath() == Void;
 }
 
 function isModuleLevel<T>(origin:Null<ClassFieldOrigin<T>>) {
@@ -136,7 +133,7 @@ function removeNulls<T>(type:JsonType<T>, nullable:Bool = false):{type:JsonType<
 	switch type.kind {
 		case TAbstract:
 			final path:JsonTypePathWithParams = type.args;
-			if (path.path.pack.length == 0 && path.path.typeName == "Null") {
+			if (type.getDotPath() == Null) {
 				if (path.params != null && path.params[0] != null) {
 					return removeNulls(path.params[0], true);
 				}
@@ -164,8 +161,7 @@ function guessName<T>(type:JsonType<T>):String {
 
 function hasMandatoryTypeParameters(type:DisplayModuleType):Bool {
 	// Dynamic is a special case regarding this in the compiler
-	final path = type.path;
-	if (path.typeName == "Dynamic" && path.pack.length == 0) {
+	if (type.path.getDotPath2() == Dynamic) {
 		return false;
 	}
 	return type.params != null && type.params.length > 0;
