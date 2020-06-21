@@ -76,7 +76,35 @@ typedef VersionInfo = {
 	final ?until:SemVer;
 }
 
-private final DefineVersions:Map<String, Null<VersionInfo>> = ["JarLegacyLoader" => {since: new SemVer(4, 2, 0)}];
+private final DefineVersions:Map<String, Null<VersionInfo>> = {
+	final v4_0_0_rc3 = new SemVer(4, 0, 0, "rc.3");
+	final v4_0_0_rc4 = new SemVer(4, 0, 0, "rc.4");
+	final v4_1_0 = new SemVer(4, 1, 0);
+	final v4_2_0 = new SemVer(4, 2, 0);
+	[
+		"CsVer" => {
+			since: v4_0_0_rc3
+		},
+		"NetcoreVer" => {
+			since: v4_0_0_rc3
+		},
+		"DumpPath" => {
+			since: v4_0_0_rc4
+		},
+		"KeepInlinePositions" => {
+			since: v4_0_0_rc4
+		},
+		"StdEncodingUtf8" => {
+			since: v4_1_0
+		},
+		"NoTre" => {
+			since: v4_1_0
+		},
+		"JarLegacyLoader" => {
+			since: v4_2_0
+		}
+	];
+}
 
 // from https://github.com/HaxeFoundation/haxe/blob/development/src-json/define.json
 
