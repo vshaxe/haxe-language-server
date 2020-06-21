@@ -2,18 +2,9 @@ package haxeLanguageServer;
 
 import haxe.Json;
 import haxe.DynamicAccess;
-import haxe.display.Server.ConfigurePrintParams;
 import haxe.extern.EitherType;
 import haxeLanguageServer.helper.StructDefaultsMacro;
 import jsonrpc.Protocol;
-
-typedef DisplayServerConfig = {
-	var ?path:String;
-	var ?env:DynamicAccess<String>;
-	var ?arguments:Array<String>;
-	var ?print:ConfigurePrintParams;
-	var ?useSocket:Bool;
-}
 
 typedef HaxelibConfig = {
 	var ?executable:String;

@@ -18,7 +18,8 @@
 					"safety"
 				],
 				"classPaths": [
-					"src"
+					"src",
+					"shared"
 				],
 				"defines": [
 					"JSTACK_FORMAT=vscode",
@@ -53,6 +54,7 @@
 				],
 				"classPaths": [
 					"src",
+					"shared",
 					"test"
 				],
 				"output": {
