@@ -1,11 +1,9 @@
 package haxeLanguageServer.extensions;
 
-function occurrences<T>(a:Array<T>, element:T):Int {
-	var occurrences = 0;
-	for (e in a)
-		if (e == element)
-			occurrences++;
-	return occurrences;
+using Lambda;
+
+inline function occurrences<T>(a:Array<T>, element:T):Int {
+	return a.count(e -> e == element);
 }
 
 function equals<T>(a1:Array<T>, a2:Array<T>):Bool {
