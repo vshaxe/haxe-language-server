@@ -7,6 +7,7 @@ import haxeLanguageServer.helper.DocHelper;
 import haxeLanguageServer.helper.SnippetHelper;
 import haxeLanguageServer.helper.VscodeCommands;
 import haxeLanguageServer.protocol.DisplayPrinter;
+import haxeLanguageServer.protocol.DotPath;
 import languageServerProtocol.Types.CompletionItem;
 
 using Lambda;
@@ -71,7 +72,7 @@ class PostfixCompletion {
 		}
 		if (subject.keyValueIterator != null) {
 			var key = "key";
-			if (subject.keyValueIterator.key.getDotPath() == "StdTypes.Int") {
+			if (subject.keyValueIterator.key.getDotPath() == Int) {
 				key = "index";
 			}
 			add({
@@ -84,7 +85,7 @@ class PostfixCompletion {
 
 		var dotPath = type.getDotPath();
 		switch dotPath {
-			case "StdTypes.Bool":
+			case Bool:
 				add({
 					label: "not",
 					detail: "!expr",
@@ -103,17 +104,21 @@ class PostfixCompletion {
 					insertText: 'if (!$expr) $block',
 					insertTextFormat: Snippet
 				});
-			case "StdTypes.Int":
+
+			case Int:
 				for (item in createIndexedLoops(expr)) {
 					add(item);
 				}
-			case "StdTypes.Float":
+
+			case Float:
 				add({
 					label: "int",
 					detail: "Std.int(expr)",
 					insertText: 'Std.int($expr)',
 					insertTextFormat: PlainText
 				});
+
+			case _:
 		}
 
 		if (level != Filtered) {
@@ -131,8 +136,8 @@ class PostfixCompletion {
 		return result;
 	}
 
-	function createNonFilteredItems(dotPath:String, expr:String, add:PostfixCompletionItem->Void) {
-		if (dotPath != "String") {
+	function createNonFilteredItems(dotPath:DotPath, expr:String, add:PostfixCompletionItem->Void) {
+		if (dotPath != String) {
 			add({
 				label: "string",
 				detail: "Std.string(expr)",
@@ -247,8 +252,9 @@ class PostfixCompletion {
 							type;
 					}
 					switch type.getDotPath() {
-						case "StdTypes.Int" | "UInt":
+						case Int | UInt:
 							result = result.concat(createIndexedLoops('$expr.$field'));
+						case _:
 					}
 				case _:
 			}

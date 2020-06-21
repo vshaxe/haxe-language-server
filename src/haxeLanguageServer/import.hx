@@ -13,6 +13,7 @@ using haxeLanguageServer.extensions.PositionExtensions;
 using haxeLanguageServer.extensions.RangeExtensions;
 using haxeLanguageServer.extensions.ResponseErrorExtensions;
 using haxeLanguageServer.extensions.StringExtensions;
+using haxeLanguageServer.protocol.DotPath;
 using haxeLanguageServer.protocol.Extensions;
 
 #if !macro

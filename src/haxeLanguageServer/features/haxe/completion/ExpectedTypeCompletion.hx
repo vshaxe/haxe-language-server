@@ -54,7 +54,7 @@ class ExpectedTypeCompletion {
 					return createItemsForType(type.params[i], data)[0];
 				}
 				switch concreteType.getDotPath() {
-					case "Array" | "haxe.ds.ReadOnlyArray":
+					case Array | ReadOnlyArray:
 						final nested = getNested(0);
 						final item:ExpectedTypeCompletionItem = {
 							label: "[]",
@@ -65,7 +65,7 @@ class ExpectedTypeCompletion {
 						item.code = SnippetHelper.prettify(item.insertText);
 						items.push(item);
 
-					case "haxe.ds.Map":
+					case Map:
 						final nested = getNested(1);
 						final item:ExpectedTypeCompletionItem = {
 							label: "[key => value]",
@@ -80,13 +80,15 @@ class ExpectedTypeCompletion {
 						item.code = SnippetHelper.prettify(item.insertText);
 						items.push(item);
 
-					case "EReg":
+					case EReg:
 						items.push({
 							label: "~/regex/",
 							detail: "Generate regex literal",
 							insertText: "~/${1:regex}/",
 							insertTextFormat: Snippet
 						});
+
+					case _:
 				}
 			case TAnonymous:
 				// TODO: support @:structInit

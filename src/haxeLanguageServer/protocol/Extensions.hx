@@ -59,7 +59,7 @@ function resolveImports<T>(type:JsonType<T>):Array<JsonTypePath> {
 function resolveTypes<T>(type:JsonType<T>):Array<JsonType<T>> {
 	switch type.kind {
 		case TAbstract:
-			if (type.getDotPath() == "haxe.extern.EitherType") {
+			if (type.getDotPath() == EitherType) {
 				return (type.args : JsonTypePathWithParams).params.map(resolveTypes).flatten().array();
 			}
 		case _:
@@ -161,14 +161,6 @@ function guessName<T>(type:JsonType<T>):String {
 		return "unknown";
 	}
 	return IdentifierHelper.guessName(path.path.typeName);
-}
-
-function getDotPath<T>(type:JsonType<T>):Null<String> {
-	var path = type.getTypePath();
-	if (path == null) {
-		return null;
-	}
-	return new DisplayPrinter(PathPrinting.Always).printPath(path.path);
 }
 
 function hasMandatoryTypeParameters(type:DisplayModuleType):Bool {

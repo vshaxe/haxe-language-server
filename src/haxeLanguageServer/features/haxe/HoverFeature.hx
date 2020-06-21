@@ -93,7 +93,7 @@ class HoverFeature {
 			case Literal:
 				var value = item.args.name;
 				var sourceText = doc.getText(hover.range);
-				if (value != sourceText && item.type.getDotPath() != "String") {
+				if (value != sourceText && item.type.getDotPath() != String) {
 					return {definition: printCodeBlock(value, Haxe)};
 				} else {
 					printType();
