@@ -1,7 +1,7 @@
 package haxeLanguageServer;
 
-import haxe.Json;
 import haxe.DynamicAccess;
+import haxe.Json;
 import haxe.extern.EitherType;
 import haxeLanguageServer.helper.StructDefaultsMacro;
 import jsonrpc.Protocol;
@@ -21,9 +21,9 @@ typedef FunctionFormattingConfig = {
 }
 
 enum abstract ReturnTypeHintOption(String) {
-	var Always = "always";
-	var Never = "never";
-	var NonVoid = "non-void";
+	final Always = "always";
+	final Never = "never";
+	final NonVoid = "non-void";
 }
 
 private typedef FunctionGenerationConfig = {
@@ -32,8 +32,8 @@ private typedef FunctionGenerationConfig = {
 }
 
 enum abstract ImportStyle(String) {
-	var Module = "module";
-	var Type = "type";
+	final Module = "module";
+	final Type = "type";
 }
 
 private typedef ImportGenerationConfig = {
@@ -56,15 +56,15 @@ private typedef PostfixCompletionConfig = {
 }
 
 private enum abstract PostfixCompletionLevel(String) {
-	var Full = "full";
-	var Filtered = "filtered";
-	var Off = "off";
+	final Full = "full";
+	final Filtered = "filtered";
+	final Off = "off";
 }
 
 enum abstract ImportsSortOrderConfig(String) {
-	var AllAlphabetical = "all-alphabetical";
-	var StdlibThenLibsThenProject = "stdlib -> libs -> project";
-	var NonProjectThenProject = "non-project -> project";
+	final AllAlphabetical = "all-alphabetical";
+	final StdlibThenLibsThenProject = "stdlib -> libs -> project";
+	final NonProjectThenProject = "non-project -> project";
 }
 
 typedef UserConfig = {
@@ -142,14 +142,14 @@ class Configuration {
 	}
 
 	function onDidChangeConfiguration(newConfig:DidChangeConfigurationParams) {
-		var initialized = user != null;
+		final initialized = user != null;
 		var newHaxeConfig = newConfig.settings.haxe;
 		if (newHaxeConfig == null) {
 			newHaxeConfig = {};
 		}
 
-		var newConfigJson = Json.stringify(newHaxeConfig);
-		var configUnchanged = Json.stringify(unmodifiedUserConfig) == newConfigJson;
+		final newConfigJson = Json.stringify(newHaxeConfig);
+		final configUnchanged = Json.stringify(unmodifiedUserConfig) == newConfigJson;
 		if (initialized && configUnchanged) {
 			return;
 		}

@@ -15,12 +15,12 @@ class FindReferencesFeature {
 	}
 
 	function onFindReferences(params:TextDocumentPositionParams, token:CancellationToken, resolve:Array<Location>->Void, reject:ResponseError<NoData>->Void) {
-		var uri = params.textDocument.uri;
-		var doc = context.documents.getHaxe(uri);
+		final uri = params.textDocument.uri;
+		final doc = context.documents.getHaxe(uri);
 		if (doc == null || !uri.isFile()) {
 			return reject.noFittingDocument(uri);
 		}
-		var handle = if (context.haxeServer.supports(DisplayMethods.FindReferences)) handleJsonRpc else handleLegacy;
+		final handle = if (context.haxeServer.supports(DisplayMethods.FindReferences)) handleJsonRpc else handleLegacy;
 		handle(params, token, resolve, reject, doc, doc.offsetAt(params.position));
 	}
 
@@ -44,25 +44,25 @@ class FindReferencesFeature {
 
 	function handleLegacy(params:TextDocumentPositionParams, token:CancellationToken, resolve:Definition->Void, reject:ResponseError<NoData>->Void,
 			doc:TextDocument, offset:Int) {
-		var bytePos = context.displayOffsetConverter.characterOffsetToByteOffset(doc.content, doc.offsetAt(params.position));
-		var args = ['${doc.uri.toFsPath()}@$bytePos@usage'];
+		final bytePos = context.displayOffsetConverter.characterOffsetToByteOffset(doc.content, doc.offsetAt(params.position));
+		final args = ['${doc.uri.toFsPath()}@$bytePos@usage'];
 		context.callDisplay("@usage", args, doc.content, token, function(r) {
 			switch r {
 				case DCancelled:
 					resolve(null);
 				case DResult(data):
-					var xml = try Xml.parse(data).firstElement() catch (_:Any) null;
+					final xml = try Xml.parse(data).firstElement() catch (_:Any) null;
 					if (xml == null)
 						return reject.invalidXml(data);
 
-					var positions = [for (el in xml.elements()) el.firstChild().nodeValue];
+					final positions = [for (el in xml.elements()) el.firstChild().nodeValue];
 					if (positions.length == 0)
 						return resolve([]);
 
-					var results = [];
-					var haxePosCache = new Map();
+					final results = [];
+					final haxePosCache = new Map();
 					for (pos in positions) {
-						var location = HaxePosition.parse(pos, doc, haxePosCache, context.displayOffsetConverter);
+						final location = HaxePosition.parse(pos, doc, haxePosCache, context.displayOffsetConverter);
 						if (location == null) {
 							trace("Got invalid position: " + pos);
 							continue;

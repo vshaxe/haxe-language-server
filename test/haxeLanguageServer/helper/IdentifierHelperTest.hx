@@ -68,8 +68,8 @@ class IdentifierHelperTest extends Test {
 		assertUnchanged("():{ a:Int, b:Bool }");
 
 		// hopefully this is never needed...
-		var letterOverflow = '(${[for (i in 0...30) ":Int"].join(", ")}):Void';
-		var fixedSignature = addNamesToSignatureType(letterOverflow);
+		final letterOverflow = '(${[for (_ in 0...30) ":Int"].join(", ")}):Void';
+		final fixedSignature = addNamesToSignatureType(letterOverflow);
 		Assert.isFalse(fixedSignature.contains("{:")); // { comes after z in ascii
 		Assert.equals(2, fixedSignature.split(" b:").length); // arg names must be unique
 	}

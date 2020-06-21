@@ -6,36 +6,36 @@ import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
 
 private enum abstract ModuleSymbolKind(Int) {
-	var Class = 1;
-	var Interface;
-	var Enum;
-	var TypeAlias;
-	var Abstract;
-	var Field;
-	var Property;
-	var Method;
-	var Constructor;
-	var Function;
-	var Variable;
-	var Struct;
-	var EnumAbstract;
-	var Operator;
-	var EnumMember;
-	var Constant;
-	var Module;
+	final Class = 1;
+	final Interface;
+	final Enum;
+	final TypeAlias;
+	final Abstract;
+	final Field;
+	final Property;
+	final Method;
+	final Constructor;
+	final Function;
+	final Variable;
+	final Struct;
+	final EnumAbstract;
+	final Operator;
+	final EnumMember;
+	final Constant;
+	final Module;
 }
 
 private typedef ModuleSymbolEntry = {
-	var name:String;
-	var kind:ModuleSymbolKind;
-	var range:Range;
-	var ?containerName:String;
-	var ?isDeprecated:Bool;
+	final name:String;
+	final kind:ModuleSymbolKind;
+	final range:Range;
+	final ?containerName:String;
+	final ?isDeprecated:Bool;
 }
 
 private typedef SymbolReply = {
-	var file:FsPath;
-	var symbols:Array<ModuleSymbolEntry>;
+	final file:FsPath;
+	final symbols:Array<ModuleSymbolEntry>;
 }
 
 class WorkspaceSymbolsFeature {
@@ -47,9 +47,9 @@ class WorkspaceSymbolsFeature {
 	}
 
 	function processSymbolsReply(data:Array<SymbolReply>, reject:ResponseError<NoData>->Void) {
-		var result = [];
+		final result = [];
 		for (file in data) {
-			var uri = HaxePosition.getProperFileNameCase(file.file).toUri();
+			final uri = HaxePosition.getProperFileNameCase(file.file).toUri();
 			for (symbol in file.symbols) {
 				if (symbol.range == null) {
 					context.sendShowMessage(Error, "Unknown location for " + haxe.Json.stringify(symbol));
@@ -63,19 +63,19 @@ class WorkspaceSymbolsFeature {
 
 	function makeRequest(label:String, args:Array<String>, doc:Null<TextDocument>, token:CancellationToken, resolve:Array<SymbolInformation>->Void,
 			reject:ResponseError<NoData>->Void) {
-		var onResolve = context.startTimer("@workspace-symbols");
+		final onResolve = context.startTimer("@workspace-symbols");
 		context.callDisplay(label, args, doc == null ? null : doc.content, token, function(r) {
 			switch r {
 				case DCancelled:
 					resolve(null);
 				case DResult(data):
-					var data:Array<SymbolReply> = try {
+					final data:Array<SymbolReply> = try {
 						haxe.Json.parse(data);
 					} catch (e) {
 						reject(ResponseError.internalError("Error parsing document symbol response: " + Std.string(e)));
 						return;
 					}
-					var result = processSymbolsReply(data, reject);
+					final result = processSymbolsReply(data, reject);
 					resolve(result);
 					onResolve(data, data.length + " symbols");
 			}
@@ -84,12 +84,12 @@ class WorkspaceSymbolsFeature {
 
 	function onWorkspaceSymbols(params:WorkspaceSymbolParams, token:CancellationToken, resolve:Array<SymbolInformation>->Void,
 			reject:ResponseError<NoData>->Void) {
-		var args = ["?@0@workspace-symbols@" + params.query];
+		final args = ["?@0@workspace-symbols@" + params.query];
 		makeRequest("@workspace-symbols", args, null, token, resolve, reject);
 	}
 
 	function moduleSymbolEntryToSymbolInformation(entry:ModuleSymbolEntry, uri:DocumentUri):SymbolInformation {
-		var result:SymbolInformation = {
+		final result:SymbolInformation = {
 			name: entry.name,
 			kind: switch entry.kind {
 				case Class | Abstract: SymbolKind.Class;

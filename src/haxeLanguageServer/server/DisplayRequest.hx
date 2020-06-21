@@ -32,18 +32,18 @@ class DisplayRequest {
 			args.push("display-stdin");
 		}
 
-		var lenBuf = Buffer.alloc(4);
-		var chunks = [lenBuf];
+		final lenBuf = Buffer.alloc(4);
+		final chunks = [lenBuf];
 		var length = 0;
 		for (arg in args) {
-			var buf = Buffer.from(arg + "\n");
+			final buf = Buffer.from(arg + "\n");
 			chunks.push(buf);
 			length += buf.length;
 		}
 
 		if (stdin != null) {
 			chunks.push(stdinSepBuf);
-			var buf = Buffer.from(stdin);
+			final buf = Buffer.from(stdin);
 			chunks.push(buf);
 			length += buf.length + stdinSepBuf.length;
 		}
@@ -73,7 +73,7 @@ class DisplayRequest {
 	}
 
 	function processResult(data:String, callback:DisplayResult->Void, errback:(error:String) -> Void) {
-		var buf = new StringBuf();
+		final buf = new StringBuf();
 		var hasError = false;
 		for (line in data.split("\n")) {
 			switch line.fastCodeAt(0) {
@@ -87,7 +87,7 @@ class DisplayRequest {
 			}
 		}
 
-		var data = buf.toString().trim();
+		final data = buf.toString().trim();
 
 		if (hasError)
 			return errback(data);

@@ -77,7 +77,7 @@ typedef VersionInfo = {
 	final ?until:SemVer;
 }
 
-private final DefineVersions:Map<String, Null<VersionInfo>> = {
+private final DefineVersions:Map<String, VersionInfo> = {
 	final v4_0_0_rc3 = new SemVer(4, 0, 0, "rc.3");
 	final v4_0_0_rc4 = new SemVer(4, 0, 0, "rc.4");
 	final v4_1_0 = new SemVer(4, 1, 0);

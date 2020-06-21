@@ -5,21 +5,21 @@ inline function occurrences(s:String, of:String) {
 }
 
 function untilLastDot(s:String) {
-	var dotIndex = s.lastIndexOf(".");
+	final dotIndex = s.lastIndexOf(".");
 	if (dotIndex == -1)
 		return s;
 	return s.substring(0, dotIndex);
 }
 
 function untilFirstDot(s:String) {
-	var dotIndex = s.indexOf(".");
+	final dotIndex = s.indexOf(".");
 	if (dotIndex == -1)
 		return s;
 	return s.substring(0, dotIndex);
 }
 
 function afterLastDot(s:String) {
-	var dotIndex = s.lastIndexOf(".");
+	final dotIndex = s.lastIndexOf(".");
 	if (dotIndex == -1)
 		return s;
 	return s.substr(dotIndex + 1);

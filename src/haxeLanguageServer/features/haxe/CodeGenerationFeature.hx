@@ -13,7 +13,7 @@ class CodeGenerationFeature {
 	}
 
 	function modernizeSyntax(params:CodeActionParams):Array<CodeAction> {
-		var doc = context.documents.getHaxe(params.textDocument.uri);
+		final doc = context.documents.getHaxe(params.textDocument.uri);
 		if (doc == null) {
 			return [];
 		}

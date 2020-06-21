@@ -42,7 +42,7 @@ class HaxeServer {
 			return false;
 		}
 
-		var checkRun = ChildProcess.spawnSync(haxePath, ["-version"], spawnOptions);
+		final checkRun = ChildProcess.spawnSync(haxePath, ["-version"], spawnOptions);
 		if (checkRun.error != null) {
 			if (checkRun.error.message.contains("ENOENT")) {
 				if (haxePath == "haxe") { // default
@@ -71,7 +71,7 @@ class HaxeServer {
 		if (haxeVersion == null) {
 			return error("Error parsing Haxe version " + Json.stringify(output));
 		}
-		var isVersionSupported = haxeVersion >= new SemVer(3, 4, 0);
+		final isVersionSupported = haxeVersion >= new SemVer(3, 4, 0);
 		if (!isVersionSupported) {
 			return error('Unsupported Haxe version! Minimum required: 3.4.0. Found: $haxeVersion.');
 		}
@@ -98,13 +98,13 @@ class HaxeServer {
 		startRequest = null;
 		stop();
 
-		var config = context.config.displayServer;
+		final config = context.config.displayServer;
 
-		var env = new DynamicAccess();
+		final env = new DynamicAccess();
 		mergeEnvs(js.Node.process.env, env);
 		mergeEnvs(config.env, env);
 
-		var spawnOptions = {env: env, cwd: context.workspacePath.toString()};
+		final spawnOptions = {env: env, cwd: context.workspacePath.toString()};
 
 		if (!checkHaxeVersion(config.path, spawnOptions)) {
 			return;
@@ -127,7 +127,7 @@ class HaxeServer {
 				exclude: context.config.user.exclude,
 				maxCompletionItems: context.config.user.maxCompletionItems
 			}, null, function(result) {
-				var pre = result.haxeVersion.pre;
+				final pre = result.haxeVersion.pre;
 				if (result.haxeVersion.major == 4 && result.haxeVersion.minor == 0 && pre != null) {
 					context.languageServerProtocol.sendNotification(LanguageServerMethods.DidDetectOldHaxeVersion, {
 						haxe4Preview: true,
@@ -153,7 +153,7 @@ class HaxeServer {
 				onInitComplete();
 			});
 
-			var displayPort = context.config.user.displayPort;
+			final displayPort = context.config.user.displayPort;
 			if (socketListener == null && displayPort != null) {
 				if (displayPort == "auto") {
 					getAvailablePort(6000).then(startSocketServer);
@@ -177,7 +177,7 @@ class HaxeServer {
 			useSocket = false; // waiting on lix-pm/haxeshim#49
 		}
 
-		var startConnection = if (useSocket) SocketConnection.start else StdioConnection.start;
+		final startConnection = if (useSocket) SocketConnection.start else StdioConnection.start;
 		trace("Haxe Path: " + config.path);
 		spawnOptions.env["HAXE_COMPLETION_SERVER"] = "1";
 		startConnection(config.path, config.arguments, spawnOptions, onMessage, onExit, onHaxeStarted);
@@ -200,7 +200,7 @@ class HaxeServer {
 		startProgress("Building Cache");
 
 		// see vshaxe/haxe-language-server#44 for explanation
-		var leadingArgs = ["--no-output", "--each", "--no-output"];
+		final leadingArgs = ["--no-output", "--each", "--no-output"];
 
 		process("cache build", leadingArgs.concat(context.config.displayArguments), null, true, null, Processed(function(_) {
 			stopProgress();
@@ -251,7 +251,7 @@ class HaxeServer {
 	// https://gist.github.com/mikeal/1840641#gistcomment-2337132
 	function getAvailablePort(startingAt:Int):Promise<Int> {
 		function getNextAvailablePort(currentPort:Int, cb:Int->Void) {
-			var server = Net.createServer();
+			final server = Net.createServer();
 			server.listen(currentPort, "localhost", () -> {
 				server.once(ServerEvent.Close, cb.bind(currentPort));
 				server.close();
@@ -268,8 +268,8 @@ class HaxeServer {
 		socketListener = Net.createServer(function(socket) {
 			trace("Client connected");
 			socket.on(SocketEvent.Data, function(data:Buffer) {
-				var s = data.toString();
-				var split = s.split("\n");
+				final s = data.toString();
+				final split = s.split("\n");
 				split.pop(); // --connect passes extra \0
 				function callback(result:DisplayResult) {
 					switch result {
@@ -344,12 +344,12 @@ class HaxeServer {
 			return;
 		}
 
-		var haxeResponse = connection.getLastErrorOutput();
+		final haxeResponse = connection.getLastErrorOutput();
 
 		// invalid compiler argument?
-		var invalidOptionRegex = ~/unknown option [`'](.*?)'./;
+		final invalidOptionRegex = ~/unknown option [`'](.*?)'./;
 		if (invalidOptionRegex.match(haxeResponse)) {
-			var option = invalidOptionRegex.matched(1);
+			final option = invalidOptionRegex.matched(1);
 			context.sendShowMessage(Error,
 				'Invalid compiler argument \'$option\' detected. Please verify "haxe.configurations" and "haxe.displayServer.arguments".');
 			return;
@@ -362,7 +362,7 @@ class HaxeServer {
 
 	function onMessage(msg:String) {
 		if (currentRequest != null) {
-			var request = currentRequest;
+			final request = currentRequest;
 			currentRequest = null;
 			request.onData(msg);
 			updateRequestQueue();
@@ -372,7 +372,7 @@ class HaxeServer {
 
 	public function process(label:String, args:Array<String>, ?token:CancellationToken, cancellable:Bool, ?stdin:String, handler:ResultHandler) {
 		// create a request object
-		var request = new DisplayRequest(label, args, token, cancellable, stdin, handler);
+		final request = new DisplayRequest(label, args, token, cancellable, stdin, handler);
 
 		// if the request is cancellable, set a cancel callback to remove request from queue
 		if (token != null) {
@@ -441,7 +441,7 @@ class HaxeServer {
 		if (!context.config.sendMethodResults) {
 			return;
 		}
-		var queue = [];
+		final queue = [];
 		var request = currentRequest;
 		while (request != null) {
 			queue.push(request.label);

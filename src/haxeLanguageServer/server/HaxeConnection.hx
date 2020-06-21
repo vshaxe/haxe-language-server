@@ -42,12 +42,12 @@ class HaxeConnection {
 		buffer.append(data);
 		while (true) {
 			if (nextMessageLength == -1) {
-				var length = buffer.tryReadLength();
+				final length = buffer.tryReadLength();
 				if (length == -1)
 					return;
 				nextMessageLength = length;
 			}
-			var msg = buffer.tryReadContent(nextMessageLength);
+			final msg = buffer.tryReadContent(nextMessageLength);
 			if (msg == null)
 				return;
 			nextMessageLength = -1;
@@ -74,7 +74,7 @@ class StdioConnection extends HaxeConnection {
 	public static function start(path:String, arguments:Array<String>, spawnOptions:ChildProcessSpawnOptions, onMessage:String->Void,
 			onExit:HaxeConnection->Void, callback:HaxeConnection->Void) {
 		trace("Using --wait stdio");
-		var process = ChildProcess.spawn(path, arguments.concat(["--wait", "stdio"]), spawnOptions);
+		final process = ChildProcess.spawn(path, arguments.concat(["--wait", "stdio"]), spawnOptions);
 		callback(new StdioConnection(process, onMessage, onExit));
 	}
 }
@@ -118,11 +118,11 @@ class SocketConnection extends HaxeConnection {
 	public static function start(path:String, arguments:Array<String>, spawnOptions:ChildProcessSpawnOptions, onMessage:String->Void,
 			onExit:HaxeConnection->Void, callback:HaxeConnection->Void) {
 		trace("Using --server-connect");
-		var server = Net.createServer();
+		final server = Net.createServer();
 		server.listen(0, function() {
-			var port = server.address().port;
-			var process = ChildProcess.spawn(path, arguments.concat(["--server-connect", '127.0.0.1:$port']), spawnOptions);
-			var connection = new SocketConnection(process, onMessage, onExit);
+			final port = server.address().port;
+			final process = ChildProcess.spawn(path, arguments.concat(["--server-connect", '127.0.0.1:$port']), spawnOptions);
+			final connection = new SocketConnection(process, onMessage, onExit);
 			server.on(ServerEvent.Connection, function(socket) {
 				trace("Haxe connected!");
 				server.close();

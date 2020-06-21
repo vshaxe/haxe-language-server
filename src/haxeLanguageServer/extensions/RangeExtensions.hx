@@ -56,8 +56,8 @@ function containsPos(range:Range, pos:Position):Bool {
  * return undefined when there is no overlap.
  */
 function intersection(range:Range, other:Range):Range {
-	var start = PositionStatics.Max(other.start, range.start);
-	var end = PositionStatics.Min(other.end, range.end);
+	final start = PositionStatics.Max(other.start, range.start);
+	final end = PositionStatics.Min(other.end, range.end);
 	if (start.isAfter(end)) {
 		// this happens when there is no overlap:
 		// |-----|
@@ -79,8 +79,8 @@ function union(range:Range, other:Range):Range {
 	} else if (other.contains(range)) {
 		return other;
 	}
-	var start = PositionStatics.Min(other.start, range.start);
-	var end = PositionStatics.Max(other.end, range.end);
+	final start = PositionStatics.Min(other.start, range.start);
+	final end = PositionStatics.Max(other.end, range.end);
 	return {start: start, end: end};
 }
 
@@ -93,8 +93,8 @@ function union(range:Range, other:Range):Range {
  * If start and end are not different `this` range will be returned.
  */
 function with(range:Range, ?start:Position, ?end:Position):Range {
-	var start = if (start == null) range.start else start;
-	var end = if (end == null) range.end else end;
+	final start = if (start == null) range.start else start;
+	final end = if (end == null) range.end else end;
 
 	if (start.isEqual(range.start) && end.isEqual(range.end)) {
 		return range;

@@ -5,7 +5,7 @@ import tokentree.TokenTreeBuilder;
 
 class FormatterHelper {
 	public static function formatText(doc:TextDocument, context:Context, code:String, entryPoint:TokenTreeEntryPoint):String {
-		var config = Formatter.loadConfig(if (doc.uri.isFile()) {
+		final config = Formatter.loadConfig(if (doc.uri.isFile()) {
 			doc.uri.toFsPath().toString();
 		} else {
 			context.workspacePath.toString();

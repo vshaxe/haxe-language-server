@@ -9,10 +9,10 @@ import sys.io.File;
 class EditTestCaseMacro {
 	#if macro
 	public macro static function build(folder:String):Array<Field> {
-		var fields:Array<Field> = Context.getBuildFields();
-		var testCases:Array<String> = collectAllFileNames(folder);
+		final fields:Array<Field> = Context.getBuildFields();
+		final testCases:Array<String> = collectAllFileNames(folder);
 		for (testCase in testCases) {
-			var field:Field = buildTestCaseField(testCase);
+			final field:Field = buildTestCaseField(testCase);
 			if (field == null)
 				continue;
 
@@ -23,17 +23,17 @@ class EditTestCaseMacro {
 
 	static function buildTestCaseField(fileName:String):Field {
 		Context.registerModuleDependency(Context.getLocalModule(), fileName);
-		var content:String = sys.io.File.getContent(fileName);
-		var nl = "\r?\n";
-		var reg = new EReg('$nl$nl---$nl$nl', "g");
-		var segments = reg.split(content);
+		final content:String = sys.io.File.getContent(fileName);
+		final nl = "\r?\n";
+		final reg = new EReg('$nl$nl---$nl$nl', "g");
+		final segments = reg.split(content);
 		if (segments.length != 3)
 			throw 'invalid testcase format for: $fileName';
 
-		var config:String = segments[0];
-		var input:String = segments[1];
-		var gold:String = segments[2];
-		var fileName:String = new haxe.io.Path(fileName).file;
+		final config:String = segments[0];
+		final input:String = segments[1];
+		final gold:String = segments[2];
+		final fileName:String = new haxe.io.Path(fileName).file;
 		var fieldName:String = fileName;
 		fieldName = "test" + fieldName.charAt(0).toUpperCase() + fieldName.substr(1);
 
@@ -49,13 +49,13 @@ class EditTestCaseMacro {
 		#if display
 		return [];
 		#end
-		var items:Array<String> = FileSystem.readDirectory(path);
+		final items:Array<String> = FileSystem.readDirectory(path);
 		var files:Array<String> = [];
 		for (item in items) {
 			if (item == "." || item == "..")
 				continue;
 
-			var fileName = Path.join([path, item]);
+			final fileName = Path.join([path, item]);
 			if (FileSystem.isDirectory(fileName)) {
 				files = files.concat(collectAllFileNames(fileName));
 				continue;

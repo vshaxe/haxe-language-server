@@ -15,17 +15,17 @@ class OrganizeImportsFeature {
 	];
 
 	public static function organizeImports(doc:HaxeDocument, context:Context, unusedRanges:Array<Range>):Array<TextEdit> {
-		if ((doc.tokens == null) || (doc.tokens.tree == null)) {
+		if (doc!.tokens.tree == null) {
 			return [];
 		}
-		try {
+		return try {
 			var packageName:Null<String> = null;
-			var imports:Array<TokenTree> = doc.tokens.tree.filterCallback(function(token:TokenTree, index:Int):FilterResult {
+			final imports:Array<TokenTree> = doc.tokens.tree.filterCallback(function(token:TokenTree, index:Int):FilterResult {
 				switch (token.tok) {
 					case Kwd(KwdImport) | Kwd(KwdUsing):
 						return FOUND_SKIP_SUBTREE;
 					case Kwd(KwdPackage):
-						var child = token.getFirstChild();
+						final child = token.getFirstChild();
 						if (child == null) {
 							return SKIP_SUBTREE;
 						}
@@ -44,7 +44,7 @@ class OrganizeImportsFeature {
 				}
 			});
 
-			var importGroups = new Map<Int, ImportGroup>();
+			final importGroups = new Map<Int, ImportGroup>();
 			var groupCount:Int = 0;
 			for (i in imports) {
 				var id:Int = -1;
@@ -65,7 +65,7 @@ class OrganizeImportsFeature {
 					groupCount++;
 				}
 
-				var range:Range = doc.rangeAt2(doc.tokens.getTreePos(i));
+				final range:Range = doc.rangeAt2(doc.tokens.getTreePos(i));
 				var isUnused:Bool = false;
 				for (r in unusedRanges) {
 					if (r.contains(range)) {
@@ -77,7 +77,7 @@ class OrganizeImportsFeature {
 					continue;
 				}
 
-				var type:ImportType = determineImportType(i, packageName);
+				final type:ImportType = determineImportType(i, packageName);
 				switch (i.tok) {
 					case Kwd(KwdImport):
 						group.imports.push({
@@ -98,13 +98,14 @@ class OrganizeImportsFeature {
 					default:
 				}
 			}
-			return organizeImportGroups(doc, context, importGroups);
-		} catch (e) {}
-		return [];
+			organizeImportGroups(doc, context, importGroups);
+		} catch (e) {
+			[];
+		}
 	}
 
 	static function determineImportType(token:TokenTree, packageName:Null<String>):ImportType {
-		var child:Null<TokenTree> = token.getFirstChild();
+		final child:Null<TokenTree> = token.getFirstChild();
 		if (child == null) {
 			return Project;
 		}
@@ -138,20 +139,20 @@ class OrganizeImportsFeature {
 	}
 
 	static function organizeImportGroup(doc:TextDocument, context:Context, importGroup:ImportGroup):Array<TextEdit> {
-		var sortFunc:Null<ImportSortFunction> = determineSortFunction(context);
+		final sortFunc:Null<ImportSortFunction> = determineSortFunction(context);
 		if (sortFunc == null) {
 			return [];
 		}
 
 		ArraySort.sort(importGroup.imports, sortFunc);
-		var newImports:String = importGroup.imports.map(i -> i.text).join("\n");
+		final newImports:String = importGroup.imports.map(i -> i.text).join("\n");
 
 		ArraySort.sort(importGroup.usings, sortFunc);
-		var newUsings:String = importGroup.usings.map(i -> i.text).join("\n");
-		var delim:String = (importGroup.imports.length > 0 && importGroup.usings.length > 0) ? "\n" : "";
+		final newUsings:String = importGroup.usings.map(i -> i.text).join("\n");
+		final delim:String = (importGroup.imports.length > 0 && importGroup.usings.length > 0) ? "\n" : "";
 
-		var newText:String = FormatterHelper.formatText(doc, context, newImports + delim + newUsings, TokenTreeEntryPoint.TYPE_LEVEL);
-		var edits:Array<TextEdit> = [];
+		final newText:String = FormatterHelper.formatText(doc, context, newImports + delim + newUsings, TokenTreeEntryPoint.TYPE_LEVEL);
+		final edits:Array<TextEdit> = [];
 
 		// remove all existing imports/usings from group
 		for (i in importGroup.imports) {
@@ -162,7 +163,7 @@ class OrganizeImportsFeature {
 		}
 
 		// insert sorted imports/usings at startOffset
-		var importInsertPos:Position = doc.positionAt(importGroup.startOffset);
+		final importInsertPos:Position = doc.positionAt(importGroup.startOffset);
 		edits.push(WorkspaceEditHelper.insertText(importInsertPos, newText));
 
 		return edits;
@@ -170,12 +171,9 @@ class OrganizeImportsFeature {
 
 	static function determineSortFunction(context:Context):ImportSortFunction {
 		return switch (context.config.user.importsSortOrder) {
-			case AllAlphabetical:
-				sortImportsAllAlpha;
-			case StdlibThenLibsThenProject:
-				sortImportsStdlibThenLibsThenProject;
-			case NonProjectThenProject:
-				sortImportsNonProjectThenProject;
+			case AllAlphabetical: sortImportsAllAlpha;
+			case StdlibThenLibsThenProject: sortImportsStdlibThenLibsThenProject;
+			case NonProjectThenProject: sortImportsNonProjectThenProject;
 		}
 	}
 
@@ -185,14 +183,14 @@ class OrganizeImportsFeature {
 		range.end.line++;
 		range.end.character = 0;
 
-		var nextLineRange:Range = {
+		final nextLineRange:Range = {
 			start: range.end,
 			end: {
 				line: range.end.line + 1,
 				character: 0
 			}
 		};
-		var lineAfter:String = doc.getText(nextLineRange).trim();
+		final lineAfter:String = doc.getText(nextLineRange).trim();
 		if (lineAfter.length <= 0 && !isLast) {
 			range.end.line++;
 		}
@@ -241,25 +239,24 @@ class OrganizeImportsFeature {
 }
 
 private typedef ImportGroup = {
-	var id:Int;
-	var startOffset:Int;
-	var imports:Array<ImportInfo>;
-	var usings:Array<ImportInfo>;
+	final id:Int;
+	final startOffset:Int;
+	final imports:Array<ImportInfo>;
+	final usings:Array<ImportInfo>;
 	var lastIndex:Int;
 }
 
 private typedef ImportInfo = {
-	var token:TokenTree;
-	var text:String;
+	final token:TokenTree;
+	final text:String;
 	var type:ImportType;
-	var range:Range;
+	final range:Range;
 }
 
 private enum abstract ImportType(Int) {
-	var StdLib;
-	var Library;
-	var Project;
-
+	final StdLib;
+	final Library;
+	final Project;
 	@:op(a < b)
 	public function opLt(val:ImportType):Bool;
 

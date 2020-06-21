@@ -15,7 +15,7 @@ abstract Scope(Array<Token>) {
 	}
 
 	public function contains(scope:Scope):Bool {
-		var other:Array<Token> = cast scope;
+		final other:Array<Token> = cast scope;
 		if (this.length > other.length) {
 			return false;
 		}
@@ -28,7 +28,7 @@ abstract Scope(Array<Token>) {
 	}
 
 	public function equals(scope:Scope):Bool {
-		var other:Array<Token> = cast scope;
+		final other:Array<Token> = cast scope;
 		return this.equals(other);
 	}
 
@@ -55,7 +55,7 @@ class PositionAwareWalker extends StackAwareWalker {
 
 	function processTrivia(trivias:Array<Trivia>) {
 		for (trivia in trivias) {
-			var newlines = trivia.text.occurrences("\n");
+			final newlines = trivia.text.occurrences("\n");
 			if (newlines > 0) {
 				line += newlines;
 				character = 0;
@@ -66,7 +66,7 @@ class PositionAwareWalker extends StackAwareWalker {
 	}
 
 	override function walkLiteral_PLiteralString(s:StringToken, stack:WalkStack) {
-		var string = switch s {
+		final string = switch s {
 			case DoubleQuote(token) | SingleQuote(token): token.text;
 		}
 		line += string.occurrences("\n");

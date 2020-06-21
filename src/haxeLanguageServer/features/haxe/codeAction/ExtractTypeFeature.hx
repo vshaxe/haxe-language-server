@@ -20,15 +20,15 @@ class ExtractTypeFeature {
 
 	function extractType(params:CodeActionParams):Array<CodeAction> {
 		final uri = params.textDocument.uri;
-		var doc = context.documents.getHaxe(uri);
+		final doc = context.documents.getHaxe(uri);
 		if (doc == null || doc.tokens == null || doc.tokens.tree == null) {
 			return [];
 		}
-		try {
-			var fsPath:FsPath = uri.toFsPath();
-			var path = new Path(fsPath.toString());
+		return try {
+			final fsPath:FsPath = uri.toFsPath();
+			final path = new Path(fsPath.toString());
 
-			var types:Array<TokenTree> = doc.tokens.tree.filterCallback(function(token:TokenTree, index:Int):FilterResult {
+			final types:Array<TokenTree> = doc.tokens.tree.filterCallback(function(token:TokenTree, index:Int):FilterResult {
 				switch (token.tok) {
 					case Kwd(KwdClass), Kwd(KwdInterface), Kwd(KwdEnum), Kwd(KwdAbstract), Kwd(KwdTypedef):
 						return FOUND_SKIP_SUBTREE;
@@ -36,59 +36,59 @@ class ExtractTypeFeature {
 				}
 				return GO_DEEPER;
 			});
-			var lastImport:Null<TokenTree> = getLastImportToken(doc);
+			final lastImport:Null<TokenTree> = getLastImportToken(doc);
 			if (isInsideConditional(lastImport))
 				return [];
 
 			// copy all imports from current file
 			// TODO reduce imports
-			var fileHeader = copyImports(doc, path.file, lastImport);
+			final fileHeader = copyImports(doc, path.file, lastImport);
 
-			var actions = [];
+			final actions = [];
 			for (type in types) {
 				if (isInsideConditional(type)) {
 					// TODO support types inside conditionals
 					continue;
 				}
-				var nameTok:TokenTree = type.access().firstChild().isCIdent().token;
+				final nameTok:TokenTree = type.access().firstChild().isCIdent().token;
 				if (nameTok == null)
 					continue;
 
-				var name:String = nameTok.toString();
+				final name:String = nameTok.toString();
 				if (name == path.file)
 					continue;
 
-				var newFileName:String = Path.join([path.dir, name + ".hx"]);
+				final newFileName:String = Path.join([path.dir, name + ".hx"]);
 				if (FileSystem.exists(newFileName))
 					continue;
 
-				var pos = doc.tokens.getTreePos(type);
-				var docComment:Null<TokenTree> = TokenTreeCheckUtils.getDocComment(type);
+				final pos = doc.tokens.getTreePos(type);
+				final docComment:Null<TokenTree> = TokenTreeCheckUtils.getDocComment(type);
 				if (docComment != null) {
 					// expand pos.min to capture doc comment
 					pos.min = doc.tokens.getPos(docComment).min;
 				}
-				var typeRange = doc.rangeAt2(pos);
+				final typeRange = doc.rangeAt2(pos);
 				if (params.range.intersection(typeRange) == null) {
 					// no overlap between selection / cursor pos and Haxe type
 					continue;
 				}
 
 				// remove code from current file
-				var removeOld:TextDocumentEdit = WorkspaceEditHelper.textDocumentEdit(uri, [WorkspaceEditHelper.removeText(typeRange)]);
+				final removeOld:TextDocumentEdit = WorkspaceEditHelper.textDocumentEdit(uri, [WorkspaceEditHelper.removeText(typeRange)]);
 
 				// create new file
-				var newUri:DocumentUri = new FsPath(newFileName).toUri();
-				var createFile:CreateFile = WorkspaceEditHelper.createNewFile(newUri, false, true);
+				final newUri:DocumentUri = new FsPath(newFileName).toUri();
+				final createFile:CreateFile = WorkspaceEditHelper.createNewFile(newUri, false, true);
 
 				// copy file header, type and doc comment into new file
-				var addNewType:TextDocumentEdit = WorkspaceEditHelper.textDocumentEdit(newUri, [
+				final addNewType:TextDocumentEdit = WorkspaceEditHelper.textDocumentEdit(newUri, [
 					WorkspaceEditHelper.insertText(doc.positionAt(0), fileHeader + doc.getText(typeRange))
 				]);
 
 				// TODO edits in files that use type
 
-				var edit:WorkspaceEdit = {
+				final edit:WorkspaceEdit = {
 					documentChanges: [removeOld, createFile, addNewType]
 				};
 
@@ -98,9 +98,9 @@ class ExtractTypeFeature {
 					edit: edit
 				});
 			}
-			return actions;
+			actions;
 		} catch (e) {
-			return [];
+			[];
 		}
 	}
 
@@ -108,13 +108,13 @@ class ExtractTypeFeature {
 		if (lastImport == null)
 			return "";
 
-		var pos = doc.tokens.getTreePos(lastImport);
+		final pos = doc.tokens.getTreePos(lastImport);
 		pos.min = 0;
 
-		var range = doc.rangeAt2(pos);
+		final range = doc.rangeAt2(pos);
 		range.end.line++;
 		range.end.character = 0;
-		var fileHeader:String = doc.getText(range);
+		final fileHeader:String = doc.getText(range);
 
 		var pack:Null<TokenTree>;
 		doc.tokens.tree.filterCallback(function(token:TokenTree, index:Int):FilterResult {
@@ -141,7 +141,7 @@ class ExtractTypeFeature {
 	}
 
 	function getLastImportToken(doc:HaxeDocument):Null<TokenTree> {
-		var imports:Array<TokenTree> = doc.tokens.tree.filterCallback(function(token:TokenTree, index:Int):FilterResult {
+		final imports:Array<TokenTree> = doc.tokens.tree.filterCallback(function(token:TokenTree, index:Int):FilterResult {
 			switch (token.tok) {
 				case Kwd(KwdImport), Kwd(KwdUsing):
 					return FOUND_SKIP_SUBTREE;

@@ -35,7 +35,7 @@ class Haxe3DisplayOffsetConverter extends DisplayOffsetConverter {
 	}
 
 	override function byteOffsetToCharacterOffset(string:String, byteOffset:Int):Int {
-		var buf = new js.node.Buffer(string, "utf-8");
+		final buf = new js.node.Buffer(string, "utf-8");
 		return buf.toString("utf-8", 0, byteOffset).length;
 	}
 

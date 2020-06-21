@@ -35,8 +35,8 @@ class TextDocument {
 			if (event.range == null) {
 				content = event.text;
 			} else {
-				var before = content.substring(0, offsetAt(event.range.start));
-				var after = content.substring(offsetAt(event.range.end));
+				final before = content.substring(0, offsetAt(event.range.start));
+				final after = content.substring(offsetAt(event.range.end));
 				content = before + event.text + after;
 				lineOffsets = null;
 			}
@@ -47,18 +47,18 @@ class TextDocument {
 	public function positionAt(offset:Int):Position {
 		offset = Std.int(Math.max(Math.min(offset, content.length), 0));
 
-		var lineOffsets = getLineOffsets();
+		final lineOffsets = getLineOffsets();
 		var low = 0, high = lineOffsets.length;
 		if (high == 0)
 			return {line: 0, character: offset};
 		while (low < high) {
-			var mid = Std.int((low + high) / 2);
+			final mid = Std.int((low + high) / 2);
 			if (lineOffsets[mid] > offset)
 				high = mid;
 			else
 				low = mid + 1;
 		}
-		var line = low - 1;
+		final line = low - 1;
 		return {line: line, character: offset - lineOffsets[line]};
 	}
 
@@ -74,7 +74,7 @@ class TextDocument {
 	}
 
 	public function lineAt(line:Int):String {
-		var lineOffsets = getLineOffsets();
+		final lineOffsets = getLineOffsets();
 		if (line >= lineOffsets.length)
 			return "";
 		else if (line == lineOffsets.length - 1)
@@ -84,18 +84,18 @@ class TextDocument {
 	}
 
 	public function offsetAt(position:Position):Int {
-		var lineOffsets = getLineOffsets();
+		final lineOffsets = getLineOffsets();
 		if (position.line >= lineOffsets.length)
 			return content.length;
 		else if (position.line < 0)
 			return 0;
-		var lineOffset = lineOffsets[position.line];
-		var nextLineOffset = (position.line + 1 < lineOffsets.length) ? lineOffsets[position.line + 1] : content.length;
+		final lineOffset = lineOffsets[position.line];
+		final nextLineOffset = (position.line + 1 < lineOffsets.length) ? lineOffsets[position.line + 1] : content.length;
 		return Std.int(Math.max(Math.min(lineOffset + position.character, nextLineOffset), lineOffset));
 	}
 
 	public function indentAt(line:Int):String {
-		var re = ~/^\s*/;
+		final re = ~/^\s*/;
 		re.match(lineAt(line));
 		return re.matched(0);
 	}
@@ -118,8 +118,8 @@ class TextDocument {
 
 	function getLineOffsets() {
 		if (lineOffsets == null) {
-			var offsets = [];
-			var text = content;
+			final offsets = [];
+			final text = content;
 			var isLineStart = true;
 			var i = 0;
 			while (i < text.length) {
@@ -127,7 +127,7 @@ class TextDocument {
 					offsets.push(i);
 					isLineStart = false;
 				}
-				var ch = text.charCodeAt(i);
+				final ch = text.charCodeAt(i);
 				isLineStart = (ch == '\r'.code || ch == '\n'.code);
 				if (ch == '\r'.code && i + 1 < text.length && text.charCodeAt(i + 1) == '\n'.code)
 					i++;

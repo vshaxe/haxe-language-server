@@ -41,11 +41,11 @@ abstract SemVer(Version) from Version {
 		if (!reVersion.match(s)) {
 			return null;
 		}
-		var major = Std.parseInt(reVersion.matched(1));
-		var minor = Std.parseInt(reVersion.matched(2));
-		var patch = Std.parseInt(reVersion.matched(3));
-		var pre = reVersion.matched(4);
-		var build = reVersion.matched(5);
+		final major = Std.parseInt(reVersion.matched(1));
+		final minor = Std.parseInt(reVersion.matched(2));
+		final patch = Std.parseInt(reVersion.matched(3));
+		final pre = reVersion.matched(4);
+		final build = reVersion.matched(5);
 		return new SemVer(major, minor, patch, pre, build);
 	}
 

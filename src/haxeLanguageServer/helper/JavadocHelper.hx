@@ -3,18 +3,18 @@ package haxeLanguageServer.helper;
 /** Stolen from dox **/
 class JavadocHelper {
 	public static function parse(doc:String):DocInfos {
-		var tags = [];
+		final tags = [];
 		// TODO: need to parse this better as haxe source might have this sort of meta
-		var ereg = ~/^@(param|default|exception|throws|deprecated|return|returns|since|see|event|author)\s+([^@]+)/gm;
+		final ereg = ~/^@(param|default|exception|throws|deprecated|return|returns|since|see|event|author)\s+([^@]+)/gm;
 
 		doc = ereg.map(doc, function(e) {
-			var name = e.matched(1);
+			final name = e.matched(1);
 			var doc = e.matched(2);
 			var value:Null<String> = null;
 
 			switch name {
 				case 'param', 'exception', 'throws', 'event':
-					var ereg = ~/([^\s]+)\s+([\s\S]*)/g;
+					final ereg = ~/([^\s]+)\s+([\s\S]*)/g;
 					if (ereg.match(doc)) {
 						value = ereg.matched(1);
 						doc = ereg.matched(2);
@@ -29,7 +29,7 @@ class JavadocHelper {
 			return '';
 		});
 
-		var infos:DocInfos = {
+		final infos:DocInfos = {
 			doc: doc,
 			throws: [],
 			params: [],
@@ -61,9 +61,9 @@ class JavadocHelper {
 	}
 
 	static function trimDoc(doc:String) {
-		var ereg = ~/^\s+/m;
+		final ereg = ~/^\s+/m;
 		if (ereg.match(doc)) {
-			var space = new EReg('^' + ereg.matched(0), 'mg');
+			final space = new EReg('^' + ereg.matched(0), 'mg');
 			doc = space.replace(doc, '');
 		}
 		return doc;

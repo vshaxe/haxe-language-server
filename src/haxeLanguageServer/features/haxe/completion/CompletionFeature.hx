@@ -24,13 +24,13 @@ using Safety;
 using tokentree.TokenTreeAccessHelper;
 
 enum abstract CompletionItemOrigin(Int) {
-	var Haxe;
-	var Custom;
+	final Haxe;
+	final Custom;
 }
 
 typedef CompletionItemData = {
-	var origin:CompletionItemOrigin;
-	var ?index:Int;
+	final origin:CompletionItemOrigin;
+	final ?index:Int;
 }
 
 class CompletionFeature {
@@ -66,7 +66,7 @@ class CompletionFeature {
 	}
 
 	function checkCapabilities() {
-		var completion = context.capabilities.textDocument!.completion;
+		final completion = context.capabilities.textDocument!.completion;
 		contextSupport = completion!.contextSupport == true;
 		markdownSupport = completion!.completionItem!.documentationFormat.let(kinds -> kinds.contains(MarkDown)).or(false);
 		snippetSupport = completion!.completionItem!.snippetSupport == true;
@@ -75,19 +75,19 @@ class CompletionFeature {
 	}
 
 	public function onCompletion(params:CompletionParams, token:CancellationToken, resolve:CompletionList->Void, reject:ResponseError<NoData>->Void) {
-		var uri = params.textDocument.uri;
-		var doc:Null<HaxeDocument> = context.documents.getHaxe(uri);
+		final uri = params.textDocument.uri;
+		final doc:Null<HaxeDocument> = context.documents.getHaxe(uri);
 		if (doc == null || !uri.isFile()) {
 			return reject.noFittingDocument(uri);
 		}
-		var offset = doc.offsetAt(params.position);
-		var textBefore = doc.content.substring(0, offset);
-		var whitespace = textBefore.length - textBefore.rtrim().length;
-		var currentToken = new PositionAnalyzer(doc).resolve(params.position.translate(0, -whitespace));
+		final offset = doc.offsetAt(params.position);
+		final textBefore = doc.content.substring(0, offset);
+		final whitespace = textBefore.length - textBefore.rtrim().length;
+		final currentToken = new PositionAnalyzer(doc).resolve(params.position.translate(0, -whitespace));
 		if (contextSupport && !isValidCompletionPosition(currentToken, doc, params, textBefore)) {
 			return resolve({items: [], isIncomplete: false});
 		}
-		var handle = if (context.haxeServer.supports(DisplayMethods.Completion)) handleJsonRpc else legacy.handle;
+		final handle = if (context.haxeServer.supports(DisplayMethods.Completion)) handleJsonRpc else legacy.handle;
 		handle(params, token, resolve, reject, doc, offset, textBefore, currentToken);
 	}
 
@@ -97,7 +97,7 @@ class CompletionFeature {
 		if (token == null) {
 			return true;
 		}
-		var inComment = switch token.tok {
+		final inComment = switch token.tok {
 			case Comment(_), CommentLine(_): true;
 			case _: false;
 		};
@@ -123,8 +123,8 @@ class CompletionFeature {
 	static final dollarPattern = ~/(\$+)$/;
 
 	function isInterpolationPosition(token:Null<TokenTree>, doc, pos, text):Bool {
-		var inMacroReification = token.access().findParent(t -> t.is(Kwd(KwdMacro)).exists()).exists();
-		var stringKind = PositionAnalyzer.getStringKind(token, doc, pos);
+		final inMacroReification = token.access().findParent(t -> t.is(Kwd(KwdMacro)).exists()).exists();
+		final stringKind = PositionAnalyzer.getStringKind(token, doc, pos);
 
 		if (stringKind != SingleQuote) {
 			return inMacroReification;
@@ -132,12 +132,12 @@ class CompletionFeature {
 		if (!dollarPattern.match(text)) {
 			return false;
 		}
-		var escaped = dollarPattern.matched(1).length % 2 == 0;
+		final escaped = dollarPattern.matched(1).length % 2 == 0;
 		return !escaped;
 	}
 
 	public function onCompletionResolve(item:CompletionItem, token:CancellationToken, resolve:CompletionItem->Void, reject:ResponseError<NoData>->Void) {
-		var data:Null<CompletionItemData> = item.data;
+		final data:Null<CompletionItemData> = item.data;
 		if (!context.haxeServer.supports(DisplayMethods.CompletionItemResolve)
 			|| previousCompletionData == null
 			|| (data != null && data.origin == Custom)) {
@@ -159,41 +159,41 @@ class CompletionFeature {
 				wasAutoTriggered = false;
 			}
 		}
-		var haxeParams:HaxeCompletionParams = {
+		final haxeParams:HaxeCompletionParams = {
 			file: doc.uri.toFsPath(),
 			contents: doc.content,
 			offset: offset,
 			wasAutoTriggered: wasAutoTriggered,
 			meta: [CompilerMetadata.Deprecated]
 		};
-		var tokenContext = PositionAnalyzer.getContext(currentToken, doc, params.position);
-		var position = params.position;
-		var lineAfter = doc.getText({
+		final tokenContext = PositionAnalyzer.getContext(currentToken, doc, params.position);
+		final position = params.position;
+		final lineAfter = doc.getText({
 			start: position,
 			end: position.translate(1, 0)
 		});
-		var wordPattern = ~/\w*$/;
+		final wordPattern = ~/\w*$/;
 		wordPattern.match(textBefore);
 		var replaceRange = {
 			start: params.position.translate(0, -wordPattern.matched(0).length),
 			end: params.position
 		};
 		context.callHaxeMethod(DisplayMethods.Completion, haxeParams, token, function(result) {
-			var hasResult = result != null;
-			var mode = if (hasResult) result.mode.kind else null;
+			final hasResult = result != null;
+			final mode = if (hasResult) result.mode.kind else null;
 			if (mode != TypeHint && wasAutoTriggered && isAfterArrow(textBefore)) {
 				resolve({items: [], isIncomplete: false}); // avoid auto-popup after -> in arrow functions
 				return null;
 			}
-			var importPosition = determineImportPosition(doc);
-			var indent = doc.indentAt(params.position.line);
+			final importPosition = determineImportPosition(doc);
+			final indent = doc.indentAt(params.position.line);
 			// the replaceRanges sent by Haxe are only trustworthy in some cases (https://github.com/HaxeFoundation/haxe/issues/8669)
 			if (mode == Metadata || mode == Toplevel || mode == TypeHint) {
 				if (hasResult) {
 					replaceRange = result.replaceRange;
 				}
 			}
-			var data:CompletionContextData = {
+			final data:CompletionContextData = {
 				replaceRange: replaceRange,
 				mode: if (hasResult) result.mode else null,
 				doc: doc,
@@ -214,9 +214,9 @@ class CompletionFeature {
 
 			function resolveItems() {
 				for (i in 0...displayItems.length) {
-					var displayItem = displayItems[i];
-					var index = if (displayItem!.index == null) i else displayItem.index;
-					var completionItem = createCompletionItem(index, displayItem, data);
+					final displayItem = displayItems[i];
+					final index = if (displayItem!.index == null) i else displayItem.index;
+					final completionItem = createCompletionItem(index, displayItem, data);
 					if (completionItem != null) {
 						items.push(completionItem);
 					}
@@ -246,7 +246,7 @@ class CompletionFeature {
 					replaceRange: replaceRange,
 					tokenContext: tokenContext
 				}, []).then(result -> {
-					var keywords = createFieldKeywordItems(tokenContext, replaceRange, lineAfter);
+					final keywords = createFieldKeywordItems(tokenContext, replaceRange, lineAfter);
 					resolve({items: keywords.concat(result.items), isIncomplete: false});
 				});
 			}
@@ -254,14 +254,14 @@ class CompletionFeature {
 	}
 
 	function createFieldKeywordItems(tokenContext:TokenContext, replaceRange:Range, lineAfter:String):Array<CompletionItem> {
-		var isFieldLevel = switch tokenContext {
+		final isFieldLevel = switch tokenContext {
 			case Type(type) if (type.field == null): true;
 			case _: false;
 		}
 		if (!isFieldLevel) {
 			return [];
 		}
-		var results:Array<CompletionItem> = [];
+		final results:Array<CompletionItem> = [];
 		function create(keyword:KeywordKind):CompletionItem {
 			return {
 				label: keyword,
@@ -277,7 +277,7 @@ class CompletionFeature {
 				}
 			}
 		}
-		var keywords:Array<KeywordKind> = [Public, Private, Extern, Final, Static, Dynamic, Override, Inline, Macro];
+		final keywords:Array<KeywordKind> = [Public, Private, Extern, Final, Static, Dynamic, Override, Inline, Macro];
 		for (keyword in keywords) {
 			results.push(create(keyword));
 		}
@@ -288,7 +288,7 @@ class CompletionFeature {
 		if (item == null) {
 			return null;
 		}
-		var completionItem:CompletionItem = switch item.kind {
+		final completionItem:CompletionItem = switch item.kind {
 			case ClassField | EnumAbstractField: createClassFieldCompletionItem(item, data);
 			case EnumField: createEnumFieldCompletionItem(item, data);
 			case Type: createTypeCompletionItem(item.args, data);
@@ -331,7 +331,7 @@ class CompletionFeature {
 		}
 
 		if (commitCharactersSupport) {
-			var mode = data.mode.kind;
+			final mode = data.mode.kind;
 			if ((item.type != null && item.type.kind == TFun && mode != Pattern) || mode == New) {
 				completionItem.commitCharacters = ["("];
 			}
@@ -347,11 +347,11 @@ class CompletionFeature {
 	}
 
 	function createClassFieldCompletionItem<T>(item:DisplayItem<Dynamic>, data:CompletionContextData):CompletionItem {
-		var occurrence:ClassFieldOccurrence<T> = item.args;
-		var concreteType = item.type;
-		var field = occurrence.field;
-		var resolution = occurrence.resolution;
-		var printedOrigin = printer.printClassFieldOrigin(occurrence.origin, item.kind, "'");
+		final occurrence:ClassFieldOccurrence<T> = item.args;
+		final concreteType = item.type;
+		final field = occurrence.field;
+		final resolution = occurrence.resolution;
+		final printedOrigin = printer.printClassFieldOrigin(occurrence.origin, item.kind, "'");
 
 		if (field.meta.hasMeta(NoCompletion)) {
 			return null;
@@ -360,16 +360,16 @@ class CompletionFeature {
 			return createOverrideCompletionItem(item, data, printedOrigin);
 		}
 
-		var item:CompletionItem = {
+		final item:CompletionItem = {
 			label: field.name,
 			kind: getKindForField(field, item.kind),
 			detail: {
-				var overloads = if (occurrence.field.overloads == null) 0 else occurrence.field.overloads.length;
+				final overloads = if (occurrence.field.overloads == null) 0 else occurrence.field.overloads.length;
 				var detail = printer.printClassFieldDefinition(occurrence, concreteType, item.kind == EnumAbstractField);
 				if (overloads > 0) {
 					detail += ' (+$overloads overloads)';
 				}
-				var shadowed = if (!resolution.isQualified) " (shadowed)" else "";
+				final shadowed = if (!resolution.isQualified) " (shadowed)" else "";
 				switch printedOrigin {
 					case Some(v): detail + "\n" + v + shadowed;
 					case None: detail + "\n" + shadowed;
@@ -377,7 +377,7 @@ class CompletionFeature {
 			},
 			textEdit: {
 				newText: {
-					var qualifier = if (resolution.isQualified) "" else resolution.qualifier + ".";
+					final qualifier = if (resolution.isQualified) "" else resolution.qualifier + ".";
 					qualifier + switch data.mode.kind {
 						case StructureField: maybeInsert(field.name, ": ", data.lineAfter);
 						case Pattern: maybeInsert(field.name, ":", data.lineAfter);
@@ -402,25 +402,25 @@ class CompletionFeature {
 	}
 
 	function createOverrideCompletionItem<T>(item:DisplayItem<Dynamic>, data:CompletionContextData, printedOrigin:Option<String>):Null<CompletionItem> {
-		var occurrence:ClassFieldOccurrence<T> = item.args;
-		var concreteType = item.type;
-		var field = occurrence.field;
-		var importConfig = context.config.user.codeGeneration.imports;
+		final occurrence:ClassFieldOccurrence<T> = item.args;
+		final concreteType = item.type;
+		final field = occurrence.field;
+		final importConfig = context.config.user.codeGeneration.imports;
 
 		if (concreteType == null || concreteType.kind != TFun || field.isFinalField()) {
 			return null;
 		}
-		var kind = field.kind.args;
+		final kind = field.kind.args;
 		switch field.kind.kind {
 			case FMethod if (kind == MethInline || kind == MethMacro):
 				return null;
 			case _:
 		}
 
-		var fieldFormatting = context.config.user.codeGeneration.functions.field;
-		var printer = new DisplayPrinter(false, if (importConfig.enableAutoImports) Shadowed else Qualified, fieldFormatting);
+		final fieldFormatting = context.config.user.codeGeneration.functions.field;
+		final printer = new DisplayPrinter(false, if (importConfig.enableAutoImports) Shadowed else Qualified, fieldFormatting);
 
-		var item:CompletionItem = {
+		final item:CompletionItem = {
 			label: field.name,
 			kind: getKindForField(field, item.kind),
 			textEdit: {
@@ -446,14 +446,14 @@ class CompletionFeature {
 		if (kind == EnumAbstractField) {
 			return EnumMember;
 		}
-		var fieldKind:JsonFieldKind<T> = field.kind;
+		final fieldKind:JsonFieldKind<T> = field.kind;
 		return switch fieldKind.kind {
 			case FVar:
 				if (field.isFinalField()) {
 					return Field;
 				}
-				var read = fieldKind.args.read.kind;
-				var write = fieldKind.args.write.kind;
+				final read = fieldKind.args.read.kind;
+				final write = fieldKind.args.write.kind;
 				switch [read, write] {
 					case [AccNormal, AccNormal]: Field;
 					case [AccInline, _]: Constant;
@@ -474,15 +474,15 @@ class CompletionFeature {
 	}
 
 	function createEnumFieldCompletionItem<T>(item:DisplayItem<Dynamic>, data:CompletionContextData):CompletionItem {
-		var occurrence:EnumFieldOccurrence<T> = item.args;
-		var field:JsonEnumField = occurrence.field;
-		var name = field.name;
-		var result:CompletionItem = {
+		final occurrence:EnumFieldOccurrence<T> = item.args;
+		final field:JsonEnumField = occurrence.field;
+		final name = field.name;
+		final result:CompletionItem = {
 			label: name,
 			kind: EnumMember,
 			detail: {
 				var definition = printer.printEnumFieldDefinition(field, item.type);
-				var origin = printer.printEnumFieldOrigin(occurrence.origin, "'");
+				final origin = printer.printEnumFieldOrigin(occurrence.origin, "'");
 				switch origin {
 					case Some(v): definition += "\n" + v;
 					case None:
@@ -507,24 +507,24 @@ class CompletionFeature {
 	}
 
 	function createTypeCompletionItem(type:DisplayModuleType, data:CompletionContextData):Null<CompletionItem> {
-		var isImportCompletion = data.mode.kind == Import || data.mode.kind == Using;
-		var importConfig = context.config.user.codeGeneration.imports;
+		final isImportCompletion = data.mode.kind == Import || data.mode.kind == Using;
+		final importConfig = context.config.user.codeGeneration.imports;
 		var autoImport = importConfig.enableAutoImports;
 		if (isImportCompletion || type.path.importStatus == Shadowed) {
 			autoImport = false; // need to insert the qualified name
 		}
 
-		var dotPath = new DisplayPrinter(PathPrinting.Always).printPath(type.path); // pack.Foo | pack.Foo.SubType
+		final dotPath = new DisplayPrinter(PathPrinting.Always).printPath(type.path); // pack.Foo | pack.Foo.SubType
 		if (isExcluded(dotPath)) {
 			return null;
 		}
-		var unqualifiedName = type.path.typeName; // Foo | SubType
-		var containerName = if (dotPath.contains(".")) dotPath.untilLastDot() else ""; // pack | pack.Foo
+		final unqualifiedName = type.path.typeName; // Foo | SubType
+		final containerName = if (dotPath.contains(".")) dotPath.untilLastDot() else ""; // pack | pack.Foo
 
-		var pathPrinting = if (isImportCompletion) Always else Qualified;
-		var qualifiedName = new DisplayPrinter(pathPrinting).printPath(type.path); // unqualifiedName or dotPath depending on importStatus
+		final pathPrinting = if (isImportCompletion) Always else Qualified;
+		final qualifiedName = new DisplayPrinter(pathPrinting).printPath(type.path); // unqualifiedName or dotPath depending on importStatus
 
-		var item:CompletionItem = {
+		final item:CompletionItem = {
 			label: unqualifiedName + if (containerName == "") "" else " - " + dotPath,
 			kind: getKindForModuleType(type),
 			textEdit: {
@@ -537,7 +537,7 @@ class CompletionFeature {
 		if (isImportCompletion) {
 			item.textEdit.newText = maybeInsert(item.textEdit.newText, ";", data.lineAfter);
 		} else if (importConfig.enableAutoImports && type.path.importStatus == Unimported) {
-			var edit = createImportsEdit(data.doc, data.importPosition, [dotPath], importConfig.style);
+			final edit = createImportsEdit(data.doc, data.importPosition, [dotPath], importConfig.style);
 			item.additionalTextEdits = [edit];
 		}
 
@@ -552,7 +552,7 @@ class CompletionFeature {
 		}
 
 		if (data.mode.kind == StructExtension && data.mode.args != null) {
-			var completionData:StructExtensionCompletion = data.mode.args;
+			final completionData:StructExtensionCompletion = data.mode.args;
 			if (!completionData.isIntersectionType) {
 				item.textEdit.newText = maybeInsert(item.textEdit.newText, ",", data.lineAfter);
 			}
@@ -592,25 +592,20 @@ class CompletionFeature {
 	}
 
 	function printTypeDetail(type:DisplayModuleType, containerName:String):String {
-		var detail = printer.printEmptyTypeDefinition(type) + "\n";
-		switch type.path.importStatus {
-			case Imported:
-				detail += "(imported)";
-			case Unimported:
-				detail += "Auto-import from '" + containerName + "'";
-			case Shadowed:
-				detail += "(shadowed)";
+		return printer.printEmptyTypeDefinition(type) + "\n" + switch type.path.importStatus {
+			case Imported: "(imported)";
+			case Unimported: "Auto-import from '" + containerName + "'";
+			case Shadowed: "(shadowed)";
 		}
-		return detail;
 	}
 
 	function createPackageCompletionItem(pack:Package, data:CompletionContextData):Null<CompletionItem> {
-		var path = pack.path;
-		var dotPath = path.pack.join(".");
+		final path = pack.path;
+		final dotPath = path.pack.join(".");
 		if (isExcluded(dotPath)) {
 			return null;
 		}
-		var text = if (data.mode.kind == Field) path.pack[path.pack.length - 1] else dotPath;
+		final text = if (data.mode.kind == Field) path.pack[path.pack.length - 1] else dotPath;
 		return {
 			label: text,
 			kind: Module,
@@ -624,7 +619,7 @@ class CompletionFeature {
 	}
 
 	function createKeywordCompletionItem(keyword:Keyword, data:CompletionContextData):CompletionItem {
-		var item:CompletionItem = {
+		final item:CompletionItem = {
 			label: keyword.name,
 			kind: Keyword,
 			textEdit: {
@@ -672,7 +667,7 @@ class CompletionFeature {
 	}
 
 	function createLocalCompletionItem<T>(item:DisplayItem<Dynamic>, data:CompletionContextData):Null<CompletionItem> {
-		var local:DisplayLocal<T> = item.args;
+		final local:DisplayLocal<T> = item.args;
 		if (local.name == "_") {
 			return null; // naming vars "_" is a common convention for ignoring them
 		}
@@ -680,16 +675,16 @@ class CompletionFeature {
 			label: local.name,
 			kind: if (local.origin == LocalFunction) Method else Variable,
 			detail: {
-				var type = printer.printLocalDefinition(local, item.type);
-				var origin = printer.printLocalOrigin(local.origin);
+				final type = printer.printLocalDefinition(local, item.type);
+				final origin = printer.printLocalOrigin(local.origin);
 				'$type \n($origin)';
 			}
 		};
 	}
 
 	function createModuleCompletionItem(module:Module, data:CompletionContextData):Null<CompletionItem> {
-		var path = module.path;
-		var dotPath = path.pack.concat([path.moduleName]).join(".");
+		final path = module.path;
+		final dotPath = path.pack.concat([path.moduleName]).join(".");
 		return if (isExcluded(dotPath)) {
 			null;
 		} else {
@@ -702,8 +697,8 @@ class CompletionFeature {
 	}
 
 	function createLiteralCompletionItem<T>(item:DisplayItem<Dynamic>, data:CompletionContextData):CompletionItem {
-		var literal:DisplayLiteral<T> = item.args;
-		var result:CompletionItem = {
+		final literal:DisplayLiteral<T> = item.args;
+		final result:CompletionItem = {
 			label: literal.name,
 			kind: Keyword,
 			detail: printer.printType(item.type)
@@ -724,7 +719,7 @@ class CompletionFeature {
 	}
 
 	function maybeInsertPatternColon(text:String, data:CompletionContextData):String {
-		var info:PatternCompletion<Dynamic> = data.mode.args;
+		final info:PatternCompletion<Dynamic> = data.mode.args;
 		if (info == null || info.isOutermostPattern) {
 			return maybeInsert(text, ":", data.lineAfter);
 		}
@@ -741,7 +736,7 @@ class CompletionFeature {
 	}
 
 	function isExcluded(dotPath:String):Bool {
-		var excludes = context.config.user.exclude;
+		final excludes = context.config.user.exclude;
 		if (excludes == null) {
 			return false;
 		}

@@ -2,7 +2,7 @@ package haxeLanguageServer.documents;
 
 @:allow(haxeLanguageServer.Context)
 class TextDocuments {
-	public static inline var syncKind = TextDocumentSyncKind.Incremental;
+	public static inline final syncKind = TextDocumentSyncKind.Incremental;
 
 	final context:Context;
 	final documents:Map<DocumentUri, TextDocument>;
@@ -37,11 +37,11 @@ class TextDocuments {
 	}
 
 	function onDidChangeTextDocument(event:DidChangeTextDocumentParams) {
-		var td = event.textDocument;
-		var changes = event.contentChanges;
+		final td = event.textDocument;
+		final changes = event.contentChanges;
 		if (changes.length == 0)
 			return;
-		var document = documents[td.uri];
+		final document = documents[td.uri];
 		if (document != null) {
 			document.update(changes, td.version);
 		}

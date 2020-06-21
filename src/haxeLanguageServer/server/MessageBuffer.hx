@@ -3,7 +3,7 @@ package haxeLanguageServer.server;
 import js.node.Buffer;
 
 class MessageBuffer {
-	static inline var DEFAULT_SIZE = 8192;
+	static inline final DEFAULT_SIZE = 8192;
 
 	var index:Int;
 	var buffer:Buffer;
@@ -17,7 +17,7 @@ class MessageBuffer {
 		if (buffer.length - index >= chunk.length) {
 			chunk.copy(buffer, index, 0, chunk.length);
 		} else {
-			var newSize = (Math.ceil((index + chunk.length) / DEFAULT_SIZE) + 1) * DEFAULT_SIZE;
+			final newSize = (Math.ceil((index + chunk.length) / DEFAULT_SIZE) + 1) * DEFAULT_SIZE;
 			if (index == 0) {
 				buffer = Buffer.alloc(newSize);
 				chunk.copy(buffer, 0, 0, chunk.length);
@@ -31,7 +31,7 @@ class MessageBuffer {
 	public function tryReadLength():Int {
 		if (index < 4)
 			return -1;
-		var length = buffer.readInt32LE(0);
+		final length = buffer.readInt32LE(0);
 		buffer = buffer.slice(4);
 		index -= 4;
 		return length;
@@ -40,8 +40,8 @@ class MessageBuffer {
 	public function tryReadContent(length:Int):Null<String> {
 		if (index < length)
 			return null;
-		var result = buffer.toString("utf-8", 0, length);
-		var nextStart = length;
+		final result = buffer.toString("utf-8", 0, length);
+		final nextStart = length;
 		buffer.copy(buffer, 0, nextStart);
 		index -= nextStart;
 		return result;

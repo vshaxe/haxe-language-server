@@ -1,7 +1,7 @@
 package haxeLanguageServer.tokentree;
 
 import haxe.Json;
-import haxeLanguageServer.TextDocument;
+import haxeLanguageServer.documents.HaxeDocument;
 import haxeLanguageServer.features.haxe.documentSymbols.DocumentSymbolsResolver;
 import haxeLanguageServer.features.haxe.foldingRange.FoldingRangeResolver;
 
@@ -18,18 +18,18 @@ class TokenTreeTest extends Test {
 		});
 	}
 
-	function compareOutput(basePath:String, resolve:(document:TextDocument) -> Dynamic) {
-		var inputPath = '$basePath/Input.hx';
+	function compareOutput(basePath:String, resolve:(document:HaxeDocument) -> Dynamic) {
+		final inputPath = '$basePath/Input.hx';
 
 		var content = sys.io.File.getContent(inputPath);
 		content = content.replace("\r", "");
-		var uri = new FsPath(inputPath).toUri();
-		var document = new TextDocument(uri, "haxe", 0, content);
+		final uri = new FsPath(inputPath).toUri();
+		final document = new HaxeDocument(uri, "haxe", 0, content);
 
-		var stringify = Json.stringify.bind(_, null, "\t");
-		var actual = stringify(resolve(document));
+		final stringify = Json.stringify.bind(_, null, "\t");
+		final actual = stringify(resolve(document));
 		sys.io.File.saveContent('$basePath/Actual.json', actual);
-		var expected = stringify(Json.parse(sys.io.File.getContent('$basePath/Expected.json')));
+		final expected = stringify(Json.parse(sys.io.File.getContent('$basePath/Expected.json')));
 
 		// use "Compare Active File With..." and select Actual.json and Expected.json for debugging
 		Assert.isTrue(actual == expected);

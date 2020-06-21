@@ -14,16 +14,16 @@ class FoldingRangeFeature {
 	}
 
 	function onFoldingRange(params:FoldingRangeParams, token:CancellationToken, resolve:Array<FoldingRange>->Void, reject:ResponseError<NoData>->Void) {
-		var onResolve = context.startTimer("haxe/foldingRange");
-		var uri = params.textDocument.uri;
-		var doc = context.documents.getHaxe(uri);
+		final onResolve = context.startTimer("haxe/foldingRange");
+		final uri = params.textDocument.uri;
+		final doc = context.documents.getHaxe(uri);
 		if (doc == null) {
 			return reject.noFittingDocument(uri);
 		}
 		if (doc.tokens == null) {
 			return reject.noTokens();
 		}
-		var ranges = new FoldingRangeResolver(doc, context.capabilities.textDocument).resolve();
+		final ranges = new FoldingRangeResolver(doc, context.capabilities.textDocument).resolve();
 		resolve(ranges);
 		onResolve(null, ranges.length + " ranges");
 	}

@@ -6,7 +6,7 @@ using Lambda;
 
 class ExtensionsTest extends Test {
 	function testResolveImports() {
-		var imports = Extensions.resolveImports({
+		final imports = Extensions.resolveImports({
 			kind: TInst,
 			args: {
 				path: {

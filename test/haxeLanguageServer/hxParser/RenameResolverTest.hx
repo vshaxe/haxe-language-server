@@ -4,20 +4,20 @@ import haxeLanguageServer.documents.HaxeDocument;
 
 class RenameResolverTest extends Test {
 	function check(code:String, ?expected:String) {
-		var markedUsages = findMarkedRanges(code, "%");
-		var declaration = markedUsages[0];
+		final markedUsages = findMarkedRanges(code, "%");
+		final declaration = markedUsages[0];
 		if (declaration == null) {
 			throw "missing declaration markers";
 		}
 		code = code.replace("%", "");
 
-		var newName = "newName";
-		var resolver = new RenameResolver(declaration, newName);
-		var parseTree = new HaxeDocument(new DocumentUri("file:///c:/"), "haxe", 0, code).parseTree;
+		final newName = "newName";
+		final resolver = new RenameResolver(declaration, newName);
+		final parseTree = new HaxeDocument(new DocumentUri("file:///c:/"), "haxe", 0, code).parseTree;
 		resolver.walkFile(parseTree, Root);
 
 		if (expected == null) {
-			var expectedEdits = [
+			final expectedEdits = [
 				for (usage in markedUsages)
 					{
 						range: usage,
@@ -32,12 +32,12 @@ class RenameResolverTest extends Test {
 
 	function applyEdits(document:String, edits:Array<TextEdit>):String {
 		edits = edits.copy();
-		var lines = ~/\n\r?/g.split(document);
+		final lines = ~/\n\r?/g.split(document);
 		for (i in 0...lines.length) {
-			var line = lines[i];
-			var relevantEdits = edits.filter(edit -> edit.range.start.line == i);
+			final line = lines[i];
+			final relevantEdits = edits.filter(edit -> edit.range.start.line == i);
 			for (edit in relevantEdits) {
-				var range = edit.range;
+				final range = edit.range;
 				lines[i] = line.substr(0, range.start.character) + edit.newText + line.substring(range.end.character);
 				edits.remove(edit);
 			}
@@ -48,10 +48,10 @@ class RenameResolverTest extends Test {
 	function findMarkedRanges(code:String, marker:String):Array<Range> {
 		// not expecting multiple marked words in a single line..
 		var lineNumber = 0;
-		var ranges = [];
+		final ranges = [];
 		for (line in code.split("\n")) {
-			var startChar = line.indexOf(marker);
-			var endChar = line.lastIndexOf(marker);
+			final startChar = line.indexOf(marker);
+			final endChar = line.lastIndexOf(marker);
 			if (startChar != -1 && endChar != -1) {
 				ranges.push({
 					start: {line: lineNumber, character: startChar},

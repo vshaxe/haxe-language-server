@@ -6,8 +6,8 @@ class TestTextEditHelper {
 		Assert.notNull(goldEdits);
 		Assert.equals(goldEdits.length, actualEdits.length);
 		for (index in 0...goldEdits.length) {
-			var expectedEdit:TextEdit = goldEdits[index];
-			var actualEdit:TextEdit = actualEdits[index];
+			final expectedEdit:TextEdit = goldEdits[index];
+			final actualEdit:TextEdit = actualEdits[index];
 			Assert.equals(expectedEdit.newText, actualEdit.newText);
 			if (expectedEdit.range != null) {
 				Assert.equals(expectedEdit.range.start.line, actualEdit.range.start.line);

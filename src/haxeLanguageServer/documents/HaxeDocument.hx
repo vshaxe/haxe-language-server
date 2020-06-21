@@ -24,7 +24,7 @@ class HaxeDocument extends TextDocument {
 	}
 
 	inline function bytePositionToPosition(bytePosition:Position, offsetConverter:DisplayOffsetConverter):Position {
-		var line = lineAt(bytePosition.line);
+		final line = lineAt(bytePosition.line);
 		return {
 			line: bytePosition.line,
 			character: offsetConverter.byteOffsetToCharacterOffset(line, bytePosition.character)
@@ -53,7 +53,7 @@ class HaxeDocument extends TextDocument {
 
 	function get_tokens() {
 		if (_tokens == null) {
-			var stopTimer = if (context != null) context.startTimer("TokenTreeManager.create()") else null;
+			final stopTimer = if (context != null) context.startTimer("TokenTreeManager.create()") else null;
 			try {
 				_tokens = TokenTreeManager.create(content);
 			} catch (e) {

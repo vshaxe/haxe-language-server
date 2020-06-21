@@ -8,8 +8,8 @@ using Lambda;
 using hxParser.WalkStackTools;
 
 private typedef DeclInfo = {
-	var scope:Scope;
-	var isCaptureVariable:Bool;
+	final scope:Scope;
+	final isCaptureVariable:Bool;
 }
 
 class RenameResolver extends PositionAwareWalker {
@@ -46,7 +46,7 @@ class RenameResolver extends PositionAwareWalker {
 
 		// have we found the declaration yet? (assume that usages can only be after the declaration)
 		if (!declarationInScope) {
-			var range = getRange();
+			final range = getRange();
 			function isLocal() {
 				return stack.find(stack -> stack.match(Edge("expr" | "args", _))) != null;
 			}
@@ -66,7 +66,7 @@ class RenameResolver extends PositionAwareWalker {
 			}
 		}
 
-		var consumer = rangeConsumers[token];
+		final consumer = rangeConsumers[token];
 		if (consumer != null) {
 			consumer(getRange());
 			rangeConsumers.remove(token);
@@ -86,7 +86,7 @@ class RenameResolver extends PositionAwareWalker {
 		}
 
 		function addShadowingDecl(decls:Array<DeclInfo>) {
-			var last = decls[decls.length - 1];
+			final last = decls[decls.length - 1];
 			if (decls.length > 0 && isCaptureVariable && isCaptureVariableInSameScope(last, scope)) {
 				// capture vars can't shadow other capture vars on same scope
 				return;
@@ -156,7 +156,7 @@ class RenameResolver extends PositionAwareWalker {
 	}
 
 	function isMacroCaptureVariable(stack:WalkStack):Bool {
-		var macroStack = stack.find(stack -> stack.match(Node(Expr_EMacro(_, _), _)));
+		final macroStack = stack.find(stack -> stack.match(Node(Expr_EMacro(_, _), _)));
 		if (macroStack != null) {
 			return isCaptureVariable(macroStack);
 		}
@@ -168,9 +168,9 @@ class RenameResolver extends PositionAwareWalker {
 	}
 
 	function handleIdent(ident:Token, stack:WalkStack) {
-		var identText = getRawIdentifier(ident.text);
+		final identText = getRawIdentifier(ident.text);
 		// assume that lowercase idents in `case` are capture vars
-		var firstChar = identText.charAt(0);
+		final firstChar = identText.charAt(0);
 		if (ident.text.charAt(0) != "$"
 			&& firstChar == firstChar.toLowerCase()
 			&& isCaptureVariable(stack)
@@ -187,7 +187,7 @@ class RenameResolver extends PositionAwareWalker {
 			} else if (identText == newName && newIdentShadowingDecls.length == 0) {
 				// avoid conflicts
 				rangeConsumers[ident] = function(range) {
-					var prefix = if (inStaticFunction) typeName else "this";
+					final prefix = if (inStaticFunction) typeName else "this";
 					edits.push({
 						range: range,
 						newText: '$prefix.$newName'

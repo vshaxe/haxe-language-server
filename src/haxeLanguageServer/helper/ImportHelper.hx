@@ -19,7 +19,7 @@ function createImportsEdit(doc:TextDocument, result:ImportPosition, paths:Array<
 	if (style == Module) {
 		paths = paths.map(TypeHelper.getModule);
 	}
-	var importData = {
+	final importData = {
 		range: result.position.toRange(),
 		newText: paths.map(path -> 'import $path;\n').join("")
 	};
@@ -37,12 +37,12 @@ function createImportsEdit(doc:TextDocument, result:ImportPosition, paths:Array<
 
 function createFunctionImportsEdit<T>(doc:TextDocument, result:ImportPosition, context:Context, type:JsonType<T>,
 		formatting:FunctionFormattingConfig):Array<TextEdit> {
-	var importConfig = context.config.user.codeGeneration.imports;
+	final importConfig = context.config.user.codeGeneration.imports;
 	if (!importConfig.enableAutoImports) {
 		return [];
 	}
 	var paths = [];
-	var signature = type.extractFunctionSignature();
+	final signature = type.extractFunctionSignature();
 	if (formatting.argumentTypeHints && (!formatting.useArrowSyntax || signature.args.length != 1)) {
 		paths = paths.concat(signature.args.map(arg -> arg.t.resolveImports()).flatten().array());
 	}
@@ -51,16 +51,16 @@ function createFunctionImportsEdit<T>(doc:TextDocument, result:ImportPosition, c
 	}
 	paths = paths.filterDuplicates((e1, e2) -> Json.stringify(e1) == Json.stringify(e2));
 
-	if (paths.length == 0) {
-		return [];
+	return if (paths.length == 0) {
+		[];
 	} else {
-		var printer = new DisplayPrinter(false, Always);
-		return [createImportsEdit(doc, result, paths.map(printer.printPath), importConfig.style)];
+		final printer = new DisplayPrinter(false, Always);
+		[createImportsEdit(doc, result, paths.map(printer.printPath), importConfig.style)];
 	}
 }
 
 function determineImportPosition(document:HaxeDocument):ImportPosition {
-	var tokens = document.tokens;
+	final tokens = document.tokens;
 	if (tokens == null) {
 		return null;
 	}
@@ -69,7 +69,7 @@ function determineImportPosition(document:HaxeDocument):ImportPosition {
 	var packageStatement = null;
 
 	// if the first token in the file is a comment, we should add the import after this
-	var firstComment = if (tokens.list[0].tok.match(Comment(_))) {
+	final firstComment = if (tokens.list[0].tok.match(Comment(_))) {
 		tokens.list[0];
 	} else {
 		null;
@@ -93,8 +93,8 @@ function determineImportPosition(document:HaxeDocument):ImportPosition {
 			insertLineAfter: false
 		}
 	} else if (packageStatement != null) {
-		var lastChild = packageStatement.getLastChild();
-		var pos = document.positionAt(tokens.getPos(lastChild != null ? lastChild : packageStatement).max);
+		final lastChild = packageStatement.getLastChild();
+		final pos = document.positionAt(tokens.getPos(lastChild != null ? lastChild : packageStatement).max);
 		pos.line += 1;
 		pos.character = 0;
 		{
@@ -103,7 +103,7 @@ function determineImportPosition(document:HaxeDocument):ImportPosition {
 			insertLineBefore: true
 		}
 	} else if (firstComment != null) {
-		var pos = document.positionAt(firstComment.pos.max);
+		final pos = document.positionAt(firstComment.pos.max);
 		pos.line += 1;
 		pos.character = 0;
 		{

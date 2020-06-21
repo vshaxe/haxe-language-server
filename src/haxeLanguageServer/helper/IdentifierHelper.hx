@@ -25,14 +25,14 @@ class IdentifierHelper {
 			case "Void": "_";
 			case type if (type.startsWith("{")): "struct";
 			case type:
-				var segments = ~/(?=[A-Z][^A-Z]*$)/.split(type);
-				var result = segments[segments.length - 1];
+				final segments = ~/(?=[A-Z][^A-Z]*$)/.split(type);
+				final result = segments[segments.length - 1];
 				result.substring(0, 1).toLowerCase() + result.substr(1);
 		}
 	}
 
 	public static function avoidDuplicates(names:Array<String>):Array<String> {
-		var currentOccurrence:Map<String, Int> = new Map();
+		final currentOccurrence:Map<String, Int> = new Map();
 		return [
 			for (name in names) {
 				var i = currentOccurrence[name];
@@ -58,9 +58,9 @@ class IdentifierHelper {
 	**/
 	public static function addNamesToSignatureType(type:String, index:Int = 0):String {
 		inline function getUniqueLetter(index:Int) {
-			var letters = 26;
-			var alphabets = Std.int(index / letters) + 1;
-			var lowerAsciiA = 0x61;
+			final letters = 26;
+			final alphabets = Std.int(index / letters) + 1;
+			final lowerAsciiA = 0x61;
 			return [for (i in 0...alphabets) fromCharCode(lowerAsciiA + (index % letters))].join("");
 		}
 
@@ -73,14 +73,14 @@ class IdentifierHelper {
 		if (type.startsWith(":"))
 			return (if (isOptional) "?" else "") + getUniqueLetter(index) + type;
 		else if (type.startsWith("(")) {
-			var segmentsRe = ~/\((.*?)\)\s*:\s*(.*)/;
+			final segmentsRe = ~/\((.*?)\)\s*:\s*(.*)/;
 			if (!segmentsRe.match(type))
 				return type;
-			var args = segmentsRe.matched(1);
-			var returnType = segmentsRe.matched(2);
-			var fixedArgs = [
+			final args = segmentsRe.matched(1);
+			final returnType = segmentsRe.matched(2);
+			final fixedArgs = [
 				for (arg in ~/\s*,\s*/g.split(args)) {
-					var fixedArg = addNamesToSignatureType(arg, index);
+					final fixedArg = addNamesToSignatureType(arg, index);
 					index++;
 					fixedArg;
 				}

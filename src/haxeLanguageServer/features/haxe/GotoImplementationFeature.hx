@@ -16,8 +16,8 @@ class GotoImplementationFeature {
 
 	public function onGotoImplementation(params:TextDocumentPositionParams, token:CancellationToken, resolve:Definition->Void,
 			reject:ResponseError<NoData>->Void) {
-		var uri = params.textDocument.uri;
-		var doc = context.documents.getHaxe(uri);
+		final uri = params.textDocument.uri;
+		final doc = context.documents.getHaxe(uri);
 		if (doc == null || !uri.isFile()) {
 			return reject.noFittingDocument(uri);
 		}

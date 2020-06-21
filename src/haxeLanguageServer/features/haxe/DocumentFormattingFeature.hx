@@ -26,17 +26,17 @@ class DocumentFormattingFeature {
 	}
 
 	function format(uri:DocumentUri, range:Null<Range>, resolve:Array<TextEdit>->Void, reject:ResponseError<NoData>->Void) {
-		var onResolve = context.startTimer("haxe/formatting");
-		var doc:Null<HaxeDocument> = context.documents.getHaxe(uri);
+		final onResolve = context.startTimer("haxe/formatting");
+		final doc:Null<HaxeDocument> = context.documents.getHaxe(uri);
 		if (doc == null) {
 			return reject.noFittingDocument(uri);
 		}
-		var tokens = doc.tokens;
+		final tokens = doc.tokens;
 		if (tokens == null) {
 			return reject.noTokens();
 		}
 
-		var config = Formatter.loadConfig(if (doc.uri.isFile()) {
+		final config = Formatter.loadConfig(if (doc.uri.isFile()) {
 			doc.uri.toFsPath().toString();
 		} else {
 			context.workspacePath.toString();
@@ -44,7 +44,7 @@ class DocumentFormattingFeature {
 		var inputRange:FormatterInputRange = null;
 		if (range != null) {
 			range.start.character = 0;
-			var converter = new Haxe3DisplayOffsetConverter();
+			final converter = new Haxe3DisplayOffsetConverter();
 			function convert(position) {
 				return converter.characterOffsetToByteOffset(doc.content, doc.offsetAt(position));
 			}
@@ -53,7 +53,7 @@ class DocumentFormattingFeature {
 				endPos: convert(range.end)
 			}
 		}
-		var result = Formatter.format(Tokens(tokens.list, tokens.tree, tokens.bytes), config, inputRange);
+		final result = Formatter.format(Tokens(tokens.list, tokens.tree, tokens.bytes), config, inputRange);
 		switch result {
 			case Success(formattedCode):
 				if (range == null) {
@@ -62,7 +62,7 @@ class DocumentFormattingFeature {
 						end: {line: doc.lineCount - 1, character: doc.lineAt(doc.lineCount - 1).length}
 					}
 				}
-				var edits = [{range: range, newText: formattedCode}];
+				final edits = [{range: range, newText: formattedCode}];
 				resolve(edits);
 				onResolve();
 			case Failure(errorMessage):

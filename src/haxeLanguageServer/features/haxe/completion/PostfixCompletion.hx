@@ -13,7 +13,7 @@ import languageServerProtocol.Types.CompletionItem;
 using Lambda;
 
 class PostfixCompletion {
-	static inline var block = '{\n\t$0\n}';
+	static inline final block = '{\n\t$0\n}';
 
 	final context:Context;
 
@@ -22,11 +22,11 @@ class PostfixCompletion {
 	}
 
 	public function createItems<T1, T2>(data:CompletionContextData, items:Array<DisplayItem<T1>>):Array<CompletionItem> {
-		var level = context.config.user.postfixCompletion.level;
+		final level = context.config.user.postfixCompletion.level;
 		if (level == Off) {
 			return [];
 		}
-		var context = data.params.context;
+		final context = data.params.context;
 		if (context!.triggerKind == TriggerCharacter && context!.triggerCharacter != ".") {
 			return [];
 		}
@@ -39,11 +39,11 @@ class PostfixCompletion {
 				return [];
 		}
 
-		var type = subject.item.type;
+		final type = subject.item.type;
 		if (type == null) {
 			return [];
 		}
-		var type = type.removeNulls().type;
+		final type = type.removeNulls().type;
 
 		var expr = data.doc.getText(subject.range);
 		if (expr.startsWith("(") && expr.endsWith(")")) {
@@ -54,9 +54,9 @@ class PostfixCompletion {
 		if (replaceRange == null) {
 			replaceRange = data.params.position.toRange();
 		}
-		var removeRange:Range = {start: subject.range.start, end: replaceRange.start};
+		final removeRange:Range = {start: subject.range.start, end: replaceRange.start};
 
-		var result:Array<CompletionItem> = [];
+		final result:Array<CompletionItem> = [];
 		function add(item:PostfixCompletionItem) {
 			result.push(createPostfixCompletionItem(item, data.doc, removeRange, replaceRange));
 		}
@@ -71,10 +71,7 @@ class PostfixCompletion {
 			});
 		}
 		if (subject.keyValueIterator != null) {
-			var key = "key";
-			if (subject.keyValueIterator.key.getDotPath() == Int) {
-				key = "index";
-			}
+			final key = if (subject.keyValueIterator.key.getDotPath() == Int) "index" else "key";
 			add({
 				label: "for k=>v",
 				detail: 'for ($key => value in expr)',
@@ -83,7 +80,7 @@ class PostfixCompletion {
 			});
 		}
 
-		var dotPath = type.getDotPath();
+		final dotPath = type.getDotPath();
 		switch dotPath {
 			case Bool:
 				add({
@@ -128,7 +125,7 @@ class PostfixCompletion {
 		for (item in createLengthIterators(subject, items, expr)) {
 			add(item);
 		}
-		var switchItem = createSwitchItem(subject, expr);
+		final switchItem = createSwitchItem(subject, expr);
 		if (switchItem != null) {
 			add(switchItem);
 		}
@@ -243,7 +240,7 @@ class PostfixCompletion {
 					type = switch type.kind {
 						case TFun:
 							field += "()";
-							var args:JsonFunctionSignature = type.args;
+							final args:JsonFunctionSignature = type.args;
 							if (args.args.length > 0) {
 								continue;
 							}
@@ -263,12 +260,12 @@ class PostfixCompletion {
 	}
 
 	function createIndexedLoops(field:String):Array<PostfixCompletionItem> {
-		var whileForward = 'var i = 0;
+		final whileForward = 'var i = 0;
 while (i < $field) {
 	$0
 	i++;
 }';
-		var whileBackward = 'var i = $field;
+		final whileBackward = 'var i = $field;
 while (i-- > 0) {
 	$0
 }';
@@ -302,8 +299,8 @@ while (i-- > 0) {
 		if (moduleType == null) {
 			return null;
 		}
-		var printer = new DisplayPrinter();
-		var parentheses = context.config.user.codeGeneration.switch_.parentheses;
+		final printer = new DisplayPrinter();
+		final parentheses = context.config.user.codeGeneration.switch_.parentheses;
 
 		function make(insertText:String):PostfixCompletionItem {
 			return {
@@ -315,22 +312,22 @@ while (i-- > 0) {
 			};
 		}
 
-		var nullable = subject.item.type.removeNulls().nullable;
+		final nullable = subject.item.type.removeNulls().nullable;
 		switch moduleType.kind {
 			case Enum:
-				var e:JsonEnum = moduleType.args;
+				final e:JsonEnum = moduleType.args;
 				if (e.constructors.length > 0) {
 					return make(printer.printSwitchOnEnum(expr, e, nullable, true, parentheses));
 				}
 			case Abstract if (moduleType.meta.hasMeta(Enum)):
-				var a:JsonAbstract = moduleType.args;
+				final a:JsonAbstract = moduleType.args;
 				if (a.impl != null && a.impl.statics.exists(f -> f.isEnumAbstractField())) {
 					return make(printer.printSwitchOnEnumAbstract(expr, a, nullable, true, parentheses));
 				}
 			case Abstract if (moduleType.moduleName == "StdTypes" && moduleType.name == "Bool"):
 				return make(printer.printSwitch(expr, ["true", "false"], nullable, true, parentheses));
 			case _:
-				var item = make(printer.printSwitchSubject(expr, parentheses) + ' {\n\tcase $0\n}');
+				final item = make(printer.printSwitchSubject(expr, parentheses) + ' {\n\tcase $0\n}');
 				item.command = TriggerSuggest;
 				return item;
 		}
@@ -339,13 +336,13 @@ while (i-- > 0) {
 
 	function createPostfixCompletionItem(data:PostfixCompletionItem, doc:TextDocument, removeRange:Range, replaceRange:Range):CompletionItem {
 		if (data.eat != null) {
-			var pos = replaceRange.end;
-			var nextChar = doc.getText({start: pos, end: pos.translate(0, 1)});
+			final pos = replaceRange.end;
+			final nextChar = doc.getText({start: pos, end: pos.translate(0, 1)});
 			if (data.eat == nextChar) {
 				replaceRange = {start: replaceRange.start, end: pos.translate(0, 1)};
 			}
 		};
-		var item:CompletionItem = {
+		final item:CompletionItem = {
 			label: data.label,
 			sortText: "~", // sort to the end
 			kind: Snippet,
@@ -381,11 +378,11 @@ while (i-- > 0) {
 }
 
 private typedef PostfixCompletionItem = {
-	var label:String;
-	var ?detail:String;
-	var insertText:String;
-	var insertTextFormat:InsertTextFormat;
-	var ?eat:String;
-	var ?showCode:Bool;
+	final label:String;
+	final ?detail:String;
+	final insertText:String;
+	final insertTextFormat:InsertTextFormat;
+	final ?eat:String;
+	final ?showCode:Bool;
 	var ?command:Command;
 }

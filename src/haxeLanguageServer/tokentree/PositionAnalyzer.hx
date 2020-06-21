@@ -15,7 +15,7 @@ class PositionAnalyzer {
 	}
 
 	public function resolve(pos:Position):Null<TokenTree> {
-		var tokens = document.tokens;
+		final tokens = document.tokens;
 		if (tokens == null) {
 			return null;
 		}
@@ -25,13 +25,13 @@ class PositionAnalyzer {
 			if (found) {
 				return SKIP_SUBTREE;
 			}
-			var tokenPos = document.rangeAt2(tokens.getPos(token));
+			final tokenPos = document.rangeAt2(tokens.getPos(token));
 			if (tokenPos.containsPos(pos)) {
 				result = token;
 				found = true;
 				return SKIP_SUBTREE;
 			}
-			var tokenTreePos = document.rangeAt2(tokens.getTreePos(token));
+			final tokenTreePos = document.rangeAt2(tokens.getTreePos(token));
 			if (tokenTreePos.containsPos(pos)) {
 				result = token;
 				return GO_DEEPER;
@@ -47,7 +47,7 @@ class PositionAnalyzer {
 		}
 		return switch token.tok {
 			case Const(CString(_)):
-				var startPos = document.positionAt(document.tokens.getPos(token).min);
+				final startPos = document.positionAt(document.tokens.getPos(token).min);
 				return switch document.characterAt(startPos) {
 					case "'": SingleQuote;
 					case '"': DoubleQuote;
@@ -121,12 +121,12 @@ class PositionAnalyzer {
 		}
 
 		var pos = BeforePackage;
-		var root = document.tokens.tree;
+		final root = document.tokens.tree;
 		if (root.children == null) {
 			return Root(pos);
 		}
 		for (child in root.children) {
-			var childPos = document.rangeAt2(document.tokens.getPos(child));
+			final childPos = document.rangeAt2(document.tokens.getPos(child));
 			if (childPos.start.isAfter(completionPosition)) {
 				break;
 			}

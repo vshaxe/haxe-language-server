@@ -24,19 +24,19 @@ class CompletionFeatureLegacy {
 		if (contextSupport && isInvalidCompletionPosition(params.context, textBefore)) {
 			return resolve({items: [], isIncomplete: false});
 		}
-		var r = calculateCompletionPosition(textBefore, offset);
-		var bytePos = context.displayOffsetConverter.characterOffsetToByteOffset(doc.content, r.pos);
-		var args = ['${doc.uri.toFsPath()}@$bytePos' + (if (r.toplevel) "@toplevel" else "")];
+		final r = calculateCompletionPosition(textBefore, offset);
+		final bytePos = context.displayOffsetConverter.characterOffsetToByteOffset(doc.content, r.pos);
+		final args = ['${doc.uri.toFsPath()}@$bytePos' + (if (r.toplevel) "@toplevel" else "")];
 		context.callDisplay(if (r.toplevel) "@toplevel" else "field completion", args, doc.content, token, function(result) {
 			switch result {
 				case DCancelled:
 					resolve(null);
 				case DResult(data):
-					var xml = try Xml.parse(data).firstElement() catch (_:Any) null;
+					final xml = try Xml.parse(data).firstElement() catch (_:Any) null;
 					if (xml == null)
 						return reject.invalidXml(data);
 
-					var items = if (r.toplevel) parseToplevelCompletion(xml, params.position, textBefore,
+					final items = if (r.toplevel) parseToplevelCompletion(xml, params.position, textBefore,
 						doc) else parseFieldCompletion(xml, textBefore, params.position);
 					resolve({items: items, isIncomplete: false});
 			}
@@ -58,7 +58,7 @@ class CompletionFeatureLegacy {
 				toplevel: false,
 			};
 
-		var whitespaceAmount = text.length - text.rtrim().length;
+		final whitespaceAmount = text.length - text.rtrim().length;
 		return {
 			pos: index - whitespaceAmount,
 			toplevel: true,
@@ -66,25 +66,25 @@ class CompletionFeatureLegacy {
 	}
 
 	function parseToplevelCompletion(x:Xml, position:Position, textBefore:String, doc:TextDocument):Array<CompletionItem> {
-		var result = [];
-		var timers = [];
+		final result = [];
+		final timers = [];
 		for (el in x.elements()) {
-			var kind = el.get("k");
-			var type = el.get("t");
-			var name = el.firstChild().nodeValue;
+			final kind = el.get("k");
+			final type = el.get("t");
+			final name = el.firstChild().nodeValue;
 
 			if (kind == "local" && name == "_") {
 				continue;
 			}
 
-			var item:CompletionItem = {label: name, detail: ""};
+			final item:CompletionItem = {label: name, detail: ""};
 
-			var displayKind = toplevelKindToCompletionItemKind(kind, type);
+			final displayKind = toplevelKindToCompletionItemKind(kind, type);
 			if (displayKind != null)
 				item.kind = displayKind;
 
 			if (isTimerDebugFieldCompletion(name)) {
-				var info = name.split(":");
+				final info = name.split(":");
 				timers.push(getTimerCompletionItem(info[0], info[1], position));
 				continue;
 			}
@@ -96,7 +96,7 @@ class CompletionFeatureLegacy {
 				fullName = el.get("p");
 
 			if (type != null || fullName != name) {
-				var parts = [];
+				final parts = [];
 				if (fullName != name)
 					parts.push(fullName);
 				if (type != null)
@@ -104,7 +104,7 @@ class CompletionFeatureLegacy {
 				item.detail = parts.join(" ");
 			}
 
-			var documentation = el.get("d");
+			final documentation = el.get("d");
 			if (documentation != null)
 				item.documentation = formatDocumentation(documentation);
 
@@ -134,12 +134,12 @@ class CompletionFeatureLegacy {
 	}
 
 	function parseFieldCompletion(x:Xml, textBefore:String, position:Position):Array<CompletionItem> {
-		var result = [];
-		var timers = [];
-		var methods = new Map<String, {item:CompletionItem, overloads:Int}>();
+		final result = [];
+		final timers = [];
+		final methods = new Map<String, {item:CompletionItem, overloads:Int}>();
 		for (el in x.elements()) {
-			var rawKind = el.get("k");
-			var kind = fieldKindToCompletionItemKind(rawKind);
+			final rawKind = el.get("k");
+			final kind = fieldKindToCompletionItemKind(rawKind);
 			var name = el.get("n");
 			if (kind == Method && methods[name] != null) {
 				// only show an overloaded method once
@@ -170,7 +170,7 @@ class CompletionFeatureLegacy {
 				timers.push(getTimerCompletionItem(name, type, position));
 				continue;
 			}
-			var item:CompletionItem = {label: name};
+			final item:CompletionItem = {label: name};
 			if (doc != null)
 				item.documentation = formatDocumentation(doc);
 			if (kind != null)
@@ -188,7 +188,7 @@ class CompletionFeatureLegacy {
 		}
 
 		for (method in methods) {
-			var overloads = method.overloads;
+			final overloads = method.overloads;
 			if (overloads > 0) {
 				method.item.detail += ' (+$overloads overloads)';
 			}
@@ -200,8 +200,8 @@ class CompletionFeatureLegacy {
 
 	static function sortTimers(items:Array<CompletionItem>) {
 		items.sort(function(a, b) {
-			var time1:Float = cast a.data;
-			var time2:Float = cast b.data;
+			final time1:Float = cast a.data;
+			final time2:Float = cast b.data;
 			if (time1 < time2)
 				return 1;
 			if (time1 > time2)
@@ -216,7 +216,7 @@ class CompletionFeatureLegacy {
 
 	static function getTimerCompletionItem(name:String, time:String, position:Position):CompletionItem {
 		// avert your eyes...
-		var timeRegex = ~/([0-9.]*)s(?: \(([0-9]*)%\))?/;
+		final timeRegex = ~/([0-9.]*)s(?: \(([0-9]*)%\))?/;
 		var seconds = 0.0;
 		var percentage = "--";
 		try {
@@ -275,6 +275,6 @@ class CompletionFeatureLegacy {
 }
 
 private typedef CompletionPosition = {
-	var pos:Int;
-	var toplevel:Bool;
+	final pos:Int;
+	final toplevel:Bool;
 }

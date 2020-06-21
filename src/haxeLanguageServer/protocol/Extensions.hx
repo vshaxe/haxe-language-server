@@ -3,7 +3,6 @@ package haxeLanguageServer.protocol;
 import haxe.display.Display;
 import haxe.display.JsonModuleTypes;
 import haxeLanguageServer.helper.IdentifierHelper;
-import haxeLanguageServer.protocol.DisplayPrinter.PathPrinting;
 
 using Lambda;
 
@@ -31,7 +30,7 @@ function resolveImports<T>(type:JsonType<T>):Array<JsonTypePath> {
 				[];
 			case TInst | TEnum | TType | TAbstract:
 				var paths = [];
-				var typePath:JsonTypePathWithParams = type.args;
+				final typePath:JsonTypePathWithParams = type.args;
 				if (typePath.params != null) {
 					paths = typePath.params.map(rec).flatten().array();
 				}
@@ -40,7 +39,7 @@ function resolveImports<T>(type:JsonType<T>):Array<JsonTypePath> {
 				}
 				paths;
 			case TFun:
-				var signature = type.args;
+				final signature = type.args;
 				signature.args.map(arg -> rec(arg.t)).flatten().array().concat(rec(signature.ret));
 			case TAnonymous:
 				type.args.fields.map(field -> rec(field.type)).flatten().array();
@@ -97,7 +96,7 @@ function isModuleLevel<T>(origin:Null<ClassFieldOrigin<T>>) {
 	}
 	return switch (origin.kind) {
 		case Self | Parent | StaticImport | StaticExtension:
-			var moduleType:JsonModuleType<Dynamic> = origin.args;
+			final moduleType:JsonModuleType<Dynamic> = origin.args;
 			if (moduleType == null) {
 				return false;
 			}
@@ -117,13 +116,13 @@ function isStructure<T>(origin:Null<ClassFieldOrigin<T>>) {
 	}
 	return switch origin.kind {
 		case Self | StaticImport | Parent | StaticExtension:
-			var moduleType:JsonModuleType<Dynamic> = origin.args;
+			final moduleType:JsonModuleType<Dynamic> = origin.args;
 			if (moduleType == null) {
 				return false;
 			}
 			switch moduleType.kind {
 				case Typedef:
-					var jsonTypedef:JsonTypedef = moduleType.args;
+					final jsonTypedef:JsonTypedef = moduleType.args;
 					jsonTypedef.type.removeNulls().type.kind == TAnonymous;
 				case _: false;
 			}
@@ -136,7 +135,7 @@ function isStructure<T>(origin:Null<ClassFieldOrigin<T>>) {
 function removeNulls<T>(type:JsonType<T>, nullable:Bool = false):{type:JsonType<T>, nullable:Bool} {
 	switch type.kind {
 		case TAbstract:
-			var path:JsonTypePathWithParams = type.args;
+			final path:JsonTypePathWithParams = type.args;
 			if (path.path.pack.length == 0 && path.path.typeName == "Null") {
 				if (path.params != null && path.params[0] != null) {
 					return removeNulls(path.params[0], true);
@@ -156,7 +155,7 @@ function getTypePath<T>(type:JsonType<T>):JsonTypePathWithParams {
 }
 
 function guessName<T>(type:JsonType<T>):String {
-	var path = type.getTypePath();
+	final path = type.getTypePath();
 	if (path == null) {
 		return "unknown";
 	}
@@ -165,7 +164,7 @@ function guessName<T>(type:JsonType<T>):String {
 
 function hasMandatoryTypeParameters(type:DisplayModuleType):Bool {
 	// Dynamic is a special case regarding this in the compiler
-	var path = type.path;
+	final path = type.path;
 	if (path.typeName == "Dynamic" && path.pack.length == 0) {
 		return false;
 	}

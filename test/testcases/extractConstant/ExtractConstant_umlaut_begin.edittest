@@ -22,7 +22,7 @@ class Main {
 
 {
 	"edits": [{
-            "newText": "static inline var DISABLED = \"disabled\";\n\n\t"
+            "newText": "static inline final DISABLED = \"disabled\";\n\n\t"
         },{
             "newText": "DISABLED"
         },{

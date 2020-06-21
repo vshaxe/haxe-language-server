@@ -7,6 +7,6 @@ function shouldPrintReturn(config:FunctionFormattingConfig, signature:JsonFuncti
 	if (config.useArrowSyntax) {
 		return false;
 	}
-	var returnStyle = config.returnTypeHint;
+	final returnStyle = config.returnTypeHint;
 	return returnStyle == Always || (returnStyle == NonVoid && !signature.ret.isVoid());
 }

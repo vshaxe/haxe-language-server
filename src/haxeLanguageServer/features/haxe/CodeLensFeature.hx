@@ -17,13 +17,13 @@ class CodeLensFeature {
 	}
 
 	function getCodeLensFromStatistics(uri:DocumentUri, statistics:Array<StatisticsObject>) {
-		var actions:Array<CodeLens> = [];
+		final actions:Array<CodeLens> = [];
 		function addRelation(kind:String, plural:String, range:Range, relations:Null<Array<Relation>>) {
 			if (relations == null) {
 				relations = [];
 			}
-			var title = relations.length + " " + kind + (relations.length == 1 ? "" : plural);
-			var action = if (relations.length == 0) {
+			final title = relations.length + " " + kind + (relations.length == 1 ? "" : plural);
+			final action = if (relations.length == 0) {
 				{
 					command: {
 						title: title,
@@ -33,7 +33,7 @@ class CodeLensFeature {
 					range: range
 				};
 			} else {
-				var args:Array<Dynamic> = [
+				final args:Array<Dynamic> = [
 					uri,
 					range.start,
 					relations.filter(function(c) {
@@ -43,7 +43,7 @@ class CodeLensFeature {
 						var cRange = c.range;
 						// multi-line ranges are not useful, VSCode navigates to the end of them
 						if (c.range.start.line != c.range.end.line) {
-							var nextLineStart = {character: 0, line: c.range.start.line + 1};
+							final nextLineStart = {character: 0, line: c.range.start.line + 1};
 							cRange = {start: c.range.start, end: nextLineStart};
 						}
 						return {range: cRange, uri: c.file.toUri()}
@@ -64,7 +64,7 @@ class CodeLensFeature {
 			if (statistic.kind == null) {
 				continue; // Shouldn't happen, but you never know
 			}
-			var range = statistic.range;
+			final range = statistic.range;
 			switch statistic.kind {
 				case ClassType:
 					if (statistic.subclasses != null) {
@@ -96,27 +96,27 @@ class CodeLensFeature {
 		if (!context.config.user.enableCodeLens) {
 			return resolve([]);
 		}
-		var uri = params.textDocument.uri;
-		var doc:Null<HaxeDocument> = context.documents.getHaxe(uri);
+		final uri = params.textDocument.uri;
+		final doc:Null<HaxeDocument> = context.documents.getHaxe(uri);
 		if (doc == null || !uri.isFile()) {
 			return reject.noFittingDocument(uri);
 		}
-		var onResolve = context.startTimer("@statistics");
+		final onResolve = context.startTimer("@statistics");
 		context.callDisplay("@statistics", [doc.uri.toFsPath() + "@0@statistics"], doc.content, token, function(r:DisplayResult) {
 			switch r {
 				case DCancelled:
 					resolve(null);
 				case DResult(s):
-					var data:Array<Statistics> = try {
+					final data:Array<Statistics> = try {
 						haxe.Json.parse(s);
 					} catch (e) {
 						return reject(ResponseError.internalError('Error parsing stats response'));
 					}
 					onResolve(data);
 					for (statistics in data) {
-						var currentUri = statistics.file.toUri();
+						final currentUri = statistics.file.toUri();
 						if (currentUri == uri) {
-							var codeLens = getCodeLensFromStatistics(uri, statistics.statistics);
+							final codeLens = getCodeLensFromStatistics(uri, statistics.statistics);
 							cache[uri] = codeLens;
 							resolve(codeLens);
 						}
@@ -134,28 +134,28 @@ class CodeLensFeature {
 }
 
 private enum abstract StatisticObjectKind(String) {
-	var ClassType = "class type";
-	var InterfaceType = "interface type";
-	var EnumType = "enum type";
-	var ClassField = "class field";
-	var EnumField = "enum field";
+	final ClassType = "class type";
+	final InterfaceType = "interface type";
+	final EnumType = "enum type";
+	final ClassField = "class field";
+	final EnumField = "enum field";
 }
 
 private typedef Relation = {
-	var file:FsPath;
-	var range:Range;
+	final file:FsPath;
+	final range:Range;
 }
 
 private typedef StatisticsObject = {
-	var range:Range;
-	var ?kind:StatisticObjectKind;
-	var ?implementers:Array<Relation>;
-	var ?subclasses:Array<Relation>;
-	var ?overrides:Array<Relation>;
-	var ?references:Array<Relation>;
+	final range:Range;
+	final ?kind:StatisticObjectKind;
+	final ?implementers:Array<Relation>;
+	final ?subclasses:Array<Relation>;
+	final ?overrides:Array<Relation>;
+	final ?references:Array<Relation>;
 }
 
 private typedef Statistics = {
-	var file:FsPath;
-	var statistics:Array<StatisticsObject>;
+	final file:FsPath;
+	final statistics:Array<StatisticsObject>;
 }

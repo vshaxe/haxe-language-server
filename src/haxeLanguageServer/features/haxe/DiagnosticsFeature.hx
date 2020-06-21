@@ -1,6 +1,5 @@
 package haxeLanguageServer.features.haxe;
 
-import haxe.Json;
 import haxe.ds.BalancedTree;
 import haxe.io.Path;
 import haxeLanguageServer.Configuration;
@@ -18,11 +17,11 @@ import js.node.ChildProcess;
 using Lambda;
 
 class DiagnosticsFeature {
-	static inline var DiagnosticsSource = "diagnostics";
-	static inline var SortImportsUsingsTitle = "Sort imports/usings";
-	static inline var OrganizeImportsUsingsTitle = "Organize imports/usings";
-	static inline var RemoveUnusedImportUsingTitle = "Remove unused import/using";
-	static inline var RemoveAllUnusedImportsUsingsTitle = "Remove all unused imports/usings";
+	static inline final DiagnosticsSource = "diagnostics";
+	static inline final SortImportsUsingsTitle = "Sort imports/usings";
+	static inline final OrganizeImportsUsingsTitle = "Organize imports/usings";
+	static inline final RemoveUnusedImportUsingTitle = "Remove unused import/using";
+	static inline final RemoveAllUnusedImportsUsingsTitle = "Remove all unused imports/usings";
 
 	final context:Context;
 	final diagnosticsArguments:Map<DocumentUri, DiagnosticsMap<Any>>;
@@ -42,8 +41,8 @@ class DiagnosticsFeature {
 	}
 
 	function onRunGlobalDiagnostics(_) {
-		var stopProgress = context.startProgress("Collecting Diagnostics");
-		var onResolve = context.startTimer("@diagnostics");
+		final stopProgress = context.startProgress("Collecting Diagnostics");
+		final onResolve = context.startTimer("@diagnostics");
 
 		context.callDisplay("global diagnostics", ["diagnostics"], null, null, function(result) {
 			processDiagnosticsReply(null, onResolve, result);
@@ -66,7 +65,7 @@ class DiagnosticsFeature {
 	}
 
 	function extractDiagnosticsFromHaxeError(uri:Null<DocumentUri>, error:String):Bool {
-		var problemMatcher = ~/(.+):(\d+): (?:lines \d+-(\d+)|character(?:s (\d+)-| )(\d+)) : (?:(Warning) : )?(.*)/;
+		final problemMatcher = ~/(.+):(\d+): (?:lines \d+-(\d+)|character(?:s (\d+)-| )(\d+)) : (?:(Warning) : )?(.*)/;
 		if (!problemMatcher.match(error))
 			return false;
 
@@ -74,7 +73,7 @@ class DiagnosticsFeature {
 		if (!Path.isAbsolute(file))
 			file = Path.join([Sys.getCwd(), file]);
 
-		var targetUri = new FsPath(file).toUri();
+		final targetUri = new FsPath(file).toUri();
 		if (targetUri != uri)
 			return false; // only allow error reply diagnostics in current file for now (clearing becomes annoying otherwise...)
 
@@ -84,10 +83,10 @@ class DiagnosticsFeature {
 		inline function getInt(i)
 			return Std.parseInt(problemMatcher.matched(i));
 
-		var line = getInt(2);
+		final line = getInt(2);
 		var endLine = getInt(3);
-		var column = getInt(4);
-		var endColumn = getInt(5);
+		final column = getInt(4);
+		final endColumn = getInt(5);
 
 		function makePosition(line:Int, character:Null<Int>) {
 			return {
@@ -98,10 +97,10 @@ class DiagnosticsFeature {
 
 		if (endLine == null)
 			endLine = line;
-		var position = makePosition(line, column);
-		var endPosition = makePosition(endLine, endColumn);
+		final position = makePosition(line, column);
+		final endPosition = makePosition(endLine, endColumn);
 
-		var diag = {
+		final diag = {
 			range: {start: position, end: endPosition},
 			source: DiagnosticsSource,
 			severity: DiagnosticSeverity.Error,
@@ -112,12 +111,12 @@ class DiagnosticsFeature {
 	}
 
 	function extractDiagnosticsFromHaxeError2(error:String):Bool {
-		var problemMatcher = ~/^(Error): (.*)$/;
+		final problemMatcher = ~/^(Error): (.*)$/;
 		if (!problemMatcher.match(error)) {
 			return false;
 		}
 
-		var diag = {
+		final diag = {
 			range: {start: {line: 0, character: 0}, end: {line: 0, character: 0}},
 			source: DiagnosticsSource,
 			severity: DiagnosticSeverity.Error,
@@ -129,7 +128,7 @@ class DiagnosticsFeature {
 
 	function publishDiagnostic(uri:DocumentUri, diag:Diagnostic, error:String) {
 		context.languageServerProtocol.sendNotification(PublishDiagnosticsNotification.type, {uri: uri, diagnostics: [diag]});
-		var argumentsMap = diagnosticsArguments[uri] = new DiagnosticsMap();
+		final argumentsMap = diagnosticsArguments[uri] = new DiagnosticsMap();
 		argumentsMap.set({code: CompilerError, range: diag.range}, error);
 	}
 
@@ -137,7 +136,7 @@ class DiagnosticsFeature {
 		clearDiagnostics(errorUri);
 		switch result {
 			case DResult(s):
-				var data:Array<HaxeDiagnosticResponse<Any>> = try {
+				final data:Array<HaxeDiagnosticResponse<Any>> = try {
 					haxe.Json.parse(s);
 				} catch (e) {
 					trace("Error parsing diagnostics response: " + Std.string(e));
@@ -145,7 +144,7 @@ class DiagnosticsFeature {
 				}
 
 				var count = 0;
-				var sent = new Map<DocumentUri, Bool>();
+				final sent = new Map<DocumentUri, Bool>();
 				for (data in data) {
 					count += data.diagnostics.length;
 
@@ -157,11 +156,11 @@ class DiagnosticsFeature {
 					if (isPathFiltered(file))
 						continue;
 
-					var uri = file.toUri();
-					var argumentsMap = diagnosticsArguments[uri] = new DiagnosticsMap();
+					final uri = file.toUri();
+					final argumentsMap = diagnosticsArguments[uri] = new DiagnosticsMap();
 
-					var newDiagnostics = filterRelevantDiagnostics(data.diagnostics);
-					var diagnostics = new Array<Diagnostic>();
+					final newDiagnostics = filterRelevantDiagnostics(data.diagnostics);
+					final diagnostics = new Array<Diagnostic>();
 					for (hxDiag in newDiagnostics) {
 						var range = hxDiag.range;
 						if (hxDiag.range == null) {
@@ -172,8 +171,8 @@ class DiagnosticsFeature {
 							}
 						}
 
-						var kind:Int = hxDiag.kind;
-						var diag:Diagnostic = {
+						final kind:Int = hxDiag.kind;
+						final diag:Diagnostic = {
 							range: range,
 							source: DiagnosticsSource,
 							code: kind,
@@ -219,13 +218,13 @@ class DiagnosticsFeature {
 	}
 
 	function isPathFiltered(path:FsPath):Bool {
-		var pathFilter = PathHelper.preparePathFilter(context.config.user.diagnosticsPathFilter, haxelibPath, context.workspacePath);
+		final pathFilter = PathHelper.preparePathFilter(context.config.user.diagnosticsPathFilter, haxelibPath, context.workspacePath);
 		return !PathHelper.matches(path, pathFilter);
 	}
 
 	function filterRelevantDiagnostics(diagnostics:Array<HaxeDiagnostic<Any>>):Array<HaxeDiagnostic<Any>> {
 		// hide regular compiler errors while there's parser errors, they can be misleading
-		var hasProblematicParserErrors = diagnostics.find(d -> switch (d.kind : Int) {
+		final hasProblematicParserErrors = diagnostics.find(d -> switch (d.kind : Int) {
 			case ParserError: d.args != "Missing ;"; // don't be too strict
 			case _: false;
 		}) != null;
@@ -237,7 +236,7 @@ class DiagnosticsFeature {
 		}
 
 		// hide unused import warnings while there's compiler errors (to avoid false positives)
-		var hasCompilerErrors = diagnostics.find(d -> d.kind == cast CompilerError) != null;
+		final hasCompilerErrors = diagnostics.find(d -> d.kind == cast CompilerError) != null;
 		if (hasCompilerErrors) {
 			diagnostics = diagnostics.filter(d -> d.kind != cast UnusedImport);
 		}
@@ -258,9 +257,9 @@ class DiagnosticsFeature {
 			clearDiagnostics(uri);
 			return;
 		}
-		var doc:Null<HaxeDocument> = context.documents.getHaxe(uri);
+		final doc:Null<HaxeDocument> = context.documents.getHaxe(uri);
 		if (doc != null) {
-			var onResolve = context.startTimer("@diagnostics");
+			final onResolve = context.startTimer("@diagnostics");
 			context.callDisplay("@diagnostics", [doc.uri.toFsPath() + "@0@diagnostics"], null, null, processDiagnosticsReply.bind(uri, onResolve),
 				processErrorReply.bind(uri));
 		}
@@ -274,7 +273,7 @@ class DiagnosticsFeature {
 		for (d in params.context.diagnostics) {
 			if (!(d.code is Int)) // our codes are int, so we don't handle other stuff
 				continue;
-			var code = new DiagnosticKind<T>(d.code);
+			final code = new DiagnosticKind<T>(d.code);
 			actions = actions.concat(switch code {
 				case UnusedImport: getUnusedImportActions(params, d);
 				case UnresolvedIdentifier: getUnresolvedIdentifierActions(params, d);
@@ -289,7 +288,7 @@ class DiagnosticsFeature {
 	}
 
 	function getUnusedImportActions(params:CodeActionParams, d:Diagnostic):Array<CodeAction> {
-		var doc = context.documents.getHaxe(params.textDocument.uri);
+		final doc = context.documents.getHaxe(params.textDocument.uri);
 		if (doc == null) {
 			return [];
 		}
@@ -311,8 +310,8 @@ class DiagnosticsFeature {
 
 	function getUnresolvedIdentifierActions(params:CodeActionParams, d:Diagnostic):Array<CodeAction> {
 		var actions:Array<CodeAction> = [];
-		var args = getDiagnosticsArguments(params.textDocument.uri, UnresolvedIdentifier, d.range);
-		var importCount = args.count(a -> a.kind == Import);
+		final args = getDiagnosticsArguments(params.textDocument.uri, UnresolvedIdentifier, d.range);
+		final importCount = args.count(a -> a.kind == Import);
 		for (arg in args) {
 			actions = actions.concat(switch arg.kind {
 				case Import: getUnresolvedImportActions(params, d, arg, importCount);
@@ -323,16 +322,16 @@ class DiagnosticsFeature {
 	}
 
 	function getUnresolvedImportActions(params:CodeActionParams, d:Diagnostic, arg, importCount:Int):Array<CodeAction> {
-		var doc = context.documents.getHaxe(params.textDocument.uri);
+		final doc = context.documents.getHaxe(params.textDocument.uri);
 		if (doc == null) {
 			return [];
 		}
-		var preferredStyle = context.config.user.codeGeneration.imports.style;
-		var secondaryStyle:ImportStyle = if (preferredStyle == Type) Module else Type;
+		final preferredStyle = context.config.user.codeGeneration.imports.style;
+		final secondaryStyle:ImportStyle = if (preferredStyle == Type) Module else Type;
 
-		var importPosition = determineImportPosition(doc);
+		final importPosition = determineImportPosition(doc);
 		function makeImportAction(style:ImportStyle):CodeAction {
-			var path = if (style == Module) TypeHelper.getModule(arg.name) else arg.name;
+			final path = if (style == Module) TypeHelper.getModule(arg.name) else arg.name;
 			return {
 				title: "Import " + path,
 				kind: QuickFix,
@@ -370,14 +369,14 @@ class DiagnosticsFeature {
 	}
 
 	function getCompilerErrorActions(params:CodeActionParams, d:Diagnostic):Array<CodeAction> {
-		var actions:Array<CodeAction> = [];
-		var arg = getDiagnosticsArguments(params.textDocument.uri, CompilerError, d.range);
-		var suggestionsRe = ~/\(Suggestions?: (.*)\)/;
+		final actions:Array<CodeAction> = [];
+		final arg = getDiagnosticsArguments(params.textDocument.uri, CompilerError, d.range);
+		final suggestionsRe = ~/\(Suggestions?: (.*)\)/;
 		if (suggestionsRe.match(arg)) {
-			var suggestions = suggestionsRe.matched(1).split(",");
+			final suggestions = suggestionsRe.matched(1).split(",");
 			// Haxe reports the entire expression, not just the field position, so we have to be a bit creative here.
-			var range = d.range;
-			var fieldRe = ~/has no field ([^ ]+) /;
+			final range = d.range;
+			final fieldRe = ~/has no field ([^ ]+) /;
 			if (fieldRe.match(arg)) {
 				range.start.character = range.end.character - fieldRe.matched(1).length;
 			}
@@ -393,12 +392,12 @@ class DiagnosticsFeature {
 			return actions;
 		}
 
-		var invalidPackageRe = ~/Invalid package : ([\w.]*) should be ([\w.]*)/;
+		final invalidPackageRe = ~/Invalid package : ([\w.]*) should be ([\w.]*)/;
 		if (invalidPackageRe.match(arg)) {
-			var is = invalidPackageRe.matched(1);
-			var shouldBe = invalidPackageRe.matched(2);
-			var text = context.documents.getHaxe(params.textDocument.uri) !.getText(d.range);
-			var replacement = text.replace(is, shouldBe);
+			final is = invalidPackageRe.matched(1);
+			final shouldBe = invalidPackageRe.matched(2);
+			final text = context.documents.getHaxe(params.textDocument.uri) !.getText(d.range);
+			final replacement = text.replace(is, shouldBe);
 			actions.push({
 				title: "Change to " + replacement,
 				kind: QuickFix,
@@ -423,7 +422,7 @@ class DiagnosticsFeature {
 	}
 
 	function getRemovableCodeActions(params:CodeActionParams, d:Diagnostic):Array<CodeAction> {
-		var range = getDiagnosticsArguments(params.textDocument.uri, RemovableCode, d.range).range;
+		final range = getDiagnosticsArguments(params.textDocument.uri, RemovableCode, d.range).range;
 		if (range == null) {
 			return [];
 		}
@@ -439,13 +438,13 @@ class DiagnosticsFeature {
 	}
 
 	function getOrganizeImportActions(params:CodeActionParams, existingActions:Array<CodeAction>):Array<CodeAction> {
-		var uri = params.textDocument.uri;
-		var doc = context.documents.getHaxe(uri);
+		final uri = params.textDocument.uri;
+		final doc = context.documents.getHaxe(uri);
 		if (doc == null) {
 			return [];
 		}
-		var map = diagnosticsArguments[uri];
-		var removeUnusedFixes = if (map == null) [] else [
+		final map = diagnosticsArguments[uri];
+		final removeUnusedFixes = if (map == null) [] else [
 			for (key in map.keys()) {
 				if (key.code == UnusedImport) {
 					WorkspaceEditHelper.removeText(DocHelper.untrimRange(doc, key.range));
@@ -453,16 +452,16 @@ class DiagnosticsFeature {
 			}
 		];
 
-		var sortFixes = OrganizeImportsFeature.organizeImports(doc, context, []);
+		final sortFixes = OrganizeImportsFeature.organizeImports(doc, context, []);
 
-		var unusedRanges:Array<Range> = removeUnusedFixes.map(edit -> edit.range);
-		var organizeFixes = removeUnusedFixes.concat(OrganizeImportsFeature.organizeImports(doc, context, unusedRanges));
+		final unusedRanges:Array<Range> = removeUnusedFixes.map(edit -> edit.range);
+		final organizeFixes = removeUnusedFixes.concat(OrganizeImportsFeature.organizeImports(doc, context, unusedRanges));
 
-		var diagnostics = existingActions.filter(action -> action.title == RemoveUnusedImportUsingTitle)
+		final diagnostics = existingActions.filter(action -> action.title == RemoveUnusedImportUsingTitle)
 			.map(action -> action.diagnostics)
 			.flatten()
 			.array();
-		var actions:Array<CodeAction> = [
+		final actions:Array<CodeAction> = [
 			{
 				title: SortImportsUsingsTitle,
 				kind: CodeActionFeature.SourceSortImports,
@@ -489,25 +488,24 @@ class DiagnosticsFeature {
 	}
 
 	inline function getDiagnosticsArguments<T>(uri:DocumentUri, kind:DiagnosticKind<T>, range:Range):T {
-		var map = diagnosticsArguments[uri];
+		final map = diagnosticsArguments[uri];
 		return if (map == null) null else map.get({code: kind, range: range});
 	}
 }
 
 private enum abstract UnresolvedIdentifierSuggestion(Int) {
-	var Import;
-	var Typo;
+	final Import;
+	final Typo;
 }
 
 private enum abstract DiagnosticKind<T>(Int) from Int to Int {
-	var UnusedImport:DiagnosticKind<Void>;
-	var UnresolvedIdentifier:DiagnosticKind<Array<{kind:UnresolvedIdentifierSuggestion, name:String}>>;
-	var CompilerError:DiagnosticKind<String>;
-	var RemovableCode:DiagnosticKind<{description:String, range:Range}>;
-	var ParserError:DiagnosticKind<String>;
-	var DeprecationWarning:DiagnosticKind<String>;
-	var InactiveBlock:DiagnosticKind<Void>;
-
+	final UnusedImport:DiagnosticKind<Void>;
+	final UnresolvedIdentifier:DiagnosticKind<Array<{kind:UnresolvedIdentifierSuggestion, name:String}>>;
+	final CompilerError:DiagnosticKind<String>;
+	final RemovableCode:DiagnosticKind<{description:String, range:Range}>;
+	final ParserError:DiagnosticKind<String>;
+	final DeprecationWarning:DiagnosticKind<String>;
+	final InactiveBlock:DiagnosticKind<Void>;
 	public inline function new(i:Int) {
 		this = i;
 	}
@@ -526,25 +524,25 @@ private enum abstract DiagnosticKind<T>(Int) from Int to Int {
 }
 
 private typedef HaxeDiagnostic<T> = {
-	var kind:DiagnosticKind<T>;
-	var ?range:Range;
-	var severity:DiagnosticSeverity;
-	var args:T;
+	final kind:DiagnosticKind<T>;
+	final ?range:Range;
+	final severity:DiagnosticSeverity;
+	final args:T;
 }
 
 private typedef HaxeDiagnosticResponse<T> = {
-	var ?file:FsPath;
-	var diagnostics:Array<HaxeDiagnostic<T>>;
+	final ?file:FsPath;
+	final diagnostics:Array<HaxeDiagnostic<T>>;
 }
 
 private typedef DiagnosticsMapKey = {code:Int, range:Range};
 
 private class DiagnosticsMap<T> extends BalancedTree<DiagnosticsMapKey, T> {
 	override function compare(k1:DiagnosticsMapKey, k2:DiagnosticsMapKey) {
-		var start1 = k1.range.start;
-		var start2 = k2.range.start;
-		var end1 = k1.range.end;
-		var end2 = k2.range.end;
+		final start1 = k1.range.start;
+		final start2 = k2.range.start;
+		final end1 = k1.range.end;
+		final end2 = k2.range.end;
 		inline function compare(i1, i2, e) {
 			return i1 < i2 ? -1 : i1 > i2 ? 1 : e;
 		}

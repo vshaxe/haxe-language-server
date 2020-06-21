@@ -24,12 +24,12 @@ class SignatureHelpFeature {
 	}
 
 	function onSignatureHelp(params:SignatureHelpParams, token:CancellationToken, resolve:Null<SignatureHelp>->Void, reject:ResponseError<NoData>->Void) {
-		var uri = params.textDocument.uri;
-		var doc:Null<HaxeDocument> = context.documents.getHaxe(uri);
+		final uri = params.textDocument.uri;
+		final doc:Null<HaxeDocument> = context.documents.getHaxe(uri);
 		if (doc == null || !uri.isFile()) {
 			return reject.noFittingDocument(uri);
 		}
-		var handle = if (context.haxeServer.supports(DisplayMethods.SignatureHelp)) handleJsonRpc else handleLegacy;
+		final handle = if (context.haxeServer.supports(DisplayMethods.SignatureHelp)) handleJsonRpc else handleLegacy;
 		handle(params, token, resolve, reject, doc);
 	}
 
@@ -37,14 +37,14 @@ class SignatureHelpFeature {
 			doc:HaxeDocument) {
 		var wasAutoTriggered = true;
 		if (context.haxeServer.haxeVersion >= new SemVer(4, 1, 0)) {
-			var triggerKind = params!.context!.triggerKind;
+			final triggerKind = params!.context!.triggerKind;
 			wasAutoTriggered = switch triggerKind {
 				case null: false; // err on the side of showing too often for LSP clients that don't support triggerKind
 				case TriggerCharacter: true;
 				case ContentChange | Invoked: false;
 			}
 		}
-		var params = {
+		final params = {
 			file: doc.uri.toFsPath(),
 			contents: doc.content,
 			offset: doc.offsetAt(params.position),
@@ -61,14 +61,14 @@ class SignatureHelpFeature {
 	}
 
 	function createSignatureHelp(item:HaxeSignatureItem):SignatureHelp {
-		var printer = new DisplayPrinter();
+		final printer = new DisplayPrinter();
 		var labelOffset = 1; // ( or [
 		function createSignatureParameter(arg:JsonFunctionArgument):ParameterInformation {
 			return {
 				label: {
-					var printed = printer.printFunctionArgument(arg);
+					final printed = printer.printFunctionArgument(arg);
 					if (labelOffsetSupport) {
-						var range = [labelOffset, labelOffset + printed.length];
+						final range = [labelOffset, labelOffset + printed.length];
 						labelOffset += printed.length;
 						labelOffset += 2; // comma and space
 						range;
@@ -79,7 +79,7 @@ class SignatureHelpFeature {
 			}
 		}
 		function createSignatureInformation(info:HaxeSignatureInformation):SignatureInformation {
-			var label = if (item.kind == ArrayAccess) {
+			final label = if (item.kind == ArrayAccess) {
 				printer.printArrayAccess(info);
 			} else {
 				printer.printType({kind: TFun, args: {args: info.args, ret: info.ret}});
@@ -99,17 +99,17 @@ class SignatureHelpFeature {
 
 	function handleLegacy(params:SignatureHelpParams, token:CancellationToken, resolve:Null<SignatureHelp>->Void, reject:ResponseError<NoData>->Void,
 			doc:HaxeDocument) {
-		var bytePos = context.displayOffsetConverter.characterOffsetToByteOffset(doc.content, doc.offsetAt(params.position));
-		var args = ['${doc.uri.toFsPath()}@$bytePos@signature'];
+		final bytePos = context.displayOffsetConverter.characterOffsetToByteOffset(doc.content, doc.offsetAt(params.position));
+		final args = ['${doc.uri.toFsPath()}@$bytePos@signature'];
 		context.callDisplay("@signature", args, doc.content, token, function(r) {
 			switch (r) {
 				case DCancelled:
 					resolve(null);
 				case DResult(data):
-					var help:SignatureHelp = haxe.Json.parse(data);
+					final help:SignatureHelp = haxe.Json.parse(data);
 					for (signature in help.signatures) {
 						signature.documentation = getSignatureDocumentation(signature.documentation);
-						var parameters = signature.parameters;
+						final parameters = signature.parameters;
 						for (i in 0...signature.parameters.length)
 							parameters[i].label = addNamesToSignatureType(parameters[i].label, i);
 						signature.label = addNamesToSignatureType(signature.label);

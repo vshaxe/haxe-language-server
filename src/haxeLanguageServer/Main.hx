@@ -6,12 +6,12 @@ import jsonrpc.node.MessageReader;
 import jsonrpc.node.MessageWriter;
 
 function main() {
-	var reader = new MessageReader(process.stdin);
-	var writer = new MessageWriter(process.stdout);
-	var languageServerProtocol = new Protocol(writer.write);
+	final reader = new MessageReader(process.stdin);
+	final writer = new MessageWriter(process.stdout);
+	final languageServerProtocol = new Protocol(writer.write);
 	languageServerProtocol.logError = message -> languageServerProtocol.sendNotification(LogMessageNotification.type, {type: Warning, message: message});
 	setupTrace(languageServerProtocol);
-	var context = new Context(languageServerProtocol);
+	final context = new Context(languageServerProtocol);
 	reader.listen(languageServerProtocol.handleMessage);
 
 	function log(method:String, data:Dynamic) {
@@ -41,7 +41,7 @@ function main() {
 
 private function setupTrace(languageServerProtocol:Protocol) {
 	haxe.Log.trace = function(v, ?i) {
-		var r = [Std.string(v)];
+		final r = [Std.string(v)];
 		if (i != null && i.customParams != null) {
 			for (v in i.customParams)
 				r.push(Std.string(v));

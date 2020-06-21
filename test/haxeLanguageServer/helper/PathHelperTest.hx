@@ -5,7 +5,7 @@ import haxe.PosInfos;
 class PathHelperTest extends Test {
 	public function testMatches() {
 		function matches(filter:TestFilter, path:TestPath):Bool {
-			var pathFilter = PathHelper.preparePathFilter(filter, TestPath.HaxelibPath, TestPath.WorkspaceRoot);
+			final pathFilter = PathHelper.preparePathFilter(filter, TestPath.HaxelibPath, TestPath.WorkspaceRoot);
 			return PathHelper.matches(path, pathFilter);
 		}
 		function match(filter:TestFilter, path:TestPath, ?pos:PosInfos) {
@@ -47,23 +47,23 @@ class PathHelperTest extends Test {
 }
 
 enum abstract TestFilter(String) to String {
-	var WorkspaceRoot = "${workspaceRoot}";
-	var WorkspaceSource = WorkspaceRoot + "/source";
-	var HaxelibPath = "${haxelibPath}";
-	var Flixel = HaxelibPath + "\\flixel";
-	var FlixelOrLime = HaxelibPath + "/(flixel|lime)";
-	var MatchAll = ".*?";
+	final WorkspaceRoot = "${workspaceRoot}";
+	final WorkspaceSource = WorkspaceRoot + "/source";
+	final HaxelibPath = "${haxelibPath}";
+	final Flixel = HaxelibPath + "\\flixel";
+	final FlixelOrLime = HaxelibPath + "/(flixel|lime)";
+	final MatchAll = ".*?";
 }
 
 enum abstract TestPath(String) to String {
-	var WorkspaceRoot = "c:/projects/vshaxe";
-	var WorkspaceSource = WorkspaceRoot + "/source";
-	var WorkspaceExport = WorkspaceRoot + "/export";
-	var HaxelibPath = "C:\\HaxeToolkit\\haxe\\lib";
-	var FlxG = HaxelibPath + "/flixel/git/flixel/FlxG.hx";
-	var LimeSystem = HaxelibPath + "/lime/2,9,1/lime/system/System.hx";
-	var Hscript = HaxelibPath + "/hscript/2,0,7/hscript/";
-	var LinuxPath = "~/../../../lib/";
+	final WorkspaceRoot = "c:/projects/vshaxe";
+	final WorkspaceSource = WorkspaceRoot + "/source";
+	final WorkspaceExport = WorkspaceRoot + "/export";
+	final HaxelibPath = "C:\\HaxeToolkit\\haxe\\lib";
+	final FlxG = HaxelibPath + "/flixel/git/flixel/FlxG.hx";
+	final LimeSystem = HaxelibPath + "/lime/2,9,1/lime/system/System.hx";
+	final Hscript = HaxelibPath + "/hscript/2,0,7/hscript/";
+	final LinuxPath = "~/../../../lib/";
 
 	@:to function toFsPath():FsPath
 		return new FsPath(this);

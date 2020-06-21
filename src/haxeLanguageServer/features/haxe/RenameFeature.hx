@@ -15,8 +15,8 @@ class RenameFeature {
 	}
 
 	function onRename(params:RenameParams, token:CancellationToken, resolve:WorkspaceEdit->Void, reject:ResponseError<NoData>->Void) {
-		var uri = params.textDocument.uri;
-		var doc = context.documents.getHaxe(uri);
+		final uri = params.textDocument.uri;
+		final doc = context.documents.getHaxe(uri);
 		if (doc == null || !uri.isFile()) {
 			return reject.noFittingDocument(uri);
 		}
@@ -30,7 +30,7 @@ class RenameFeature {
 		}
 
 		context.gotoDefinition.onGotoDefinition(params, token, locations -> {
-			var declaration = locations[0];
+			final declaration = locations[0];
 			if (declaration == null) {
 				return reject(ResponseError.internalError("No declaration found."));
 			}
@@ -38,13 +38,13 @@ class RenameFeature {
 				return invalidRename();
 			}
 
-			var resolver = new RenameResolver(declaration.range, params.newName);
+			final resolver = new RenameResolver(declaration.range, params.newName);
 			resolver.walkFile(doc.parseTree, Root);
 			if (resolver.edits.length == 0) {
 				return invalidRename();
 			}
 
-			var changes = new haxe.DynamicAccess();
+			final changes = new haxe.DynamicAccess();
 			changes[uri.toString()] = resolver.edits;
 			resolve({changes: changes});
 		}, _ -> invalidRename());

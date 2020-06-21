@@ -9,13 +9,13 @@ class ImportHelperTest extends Test {
 			testCase.before = testCase.before.replace("\r", "");
 			testCase.after = testCase.after.replace("\r", "");
 
-			var doc = new HaxeDocument(new DocumentUri("file://dummy"), "", 0, testCase.before);
-			var result = ImportHelper.determineImportPosition(doc);
-			var edit = ImportHelper.createImportsEdit(doc, result, ["Test"], Type);
+			final doc = new HaxeDocument(new DocumentUri("file://dummy"), "", 0, testCase.before);
+			final result = ImportHelper.determineImportPosition(doc);
+			final edit = ImportHelper.createImportsEdit(doc, result, ["Test"], Type);
 
 			// TODO: apply the edit properly instead of this hack?
-			var lines = testCase.before.split("\n");
-			var insertLine = edit.range.start.line;
+			final lines = testCase.before.split("\n");
+			final insertLine = edit.range.start.line;
 			lines[insertLine] = edit.newText + lines[insertLine];
 
 			Assert.equals(testCase.after, lines.join("\n"), pos);

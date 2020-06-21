@@ -19,17 +19,18 @@ class ExtractFunctionFeature {
 	}
 
 	function extractFunction(params:CodeActionParams):Array<CodeAction> {
-		var doc = context.documents.getHaxe(params.textDocument.uri);
-		if (doc == null || doc.tokens == null || doc.tokens.tree == null)
+		final doc = context.documents.getHaxe(params.textDocument.uri);
+		if (doc == null || doc.tokens == null || doc.tokens.tree == null) {
 			return [];
-		try {
+		}
+		return try {
 			var text:String = doc.getText(params.range);
-			var leftOffset:Int = text.length - text.ltrim().length;
-			var rightOffset:Int = text.length - text.rtrim().length;
+			final leftOffset:Int = text.length - text.ltrim().length;
+			final rightOffset:Int = text.length - text.rtrim().length;
 			text = text.trim();
 
-			var tokenStart:Null<TokenTree> = doc.tokens.getTokenAtOffset(doc.offsetAt(params.range.start) + leftOffset);
-			var tokenEnd:Null<TokenTree> = doc.tokens.getTokenAtOffset(doc.offsetAt(params.range.end) - rightOffset);
+			final tokenStart:Null<TokenTree> = doc.tokens.getTokenAtOffset(doc.offsetAt(params.range.start) + leftOffset);
+			final tokenEnd:Null<TokenTree> = doc.tokens.getTokenAtOffset(doc.offsetAt(params.range.end) - rightOffset);
 			if (tokenStart == null || tokenEnd == null)
 				return [];
 			if (tokenStart.index == tokenEnd.index)
@@ -38,16 +39,16 @@ class ExtractFunctionFeature {
 			if (tokenStart.index + 10 > tokenEnd.index)
 				return [];
 
-			var parentOfStart:Null<TokenTree> = findParentFunction(tokenStart);
-			var parentOfEnd:Null<TokenTree> = findParentFunction(tokenEnd);
+			final parentOfStart:Null<TokenTree> = findParentFunction(tokenStart);
+			final parentOfEnd:Null<TokenTree> = findParentFunction(tokenEnd);
 			if (parentOfStart == null || parentOfEnd == null)
 				return [];
 			if (parentOfStart.index != parentOfEnd.index)
 				return [];
-			var lastToken:TokenTree = TokenTreeCheckUtils.getLastToken(parentOfStart);
+			final lastToken:TokenTree = TokenTreeCheckUtils.getLastToken(parentOfStart);
 
-			var rangeIdents:Array<String> = [];
-			var varTokens:Array<TokenTree> = [];
+			final rangeIdents:Array<String> = [];
+			final varTokens:Array<TokenTree> = [];
 			var hasReturn:Bool = false;
 			parentOfStart.filterCallback(function(token:TokenTree, index:Int):FilterResult {
 				if (token.index > lastToken.index)
@@ -76,27 +77,28 @@ class ExtractFunctionFeature {
 			if (hasReturn) {
 				returnSpec = makeReturnSpec(parentOfStart);
 			}
-			var isStatic:Bool = isStaticFunction(parentOfStart);
-			var indent:String = detectIndent(doc, parentOfStart);
+			final isStatic:Bool = isStaticFunction(parentOfStart);
+			final indent:String = detectIndent(doc, parentOfStart);
 
 			var newParams:Array<NewFunctionParameter> = copyParentFunctionParameters(parentOfStart, text, rangeIdents);
 			newParams = newParams.concat(localVarsToParameter(varTokens, text, rangeIdents));
 
-			var action:Null<CodeAction> = makeExtractFunctionChanges(doc, doc.uri, params, text, isStatic, newParams, returnSpec, indent,
+			final action:Null<CodeAction> = makeExtractFunctionChanges(doc, doc.uri, params, text, isStatic, newParams, returnSpec, indent,
 				doc.positionAt(lastToken.pos.max + 1));
 			if (action == null)
 				return [];
-			return [action];
-		} catch (e) {}
-		return [];
+			[action];
+		} catch (e) {
+			[];
+		}
 	}
 
 	function makeExtractFunctionChanges(doc:HaxeDocument, uri:DocumentUri, params:CodeActionParams, text:String, isStatic:Bool,
 			newParams:Array<NewFunctionParameter>, returnSpec:String, indent:String, newFuncPos:Position):CodeAction {
-		var callParams:String = newParams.map(s -> s.call).join(", ");
-		var funcParams:String = newParams.map(s -> s.param).join(", ");
+		final callParams:String = newParams.map(s -> s.call).join(", ");
+		final funcParams:String = newParams.map(s -> s.param).join(", ");
 
-		var funcName:String = "newFunction";
+		final funcName:String = "newFunction";
 
 		var call:String = '$funcName($callParams);\n';
 		if (returnSpec.length > 0) {
@@ -104,19 +106,20 @@ class ExtractFunctionFeature {
 		}
 
 		var func:String = 'function $funcName($funcParams)$returnSpec {\n$text\n}\n';
-		if (isStatic)
+		if (isStatic) {
 			func = 'static $func';
+		}
 
 		call = FormatterHelper.formatText(doc, context, call, TokenTreeEntryPoint.FIELD_LEVEL);
 		func = FormatterHelper.formatText(doc, context, func, TokenTreeEntryPoint.FIELD_LEVEL);
 		func = func.split("\n").map(s -> indent + s).join("\n");
-		var edits:Array<TextEdit> = [];
+		final edits:Array<TextEdit> = [];
 
 		edits.push(WorkspaceEditHelper.insertText(newFuncPos, func));
 		edits.push(WorkspaceEditHelper.replaceText(params.range, call));
 
-		var textEdit:TextDocumentEdit = WorkspaceEditHelper.textDocumentEdit(uri, edits);
-		var edit:WorkspaceEdit = {
+		final textEdit:TextDocumentEdit = WorkspaceEditHelper.textDocumentEdit(uri, edits);
+		final edit:WorkspaceEdit = {
 			documentChanges: [textEdit]
 		};
 		return {
@@ -156,11 +159,11 @@ class ExtractFunctionFeature {
 	}
 
 	function detectIndent(doc:HaxeDocument, functionToken:TokenTree):String {
-		var functionRange:Range = doc.rangeAt2(functionToken.pos);
+		final functionRange:Range = doc.rangeAt2(functionToken.pos);
 		functionRange.start.character = 0;
 
-		var text:String = doc.getText(functionRange);
-		var whitespace:EReg = ~/^([ \t]+)/;
+		final text:String = doc.getText(functionRange);
+		final whitespace:EReg = ~/^([ \t]+)/;
 		if (!whitespace.match(text))
 			return "";
 
@@ -176,13 +179,13 @@ class ExtractFunctionFeature {
 		if (paramterList == null || paramterList.children == null)
 			return [];
 
-		var newFuncParameter:Array<NewFunctionParameter> = [];
+		final newFuncParameter:Array<NewFunctionParameter> = [];
 		for (child in paramterList.children) {
 			switch (child.tok) {
 				case Const(CIdent(s)):
 					checkAndAddIdentifier(child, s, text, rangeIdents, newFuncParameter);
 				case Question:
-					var firstChild:Null<TokenTree> = child.getFirstChild();
+					final firstChild:Null<TokenTree> = child.getFirstChild();
 					if (firstChild == null)
 						continue;
 					switch (firstChild.tok) {
@@ -220,7 +223,7 @@ class ExtractFunctionFeature {
 	}
 
 	function localVarsToParameter(varTokens:Array<TokenTree>, text:String, rangeIdents:Array<String>):Array<NewFunctionParameter> {
-		var newFuncParameter:Array<NewFunctionParameter> = [];
+		final newFuncParameter:Array<NewFunctionParameter> = [];
 
 		for (varToken in varTokens) {
 			// TODO handle multiple vars
@@ -288,6 +291,6 @@ class ExtractFunctionFeature {
 }
 
 typedef NewFunctionParameter = {
-	var call:String;
-	var param:String;
+	final call:String;
+	final param:String;
 }

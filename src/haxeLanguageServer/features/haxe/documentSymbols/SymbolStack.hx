@@ -56,7 +56,7 @@ abstract SymbolStack(Array<{level:SymbolLevel, symbol:DocumentSymbol}>) {
 	}
 
 	public function addSymbol(level:SymbolLevel, symbol:DocumentSymbol, opensScope:Bool) {
-		var parentSymbol = this[depth].symbol;
+		final parentSymbol = this[depth].symbol;
 		if (parentSymbol.children == null) {
 			parentSymbol.children = [];
 		}

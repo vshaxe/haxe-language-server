@@ -50,14 +50,14 @@ class DisplayPrinter {
 	}
 
 	public function printPath(path:JsonTypePath) {
-		var qualified = switch pathPrinting {
+		final qualified = switch pathPrinting {
 			case Always: true;
 			case Never: false;
 			case Qualified: path.importStatus != Imported;
 			case Shadowed: path.importStatus == Shadowed;
 		}
-		var isSubType = path.moduleName != path.typeName;
-		var isToplevelType = path.pack.length == 0 && !isSubType;
+		final isSubType = path.moduleName != path.typeName;
+		final isToplevelType = path.pack.length == 0 && !isSubType;
 		if (isToplevelType && path.importStatus == Shadowed) {
 			path.pack.push("std");
 		}
@@ -73,7 +73,7 @@ class DisplayPrinter {
 	}
 
 	public function printPathWithParams(path:JsonTypePathWithParams) {
-		var s = printPath(path.path);
+		final s = printPath(path.path);
 		if (path.params.length == 0) {
 			return s;
 		} else {
@@ -90,12 +90,12 @@ class DisplayPrinter {
 				if (t.args == null) {
 					"Dynamic";
 				} else {
-					var s = printTypeRec(t.args);
+					final s = printTypeRec(t.args);
 					'Dynamic<$s>';
 				}
 			case TAnonymous:
-				var fields = t.args.fields;
-				var s = [
+				final fields = t.args.fields;
+				final s = [
 					for (field in fields) {
 						var prefix = if (field.meta.hasMeta(Optional)) "?" else "";
 						'$prefix${field.name}:${printTypeRec(field.type)}';
@@ -110,19 +110,19 @@ class DisplayPrinter {
 					}
 					return this.printFunctionArgument(arg);
 				}
-				var args = t.args.args.map(printFunctionArgument);
-				var r = printTypeRec(t.args.ret);
+				final args = t.args.args.map(printFunctionArgument);
+				final r = printTypeRec(t.args.ret);
 				switch args.length {
 					case 0: '() -> $r';
 					case 1 if (hasNamed): '(${args[0]}) -> $r';
 					case 1: '${args[0]} -> $r';
 					case _:
-						var busy = args.fold((args, i) -> i + args.length, 0);
+						final busy = args.fold((args, i) -> i + args.length, 0);
 						if (busy < 50 || !wrap) {
 							var s = args.join(", ");
 							'($s) -> $r';
 						} else {
-							var s = args.join(',\n $indent');
+							final s = args.join(',\n $indent');
 							'($s)\n$indent-> $r';
 						}
 				}
@@ -130,16 +130,16 @@ class DisplayPrinter {
 	}
 
 	function printTypeRec<T>(t:JsonType<T>) {
-		var old = indent;
+		final old = indent;
 		indent += "  ";
-		var t = printType(t);
+		final t = printType(t);
 		indent = old;
 		return t;
 	}
 
 	public function printFunctionArgument<T>(arg:JsonFunctionArgument) {
-		var nullRemoval = arg.t.removeNulls();
-		var concreteType = if (functionFormatting.explicitNull || !arg.opt) arg.t else nullRemoval.type;
+		final nullRemoval = arg.t.removeNulls();
+		final concreteType = if (functionFormatting.explicitNull || !arg.opt) arg.t else nullRemoval.type;
 
 		var argument = (if (arg.opt) "?" else "") + arg.name;
 		if (functionFormatting.argumentTypeHints && (concreteType.kind != TMono || arg.name == "")) {
@@ -181,7 +181,7 @@ class DisplayPrinter {
 	}
 
 	public function printEmptyFunctionDefinition<T>(name:String, signature:JsonFunctionSignature, ?params:JsonTypeParameters) {
-		var printedParams = if (params == null) "" else printTypeParameters(params);
+		final printedParams = if (params == null) "" else printTypeParameters(params);
 		return "function " + name + printedParams + printCallArguments(signature, printFunctionArgument) + printReturn(signature);
 	}
 
@@ -193,14 +193,14 @@ class DisplayPrinter {
 		if (!field.isPublic && !functionFormatting.explicitPrivate) {
 			access = "";
 		}
-		var signature = concreteType.extractFunctionSignature();
-		var returnKeyword = if (signature.ret.isVoid()) "" else "return ";
-		var arguments = printCallArguments(signature, arg -> arg.name);
-		var lineBreak = if (functionFormatting.placeOpenBraceOnNewLine) "\n" else " ";
+		final signature = concreteType.extractFunctionSignature();
+		final returnKeyword = if (signature.ret.isVoid()) "" else "return ";
+		final arguments = printCallArguments(signature, arg -> arg.name);
+		final lineBreak = if (functionFormatting.placeOpenBraceOnNewLine) "\n" else " ";
 
-		var definition = access + printEmptyFunctionDefinition(field.name, signature, field.params) + '$lineBreak{\n${indent}';
-		var superCall = '${returnKeyword}super.${field.name}$arguments;';
-		var end = '\n}';
+		final definition = access + printEmptyFunctionDefinition(field.name, signature, field.params) + '$lineBreak{\n${indent}';
+		final superCall = '${returnKeyword}super.${field.name}$arguments;';
+		final end = '\n}';
 		return if (snippets) {
 			definition + '$${1:$superCall}$0$end';
 		} else {
@@ -211,23 +211,23 @@ class DisplayPrinter {
 	static final castRegex = ~/^(cast )+/;
 
 	public function printClassFieldDefinition<T0, T1, T2>(occurrence:ClassFieldOccurrence<T0>, concreteType:JsonType<T1>, isEnumAbstractField:Bool) {
-		var field = occurrence.field;
+		final field = occurrence.field;
 		switch concreteType.kind {
 			case TMono:
 				concreteType = field.type;
 			case _:
 		}
-		var type = printType(concreteType);
+		final type = printType(concreteType);
 		var name = field.name;
-		var kind:JsonFieldKind<T2> = field.kind;
+		final kind:JsonFieldKind<T2> = field.kind;
 		var access = if (field.isPublic) "public " else "private ";
 		var staticKeyword = if (field.scope == Static && !occurrence.origin.isModuleLevel()) "static " else "";
 		return switch kind.kind {
 			case FVar:
-				var inlineKeyword = if (kind.args.write.kind == AccInline) "inline " else "";
-				var keyword = if (kind.args.write.kind == AccCtor || field.isFinalField()) "final" else "var";
-				var read = printAccessor(kind.args.read, true);
-				var write = printAccessor(kind.args.write, false);
+				final inlineKeyword = if (kind.args.write.kind == AccInline) "inline " else "";
+				final keyword = if (kind.args.write.kind == AccCtor || field.isFinalField()) "final" else "var";
+				final read = printAccessor(kind.args.read, true);
+				final write = printAccessor(kind.args.write, false);
 				var accessors = if ((read != null && write != null)
 					&& (read != "default" || write != "default")) '($read, $write)' else "";
 				// structure fields get some special treatment
@@ -245,20 +245,20 @@ class DisplayPrinter {
 				}
 				var definition = '$access$staticKeyword$keyword $inlineKeyword$name$accessors:$type';
 				if (field.expr != null) {
-					var expr = castRegex.replace(field.expr.string, "");
+					final expr = castRegex.replace(field.expr.string, "");
 					definition += " = " + expr;
 				}
 				definition;
 			case FMethod:
-				var methodKind = switch kind.args {
+				final methodKind = switch kind.args {
 					case MethNormal: "";
 					case MethInline: "inline ";
 					case MethDynamic: "dynamic ";
 					case MethMacro: "macro ";
 				}
-				var finalKeyword = if (field.isFinalField()) "final " else "";
-				var methodSignature = concreteType.extractFunctionSignature();
-				var definition = printEmptyFunctionDefinition(name, methodSignature, field.params);
+				final finalKeyword = if (field.isFinalField()) "final " else "";
+				final methodSignature = concreteType.extractFunctionSignature();
+				final definition = printEmptyFunctionDefinition(name, methodSignature, field.params);
 				'$access$staticKeyword$finalKeyword$methodKind$definition';
 		};
 	}
@@ -279,7 +279,7 @@ class DisplayPrinter {
 	public function printLocalDefinition<T1, T2>(local:DisplayLocal<T1>, concreteType:JsonType<T2>) {
 		return switch local.origin {
 			case LocalFunction:
-				var inlineKeyword = if (local.isInline) "inline " else "";
+				final inlineKeyword = if (local.isInline) "inline " else "";
 				inlineKeyword + printEmptyFunctionDefinition(local.name, concreteType.extractFunctionSignature(),
 					if (local.extra == null) null else local.extra.params);
 			case other:
@@ -300,7 +300,7 @@ class DisplayPrinter {
 		(`modifiers... keyword Name<Params>`)
 	**/
 	public function printEmptyTypeDefinition(type:DisplayModuleType):String {
-		var components = [];
+		final components = [];
 		if (type.isPrivate)
 			components.push("private");
 		if (type.isFinalType())
@@ -392,7 +392,7 @@ class DisplayPrinter {
 		return switch concreteType.kind {
 			case TEnum: field.name;
 			case TFun:
-				var signature:JsonFunctionSignature = concreteType.args;
+				final signature:JsonFunctionSignature = concreteType.args;
 				var text = '${field.name}(';
 				for (i in 0...signature.args.length) {
 					var arg = signature.args[i];
@@ -416,14 +416,14 @@ class DisplayPrinter {
 	}
 
 	public function printAnonymousFunctionDefinition(signature:JsonFunctionSignature) {
-		var args = signature.args.map(arg -> {
+		final args = signature.args.map(arg -> {
 			name: if (arg.name == "") null else arg.name,
 			opt: arg.opt,
 			type: new DisplayPrinter(PathPrinting.Never).printTypeRec(arg.t)
 		});
-		var names = IdentifierHelper.guessNames(args);
+		final names = IdentifierHelper.guessNames(args);
 		var printedArgs = [];
-		var singleArgument = args.length == 1;
+		final singleArgument = args.length == 1;
 		if (singleArgument && functionFormatting.useArrowSyntax) {
 			printedArgs = [names[0]];
 		} else {
@@ -447,10 +447,10 @@ class DisplayPrinter {
 	}
 
 	public function printObjectLiteral(anon:JsonAnon, singleLine:Bool, onlyRequiredFields:Bool, snippets:Bool) {
-		var printedFields = [];
+		final printedFields = [];
 		for (i in 0...anon.fields.length) {
-			var field = anon.fields[i];
-			var name = field.name;
+			final field = anon.fields[i];
+			final name = field.name;
 			var printedField = name + ': ';
 			if (!singleLine) {
 				printedField = "\t" + printedField;
@@ -479,12 +479,12 @@ class DisplayPrinter {
 	}
 
 	public function printSwitchOnEnum(subject:String, e:JsonEnum, nullable:Bool, snippets:Bool, parentheses:Bool) {
-		var fields = e.constructors.map(field -> printEnumField(field, field.type, false, false));
+		final fields = e.constructors.map(field -> printEnumField(field, field.type, false, false));
 		return printSwitch(subject, fields, nullable, snippets, parentheses);
 	}
 
 	public function printSwitchOnEnumAbstract(subject:String, a:JsonAbstract, nullable:Bool, snippets:Bool, parentheses:Bool) {
-		var fields = a.impl.statics.filter(f -> f.isEnumAbstractField()).map(field -> field.name);
+		final fields = a.impl.statics.filter(f -> f.isEnumAbstractField()).map(field -> field.name);
 		return printSwitch(subject, fields, nullable, snippets, parentheses);
 	}
 
@@ -562,7 +562,7 @@ class DisplayPrinter {
 	}
 
 	public function printArrayAccess(signature:JsonFunctionSignature) {
-		var index = printFunctionArgument(signature.args[0]);
+		final index = printFunctionArgument(signature.args[0]);
 		return if (signature.args.length > 1) {
 			// set
 			var rhs = printFunctionArgument(signature.args[1]);

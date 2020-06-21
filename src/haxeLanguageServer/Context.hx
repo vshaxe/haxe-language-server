@@ -70,11 +70,11 @@ class Context {
 		this.languageServerProtocol = languageServerProtocol;
 
 		haxeDisplayProtocol = new Protocol((message, token) -> {
-			var method:String = Reflect.field(message, "method");
+			final method:String = Reflect.field(message, "method");
 			if (method == CancelNotification.type) {
 				return; // don't send cancel notifications, not supported by Haxe
 			}
-			var includeDisplayArguments = method.startsWith("display/") || method == ServerMethods.ReadClassPaths;
+			final includeDisplayArguments = method.startsWith("display/") || method == ServerMethods.ReadClassPaths;
 			callDisplay(method, [Json.stringify(message)], token, function(result:DisplayResult) {
 				switch result {
 					case DResult(msg):
@@ -86,7 +86,7 @@ class Context {
 					Json.parse(error);
 				} catch (_:Any) {
 					// pretend we got a proper JSON (HaxeFoundation/haxe#7955)
-					var message:ResponseMessage = {
+					final message:ResponseMessage = {
 						jsonrpc: Protocol.PROTOCOL_VERSION,
 						id: @:privateAccess haxeDisplayProtocol.nextRequestId - 1, // ew..
 						error: new ResponseError(ResponseError.InternalError, "Compiler error", ([
@@ -120,7 +120,7 @@ class Context {
 		if (capabilities.window!.workDoneProgress == false) {
 			return function() {};
 		}
-		var id = progressId++;
+		final id = progressId++;
 		languageServerProtocol.sendRequest(WorkDoneProgressCreateRequest.type, {token: id});
 		languageServerProtocol.sendProgress(WorkDoneProgress.type, id, {kind: Begin, title: 'Haxe: $title...'});
 		return function() {
@@ -355,7 +355,7 @@ class Context {
 	}
 
 	function onDidOpenTextDocument(event:DidOpenTextDocumentParams) {
-		var uri = event.textDocument.uri;
+		final uri = event.textDocument.uri;
 		if (isUriSupported(uri)) {
 			activeEditor = uri;
 			documents.onDidOpenTextDocument(event);
@@ -364,7 +364,7 @@ class Context {
 	}
 
 	function onDidChangeTextDocument(event:DidChangeTextDocumentParams) {
-		var uri = event.textDocument.uri;
+		final uri = event.textDocument.uri;
 		if (isUriSupported(uri)) {
 			callFileParamsMethod(uri, ServerMethods.Invalidate);
 			documents.onDidChangeTextDocument(event);
@@ -372,7 +372,7 @@ class Context {
 	}
 
 	function onDidCloseTextDocument(event:DidCloseTextDocumentParams) {
-		var uri = event.textDocument.uri;
+		final uri = event.textDocument.uri;
 		if (isUriSupported(uri)) {
 			documents.onDidCloseTextDocument(event);
 			diagnostics.clearDiagnostics(uri);
@@ -380,7 +380,7 @@ class Context {
 	}
 
 	function onDidSaveTextDocument(event:DidSaveTextDocumentParams) {
-		var uri = event.textDocument.uri;
+		final uri = event.textDocument.uri;
 		if (isUriSupported(uri)) {
 			publishDiagnostics(uri);
 		}
@@ -409,12 +409,12 @@ class Context {
 
 	function onDidChangeActiveTextEditor(params:{uri:DocumentUri}) {
 		activeEditor = params.uri;
-		var document = documents.getHaxe(params.uri);
+		final document = documents.getHaxe(params.uri);
 		if (document == null) {
 			return;
 		}
 		// avoid running diagnostics twice when the document is initially opened (open + activate event)
-		var timeSinceOpened = haxe.Timer.stamp() - document.openTimestamp;
+		final timeSinceOpened = haxe.Timer.stamp() - document.openTimestamp;
 		if (timeSinceOpened > 0.1) {
 			publishDiagnostics(params.uri);
 		}
@@ -437,16 +437,16 @@ class Context {
 
 	public function callHaxeMethod<P, R>(method:HaxeRequestMethod<P, Response<R>>, ?params:P, ?token:CancellationToken, callback:(result:R) -> Null<String>,
 			errback:(error:String) -> Void) {
-		var beforeCallTime = Date.now().getTime();
+		final beforeCallTime = Date.now().getTime();
 		haxeDisplayProtocol.sendRequest(cast method, params, token, function(response) {
-			var arrivalTime = Date.now().getTime();
+			final arrivalTime = Date.now().getTime();
 			if (!config.sendMethodResults) {
 				callback(response.result);
 				return;
 			}
 
-			var beforeProcessingTime = Date.now().getTime();
-			var debugInfo:Null<String> = try {
+			final beforeProcessingTime = Date.now().getTime();
+			final debugInfo:Null<String> = try {
 				callback(response.result);
 			} catch (e) {
 				errback(e.toString());
@@ -454,8 +454,8 @@ class Context {
 				trace(e.stack);
 				null;
 			}
-			var afterProcessingTime = Date.now().getTime();
-			var methodResult:MethodResult = {
+			final afterProcessingTime = Date.now().getTime();
+			final methodResult:MethodResult = {
 				kind: Haxe,
 				method: method,
 				debugInfo: debugInfo,
@@ -469,7 +469,7 @@ class Context {
 			};
 			languageServerProtocol.sendNotification(LanguageServerMethods.DidRunMethod, methodResult);
 		}, function(error:ResponseErrorData) {
-			var data:HaxeResponseErrorData = error.data;
+			final data:HaxeResponseErrorData = error.data;
 			errback(data[0].message);
 		});
 	}
@@ -505,7 +505,7 @@ class Context {
 	}
 
 	public function startTimer(method:String) {
-		var startTime = Date.now().getTime();
+		final startTime = Date.now().getTime();
 		return function(?result:Dynamic, ?debugInfo:String) {
 			if (config.sendMethodResults) {
 				languageServerProtocol.sendNotification(LanguageServerMethods.DidRunMethod, {

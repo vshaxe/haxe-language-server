@@ -11,11 +11,11 @@ class HaxePosition {
 		if (!positionRe.match(pos))
 			return null;
 
-		var file = getProperFileNameCase(new FsPath(positionRe.matched(1)));
+		final file = getProperFileNameCase(new FsPath(positionRe.matched(1)));
 		var s = positionRe.matched(3);
 		if (s != null) { // line span
-			var startLine = Std.parseInt(s);
-			var endLine = Std.parseInt(positionRe.matched(4));
+			final startLine = Std.parseInt(s);
+			final endLine = Std.parseInt(positionRe.matched(4));
 			return {
 				uri: if (file == doc.uri.toFsPath()) doc.uri else file.toUri(),
 				range: {
@@ -46,16 +46,15 @@ class HaxePosition {
 				uri = file.toUri();
 			}
 
-			var endByte = offsetConverter.positionCharToZeroBasedColumn(Std.parseInt(positionRe.matched(6)));
-			var endChar = offsetConverter.byteOffsetToCharacterOffset(lineContent, endByte);
+			final endByte = offsetConverter.positionCharToZeroBasedColumn(Std.parseInt(positionRe.matched(6)));
+			final endChar = offsetConverter.byteOffsetToCharacterOffset(lineContent, endByte);
 
 			s = positionRe.matched(5);
-			var startChar;
-			if (s != null) {
-				var startByte = offsetConverter.positionCharToZeroBasedColumn(Std.parseInt(s));
-				startChar = offsetConverter.byteOffsetToCharacterOffset(lineContent, startByte);
+			final startChar = if (s != null) {
+				final startByte = offsetConverter.positionCharToZeroBasedColumn(Std.parseInt(s));
+				offsetConverter.byteOffsetToCharacterOffset(lineContent, startByte);
 			} else {
-				startChar = endChar;
+				endChar;
 			}
 
 			return {
@@ -72,12 +71,12 @@ class HaxePosition {
 		if (!isWindows)
 			return normalizedPath;
 		if (properFileNameCaseCache != null) {
-			var cached = properFileNameCaseCache[normalizedPath];
+			final cached = properFileNameCaseCache[normalizedPath];
 			if (cached != null)
 				return cached;
 		}
 		var result = normalizedPath;
-		var parts = normalizedPath.toString().split("\\");
+		final parts = normalizedPath.toString().split("\\");
 		if (parts.length > 1) {
 			var acc = parts[0];
 			for (i in 1...parts.length) {

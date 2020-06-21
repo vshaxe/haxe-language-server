@@ -6,7 +6,7 @@ import haxeLanguageServer.helper.TypeHelper;
 
 class TypeHelperTest extends Test {
 	function testParseFunctionArgumentType() {
-		var parsed = parseFunctionArgumentType("?Callback:Null<flixel.FlxObject -> ?String -> Void>");
+		final parsed = parseFunctionArgumentType("?Callback:Null<flixel.FlxObject -> ?String -> Void>");
 		switch parsed {
 			case DisplayType.DTFunction(args, ret):
 				Assert.equals("flixel.FlxObject", args[0].type);
@@ -21,7 +21,7 @@ class TypeHelperTest extends Test {
 	}
 
 	function testParseFunctionArgumentTypeNestedNulls() {
-		var parsed = parseFunctionArgumentType("foo:Null<Null<Null<Null<String -> Void>>>>");
+		final parsed = parseFunctionArgumentType("foo:Null<Null<Null<Null<String -> Void>>>>");
 		switch parsed {
 			case DisplayType.DTFunction(args, ret):
 				Assert.equals("String", args[0].type);
@@ -60,10 +60,10 @@ class TypeHelperTest extends Test {
 	}
 
 	function assertPrintedEquals(parser:String->DisplayType, expected:String, functionType:String, formatting:FunctionFormattingConfig) {
-		var parsed = parseFunctionArgumentType(functionType);
+		final parsed = parseFunctionArgumentType(functionType);
 		switch parsed {
 			case DisplayType.DTFunction(args, ret):
-				var decl = printFunctionDeclaration(args, ret, formatting);
+				final decl = printFunctionDeclaration(args, ret, formatting);
 				Assert.equals(expected, decl);
 			case _:
 				Assert.fail();

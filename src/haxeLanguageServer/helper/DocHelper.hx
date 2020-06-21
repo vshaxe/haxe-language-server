@@ -21,8 +21,8 @@ class DocHelper {
 		doc = doc.trim();
 
 		// detect doc comment style/indent
-		var ereg = ~/^([ \t]+(\* )?)[^\s\*]/m;
-		var matched = ereg.match(doc);
+		final ereg = ~/^([ \t]+(\* )?)[^\s\*]/m;
+		final matched = ereg.match(doc);
 
 		if (matched) {
 			var string = ereg.matched(1);
@@ -30,7 +30,7 @@ class DocHelper {
 			// escape asterisk and allow one optional space after it
 			string = string.split('* ').join('\\* ?');
 
-			var indent = new EReg("^" + string, "gm");
+			final indent = new EReg("^" + string, "gm");
 			doc = indent.replace(doc, "");
 		}
 
@@ -50,15 +50,15 @@ class DocHelper {
 			return s.replace("\n", by).replace("\r", by);
 		function mapDocTags(tags)
 			return tags.map(function(p) {
-				var desc = replaceNewlines(p.doc, " ");
+				final desc = replaceNewlines(p.doc, " ");
 				return tableLine("`" + p.value + "`", desc);
 			}).join("");
 
 		doc = trim(doc);
-		var docInfos = JavadocHelper.parse(doc);
+		final docInfos = JavadocHelper.parse(doc);
 		var result = docInfos.doc;
-		var hasParams = docInfos.params.length > 0;
-		var hasReturn = docInfos.returns != null;
+		final hasParams = docInfos.params.length > 0;
+		final hasReturn = docInfos.returns != null;
 
 		result += "\n";
 
@@ -116,7 +116,7 @@ class DocHelper {
 		@param range selected range inside document
 	**/
 	public static function untrimRange(doc:TextDocument, range:Range) {
-		var startLine = doc.lineAt(range.start.line);
+		final startLine = doc.lineAt(range.start.line);
 		if (reStartsWhitespace.match(startLine.substring(0, range.start.character)))
 			range = {
 				start: {
@@ -126,7 +126,7 @@ class DocHelper {
 				end: range.end
 			};
 
-		var endLine = if (range.start.line == range.end.line) startLine else doc.lineAt(range.end.line);
+		final endLine = if (range.start.line == range.end.line) startLine else doc.lineAt(range.end.line);
 		if (reEndsWithWhitespace.match(endLine.substring(range.end.character)))
 			range = {
 				start: range.start,
@@ -140,8 +140,8 @@ class DocHelper {
 }
 
 enum abstract LanguageId(String) to String {
-	var Haxe = "haxe";
-	var HaxeType = "haxe.type";
-	var HaxeArgument = "haxe.argument";
-	var Hxml = "hxml";
+	final Haxe = "haxe";
+	final HaxeType = "haxe.type";
+	final HaxeArgument = "haxe.argument";
+	final Hxml = "hxml";
 }

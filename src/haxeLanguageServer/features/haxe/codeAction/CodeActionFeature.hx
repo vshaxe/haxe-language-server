@@ -7,7 +7,7 @@ import jsonrpc.Types.NoData;
 typedef CodeActionContributor = CodeActionParams->Array<CodeAction>;
 
 class CodeActionFeature {
-	public static inline var SourceSortImports = "source.sortImports";
+	public static inline final SourceSortImports = "source.sortImports";
 
 	final context:Context;
 	final contributors:Array<CodeActionContributor> = [];

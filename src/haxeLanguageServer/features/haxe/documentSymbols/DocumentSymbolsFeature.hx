@@ -17,16 +17,16 @@ class DocumentSymbolsFeature {
 
 	function onDocumentSymbols(params:DocumentSymbolParams, token:CancellationToken, resolve:Array<EitherType<SymbolInformation, DocumentSymbol>>->Void,
 			reject:ResponseError<NoData>->Void) {
-		var onResolve = context.startTimer("haxe/documentSymbol");
-		var uri = params.textDocument.uri;
-		var doc = context.documents.getHaxe(uri);
+		final onResolve = context.startTimer("haxe/documentSymbol");
+		final uri = params.textDocument.uri;
+		final doc = context.documents.getHaxe(uri);
 		if (doc == null) {
 			return reject.noFittingDocument(uri);
 		}
 		if (doc.tokens == null) {
 			return reject.noTokens();
 		}
-		var symbols = new DocumentSymbolsResolver(doc).resolve();
+		final symbols = new DocumentSymbolsResolver(doc).resolve();
 		resolve(symbols);
 		onResolve(null, countSymbols(symbols) + " symbols");
 	}

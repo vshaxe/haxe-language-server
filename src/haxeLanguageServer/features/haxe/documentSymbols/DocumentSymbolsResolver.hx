@@ -15,8 +15,8 @@ class DocumentSymbolsResolver {
 	}
 
 	public function resolve():Array<DocumentSymbol> {
-		var stack = new SymbolStack();
-		var tokens = document.tokens;
+		final stack = new SymbolStack();
+		final tokens = document.tokens;
 		if (tokens == null) {
 			return [];
 		}
@@ -41,13 +41,13 @@ class DocumentSymbolsResolver {
 				}
 				var range = tokens.getTreePos(token);
 				if (level != Expression) {
-					var docComment = token.getDocComment();
+					final docComment = token.getDocComment();
 					if (docComment != null) {
-						var docCommentPos = tokens.getPos(docComment);
+						final docCommentPos = tokens.getPos(docComment);
 						range = {file: range.file, min: docCommentPos.min, max: range.max};
 					}
 				}
-				var symbol:DocumentSymbol = {
+				final symbol:DocumentSymbol = {
 					name: name,
 					kind: kind,
 					range: rangeAt(range),
@@ -90,7 +90,7 @@ class DocumentSymbolsResolver {
 					}
 
 				case Kwd(KwdFunction), Kwd(KwdVar), Kwd(KwdFinal):
-					var currentLevel = switch stack.level {
+					final currentLevel = switch stack.level {
 						case Root, Type(_): Field;
 						case Field, Expression: Expression;
 					};
@@ -99,8 +99,8 @@ class DocumentSymbolsResolver {
 							if (name == null) {
 								name = "<anonymous function>";
 							}
-							var type = stack.getParentTypeKind();
-							var kind:SymbolKind = if (name == "new") {
+							final type = stack.getParentTypeKind();
+							final kind:SymbolKind = if (name == "new") {
 								Constructor;
 							} else if (token.isOperatorFunction() && (type == Abstract || type == EnumAbstract)) {
 								Operator;
@@ -111,18 +111,18 @@ class DocumentSymbolsResolver {
 
 						case VAR(name, _, isStatic, isInline, _, _):
 							if (currentLevel == Expression) {
-								var children = token.children;
+								final children = token.children;
 								if (children != null) {
-									// at expression level, we might have a multi-var expr (`var a, b, c;`)
+									// at expression level, we might have a multi-final expr (`final a, b, c;`)
 									for (i in 0...children.length) {
-										var opensScope = i == children.length - 1;
-										var token = if (i == 0) token else children[i];
+										final opensScope = i == children.length - 1;
+										final token = if (i == 0) token else children[i];
 										add(token, Variable, currentLevel, opensScope);
 									}
 								}
 							} else {
-								var type = stack.getParentTypeKind();
-								var kind:SymbolKind = if (type == EnumAbstract && !isStatic) {
+								final type = stack.getParentTypeKind();
+								final kind:SymbolKind = if (type == EnumAbstract && !isStatic) {
 									EnumMember;
 								} else if (isInline) {
 									Constant;
@@ -139,7 +139,7 @@ class DocumentSymbolsResolver {
 					}
 
 				case Kwd(KwdFor), Kwd(KwdCatch):
-					var ident = token.access().firstChild().is(POpen).firstChild().isCIdent().token;
+					final ident = token.access().firstChild().is(POpen).firstChild().isCIdent().token;
 					if (ident != null) {
 						add(ident, Variable, Expression, false);
 					}

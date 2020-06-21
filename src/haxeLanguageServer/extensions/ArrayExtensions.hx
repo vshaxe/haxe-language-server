@@ -22,7 +22,7 @@ function equals<T>(a1:Array<T>, a2:Array<T>):Bool {
 }
 
 function filterDuplicates<T>(array:Array<T>, filter:(a:T, b:T) -> Bool):Array<T> {
-	var unique:Array<T> = [];
+	final unique:Array<T> = [];
 	for (element in array) {
 		var present = false;
 		for (unique in unique)

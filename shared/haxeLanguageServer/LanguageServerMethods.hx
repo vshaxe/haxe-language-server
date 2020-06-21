@@ -12,68 +12,68 @@ class LanguageServerMethods {
 	/**
 		This notification is sent from the client to the server when display arguments have changed.
 	**/
-	static inline var DidChangeDisplayArguments = new NotificationType<{arguments:Array<String>}>("haxe/didChangeDisplayArguments");
+	static inline final DidChangeDisplayArguments = new NotificationType<{arguments:Array<String>}>("haxe/didChangeDisplayArguments");
 
 	/**
 		This notification is sent from the client to the server when display arguments have changed.
 	**/
-	static inline var DidChangeDisplayServerConfig = new NotificationType<DisplayServerConfig>("haxe/didChangeDisplayServerConfig");
+	static inline final DidChangeDisplayServerConfig = new NotificationType<DisplayServerConfig>("haxe/didChangeDisplayServerConfig");
 
 	/**
 		This request is sent from the client to the server to determine the haxe package for a given file,
 		based on class paths configuration.
 	**/
-	static inline var DeterminePackage = new RequestType<{fsPath:String}, {pack:String}, NoData>("haxe/determinePackage");
+	static inline final DeterminePackage = new RequestType<{fsPath:String}, {pack:String}, NoData>("haxe/determinePackage");
 
 	/**
 		This notification is sent from the client to the server to run a global diagnostics check.
 	**/
-	static inline var RunGlobalDiagnostics = new NotificationType<NoData>("haxe/runGlobalDiagnostics");
+	static inline final RunGlobalDiagnostics = new NotificationType<NoData>("haxe/runGlobalDiagnostics");
 
 	/**
 		This notification is sent from the server to the client when a global diagnostics check was finished successfully.
 	**/
-	static inline var DidRunRunGlobalDiagnostics = new NotificationType<NoData>("haxe/didRunGlobalDiagnostics");
+	static inline final DidRunRunGlobalDiagnostics = new NotificationType<NoData>("haxe/didRunGlobalDiagnostics");
 
 	/**
 		This notification is sent from the client to the server when the active text editor has changed.
 	**/
-	static inline var DidChangeActiveTextEditor = new NotificationType<{uri:DocumentUri}>("haxe/didChangeActiveTextEditor");
+	static inline final DidChangeActiveTextEditor = new NotificationType<{uri:DocumentUri}>("haxe/didChangeActiveTextEditor");
 
 	/**
 		This notification is sent from the server to the client when the display port has changed.
 	**/
-	static inline var DidChangeDisplayPort = new NotificationType<{port:Int}>("haxe/didChangeDisplayPort");
+	static inline final DidChangeDisplayPort = new NotificationType<{port:Int}>("haxe/didChangeDisplayPort");
 
 	/**
 		This notification is sent from the server to the client when a Haxe JSON-RPC method was executed.
 	**/
-	static inline var DidRunMethod = new NotificationType<MethodResult>("haxe/didRunHaxeMethod");
+	static inline final DidRunMethod = new NotificationType<MethodResult>("haxe/didRunHaxeMethod");
 
 	/**
 		This notification is sent from the server to the client when the request queue has changed.
 	**/
-	static inline var DidChangeRequestQueue = new NotificationType<{queue:Array<String>}>("haxe/didChangeRequestQueue");
+	static inline final DidChangeRequestQueue = new NotificationType<{queue:Array<String>}>("haxe/didChangeRequestQueue");
 
 	/**
 		This notification is sent from the client to the server to instruct a specific Haxe JSON-RPC method to be executed.
 	**/
-	static inline var RunMethod = new RequestType<{method:String, ?params:Dynamic}, Dynamic, NoData>("haxe/runMethod");
+	static inline final RunMethod = new RequestType<{method:String, ?params:Dynamic}, Dynamic, NoData>("haxe/runMethod");
 
 	/**
 		This notification is sent from the server to the client to indicate that it has failed to build a completion cache.
 	**/
-	static inline var CacheBuildFailed = new NotificationType<NoData>("haxe/cacheBuildFailed");
+	static inline final CacheBuildFailed = new NotificationType<NoData>("haxe/cacheBuildFailed");
 
 	/**
 		This notification is sent from the server to the client to indicate that the Haxe process has crashed multiple times.
 	**/
-	static inline var HaxeKeepsCrashing = new NotificationType<NoData>("haxe/haxeKeepsCrashing");
+	static inline final HaxeKeepsCrashing = new NotificationType<NoData>("haxe/haxeKeepsCrashing");
 
 	/**
 		This notification is sent from the server to the client to indicate that an old Haxe version is being used.
 	**/
-	static inline var DidDetectOldHaxeVersion = new NotificationType<{haxe4Preview:Bool, version:String}>("haxe/didDetectOldHaxeVersion");
+	static inline final DidDetectOldHaxeVersion = new NotificationType<{haxe4Preview:Bool, version:String}>("haxe/didDetectOldHaxeVersion");
 }
 
 typedef MethodResult = {
@@ -85,8 +85,8 @@ typedef MethodResult = {
 }
 
 enum abstract MethodResultKind(String) {
-	var Haxe;
-	var Lsp;
+	final Haxe;
+	final Lsp;
 }
 
 typedef AdditionalTimes = {

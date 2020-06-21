@@ -12,10 +12,10 @@ import languageServerProtocol.protocol.Protocol.CompletionParams;
 using haxe.io.Path;
 
 typedef SnippetCompletionContextData = {
-	var doc:TextDocument;
-	var params:CompletionParams;
-	var replaceRange:Range;
-	var tokenContext:TokenContext;
+	final doc:TextDocument;
+	final params:CompletionParams;
+	final replaceRange:Range;
+	final tokenContext:TokenContext;
 }
 
 class SnippetCompletion {
@@ -27,16 +27,16 @@ class SnippetCompletion {
 
 	public function createItems<T1, T2>(data:SnippetCompletionContextData,
 			displayItems:Array<DisplayItem<T1>>):Promise<{items:Array<CompletionItem>, displayItems:Array<DisplayItem<T1>>}> {
-		var fsPath = data.doc.uri.toFsPath().toString();
+		final fsPath = data.doc.uri.toFsPath().toString();
 
-		var pos = data.params.position;
-		var isRestOfLineEmpty = data.doc.lineAt(pos.line).substr(pos.character).trim().length == 0;
+		final pos = data.params.position;
+		final isRestOfLineEmpty = data.doc.lineAt(pos.line).substr(pos.character).trim().length == 0;
 
 		for (i in 0...displayItems.length) {
-			var item = displayItems[i];
+			final item = displayItems[i];
 			switch item.kind {
 				case Keyword:
-					var kwd:KeywordKind = item.args.name;
+					final kwd:KeywordKind = item.args.name;
 					switch kwd {
 						case Class, Interface, Enum, Abstract, Typedef if (isRestOfLineEmpty):
 							displayItems[i] = null;
@@ -55,7 +55,7 @@ class SnippetCompletion {
 		inline function block(i:Int) {
 			return '{\n\t$$$i\n}';
 		}
-		var body = block(0);
+		final body = block(0);
 
 		function add(label:String, detail:String, code:String, ?sortText:String) {
 			items.push(createItem(label, detail, code, data.replaceRange, sortText));
@@ -66,12 +66,12 @@ class SnippetCompletion {
 		final addFunction = add.bind("function", "function name()", 'function $${1:name}($$2) $body');
 
 		function addReadonly(isDefaultPrivate:Bool) {
-			var prefix = if (isDefaultPrivate) "public " else "";
+			final prefix = if (isDefaultPrivate) "public " else "";
 			add("readonly", prefix + "var name(default, null):T;", prefix + 'var $${1:name}(default, null):$${2:T};');
 		}
 		function addProperty(isDefaultPrivate:Bool) {
-			var propertyPrefix = if (isDefaultPrivate) "public " else "";
-			var accessorPrefix = if (isDefaultPrivate) "" else "private ";
+			final propertyPrefix = if (isDefaultPrivate) "public " else "";
+			final accessorPrefix = if (isDefaultPrivate) "" else "private ";
 			add("property", propertyPrefix
 				+ "var name(get, set):T;", propertyPrefix
 				+ 'var $${1:name}(get, set):$${2:T};
@@ -82,7 +82,7 @@ ${accessorPrefix}function set_$${1:name}($${1:name}:$${2:T}):$${2:T} $body');
 
 		}
 		function addMain(explicitStatic:Bool) {
-			var main = (if (explicitStatic) "static " else "") + "function main()";
+			final main = (if (explicitStatic) "static " else "") + "function main()";
 			add("main", main, '$main $body');
 		}
 
@@ -96,9 +96,9 @@ ${accessorPrefix}function set_$${1:name}($${1:name}:$${2:T}):$${2:T} $body');
 
 		switch data.tokenContext {
 			case Root(pos):
-				var moduleName = fsPath.withoutDirectory().untilFirstDot();
-				var name = '$${1:$moduleName}';
-				var abstractName = name + '($${2:T})';
+				final moduleName = fsPath.withoutDirectory().untilFirstDot();
+				final name = '$${1:$moduleName}';
+				final abstractName = name + '($${2:T})';
 				return new Promise((resolve, reject) -> {
 					if (isRestOfLineEmpty) {
 						items = [
@@ -125,7 +125,7 @@ ${accessorPrefix}function set_$${1:name}($${1:name}:$${2:T}):$${2:T} $body');
 
 					if (pos == BeforePackage) {
 						context.determinePackage.onDeterminePackage({fsPath: fsPath}, null, pack -> {
-							var code = if (pack.pack == "") "package;" else 'package ${pack.pack};';
+							final code = if (pack.pack == "") "package;" else 'package ${pack.pack};';
 							add("package", code, code);
 							resolve(result());
 						}, _ -> resolve(result()));
@@ -135,9 +135,9 @@ ${accessorPrefix}function set_$${1:name}($${1:name}:$${2:T}):$${2:T} $body');
 				});
 
 			case Type(type):
-				var isClass = type.kind == Class || type.kind == MacroClass;
-				var isAbstract = type.kind == Abstract || type.kind == EnumAbstract;
-				var canInsertClassFields = type.field == null && (isClass || isAbstract);
+				final isClass = type.kind == Class || type.kind == MacroClass;
+				final isAbstract = type.kind == Abstract || type.kind == EnumAbstract;
+				final canInsertClassFields = type.field == null && (isClass || isAbstract);
 				if (canInsertClassFields) {
 					if (type.kind == EnumAbstract) {
 						add("var", "var Name;", 'var $${1:Name}$$2;', "~");
@@ -151,7 +151,7 @@ ${accessorPrefix}function set_$${1:name}($${1:name}:$${2:T}):$${2:T} $body');
 					addFunction();
 					addProperty(true);
 
-					var constructor = "public function new";
+					final constructor = "public function new";
 					add("new", '$constructor()', '$constructor($1) $body');
 
 					if (isClass) {

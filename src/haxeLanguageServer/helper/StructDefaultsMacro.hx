@@ -17,12 +17,12 @@ class StructDefaultsMacro {
 		inline function error(message:String)
 			Context.fatalError(message, struct.pos);
 
-		var structType = Context.typeof(struct);
-		var defaultsType = Context.typeof(defaults);
+		final structType = Context.typeof(struct);
+		final defaultsType = Context.typeof(defaults);
 		if (!defaultsType.unify(structType))
 			error("Arguments don't unify");
 
-		var fields = getStructFields(structType);
+		final fields = getStructFields(structType);
 		if (fields == null)
 			error("Unable to retrieve struct fields");
 
@@ -38,7 +38,7 @@ class StructDefaultsMacro {
 	static function generateAssignments(fields:Array<ClassField>, struct:Expr, defaults:Expr):Array<Expr> {
 		var assignments = [];
 		for (field in fields) {
-			var name = field.name;
+			final name = field.name;
 			assignments.push(macro {
 				if ($struct.$name == null)
 					$struct.$name = $defaults.$name;
@@ -47,7 +47,7 @@ class StructDefaultsMacro {
 			// recurse
 			switch field.type {
 				case TType(_, params) | TAbstract(_, params) if (params.length > 0):
-					var innerFields = getStructFields(params[0]);
+					final innerFields = getStructFields(params[0]);
 					if (innerFields != null)
 						assignments = assignments.concat(generateAssignments(innerFields, macro {$struct.$name;}, macro {$defaults.$name;}));
 				case _:

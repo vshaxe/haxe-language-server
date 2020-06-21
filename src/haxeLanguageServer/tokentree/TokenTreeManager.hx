@@ -12,16 +12,16 @@ import tokentree.TokenTreeBuilder;
 
 class TokenTreeManager {
 	public static function create(content:String):TokenTreeManager {
-		var bytes = Bytes.ofString(content);
-		var tokens = createTokens(bytes);
-		var tree = createTokenTree(bytes, tokens);
+		final bytes = Bytes.ofString(content);
+		final tokens = createTokens(bytes);
+		final tree = createTokenTree(bytes, tokens);
 		return new TokenTreeManager(bytes, tokens, tree);
 	}
 
 	static function createTokens(bytes:Bytes):Array<Token> {
 		try {
-			var tokens = [];
-			var lexer = new HaxeLexer(ByteData.ofBytes(bytes));
+			final tokens = [];
+			final lexer = new HaxeLexer(ByteData.ofBytes(bytes));
 			var t:Token = lexer.token(haxeparser.HaxeLexer.tok);
 			while (t.tok != Eof) {
 				tokens.push(t);
@@ -71,13 +71,13 @@ class TokenTreeManager {
 		Copy of `TokenTree.getPos()`.
 	**/
 	public function getTreePos(tokenTree:TokenTree):Null<Position> {
-		var pos = getPos(tokenTree);
+		final pos = getPos(tokenTree);
 		if (pos == null || tokenTree.children == null || tokenTree.children.length <= 0)
 			return pos;
 
-		var fullPos:Position = {file: pos.file, min: pos.min, max: pos.max};
+		final fullPos:Position = {file: pos.file, min: pos.min, max: pos.max};
 		for (child in tokenTree.children) {
-			var childPos = getTreePos(child);
+			final childPos = getTreePos(child);
 			if (childPos == null)
 				continue;
 
@@ -126,7 +126,7 @@ class TokenTreeManager {
 			if (child.index == index)
 				return child;
 
-			var token:Null<TokenTree> = findTokenAtIndex(child, index);
+			final token:Null<TokenTree> = findTokenAtIndex(child, index);
 			if (token != null)
 				return token;
 		}
@@ -140,7 +140,7 @@ class TokenTreeManager {
 		tokenCharacterRanges = new Map();
 		var offset = 0;
 		for (i in 0...list.length) {
-			var token = list[i];
+			final token = list[i];
 			offset += switch token.tok {
 				// these should be the only places where Unicode characters can appear in Haxe
 				case Const(CString(s)), Const(CRegexp(s, _)), Comment(s), CommentLine(s):

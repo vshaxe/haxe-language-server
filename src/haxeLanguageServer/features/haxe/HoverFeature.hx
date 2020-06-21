@@ -18,12 +18,12 @@ class HoverFeature {
 	}
 
 	public function onHover(params:TextDocumentPositionParams, token:CancellationToken, resolve:Null<Hover>->Void, reject:ResponseError<NoData>->Void) {
-		var uri = params.textDocument.uri;
-		var doc:Null<HaxeDocument> = context.documents.getHaxe(uri);
+		final uri = params.textDocument.uri;
+		final doc:Null<HaxeDocument> = context.documents.getHaxe(uri);
 		if (doc == null || !uri.isFile()) {
 			return reject.noFittingDocument(uri);
 		}
-		var handle = if (context.haxeServer.supports(DisplayMethods.Hover)) handleJsonRpc else handleLegacy;
+		final handle = if (context.haxeServer.supports(DisplayMethods.Hover)) handleJsonRpc else handleLegacy;
 		handle(params, token, resolve, reject, doc, doc.offsetAt(params.position));
 	}
 
@@ -40,32 +40,32 @@ class HoverFeature {
 	}
 
 	function printContent<T>(doc:TextDocument, hover:HoverDisplayItemOccurence<T>):HoverContent {
-		var printer = new DisplayPrinter(true, Qualified, {
+		final printer = new DisplayPrinter(true, Qualified, {
 			argumentTypeHints: true,
 			returnTypeHint: NonVoid,
 			explicitPublic: true,
 			explicitPrivate: true,
 			explicitNull: true
 		});
-		var item = hover.item;
-		var concreteType = hover.item.type;
+		final item = hover.item;
+		final concreteType = hover.item.type;
 		function printType():HoverContent {
-			var type = printer.printType(concreteType);
+			final type = printer.printType(concreteType);
 			return {definition: printCodeBlock(type, HaxeType)};
 		}
-		var result:HoverContent = switch item.kind {
+		final result:HoverContent = switch item.kind {
 			case Type:
-				var typeDefinition = printer.printEmptyTypeDefinition(hover.item.args);
+				final typeDefinition = printer.printEmptyTypeDefinition(hover.item.args);
 				{definition: printCodeBlock(typeDefinition, Haxe)}
 			case Local:
-				var languageId = if (item.args.origin == Argument) HaxeArgument else Haxe;
-				var local = printer.printLocalDefinition(hover.item.args, concreteType);
+				final languageId = if (item.args.origin == Argument) HaxeArgument else Haxe;
+				final local = printer.printLocalDefinition(hover.item.args, concreteType);
 				{
 					definition: printCodeBlock(local, languageId),
 					origin: printer.printLocalOrigin(item.args.origin)
 				}
 			case ClassField | EnumAbstractField:
-				var field = printer.printClassFieldDefinition(item.args, concreteType, item.kind == EnumAbstractField);
+				final field = printer.printClassFieldDefinition(item.args, concreteType, item.kind == EnumAbstractField);
 				{
 					definition: printCodeBlock(field, Haxe),
 					origin: switch printer.printClassFieldOrigin(item.args.origin, item.kind) {
@@ -74,7 +74,7 @@ class HoverFeature {
 					}
 				}
 			case EnumField:
-				var field = printer.printEnumFieldDefinition(item.args.field, item.type);
+				final field = printer.printEnumFieldDefinition(item.args.field, item.type);
 				{
 					definition: printCodeBlock(field, Haxe),
 					origin: switch printer.printEnumFieldOrigin(item.args.origin) {
@@ -88,11 +88,11 @@ class HoverFeature {
 					name = "@" + name; // backward compatibility with preview 4
 				{definition: printCodeBlock(name, Haxe)};
 			case Define:
-				var value = item.args.value;
+				final value = item.args.value;
 				{definition: if (value == null) "_not defined_" else printCodeBlock('"$value"', Haxe)};
 			case Literal:
-				var value = item.args.name;
-				var sourceText = doc.getText(hover.range);
+				final value = item.args.name;
+				final sourceText = doc.getText(hover.range);
 				if (value != sourceText && item.type.getDotPath() != String) {
 					return {definition: printCodeBlock(value, Haxe)};
 				} else {
@@ -102,11 +102,11 @@ class HoverFeature {
 				printType();
 		}
 
-		var expected = hover.expected;
+		final expected = hover.expected;
 		if (expected != null && expected.name != null && expected.name.kind == FunctionArgument) {
 			var argument = expected.name.name;
 			if (expected.type != null) {
-				var printer = new DisplayPrinter(PathPrinting.Never);
+				final printer = new DisplayPrinter(PathPrinting.Never);
 				argument += ":" + printer.printType(expected.type);
 			}
 			result.additionalSections = ['*for argument `$argument`*'];
@@ -117,18 +117,18 @@ class HoverFeature {
 
 	function handleLegacy(params:TextDocumentPositionParams, token:CancellationToken, resolve:Hover->Void, reject:ResponseError<NoData>->Void,
 			doc:TextDocument, offset:Int) {
-		var bytePos = context.displayOffsetConverter.characterOffsetToByteOffset(doc.content, offset);
-		var args = ['${doc.uri.toFsPath()}@$bytePos@type'];
-		context.callDisplay("@type", args, doc.content, token, function(r) {
-			switch r {
+		final bytePos = context.displayOffsetConverter.characterOffsetToByteOffset(doc.content, offset);
+		final args = ['${doc.uri.toFsPath()}@$bytePos@type'];
+		context.callDisplay("@type", args, doc.content, token, function(result) {
+			switch result {
 				case DCancelled:
 					resolve(null);
 				case DResult(data):
-					var xml = try Xml.parse(data).firstElement() catch (_:Any) null;
+					final xml = try Xml.parse(data).firstElement() catch (_:Any) null;
 					if (xml == null)
 						return reject.invalidXml(data);
 
-					var s = xml.firstChild().nodeValue.trim();
+					final s = xml.firstChild().nodeValue.trim();
 					switch xml.nodeName {
 						case "metadata":
 							if (s.length == 0)
@@ -137,18 +137,18 @@ class HoverFeature {
 						case _:
 							if (s.length == 0)
 								return reject(new ResponseError(0, "No type information"));
-							var type = switch parseDisplayType(s) {
+							final type = switch parseDisplayType(s) {
 								case DTFunction(args, ret):
 									printFunctionType(args, ret);
 								case DTValue(type):
 									if (type == null) "unknown" else type;
 							};
-							var documentation = xml.get("d");
-							var p = HaxePosition.parse(xml.get("p"), doc, null, context.displayOffsetConverter);
+							final documentation = xml.get("d");
+							final pos = HaxePosition.parse(xml.get("p"), doc, null, context.displayOffsetConverter);
 							var range:Null<Range> = null;
-							if (p != null)
-								range = p.range;
-							var definition = {definition: printCodeBlock(type, HaxeType)};
+							if (pos != null)
+								range = pos.range;
+							final definition = {definition: printCodeBlock(type, HaxeType)};
 							resolve(createHover(definition, documentation, range));
 					}
 			}
@@ -176,7 +176,7 @@ class HoverFeature {
 		if (content.additionalSections != null) {
 			sections = sections.concat(content.additionalSections);
 		}
-		var hover:Hover = {
+		final hover:Hover = {
 			contents: {
 				kind: MarkDown,
 				value: sections.join("\n\n---\n")

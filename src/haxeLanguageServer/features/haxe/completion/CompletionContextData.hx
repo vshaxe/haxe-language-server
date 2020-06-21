@@ -5,13 +5,13 @@ import haxeLanguageServer.helper.ImportHelper.ImportPosition;
 import haxeLanguageServer.tokentree.TokenContext;
 
 typedef CompletionContextData = {
-	var replaceRange:Range;
-	var mode:CompletionMode<Dynamic>;
-	var doc:TextDocument;
-	var indent:String;
-	var lineAfter:String;
-	var params:CompletionParams;
-	var importPosition:ImportPosition;
-	var tokenContext:TokenContext;
+	final replaceRange:Range;
+	final mode:CompletionMode<Dynamic>;
+	final doc:TextDocument;
+	final indent:String;
+	final lineAfter:String;
+	final params:CompletionParams;
+	final importPosition:ImportPosition;
+	final tokenContext:TokenContext;
 	var isResolve:Bool;
 }

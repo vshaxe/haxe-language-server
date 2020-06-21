@@ -4,6 +4,7 @@ import haxeLanguageServer.features.haxe.codeAction.*;
 import haxeLanguageServer.helper.*;
 import haxeLanguageServer.hxParser.*;
 import haxeLanguageServer.protocol.*;
+import haxeLanguageServer.tokentree.*;
 import utest.UTest;
 
 class TestMain {
@@ -21,7 +22,8 @@ class TestMain {
 			new ExtensionsTest(),
 			new ExtractConstantFeatureTest(),
 			new OrganizeImportsFeatureTest(),
-			new SemVerTest()
+			new SemVerTest(),
+			new TokenTreeTest()
 		]);
 		// @formatter:on
 	}
