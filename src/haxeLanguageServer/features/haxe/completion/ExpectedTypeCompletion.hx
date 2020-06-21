@@ -45,28 +45,27 @@ class ExpectedTypeCompletion {
 
 		final anonFormatting = context.config.user.codeGeneration.functions.anonymous;
 		final printer = new DisplayPrinter(false, Shadowed, anonFormatting);
-		final dotPath = concreteType.getDotPath();
 		switch concreteType.kind {
 			case TInst | TAbstract:
-				switch dotPath {
+				switch concreteType.getDotPath() {
 					case "Array" | "haxe.ds.ReadOnlyArray":
 						items.push({
 							label: "[]",
-							detail: "Auto-generate array literal",
+							detail: "Generate array literal",
 							insertText: "[$1]",
 							insertTextFormat: Snippet
 						});
 					case "haxe.ds.Map":
 						items.push({
 							label: "[key => value]",
-							detail: "Auto-generate map literal",
+							detail: "Generate map literal",
 							insertText: "[${1:key} => ${2:value}]",
 							insertTextFormat: Snippet
 						});
 					case "EReg":
 						items.push({
 							label: "~/regex/",
-							detail: "Auto-generate regex literal",
+							detail: "Generate regex literal",
 							insertText: "~/${1:regex}/",
 							insertTextFormat: Snippet
 						});
@@ -80,7 +79,7 @@ class ExpectedTypeCompletion {
 				if (allFields == requiredFields) {
 					items.push({
 						label: if (anon.fields.length == 0) "{}" else "{fields...}",
-						detail: "Auto-generate object literal",
+						detail: "Generate object literal",
 						insertText: allFields,
 						insertTextFormat: Snippet,
 						code: printer.printObjectLiteral(anon, singleLine, false, false)
@@ -88,14 +87,14 @@ class ExpectedTypeCompletion {
 				} else {
 					items.push({
 						label: "{all fields...}",
-						detail: "Auto-generate object literal\n(all fields)",
+						detail: "Generate object literal\n(all fields)",
 						insertText: allFields,
 						insertTextFormat: Snippet,
 						code: printer.printObjectLiteral(anon, singleLine, false, false)
 					});
 					items.push({
 						label: "{required fields...}",
-						detail: "Auto-generate object literal\n(only required fields)",
+						detail: "Generate object literal\n(only required fields)",
 						insertText: requiredFields,
 						insertTextFormat: Snippet,
 						code: printer.printObjectLiteral(anon, singleLine, true, false)
@@ -106,7 +105,7 @@ class ExpectedTypeCompletion {
 				var definition = printer.printAnonymousFunctionDefinition(signature);
 				items.push({
 					label: definition,
-					detail: "Auto-generate anonymous function",
+					detail: "Generate anonymous function",
 					insertText: definition,
 					insertTextFormat: PlainText,
 					additionalTextEdits: createFunctionImportsEdit(data.doc, data.importPosition, context, concreteType, anonFormatting)
