@@ -100,7 +100,7 @@ class CompletionFeature {
 
 	function createDefineCompletion():Array<CompletionItem> {
 		final haxeVersion = context.haxeServer.haxeVersion;
-		return Defines.map(define -> {
+		return getDefines(false).map(define -> {
 			final item:CompletionItem = {
 				label: define.getRealName(),
 				kind: Constant,

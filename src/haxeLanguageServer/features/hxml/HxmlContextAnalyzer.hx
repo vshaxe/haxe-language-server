@@ -38,7 +38,7 @@ function analyzeHxmlContext(line:String, pos:Position):HxmlContext {
 					case Enum(values): EnumValue(values.find(v -> v.name == arg), values);
 					case Define:
 						function findDefine(define) {
-							return Defines.find(d -> d.matches(define));
+							return getDefines(true).find(d -> d.matches(define));
 						}
 						switch arg.split("=") {
 							case []: Define();

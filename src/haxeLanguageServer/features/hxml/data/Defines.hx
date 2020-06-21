@@ -69,6 +69,7 @@ private typedef DefineData = {
 	final ?platforms:ReadOnlyArray<String>;
 	final ?params:ReadOnlyArray<String>;
 	final ?links:ReadOnlyArray<String>;
+	final ?reserved:Bool;
 }
 
 typedef VersionInfo = {
@@ -106,9 +107,13 @@ private final DefineVersions:Map<String, Null<VersionInfo>> = {
 	];
 }
 
+function getDefines(includeReserved:Bool):ReadOnlyArray<Define> {
+	return if (includeReserved) Defines else Defines.filter(d -> !d.reserved);
+}
+
 // from https://github.com/HaxeFoundation/haxe/blob/development/src-json/define.json
 
-final Defines:ReadOnlyArray<Define> = [
+private final Defines:ReadOnlyArray<DefineData> = [
 	{
 		"name": "AbsolutePath",
 		"define": "absolute_path",
@@ -341,12 +346,14 @@ final Defines:ReadOnlyArray<Define> = [
 	{
 		"name": "HaxeVer",
 		"define": "haxe_ver",
-		"doc": "The current Haxe version value as decimal number. E.g. 3.407 for 3.4.7."
+		"doc": "The current Haxe version value as decimal number. E.g. 3.407 for 3.4.7.",
+		"reserved": true
 	},
 	{
 		"name": "Haxe",
 		"define": "haxe",
-		"doc": "The current Haxe version value in SemVer format."
+		"doc": "The current Haxe version value in SemVer format.",
+		"reserved": true
 	},
 	{
 		"name": "HlVer",
@@ -482,7 +489,8 @@ final Defines:ReadOnlyArray<Define> = [
 		"name": "Macro",
 		"define": "macro",
 		"doc": "Defined when code is compiled in the macro context.",
-		"links": ["https://haxe.org/manual/macro.html"]
+		"links": ["https://haxe.org/manual/macro.html"],
+		"reserved": true
 	},
 	{
 		"name": "MacroTimes",
@@ -676,7 +684,8 @@ final Defines:ReadOnlyArray<Define> = [
 	{
 		"name": "Static",
 		"define": "static",
-		"doc": "Defined if the current target is static."
+		"doc": "Defined if the current target is static.",
+		"reserved": true
 	},
 	{
 		"name": "StdEncodingUtf8",
@@ -688,7 +697,8 @@ final Defines:ReadOnlyArray<Define> = [
 		"name": "Swc",
 		"define": "swc",
 		"doc": "Output a SWC instead of a SWF.",
-		"platforms": ["flash"]
+		"platforms": ["flash"],
+		"reserved": true
 	},
 	{
 		"name": "SwfCompressLevel",
@@ -751,7 +761,8 @@ final Defines:ReadOnlyArray<Define> = [
 	{
 		"name": "Sys",
 		"define": "sys",
-		"doc": "Defined for all system platforms."
+		"doc": "Defined for all system platforms.",
+		"reserved": true
 	},
 	{
 		"name": "Unsafe",
@@ -768,7 +779,8 @@ final Defines:ReadOnlyArray<Define> = [
 	{
 		"name": "Utf16",
 		"define": "utf16",
-		"doc": "Defined for all platforms that use UTF-16 string encoding with UCS-2 API."
+		"doc": "Defined for all platforms that use UTF-16 string encoding with UCS-2 API.",
+		"reserved": true
 	},
 	{
 		"name": "Vcproj",
