@@ -3,7 +3,6 @@ package haxeLanguageServer.features.hxml;
 import haxeLanguageServer.features.hxml.data.Defines;
 import haxeLanguageServer.features.hxml.data.Flags;
 import haxeLanguageServer.features.hxml.data.Shared;
-import haxeLanguageServer.helper.SemVer;
 
 using Lambda;
 

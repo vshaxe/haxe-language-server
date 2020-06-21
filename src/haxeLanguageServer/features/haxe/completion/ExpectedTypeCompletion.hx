@@ -2,9 +2,11 @@ package haxeLanguageServer.features.haxe.completion;
 
 import haxe.display.Display.ToplevelCompletion;
 import haxe.display.JsonModuleTypes.JsonType;
+import haxe.display.JsonModuleTypes.JsonTypePathWithParams;
 import haxeLanguageServer.features.haxe.completion.CompletionFeature;
 import haxeLanguageServer.helper.DocHelper;
 import haxeLanguageServer.helper.ImportHelper;
+import haxeLanguageServer.helper.SnippetHelper;
 import haxeLanguageServer.protocol.DisplayPrinter;
 
 class ExpectedTypeCompletion {
@@ -34,34 +36,50 @@ class ExpectedTypeCompletion {
 		var items:Array<CompletionItem> = [];
 		var types = expectedTypeFollowed.resolveTypes();
 		for (type in types) {
-			items = items.concat(createItemsForType(type, data));
+			items = items.concat(createItemsForType(type, data).map(createExpectedTypeCompletionItem.bind(_, data.params.position)));
 		}
 		items = items.filterDuplicates((item1, item2) -> item1.textEdit.newText == item2.textEdit.newText);
 		return items;
 	}
 
-	function createItemsForType<T>(concreteType:JsonType<T>, data:CompletionContextData):Array<CompletionItem> {
+	function createItemsForType<T>(concreteType:JsonType<T>, data:CompletionContextData):Array<ExpectedTypeCompletionItem> {
 		final items:Array<ExpectedTypeCompletionItem> = [];
 
 		final anonFormatting = context.config.user.codeGeneration.functions.anonymous;
 		final printer = new DisplayPrinter(false, Shadowed, anonFormatting);
 		switch concreteType.kind {
 			case TInst | TAbstract:
+				final type:JsonTypePathWithParams = concreteType.args;
+				function getNested(i:Int) {
+					return createItemsForType(type.params[i], data)[0];
+				}
 				switch concreteType.getDotPath() {
 					case "Array" | "haxe.ds.ReadOnlyArray":
-						items.push({
+						final nested = getNested(0);
+						final item:ExpectedTypeCompletionItem = {
 							label: "[]",
 							detail: "Generate array literal",
-							insertText: "[$1]",
+							insertText: "[" + (if (nested == null) "$1" else nested.insertText) + "]",
 							insertTextFormat: Snippet
-						});
+						};
+						item.code = SnippetHelper.prettify(item.insertText);
+						items.push(item);
+
 					case "haxe.ds.Map":
-						items.push({
+						final nested = getNested(1);
+						final item:ExpectedTypeCompletionItem = {
 							label: "[key => value]",
 							detail: "Generate map literal",
-							insertText: "[${1:key} => ${2:value}]",
+							insertText: "[${1:key} => " + (if (nested == null) {
+								"${2:value}";
+							} else {
+								SnippetHelper.offset(nested.insertText, 1);
+							}) + "]",
 							insertTextFormat: Snippet
-						});
+						};
+						item.code = SnippetHelper.prettify(item.insertText);
+						items.push(item);
+
 					case "EReg":
 						items.push({
 							label: "~/regex/",
@@ -113,7 +131,7 @@ class ExpectedTypeCompletion {
 			case _:
 		}
 
-		return items.map(createExpectedTypeCompletionItem.bind(_, data.params.position));
+		return items;
 	}
 
 	function createExpectedTypeCompletionItem(data:ExpectedTypeCompletionItem, position:Position):CompletionItem {
