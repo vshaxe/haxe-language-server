@@ -41,11 +41,36 @@ class ExpectedTypeCompletion {
 	}
 
 	function createItemsForType<T>(concreteType:JsonType<T>, data:CompletionContextData):Array<CompletionItem> {
-		var items:Array<ExpectedTypeCompletionItem> = [];
+		final items:Array<ExpectedTypeCompletionItem> = [];
 
-		var anonFormatting = context.config.user.codeGeneration.functions.anonymous;
-		var printer = new DisplayPrinter(false, Shadowed, anonFormatting);
+		final anonFormatting = context.config.user.codeGeneration.functions.anonymous;
+		final printer = new DisplayPrinter(false, Shadowed, anonFormatting);
+		final dotPath = concreteType.getDotPath();
 		switch concreteType.kind {
+			case TInst | TAbstract:
+				switch dotPath {
+					case "Array" | "haxe.ds.ReadOnlyArray":
+						items.push({
+							label: "[]",
+							detail: "Auto-generate array literal",
+							insertText: "[$1]",
+							insertTextFormat: Snippet
+						});
+					case "haxe.ds.Map":
+						items.push({
+							label: "[key => value]",
+							detail: "Auto-generate map literal",
+							insertText: "[${1:key} => ${2:value}]",
+							insertTextFormat: Snippet
+						});
+					case "EReg":
+						items.push({
+							label: "~/regex/",
+							detail: "Auto-generate regex literal",
+							insertText: "~/${1:regex}/",
+							insertTextFormat: Snippet
+						});
+				}
 			case TAnonymous:
 				// TODO: support @:structInit
 				var anon = concreteType.args;
