@@ -1,5 +1,6 @@
 package haxeLanguageServer.features;
 
+import haxe.extern.EitherType;
 import haxeLanguageServer.features.haxe.completion.CompletionFeature as HaxeCompletionFeature;
 import haxeLanguageServer.features.hxml.CompletionFeature as HxmlCompletionFeature;
 import jsonrpc.CancellationToken;
@@ -18,7 +19,8 @@ class CompletionFeature {
 		context.languageServerProtocol.onRequest(CompletionResolveRequest.type, onCompletionResolve);
 	}
 
-	function onCompletion(params:CompletionParams, token:CancellationToken, resolve:CompletionList->Void, reject:ResponseError<NoData>->Void) {
+	function onCompletion(params:CompletionParams, token:CancellationToken, resolve:Null<EitherType<Array<CompletionItem>, CompletionList>>->Void,
+			reject:ResponseError<NoData>->Void) {
 		final uri = params.textDocument.uri;
 		if (uri.isHaxeFile()) {
 			haxe.onCompletion(params, token, resolve, reject);

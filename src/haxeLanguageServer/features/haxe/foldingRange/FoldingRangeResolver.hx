@@ -13,7 +13,7 @@ class FoldingRangeResolver {
 
 	public function new(document:HaxeDocument, capabilities:Null<TextDocumentClientCapabilities>) {
 		this.document = document;
-		lineFoldingOnly = capabilities!.foldingRange!.lineFoldingOnly;
+		lineFoldingOnly = capabilities!.foldingRange!.lineFoldingOnly == true;
 	}
 
 	public function resolve():Array<FoldingRange> {
@@ -39,11 +39,14 @@ class FoldingRangeResolver {
 			add(start, end, kind);
 		}
 
-		var firstImport = null;
-		var lastImport = null;
+		var firstImport:Null<TokenTree> = null;
+		var lastImport:Null<TokenTree> = null;
 		final conditionalStack = [];
 		final regionStack = [];
 		final tokens = document.tokens;
+		if (tokens == null) {
+			return [];
+		}
 		tokens.tree.filterCallback(function(token:TokenTree, _) {
 			switch token.tok {
 				case BrOpen, Const(CString(_)), BkOpen:
@@ -67,6 +70,7 @@ class FoldingRangeResolver {
 					final start = regionStack.pop();
 					if (start != null) {
 						final end = tokens.getPos(token);
+						@:nullSafety(Off)
 						addRange({file: end.file, min: start, max: end.max}, Region);
 					}
 
@@ -89,7 +93,7 @@ class FoldingRangeResolver {
 
 					// everything except `#end` starts a range
 					if (sharp == "if" || sharp == "else" || sharp == "elseif") {
-						final pClose = token.access().firstChild().is(POpen).lastChild().is(PClose).token;
+						final pClose:Null<TokenTree> = token.access().firstChild().is(POpen).lastChild().is(PClose).token;
 						final pos = if (pClose == null) tokens.getPos(token) else tokens.getPos(pClose);
 						final start = document.positionAt(pos.max);
 						start.character++;

@@ -39,13 +39,18 @@ class DisplayPrinter {
 	public function new(wrap:Bool = false, pathPrinting:PathPrinting = Qualified, ?functionFormatting:FunctionFormattingConfig) {
 		this.wrap = wrap;
 		this.pathPrinting = pathPrinting;
-		this.functionFormatting = functionFormatting;
-		if (this.functionFormatting == null) {
-			this.functionFormatting = {
+		this.functionFormatting = if (functionFormatting == null) {
+			{
 				useArrowSyntax: true,
 				returnTypeHint: NonVoid,
-				argumentTypeHints: true
+				argumentTypeHints: true,
+				placeOpenBraceOnNewLine: false,
+				explicitPublic: false,
+				explicitPrivate: false,
+				explicitNull: false
 			}
+		} else {
+			functionFormatting;
 		}
 	}
 
@@ -343,7 +348,7 @@ class DisplayPrinter {
 			final name = quote + (if (origin.isModuleLevel()) type.moduleName else type.name) + quote;
 			return kind + " " + name;
 		}
-		return Some("from " + switch origin.kind {
+		return Some("from " + @:nullSafety(Off) switch origin.kind {
 			case Self:
 				printTypeInfo(origin.args);
 			case Parent:
@@ -484,7 +489,7 @@ class DisplayPrinter {
 	}
 
 	public function printSwitchOnEnumAbstract(subject:String, a:JsonAbstract, nullable:Bool, snippets:Bool, parentheses:Bool) {
-		final fields = a.impl.statics.filter(f -> f.isEnumAbstractField()).map(field -> field.name);
+		final fields = if (a.impl == null) [] else a.impl.statics.filter(f -> f.isEnumAbstractField()).map(field -> field.name);
 		return printSwitch(subject, fields, nullable, snippets, parentheses);
 	}
 

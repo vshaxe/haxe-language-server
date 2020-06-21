@@ -2,6 +2,7 @@ package haxeLanguageServer.features.haxe.codeAction;
 
 import haxeLanguageServer.helper.FormatterHelper;
 import haxeLanguageServer.helper.WorkspaceEditHelper;
+import haxeLanguageServer.tokentree.TokenTreeManager;
 import tokentree.TokenTree;
 
 using tokentree.TokenTreeAccessHelper;
@@ -20,29 +21,33 @@ class ExtractConstantFeature {
 		return internalExtractConstant(doc, uri, params.range);
 	}
 
-	function internalExtractConstant(doc:HaxeDocument, uri:DocumentUri, range:Range):Array<CodeAction> {
-		if (doc == null || doc.tokens == null || doc.tokens.tree == null) {
+	function internalExtractConstant(doc:Null<HaxeDocument>, uri:DocumentUri, range:Range):Array<CodeAction> {
+		if (doc == null) {
 			return [];
 		}
-		try {
+		final tokens = doc.tokens;
+		if (tokens == null) {
+			return [];
+		}
+		return try {
 			// only look at token at range start
-			final token:Null<TokenTree> = doc.tokens.getTokenAtOffset(doc.offsetAt(range.start));
+			final token:Null<TokenTree> = tokens.getTokenAtOffset(doc.offsetAt(range.start));
 			if (token == null)
 				return [];
 
 			// must be a Const(CString(_))
-			return switch (token.tok) {
+			switch (token.tok) {
 				case Const(CString(s)):
-					final action:Null<CodeAction> = makeExtractConstAction(doc, uri, token, s);
+					final action:Null<CodeAction> = makeExtractConstAction(doc, tokens, uri, token, s);
 					if (action == null) [] else [action];
 				default: [];
 			}
 		} catch (e) {
-			return [];
+			[];
 		}
 	}
 
-	function makeExtractConstAction(doc:HaxeDocument, uri:DocumentUri, token:TokenTree, text:String):Null<CodeAction> {
+	function makeExtractConstAction(doc:HaxeDocument, tokens:TokenTreeManager, uri:DocumentUri, token:TokenTree, text:String):Null<CodeAction> {
 		if (text == null || text == "")
 			return null;
 
@@ -50,7 +55,7 @@ class ExtractConstantFeature {
 			return null;
 
 		// skip string literals with interpolation
-		final fullText:String = doc.getText(doc.rangeAt2(doc.tokens.getPos(token)));
+		final fullText:String = doc.getText(doc.rangeAt2(tokens.getPos(token)));
 		if (fullText.startsWith("'") && ~/[$]/g.match(text))
 			return null;
 
@@ -70,17 +75,15 @@ class ExtractConstantFeature {
 		final firstToken:Null<TokenTree> = type.access().firstChild().isCIdent().firstOf(BrOpen).firstChild().token;
 		if (firstToken == null)
 			return null;
-		final constInsertPos:Position = doc.positionAt(doc.tokens.getTreePos(firstToken).min);
+		final constInsertPos:Position = doc.positionAt(tokens.getTreePos(firstToken).min);
 
 		// find all occurrences of string constant
 		final occurrences:Array<TokenTree> = type.filterCallback(function(token:TokenTree, index:Int):FilterResult {
-			switch (token.tok) {
+			return switch (token.tok) {
 				case Const(CString(s)):
-					if (s == text)
-						return FOUND_SKIP_SUBTREE;
-					return GO_DEEPER;
+					if (s == text) FOUND_SKIP_SUBTREE else GO_DEEPER;
 				default:
-					return GO_DEEPER;
+					GO_DEEPER;
 			}
 		});
 
@@ -93,7 +96,7 @@ class ExtractConstantFeature {
 
 		// replace all occurrences with const name
 		for (occurrence in occurrences) {
-			edits.push(WorkspaceEditHelper.replaceText(doc.rangeAt2(doc.tokens.getPos(occurrence)), name));
+			edits.push(WorkspaceEditHelper.replaceText(doc.rangeAt2(tokens.getPos(occurrence)), name));
 		}
 
 		final textEdit:TextDocumentEdit = WorkspaceEditHelper.textDocumentEdit(uri, edits);

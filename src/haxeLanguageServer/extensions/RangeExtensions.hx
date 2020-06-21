@@ -55,7 +55,7 @@ function containsPos(range:Range, pos:Position):Bool {
  * @return A range of the greater start and smaller end positions. Will
  * return undefined when there is no overlap.
  */
-function intersection(range:Range, other:Range):Range {
+function intersection(range:Range, other:Range):Null<Range> {
 	final start = PositionStatics.Max(other.start, range.start);
 	final end = PositionStatics.Min(other.end, range.end);
 	if (start.isAfter(end)) {
@@ -93,8 +93,8 @@ function union(range:Range, other:Range):Range {
  * If start and end are not different `this` range will be returned.
  */
 function with(range:Range, ?start:Position, ?end:Position):Range {
-	final start = if (start == null) range.start else start;
-	final end = if (end == null) range.end else end;
+	final start:Position = if (start == null) range.start else start;
+	final end:Position = if (end == null) range.end else end;
 
 	if (start.isEqual(range.start) && end.isEqual(range.end)) {
 		return range;

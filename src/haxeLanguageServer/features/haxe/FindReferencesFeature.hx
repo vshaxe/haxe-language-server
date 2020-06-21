@@ -14,7 +14,8 @@ class FindReferencesFeature {
 		context.languageServerProtocol.onRequest(ReferencesRequest.type, onFindReferences);
 	}
 
-	function onFindReferences(params:TextDocumentPositionParams, token:CancellationToken, resolve:Array<Location>->Void, reject:ResponseError<NoData>->Void) {
+	function onFindReferences(params:TextDocumentPositionParams, token:CancellationToken, resolve:Null<Array<Location>>->Void,
+			reject:ResponseError<NoData>->Void) {
 		final uri = params.textDocument.uri;
 		final doc = context.documents.getHaxe(uri);
 		if (doc == null || !uri.isFile()) {
@@ -24,8 +25,8 @@ class FindReferencesFeature {
 		handle(params, token, resolve, reject, doc, doc.offsetAt(params.position));
 	}
 
-	function handleJsonRpc(params:TextDocumentPositionParams, token:CancellationToken, resolve:Definition->Void, reject:ResponseError<NoData>->Void,
-			doc:TextDocument, offset:Int) {
+	function handleJsonRpc(params:TextDocumentPositionParams, token:CancellationToken, resolve:Null<Array<Location>>->Void,
+			reject:ResponseError<NoData>->Void, doc:TextDocument, offset:Int) {
 		context.callHaxeMethod(DisplayMethods.FindReferences, {
 			file: doc.uri.toFsPath(),
 			contents: doc.content,
@@ -42,7 +43,7 @@ class FindReferencesFeature {
 		}, reject.handler());
 	}
 
-	function handleLegacy(params:TextDocumentPositionParams, token:CancellationToken, resolve:Definition->Void, reject:ResponseError<NoData>->Void,
+	function handleLegacy(params:TextDocumentPositionParams, token:CancellationToken, resolve:Null<Array<Location>>->Void, reject:ResponseError<NoData>->Void,
 			doc:TextDocument, offset:Int) {
 		final bytePos = context.displayOffsetConverter.characterOffsetToByteOffset(doc.content, doc.offsetAt(params.position));
 		final args = ['${doc.uri.toFsPath()}@$bytePos@usage'];

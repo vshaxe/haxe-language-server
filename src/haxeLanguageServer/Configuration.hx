@@ -7,17 +7,17 @@ import haxeLanguageServer.helper.StructDefaultsMacro;
 import jsonrpc.Protocol;
 
 typedef HaxelibConfig = {
-	var ?executable:String;
+	var executable:String;
 }
 
 typedef FunctionFormattingConfig = {
-	var ?argumentTypeHints:Bool;
-	var ?returnTypeHint:ReturnTypeHintOption;
-	var ?useArrowSyntax:Bool;
-	var ?placeOpenBraceOnNewLine:Bool;
-	var ?explicitPublic:Bool;
-	var ?explicitPrivate:Bool;
-	var ?explicitNull:Bool;
+	var argumentTypeHints:Bool;
+	var returnTypeHint:ReturnTypeHintOption;
+	var useArrowSyntax:Bool;
+	var placeOpenBraceOnNewLine:Bool;
+	var explicitPublic:Bool;
+	var explicitPrivate:Bool;
+	var explicitNull:Bool;
 }
 
 enum abstract ReturnTypeHintOption(String) {
@@ -27,8 +27,8 @@ enum abstract ReturnTypeHintOption(String) {
 }
 
 private typedef FunctionGenerationConfig = {
-	var ?anonymous:FunctionFormattingConfig;
-	var ?field:FunctionFormattingConfig;
+	var anonymous:FunctionFormattingConfig;
+	var field:FunctionFormattingConfig;
 }
 
 enum abstract ImportStyle(String) {
@@ -37,22 +37,22 @@ enum abstract ImportStyle(String) {
 }
 
 private typedef ImportGenerationConfig = {
-	var ?enableAutoImports:Bool;
-	var ?style:ImportStyle;
+	var enableAutoImports:Bool;
+	var style:ImportStyle;
 }
 
 private typedef SwitchGenerationConfig = {
-	var ?parentheses:Bool;
+	var parentheses:Bool;
 }
 
 private typedef CodeGenerationConfig = {
-	var ?functions:FunctionGenerationConfig;
-	var ?imports:ImportGenerationConfig;
-	var ?switch_:SwitchGenerationConfig;
+	var functions:FunctionGenerationConfig;
+	var imports:ImportGenerationConfig;
+	var switch_:SwitchGenerationConfig;
 }
 
 private typedef PostfixCompletionConfig = {
-	var ?level:PostfixCompletionLevel;
+	var level:PostfixCompletionLevel;
 }
 
 private enum abstract PostfixCompletionLevel(String) {
@@ -68,27 +68,27 @@ enum abstract ImportsSortOrderConfig(String) {
 }
 
 typedef UserConfig = {
-	var ?enableCodeLens:Bool;
-	var ?enableDiagnostics:Bool;
-	var ?enableServerView:Bool;
-	var ?enableSignatureHelpDocumentation:Bool;
-	var ?diagnosticsPathFilter:String;
-	var ?displayPort:EitherType<Int, String>;
-	var ?buildCompletionCache:Bool;
-	var ?enableCompletionCacheWarning:Bool;
-	var ?useLegacyCompletion:Bool;
-	var ?codeGeneration:CodeGenerationConfig;
-	var ?exclude:Array<String>;
-	var ?postfixCompletion:PostfixCompletionConfig;
-	var ?importsSortOrder:ImportsSortOrderConfig;
-	var ?maxCompletionItems:Int;
+	var enableCodeLens:Bool;
+	var enableDiagnostics:Bool;
+	var enableServerView:Bool;
+	var enableSignatureHelpDocumentation:Bool;
+	var diagnosticsPathFilter:String;
+	var displayPort:EitherType<Int, String>;
+	var buildCompletionCache:Bool;
+	var enableCompletionCacheWarning:Bool;
+	var useLegacyCompletion:Bool;
+	var codeGeneration:CodeGenerationConfig;
+	var exclude:Array<String>;
+	var postfixCompletion:PostfixCompletionConfig;
+	var importsSortOrder:ImportsSortOrderConfig;
+	var maxCompletionItems:Int;
 }
 
 private typedef InitOptions = {
-	var ?displayServerConfig:DisplayServerConfig;
-	var ?displayArguments:Array<String>;
-	var ?haxelibConfig:HaxelibConfig;
-	var ?sendMethodResults:Bool;
+	var displayServerConfig:DisplayServerConfig;
+	var displayArguments:Array<String>;
+	var haxelibConfig:HaxelibConfig;
+	var sendMethodResults:Bool;
 }
 
 enum ConfigurationKind {
@@ -99,12 +99,12 @@ enum ConfigurationKind {
 
 class Configuration {
 	final onDidChange:(kind:ConfigurationKind) -> Void;
-	var unmodifiedUserConfig:UserConfig;
+	var unmodifiedUserConfig:Null<UserConfig>;
 
-	public var user(default, null):UserConfig;
-	public var displayServer(default, null):DisplayServerConfig;
-	public var displayArguments(default, null):Array<String>;
-	public var haxelib(default, null):HaxelibConfig;
+	@:nullSafety(Off) public var user(default, null):UserConfig;
+	@:nullSafety(Off) public var displayServer(default, null):DisplayServerConfig;
+	@:nullSafety(Off) public var displayArguments(default, null):Array<String>;
+	@:nullSafety(Off) public var haxelib(default, null):HaxelibConfig;
 	public var sendMethodResults(default, null):Bool = false;
 
 	public function new(languageServerProtocol:Protocol, onDidChange:(kind:ConfigurationKind) -> Void) {
@@ -116,7 +116,7 @@ class Configuration {
 	}
 
 	public function onInitialize(params:InitializeParams) {
-		var options:InitOptions = params.initializationOptions;
+		var options:Null<InitOptions> = params.initializationOptions;
 		var defaults:InitOptions = {
 			displayServerConfig: {
 				path: "haxe",
@@ -149,7 +149,7 @@ class Configuration {
 		}
 
 		final newConfigJson = Json.stringify(newHaxeConfig);
-		final configUnchanged = Json.stringify(unmodifiedUserConfig) == newConfigJson;
+		final configUnchanged = unmodifiedUserConfig != null && Json.stringify(unmodifiedUserConfig) == newConfigJson;
 		if (initialized && configUnchanged) {
 			return;
 		}
@@ -189,14 +189,18 @@ class Configuration {
 			codeGeneration: {
 				functions: {
 					anonymous: {
-						returnTypeHint: Never,
 						argumentTypeHints: false,
+						returnTypeHint: Never,
 						useArrowSyntax: true,
-						explicitNull: false,
+						placeOpenBraceOnNewLine: false,
+						explicitPublic: false,
+						explicitPrivate: false,
+						explicitNull: false
 					},
 					field: {
-						returnTypeHint: NonVoid,
 						argumentTypeHints: true,
+						returnTypeHint: NonVoid,
+						useArrowSyntax: false,
 						placeOpenBraceOnNewLine: false,
 						explicitPublic: false,
 						explicitPrivate: false,

@@ -33,7 +33,7 @@ class PostfixCompletion {
 
 		var subject:FieldCompletionSubject<T2>;
 		switch data.mode.kind {
-			case Field:
+			case Field if (data.mode.args != null):
 				subject = data.mode.args;
 			case _:
 				return [];
@@ -133,7 +133,7 @@ class PostfixCompletion {
 		return result;
 	}
 
-	function createNonFilteredItems(dotPath:DotPath, expr:String, add:PostfixCompletionItem->Void) {
+	function createNonFilteredItems(dotPath:Null<DotPath>, expr:String, add:PostfixCompletionItem->Void) {
 		if (dotPath != String) {
 			add({
 				label: "string",
@@ -233,7 +233,7 @@ class PostfixCompletion {
 			switch (item.kind) {
 				case ClassField:
 					var field = item.args.field.name;
-					if (!~/^(get)?(length|count|size)$/i.match(field)) {
+					if (!~/^(get)?(length|count|size)$/i.match(field) || item.type == null) {
 						continue;
 					}
 					var type = item.type.removeNulls().type;
@@ -299,6 +299,11 @@ while (i-- > 0) {
 		if (moduleType == null) {
 			return null;
 		}
+		final type = subject.item.type;
+		if (type == null) {
+			return null;
+		}
+
 		final printer = new DisplayPrinter();
 		final parentheses = context.config.user.codeGeneration.switch_.parentheses;
 
@@ -312,7 +317,7 @@ while (i-- > 0) {
 			};
 		}
 
-		final nullable = subject.item.type.removeNulls().nullable;
+		final nullable = type.removeNulls().nullable;
 		switch moduleType.kind {
 			case Enum:
 				final e:JsonEnum = moduleType.args;
@@ -361,7 +366,7 @@ while (i-- > 0) {
 				origin: CompletionItemOrigin.Custom
 			}
 		}
-		if (data.showCode) {
+		if (data.showCode == true) {
 			item.documentation = {
 				kind: MarkDown,
 				value: DocHelper.printCodeBlock(SnippetHelper.prettify(data.insertText), Haxe)

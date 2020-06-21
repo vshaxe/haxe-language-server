@@ -93,7 +93,7 @@ class CodeLensFeature {
 	}
 
 	function onCodeLens(params:CodeLensParams, token:CancellationToken, resolve:Array<CodeLens>->Void, reject:ResponseError<NoData>->Void) {
-		if (!context.config.user.enableCodeLens) {
+		if (context.config.user.enableCodeLens == false) {
 			return resolve([]);
 		}
 		final uri = params.textDocument.uri;
@@ -105,7 +105,7 @@ class CodeLensFeature {
 		context.callDisplay("@statistics", [doc.uri.toFsPath() + "@0@statistics"], doc.content, token, function(r:DisplayResult) {
 			switch r {
 				case DCancelled:
-					resolve(null);
+					resolve([]);
 				case DResult(s):
 					final data:Array<Statistics> = try {
 						haxe.Json.parse(s);
@@ -123,8 +123,9 @@ class CodeLensFeature {
 					}
 			}
 		}, function(error) {
-			if (cache.exists(uri)) {
-				resolve(cache[uri]);
+			final lens = cache[uri];
+			if (lens != null) {
+				resolve(lens);
 				trace('Reusing cached code lens - failed with:\n\t$error');
 			} else {
 				reject(ResponseError.internalError(error));

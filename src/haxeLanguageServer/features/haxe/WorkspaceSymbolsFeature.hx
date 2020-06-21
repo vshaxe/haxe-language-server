@@ -67,7 +67,7 @@ class WorkspaceSymbolsFeature {
 		context.callDisplay(label, args, doc == null ? null : doc.content, token, function(r) {
 			switch r {
 				case DCancelled:
-					resolve(null);
+					resolve([]);
 				case DResult(data):
 					final data:Array<SymbolReply> = try {
 						haxe.Json.parse(data);

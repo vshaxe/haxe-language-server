@@ -56,8 +56,8 @@ class GotoDefinitionFeature {
 						resolve([]);
 					final results = [];
 					for (pos in positions) {
-						final location = HaxePosition.parse(pos, doc, null,
-							context.displayOffsetConverter); // no cache because this right now only returns one position
+						// no cache because this right now only returns one position
+						final location = HaxePosition.parse(pos, doc, null, context.displayOffsetConverter);
 						if (location == null) {
 							trace("Got invalid position: " + pos);
 							continue;

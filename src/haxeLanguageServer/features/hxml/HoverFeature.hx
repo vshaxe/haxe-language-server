@@ -39,13 +39,20 @@ class HoverFeature {
 					signature += " " + flag.argument.name;
 				}
 				makeHover([printCodeBlock(signature, Hxml), flag.description]);
+
 			case EnumValue(value, _) if (value != null):
-				makeHover([printCodeBlock(value.name, Hxml), value.description]);
+				final sections = [printCodeBlock(value.name, Hxml)];
+				if (value.description != null) {
+					sections.push(value.description);
+				}
+				makeHover(sections);
+
 			case Define(define) if (define != null):
 				makeHover([
 					printCodeBlock(define.getRealName(), Hxml),
 					define.printDetails(context.haxeServer.haxeVersion)
 				]);
+
 			case DefineValue(define, value): null;
 			case _: null;
 		});

@@ -29,17 +29,26 @@ class RenameFeature {
 			reject(ResponseError.internalError("Only local variables and function parameters can be renamed."));
 		}
 
-		context.gotoDefinition.onGotoDefinition(params, token, locations -> {
+		context.gotoDefinition.onGotoDefinition(params, token, function(locations) {
+			function noDeclaration() {
+				reject(ResponseError.internalError("No declaration found."));
+			}
+			if (locations == null) {
+				return noDeclaration();
+			}
 			final declaration = locations[0];
 			if (declaration == null) {
-				return reject(ResponseError.internalError("No declaration found."));
+				return noDeclaration();
 			}
 			if (declaration.uri != uri) {
 				return invalidRename();
 			}
-
+			final parseTree = doc.parseTree;
+			if (parseTree == null) {
+				return reject.noTokens();
+			}
 			final resolver = new RenameResolver(declaration.range, params.newName);
-			resolver.walkFile(doc.parseTree, Root);
+			resolver.walkFile(parseTree, Root);
 			if (resolver.edits.length == 0) {
 				return invalidRename();
 			}

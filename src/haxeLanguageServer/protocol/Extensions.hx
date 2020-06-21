@@ -93,7 +93,7 @@ function isModuleLevel<T>(origin:Null<ClassFieldOrigin<T>>) {
 	}
 	return switch (origin.kind) {
 		case Self | Parent | StaticImport | StaticExtension:
-			final moduleType:JsonModuleType<Dynamic> = origin.args;
+			final moduleType:Null<JsonModuleType<Dynamic>> = origin.args;
 			if (moduleType == null) {
 				return false;
 			}
@@ -113,7 +113,7 @@ function isStructure<T>(origin:Null<ClassFieldOrigin<T>>) {
 	}
 	return switch origin.kind {
 		case Self | StaticImport | Parent | StaticExtension:
-			final moduleType:JsonModuleType<Dynamic> = origin.args;
+			final moduleType:Null<JsonModuleType<Dynamic>> = origin.args;
 			if (moduleType == null) {
 				return false;
 			}
@@ -143,7 +143,7 @@ function removeNulls<T>(type:JsonType<T>, nullable:Bool = false):{type:JsonType<
 	return {type: type, nullable: nullable};
 }
 
-function getTypePath<T>(type:JsonType<T>):JsonTypePathWithParams {
+function getTypePath<T>(type:JsonType<T>):Null<JsonTypePathWithParams> {
 	return switch type.kind {
 		case null: null;
 		case TInst | TEnum | TType | TAbstract: type.args;

@@ -17,7 +17,7 @@ class ExpectedTypeCompletion {
 	}
 
 	public function createItems<T, TType>(data:CompletionContextData):Array<CompletionItem> {
-		var toplevel:ToplevelCompletion<TType>;
+		var toplevel:Null<ToplevelCompletion<TType>>;
 		switch data.mode.kind {
 			case Toplevel, Pattern:
 				toplevel = data.mode.args;
@@ -28,18 +28,18 @@ class ExpectedTypeCompletion {
 			return [];
 		}
 
-		final expectedTypeFollowed:JsonType<TType> = toplevel.expectedTypeFollowed;
+		final expectedTypeFollowed:Null<JsonType<TType>> = toplevel.expectedTypeFollowed;
 		if (expectedTypeFollowed == null) {
 			return [];
 		}
 
-		var items:Array<CompletionItem> = [];
+		var items:Array<ExpectedTypeCompletionItem> = [];
 		final types = expectedTypeFollowed.resolveTypes();
 		for (type in types) {
-			items = items.concat(createItemsForType(type, data).map(createExpectedTypeCompletionItem.bind(_, data.params.position)));
+			items = items.concat(createItemsForType(type, data));
 		}
-		items = items.filterDuplicates((item1, item2) -> item1.textEdit.newText == item2.textEdit.newText);
-		return items;
+		items = items.filterDuplicates((item1, item2) -> item1.insertText == item2.insertText);
+		return items.map(createExpectedTypeCompletionItem.bind(_, data.params.position));
 	}
 
 	function createItemsForType<T>(concreteType:JsonType<T>, data:CompletionContextData):Array<ExpectedTypeCompletionItem> {

@@ -25,8 +25,10 @@ class SnippetCompletion {
 		this.context = context;
 	}
 
-	public function createItems<T1, T2>(data:SnippetCompletionContextData,
-			displayItems:Array<DisplayItem<T1>>):Promise<{items:Array<CompletionItem>, displayItems:Array<DisplayItem<T1>>}> {
+	public function createItems<T1, T2>(data:SnippetCompletionContextData, displayItems:Array<Null<DisplayItem<T1>>>):Promise<{
+		items:Array<CompletionItem>,
+		displayItems:Array<Null<DisplayItem<T1>>>
+	}> {
 		final fsPath = data.doc.uri.toFsPath().toString();
 
 		final pos = data.params.position;
@@ -34,6 +36,9 @@ class SnippetCompletion {
 
 		for (i in 0...displayItems.length) {
 			final item = displayItems[i];
+			if (item == null) {
+				continue;
+			}
 			switch item.kind {
 				case Keyword:
 					final kwd:KeywordKind = item.args.name;
@@ -99,7 +104,7 @@ ${accessorPrefix}function set_$${1:name}($${1:name}:$${2:T}):$${2:T} $body');
 				final moduleName = fsPath.withoutDirectory().untilFirstDot();
 				final name = '$${1:$moduleName}';
 				final abstractName = name + '($${2:T})';
-				return new Promise((resolve, reject) -> {
+				return new Promise(function(resolve, reject) {
 					if (isRestOfLineEmpty) {
 						items = [
 							{label: "class", code: 'class $name $body'},

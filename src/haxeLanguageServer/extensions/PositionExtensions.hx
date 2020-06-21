@@ -139,8 +139,8 @@ inline function translatePos(pos:Position, other:Position):Position {
  * @return A position where line and character are replaced by the given values.
  */
 inline function with(pos:Position, ?line:Int, ?character:Int):Position {
-	final line = if (line == null) pos.line else line;
-	final character = if (line == null) pos.character else character;
+	final line:Int = if (line == null) pos.line else line;
+	final character:Int = if (character == null) pos.character else character;
 	return {line: line, character: character};
 }
 

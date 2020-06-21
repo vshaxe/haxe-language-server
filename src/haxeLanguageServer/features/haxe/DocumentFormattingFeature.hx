@@ -41,7 +41,7 @@ class DocumentFormattingFeature {
 		} else {
 			context.workspacePath.toString();
 		});
-		var inputRange:FormatterInputRange = null;
+		var inputRange:Null<FormatterInputRange> = null;
 		if (range != null) {
 			range.start.character = 0;
 			final converter = new Haxe3DisplayOffsetConverter();
@@ -56,11 +56,13 @@ class DocumentFormattingFeature {
 		final result = Formatter.format(Tokens(tokens.list, tokens.tree, tokens.bytes), config, inputRange);
 		switch result {
 			case Success(formattedCode):
-				if (range == null) {
-					range = {
+				final range:Range = if (range == null) {
+					{
 						start: {line: 0, character: 0},
 						end: {line: doc.lineCount - 1, character: doc.lineAt(doc.lineCount - 1).length}
 					}
+				} else {
+					range;
 				}
 				final edits = [{range: range, newText: formattedCode}];
 				resolve(edits);

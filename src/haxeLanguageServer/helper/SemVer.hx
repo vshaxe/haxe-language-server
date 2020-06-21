@@ -27,12 +27,12 @@ abstract SemVer(Version) from Version {
 		return this.patch;
 
 	/** note: not considered in comparisons or `toString()` **/
-	public var pre(get, never):String;
+	public var pre(get, never):Null<String>;
 
 	inline function get_pre()
 		return this.pre;
 
-	public var build(get, never):String;
+	public var build(get, never):Null<String>;
 
 	inline function get_build()
 		return this.build;

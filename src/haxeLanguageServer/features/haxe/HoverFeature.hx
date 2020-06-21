@@ -43,6 +43,8 @@ class HoverFeature {
 		final printer = new DisplayPrinter(true, Qualified, {
 			argumentTypeHints: true,
 			returnTypeHint: NonVoid,
+			useArrowSyntax: false,
+			placeOpenBraceOnNewLine: false,
 			explicitPublic: true,
 			explicitPrivate: true,
 			explicitNull: true

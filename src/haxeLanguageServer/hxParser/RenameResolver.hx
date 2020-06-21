@@ -18,11 +18,11 @@ class RenameResolver extends PositionAwareWalker {
 	final declaration:Range;
 	final newName:String;
 	final rangeConsumers = new Map<Token, Range->Void>();
-	var declarationInfo:DeclInfo;
+	var declarationInfo:Null<DeclInfo>;
 	var declarationInScope = false;
-	var declarationIdentifier:String;
+	var declarationIdentifier:Null<String>;
 	var inStaticFunction:Bool = false;
-	var typeName:String;
+	var typeName:Null<String>;
 	final shadowingDecls:Array<DeclInfo> = [];
 	final newIdentShadowingDecls:Array<DeclInfo> = [];
 
@@ -40,7 +40,7 @@ class RenameResolver extends PositionAwareWalker {
 		}
 
 		// are we still in the declaration scope?
-		if (declarationInScope && !declarationInfo.scope.contains(scope)) {
+		if (declarationInScope && declarationInfo != null && !declarationInfo.scope.contains(scope)) {
 			declarationInScope = false;
 		}
 

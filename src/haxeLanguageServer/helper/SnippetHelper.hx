@@ -8,12 +8,15 @@ class SnippetHelper {
 
 	public static function offset(snippet:String, offset:Int):String {
 		return ~/\$\{(\d+)(:.*?)?\}/g.map(snippet, function(regex) {
-			final id = Std.parseInt(regex.matched(1)) + offset;
+			final id = Std.parseInt(regex.matched(1));
+			if (id == null) {
+				return regex.matched(0);
+			}
 			var name = regex.matched(2);
 			if (name == null) {
 				name = "";
 			}
-			return '$${$id$name}';
+			return '$${${id + offset}$name}';
 		});
 	}
 }

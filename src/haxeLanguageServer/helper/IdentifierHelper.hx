@@ -8,12 +8,15 @@ class IdentifierHelper {
 		return avoidDuplicates([for (arg in args) if (arg.name != null) arg.name else guessName(arg.type)]);
 	}
 
-	public static function guessName(type:String):String {
+	public static function guessName(type:Null<String>):String {
+		if (type == null) {
+			return "unknown";
+		}
 		type = TypeHelper.unwrapNullable(type);
 		type = TypeHelper.getTypeWithoutParams(type);
 
 		return switch type {
-			case null, "": "unknown";
+			case "": "unknown";
 			case "Int": "i";
 			case "Float": "f";
 			case "Bool": "b";

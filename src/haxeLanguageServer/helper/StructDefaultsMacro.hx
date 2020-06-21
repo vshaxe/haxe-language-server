@@ -63,6 +63,8 @@ class StructDefaultsMacro {
 					case TAnonymous(a): a.get().fields;
 					case _: null;
 				}
+			case TAbstract(_.get() => a, params) if (a.pack.length == 0 && a.name == "Null"):
+				getStructFields(params[0]);
 			case _: null;
 		}
 	}

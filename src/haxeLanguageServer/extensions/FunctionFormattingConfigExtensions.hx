@@ -4,7 +4,7 @@ import haxe.display.JsonModuleTypes;
 import haxeLanguageServer.Configuration.FunctionFormattingConfig;
 
 function shouldPrintReturn(config:FunctionFormattingConfig, signature:JsonFunctionSignature) {
-	if (config.useArrowSyntax) {
+	if (config.useArrowSyntax == true) {
 		return false;
 	}
 	final returnStyle = config.returnTypeHint;

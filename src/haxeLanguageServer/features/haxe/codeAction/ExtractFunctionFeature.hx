@@ -20,7 +20,11 @@ class ExtractFunctionFeature {
 
 	function extractFunction(params:CodeActionParams):Array<CodeAction> {
 		final doc = context.documents.getHaxe(params.textDocument.uri);
-		if (doc == null || doc.tokens == null || doc.tokens.tree == null) {
+		if (doc == null) {
+			return [];
+		}
+		final tokens = doc.tokens;
+		if (tokens == null) {
 			return [];
 		}
 		return try {
@@ -29,8 +33,8 @@ class ExtractFunctionFeature {
 			final rightOffset:Int = text.length - text.rtrim().length;
 			text = text.trim();
 
-			final tokenStart:Null<TokenTree> = doc.tokens.getTokenAtOffset(doc.offsetAt(params.range.start) + leftOffset);
-			final tokenEnd:Null<TokenTree> = doc.tokens.getTokenAtOffset(doc.offsetAt(params.range.end) - rightOffset);
+			final tokenStart:Null<TokenTree> = tokens.getTokenAtOffset(doc.offsetAt(params.range.start) + leftOffset);
+			final tokenEnd:Null<TokenTree> = tokens.getTokenAtOffset(doc.offsetAt(params.range.end) - rightOffset);
 			if (tokenStart == null || tokenEnd == null)
 				return [];
 			if (tokenStart.index == tokenEnd.index)
@@ -45,13 +49,13 @@ class ExtractFunctionFeature {
 				return [];
 			if (parentOfStart.index != parentOfEnd.index)
 				return [];
-			final lastToken:TokenTree = TokenTreeCheckUtils.getLastToken(parentOfStart);
+			final lastToken:Null<TokenTree> = TokenTreeCheckUtils.getLastToken(parentOfStart);
 
 			final rangeIdents:Array<String> = [];
 			final varTokens:Array<TokenTree> = [];
 			var hasReturn:Bool = false;
 			parentOfStart.filterCallback(function(token:TokenTree, index:Int):FilterResult {
-				if (token.index > lastToken.index)
+				if (lastToken == null || token.index > lastToken.index)
 					return SKIP_SUBTREE;
 				switch (token.tok) {
 					case Const(CIdent(s)):
@@ -226,6 +230,9 @@ class ExtractFunctionFeature {
 		final newFuncParameter:Array<NewFunctionParameter> = [];
 
 		for (varToken in varTokens) {
+			if (varToken.children == null) {
+				continue;
+			}
 			// TODO handle multiple vars
 			for (child in varToken.children) {
 				switch (child.tok) {

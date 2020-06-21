@@ -17,11 +17,11 @@ class TextDocuments {
 	}
 
 	public inline function getHaxe(uri:DocumentUri):Null<HaxeDocument> {
-		return Std.downcast(documents[uri], HaxeDocument);
+		return @:nullSafety(Off) Std.downcast(documents[uri], HaxeDocument);
 	}
 
 	public inline function getHxml(uri:DocumentUri):Null<HxmlDocument> {
-		return Std.downcast(documents[uri], HxmlDocument);
+		return @:nullSafety(Off) Std.downcast(documents[uri], HxmlDocument);
 	}
 
 	function onDidOpenTextDocument(event:DidOpenTextDocumentParams) {

@@ -15,12 +15,13 @@ class OrganizeImportsFeature {
 	];
 
 	public static function organizeImports(doc:HaxeDocument, context:Context, unusedRanges:Array<Range>):Array<TextEdit> {
-		if (doc!.tokens.tree == null) {
+		final tokens = doc.tokens;
+		if (tokens == null) {
 			return [];
 		}
 		return try {
 			var packageName:Null<String> = null;
-			final imports:Array<TokenTree> = doc.tokens.tree.filterCallback(function(token:TokenTree, index:Int):FilterResult {
+			final imports:Array<TokenTree> = tokens.tree.filterCallback(function(token:TokenTree, index:Int):FilterResult {
 				switch (token.tok) {
 					case Kwd(KwdImport) | Kwd(KwdUsing):
 						return FOUND_SKIP_SUBTREE;
@@ -56,7 +57,7 @@ class OrganizeImportsFeature {
 				if (group == null) {
 					group = {
 						id: id,
-						startOffset: determineStartPos(doc, i),
+						startOffset: tokens.getPos(i).min,
 						imports: [],
 						usings: [],
 						lastIndex: i.index
@@ -65,7 +66,7 @@ class OrganizeImportsFeature {
 					groupCount++;
 				}
 
-				final range:Range = doc.rangeAt2(doc.tokens.getTreePos(i));
+				final range:Range = doc.rangeAt2(tokens.getTreePos(i));
 				var isUnused:Bool = false;
 				for (r in unusedRanges) {
 					if (r.contains(range)) {
@@ -231,10 +232,6 @@ class OrganizeImportsFeature {
 			b.type = Library;
 		}
 		return sortImportsStdlibThenLibsThenProject(a, b);
-	}
-
-	static function determineStartPos(doc:HaxeDocument, token:TokenTree):Int {
-		return doc.tokens.getPos(token).min;
 	}
 }
 

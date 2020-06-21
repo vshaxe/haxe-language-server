@@ -14,7 +14,7 @@ class DocumentSymbolsResolver {
 		this.document = document;
 	}
 
-	public function resolve():Array<DocumentSymbol> {
+	public function resolve():Null<Array<DocumentSymbol>> {
 		final stack = new SymbolStack();
 		final tokens = document.tokens;
 		if (tokens == null) {
@@ -32,6 +32,9 @@ class DocumentSymbolsResolver {
 				}
 				if (name == null) {
 					name = nameToken.getName();
+					if (name == null) {
+						return;
+					}
 				}
 				if (level == Expression && name == "_") {
 					return; // naming vars "_" is a common convention for ignoring them
@@ -47,6 +50,7 @@ class DocumentSymbolsResolver {
 						range = {file: range.file, min: docCommentPos.min, max: range.max};
 					}
 				}
+				@:nullSafety(Off)
 				final symbol:DocumentSymbol = {
 					name: name,
 					kind: kind,
@@ -61,7 +65,7 @@ class DocumentSymbolsResolver {
 
 			switch token.tok {
 				case Kwd(KwdClass):
-					var name = token.getNameToken().getName();
+					var name = token.getNameToken() !.getName();
 					if (name == null && token.isTypeMacroClass()) {
 						name = "<macro class>";
 					}
@@ -139,7 +143,7 @@ class DocumentSymbolsResolver {
 					}
 
 				case Kwd(KwdFor), Kwd(KwdCatch):
-					final ident = token.access().firstChild().is(POpen).firstChild().isCIdent().token;
+					final ident:Null<TokenTree> = token.access().firstChild().is(POpen).firstChild().isCIdent().token;
 					if (ident != null) {
 						add(ident, Variable, Expression, false);
 					}

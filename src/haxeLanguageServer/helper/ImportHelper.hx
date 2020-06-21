@@ -5,6 +5,7 @@ import haxe.display.JsonModuleTypes;
 import haxeLanguageServer.Configuration.FunctionFormattingConfig;
 import haxeLanguageServer.Configuration.ImportStyle;
 import haxeLanguageServer.protocol.DisplayPrinter;
+import tokentree.TokenTree;
 
 using Lambda;
 using tokentree.TokenTreeAccessHelper;
@@ -59,14 +60,14 @@ function createFunctionImportsEdit<T>(doc:TextDocument, result:ImportPosition, c
 	}
 }
 
-function determineImportPosition(document:HaxeDocument):ImportPosition {
+function determineImportPosition(document:HaxeDocument):Null<ImportPosition> {
 	final tokens = document.tokens;
 	if (tokens == null) {
 		return null;
 	}
 
-	var firstImport = null;
-	var packageStatement = null;
+	var firstImport:Null<TokenTree> = null;
+	var packageStatement:Null<TokenTree> = null;
 
 	// if the first token in the file is a comment, we should add the import after this
 	final firstComment = if (tokens.list[0].tok.match(Comment(_))) {
@@ -94,7 +95,8 @@ function determineImportPosition(document:HaxeDocument):ImportPosition {
 		}
 	} else if (packageStatement != null) {
 		final lastChild = packageStatement.getLastChild();
-		final pos = document.positionAt(tokens.getPos(lastChild != null ? lastChild : packageStatement).max);
+		final tokenPos = tokens.getPos(if (lastChild != null) lastChild else packageStatement);
+		final pos = document.positionAt(tokenPos.max);
 		pos.line += 1;
 		pos.character = 0;
 		{

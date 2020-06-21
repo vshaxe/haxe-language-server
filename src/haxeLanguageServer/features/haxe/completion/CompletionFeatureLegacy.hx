@@ -11,7 +11,7 @@ import jsonrpc.Types.NoData;
 class CompletionFeatureLegacy {
 	final context:Context;
 	final contextSupport:Bool;
-	final formatDocumentation:(doc:String) -> EitherType<String, MarkupContent>;
+	final formatDocumentation:(doc:String) -> Null<EitherType<String, MarkupContent>>;
 
 	public function new(context, contextSupport, formatDocumentation) {
 		this.context = context;
@@ -19,8 +19,8 @@ class CompletionFeatureLegacy {
 		this.formatDocumentation = formatDocumentation;
 	}
 
-	public function handle(params:CompletionParams, token:CancellationToken, resolve:CompletionList->Void, reject:ResponseError<NoData>->Void,
-			doc:TextDocument, offset:Int, textBefore:String, _) {
+	public function handle(params:CompletionParams, token:CancellationToken, resolve:Null<EitherType<Array<CompletionItem>, CompletionList>>->Void,
+			reject:ResponseError<NoData>->Void, doc:TextDocument, offset:Int, textBefore:String, _) {
 		if (contextSupport && isInvalidCompletionPosition(params.context, textBefore)) {
 			return resolve({items: [], isIncomplete: false});
 		}
@@ -45,8 +45,8 @@ class CompletionFeatureLegacy {
 
 	static final reCaseOrDefault = ~/\b(case|default)\b[^:]*:$/;
 
-	static function isInvalidCompletionPosition(context:CompletionContext, text:String):Bool {
-		return context.triggerCharacter == ":" && reCaseOrDefault.match(text);
+	static function isInvalidCompletionPosition(context:Null<CompletionContext>, text:String):Bool {
+		return context!.triggerCharacter == ":" && reCaseOrDefault.match(text);
 	}
 
 	static final reFieldPart = ~/(\.|@(:?))(\w*)$/;
@@ -141,10 +141,13 @@ class CompletionFeatureLegacy {
 			final rawKind = el.get("k");
 			final kind = fieldKindToCompletionItemKind(rawKind);
 			var name = el.get("n");
-			if (kind == Method && methods[name] != null) {
-				// only show an overloaded method once
-				methods[name].overloads++;
-				continue;
+			if (kind == Method) {
+				final method = methods[name];
+				if (method != null) {
+					// only show an overloaded method once
+					method.overloads++;
+					continue;
+				}
 			}
 
 			var type = null, doc = null;
@@ -158,7 +161,7 @@ class CompletionFeatureLegacy {
 						doc = getOrNull(child.firstChild().nodeValue);
 				}
 			}
-			var textEdit = null;
+			var textEdit:Null<TextEdit> = null;
 			if (rawKind == "metadata") {
 				name = name.substr(1); // remove the @
 				// if there's already a colon, don't duplicate it
@@ -166,7 +169,7 @@ class CompletionFeatureLegacy {
 				if (reFieldPart.matched(2) == ":") {
 					textEdit = {newText: name, range: {start: position.translate(0, -1), end: position}};
 				}
-			} else if (isTimerDebugFieldCompletion(name)) {
+			} else if (isTimerDebugFieldCompletion(name) && type != null) {
 				timers.push(getTimerCompletionItem(name, type, position));
 				continue;
 			}
@@ -225,7 +228,7 @@ class CompletionFeatureLegacy {
 			percentage = timeRegex.matched(2);
 		} catch (e) {}
 
-		var doc = null;
+		var doc:Null<String> = null;
 		if (name.startsWith("@TIME @TOTAL")) {
 			name = "@Total time: " + time;
 		} else {

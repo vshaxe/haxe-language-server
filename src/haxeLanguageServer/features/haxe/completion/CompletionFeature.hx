@@ -7,6 +7,7 @@ import haxe.ds.Option;
 import haxe.extern.EitherType;
 import haxeLanguageServer.helper.DocHelper;
 import haxeLanguageServer.helper.ImportHelper;
+import haxeLanguageServer.helper.TextEditCompletionItem;
 import haxeLanguageServer.helper.VscodeCommands;
 import haxeLanguageServer.protocol.CompilerMetadata;
 import haxeLanguageServer.protocol.DisplayPrinter;
@@ -57,6 +58,8 @@ class CompletionFeature {
 		printer = new DisplayPrinter(false, Qualified, {
 			argumentTypeHints: true,
 			returnTypeHint: NonVoid,
+			useArrowSyntax: false,
+			placeOpenBraceOnNewLine: false,
 			explicitPublic: true,
 			explicitPrivate: true,
 			explicitNull: true
@@ -74,7 +77,8 @@ class CompletionFeature {
 		deprecatedSupport = completion!.completionItem!.tagSupport!.valueSet.let(tags -> tags.contains(Deprecated)).or(false);
 	}
 
-	public function onCompletion(params:CompletionParams, token:CancellationToken, resolve:CompletionList->Void, reject:ResponseError<NoData>->Void) {
+	public function onCompletion(params:CompletionParams, token:CancellationToken, resolve:Null<EitherType<Array<CompletionItem>, CompletionList>>->Void,
+			reject:ResponseError<NoData>->Void) {
 		final uri = params.textDocument.uri;
 		final doc:Null<HaxeDocument> = context.documents.getHaxe(uri);
 		if (doc == null || !uri.isFile()) {
@@ -93,7 +97,7 @@ class CompletionFeature {
 
 	static final autoTriggerOnSpacePattern = ~/(\b(import|using|extends|implements|from|to|case|new|cast|override)|(->)) $/;
 
-	function isValidCompletionPosition(token:TokenTree, doc:HaxeDocument, params:CompletionParams, text:String):Bool {
+	function isValidCompletionPosition(token:Null<TokenTree>, doc:HaxeDocument, params:CompletionParams, text:String):Bool {
 		if (token == null) {
 			return true;
 		}
@@ -140,11 +144,11 @@ class CompletionFeature {
 		final data:Null<CompletionItemData> = item.data;
 		if (!context.haxeServer.supports(DisplayMethods.CompletionItemResolve)
 			|| previousCompletionData == null
-			|| (data != null && data.origin == Custom)) {
+			|| data!.origin == Custom) {
 			return resolve(item);
 		}
 		previousCompletionData.isResolve = true;
-		context.callHaxeMethod(DisplayMethods.CompletionItemResolve, {index: item.data.index}, token, result -> {
+		context.callHaxeMethod(DisplayMethods.CompletionItemResolve, {index: data.index}, token, function(result) {
 			resolve(createCompletionItem(data.index, result.item, previousCompletionData));
 			return null;
 		}, reject.handler());
@@ -346,7 +350,7 @@ class CompletionFeature {
 		return completionItem;
 	}
 
-	function createClassFieldCompletionItem<T>(item:DisplayItem<Dynamic>, data:CompletionContextData):CompletionItem {
+	function createClassFieldCompletionItem<T>(item:DisplayItem<Dynamic>, data:CompletionContextData):Null<CompletionItem> {
 		final occurrence:ClassFieldOccurrence<T> = item.args;
 		final concreteType = item.type;
 		final field = occurrence.field;
@@ -477,7 +481,7 @@ class CompletionFeature {
 		final occurrence:EnumFieldOccurrence<T> = item.args;
 		final field:JsonEnumField = occurrence.field;
 		final name = field.name;
-		final result:CompletionItem = {
+		final result:TextEditCompletionItem = {
 			label: name,
 			kind: EnumMember,
 			detail: {
@@ -593,6 +597,7 @@ class CompletionFeature {
 
 	function printTypeDetail(type:DisplayModuleType, containerName:String):String {
 		return printer.printEmptyTypeDefinition(type) + "\n" + switch type.path.importStatus {
+			case null: "";
 			case Imported: "(imported)";
 			case Unimported: "Auto-import from '" + containerName + "'";
 			case Shadowed: "(shadowed)";

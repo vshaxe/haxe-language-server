@@ -14,7 +14,7 @@ class TextDocument {
 
 	final context:Null<Context>;
 
-	var lineOffsets:Array<Int>;
+	var lineOffsets:Null<Array<Int>>;
 	var onUpdateListeners:Array<OnTextDocumentChangeListener> = [];
 
 	public function new(?context:Context, uri:DocumentUri, languageId:String, version:Int, content:String) {
@@ -116,7 +116,7 @@ class TextDocument {
 		onUpdateListeners.remove(listener);
 	}
 
-	function getLineOffsets() {
+	function getLineOffsets():Array<Int> {
 		if (lineOffsets == null) {
 			final offsets = [];
 			final text = content;

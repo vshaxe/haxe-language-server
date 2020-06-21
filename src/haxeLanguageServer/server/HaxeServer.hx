@@ -29,8 +29,8 @@ class HaxeServer {
 	var crashes:Int = 0;
 	var supportedMethods:Array<String> = [];
 
-	public var haxeVersion(default, null):Null<SemVer>;
-	public var protocolVersion(default, null):Null<SemVer>;
+	public var haxeVersion(default, null) = new SemVer(0, 0, 0);
+	public var protocolVersion(default, null) = new SemVer(0, 0, 0);
 
 	public function new(context:Context) {
 		this.context = context;
@@ -67,9 +67,11 @@ class HaxeServer {
 			});
 		}
 
-		haxeVersion = SemVer.parse(output);
+		final haxeVersion = SemVer.parse(output);
 		if (haxeVersion == null) {
 			return error("Error parsing Haxe version " + Json.stringify(output));
+		} else {
+			this.haxeVersion = haxeVersion;
 		}
 		final isVersionSupported = haxeVersion >= new SemVer(3, 4, 0);
 		if (!isVersionSupported) {
@@ -79,6 +81,7 @@ class HaxeServer {
 	}
 
 	function mergeEnvs(from:DynamicAccess<String>, to:DynamicAccess<String>) {
+		@:nullSafety(Off)
 		for (key => value in from) {
 			if (Sys.systemName() == "Windows") {
 				key = key.toLowerCase();
@@ -398,9 +401,10 @@ class HaxeServer {
 
 		// add to the queue
 		if (requestsHead == null) {
-			requestsHead = requestsTail = request;
-		} else {
+			requestsHead = request;
+			requestsTail = request;
 			requestsTail.next = request;
+		} else {
 			request.prev = requestsTail;
 			requestsTail = request;
 		}

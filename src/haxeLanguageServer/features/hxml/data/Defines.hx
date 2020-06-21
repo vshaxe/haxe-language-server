@@ -108,7 +108,7 @@ private final DefineVersions:Map<String, VersionInfo> = {
 }
 
 function getDefines(includeReserved:Bool):ReadOnlyArray<Define> {
-	return if (includeReserved) Defines else Defines.filter(d -> !d.reserved);
+	return if (includeReserved) Defines else Defines.filter(define -> define.reserved != true);
 }
 
 // from https://github.com/HaxeFoundation/haxe/blob/development/src-json/define.json

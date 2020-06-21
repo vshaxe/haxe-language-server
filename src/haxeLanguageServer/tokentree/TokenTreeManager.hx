@@ -57,26 +57,26 @@ class TokenTreeManager {
 	/**
 		Gets the character position of a token.
 	**/
-	public function getPos(tokenTree:TokenTree):Null<Position> {
+	public function getPos(tokenTree:TokenTree):Position {
 		inline createTokenCharacterRanges();
-		return if (tokenCharacterRanges[tokenTree.index] == null) {
-			tokenTree.pos;
-		} else {
-			tokenCharacterRanges[tokenTree.index];
-		}
+		final pos = tokenCharacterRanges[tokenTree.index];
+		return if (pos == null) tokenTree.pos else pos;
 	}
 
 	/**
 		Gets the character position of a subtree.
 		Copy of `TokenTree.getPos()`.
 	**/
-	public function getTreePos(tokenTree:TokenTree):Null<Position> {
+	public function getTreePos(tokenTree:TokenTree):Position {
 		final pos = getPos(tokenTree);
-		if (pos == null || tokenTree.children == null || tokenTree.children.length <= 0)
+		final children = tokenTree.children;
+		if (pos == null || children == null)
+			return pos;
+		if (children.length <= 0)
 			return pos;
 
 		final fullPos:Position = {file: pos.file, min: pos.min, max: pos.max};
-		for (child in tokenTree.children) {
+		for (child in children) {
 			final childPos = getTreePos(child);
 			if (childPos == null)
 				continue;
@@ -97,9 +97,6 @@ class TokenTreeManager {
 			return null;
 
 		if (off > list[list.length - 1].pos.max)
-			return null;
-
-		if (tree == null)
 			return null;
 
 		inline createTokenCharacterRanges();

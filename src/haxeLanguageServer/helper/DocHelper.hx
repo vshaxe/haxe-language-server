@@ -1,5 +1,7 @@
 package haxeLanguageServer.helper;
 
+import haxeLanguageServer.helper.JavadocHelper.DocTag;
+
 class DocHelper {
 	static final reStartsWhitespace = ~/^\s*/;
 	static final reEndsWithWhitespace = ~/\s*$/;
@@ -48,7 +50,7 @@ class DocHelper {
 			return "\n" + tableLine(a, b) + tableLine("------", "------");
 		function replaceNewlines(s:String, by:String)
 			return s.replace("\n", by).replace("\r", by);
-		function mapDocTags(tags)
+		function mapDocTags(tags:Array<DocTag>)
 			return tags.map(function(p) {
 				final desc = replaceNewlines(p.doc, " ");
 				return tableLine("`" + p.value + "`", desc);
@@ -70,7 +72,7 @@ class DocHelper {
 		if (hasParams)
 			result += mapDocTags(docInfos.params);
 		if (hasReturn)
-			result += tableLine("`return`", replaceNewlines(docInfos.returns.doc, " "));
+			result += tableLine("`return`", @:nullSafety(Off) replaceNewlines(docInfos.returns.doc, " "));
 
 		if (docInfos.throws.length > 0)
 			result += tableHeader("Exception", "Description") + mapDocTags(docInfos.throws);
@@ -87,20 +89,16 @@ class DocHelper {
 		return result;
 	}
 
-	public static function extractText(doc:String):String {
-		if (doc == null)
+	public static function extractText(doc:String):Null<String> {
+		if (doc == null) {
 			return null;
-
+		}
 		var result = "";
 		for (line in doc.trim().split("\n")) {
 			line = line.trim();
 			if (line.startsWith("*")) // JavaDoc-style comments
 				line = line.substr(1);
-
-			if (line == "")
-				result += "\n\n";
-			else
-				result += line + " ";
+			result += if (line == "") "\n\n" else line + " ";
 		}
 		return result;
 	}

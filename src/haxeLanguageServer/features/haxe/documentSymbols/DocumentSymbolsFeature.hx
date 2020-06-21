@@ -15,7 +15,7 @@ class DocumentSymbolsFeature {
 		context.languageServerProtocol.onRequest(DocumentSymbolRequest.type, onDocumentSymbols);
 	}
 
-	function onDocumentSymbols(params:DocumentSymbolParams, token:CancellationToken, resolve:Array<EitherType<SymbolInformation, DocumentSymbol>>->Void,
+	function onDocumentSymbols(params:DocumentSymbolParams, token:CancellationToken, resolve:Null<Array<EitherType<SymbolInformation, DocumentSymbol>>>->Void,
 			reject:ResponseError<NoData>->Void) {
 		final onResolve = context.startTimer("haxe/documentSymbol");
 		final uri = params.textDocument.uri;
@@ -31,7 +31,7 @@ class DocumentSymbolsFeature {
 		onResolve(null, countSymbols(symbols) + " symbols");
 	}
 
-	function countSymbols(symbols:Array<DocumentSymbol>):Int {
+	function countSymbols(symbols:Null<Array<DocumentSymbol>>):Int {
 		return if (symbols == null) {
 			0;
 		} else {

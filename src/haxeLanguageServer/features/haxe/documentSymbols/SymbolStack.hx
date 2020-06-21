@@ -67,7 +67,7 @@ abstract SymbolStack(Array<{level:SymbolLevel, symbol:DocumentSymbol}>) {
 		}
 	}
 
-	public function getParentTypeKind():DisplayModuleTypeKind {
+	public function getParentTypeKind():Null<DisplayModuleTypeKind> {
 		var i = depth;
 		while (i-- > 0) {
 			switch this[i].level {
