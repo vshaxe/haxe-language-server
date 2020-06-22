@@ -18,9 +18,9 @@ class ExpectedTypeCompletion {
 
 	public function createItems<T, TType>(data:CompletionContextData):Array<CompletionItem> {
 		var toplevel:Null<ToplevelCompletion<TType>>;
-		switch data.mode.kind {
+		switch data.mode!.kind {
 			case Toplevel, Pattern:
-				toplevel = data.mode.args;
+				toplevel = data.mode!.args;
 			case _:
 				return [];
 		}
@@ -93,7 +93,7 @@ class ExpectedTypeCompletion {
 			case TAnonymous:
 				// TODO: support @:structInit
 				final anon = concreteType.args;
-				final singleLine = data.mode.kind == Pattern;
+				final singleLine = data.mode!.kind == Pattern;
 				final allFields = printer.printObjectLiteral(anon, singleLine, false, true);
 				final requiredFields = printer.printObjectLiteral(anon, singleLine, true, true);
 				if (allFields == requiredFields) {

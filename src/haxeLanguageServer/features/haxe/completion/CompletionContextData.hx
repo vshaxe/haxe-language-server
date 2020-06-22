@@ -6,7 +6,7 @@ import haxeLanguageServer.tokentree.TokenContext;
 
 typedef CompletionContextData = {
 	final replaceRange:Range;
-	final mode:CompletionMode<Dynamic>;
+	final mode:Null<CompletionMode<Dynamic>>;
 	final doc:TextDocument;
 	final indent:String;
 	final lineAfter:String;

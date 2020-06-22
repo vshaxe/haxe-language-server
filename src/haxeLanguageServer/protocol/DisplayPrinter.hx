@@ -328,7 +328,10 @@ class DisplayPrinter {
 		return components.join(" ");
 	}
 
-	public function printClassFieldOrigin<T>(origin:ClassFieldOrigin<T>, kind:DisplayItemKind<Dynamic>, quote:String = ""):Option<String> {
+	public function printClassFieldOrigin<T>(origin:Null<ClassFieldOrigin<T>>, kind:DisplayItemKind<Dynamic>, quote:String = ""):Option<String> {
+		if (origin == null) {
+			return None;
+		}
 		if (kind == EnumAbstractField || origin.kind == cast Unknown) {
 			return None;
 		}
@@ -366,8 +369,8 @@ class DisplayPrinter {
 		});
 	}
 
-	public function printEnumFieldOrigin<T>(origin:EnumFieldOrigin<T>, quote:String = ""):Option<String> {
-		if (origin.args == null) {
+	public function printEnumFieldOrigin<T>(origin:Null<EnumFieldOrigin<T>>, quote:String = ""):Option<String> {
+		if (origin == null || origin.args == null) {
 			return None;
 		}
 		return Some('from enum ' + switch origin.kind {
@@ -400,7 +403,7 @@ class DisplayPrinter {
 				final signature:JsonFunctionSignature = concreteType.args;
 				var text = '${field.name}(';
 				for (i in 0...signature.args.length) {
-					var arg = signature.args[i];
+					final arg = signature.args[i];
 					text += if (snippets) {
 						'$${${i+1}:${arg.name}}';
 					} else {
@@ -441,13 +444,13 @@ class DisplayPrinter {
 			}
 		}
 		var printedArguments = printedArgs.join(", ");
-		if (functionFormatting.useArrowSyntax) {
+		return if (functionFormatting.useArrowSyntax) {
 			if (!singleArgument) {
 				printedArguments = '($printedArguments)';
 			}
-			return printedArguments + " -> ";
+			printedArguments + " -> ";
 		} else {
-			return "function(" + printedArguments + ")" + printReturn(signature) + " ";
+			"function(" + printedArguments + ")" + printReturn(signature) + " ";
 		}
 	}
 
@@ -469,10 +472,9 @@ class DisplayPrinter {
 				printedFields.push(printedField);
 			}
 		}
-		if (printedFields.length == 0) {
-			return "{}";
-		}
-		return if (singleLine) {
+		return if (printedFields.length == 0) {
+			"{}";
+		} else if (singleLine) {
 			'{${printedFields.join(", ")}}';
 		} else {
 			'{\n${printedFields.join(",\n")}\n}';

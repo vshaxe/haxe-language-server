@@ -60,10 +60,17 @@ function createFunctionImportsEdit<T>(doc:TextDocument, result:ImportPosition, c
 	}
 }
 
-function determineImportPosition(document:HaxeDocument):Null<ImportPosition> {
+function determineImportPosition(document:HaxeDocument):ImportPosition {
+	function defaultResult():ImportPosition {
+		return {
+			position: {line: 0, character: 0},
+			insertLineAfter: true,
+			insertLineBefore: true
+		}
+	}
 	final tokens = document.tokens;
 	if (tokens == null) {
-		return null;
+		return defaultResult();
 	}
 
 	var firstImport:Null<TokenTree> = null;
@@ -114,10 +121,6 @@ function determineImportPosition(document:HaxeDocument):Null<ImportPosition> {
 			insertLineBefore: true
 		}
 	} else {
-		{
-			position: {line: 0, character: 0},
-			insertLineAfter: true,
-			insertLineBefore: true
-		}
+		defaultResult();
 	}
 }

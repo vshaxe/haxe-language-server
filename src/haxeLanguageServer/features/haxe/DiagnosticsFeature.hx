@@ -149,7 +149,7 @@ class DiagnosticsFeature {
 					count += data.diagnostics.length;
 
 					var file = data.file;
-					if (data.file == null) {
+					if (file == null) {
 						// LSP always needs a URI for now (https://github.com/Microsoft/language-server-protocol/issues/256)
 						file = errorUri.toFsPath();
 					}
@@ -162,18 +162,17 @@ class DiagnosticsFeature {
 					final newDiagnostics = filterRelevantDiagnostics(data.diagnostics);
 					final diagnostics = new Array<Diagnostic>();
 					for (hxDiag in newDiagnostics) {
-						var range = hxDiag.range;
-						if (hxDiag.range == null) {
-							// range is not optional in the LSP yet
-							range = {
-								start: {line: 0, character: 0},
-								end: {line: 0, character: 0}
-							}
-						}
-
 						final kind:Int = hxDiag.kind;
 						final diag:Diagnostic = {
-							range: range,
+							range: if (hxDiag.range == null) {
+								// range is not optional in the LSP yet
+								{
+									start: {line: 0, character: 0},
+									end: {line: 0, character: 0}
+								}
+							} else {
+								hxDiag.range;
+							},
 							source: DiagnosticsSource,
 							code: kind,
 							severity: hxDiag.severity,

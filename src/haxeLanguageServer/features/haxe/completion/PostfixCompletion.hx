@@ -32,9 +32,13 @@ class PostfixCompletion {
 		}
 
 		var subject:FieldCompletionSubject<T2>;
-		switch data.mode.kind {
-			case Field if (data.mode.args != null):
-				subject = data.mode.args;
+		final mode = data.mode;
+		if (mode == null) {
+			return [];
+		}
+		switch mode.kind {
+			case Field if (mode.args != null):
+				subject = mode.args;
 			case _:
 				return [];
 		}

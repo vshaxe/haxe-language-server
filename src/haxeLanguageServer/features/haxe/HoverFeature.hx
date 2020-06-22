@@ -10,6 +10,8 @@ import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
 
+using Safety;
+
 class HoverFeature {
 	final context:Context;
 
@@ -50,7 +52,7 @@ class HoverFeature {
 			explicitNull: true
 		});
 		final item = hover.item;
-		final concreteType = hover.item.type;
+		final concreteType = hover.item.type.sure();
 		function printType():HoverContent {
 			final type = printer.printType(concreteType);
 			return {definition: printCodeBlock(type, HaxeType)};
@@ -76,7 +78,7 @@ class HoverFeature {
 					}
 				}
 			case EnumField:
-				final field = printer.printEnumFieldDefinition(item.args.field, item.type);
+				final field = printer.printEnumFieldDefinition(item.args.field, concreteType);
 				{
 					definition: printCodeBlock(field, Haxe),
 					origin: switch printer.printEnumFieldOrigin(item.args.origin) {
@@ -95,7 +97,7 @@ class HoverFeature {
 			case Literal:
 				final value = item.args.name;
 				final sourceText = doc.getText(hover.range);
-				if (value != sourceText && item.type.getDotPath() != String) {
+				if (value != sourceText && concreteType.getDotPath() != String) {
 					return {definition: printCodeBlock(value, Haxe)};
 				} else {
 					printType();
@@ -117,7 +119,7 @@ class HoverFeature {
 		return result;
 	}
 
-	function handleLegacy(params:TextDocumentPositionParams, token:CancellationToken, resolve:Hover->Void, reject:ResponseError<NoData>->Void,
+	function handleLegacy(params:TextDocumentPositionParams, token:CancellationToken, resolve:Null<Hover>->Void, reject:ResponseError<NoData>->Void,
 			doc:TextDocument, offset:Int) {
 		final bytePos = context.displayOffsetConverter.characterOffsetToByteOffset(doc.content, offset);
 		final args = ['${doc.uri.toFsPath()}@$bytePos@type'];
@@ -139,7 +141,7 @@ class HoverFeature {
 						case _:
 							if (s.length == 0)
 								return reject(new ResponseError(0, "No type information"));
-							final type = switch parseDisplayType(s) {
+							final type:String = switch parseDisplayType(s) {
 								case DTFunction(args, ret):
 									printFunctionType(args, ret);
 								case DTValue(type):

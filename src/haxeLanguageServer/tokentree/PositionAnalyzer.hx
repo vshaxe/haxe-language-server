@@ -42,12 +42,13 @@ class PositionAnalyzer {
 	}
 
 	public static function getStringKind(token:Null<TokenTree>, document:HaxeDocument, pos:Position):StringKind {
-		if (token == null) {
+		final tokens = document.tokens;
+		if (token == null || tokens == null) {
 			return None;
 		}
 		return switch token.tok {
 			case Const(CString(_)):
-				final startPos = document.positionAt(document.tokens.getPos(token).min);
+				final startPos = document.positionAt(tokens.getPos(token).min);
 				return switch document.characterAt(startPos) {
 					case "'": SingleQuote;
 					case '"': DoubleQuote;
@@ -59,7 +60,8 @@ class PositionAnalyzer {
 	}
 
 	public static function getContext(token:Null<TokenTree>, document:HaxeDocument, completionPosition:Position):TokenContext {
-		if (token == null) {
+		final tokens = document.tokens;
+		if (token == null || tokens == null) {
 			return Root(BeforePackage);
 		}
 		inline function isType(tok:TokenDef) {
@@ -89,7 +91,7 @@ class PositionAnalyzer {
 				case Kwd(KwdVar): Var;
 				case Kwd(KwdFinal): Final;
 				case Kwd(KwdFunction): Function;
-				case _: null;
+				case _: throw "assert false";
 			}
 		}
 
@@ -121,12 +123,12 @@ class PositionAnalyzer {
 		}
 
 		var pos = BeforePackage;
-		final root = document.tokens.tree;
+		final root = tokens.tree;
 		if (root.children == null) {
 			return Root(pos);
 		}
 		for (child in root.children) {
-			final childPos = document.rangeAt2(document.tokens.getPos(child));
+			final childPos = document.rangeAt2(tokens.getPos(child));
 			if (childPos.start.isAfter(completionPosition)) {
 				break;
 			}

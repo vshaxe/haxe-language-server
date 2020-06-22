@@ -22,9 +22,9 @@ class SyntaxModernizer {
 		tokens.tree.filterCallback(function(token:TokenTree, _) {
 			switch token.tok {
 				case Kwd(kwd) if (kwd == KwdEnum || kwd == KwdExtern || kwd == KwdFinal):
-					final dblDot = token.access().parent().is(DblDot).token;
-					final at = dblDot.access().parent().is(At).token;
-					if (at != null) {
+					final dblDot:Null<TokenTree> = token.access().parent().is(DblDot).token;
+					final at:Null<TokenTree> = dblDot.access().parent().is(At).token;
+					if (dblDot != null && at != null) {
 						final range = document.rangeAt(tokens.getPos(at).min, tokens.getPos(dblDot).max);
 						final keyword = KeywordPrinter.toString(kwd);
 						actions.push({

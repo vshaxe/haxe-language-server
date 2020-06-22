@@ -7,11 +7,12 @@ class PathHelper {
 		return new EReg(pathFilter.toString(), "").match(PathHelper.normalize(path).toString());
 	}
 
-	public static function preparePathFilter(diagnosticsPathFilter:String, haxelibPath:FsPath, workspaceRoot:FsPath):FsPath {
+	public static function preparePathFilter(diagnosticsPathFilter:String, haxelibPath:Null<FsPath>, workspaceRoot:FsPath):FsPath {
 		var path = diagnosticsPathFilter;
 		path = path.replace("${workspaceRoot}", workspaceRoot.toString());
-		if (haxelibPath != null)
+		if (haxelibPath != null) {
 			path = path.replace("${haxelibPath}", haxelibPath.toString());
+		}
 		return normalize(new FsPath(path));
 	}
 

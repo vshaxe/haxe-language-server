@@ -155,7 +155,7 @@ class CompletionFeature {
 	}
 
 	function handleJsonRpc(params:CompletionParams, token:CancellationToken, resolve:CompletionList->Void, reject:ResponseError<NoData>->Void,
-			doc:HaxeDocument, offset:Int, textBefore:String, currentToken:TokenTree) {
+			doc:HaxeDocument, offset:Int, textBefore:String, currentToken:Null<TokenTree>) {
 		var wasAutoTriggered = true;
 		if (params.context != null) {
 			wasAutoTriggered = params.context.triggerKind == TriggerCharacter;
@@ -183,8 +183,7 @@ class CompletionFeature {
 			end: params.position
 		};
 		context.callHaxeMethod(DisplayMethods.Completion, haxeParams, token, function(result) {
-			final hasResult = result != null;
-			final mode = if (hasResult) result.mode.kind else null;
+			final mode = if (result != null) result.mode.kind else null;
 			if (mode != TypeHint && wasAutoTriggered && isAfterArrow(textBefore)) {
 				resolve({items: [], isIncomplete: false}); // avoid auto-popup after -> in arrow functions
 				return null;
@@ -193,13 +192,13 @@ class CompletionFeature {
 			final indent = doc.indentAt(params.position.line);
 			// the replaceRanges sent by Haxe are only trustworthy in some cases (https://github.com/HaxeFoundation/haxe/issues/8669)
 			if (mode == Metadata || mode == Toplevel || mode == TypeHint) {
-				if (hasResult) {
+				if (result!.replaceRange != null) {
 					replaceRange = result.replaceRange;
 				}
 			}
 			final data:CompletionContextData = {
 				replaceRange: replaceRange,
-				mode: if (hasResult) result.mode else null,
+				mode: if (result != null) result.mode else null,
 				doc: doc,
 				indent: indent,
 				lineAfter: lineAfter,
@@ -208,9 +207,9 @@ class CompletionFeature {
 				tokenContext: tokenContext,
 				isResolve: false
 			};
-			var displayItems = if (hasResult) result.items else [];
+			var displayItems = if (result != null) result.items else [];
 			var items = [];
-			if (hasResult) {
+			if (result != null) {
 				items = items.concat(postfixCompletion.createItems(data, displayItems));
 				items = items.concat(expectedTypeCompletion.createItems(data));
 			}
@@ -228,11 +227,12 @@ class CompletionFeature {
 				items = items.filter(i -> i != null);
 				resolve({
 					items: items,
-					isIncomplete: if (result!.isIncomplete == null) false else result.isIncomplete
+					isIncomplete: if (result != null) result.isIncomplete else false
 				});
 			}
+			var displayItems:Array<Null<DisplayItem<Dynamic>>> = displayItems;
 			if (snippetSupport && mode != Import && mode != Field) {
-				snippetCompletion.createItems(data, displayItems).then(result -> {
+				snippetCompletion.createItems(data, displayItems).then(function(result) {
 					items = items.concat(result.items);
 					displayItems = result.displayItems;
 					resolveItems();
@@ -335,7 +335,7 @@ class CompletionFeature {
 		}
 
 		if (commitCharactersSupport) {
-			final mode = data.mode.kind;
+			final mode = data.mode!.kind;
 			if ((item.type != null && item.type.kind == TFun && mode != Pattern) || mode == New) {
 				completionItem.commitCharacters = ["("];
 			}
@@ -360,7 +360,7 @@ class CompletionFeature {
 		if (field.meta.hasMeta(NoCompletion)) {
 			return null;
 		}
-		if (data.mode.kind == Override) {
+		if (data.mode!.kind == Override) {
 			return createOverrideCompletionItem(item, data, printedOrigin);
 		}
 
@@ -382,7 +382,7 @@ class CompletionFeature {
 			textEdit: {
 				newText: {
 					final qualifier = if (resolution.isQualified) "" else resolution.qualifier + ".";
-					qualifier + switch data.mode.kind {
+					qualifier + switch data.mode!.kind {
 						case StructureField: maybeInsert(field.name, ": ", data.lineAfter);
 						case Pattern: maybeInsert(field.name, ":", data.lineAfter);
 						case _: field.name;
@@ -392,7 +392,7 @@ class CompletionFeature {
 			}
 		}
 
-		switch data.mode.kind {
+		switch data.mode!.kind {
 			case StructureField:
 				if (field.meta.hasMeta(Optional)) {
 					item.label = "?" + field.name;
@@ -499,7 +499,7 @@ class CompletionFeature {
 			}
 		};
 
-		if (data.mode.kind == Pattern) {
+		if (data.mode!.kind == Pattern) {
 			var field = printer.printEnumField(field, item.type, true, false);
 			field = maybeInsertPatternColon(field, data);
 			result.textEdit.newText = field;
@@ -528,7 +528,7 @@ class CompletionFeature {
 		final pathPrinting = if (isImportCompletion) Always else Qualified;
 		final qualifiedName = new DisplayPrinter(pathPrinting).printPath(type.path); // unqualifiedName or dotPath depending on importStatus
 
-		final item:CompletionItem = {
+		final item:TextEditCompletionItem = {
 			label: unqualifiedName + if (containerName == "") "" else " - " + dotPath,
 			kind: getKindForModuleType(type),
 			textEdit: {
@@ -582,7 +582,7 @@ class CompletionFeature {
 		}
 	}
 
-	function formatDocumentation(doc:String):Null<EitherType<String, MarkupContent>> {
+	function formatDocumentation(doc:Null<String>):Null<EitherType<String, MarkupContent>> {
 		if (doc == null) {
 			return null;
 		}
@@ -624,7 +624,7 @@ class CompletionFeature {
 	}
 
 	function createKeywordCompletionItem(keyword:Keyword, data:CompletionContextData):CompletionItem {
-		final item:CompletionItem = {
+		final item:TextEditCompletionItem = {
 			label: keyword.name,
 			kind: Keyword,
 			textEdit: {
@@ -636,7 +636,7 @@ class CompletionFeature {
 		if (data.mode.kind == TypeRelation || keyword.name == New || keyword.name == Inline) {
 			item.command = TriggerSuggest;
 		}
-		if (data.mode.kind == TypeDeclaration) {
+		if (data.mode!.kind == TypeDeclaration) {
 			switch keyword.name {
 				case Import | Using | Final | Extern | Private:
 					item.command = TriggerSuggest;
@@ -724,7 +724,7 @@ class CompletionFeature {
 	}
 
 	function maybeInsertPatternColon(text:String, data:CompletionContextData):String {
-		final info:PatternCompletion<Dynamic> = data.mode.args;
+		final info:Null<PatternCompletion<Dynamic>> = data.mode!.args;
 		if (info == null || info.isOutermostPattern) {
 			return maybeInsert(text, ":", data.lineAfter);
 		}

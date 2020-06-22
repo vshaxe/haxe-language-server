@@ -1,5 +1,6 @@
 package haxeLanguageServer.features.haxe;
 
+import haxe.Json;
 import haxe.display.Display.DisplayMethods;
 import haxe.display.Display.SignatureInformation as HaxeSignatureInformation;
 import haxe.display.Display.SignatureItem as HaxeSignatureItem;
@@ -19,7 +20,7 @@ class SignatureHelpFeature {
 
 	public function new(context:Context) {
 		this.context = context;
-		labelOffsetSupport = context.capabilities.textDocument!.signatureHelp!.signatureInformation!.parameterInformation!.labelOffsetSupport;
+		labelOffsetSupport = context.capabilities.textDocument!.signatureHelp!.signatureInformation!.parameterInformation!.labelOffsetSupport == true;
 		context.languageServerProtocol.onRequest(SignatureHelpRequest.type, onSignatureHelp);
 	}
 
@@ -106,12 +107,14 @@ class SignatureHelpFeature {
 				case DCancelled:
 					resolve(null);
 				case DResult(data):
-					final help:SignatureHelp = haxe.Json.parse(data);
+					final help:SignatureHelp = Json.parse(data);
 					for (signature in help.signatures) {
 						signature.documentation = getSignatureDocumentation(signature.documentation);
 						final parameters = signature.parameters;
-						for (i in 0...signature.parameters.length)
-							parameters[i].label = addNamesToSignatureType(parameters[i].label, i);
+						if (parameters != null) {
+							for (i in 0...parameters.length)
+								parameters[i].label = addNamesToSignatureType(parameters[i].label, i);
+						}
 						signature.label = addNamesToSignatureType(signature.label);
 					}
 					resolve(help);
@@ -119,8 +122,8 @@ class SignatureHelpFeature {
 		}, reject.handler());
 	}
 
-	function getSignatureDocumentation(documentation:String):Null<EitherType<String, MarkupContent>> {
-		if (context.config.user.enableSignatureHelpDocumentation) {
+	function getSignatureDocumentation(documentation:Null<String>):Null<EitherType<String, MarkupContent>> {
+		if (documentation != null && context.config.user.enableSignatureHelpDocumentation) {
 			return {
 				kind: MarkupKind.MarkDown,
 				value: DocHelper.markdownFormat(documentation)

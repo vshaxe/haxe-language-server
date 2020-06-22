@@ -1,6 +1,7 @@
 package haxeLanguageServer.helper;
 
 import languageServerProtocol.Types.Location;
+using Safety;
 
 class HaxePosition {
 	static final positionRe = ~/^(.+):(\d+): (?:lines (\d+)-(\d+)|character(?:s (\d+)-| )(\d+))$/;
@@ -14,7 +15,7 @@ class HaxePosition {
 		final file = getProperFileNameCase(new FsPath(positionRe.matched(1)));
 		var s = positionRe.matched(3);
 		if (s != null) { // line span
-			final startLine = Std.parseInt(s);
+			final startLine = Std.parseInt(s).sure();
 			final endLine = Std.parseInt(positionRe.matched(4));
 			return {
 				uri: if (file == doc.uri.toFsPath()) doc.uri else file.toUri(),
@@ -24,7 +25,7 @@ class HaxePosition {
 				}
 			};
 		} else { // char span
-			var line = Std.parseInt(positionRe.matched(2));
+			var line = Std.parseInt(positionRe.matched(2)).sure();
 			line--;
 
 			var lineContent, uri;
@@ -34,7 +35,7 @@ class HaxePosition {
 				uri = doc.uri;
 			} else {
 				// we have to read lines from a file on disk (cache if available)
-				var lines;
+				var lines:Null<Array<String>>;
 				if (cache == null) {
 					lines = sys.io.File.getContent(file.toString()).split("\n");
 				} else {
@@ -46,12 +47,12 @@ class HaxePosition {
 				uri = file.toUri();
 			}
 
-			final endByte = offsetConverter.positionCharToZeroBasedColumn(Std.parseInt(positionRe.matched(6)));
+			final endByte = offsetConverter.positionCharToZeroBasedColumn(Std.parseInt(positionRe.matched(6)).sure());
 			final endChar = offsetConverter.byteOffsetToCharacterOffset(lineContent, endByte);
 
 			s = positionRe.matched(5);
 			final startChar = if (s != null) {
-				final startByte = offsetConverter.positionCharToZeroBasedColumn(Std.parseInt(s));
+				final startByte = offsetConverter.positionCharToZeroBasedColumn(Std.parseInt(s).sure());
 				offsetConverter.byteOffsetToCharacterOffset(lineContent, startByte);
 			} else {
 				endChar;
@@ -68,12 +69,14 @@ class HaxePosition {
 	}
 
 	public static function getProperFileNameCase(normalizedPath:FsPath):FsPath {
-		if (!isWindows)
+		if (!isWindows) {
 			return normalizedPath;
+		}
 		if (properFileNameCaseCache != null) {
 			final cached = properFileNameCaseCache[normalizedPath];
-			if (cached != null)
+			if (cached != null) {
 				return cached;
+			}
 		}
 		var result = normalizedPath;
 		final parts = normalizedPath.toString().split("\\");
