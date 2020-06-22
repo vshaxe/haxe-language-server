@@ -42,7 +42,14 @@ function analyzeHxmlContext(line:String, pos:Position):HxmlContext {
 						switch arg.split("=") {
 							case []: Define();
 							case [define]: Define(findDefine(define));
-							case [define, value]: DefineValue(findDefine(define), value);
+							case [define, value]:
+								final define = findDefine(define);
+								final enumValues = define!.getEnumValues();
+								if (enumValues != null) {
+									EnumValue(enumValues.find(v -> v.name == arg), enumValues);
+								} else {
+									DefineValue(define, value);
+								}
 							case _: Unknown;
 						}
 				}

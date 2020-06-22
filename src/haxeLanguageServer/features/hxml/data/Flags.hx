@@ -251,20 +251,7 @@ final HxmlFlags = {
 				deprecatedNames: ["-dce"],
 				argument: {
 					name: "[std|full|no]",
-					kind: Enum([
-						{
-							name: "std",
-							description: "Only apply dead code elimination to the standard library."
-						},
-						{
-							name: "full",
-							description: "Apply dead code elimination to all code."
-						},
-						{
-							name: "no",
-							description: "Disable dead code elimination."
-						}
-					])
+					kind: Enum(DceEnumValues)
 				},
 				description: "set the dead code elimination mode (default `std`)"
 			},

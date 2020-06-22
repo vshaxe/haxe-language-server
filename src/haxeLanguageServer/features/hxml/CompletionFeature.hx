@@ -34,7 +34,7 @@ class CompletionFeature {
 			items: switch hxmlContext.element {
 				case Flag(_): createFlagCompletion(hxmlContext.range, textAfter);
 				case EnumValue(_, values):
-					[
+					final items:Array<CompletionItem> = [
 						for (value in values)
 							{
 								label: value.name,
@@ -42,6 +42,8 @@ class CompletionFeature {
 								documentation: value.description
 							}
 					];
+					items[0].preselect = true;
+					items;
 				case Define(): createDefineCompletion();
 				case DefineValue(define, value):
 					[

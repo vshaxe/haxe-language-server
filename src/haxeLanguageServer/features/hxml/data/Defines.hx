@@ -1,5 +1,6 @@
 package haxeLanguageServer.features.hxml.data;
 
+import haxeLanguageServer.features.hxml.data.Shared;
 import haxeLanguageServer.helper.SemVer;
 import haxeLanguageServer.protocol.DisplayPrinter;
 
@@ -43,7 +44,7 @@ abstract Define(DefineData) from DefineData {
 	}
 
 	public function hasParams():Bool {
-		return this.params != null;
+		return this.params != null || getEnumValues() != null;
 	}
 
 	public function isAvailable(haxeVersion:SemVer):Bool {
@@ -58,6 +59,10 @@ abstract Define(DefineData) from DefineData {
 			return false;
 		}
 		return true;
+	}
+
+	public function getEnumValues():Null<EnumValues> {
+		return DefineEnums[this.name];
 	}
 }
 
@@ -106,6 +111,23 @@ private final DefineVersions:Map<String, VersionInfo> = {
 		}
 	];
 }
+
+private final DefineEnums:Map<String, EnumValues> = [
+	"Dce" => DceEnumValues,
+	"Dump" => [{name: "pretty"}, {name: "record"}, {name: "position"}, {name: "legacy"}],
+	"HlVer" => [{name: "1.10.0"}, {name: "1.11.0"}, {name: "1.12.0"}],
+	"JavaVer" => [{name: "7"}, {name: "6"}, {name: "5"}],
+	"JsEs" => [{name: "6"}, {name: "5"}, {name: "3"}],
+	"LuaVer" => [{name: "5.2"}, {name: "5.1"}],
+	"NetTarget" => [
+		{name: "net"},
+		{name: "netcore", description: ".NET core"},
+		{name: "xbox"},
+		{name: "micro", description: "Micro Framework"},
+		{name: "compact", description: "Compact Framework"}
+	],
+	"SwfCompressLevel" => [for (i in 0...9) {name: Std.string(i + 1)}]
+];
 
 function getDefines(includeReserved:Bool):ReadOnlyArray<Define> {
 	return if (includeReserved) Defines else Defines.filter(define -> define.reserved != true);
@@ -421,7 +443,7 @@ private final Defines:ReadOnlyArray<DefineData> = [
 		"define": "js_es",
 		"doc": "Generate JS compliant with given ES standard version. (default: 5)",
 		"platforms": ["js"],
-		"params": ["version number"],
+		"params": ["version: 3 | 5 | 6"],
 		"links": ["https://haxe.org/manual/target-javascript-es6.html"]
 	},
 	{
