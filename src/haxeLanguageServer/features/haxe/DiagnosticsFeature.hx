@@ -87,6 +87,9 @@ class DiagnosticsFeature {
 		var endLine = getInt(3);
 		final column = getInt(4);
 		final endColumn = getInt(5);
+		if (line == null) {
+			return false;
+		}
 
 		function makePosition(line:Int, character:Null<Int>) {
 			return {
@@ -106,7 +109,7 @@ class DiagnosticsFeature {
 			severity: DiagnosticSeverity.Error,
 			message: problemMatcher.matched(7)
 		};
-		publishDiagnostic(uri, diag, error);
+		publishDiagnostic(targetUri, diag, error);
 		return true;
 	}
 
@@ -241,7 +244,7 @@ class DiagnosticsFeature {
 		}
 
 		// hide inactive blocks that are contained within other inactive blocks
-		diagnostics = diagnostics.filter(a -> !diagnostics.exists(b -> a != b && b.range.contains(a.range)));
+		diagnostics = diagnostics.filter(a -> !diagnostics.exists(b -> a != b && a.range != null && b.range != null && b.range.contains(a.range)));
 
 		return diagnostics;
 	}
@@ -270,7 +273,7 @@ class DiagnosticsFeature {
 		}
 		var actions:Array<CodeAction> = [];
 		for (d in params.context.diagnostics) {
-			if (!(d.code is Int)) // our codes are int, so we don't handle other stuff
+			if (d.code == null || !(d.code is Int)) // our codes are int, so we don't handle other stuff
 				continue;
 			final code = new DiagnosticKind<T>(d.code);
 			actions = actions.concat(switch code {
@@ -308,8 +311,11 @@ class DiagnosticsFeature {
 	}
 
 	function getUnresolvedIdentifierActions(params:CodeActionParams, d:Diagnostic):Array<CodeAction> {
-		var actions:Array<CodeAction> = [];
 		final args = getDiagnosticsArguments(params.textDocument.uri, UnresolvedIdentifier, d.range);
+		if (args == null) {
+			return [];
+		}
+		var actions:Array<CodeAction> = [];
 		final importCount = args.count(a -> a.kind == Import);
 		for (arg in args) {
 			actions = actions.concat(switch arg.kind {
@@ -370,6 +376,9 @@ class DiagnosticsFeature {
 	function getCompilerErrorActions(params:CodeActionParams, d:Diagnostic):Array<CodeAction> {
 		final actions:Array<CodeAction> = [];
 		final arg = getDiagnosticsArguments(params.textDocument.uri, CompilerError, d.range);
+		if (arg == null) {
+			return actions;
+		}
 		final suggestionsRe = ~/\(Suggestions?: (.*)\)/;
 		if (suggestionsRe.match(arg)) {
 			final suggestions = suggestionsRe.matched(1).split(",");
@@ -395,15 +404,17 @@ class DiagnosticsFeature {
 		if (invalidPackageRe.match(arg)) {
 			final is = invalidPackageRe.matched(1);
 			final shouldBe = invalidPackageRe.matched(2);
-			final text = context.documents.getHaxe(params.textDocument.uri) !.getText(d.range);
-			final replacement = text.replace(is, shouldBe);
-			actions.push({
-				title: "Change to " + replacement,
-				kind: QuickFix,
-				edit: WorkspaceEditHelper.create(context, params, [{range: d.range, newText: replacement}]),
-				diagnostics: [d],
-				isPreferred: true
-			});
+			final document = context.documents.getHaxe(params.textDocument.uri);
+			if (document != null) {
+				final replacement = document.getText(d.range).replace(is, shouldBe);
+				actions.push({
+					title: "Change to " + replacement,
+					kind: QuickFix,
+					edit: WorkspaceEditHelper.create(context, params, [{range: d.range, newText: replacement}]),
+					diagnostics: [d],
+					isPreferred: true
+				});
+			}
 		}
 
 		if (context.haxeServer.haxeVersion.major >= 4 // unsuitable error range before Haxe 4
@@ -421,7 +432,7 @@ class DiagnosticsFeature {
 	}
 
 	function getRemovableCodeActions(params:CodeActionParams, d:Diagnostic):Array<CodeAction> {
-		final range = getDiagnosticsArguments(params.textDocument.uri, RemovableCode, d.range).range;
+		final range = getDiagnosticsArguments(params.textDocument.uri, RemovableCode, d.range) !.range;
 		if (range == null) {
 			return [];
 		}
@@ -429,7 +440,7 @@ class DiagnosticsFeature {
 			{
 				title: "Remove",
 				kind: QuickFix,
-				edit: WorkspaceEditHelper.create(context, params, [{range: range, newText: ""}]),
+				edit: WorkspaceEditHelper.create(context, params, @:nullSafety(Off) [{range: range, newText: ""}]),
 				diagnostics: [d],
 				isPreferred: true
 			}
@@ -456,6 +467,7 @@ class DiagnosticsFeature {
 		final unusedRanges:Array<Range> = removeUnusedFixes.map(edit -> edit.range);
 		final organizeFixes = removeUnusedFixes.concat(OrganizeImportsFeature.organizeImports(doc, context, unusedRanges));
 
+		@:nullSafety(Off) // ?
 		final diagnostics = existingActions.filter(action -> action.title == RemoveUnusedImportUsingTitle)
 			.map(action -> action.diagnostics)
 			.flatten()
@@ -486,8 +498,9 @@ class DiagnosticsFeature {
 		return actions;
 	}
 
-	inline function getDiagnosticsArguments<T>(uri:DocumentUri, kind:DiagnosticKind<T>, range:Range):T {
+	function getDiagnosticsArguments<T>(uri:DocumentUri, kind:DiagnosticKind<T>, range:Range):Null<T> {
 		final map = diagnosticsArguments[uri];
+		@:nullSafety(Off) // ?
 		return if (map == null) null else map.get({code: kind, range: range});
 	}
 }
