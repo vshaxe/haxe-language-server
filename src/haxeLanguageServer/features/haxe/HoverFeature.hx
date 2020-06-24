@@ -72,19 +72,13 @@ class HoverFeature {
 				final field = printer.printClassFieldDefinition(item.args, concreteType, item.kind == EnumAbstractField);
 				{
 					definition: printCodeBlock(field, Haxe),
-					origin: switch printer.printClassFieldOrigin(item.args.origin, item.kind) {
-						case Some(v): v;
-						case None: null;
-					}
+					origin: printer.printClassFieldOrigin(item.args.origin, item.kind)
 				}
 			case EnumField:
 				final field = printer.printEnumFieldDefinition(item.args.field, concreteType);
 				{
 					definition: printCodeBlock(field, Haxe),
-					origin: switch printer.printEnumFieldOrigin(item.args.origin) {
-						case Some(v): v;
-						case None: null;
-					}
+					origin: printer.printEnumFieldOrigin(item.args.origin)
 				}
 			case Metadata:
 				var name = item.args.name;

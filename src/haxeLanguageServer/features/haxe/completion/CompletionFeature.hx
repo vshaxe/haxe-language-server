@@ -3,7 +3,6 @@ package haxeLanguageServer.features.haxe.completion;
 import haxe.display.Display.CompletionParams as HaxeCompletionParams;
 import haxe.display.Display;
 import haxe.display.JsonModuleTypes;
-import haxe.ds.Option;
 import haxe.extern.EitherType;
 import haxeLanguageServer.helper.DocHelper;
 import haxeLanguageServer.helper.ImportHelper;
@@ -396,9 +395,10 @@ class CompletionFeature {
 					detail += ' (+$overloads overloads)';
 				}
 				final shadowed = if (!resolution.isQualified) " (shadowed)" else "";
-				switch printedOrigin {
-					case Some(v): detail + "\n" + v + shadowed;
-					case None: detail + "\n" + shadowed;
+				if (printedOrigin != null) {
+					detail + "\n" + printedOrigin + shadowed;
+				} else {
+					detail + "\n" + shadowed;
 				}
 			},
 			textEdit: {
@@ -427,7 +427,7 @@ class CompletionFeature {
 		return item;
 	}
 
-	function createOverrideCompletionItem<T>(item:DisplayItem<Dynamic>, data:CompletionContextData, printedOrigin:Option<String>):Null<CompletionItem> {
+	function createOverrideCompletionItem<T>(item:DisplayItem<Dynamic>, data:CompletionContextData, printedOrigin:Null<String>):Null<CompletionItem> {
 		final occurrence:ClassFieldOccurrence<T> = item.args;
 		final concreteType = item.type;
 		final field = occurrence.field;
@@ -454,10 +454,7 @@ class CompletionFeature {
 				range: data.replaceRange
 			},
 			insertTextFormat: Snippet,
-			detail: "Auto-generate override" + switch printedOrigin {
-				case Some(v): "\n" + v;
-				case None: "";
-			},
+			detail: "Auto-generate override" + (if (printedOrigin == null) "" else "\n" + printedOrigin),
 			documentation: {
 				kind: MarkDown,
 				value: DocHelper.printCodeBlock("override " + printer.printOverrideDefinition(field, concreteType, data.indent, false), Haxe)
@@ -510,13 +507,13 @@ class CompletionFeature {
 			label: name,
 			kind: EnumMember,
 			detail: {
-				var definition = printer.printEnumFieldDefinition(field, item.type);
+				final definition = printer.printEnumFieldDefinition(field, item.type);
 				final origin = printer.printEnumFieldOrigin(occurrence.origin, "'");
-				switch origin {
-					case Some(v): definition += "\n" + v;
-					case None:
+				if (origin != null) {
+					definition + "\n" + origin;
+				} else {
+					definition;
 				}
-				definition;
 			},
 			textEdit: {
 				newText: name,

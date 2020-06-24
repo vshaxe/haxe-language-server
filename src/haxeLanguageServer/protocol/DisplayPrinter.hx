@@ -2,7 +2,6 @@ package haxeLanguageServer.protocol;
 
 import haxe.display.Display;
 import haxe.display.JsonModuleTypes;
-import haxe.ds.Option;
 import haxeLanguageServer.Configuration.FunctionFormattingConfig;
 import haxeLanguageServer.helper.IdentifierHelper;
 
@@ -328,15 +327,15 @@ class DisplayPrinter {
 		return components.join(" ");
 	}
 
-	public function printClassFieldOrigin<T>(origin:Null<ClassFieldOrigin<T>>, kind:DisplayItemKind<Dynamic>, quote:String = ""):Option<String> {
+	public function printClassFieldOrigin<T>(origin:Null<ClassFieldOrigin<T>>, kind:DisplayItemKind<Dynamic>, quote:String = ""):Null<String> {
 		if (origin == null) {
-			return None;
+			return null;
 		}
 		if (kind == EnumAbstractField || origin.kind == cast Unknown) {
-			return None;
+			return null;
 		}
 		if (origin.args == null && origin.kind != cast BuiltIn) {
-			return None;
+			return null;
 		}
 		function printTypeKind(type:JsonModuleType<Dynamic>) {
 			return switch type.kind {
@@ -351,7 +350,7 @@ class DisplayPrinter {
 			final name = quote + (if (origin.isModuleLevel()) type.moduleName else type.name) + quote;
 			return kind + " " + name;
 		}
-		return Some("from " + @:nullSafety(Off) switch origin.kind {
+		return "from " + @:nullSafety(Off) switch origin.kind {
 			case Self:
 				printTypeInfo(origin.args);
 			case Parent:
@@ -366,19 +365,19 @@ class DisplayPrinter {
 				'compiler (built-in)';
 			case Unknown:
 				''; // already handled
-		});
+		}
 	}
 
-	public function printEnumFieldOrigin<T>(origin:Null<EnumFieldOrigin<T>>, quote:String = ""):Option<String> {
+	public function printEnumFieldOrigin<T>(origin:Null<EnumFieldOrigin<T>>, quote:String = ""):Null<String> {
 		if (origin == null || origin.args == null) {
-			return None;
+			return null;
 		}
-		return Some('from enum ' + switch origin.kind {
+		return 'from enum ' + switch origin.kind {
 			case Self:
 				'$quote${origin.args.name}$quote';
 			case StaticImport:
 				'$quote${origin.args.name}$quote (statically imported)';
-		});
+		}
 	}
 
 	public function printLocalOrigin(origin:LocalOrigin):String {
