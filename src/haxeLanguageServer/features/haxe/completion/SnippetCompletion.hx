@@ -4,6 +4,7 @@ import haxe.display.Display;
 import haxeLanguageServer.features.haxe.completion.CompletionFeature.CompletionItemOrigin;
 import haxeLanguageServer.helper.DocHelper;
 import haxeLanguageServer.helper.SemVer;
+import haxeLanguageServer.helper.Set;
 import haxeLanguageServer.helper.SnippetHelper;
 import haxeLanguageServer.tokentree.TokenContext;
 import js.lib.Promise;
@@ -25,28 +26,25 @@ class SnippetCompletion {
 		this.context = context;
 	}
 
-	public function createItems<T1, T2>(data:SnippetCompletionContextData, displayItems:Array<Null<DisplayItem<T1>>>):Promise<{
+	public function createItems<T1, T2>(data:SnippetCompletionContextData, displayItems:Array<DisplayItem<T1>>):Promise<{
 		items:Array<CompletionItem>,
-		displayItems:Array<Null<DisplayItem<T1>>>
+		itemsToIgnore:Set<DisplayItem<T1>>
 	}> {
 		final fsPath = data.doc.uri.toFsPath().toString();
 
 		final pos = data.params.position;
 		final isRestOfLineEmpty = data.doc.lineAt(pos.line).substr(pos.character).trim().length == 0;
 
-		for (i in 0...displayItems.length) {
-			final item = displayItems[i];
-			if (item == null) {
-				continue;
-			}
+		final itemsToIgnore = new Set<DisplayItem<T1>>();
+		for (item in displayItems) {
 			switch item.kind {
 				case Keyword:
 					final kwd:KeywordKind = item.args.name;
 					switch kwd {
 						case Class, Interface, Enum, Abstract, Typedef if (isRestOfLineEmpty):
-							displayItems[i] = null;
+							itemsToIgnore.add(item);
 						case Package, Var, Final, Function:
-							displayItems[i] = null;
+							itemsToIgnore.add(item);
 						case _:
 					}
 				case _:
@@ -55,7 +53,7 @@ class SnippetCompletion {
 
 		var items = [];
 		function result() {
-			return {items: items, displayItems: displayItems};
+			return {items: items, itemsToIgnore: itemsToIgnore};
 		}
 		inline function block(i:Int) {
 			return '{\n\t$$$i\n}';

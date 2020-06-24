@@ -7,6 +7,7 @@ import haxe.ds.Option;
 import haxe.extern.EitherType;
 import haxeLanguageServer.helper.DocHelper;
 import haxeLanguageServer.helper.ImportHelper;
+import haxeLanguageServer.helper.Set;
 import haxeLanguageServer.helper.TextEditCompletionItem;
 import haxeLanguageServer.helper.VscodeCommands;
 import haxeLanguageServer.protocol.CompilerMetadata;
@@ -71,10 +72,10 @@ class CompletionFeature {
 	function checkCapabilities() {
 		final completion = context.capabilities.textDocument!.completion;
 		contextSupport = completion!.contextSupport == true;
-		markdownSupport = completion!.completionItem!.documentationFormat.let(kinds -> kinds.contains(MarkDown)).or(false);
+		markdownSupport = completion!.completionItem!.documentationFormat.let(kinds -> kinds.contains(MarkDown)) == true;
 		snippetSupport = completion!.completionItem!.snippetSupport == true;
 		commitCharactersSupport = completion!.completionItem!.commitCharactersSupport == true;
-		deprecatedSupport = completion!.completionItem!.tagSupport!.valueSet.let(tags -> tags.contains(Deprecated)).or(false);
+		deprecatedSupport = completion!.completionItem!.tagSupport!.valueSet.let(tags -> tags.contains(Deprecated)) == true;
 	}
 
 	public function onCompletion(params:CompletionParams, token:CancellationToken, resolve:Null<EitherType<Array<CompletionItem>, CompletionList>>->Void,
@@ -147,9 +148,15 @@ class CompletionFeature {
 			|| data!.origin == Custom) {
 			return resolve(item);
 		}
+		final index = data!.index.sure();
 		previousCompletionData.isResolve = true;
-		context.callHaxeMethod(DisplayMethods.CompletionItemResolve, {index: data.index}, token, function(result) {
-			resolve(createCompletionItem(data.index, result.item, previousCompletionData));
+		context.callHaxeMethod(DisplayMethods.CompletionItemResolve, {index: index}, token, function(result) {
+			final resolvedItem = createCompletionItem(index, result.item, previousCompletionData.sure());
+			if (resolvedItem != null) {
+				resolve(resolvedItem);
+			} else {
+				reject(ResponseError.internalError("Unable to resolve completion item."));
+			}
 			return null;
 		}, reject.handler());
 	}
@@ -182,8 +189,35 @@ class CompletionFeature {
 			start: params.position.translate(0, -wordPattern.matched(0).length),
 			end: params.position
 		};
+
+		function createCompletionWithoutHaxeResponse() {
+			final keywords = createFieldKeywordItems(tokenContext, replaceRange, lineAfter);
+			if (snippetSupport) {
+				snippetCompletion.createItems({
+					doc: doc,
+					params: params,
+					replaceRange: replaceRange,
+					tokenContext: tokenContext
+				}, []).then(result -> {
+					resolve({
+						items: keywords.concat(result.items),
+						isIncomplete: false
+					});
+				});
+			} else {
+				resolve({
+					items: keywords,
+					isIncomplete: false
+				});
+			}
+		}
+
 		context.callHaxeMethod(DisplayMethods.Completion, haxeParams, token, function(result) {
-			final mode = if (result != null) result.mode.kind else null;
+			if (result == null) {
+				createCompletionWithoutHaxeResponse();
+				return null;
+			}
+			final mode = result.mode.kind;
 			if (mode != TypeHint && wasAutoTriggered && isAfterArrow(textBefore)) {
 				resolve({items: [], isIncomplete: false}); // avoid auto-popup after -> in arrow functions
 				return null;
@@ -192,13 +226,15 @@ class CompletionFeature {
 			final indent = doc.indentAt(params.position.line);
 			// the replaceRanges sent by Haxe are only trustworthy in some cases (https://github.com/HaxeFoundation/haxe/issues/8669)
 			if (mode == Metadata || mode == Toplevel || mode == TypeHint) {
-				if (result!.replaceRange != null) {
+				if (result.replaceRange != null) {
 					replaceRange = result.replaceRange;
 				}
 			}
+
+			final displayItems = result.items;
 			final data:CompletionContextData = {
 				replaceRange: replaceRange,
-				mode: if (result != null) result.mode else null,
+				mode: result.mode,
 				doc: doc,
 				indent: indent,
 				lineAfter: lineAfter,
@@ -207,18 +243,19 @@ class CompletionFeature {
 				tokenContext: tokenContext,
 				isResolve: false
 			};
-			var displayItems = if (result != null) result.items else [];
+
 			var items = [];
-			if (result != null) {
-				items = items.concat(postfixCompletion.createItems(data, displayItems));
-				items = items.concat(expectedTypeCompletion.createItems(data));
-			}
+			items = items.concat(postfixCompletion.createItems(data, displayItems));
+			items = items.concat(expectedTypeCompletion.createItems(data));
 			items = items.concat(createFieldKeywordItems(tokenContext, replaceRange, lineAfter));
 
-			function resolveItems() {
+			function resolveItems(itemsToIgnore:Set<DisplayItem<Dynamic>>) {
 				for (i in 0...displayItems.length) {
 					final displayItem = displayItems[i];
-					final index = if (displayItem!.index == null) i else displayItem.index;
+					if (itemsToIgnore.has(displayItem)) {
+						continue;
+					}
+					final index = if (displayItem.index == null) i else displayItem.index;
 					final completionItem = createCompletionItem(index, displayItem, data);
 					if (completionItem != null) {
 						items.push(completionItem);
@@ -227,33 +264,21 @@ class CompletionFeature {
 				items = items.filter(i -> i != null);
 				resolve({
 					items: items,
-					isIncomplete: if (result != null) result.isIncomplete else false
+					isIncomplete: result.isIncomplete == true
 				});
 			}
-			var displayItems:Array<Null<DisplayItem<Dynamic>>> = displayItems;
 			if (snippetSupport && mode != Import && mode != Field) {
 				snippetCompletion.createItems(data, displayItems).then(function(result) {
 					items = items.concat(result.items);
-					displayItems = result.displayItems;
-					resolveItems();
+					resolveItems(result.itemsToIgnore);
 				});
 			} else {
-				resolveItems();
+				resolveItems(new Set());
 			}
 			previousCompletionData = data;
 			return displayItems.length + " items";
 		}, function(error) {
-			if (snippetSupport) {
-				snippetCompletion.createItems({
-					doc: doc,
-					params: params,
-					replaceRange: replaceRange,
-					tokenContext: tokenContext
-				}, []).then(result -> {
-					final keywords = createFieldKeywordItems(tokenContext, replaceRange, lineAfter);
-					resolve({items: keywords.concat(result.items), isIncomplete: false});
-				});
-			}
+			createCompletionWithoutHaxeResponse();
 		});
 	}
 
@@ -288,10 +313,7 @@ class CompletionFeature {
 		return results;
 	}
 
-	function createCompletionItem<T>(index:Int, item:Null<DisplayItem<T>>, data:CompletionContextData):Null<CompletionItem> {
-		if (item == null) {
-			return null;
-		}
+	function createCompletionItem<T>(index:Int, item:DisplayItem<T>, data:CompletionContextData):Null<CompletionItem> {
 		final completionItem:CompletionItem = switch item.kind {
 			case ClassField | EnumAbstractField: createClassFieldCompletionItem(item, data);
 			case EnumField: createEnumFieldCompletionItem(item, data);
@@ -335,7 +357,7 @@ class CompletionFeature {
 		}
 
 		if (commitCharactersSupport) {
-			final mode = data.mode!.kind;
+			final mode = data.mode.kind;
 			if ((item.type != null && item.type.kind == TFun && mode != Pattern) || mode == New) {
 				completionItem.commitCharacters = ["("];
 			}
@@ -357,10 +379,10 @@ class CompletionFeature {
 		final resolution = occurrence.resolution;
 		final printedOrigin = printer.printClassFieldOrigin(occurrence.origin, item.kind, "'");
 
-		if (field.meta.hasMeta(NoCompletion)) {
+		if (concreteType == null || field.meta.hasMeta(NoCompletion)) {
 			return null;
 		}
-		if (data.mode!.kind == Override) {
+		if (data.mode.kind == Override) {
 			return createOverrideCompletionItem(item, data, printedOrigin);
 		}
 
@@ -382,7 +404,7 @@ class CompletionFeature {
 			textEdit: {
 				newText: {
 					final qualifier = if (resolution.isQualified) "" else resolution.qualifier + ".";
-					qualifier + switch data.mode!.kind {
+					qualifier + switch data.mode.kind {
 						case StructureField: maybeInsert(field.name, ": ", data.lineAfter);
 						case Pattern: maybeInsert(field.name, ":", data.lineAfter);
 						case _: field.name;
@@ -392,7 +414,7 @@ class CompletionFeature {
 			}
 		}
 
-		switch data.mode!.kind {
+		switch data.mode.kind {
 			case StructureField:
 				if (field.meta.hasMeta(Optional)) {
 					item.label = "?" + field.name;
@@ -477,7 +499,10 @@ class CompletionFeature {
 		}
 	}
 
-	function createEnumFieldCompletionItem<T>(item:DisplayItem<Dynamic>, data:CompletionContextData):CompletionItem {
+	function createEnumFieldCompletionItem<T>(item:DisplayItem<Dynamic>, data:CompletionContextData):Null<CompletionItem> {
+		if (item.type == null) {
+			return null;
+		}
 		final occurrence:EnumFieldOccurrence<T> = item.args;
 		final field:JsonEnumField = occurrence.field;
 		final name = field.name;
@@ -499,7 +524,7 @@ class CompletionFeature {
 			}
 		};
 
-		if (data.mode!.kind == Pattern) {
+		if (data.mode.kind == Pattern) {
 			var field = printer.printEnumField(field, item.type, true, false);
 			field = maybeInsertPatternColon(field, data);
 			result.textEdit.newText = field;
@@ -511,7 +536,8 @@ class CompletionFeature {
 	}
 
 	function createTypeCompletionItem(type:DisplayModuleType, data:CompletionContextData):Null<CompletionItem> {
-		final isImportCompletion = data.mode.kind == Import || data.mode.kind == Using;
+		final mode = data.mode;
+		final isImportCompletion = mode.kind == Import || mode.kind == Using;
 		final importConfig = context.config.user.codeGeneration.imports;
 		var autoImport = importConfig.enableAutoImports;
 		if (isImportCompletion || type.path.importStatus == Shadowed) {
@@ -636,7 +662,7 @@ class CompletionFeature {
 		if (data.mode.kind == TypeRelation || keyword.name == New || keyword.name == Inline) {
 			item.command = TriggerSuggest;
 		}
-		if (data.mode!.kind == TypeDeclaration) {
+		if (data.mode.kind == TypeDeclaration) {
 			switch keyword.name {
 				case Import | Using | Final | Extern | Private:
 					item.command = TriggerSuggest;
@@ -673,7 +699,7 @@ class CompletionFeature {
 
 	function createLocalCompletionItem<T>(item:DisplayItem<Dynamic>, data:CompletionContextData):Null<CompletionItem> {
 		final local:DisplayLocal<T> = item.args;
-		if (local.name == "_") {
+		if (item.type == null || local.name == "_") {
 			return null; // naming vars "_" is a common convention for ignoring them
 		}
 		return {
@@ -701,7 +727,10 @@ class CompletionFeature {
 		}
 	}
 
-	function createLiteralCompletionItem<T>(item:DisplayItem<Dynamic>, data:CompletionContextData):CompletionItem {
+	function createLiteralCompletionItem<T>(item:DisplayItem<Dynamic>, data:CompletionContextData):Null<CompletionItem> {
+		if (item.type == null) {
+			return null;
+		}
 		final literal:DisplayLiteral<T> = item.args;
 		final result:CompletionItem = {
 			label: literal.name,
@@ -724,7 +753,7 @@ class CompletionFeature {
 	}
 
 	function maybeInsertPatternColon(text:String, data:CompletionContextData):String {
-		final info:Null<PatternCompletion<Dynamic>> = data.mode!.args;
+		final info:Null<PatternCompletion<Dynamic>> = data.mode.args;
 		if (info == null || info.isOutermostPattern) {
 			return maybeInsert(text, ":", data.lineAfter);
 		}
