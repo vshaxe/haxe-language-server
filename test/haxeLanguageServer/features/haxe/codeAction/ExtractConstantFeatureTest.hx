@@ -21,9 +21,9 @@ class ExtractConstantFeatureTest extends Test implements IExtractConstantFeature
 	function makeEdits(content:String, fileName:String, range:Range):Array<TextEdit> {
 		final context = new TestContext(new Protocol(null));
 		final uri = new DocumentUri("file://" + fileName + ".edittest");
-		final doc = new HaxeDocument(context, uri, "haxe", 4, content);
+		final doc = new HaxeDocument(uri, "haxe", 4, content);
 
-		final extractConst:ExtractConstantFeature = new ExtractConstantFeature(context);
+		final extractConst = new ExtractConstantFeature(context);
 
 		final actions:Array<CodeAction> = extractConst.internalExtractConstant(doc, uri, range);
 		Assert.equals(1, actions.length);

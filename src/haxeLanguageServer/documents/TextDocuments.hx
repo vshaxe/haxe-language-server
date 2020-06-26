@@ -4,13 +4,9 @@ package haxeLanguageServer.documents;
 class TextDocuments {
 	public static inline final syncKind = TextDocumentSyncKind.Incremental;
 
-	final context:Context;
-	final documents:Map<DocumentUri, TextDocument>;
+	final documents = new Map<DocumentUri, TextDocument>();
 
-	public function new(context:Context) {
-		this.context = context;
-		documents = new Map();
-	}
+	public function new() {}
 
 	public inline function iterator():Iterator<TextDocument> {
 		return documents.iterator();
@@ -28,9 +24,9 @@ class TextDocuments {
 		final td = event.textDocument;
 		final uri = td.uri;
 		if (uri.isHaxeFile()) {
-			documents[td.uri] = new HaxeDocument(context, td.uri, td.languageId, td.version, td.text);
+			documents[td.uri] = new HaxeDocument(td.uri, td.languageId, td.version, td.text);
 		} else if (uri.isHxmlFile()) {
-			documents[td.uri] = new HxmlDocument(context, td.uri, td.languageId, td.version, td.text);
+			documents[td.uri] = new HxmlDocument(td.uri, td.languageId, td.version, td.text);
 		} else {
 			throw uri + " has unsupported file type (must be .hx or .hxml)";
 		}

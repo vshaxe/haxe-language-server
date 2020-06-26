@@ -53,14 +53,10 @@ class HaxeDocument extends TextDocument {
 
 	function get_tokens() {
 		if (_tokens == null) {
-			final stopTimer = if (context != null) context.startTimer("TokenTreeManager.create()") else null;
 			try {
 				_tokens = TokenTreeManager.create(content);
 			} catch (e) {
 				trace('$uri: $e');
-			}
-			if (stopTimer != null) {
-				stopTimer();
 			}
 		}
 		return _tokens;

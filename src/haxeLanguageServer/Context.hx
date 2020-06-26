@@ -67,7 +67,7 @@ class Context {
 		this.languageServerProtocol = languageServerProtocol;
 		haxeDisplayProtocol = new Protocol(@:nullSafety(Off) writeMessage);
 		haxeServer = @:nullSafety(Off) new HaxeServer(this);
-		documents = @:nullSafety(Off) new TextDocuments(this);
+		documents = new TextDocuments();
 		config = new Configuration(languageServerProtocol, kind -> restartServer('$kind configuration was changed'));
 
 		languageServerProtocol.onRequest(InitializeRequest.type, onInitialize);

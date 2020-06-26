@@ -12,13 +12,10 @@ class TextDocument {
 	public var content:String;
 	public var lineCount(get, never):Int;
 
-	final context:Null<Context>;
-
 	var lineOffsets:Null<Array<Int>>;
 	var onUpdateListeners:Array<OnTextDocumentChangeListener> = [];
 
-	public function new(?context:Context, uri:DocumentUri, languageId:String, version:Int, content:String) {
-		this.context = context;
+	public function new(uri:DocumentUri, languageId:String, version:Int, content:String) {
 		this.uri = uri;
 		this.languageId = languageId;
 		this.openTimestamp = Timer.stamp();

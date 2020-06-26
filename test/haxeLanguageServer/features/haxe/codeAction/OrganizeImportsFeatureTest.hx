@@ -26,7 +26,7 @@ class OrganizeImportsFeatureTest extends Test implements IOrganizeImportsFeature
 		final settings = Reflect.copy(Configuration.DefaultUserSettings);
 		settings.importsSortOrder = importsSortOrder;
 		context.config.user = settings;
-		final doc = new HaxeDocument(context, new DocumentUri("file://" + fileName + ".edittest"), "haxe", 4, content);
+		final doc = new HaxeDocument(new DocumentUri("file://" + fileName + ".edittest"), "haxe", 4, content);
 		return OrganizeImportsFeature.organizeImports(doc, context, []);
 	}
 } 
