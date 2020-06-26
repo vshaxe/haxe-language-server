@@ -79,7 +79,7 @@ class LanguageServerMethods {
 typedef MethodResult = {
 	final kind:MethodResultKind;
 	final method:String;
-	final debugInfo:String;
+	final debugInfo:Null<String>;
 	final response:Response<Dynamic>;
 	final ?additionalTimes:AdditionalTimes;
 }

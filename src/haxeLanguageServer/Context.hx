@@ -49,57 +49,26 @@ class Context {
 	public final languageServerProtocol:Protocol;
 	public final haxeDisplayProtocol:Protocol;
 
-	public var haxeServer(default, null):HaxeServer;
-	public var workspacePath(default, null):FsPath;
-	public var capabilities(default, null):ClientCapabilities;
 	public var documents(default, null):TextDocuments;
-	public var displayOffsetConverter(default, null):DisplayOffsetConverter;
-	public var gotoDefinition(default, null):GotoDefinitionFeature;
-	public var determinePackage(default, null):DeterminePackageFeature;
+	@:nullSafety(Off) public var haxeServer:HaxeServer;
+	@:nullSafety(Off) public var workspacePath(default, null):FsPath;
+	@:nullSafety(Off) public var capabilities(default, null):ClientCapabilities;
+	@:nullSafety(Off) public var displayOffsetConverter(default, null):DisplayOffsetConverter;
+	@:nullSafety(Off) public var gotoDefinition(default, null):GotoDefinitionFeature;
+	@:nullSafety(Off) public var determinePackage(default, null):DeterminePackageFeature;
 
-	var diagnostics:DiagnosticsFeature;
-	var codeActions:CodeActionFeature;
-	var activeEditor:DocumentUri;
+	@:nullSafety(Off) var diagnostics:DiagnosticsFeature;
+	@:nullSafety(Off) var codeActions:CodeActionFeature;
+	var activeEditor:Null<DocumentUri>;
 	var initialized = false;
 	var progressId = 0;
 
 	public function new(languageServerProtocol) {
-		config = new Configuration(languageServerProtocol, kind -> restartServer('$kind configuration was changed'));
 		this.languageServerProtocol = languageServerProtocol;
-
-		haxeDisplayProtocol = new Protocol((message, token) -> {
-			final method:String = Reflect.field(message, "method");
-			if (method == CancelNotification.type) {
-				return; // don't send cancel notifications, not supported by Haxe
-			}
-			final includeDisplayArguments = method.startsWith("display/") || method == ServerMethods.ReadClassPaths;
-			callDisplay(method, [Json.stringify(message)], token, function(result:DisplayResult) {
-				switch result {
-					case DResult(msg):
-						haxeDisplayProtocol.handleMessage(Json.parse(msg));
-					case DCancelled:
-				}
-			}, function(error) {
-				haxeDisplayProtocol.handleMessage(try {
-					Json.parse(error);
-				} catch (_:Any) {
-					// pretend we got a proper JSON (HaxeFoundation/haxe#7955)
-					final message:ResponseMessage = {
-						jsonrpc: Protocol.PROTOCOL_VERSION,
-						id: @:privateAccess haxeDisplayProtocol.nextRequestId - 1, // ew..
-						error: new ResponseError(ResponseError.InternalError, "Compiler error", ([
-							{
-								severity: Error,
-								message: error
-							}
-						] : HaxeResponseErrorData))
-					}
-					message;
-				});
-			}, includeDisplayArguments);
-		});
-
-		haxeServer = new HaxeServer(this);
+		haxeDisplayProtocol = new Protocol(@:nullSafety(Off) writeMessage);
+		haxeServer = @:nullSafety(Off) new HaxeServer(this);
+		documents = @:nullSafety(Off) new TextDocuments(this);
+		config = new Configuration(languageServerProtocol, kind -> restartServer('$kind configuration was changed'));
 
 		languageServerProtocol.onRequest(InitializeRequest.type, onInitialize);
 		languageServerProtocol.onRequest(ShutdownRequest.type, onShutdown);
@@ -112,6 +81,38 @@ class Context {
 
 		languageServerProtocol.onNotification(LanguageServerMethods.DidChangeActiveTextEditor, onDidChangeActiveTextEditor);
 		languageServerProtocol.onRequest(LanguageServerMethods.RunMethod, runMethod);
+	}
+
+	function writeMessage(message:Message, token:Null<CancellationToken>) {
+		final method:String = Reflect.field(message, "method");
+		if (method == CancelNotification.type) {
+			return; // don't send cancel notifications, not supported by Haxe
+		}
+		final includeDisplayArguments = method.startsWith("display/") || method == ServerMethods.ReadClassPaths;
+		callDisplay(method, [Json.stringify(message)], token, function(result:DisplayResult) {
+			switch result {
+				case DResult(msg):
+					haxeDisplayProtocol.handleMessage(Json.parse(msg));
+				case DCancelled:
+			}
+		}, function(error) {
+			haxeDisplayProtocol.handleMessage(try {
+				Json.parse(error);
+			} catch (_:Any) {
+				// pretend we got a proper JSON (HaxeFoundation/haxe#7955)
+				final message:ResponseMessage = {
+					jsonrpc: Protocol.PROTOCOL_VERSION,
+					id: @:privateAccess haxeDisplayProtocol.nextRequestId - 1, // ew..
+					error: new ResponseError(ResponseError.InternalError, "Compiler error", ([
+						{
+							severity: Error,
+							message: error
+						}
+					] : HaxeResponseErrorData))
+				}
+				message;
+			});
+		}, includeDisplayArguments);
 	}
 
 	public function startProgress(title:String):() -> Void {
@@ -141,7 +142,6 @@ class Context {
 		capabilities = params.capabilities;
 		config.onInitialize(params);
 
-		documents = new TextDocuments(this);
 		new DocumentSymbolsFeature(this);
 		new FoldingRangeFeature(this);
 		new DocumentFormattingFeature(this);
@@ -256,16 +256,15 @@ class Context {
 		languageServerProtocol.sendRequest(RegistrationRequest.type, {registrations: registrations}, null, _ -> {}, error -> trace(error));
 	}
 
+	@:nullSafety(Off)
 	function onShutdown(_, _, resolve:NoData->Void, _) {
 		haxeServer.stop();
-		haxeServer = null;
 		return resolve(null);
 	}
 
 	function onExit(_) {
 		if (haxeServer != null) {
 			haxeServer.stop();
-			haxeServer = null;
 			process.exit(1);
 		} else {
 			process.exit(0);
@@ -424,7 +423,7 @@ class Context {
 		}
 	}
 
-	function runMethod(params:{method:String, params:Any}, token:CancellationToken, resolve:Dynamic->Void, reject:ResponseError<NoData>->Void) {
+	function runMethod(params:{method:String, ?params:Any}, ?token:CancellationToken, resolve:Dynamic->Void, reject:ResponseError<NoData>->Void) {
 		callHaxeMethod(cast params.method, params.params, token, function(response) {
 			resolve(response);
 			return null;
@@ -467,8 +466,7 @@ class Context {
 			};
 			languageServerProtocol.sendNotification(LanguageServerMethods.DidRunMethod, methodResult);
 		}, function(error:ResponseErrorData) {
-			final data:HaxeResponseErrorData = error.data;
-			errback(data[0].message);
+			errback(if (error.data != null) error.data[0].message else "unknown error");
 		});
 	}
 

@@ -31,7 +31,8 @@
 				},
 				"macros": [
 					"haxeLanguageServer.Init.run()",
-					"Safety.safeNavigation('haxeLanguageServer')"
+					"Safety.safeNavigation('haxeLanguageServer')",
+					"nullSafety('haxeLanguageServer')"
 				],
 				"deadCodeElimination": "full",
 				"main": "haxeLanguageServer.Main"

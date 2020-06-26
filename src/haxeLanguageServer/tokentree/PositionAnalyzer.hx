@@ -72,7 +72,7 @@ class PositionAnalyzer {
 		var hasBlockParent = false;
 
 		var parent = token.access();
-		while (parent.exists() && parent.token.tok != null) {
+		while (parent.exists() && parent.token != null) {
 			switch parent.token.tok {
 				case BrOpen if (TokenTreeCheckUtils.getBrOpenType(parent.token) == BLOCK):
 					hasBlockParent = true;
