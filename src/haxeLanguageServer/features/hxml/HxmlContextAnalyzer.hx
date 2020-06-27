@@ -16,6 +16,8 @@ enum HxmlElement {
 	EnumValue(?value:EnumValue, values:EnumValues);
 	Define(?define:Define);
 	DefineValue(?define:Define, value:String);
+	File(?path:String);
+	Directory(?path:String);
 	Unknown;
 }
 
@@ -52,6 +54,8 @@ function analyzeHxmlContext(line:String, pos:Position):HxmlContext {
 								}
 							case _: Unknown;
 						}
+					case File: File(arg);
+					case Directory: Directory(arg);
 				}
 			case _:
 				Unknown; // no completion after the first argument

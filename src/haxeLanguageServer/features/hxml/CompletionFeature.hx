@@ -1,13 +1,16 @@
 package haxeLanguageServer.features.hxml;
 
+import haxe.io.Path;
 import haxeLanguageServer.features.hxml.HxmlContextAnalyzer;
 import haxeLanguageServer.features.hxml.data.Defines;
 import haxeLanguageServer.features.hxml.data.Flags;
+import haxeLanguageServer.features.hxml.data.Shared;
 import haxeLanguageServer.helper.TextEditCompletionItem;
 import haxeLanguageServer.helper.VscodeCommands;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
+import sys.FileSystem;
 
 using Lambda;
 
@@ -33,25 +36,11 @@ class CompletionFeature {
 			isIncomplete: false,
 			items: switch hxmlContext.element {
 				case Flag(_): createFlagCompletion(hxmlContext.range, textAfter);
-				case EnumValue(_, values):
-					final items:Array<CompletionItem> = [
-						for (value in values)
-							{
-								label: value.name,
-								kind: EnumMember,
-								documentation: value.description
-							}
-					];
-					items[0].preselect = true;
-					items;
+				case EnumValue(_, values): createEnumValueCompletion(values);
 				case Define(): createDefineCompletion();
-				case DefineValue(define, value):
-					[
-						{
-							label: "value"
-						}
-					];
-				case Unknown: [];
+				case File(path): createFilePathCompletion(hxmlContext.range, path, true);
+				case Directory(path): createFilePathCompletion(hxmlContext.range, path, false);
+				case DefineValue(_) | Unknown: [];
 			}
 		});
 	}
@@ -101,6 +90,19 @@ class CompletionFeature {
 		return items;
 	}
 
+	function createEnumValueCompletion(values:EnumValues):Array<CompletionItem> {
+		final items:Array<CompletionItem> = [
+			for (value in values)
+				{
+					label: value.name,
+					kind: EnumMember,
+					documentation: value.description
+				}
+		];
+		items[0].preselect = true;
+		return items;
+	}
+
 	function createDefineCompletion():Array<CompletionItem> {
 		final haxeVersion = context.haxeServer.haxeVersion;
 		return getDefines(false).map(define -> {
@@ -121,5 +123,44 @@ class CompletionFeature {
 			}
 			return item;
 		});
+	}
+
+	final IgnoredFiles:ReadOnlyArray<String> = ["haxe_libraries", "node_modules", "dump"];
+
+	function createFilePathCompletion(range:Range, path:Null<String>, includeFiles:Bool):Array<CompletionItem> {
+		if (path == null) {
+			path = "";
+		}
+		function isValidDirectory(path) {
+			return FileSystem.exists(path) && FileSystem.isDirectory(path);
+		}
+		var directory = if ((path.endsWith("/") || path.endsWith("\\")) && isValidDirectory(path)) path else Path.directory(path);
+		if (directory.trim() == "") {
+			directory = ".";
+		}
+		if (!isValidDirectory(directory)) {
+			return [];
+		}
+		final items = new Array<CompletionItem>();
+		for (file in FileSystem.readDirectory(directory)) {
+			if (file.startsWith(".") || file.startsWith("$") || IgnoredFiles.contains(file)) {
+				continue;
+			}
+			final fullPath = Path.join([directory, file]);
+			final isDirectory = FileSystem.isDirectory(fullPath);
+			if (!includeFiles && !isDirectory) {
+				continue;
+			}
+			final item:CompletionItem = {
+				label: file,
+				kind: if (isDirectory) Folder else File
+			}
+			if (isDirectory && includeFiles) {
+				item.insertText = file + "/";
+				item.command = TriggerSuggest;
+			}
+			items.push(item);
+		}
+		return items;
 	}
 }

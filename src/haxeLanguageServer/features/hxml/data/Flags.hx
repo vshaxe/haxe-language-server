@@ -19,6 +19,8 @@ typedef Flag = {
 enum ArgumentKind {
 	Enum(values:EnumValues);
 	Define;
+	File;
+	Directory;
 }
 
 enum Category {
@@ -41,7 +43,8 @@ final HxmlFlags = {
 				deprecatedNames: ["-js"],
 				argument: {
 					name: "<file>",
-					insertion: "bin/${1:main}.js"
+					insertion: "bin/${1:main}.js",
+					kind: File
 				},
 				description: "generate JavaScript code into target file"
 			},
@@ -50,7 +53,8 @@ final HxmlFlags = {
 				deprecatedNames: ["-lua"],
 				argument: {
 					name: "<file>",
-					insertion: "bin/${1:main}.lua"
+					insertion: "bin/${1:main}.lua",
+					kind: File
 				},
 				description: "generate Lua code into target file"
 			},
@@ -59,7 +63,8 @@ final HxmlFlags = {
 				deprecatedNames: ["-swf"],
 				argument: {
 					name: "<file>",
-					insertion: "bin/${1:main}.swf"
+					insertion: "bin/${1:main}.swf",
+					kind: File
 				},
 				description: "generate Flash SWF bytecode into target file"
 			},
@@ -68,7 +73,8 @@ final HxmlFlags = {
 				deprecatedNames: ["-neko"],
 				argument: {
 					name: "<file>",
-					insertion: "bin/${1:main}.n"
+					insertion: "bin/${1:main}.n",
+					kind: File
 				},
 				description: "generate Neko bytecode into target file"
 			},
@@ -77,7 +83,8 @@ final HxmlFlags = {
 				deprecatedNames: ["-php"],
 				argument: {
 					name: "<directory>",
-					insertion: "bin/php"
+					insertion: "bin/php",
+					kind: Directory
 				},
 				description: "generate PHP code into target directory"
 			},
@@ -86,7 +93,8 @@ final HxmlFlags = {
 				deprecatedNames: ["-cpp"],
 				argument: {
 					name: "<directory>",
-					insertion: "bin/cpp"
+					insertion: "bin/cpp",
+					kind: Directory
 				},
 				description: "generate C++ code into target directory"
 			},
@@ -95,7 +103,8 @@ final HxmlFlags = {
 				deprecatedNames: ["-cppia"],
 				argument: {
 					name: "<file>",
-					insertion: "bin/${1:main}.cppia"
+					insertion: "bin/${1:main}.cppia",
+					kind: File
 				},
 				description: "generate Cppia bytecode into target file"
 			},
@@ -104,7 +113,8 @@ final HxmlFlags = {
 				deprecatedNames: ["-cs"],
 				argument: {
 					name: "<directory>",
-					insertion: "bin/cs"
+					insertion: "bin/cs",
+					kind: Directory
 				},
 				description: "generate C# code into target directory"
 			},
@@ -113,7 +123,8 @@ final HxmlFlags = {
 				deprecatedNames: ["-java"],
 				argument: {
 					name: "<directory>",
-					insertion: "bin/java"
+					insertion: "bin/java",
+					kind: Directory
 				},
 				description: "generate Java code into target directory"
 			},
@@ -122,7 +133,8 @@ final HxmlFlags = {
 				deprecatedNames: ["-jvm"],
 				argument: {
 					name: "<file>",
-					insertion: "bin/${1:main}.jar"
+					insertion: "bin/${1:main}.jar",
+					kind: File
 				},
 				description: "generate JVM bytecode into target file"
 			},
@@ -131,7 +143,8 @@ final HxmlFlags = {
 				deprecatedNames: ["-python"],
 				argument: {
 					name: "<file>",
-					insertion: "bin/${1:main}.py"
+					insertion: "bin/${1:main}.py",
+					kind: File
 				},
 				description: "generate Python code into target file"
 			},
@@ -140,7 +153,8 @@ final HxmlFlags = {
 				deprecatedNames: ["-hl"],
 				argument: {
 					name: "<file>",
-					insertion: "bin/${1:main}.hl"
+					insertion: "bin/${1:main}.hl",
+					kind: File
 				},
 				description: "generate HashLink `.hl` bytecode or `.c` code into target file"
 			},
@@ -165,7 +179,8 @@ final HxmlFlags = {
 				shortName: "-p",
 				deprecatedNames: ["-cp"],
 				argument: {
-					name: "<path>"
+					name: "<path>",
+					kind: Directory
 				},
 				description: "add a directory to find source files"
 			},
@@ -203,7 +218,8 @@ final HxmlFlags = {
 				shortName: "-r",
 				deprecatedNames: ["-resource"],
 				argument: {
-					name: "<file>[@name]"
+					name: "<file>[@name]",
+					kind: File
 				},
 				description: "define a conditional compilation flag"
 			},
@@ -236,7 +252,8 @@ final HxmlFlags = {
 				name: "--cwd",
 				shortName: "-C",
 				argument: {
-					name: "<directory>"
+					name: "<directory>",
+					kind: Directory
 				},
 				description: "set current working directory"
 			},
@@ -306,7 +323,8 @@ final HxmlFlags = {
 				deprecatedNames: ["-xml"],
 				argument: {
 					name: "<file>",
-					insertion: "bin/${1:types}.xml"
+					insertion: "bin/${1:types}.xml",
+					kind: File
 				},
 				description: "generate XML types description"
 			},
@@ -314,7 +332,8 @@ final HxmlFlags = {
 				name: "--json",
 				argument: {
 					name: "<file>",
-					insertion: "bin/${1:types}.json"
+					insertion: "bin/${1:types}.json",
+					kind: File
 				},
 				description: "generate JSON types description"
 			}
@@ -360,42 +379,48 @@ final HxmlFlags = {
 			{
 				name: "--swf-lib",
 				argument: {
-					name: "<file>"
+					name: "<file>",
+					kind: File
 				},
 				description: "add the SWF library to the compiled SWF"
 			},
 			{
 				name: "--swf-lib-extern",
 				argument: {
-					name: "<file>"
+					name: "<file>",
+					kind: File
 				},
 				description: "use the SWF library for type checking"
 			},
 			{
 				name: "--java-lib",
 				argument: {
-					name: "<file>"
+					name: "<file>",
+					kind: File
 				},
 				description: "add an external JAR or directory of JAR files"
 			},
 			{
 				name: "--java-lib-extern",
 				argument: {
-					name: "<file>"
+					name: "<file>",
+					kind: File
 				},
 				description: "use an external JAR or directory of JAR files for type checking"
 			},
 			{
 				name: "--net-lib",
 				argument: {
-					name: "<file>[@std]"
+					name: "<file>[@std]",
+					kind: File
 				},
 				description: "add an external .NET DLL file"
 			},
 			{
 				name: "--net-std",
 				argument: {
-					name: "<file>"
+					name: "<file>",
+					kind: File
 				},
 				description: "add a root std .NET DLL search path"
 			},
