@@ -61,11 +61,11 @@ class WorkspaceSymbolsFeature {
 		return result;
 	}
 
-	function makeRequest(label:String, args:Array<String>, doc:Null<TextDocument>, token:CancellationToken, resolve:Array<SymbolInformation>->Void,
+	function makeRequest(label:String, args:Array<String>, doc:Null<TextDocument>, token:Null<CancellationToken>, resolve:Array<SymbolInformation>->Void,
 			reject:ResponseError<NoData>->Void) {
 		final onResolve = context.startTimer("@workspace-symbols");
-		context.callDisplay(label, args, doc == null ? null : doc.content, token, function(r) {
-			switch r {
+		context.callDisplay(label, args, doc!.content, token, function(result) {
+			switch result {
 				case DCancelled:
 					resolve([]);
 				case DResult(data):
@@ -82,7 +82,7 @@ class WorkspaceSymbolsFeature {
 		}, reject.handler());
 	}
 
-	function onWorkspaceSymbols(params:WorkspaceSymbolParams, token:CancellationToken, resolve:Array<SymbolInformation>->Void,
+	public function onWorkspaceSymbols(params:WorkspaceSymbolParams, token:Null<CancellationToken>, resolve:Array<SymbolInformation>->Void,
 			reject:ResponseError<NoData>->Void) {
 		final args = ["?@0@workspace-symbols@" + params.query];
 		makeRequest("@workspace-symbols", args, null, token, resolve, reject);

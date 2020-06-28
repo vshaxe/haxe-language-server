@@ -21,6 +21,7 @@ enum ArgumentKind {
 	Define;
 	File;
 	Directory;
+	EntryPoint;
 }
 
 enum Category {
@@ -167,7 +168,7 @@ final HxmlFlags = {
 				name: "--run",
 				argument: {
 					name: "<module> [args...]",
-					insertion: "Main"
+					kind: EntryPoint
 				},
 				description: "interpret a Haxe module with command line arguments"
 			}
@@ -190,7 +191,7 @@ final HxmlFlags = {
 				deprecatedNames: ["-main"],
 				argument: {
 					name: "<class>",
-					insertion: "Main"
+					kind: EntryPoint
 				},
 				description: "select startup class"
 			},

@@ -56,6 +56,7 @@ class Context {
 	@:nullSafety(Off) public var displayOffsetConverter(default, null):DisplayOffsetConverter;
 	@:nullSafety(Off) public var gotoDefinition(default, null):GotoDefinitionFeature;
 	@:nullSafety(Off) public var determinePackage(default, null):DeterminePackageFeature;
+	@:nullSafety(Off) public var workspaceSymbols(default, null):WorkspaceSymbolsFeature;
 
 	@:nullSafety(Off) var diagnostics:DiagnosticsFeature;
 	@:nullSafety(Off) var codeActions:CodeActionFeature;
@@ -327,7 +328,7 @@ class Context {
 				diagnostics = new DiagnosticsFeature(this);
 				new CodeLensFeature(this);
 				new CodeGenerationFeature(this);
-				new WorkspaceSymbolsFeature(this);
+				workspaceSymbols = new WorkspaceSymbolsFeature(this);
 				new ExtractTypeFeature(this);
 				new ExtractConstantFeature(this);
 				new ExtractFunctionFeature(this);
