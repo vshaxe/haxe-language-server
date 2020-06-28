@@ -56,7 +56,7 @@ class LanguageServerMethods {
 	static inline final DidChangeRequestQueue = new NotificationType<{queue:Array<String>}>("haxe/didChangeRequestQueue");
 
 	/**
-		This notification is sent from the client to the server to instruct a specific Haxe JSON-RPC method to be executed.
+		This request is sent from the client to the server to instruct a specific Haxe JSON-RPC method to be executed.
 	**/
 	static inline final RunMethod = new RequestType<{method:String, ?params:Dynamic}, Dynamic, NoData>("haxe/runMethod");
 
@@ -74,6 +74,11 @@ class LanguageServerMethods {
 		This notification is sent from the server to the client to indicate that an old Haxe version is being used.
 	**/
 	static inline final DidDetectOldHaxeVersion = new NotificationType<{haxe4Preview:Bool, version:String}>("haxe/didDetectOldHaxeVersion");
+
+	/**
+		This request is sent from the server to the client to get a list of available libraries.
+	**/
+	static inline final ListLibraries = new RequestType<Null<NoData>, Array<{name:String}>, NoData>("haxe/listLibraries");
 }
 
 typedef MethodResult = {

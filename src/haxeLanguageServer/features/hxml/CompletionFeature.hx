@@ -32,17 +32,29 @@ class CompletionFeature {
 		final textBefore = line.substr(0, pos.character);
 		final textAfter = line.substr(pos.character);
 		final hxmlContext = analyzeHxmlContext(textBefore, pos);
-		resolve({
-			isIncomplete: false,
-			items: switch hxmlContext.element {
-				case Flag(_): createFlagCompletion(hxmlContext.range, textAfter);
-				case EnumValue(_, values): createEnumValueCompletion(values);
-				case Define(): createDefineCompletion();
-				case File(path): createFilePathCompletion(hxmlContext.range, path, true);
-				case Directory(path): createFilePathCompletion(hxmlContext.range, path, false);
-				case DefineValue(_) | Unknown: [];
-			}
-		});
+
+		function resolveItems(items) {
+			resolve({
+				isIncomplete: false,
+				items: items
+			});
+		}
+		switch hxmlContext.element {
+			case Flag(_):
+				resolveItems(createFlagCompletion(hxmlContext.range, textAfter));
+			case EnumValue(_, values):
+				resolveItems(createEnumValueCompletion(values));
+			case Define():
+				resolveItems(createDefineCompletion());
+			case File(path):
+				resolveItems(createFilePathCompletion(hxmlContext.range, path, true));
+			case Directory(path):
+				resolveItems(createFilePathCompletion(hxmlContext.range, path, false));
+			case LibraryName(_):
+				createLibraryNameCompletion(resolve, reject);
+			case DefineValue(_) | Unknown:
+				[];
+		}
 	}
 
 	function createFlagCompletion(range:Range, textAfter:String):Array<CompletionItem> {
@@ -162,5 +174,19 @@ class CompletionFeature {
 			items.push(item);
 		}
 		return items;
+	}
+
+	function createLibraryNameCompletion(resolve:CompletionList->Void, reject:ResponseError<NoData>->Void) {
+		context.languageServerProtocol.sendRequest(LanguageServerMethods.ListLibraries, null, null, function(libraries) {
+			resolve({
+				isIncomplete: false,
+				items: libraries.map(lib -> ({
+					label: lib.name,
+					kind: Folder
+				} : CompletionItem))
+			});
+		}, function(_) {
+			reject(ResponseError.internalError("unable to retrieve library names"));
+		});
 	}
 }

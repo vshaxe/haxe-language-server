@@ -21,6 +21,7 @@ enum ArgumentKind {
 	Define;
 	File;
 	Directory;
+	LibraryName;
 }
 
 enum Category {
@@ -200,7 +201,7 @@ final HxmlFlags = {
 				deprecatedNames: ["-lib"],
 				argument: {
 					name: "<name[:ver]>",
-					insertion: "name"
+					kind: LibraryName
 				},
 				description: "use a haxelib library"
 			},
