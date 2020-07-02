@@ -108,6 +108,12 @@ private final DefineVersions:Map<String, VersionInfo> = {
 		},
 		"JarLegacyLoader" => {
 			since: v4_2_0
+		},
+		"NoCOpt" => {
+			until: v4_1_0
+		},
+		"OldConstructorInline" => {
+			until: v4_1_0
 		}
 	];
 }
