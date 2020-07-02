@@ -9,6 +9,7 @@ enum abstract DotPath(String) {
 	final Bool = "StdTypes.Bool";
 	final Int = "StdTypes.Int";
 	final Float = "StdTypes.Float";
+	final Null = "StdTypes.Null";
 	final UInt;
 	final String;
 	final EitherType = "haxe.extern.EitherType";
@@ -16,7 +17,6 @@ enum abstract DotPath(String) {
 	final Map = "haxe.ds.Map";
 	final ReadOnlyArray = "haxe.ds.ReadOnlyArray";
 	final EReg;
-	final Null;
 	final Dynamic;
 	function new(dotPath) {
 		this = dotPath;
