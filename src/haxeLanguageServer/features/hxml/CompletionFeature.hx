@@ -39,19 +39,20 @@ class CompletionFeature {
 				items: items
 			});
 		}
+		final range = hxmlContext.range;
 		switch hxmlContext.element {
 			case Flag(_):
-				resolveItems(createFlagCompletion(hxmlContext.range, textAfter));
+				resolveItems(createFlagCompletion(range, textAfter));
 			case EnumValue(_, values):
-				resolveItems(createEnumValueCompletion(values));
+				resolveItems(createEnumValueCompletion(range, values));
 			case Define():
-				resolveItems(createDefineCompletion());
+				resolveItems(createDefineCompletion(range));
 			case File(path):
-				resolveItems(createFilePathCompletion(hxmlContext.range, path, true));
+				resolveItems(createFilePathCompletion(range, path, true));
 			case Directory(path):
-				resolveItems(createFilePathCompletion(hxmlContext.range, path, false));
+				resolveItems(createFilePathCompletion(range, path, false));
 			case LibraryName(_):
-				createLibraryNameCompletion(resolve, reject);
+				createLibraryNameCompletion(range, resolve, reject);
 			case DefineValue(_) | Unknown:
 				[];
 		}
@@ -102,12 +103,16 @@ class CompletionFeature {
 		return items;
 	}
 
-	function createEnumValueCompletion(values:EnumValues):Array<CompletionItem> {
+	function createEnumValueCompletion(range, values:EnumValues):Array<CompletionItem> {
 		final items:Array<CompletionItem> = [
 			for (value in values)
 				{
 					label: value.name,
 					kind: EnumMember,
+					textEdit: {
+						range: range,
+						newText: value.name
+					},
 					documentation: value.description
 				}
 		];
@@ -115,12 +120,17 @@ class CompletionFeature {
 		return items;
 	}
 
-	function createDefineCompletion():Array<CompletionItem> {
+	function createDefineCompletion(range:Range):Array<CompletionItem> {
 		final haxeVersion = context.haxeServer.haxeVersion;
 		return getDefines(false).map(define -> {
+			final name = define.getRealName();
 			final item:CompletionItem = {
-				label: define.getRealName(),
+				label: name,
 				kind: Constant,
+				textEdit: {
+					range: range,
+					newText: name
+				},
 				documentation: {
 					kind: MarkDown,
 					value: define.printDetails(haxeVersion)
@@ -176,13 +186,17 @@ class CompletionFeature {
 		return items;
 	}
 
-	function createLibraryNameCompletion(resolve:CompletionList->Void, reject:ResponseError<NoData>->Void) {
+	function createLibraryNameCompletion(range:Range, resolve:CompletionList->Void, reject:ResponseError<NoData>->Void) {
 		context.languageServerProtocol.sendRequest(LanguageServerMethods.ListLibraries, null, null, function(libraries) {
 			resolve({
 				isIncomplete: false,
 				items: libraries.map(lib -> ({
 					label: lib.name,
-					kind: Folder
+					kind: Folder,
+					textEdit: {
+						newText: lib.name,
+						range: range
+					}
 				} : CompletionItem))
 			});
 		}, function(_) {
