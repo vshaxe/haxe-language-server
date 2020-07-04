@@ -57,7 +57,7 @@ class ExtractFunctionFeature {
 			parentOfStart.filterCallback(function(token:TokenTree, index:Int):FilterResult {
 				if (lastToken == null || token.index > lastToken.index)
 					return SKIP_SUBTREE;
-				switch (token.tok) {
+				switch token.tok {
 					case Const(CIdent(s)):
 						if ((token.index >= tokenStart.index) && (token.index <= tokenEnd.index) && (!rangeIdents.contains(s)))
 							rangeIdents.push(s);
@@ -136,7 +136,7 @@ class ExtractFunctionFeature {
 	function findParentFunction(token:TokenTree):Null<TokenTree> {
 		var parent:Null<TokenTree> = token.parent;
 		while (parent != null && parent.tok != null) {
-			switch (parent.tok) {
+			switch parent.tok {
 				case Kwd(KwdFunction):
 					return parent;
 				default:
@@ -185,14 +185,14 @@ class ExtractFunctionFeature {
 
 		final newFuncParameter:Array<NewFunctionParameter> = [];
 		for (child in paramterList.children) {
-			switch (child.tok) {
+			switch child.tok {
 				case Const(CIdent(s)):
 					checkAndAddIdentifier(child, s, text, rangeIdents, newFuncParameter);
 				case Question:
 					final firstChild:Null<TokenTree> = child.getFirstChild();
 					if (firstChild == null)
 						continue;
-					switch (firstChild.tok) {
+					switch firstChild.tok {
 						case Const(CString(s)):
 							checkAndAddIdentifier(child, s, text, rangeIdents, newFuncParameter);
 						default:
@@ -235,7 +235,7 @@ class ExtractFunctionFeature {
 			}
 			// TODO handle multiple vars
 			for (child in varToken.children) {
-				switch (child.tok) {
+				switch child.tok {
 					case Const(CIdent(s)):
 						checkAndAddIdentifier(child, s, text, rangeIdents, newFuncParameter);
 					case Dollar(s):
@@ -258,7 +258,7 @@ class ExtractFunctionFeature {
 		if (token.children == null)
 			return result;
 		for (child in token.children) {
-			switch (child.tok) {
+			switch child.tok {
 				case Kwd(_):
 					result += varToString(child);
 				case Const(_):
@@ -285,7 +285,7 @@ class ExtractFunctionFeature {
 		if (token.children == null)
 			return result;
 		for (child in token.children) {
-			switch (child.tok) {
+			switch child.tok {
 				case Binop(OpGt):
 					result += child.toString();
 					break;

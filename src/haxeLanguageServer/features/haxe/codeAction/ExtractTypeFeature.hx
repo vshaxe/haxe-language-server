@@ -34,7 +34,7 @@ class ExtractTypeFeature {
 			final path = new Path(fsPath.toString());
 
 			final types:Array<TokenTree> = tokens.tree.filterCallback(function(token:TokenTree, index:Int):FilterResult {
-				switch (token.tok) {
+				switch token.tok {
 					case Kwd(KwdClass), Kwd(KwdInterface), Kwd(KwdEnum), Kwd(KwdAbstract), Kwd(KwdTypedef):
 						return FOUND_SKIP_SUBTREE;
 					default:
@@ -123,7 +123,7 @@ class ExtractTypeFeature {
 
 		var pack:Null<TokenTree>;
 		tokens.tree.filterCallback(function(token:TokenTree, index:Int):FilterResult {
-			switch (token.tok) {
+			switch token.tok {
 				case Kwd(KwdPackage):
 					pack = token;
 					return SKIP_SUBTREE;
@@ -147,7 +147,7 @@ class ExtractTypeFeature {
 
 	function getLastImportToken(tree:TokenTree):Null<TokenTree> {
 		final imports:Array<TokenTree> = tree.filterCallback(function(token:TokenTree, index:Int):FilterResult {
-			switch (token.tok) {
+			switch token.tok {
 				case Kwd(KwdImport), Kwd(KwdUsing):
 					return FOUND_SKIP_SUBTREE;
 				default:
@@ -163,7 +163,7 @@ class ExtractTypeFeature {
 
 		var parent:Null<TokenTree> = token.parent;
 		while (parent != null && parent.tok != null) {
-			switch (parent.tok) {
+			switch parent.tok {
 				case Sharp(_):
 					return true;
 				default:

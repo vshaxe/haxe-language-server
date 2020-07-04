@@ -91,7 +91,7 @@ function isModuleLevel<T>(origin:Null<ClassFieldOrigin<T>>) {
 	if (origin == null) {
 		return false;
 	}
-	return switch (origin.kind) {
+	return switch origin.kind {
 		case Self | Parent | StaticImport | StaticExtension:
 			final moduleType:Null<JsonModuleType<Dynamic>> = origin.args;
 			if (moduleType == null) {

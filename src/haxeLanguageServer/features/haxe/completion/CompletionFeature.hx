@@ -734,7 +734,7 @@ class CompletionFeature {
 			kind: Keyword,
 			detail: printer.printType(item.type)
 		};
-		switch (literal.name) {
+		switch literal.name {
 			case "null" | "true" | "false":
 				result.textEdit = {
 					range: data.replaceRange,

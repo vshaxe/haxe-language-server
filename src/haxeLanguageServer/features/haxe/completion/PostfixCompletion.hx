@@ -234,7 +234,7 @@ class PostfixCompletion {
 		var result:Array<PostfixCompletionItem> = [];
 
 		for (item in items) {
-			switch (item.kind) {
+			switch item.kind {
 				case ClassField:
 					var field = item.args.field.name;
 					if (!~/^(get)?(length|count|size)$/i.match(field) || item.type == null) {

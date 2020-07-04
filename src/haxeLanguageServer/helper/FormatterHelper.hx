@@ -10,7 +10,7 @@ class FormatterHelper {
 		} else {
 			context.workspacePath.toString();
 		});
-		switch (Formatter.format(Code(code), config, null, entryPoint)) {
+		switch Formatter.format(Code(code), config, null, entryPoint) {
 			case Success(formattedCode):
 				return formattedCode;
 			case Failure(_):

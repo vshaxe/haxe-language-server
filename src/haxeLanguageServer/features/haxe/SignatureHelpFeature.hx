@@ -102,8 +102,8 @@ class SignatureHelpFeature {
 			doc:HaxeDocument) {
 		final bytePos = context.displayOffsetConverter.characterOffsetToByteOffset(doc.content, doc.offsetAt(params.position));
 		final args = ['${doc.uri.toFsPath()}@$bytePos@signature'];
-		context.callDisplay("@signature", args, doc.content, token, function(r) {
-			switch (r) {
+		context.callDisplay("@signature", args, doc.content, token, function(result) {
+			switch result {
 				case DCancelled:
 					resolve(null);
 				case DResult(data):

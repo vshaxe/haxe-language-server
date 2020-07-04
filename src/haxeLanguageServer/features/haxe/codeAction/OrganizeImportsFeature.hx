@@ -22,7 +22,7 @@ class OrganizeImportsFeature {
 		return try {
 			var packageName:Null<String> = null;
 			final imports:Array<TokenTree> = tokens.tree.filterCallback(function(token:TokenTree, index:Int):FilterResult {
-				switch (token.tok) {
+				switch token.tok {
 					case Kwd(KwdImport) | Kwd(KwdUsing):
 						return FOUND_SKIP_SUBTREE;
 					case Kwd(KwdPackage):
@@ -30,7 +30,7 @@ class OrganizeImportsFeature {
 						if (child == null) {
 							return SKIP_SUBTREE;
 						}
-						switch (child.tok) {
+						switch child.tok {
 							case Kwd(_):
 								packageName = '$child';
 							case Const(CIdent(s)):
@@ -79,7 +79,7 @@ class OrganizeImportsFeature {
 				}
 
 				final type:ImportType = determineImportType(i, packageName);
-				switch (i.tok) {
+				switch i.tok {
 					case Kwd(KwdImport):
 						group.imports.push({
 							token: i,
@@ -111,7 +111,7 @@ class OrganizeImportsFeature {
 			return Project;
 		}
 		var topLevelPack:String;
-		switch (child.tok) {
+		switch child.tok {
 			case Kwd(_):
 				topLevelPack = '$child';
 			case Const(CIdent(s)):
@@ -171,7 +171,7 @@ class OrganizeImportsFeature {
 	}
 
 	static function determineSortFunction(context:Context):ImportSortFunction {
-		return switch (context.config.user.importsSortOrder) {
+		return switch context.config.user.importsSortOrder {
 			case AllAlphabetical: sortImportsAllAlpha;
 			case StdlibThenLibsThenProject: sortImportsStdlibThenLibsThenProject;
 			case NonProjectThenProject: sortImportsNonProjectThenProject;

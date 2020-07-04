@@ -36,7 +36,7 @@ class ExtractConstantFeature {
 				return [];
 
 			// must be a Const(CString(_))
-			switch (token.tok) {
+			switch token.tok {
 				case Const(CString(s)):
 					final action:Null<CodeAction> = makeExtractConstAction(doc, tokens, uri, token, s);
 					if (action == null) [] else [action];
@@ -79,7 +79,7 @@ class ExtractConstantFeature {
 
 		// find all occurrences of string constant
 		final occurrences:Array<TokenTree> = type.filterCallback(function(token:TokenTree, index:Int):FilterResult {
-			return switch (token.tok) {
+			return switch token.tok {
 				case Const(CString(s)):
 					if (s == text) FOUND_SKIP_SUBTREE else GO_DEEPER;
 				default:
@@ -114,7 +114,7 @@ class ExtractConstantFeature {
 		if (parent == null || parent.tok == null) {
 			return true;
 		}
-		switch (parent.tok) {
+		switch parent.tok {
 			case BrOpen:
 				return true;
 			case POpen:
@@ -123,7 +123,7 @@ class ExtractConstantFeature {
 				if (atToken == null) {
 					return false;
 				}
-				switch (atToken.tok) {
+				switch atToken.tok {
 					case At:
 						return true;
 					case DblDot:
@@ -137,14 +137,14 @@ class ExtractConstantFeature {
 				// prevent const extraction from class fields
 				final varToken:Null<TokenTree> = parent.access().parent().isCIdent().parent().token;
 				if (varToken != null) {
-					switch (varToken.tok) {
-						case Kwd(KwdVar) | Kwd(KwdFinal):
+					switch varToken.tok {
+						case Kwd(KwdVar | KwdFinal):
 							final typeToken:Null<TokenTree> = varToken.access().parent().is(BrOpen).parent().isCIdent().parent().token;
 							if (typeToken == null) {
 								return false;
 							}
-							switch (typeToken.tok) {
-								case Kwd(KwdClass), Kwd(KwdAbstract):
+							switch typeToken.tok {
+								case Kwd(KwdClass | KwdAbstract):
 									return true;
 								default:
 									return false;
@@ -160,8 +160,8 @@ class ExtractConstantFeature {
 	function findParentType(token:TokenTree):Null<TokenTree> {
 		var parent:Null<TokenTree> = token.parent;
 		while (parent != null && parent.tok != null) {
-			switch (parent.tok) {
-				case Kwd(KwdClass), Kwd(KwdAbstract):
+			switch parent.tok {
+				case Kwd(KwdClass | KwdAbstract):
 					return parent;
 				default:
 			}
