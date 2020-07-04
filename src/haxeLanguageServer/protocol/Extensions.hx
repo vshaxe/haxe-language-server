@@ -58,7 +58,7 @@ function resolveImports<T>(type:JsonType<T>):Array<JsonTypePath> {
 function resolveTypes<T>(type:JsonType<T>):Array<JsonType<T>> {
 	switch type.kind {
 		case TAbstract:
-			if (type.getDotPath() == EitherType) {
+			if (type.getDotPath() == Haxe_Extern_EitherType) {
 				return (type.args : JsonTypePathWithParams).params.map(resolveTypes).flatten().array();
 			}
 		case _:
@@ -84,7 +84,7 @@ function isEnumAbstractField(field:JsonClassField) {
 }
 
 inline function isVoid<T>(type:JsonType<T>) {
-	return type.getDotPath() == Void;
+	return type.getDotPath() == Std_Void;
 }
 
 function isModuleLevel<T>(origin:Null<ClassFieldOrigin<T>>) {
@@ -133,7 +133,7 @@ function removeNulls<T>(type:JsonType<T>, nullable:Bool = false):{type:JsonType<
 	switch type.kind {
 		case TAbstract:
 			final path:JsonTypePathWithParams = type.args;
-			if (type.getDotPath() == Null) {
+			if (type.getDotPath() == Std_Null) {
 				if (path.params != null && path.params[0] != null) {
 					return removeNulls(path.params[0], true);
 				}
@@ -161,7 +161,7 @@ function guessName<T>(type:JsonType<T>):String {
 
 function hasMandatoryTypeParameters(type:DisplayModuleType):Bool {
 	// Dynamic is a special case regarding this in the compiler
-	if (type.path.getDotPath2() == Dynamic) {
+	if (type.path.getDotPath2() == Std_Dynamic) {
 		return false;
 	}
 	return type.params != null && type.params.length > 0;

@@ -5,19 +5,19 @@ import haxe.display.JsonModuleTypes.JsonTypePath;
 import haxeLanguageServer.protocol.DisplayPrinter.PathPrinting;
 
 enum abstract DotPath(String) {
-	final Void = "StdTypes.Void";
-	final Bool = "StdTypes.Bool";
-	final Int = "StdTypes.Int";
-	final Float = "StdTypes.Float";
-	final Null = "StdTypes.Null";
-	final UInt;
-	final String;
-	final EitherType = "haxe.extern.EitherType";
-	final Array;
-	final Map = "haxe.ds.Map";
-	final ReadOnlyArray = "haxe.ds.ReadOnlyArray";
-	final EReg;
-	final Dynamic;
+	final Std_Void = "StdTypes.Void";
+	final Std_Bool = "StdTypes.Bool";
+	final Std_Int = "StdTypes.Int";
+	final Std_Float = "StdTypes.Float";
+	final Std_Null = "StdTypes.Null";
+	final Std_UInt = "UInt";
+	final Std_String = "String";
+	final Std_Array = "Array";
+	final Std_EReg = "EReg";
+	final Std_Dynamic = "Dynamic";
+	final Haxe_Extern_EitherType = "haxe.extern.EitherType";
+	final Haxe_Ds_Map = "haxe.ds.Map";
+	final Haxe_Ds_ReadOnlyArray = "haxe.ds.ReadOnlyArray";
 	function new(dotPath) {
 		this = dotPath;
 	}

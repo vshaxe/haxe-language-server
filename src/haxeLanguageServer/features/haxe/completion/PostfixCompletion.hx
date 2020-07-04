@@ -75,7 +75,7 @@ class PostfixCompletion {
 			});
 		}
 		if (subject.keyValueIterator != null) {
-			final key = if (subject.keyValueIterator.key.getDotPath() == Int) "index" else "key";
+			final key = if (subject.keyValueIterator.key.getDotPath() == Std_Int) "index" else "key";
 			add({
 				label: "for k=>v",
 				detail: 'for ($key => value in expr)',
@@ -86,7 +86,7 @@ class PostfixCompletion {
 
 		final dotPath = type.getDotPath();
 		switch dotPath {
-			case Bool:
+			case Std_Bool:
 				add({
 					label: "not",
 					detail: "!expr",
@@ -106,12 +106,12 @@ class PostfixCompletion {
 					insertTextFormat: Snippet
 				});
 
-			case Int:
+			case Std_Int:
 				for (item in createIndexedLoops(expr)) {
 					add(item);
 				}
 
-			case Float:
+			case Std_Float:
 				add({
 					label: "int",
 					detail: "Std.int(expr)",
@@ -138,7 +138,7 @@ class PostfixCompletion {
 	}
 
 	function createNonFilteredItems(dotPath:Null<DotPath>, expr:String, add:PostfixCompletionItem->Void) {
-		if (dotPath != String) {
+		if (dotPath != Std_String) {
 			add({
 				label: "string",
 				detail: "Std.string(expr)",
@@ -253,7 +253,7 @@ class PostfixCompletion {
 							type;
 					}
 					switch type.getDotPath() {
-						case Int | UInt:
+						case Std_Int | Std_UInt:
 							result = result.concat(createIndexedLoops('$expr.$field'));
 						case _:
 					}

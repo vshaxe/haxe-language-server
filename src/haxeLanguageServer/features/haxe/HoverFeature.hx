@@ -91,7 +91,7 @@ class HoverFeature {
 			case Literal:
 				final value = item.args.name;
 				final sourceText = doc.getText(hover.range);
-				if (value != sourceText && concreteType.getDotPath() != String) {
+				if (value != sourceText && concreteType.getDotPath() != Std_String) {
 					return {definition: printCodeBlock(value, Haxe)};
 				} else {
 					printType();
