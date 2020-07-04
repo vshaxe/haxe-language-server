@@ -19,13 +19,13 @@ class ExtractConstantFeatureTest extends Test implements IExtractConstantFeature
 
 	@:access(haxeLanguageServer.features.haxe.codeAction.ExtractConstantFeature)
 	function makeEdits(content:String, fileName:String, range:Range):Array<TextEdit> {
-		final context = new TestContext(new Protocol(null));
+		final context = new Context(new Protocol(null));
 		final uri = new DocumentUri("file://" + fileName + ".edittest");
 		final doc = new HaxeDocument(uri, "haxe", 4, content);
 
 		final extractConst = new ExtractConstantFeature(context);
 
-		final actions:Array<CodeAction> = extractConst.internalExtractConstant(doc, uri, range);
+		final actions:Array<CodeAction> = extractConst.extractConstant(doc, uri, range);
 		Assert.equals(1, actions.length);
 
 		final docEdit:TextDocumentEdit = cast actions[0].edit.documentChanges[0];
