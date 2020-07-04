@@ -4,7 +4,9 @@ import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
 
-typedef CodeActionContributor = CodeActionParams->Array<CodeAction>;
+interface CodeActionContributor {
+	function createCodeActions(params:CodeActionParams):Array<CodeAction>;
+}
 
 class CodeActionFeature {
 	public static inline final SourceSortImports = "source.sortImports";
@@ -12,7 +14,7 @@ class CodeActionFeature {
 	final context:Context;
 	final contributors:Array<CodeActionContributor> = [];
 
-	public function new(context:Context) {
+	public function new(context, diagnostics) {
 		this.context = context;
 
 		context.registerCapability(CodeActionRequest.type, {
@@ -20,6 +22,13 @@ class CodeActionFeature {
 			codeActionKinds: [QuickFix, SourceOrganizeImports, SourceSortImports, RefactorExtract]
 		});
 		context.languageServerProtocol.onRequest(CodeActionRequest.type, onCodeAction);
+
+		registerContributor(new ExtractConstantFeature(context));
+		registerContributor(new DiagnosticsCodeActionFeature(context, diagnostics));
+		#if debug
+		registerContributor(new ExtractTypeFeature(context));
+		registerContributor(new ExtractFunctionFeature(context));
+		#end
 	}
 
 	public function registerContributor(contributor:CodeActionContributor) {
@@ -29,7 +38,7 @@ class CodeActionFeature {
 	function onCodeAction(params:CodeActionParams, token:CancellationToken, resolve:Array<CodeAction>->Void, reject:ResponseError<NoData>->Void) {
 		var codeActions = [];
 		for (contributor in contributors) {
-			codeActions = codeActions.concat(contributor(params));
+			codeActions = codeActions.concat(contributor.createCodeActions(params));
 		}
 		resolve(codeActions);
 	}

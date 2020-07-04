@@ -10,7 +10,6 @@ import haxe.display.Server.ServerMethods;
 import haxeLanguageServer.LanguageServerMethods.MethodResult;
 import haxeLanguageServer.features.CompletionFeature;
 import haxeLanguageServer.features.HoverFeature;
-import haxeLanguageServer.features.haxe.CodeGenerationFeature;
 import haxeLanguageServer.features.haxe.CodeLensFeature;
 import haxeLanguageServer.features.haxe.DeterminePackageFeature;
 import haxeLanguageServer.features.haxe.DiagnosticsFeature;
@@ -58,7 +57,6 @@ class Context {
 	@:nullSafety(Off) public var determinePackage(default, null):DeterminePackageFeature;
 
 	@:nullSafety(Off) var diagnostics:DiagnosticsFeature;
-	@:nullSafety(Off) var codeActions:CodeActionFeature;
 	var activeEditor:Null<DocumentUri>;
 	var initialized = false;
 	var progressId = 0;
@@ -314,7 +312,6 @@ class Context {
 			haxeServer.start(function() {
 				onServerStarted();
 
-				codeActions = new CodeActionFeature(this);
 				new CompletionFeature(this);
 				new HoverFeature(this);
 				new SignatureHelpFeature(this);
@@ -325,12 +322,9 @@ class Context {
 				determinePackage = new DeterminePackageFeature(this);
 				new RenameFeature(this);
 				diagnostics = new DiagnosticsFeature(this);
+				new CodeActionFeature(this, diagnostics);
 				new CodeLensFeature(this);
-				new CodeGenerationFeature(this);
 				new WorkspaceSymbolsFeature(this);
-				new ExtractTypeFeature(this);
-				new ExtractConstantFeature(this);
-				new ExtractFunctionFeature(this);
 
 				for (doc in documents) {
 					publishDiagnostics(doc.uri);
@@ -494,10 +488,6 @@ class Context {
 		actualArgs.push("--display");
 		actualArgs = actualArgs.concat(args); // finally, add given query args
 		haxeServer.process(label, actualArgs, token, true, stdin, Processed(callback, errback));
-	}
-
-	public function registerCodeActionContributor(contributor:CodeActionContributor) {
-		codeActions.registerContributor(contributor);
 	}
 
 	public function startTimer(method:String) {

@@ -1,5 +1,6 @@
 package haxeLanguageServer.features.haxe.codeAction;
 
+import haxeLanguageServer.features.haxe.codeAction.CodeActionFeature.CodeActionContributor;
 import haxeLanguageServer.helper.FormatterHelper;
 import haxeLanguageServer.helper.WorkspaceEditHelper;
 import haxeLanguageServer.tokentree.TokenTreeManager;
@@ -7,21 +8,20 @@ import tokentree.TokenTree;
 
 using tokentree.TokenTreeAccessHelper;
 
-class ExtractConstantFeature {
+class ExtractConstantFeature implements CodeActionContributor {
 	final context:Context;
 
 	public function new(context:Context) {
 		this.context = context;
-		context.registerCodeActionContributor(extractConstant);
 	}
 
-	function extractConstant(params:CodeActionParams):Array<CodeAction> {
+	public function createCodeActions(params:CodeActionParams):Array<CodeAction> {
 		final uri = params.textDocument.uri;
 		final doc = context.documents.getHaxe(uri);
-		return internalExtractConstant(doc, uri, params.range);
+		return extractConstant(doc, uri, params.range);
 	}
 
-	function internalExtractConstant(doc:Null<HaxeDocument>, uri:DocumentUri, range:Range):Array<CodeAction> {
+	function extractConstant(doc:Null<HaxeDocument>, uri:DocumentUri, range:Range):Array<CodeAction> {
 		if (doc == null) {
 			return [];
 		}

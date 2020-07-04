@@ -1,5 +1,6 @@
 package haxeLanguageServer.features.haxe.codeAction;
 
+import haxeLanguageServer.features.haxe.codeAction.CodeActionFeature.CodeActionContributor;
 import haxeLanguageServer.helper.FormatterHelper;
 import haxeLanguageServer.helper.WorkspaceEditHelper;
 import tokentree.TokenTree;
@@ -8,17 +9,14 @@ import tokentree.utils.TokenTreeCheckUtils;
 
 using tokentree.TokenTreeAccessHelper;
 
-class ExtractFunctionFeature {
+class ExtractFunctionFeature implements CodeActionContributor {
 	final context:Context;
 
 	public function new(context:Context) {
 		this.context = context;
-		#if debug
-		context.registerCodeActionContributor(extractFunction);
-		#end
 	}
 
-	function extractFunction(params:CodeActionParams):Array<CodeAction> {
+	public function createCodeActions(params:CodeActionParams):Array<CodeAction> {
 		final doc = context.documents.getHaxe(params.textDocument.uri);
 		if (doc == null) {
 			return [];
@@ -59,18 +57,18 @@ class ExtractFunctionFeature {
 					return SKIP_SUBTREE;
 				switch token.tok {
 					case Const(CIdent(s)):
-						if ((token.index >= tokenStart.index) && (token.index <= tokenEnd.index) && (!rangeIdents.contains(s)))
+						if (token.index >= tokenStart.index && token.index <= tokenEnd.index && !rangeIdents.contains(s))
 							rangeIdents.push(s);
 					case Dollar(s):
-						if ((token.index >= tokenStart.index) && (token.index <= tokenEnd.index) && (!rangeIdents.contains(s)))
+						if (token.index >= tokenStart.index && token.index <= tokenEnd.index && !rangeIdents.contains(s))
 							rangeIdents.push("$" + s);
 					case Kwd(KwdReturn):
-						if ((token.index >= tokenStart.index) && (token.index <= tokenEnd.index))
+						if (token.index >= tokenStart.index && token.index <= tokenEnd.index)
 							hasReturn = true;
 					case Kwd(KwdVar):
 						if (token.index >= tokenStart.index)
 							return GO_DEEPER;
-						if ((token.index >= parentOfStart.index) && (token.index <= lastToken.index))
+						if (token.index >= parentOfStart.index && token.index <= lastToken.index)
 							varTokens.push(token);
 					default:
 				}
@@ -297,7 +295,7 @@ class ExtractFunctionFeature {
 	}
 }
 
-typedef NewFunctionParameter = {
+private typedef NewFunctionParameter = {
 	final call:String;
 	final param:String;
 }

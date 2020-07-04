@@ -1,6 +1,7 @@
 package haxeLanguageServer.features.haxe.codeAction;
 
 import haxe.io.Path;
+import haxeLanguageServer.features.haxe.codeAction.CodeActionFeature.CodeActionContributor;
 import haxeLanguageServer.helper.WorkspaceEditHelper;
 import haxeLanguageServer.tokentree.TokenTreeManager;
 import sys.FileSystem;
@@ -9,17 +10,14 @@ import tokentree.utils.TokenTreeCheckUtils;
 
 using tokentree.TokenTreeAccessHelper;
 
-class ExtractTypeFeature {
+class ExtractTypeFeature implements CodeActionContributor {
 	final context:Context;
 
 	public function new(context:Context) {
 		this.context = context;
-		#if debug
-		context.registerCodeActionContributor(extractType);
-		#end
 	}
 
-	function extractType(params:CodeActionParams):Array<CodeAction> {
+	public function createCodeActions(params:CodeActionParams):Array<CodeAction> {
 		final uri = params.textDocument.uri;
 		final doc = context.documents.getHaxe(uri);
 		if (doc == null) {

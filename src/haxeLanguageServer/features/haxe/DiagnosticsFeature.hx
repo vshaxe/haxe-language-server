@@ -1,27 +1,21 @@
 package haxeLanguageServer.features.haxe;
 
+import haxe.Json;
 import haxe.ds.BalancedTree;
 import haxe.io.Path;
-import haxeLanguageServer.Configuration;
 import haxeLanguageServer.LanguageServerMethods;
-import haxeLanguageServer.features.haxe.codeAction.CodeActionFeature;
-import haxeLanguageServer.features.haxe.codeAction.OrganizeImportsFeature;
-import haxeLanguageServer.helper.DocHelper;
-import haxeLanguageServer.helper.ImportHelper;
 import haxeLanguageServer.helper.PathHelper;
-import haxeLanguageServer.helper.TypeHelper;
-import haxeLanguageServer.helper.WorkspaceEditHelper;
 import haxeLanguageServer.server.DisplayResult;
 import js.node.ChildProcess;
 
 using Lambda;
 
 class DiagnosticsFeature {
-	static inline final DiagnosticsSource = "diagnostics";
-	static inline final SortImportsUsingsTitle = "Sort imports/usings";
-	static inline final OrganizeImportsUsingsTitle = "Organize imports/usings";
-	static inline final RemoveUnusedImportUsingTitle = "Remove unused import/using";
-	static inline final RemoveAllUnusedImportsUsingsTitle = "Remove all unused imports/usings";
+	public static inline final DiagnosticsSource = "diagnostics";
+	public static inline final SortImportsUsingsTitle = "Sort imports/usings";
+	public static inline final OrganizeImportsUsingsTitle = "Organize imports/usings";
+	public static inline final RemoveUnusedImportUsingTitle = "Remove unused import/using";
+	public static inline final RemoveAllUnusedImportsUsingsTitle = "Remove all unused imports/usings";
 
 	final context:Context;
 	final diagnosticsArguments:Map<DocumentUri, DiagnosticsMap<Any>>;
@@ -36,7 +30,6 @@ class DiagnosticsFeature {
 
 		ChildProcess.exec(context.config.haxelib.executable + " config", (error, stdout, stderr) -> haxelibPath = new FsPath(stdout.trim()));
 
-		context.registerCodeActionContributor(getCodeActions);
 		context.languageServerProtocol.onNotification(LanguageServerMethods.RunGlobalDiagnostics, onRunGlobalDiagnostics);
 	}
 
@@ -118,7 +111,6 @@ class DiagnosticsFeature {
 		if (!problemMatcher.match(error)) {
 			return false;
 		}
-
 		final diag = {
 			range: {start: {line: 0, character: 0}, end: {line: 0, character: 0}},
 			source: DiagnosticsSource,
@@ -137,86 +129,82 @@ class DiagnosticsFeature {
 
 	function processDiagnosticsReply(uri:Null<DocumentUri>, onResolve:(result:Dynamic, ?debugInfo:String) -> Void, result:DisplayResult) {
 		clearDiagnostics(errorUri);
-		switch result {
+		final data:Array<HaxeDiagnosticResponse<Any>> = switch result {
 			case DResult(s):
-				final data:Array<HaxeDiagnosticResponse<Any>> = try {
-					haxe.Json.parse(s);
+				try {
+					Json.parse(s);
 				} catch (e) {
-					trace("Error parsing diagnostics response: " + Std.string(e));
+					trace("Error parsing diagnostics response: " + e);
 					return;
 				}
-
-				var count = 0;
-				final sent = new Map<DocumentUri, Bool>();
-				for (data in data) {
-					count += data.diagnostics.length;
-
-					var file = data.file;
-					if (file == null) {
-						// LSP always needs a URI for now (https://github.com/Microsoft/language-server-protocol/issues/256)
-						file = errorUri.toFsPath();
-					}
-					if (isPathFiltered(file))
-						continue;
-
-					final uri = file.toUri();
-					final argumentsMap = diagnosticsArguments[uri] = new DiagnosticsMap();
-
-					final newDiagnostics = filterRelevantDiagnostics(data.diagnostics);
-					final diagnostics = new Array<Diagnostic>();
-					for (hxDiag in newDiagnostics) {
-						final kind:Int = hxDiag.kind;
-						final diag:Diagnostic = {
-							range: if (hxDiag.range == null) {
-								// range is not optional in the LSP yet
-								{
-									start: {line: 0, character: 0},
-									end: {line: 0, character: 0}
-								}
-							} else {
-								hxDiag.range;
-							},
-							source: DiagnosticsSource,
-							code: kind,
-							severity: hxDiag.severity,
-							message: hxDiag.kind.getMessage(hxDiag.args)
-						}
-						if (kind == RemovableCode
-							|| kind == UnusedImport
-							|| diag.message.contains("has no effect")
-							|| kind == InactiveBlock) {
-							diag.severity = Hint;
-							diag.tags = [Unnecessary];
-						}
-						if (diag.message == "This case is unused") {
-							diag.tags = [Unnecessary];
-						}
-						if (kind == DeprecationWarning) {
-							diag.tags = [Deprecated];
-						}
-						argumentsMap.set({code: kind, range: diag.range}, hxDiag.args);
-						diagnostics.push(diag);
-					}
-					context.languageServerProtocol.sendNotification(PublishDiagnosticsNotification.type, {uri: uri, diagnostics: diagnostics});
-					sent[uri] = true;
-				}
-
-				inline function removeOldDiagnostics(uri:DocumentUri) {
-					if (!sent.exists(uri))
-						clearDiagnostics(uri);
-				}
-
-				if (uri == null) {
-					for (uri in diagnosticsArguments.keys())
-						removeOldDiagnostics(uri);
-				} else {
-					removeOldDiagnostics(uri);
-				}
-
-				onResolve(data, count + " diagnostics");
-
 			case DCancelled:
+				return;
 		}
+		var count = 0;
+		final sent = new Map<DocumentUri, Bool>();
+		for (data in data) {
+			count += data.diagnostics.length;
+
+			var file = data.file;
+			if (file == null) {
+				// LSP always needs a URI for now (https://github.com/Microsoft/language-server-protocol/issues/256)
+				file = errorUri.toFsPath();
+			}
+			if (isPathFiltered(file))
+				continue;
+
+			final uri = file.toUri();
+			final argumentsMap = diagnosticsArguments[uri] = new DiagnosticsMap();
+
+			final newDiagnostics = filterRelevantDiagnostics(data.diagnostics);
+			final diagnostics = new Array<Diagnostic>();
+			for (hxDiag in newDiagnostics) {
+				final kind:Int = hxDiag.kind;
+				final diag:Diagnostic = {
+					range: if (hxDiag.range == null) {
+						// range is not optional in the LSP yet
+						{
+							start: {line: 0, character: 0},
+							end: {line: 0, character: 0}
+						}
+					} else {
+						hxDiag.range;
+					},
+					source: DiagnosticsSource,
+					code: kind,
+					severity: hxDiag.severity,
+					message: hxDiag.kind.getMessage(hxDiag.args)
+				}
+				if (kind == RemovableCode || kind == UnusedImport || diag.message.contains("has no effect") || kind == InactiveBlock) {
+					diag.severity = Hint;
+					diag.tags = [Unnecessary];
+				}
+				if (diag.message == "This case is unused") {
+					diag.tags = [Unnecessary];
+				}
+				if (kind == DeprecationWarning) {
+					diag.tags = [Deprecated];
+				}
+				argumentsMap.set({code: kind, range: diag.range}, hxDiag.args);
+				diagnostics.push(diag);
+			}
+			context.languageServerProtocol.sendNotification(PublishDiagnosticsNotification.type, {uri: uri, diagnostics: diagnostics});
+			sent[uri] = true;
+		}
+
+		inline function removeOldDiagnostics(uri:DocumentUri) {
+			if (!sent.exists(uri))
+				clearDiagnostics(uri);
+		}
+
+		if (uri == null) {
+			for (uri in diagnosticsArguments.keys())
+				removeOldDiagnostics(uri);
+		} else {
+			removeOldDiagnostics(uri);
+		}
+
+		onResolve(data, count + " diagnostics");
 	}
 
 	function isPathFiltered(path:FsPath):Bool {
@@ -250,8 +238,9 @@ class DiagnosticsFeature {
 	}
 
 	public function clearDiagnostics(uri:DocumentUri) {
-		if (diagnosticsArguments.remove(uri))
+		if (diagnosticsArguments.remove(uri)) {
 			context.languageServerProtocol.sendNotification(PublishDiagnosticsNotification.type, {uri: uri, diagnostics: []});
+		}
 	}
 
 	public function publishDiagnostics(uri:DocumentUri) {
@@ -267,250 +256,23 @@ class DiagnosticsFeature {
 		}
 	}
 
-	function getCodeActions<T>(params:CodeActionParams) {
-		if (!params.textDocument.uri.isFile()) {
-			return [];
-		}
-		var actions:Array<CodeAction> = [];
-		for (d in params.context.diagnostics) {
-			if (d.code == null || !(d.code is Int)) // our codes are int, so we don't handle other stuff
-				continue;
-			final code = new DiagnosticKind<T>(d.code);
-			actions = actions.concat(switch code {
-				case UnusedImport: getUnusedImportActions(params, d);
-				case UnresolvedIdentifier: getUnresolvedIdentifierActions(params, d);
-				case CompilerError: getCompilerErrorActions(params, d);
-				case RemovableCode: getRemovableCodeActions(params, d);
-				case _: [];
-			});
-		}
-		actions = getOrganizeImportActions(params, actions).concat(actions);
-		actions = actions.filterDuplicates((a1, a2) -> a1.title == a2.title);
-		return actions;
-	}
-
-	function getUnusedImportActions(params:CodeActionParams, d:Diagnostic):Array<CodeAction> {
-		final doc = context.documents.getHaxe(params.textDocument.uri);
-		if (doc == null) {
-			return [];
-		}
-		return [
-			{
-				title: RemoveUnusedImportUsingTitle,
-				kind: QuickFix,
-				edit: WorkspaceEditHelper.create(context, params, [
-					{
-						range: DocHelper.untrimRange(doc, d.range),
-						newText: ""
-					}
-				]),
-				diagnostics: [d],
-				isPreferred: true
-			}
-		];
-	}
-
-	function getUnresolvedIdentifierActions(params:CodeActionParams, d:Diagnostic):Array<CodeAction> {
-		final args = getDiagnosticsArguments(params.textDocument.uri, UnresolvedIdentifier, d.range);
-		if (args == null) {
-			return [];
-		}
-		var actions:Array<CodeAction> = [];
-		final importCount = args.count(a -> a.kind == Import);
-		for (arg in args) {
-			actions = actions.concat(switch arg.kind {
-				case Import: getUnresolvedImportActions(params, d, arg, importCount);
-				case Typo: getTypoActions(params, d, arg);
-			});
-		}
-		return actions;
-	}
-
-	function getUnresolvedImportActions(params:CodeActionParams, d:Diagnostic, arg, importCount:Int):Array<CodeAction> {
-		final doc = context.documents.getHaxe(params.textDocument.uri);
-		if (doc == null) {
-			return [];
-		}
-		final preferredStyle = context.config.user.codeGeneration.imports.style;
-		final secondaryStyle:ImportStyle = if (preferredStyle == Type) Module else Type;
-
-		final importPosition = determineImportPosition(doc);
-		function makeImportAction(style:ImportStyle):CodeAction {
-			final path = if (style == Module) TypeHelper.getModule(arg.name) else arg.name;
-			return {
-				title: "Import " + path,
-				kind: QuickFix,
-				edit: WorkspaceEditHelper.create(context, params, [createImportsEdit(doc, importPosition, [arg.name], style)]),
-				diagnostics: [d]
-			};
-		}
-
-		final preferred = makeImportAction(preferredStyle);
-		final secondary = makeImportAction(secondaryStyle);
-		if (importCount == 1) {
-			preferred.isPreferred = true;
-		}
-		final actions = [preferred, secondary];
-
-		actions.push({
-			title: "Change to " + arg.name,
-			kind: QuickFix,
-			edit: WorkspaceEditHelper.create(context, params, [{range: d.range, newText: arg.name}]),
-			diagnostics: [d]
-		});
-
-		return actions;
-	}
-
-	function getTypoActions(params:CodeActionParams, d:Diagnostic, arg):Array<CodeAction> {
-		return [
-			{
-				title: "Change to " + arg.name,
-				kind: QuickFix,
-				edit: WorkspaceEditHelper.create(context, params, [{range: d.range, newText: arg.name}]),
-				diagnostics: [d]
-			}
-		];
-	}
-
-	function getCompilerErrorActions(params:CodeActionParams, d:Diagnostic):Array<CodeAction> {
-		final actions:Array<CodeAction> = [];
-		final arg = getDiagnosticsArguments(params.textDocument.uri, CompilerError, d.range);
-		if (arg == null) {
-			return actions;
-		}
-		final suggestionsRe = ~/\(Suggestions?: (.*)\)/;
-		if (suggestionsRe.match(arg)) {
-			final suggestions = suggestionsRe.matched(1).split(",");
-			// Haxe reports the entire expression, not just the field position, so we have to be a bit creative here.
-			final range = d.range;
-			final fieldRe = ~/has no field ([^ ]+) /;
-			if (fieldRe.match(arg)) {
-				range.start.character = range.end.character - fieldRe.matched(1).length;
-			}
-			for (suggestion in suggestions) {
-				suggestion = suggestion.trim();
-				actions.push({
-					title: "Change to " + suggestion,
-					kind: QuickFix,
-					edit: WorkspaceEditHelper.create(context, params, [{range: range, newText: suggestion}]),
-					diagnostics: [d]
-				});
-			}
-			return actions;
-		}
-
-		final invalidPackageRe = ~/Invalid package : ([\w.]*) should be ([\w.]*)/;
-		if (invalidPackageRe.match(arg)) {
-			final is = invalidPackageRe.matched(1);
-			final shouldBe = invalidPackageRe.matched(2);
-			final document = context.documents.getHaxe(params.textDocument.uri);
-			if (document != null) {
-				final replacement = document.getText(d.range).replace(is, shouldBe);
-				actions.push({
-					title: "Change to " + replacement,
-					kind: QuickFix,
-					edit: WorkspaceEditHelper.create(context, params, [{range: d.range, newText: replacement}]),
-					diagnostics: [d],
-					isPreferred: true
-				});
-			}
-		}
-
-		if (context.haxeServer.haxeVersion.major >= 4 // unsuitable error range before Haxe 4
-			&& arg.contains("should be declared with 'override' since it is inherited from superclass")) {
-			actions.push({
-				title: "Add override keyword",
-				kind: QuickFix,
-				edit: WorkspaceEditHelper.create(context, params, [{range: d.range.start.toRange(), newText: "override "}]),
-				diagnostics: [d],
-				isPreferred: true
-			});
-		}
-
-		return actions;
-	}
-
-	function getRemovableCodeActions(params:CodeActionParams, d:Diagnostic):Array<CodeAction> {
-		final range = getDiagnosticsArguments(params.textDocument.uri, RemovableCode, d.range) !.range;
-		if (range == null) {
-			return [];
-		}
-		return [
-			{
-				title: "Remove",
-				kind: QuickFix,
-				edit: WorkspaceEditHelper.create(context, params, @:nullSafety(Off) [{range: range, newText: ""}]),
-				diagnostics: [d],
-				isPreferred: true
-			}
-		];
-	}
-
-	function getOrganizeImportActions(params:CodeActionParams, existingActions:Array<CodeAction>):Array<CodeAction> {
-		final uri = params.textDocument.uri;
-		final doc = context.documents.getHaxe(uri);
-		if (doc == null) {
-			return [];
-		}
-		final map = diagnosticsArguments[uri];
-		final removeUnusedFixes = if (map == null) [] else [
-			for (key in map.keys()) {
-				if (key.code == UnusedImport) {
-					WorkspaceEditHelper.removeText(DocHelper.untrimRange(doc, key.range));
-				}
-			}
-		];
-
-		final sortFixes = OrganizeImportsFeature.organizeImports(doc, context, []);
-
-		final unusedRanges:Array<Range> = removeUnusedFixes.map(edit -> edit.range);
-		final organizeFixes = removeUnusedFixes.concat(OrganizeImportsFeature.organizeImports(doc, context, unusedRanges));
-
-		@:nullSafety(Off) // ?
-		final diagnostics = existingActions.filter(action -> action.title == RemoveUnusedImportUsingTitle)
-			.map(action -> action.diagnostics)
-			.flatten()
-			.array();
-		final actions:Array<CodeAction> = [
-			{
-				title: SortImportsUsingsTitle,
-				kind: CodeActionFeature.SourceSortImports,
-				edit: WorkspaceEditHelper.create(context, params, sortFixes)
-			},
-			{
-				title: OrganizeImportsUsingsTitle,
-				kind: SourceOrganizeImports,
-				edit: WorkspaceEditHelper.create(context, params, organizeFixes),
-				diagnostics: diagnostics
-			}
-		];
-
-		if (diagnostics.length > 0 && removeUnusedFixes.length > 1) {
-			actions.push({
-				title: RemoveAllUnusedImportsUsingsTitle,
-				kind: QuickFix,
-				edit: WorkspaceEditHelper.create(context, params, removeUnusedFixes),
-				diagnostics: diagnostics
-			});
-		}
-
-		return actions;
-	}
-
-	function getDiagnosticsArguments<T>(uri:DocumentUri, kind:DiagnosticKind<T>, range:Range):Null<T> {
+	public function getArguments<T>(uri:DocumentUri, kind:DiagnosticKind<T>, range:Range):Null<T> {
 		final map = diagnosticsArguments[uri];
 		@:nullSafety(Off) // ?
 		return if (map == null) null else map.get({code: kind, range: range});
 	}
+
+	public function getArgumentsMap(uri:DocumentUri):Null<DiagnosticsMap<Any>> {
+		return diagnosticsArguments[uri];
+	}
 }
 
-private enum abstract UnresolvedIdentifierSuggestion(Int) {
+enum abstract UnresolvedIdentifierSuggestion(Int) {
 	final Import;
 	final Typo;
 }
 
-private enum abstract DiagnosticKind<T>(Int) from Int to Int {
+enum abstract DiagnosticKind<T>(Int) from Int to Int {
 	final UnusedImport:DiagnosticKind<Void>;
 	final UnresolvedIdentifier:DiagnosticKind<Array<{kind:UnresolvedIdentifierSuggestion, name:String}>>;
 	final CompilerError:DiagnosticKind<String>;
