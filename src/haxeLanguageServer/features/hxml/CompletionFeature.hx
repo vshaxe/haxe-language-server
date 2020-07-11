@@ -124,7 +124,7 @@ class CompletionFeature {
 		final haxeVersion = context.haxeServer.haxeVersion;
 		return getDefines(false).map(define -> {
 			final name = define.getRealName();
-			final item:CompletionItem = {
+			final item:TextEditCompletionItem = {
 				label: name,
 				kind: Constant,
 				textEdit: {
@@ -137,7 +137,7 @@ class CompletionFeature {
 				}
 			}
 			if (define.hasParams()) {
-				item.insertText = item.label + "=";
+				item.textEdit.newText = item.label + "=";
 				item.command = TriggerSuggest;
 			}
 			if (!define.isAvailable(haxeVersion)) {
