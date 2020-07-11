@@ -52,9 +52,11 @@ class HoverFeature {
 			explicitNull: true
 		});
 		final item = hover.item;
-		final concreteType = hover.item.type.sure();
+		function getType() {
+			return hover.item.type.sure();
+		}
 		function printType():HoverContent {
-			final type = printer.printType(concreteType);
+			final type = printer.printType(getType());
 			return {definition: printCodeBlock(type, HaxeType)};
 		}
 		final result:HoverContent = switch item.kind {
@@ -63,19 +65,19 @@ class HoverFeature {
 				{definition: printCodeBlock(typeDefinition, Haxe)}
 			case Local:
 				final languageId = if (item.args.origin == Argument) HaxeArgument else Haxe;
-				final local = printer.printLocalDefinition(hover.item.args, concreteType);
+				final local = printer.printLocalDefinition(hover.item.args, getType());
 				{
 					definition: printCodeBlock(local, languageId),
 					origin: printer.printLocalOrigin(item.args.origin)
 				}
 			case ClassField | EnumAbstractField:
-				final field = printer.printClassFieldDefinition(item.args, concreteType, item.kind == EnumAbstractField);
+				final field = printer.printClassFieldDefinition(item.args, getType(), item.kind == EnumAbstractField);
 				{
 					definition: printCodeBlock(field, Haxe),
 					origin: printer.printClassFieldOrigin(item.args.origin, item.kind)
 				}
 			case EnumField:
-				final field = printer.printEnumFieldDefinition(item.args.field, concreteType);
+				final field = printer.printEnumFieldDefinition(item.args.field, getType());
 				{
 					definition: printCodeBlock(field, Haxe),
 					origin: printer.printEnumFieldOrigin(item.args.origin)
@@ -91,7 +93,7 @@ class HoverFeature {
 			case Literal:
 				final value = item.args.name;
 				final sourceText = doc.getText(hover.range);
-				if (value != sourceText && concreteType.getDotPath() != Std_String) {
+				if (value != sourceText && getType().getDotPath() != Std_String) {
 					return {definition: printCodeBlock(value, Haxe)};
 				} else {
 					printType();
