@@ -203,7 +203,8 @@ private final Defines:ReadOnlyArray<DefineData> = [
 		"name": "CsVer",
 		"define": "cs_ver",
 		"doc": "The C# version to target.",
-		"platforms": ["cs"]
+		"platforms": ["cs"],
+		"params": ["version"]
 	},
 	{
 		"name": "NoCppiaAst",
@@ -271,7 +272,8 @@ private final Defines:ReadOnlyArray<DefineData> = [
 	{
 		"name": "DumpPath",
 		"define": "dump_path",
-		"doc": "Path to generate dumps to (default: \"dump\")."
+		"doc": "Path to generate dumps to (default: \"dump\").",
+		"params": ["path"]
 	},
 	{
 		"name": "DumpDependencies",
@@ -408,7 +410,8 @@ private final Defines:ReadOnlyArray<DefineData> = [
 		"name": "HxcppApiLevel",
 		"define": "hxcpp_api_level",
 		"doc": "Provided to allow compatibility between hxcpp versions.",
-		"platforms": ["cpp"]
+		"platforms": ["cpp"],
+		"reserved": true
 	},
 	{
 		"name": "HxcppGcGenerational",
