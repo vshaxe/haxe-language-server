@@ -137,7 +137,7 @@ class CompletionFeature {
 				}
 			}
 			if (define.hasParams()) {
-				item.textEdit.newText = item.label + "=";
+				item.textEdit.newText += "=";
 				item.command = TriggerSuggest;
 			}
 			if (!define.isAvailable(haxeVersion)) {
