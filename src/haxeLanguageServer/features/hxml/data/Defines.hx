@@ -136,8 +136,22 @@ private final DefineEnums:Map<String, EnumValues> = [
 ];
 
 function getDefines(includeReserved:Bool):ReadOnlyArray<Define> {
-	return if (includeReserved) Defines else Defines.filter(define -> define.reserved != true);
+	final allDefines = Defines.concat(RemovedDefines.copy());
+	return if (includeReserved) allDefines else allDefines.filter(define -> define.reserved != true);
 }
+
+private final RemovedDefines:ReadOnlyArray<DefineData> = [
+	{
+		"name": "NoCOpt",
+		"define": "no_copt",
+		"doc": "Disable completion optimization (for debug purposes)."
+	},
+	{
+		"name": "OldConstructorInline",
+		"define": "old-constructor-inline",
+		"doc": "Use old constructor inlining logic (from Haxe 3.4.2) instead of the reworked version."
+	},
+];
 
 // from https://github.com/HaxeFoundation/haxe/blob/development/src-json/define.json
 
@@ -571,11 +585,6 @@ private final Defines:ReadOnlyArray<DefineData> = [
 		"platforms": ["cs", "java", "cpp", "hl"]
 	},
 	{
-		"name": "NoCOpt",
-		"define": "no_copt",
-		"doc": "Disable completion optimization (for debug purposes)."
-	},
-	{
 		"name": "NoDebug",
 		"define": "no_debug",
 		"doc": "Remove all debug macros from cpp output."
@@ -635,11 +644,6 @@ private final Defines:ReadOnlyArray<DefineData> = [
 		"define": "objc",
 		"doc": "Sets the hxcpp output to Objective-C++ classes. Must be defined for interop.",
 		"platforms": ["cpp"]
-	},
-	{
-		"name": "OldConstructorInline",
-		"define": "old-constructor-inline",
-		"doc": "Use old constructor inlining logic (from Haxe 3.4.2) instead of the reworked version."
 	},
 	{
 		"name": "OldErrorFormat",
