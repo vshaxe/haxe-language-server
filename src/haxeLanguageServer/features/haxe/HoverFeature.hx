@@ -83,10 +83,7 @@ class HoverFeature {
 					origin: printer.printEnumFieldOrigin(item.args.origin)
 				}
 			case Metadata:
-				var name = item.args.name;
-				if (name.charAt(0) != "@")
-					name = "@" + name; // backward compatibility with preview 4
-				{definition: printCodeBlock(name, Haxe)};
+				{definition: printCodeBlock(item.args.name, Haxe)};
 			case Define:
 				final value = item.args.value;
 				{definition: if (value == null) "_not defined_" else printCodeBlock('"$value"', Haxe)};
