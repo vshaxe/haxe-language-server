@@ -305,7 +305,7 @@ class CompletionFeature {
 				}
 			}
 		}
-		final keywords:Array<KeywordKind> = [Public, Private, Extern, Final, Static, Dynamic, Override, Inline, Macro];
+		final keywords:Array<KeywordKind> = [Public, Private, Extern, Final, Static, Dynamic, Override, Inline, Macro, Abstract];
 		for (keyword in keywords) {
 			results.push(create(keyword));
 		}
