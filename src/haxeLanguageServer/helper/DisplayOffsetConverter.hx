@@ -9,22 +9,16 @@ import js.node.Buffer;
 	conversion is required. So we have two implementations, one of which is selected based on
 	Haxe version.
 **/
-class DisplayOffsetConverter {
+abstract class DisplayOffsetConverter {
 	public static function create(haxeVersion:SemVer):DisplayOffsetConverter {
-		if (haxeVersion >= new SemVer(4, 0, 0))
-			return new Haxe4DisplayOffsetConverter();
-		else
-			return new Haxe3DisplayOffsetConverter();
+		return if (haxeVersion >= new SemVer(4, 0, 0)) new Haxe4DisplayOffsetConverter() else new Haxe3DisplayOffsetConverter();
 	}
 
-	public function positionCharToZeroBasedColumn(char:Int):Int
-		throw "abstract method";
+	public abstract function positionCharToZeroBasedColumn(char:Int):Int;
 
-	public function byteOffsetToCharacterOffset(string:String, byteOffset:Int):Int
-		throw "abstract method";
+	public abstract function byteOffsetToCharacterOffset(string:String, byteOffset:Int):Int;
 
-	public function characterOffsetToByteOffset(string:String, offset:Int):Int
-		throw "abstract method";
+	public abstract function characterOffsetToByteOffset(string:String, offset:Int):Int;
 }
 
 class Haxe3DisplayOffsetConverter extends DisplayOffsetConverter {
