@@ -34,6 +34,7 @@ class DisplayPrinter {
 	final pathPrinting:PathPrinting;
 	final functionFormatting:FunctionFormattingConfig;
 	var indent = "";
+	var qualifiedPaths:Null<Array<String>>;
 
 	public function new(wrap:Bool = false, pathPrinting:PathPrinting = Qualified, ?functionFormatting:FunctionFormattingConfig) {
 		this.wrap = wrap;
@@ -53,6 +54,15 @@ class DisplayPrinter {
 		}
 	}
 
+	public function collectQualifiedPaths() {
+		var previous = qualifiedPaths;
+		var current = qualifiedPaths = [];
+		return function():Array<String> {
+			qualifiedPaths = previous;
+			return current;
+		}
+	}
+
 	public function printPath(path:JsonTypePath) {
 		final qualified = switch pathPrinting {
 			case Always: true;
@@ -65,13 +75,19 @@ class DisplayPrinter {
 		if (isToplevelType && path.importStatus == Shadowed) {
 			path.pack.push("std");
 		}
-		return if (qualified) {
+		function printFullPath() {
 			var printedPath = path.moduleName + (if (isSubType) "." + path.typeName else "");
 			if (path.pack.length > 0) {
 				printedPath = path.pack.join(".") + "." + printedPath;
 			}
-			printedPath;
+			return printedPath;
+		}
+		return if (qualified) {
+			printFullPath();
 		} else {
+			if (path.importStatus == Unimported && qualifiedPaths != null) {
+				qualifiedPaths.push(printFullPath());
+			}
 			path.typeName;
 		}
 	}
@@ -210,6 +226,37 @@ class DisplayPrinter {
 		} else {
 			definition + superCall + end;
 		}
+	}
+
+	public function printClassFieldImplementation<T>(field:JsonClassField, concreteType:JsonType<T>, withOverride:Bool, tab:String = "\t") {
+		var buf = new StringBuf();
+		final signature = concreteType.extractFunctionSignature();
+		final lineBreak = if (functionFormatting.placeOpenBraceOnNewLine) "\n" else " ";
+		if (field.meta.exists(meta -> meta.name == ":overload")) {
+			buf.add("@:overload ");
+		}
+		if (field.isPublic) {
+			buf.add("public ");
+		} else if (functionFormatting.explicitPrivate) {
+			buf.add("private ");
+		}
+		if (withOverride) {
+			buf.add("override ");
+		}
+		buf.add(printEmptyFunctionDefinition(field.name, signature, field.params));
+		buf.add(lineBreak);
+		buf.add("{");
+		if (!signature.ret.isVoid()) {
+			buf.add("\n");
+			buf.add(indent);
+			buf.add(tab);
+			buf.add(tab);
+			buf.add("throw new haxe.exceptions.NotImplementedException();\n");
+			buf.add(indent);
+			buf.add(tab);
+		}
+		buf.add("}\n");
+		return buf.toString();
 	}
 
 	static final castRegex = ~/^(cast )+/;

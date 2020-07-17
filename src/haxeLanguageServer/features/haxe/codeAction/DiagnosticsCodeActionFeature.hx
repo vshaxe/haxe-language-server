@@ -9,8 +9,11 @@ import haxeLanguageServer.helper.DocHelper;
 import haxeLanguageServer.helper.ImportHelper;
 import haxeLanguageServer.helper.TypeHelper;
 import haxeLanguageServer.helper.WorkspaceEditHelper;
+import haxeLanguageServer.protocol.DisplayPrinter;
+import tokentree.TokenTree;
 
 using Lambda;
+using tokentree.utils.TokenTreeCheckUtils;
 
 class DiagnosticsCodeActionFeature implements CodeActionContributor {
 	final context:Context;
@@ -36,6 +39,7 @@ class DiagnosticsCodeActionFeature implements CodeActionContributor {
 				case UnresolvedIdentifier: createUnresolvedIdentifierActions(params, diagnostic);
 				case CompilerError: createCompilerErrorActions(params, diagnostic);
 				case RemovableCode: createRemovableCodeActions(params, diagnostic);
+				case MissingFields: createMissingFieldsActions(params, diagnostic);
 				case _: [];
 			});
 		}
@@ -255,6 +259,109 @@ class DiagnosticsCodeActionFeature implements CodeActionContributor {
 			});
 		}
 
+		return actions;
+	}
+
+	function createMissingFieldsActions(params:CodeActionParams, diagnostic:Diagnostic):Array<CodeAction> {
+		final args = diagnostics.getArguments(params.textDocument.uri, MissingFields, diagnostic.range);
+		if (args == null) {
+			return [];
+		}
+		var document = context.documents.getHaxe(params.textDocument.uri);
+		if (document == null) {
+			return [];
+		}
+		var tokens = document.tokens;
+		if (tokens == null) {
+			return [];
+		}
+		var className = args.classPath.typeName;
+		var classToken:Null<TokenTree> = null;
+		var classTokens = tokens.tree.filterCallback((token, _) -> {
+			return switch (token.tok) {
+				case Kwd(KwdClass):
+					FOUND_SKIP_SUBTREE;
+				case Sharp(_):
+					GO_DEEPER;
+				case _:
+					SKIP_SUBTREE;
+			}
+		});
+		for (token in classTokens) {
+			var nameToken = token.getNameToken();
+			if (nameToken == null) {
+				continue;
+			}
+			var name = nameToken.getName();
+			if (name == className) {
+				classToken = token;
+			}
+		}
+		if (classToken == null) {
+			return [];
+		}
+
+		var actions:Array<CodeAction> = [];
+		final importConfig = context.config.user.codeGeneration.imports;
+		final fieldFormatting = context.config.user.codeGeneration.functions.field;
+		final printer = new DisplayPrinter(false, if (importConfig.enableAutoImports) Shadowed else Qualified, fieldFormatting);
+		var pos = tokens.getPos(classToken);
+		var rangeClass = document.rangeAt(pos.min, pos.min);
+		var pos = tokens.getTreePos(classToken);
+		var rangeEnd = document.rangeAt(pos.max - 1, pos.max - 1);
+		var allEdits = [];
+		var allDotPaths = [];
+		for (entry in args.entries) {
+			var withOverride = false;
+			var cause = switch (entry.cause.kind) {
+				case AbstractParent:
+					actions.push({
+						title: "Make abstract",
+						kind: QuickFix,
+						edit: WorkspaceEditHelper.create(context, params, [{range: rangeClass, newText: "abstract "}]),
+						diagnostics: [diagnostic]
+					});
+					withOverride = true;
+					printer.printPathWithParams(entry.cause.args.parent);
+				case ImplementedInterface:
+					printer.printPathWithParams(entry.cause.args.parent);
+			}
+			var edits = [];
+			final getQualified = printer.collectQualifiedPaths();
+			for (field in entry.fields) {
+				var buf = new StringBuf();
+				buf.add("\n\t");
+				buf.add(printer.printClassFieldImplementation(field.field, field.type, withOverride));
+				var edit = {
+					range: rangeEnd,
+					newText: buf.toString()
+				};
+				edits.push(edit);
+				if (field.unique) {
+					allEdits.push(edit);
+				}
+			}
+			var dotPaths = getQualified();
+			dotPaths = dotPaths.filterDuplicates((a, b) -> a == b);
+			allDotPaths = allDotPaths.concat(dotPaths);
+			edits.push(createImportsEdit(document, determineImportPosition(document), dotPaths, importConfig.style));
+			actions.push({
+				title: "Implement methods for " + cause,
+				kind: QuickFix,
+				edit: WorkspaceEditHelper.create(context, params, edits),
+				diagnostics: [diagnostic]
+			});
+		}
+		if (args.entries.length > 1) {
+			allDotPaths = allDotPaths.filterDuplicates((a, b) -> a == b);
+			allEdits.push(createImportsEdit(document, determineImportPosition(document), allDotPaths, importConfig.style));
+			actions.push({
+				title: "Implement all missing methods",
+				kind: QuickFix,
+				edit: WorkspaceEditHelper.create(context, params, allEdits),
+				diagnostics: [diagnostic]
+			});
+		}
 		return actions;
 	}
 }

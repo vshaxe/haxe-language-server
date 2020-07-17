@@ -1,10 +1,12 @@
 package haxeLanguageServer.features.haxe;
 
 import haxe.Json;
+import haxe.display.JsonModuleTypes;
 import haxe.ds.BalancedTree;
 import haxe.io.Path;
 import haxeLanguageServer.LanguageServerMethods;
 import haxeLanguageServer.helper.PathHelper;
+import haxeLanguageServer.protocol.DisplayPrinter;
 import haxeLanguageServer.server.DisplayResult;
 import js.node.ChildProcess;
 
@@ -272,6 +274,38 @@ enum abstract UnresolvedIdentifierSuggestion(Int) {
 	final Typo;
 }
 
+enum abstract MissingFieldCauseKind<T>(String) {
+	final AbstractParent:MissingFieldCauseKind<{parent:JsonTypePathWithParams}>;
+	final ImplementedInterface:MissingFieldCauseKind<{parent:JsonTypePathWithParams}>;
+}
+
+typedef MissingFieldCause<T> = {
+	var kind:MissingFieldCauseKind<T>;
+	var args:T;
+}
+
+typedef MissingField = {
+	var field:JsonClassField;
+	var type:JsonType<Dynamic>;
+
+	/**
+		When implementing multiple interfaces, there can be field duplicates among them. This flag is only
+		true for the first such occurrence of a field, so that the "Implement all" code action doesn't end
+		up implementing the same field multiple times.
+	**/
+	var unique:Bool;
+}
+
+typedef MissingFieldDiagnostic = {
+	var fields:Array<MissingField>;
+	var cause:MissingFieldCause<Dynamic>;
+}
+
+typedef MissingFieldDiagnostics = {
+	var classPath:JsonTypePath;
+	var entries:Array<MissingFieldDiagnostic>;
+}
+
 enum abstract DiagnosticKind<T>(Int) from Int to Int {
 	final UnusedImport:DiagnosticKind<Void>;
 	final UnresolvedIdentifier:DiagnosticKind<Array<{kind:UnresolvedIdentifierSuggestion, name:String}>>;
@@ -280,6 +314,7 @@ enum abstract DiagnosticKind<T>(Int) from Int to Int {
 	final ParserError:DiagnosticKind<String>;
 	final DeprecationWarning:DiagnosticKind<String>;
 	final InactiveBlock:DiagnosticKind<Void>;
+	final MissingFields:DiagnosticKind<MissingFieldDiagnostics>;
 	public inline function new(i:Int) {
 		this = i;
 	}
@@ -293,6 +328,13 @@ enum abstract DiagnosticKind<T>(Int) from Int to Int {
 			case ParserError: args;
 			case DeprecationWarning: args;
 			case InactiveBlock: "Inactive conditional compilation block";
+			case MissingFields:
+				var printer = new DisplayPrinter(Never);
+				var cause = args.entries.map(diag -> switch (diag.cause.kind) {
+					case AbstractParent: printer.printPathWithParams(diag.cause.args.parent);
+					case ImplementedInterface: printer.printPathWithParams(diag.cause.args.parent);
+				}).join(", ");
+				"Missing fields for " + cause;
 		}
 	}
 }
