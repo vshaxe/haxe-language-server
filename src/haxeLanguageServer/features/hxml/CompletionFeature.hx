@@ -183,6 +183,12 @@ class CompletionFeature {
 			}
 			items.push(item);
 		}
+		items.push({
+			label: "..",
+			insertText: "../",
+			kind: Folder,
+			command: TriggerSuggest
+		});
 		return items;
 	}
 
