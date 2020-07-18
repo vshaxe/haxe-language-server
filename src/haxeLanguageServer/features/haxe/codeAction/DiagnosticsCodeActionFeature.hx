@@ -346,7 +346,7 @@ class DiagnosticsCodeActionFeature implements CodeActionContributor {
 			allDotPaths = allDotPaths.concat(dotPaths);
 			edits.push(createImportsEdit(document, determineImportPosition(document), dotPaths, importConfig.style));
 			actions.push({
-				title: "Implement methods for " + cause,
+				title: "Implement fields for " + cause,
 				kind: QuickFix,
 				edit: WorkspaceEditHelper.create(context, params, edits),
 				diagnostics: [diagnostic]
@@ -355,8 +355,8 @@ class DiagnosticsCodeActionFeature implements CodeActionContributor {
 		if (args.entries.length > 1) {
 			allDotPaths = allDotPaths.filterDuplicates((a, b) -> a == b);
 			allEdits.push(createImportsEdit(document, determineImportPosition(document), allDotPaths, importConfig.style));
-			actions.push({
-				title: "Implement all missing methods",
+			actions.unshift({
+				title: "Implement all missing fields",
 				kind: QuickFix,
 				edit: WorkspaceEditHelper.create(context, params, allEdits),
 				diagnostics: [diagnostic]
