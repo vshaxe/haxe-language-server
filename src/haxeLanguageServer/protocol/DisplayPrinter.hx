@@ -235,6 +235,9 @@ class DisplayPrinter {
 		if (field.meta.hasMeta(Overload)) {
 			buf.add("@:overload ");
 		}
+		if (field.scope == Static) {
+			buf.add("static ");
+		}
 		if (field.isPublic) {
 			buf.add("public ");
 		} else if (functionFormatting.explicitPrivate) {

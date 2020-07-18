@@ -313,7 +313,7 @@ class DiagnosticsCodeActionFeature implements CodeActionContributor {
 		var allDotPaths = [];
 		for (entry in args.entries) {
 			var withOverride = false;
-			var cause = switch (entry.cause.kind) {
+			var title = switch (entry.cause.kind) {
 				case AbstractParent:
 					actions.push({
 						title: "Make abstract",
@@ -322,9 +322,11 @@ class DiagnosticsCodeActionFeature implements CodeActionContributor {
 						diagnostics: [diagnostic]
 					});
 					withOverride = true;
-					printer.printPathWithParams(entry.cause.args.parent);
+					'Implement methods for ${printer.printPathWithParams(entry.cause.args.parent)}';
 				case ImplementedInterface:
-					printer.printPathWithParams(entry.cause.args.parent);
+					'Implement fields for ${printer.printPathWithParams(entry.cause.args.parent)}';
+				case PropertyAccessor:
+					'Implement ${entry.cause.args.isGetter ? "getter" : "setter"} for ${entry.cause.args.property.name}';
 			}
 			var edits = [];
 			final getQualified = printer.collectQualifiedPaths();
@@ -346,7 +348,7 @@ class DiagnosticsCodeActionFeature implements CodeActionContributor {
 			allDotPaths = allDotPaths.concat(dotPaths);
 			edits.push(createImportsEdit(document, determineImportPosition(document), dotPaths, importConfig.style));
 			actions.unshift({
-				title: "Implement fields for " + cause,
+				title: title,
 				kind: QuickFix,
 				edit: WorkspaceEditHelper.create(context, params, edits),
 				diagnostics: [diagnostic]

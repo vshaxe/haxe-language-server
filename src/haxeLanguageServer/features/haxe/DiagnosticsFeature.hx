@@ -277,6 +277,7 @@ enum abstract UnresolvedIdentifierSuggestion(Int) {
 enum abstract MissingFieldCauseKind<T>(String) {
 	final AbstractParent:MissingFieldCauseKind<{parent:JsonTypePathWithParams}>;
 	final ImplementedInterface:MissingFieldCauseKind<{parent:JsonTypePathWithParams}>;
+	final PropertyAccessor:MissingFieldCauseKind<{property:JsonClassField, isGetter:Bool}>;
 }
 
 typedef MissingFieldCause<T> = {
@@ -333,6 +334,7 @@ enum abstract DiagnosticKind<T>(Int) from Int to Int {
 				var cause = args.entries.map(diag -> switch (diag.cause.kind) {
 					case AbstractParent: printer.printPathWithParams(diag.cause.args.parent);
 					case ImplementedInterface: printer.printPathWithParams(diag.cause.args.parent);
+					case PropertyAccessor: diag.cause.args.property.name;
 				}).join(", ");
 				"Missing fields for " + cause;
 		}
