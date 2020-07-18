@@ -312,8 +312,8 @@ class DisplayPrinter {
 		return switch kind.kind {
 			case FVar:
 				final inlineKeyword = if (kind.args.write.kind == AccInline) "inline " else "";
-				final keyword = if (kind.args.write.kind == AccCtor || field.isFinalField()) "final" else "var";
-				var accessors = printAccessors(kind.args);
+				final isFinal = kind.args.write.kind == AccCtor || field.isFinalField();
+				final accessors = if (isFinal) "" else printAccessors(kind.args);
 				// structure fields get some special treatment
 				if (occurrence.origin.isStructure()) {
 					access = "";
@@ -324,9 +324,7 @@ class DisplayPrinter {
 					access = "";
 					staticKeyword = "";
 				}
-				if (keyword == "final") {
-					accessors = "";
-				}
+				final keyword = if (isFinal) "final" else "var";
 				var definition = '$access$staticKeyword$keyword $inlineKeyword$name$accessors:$type';
 				if (field.expr != null) {
 					final expr = castRegex.replace(field.expr.string, "");
