@@ -228,7 +228,7 @@ class DisplayPrinter {
 		}
 	}
 
-	public function printClassFieldImplementation<T>(field:JsonClassField, concreteType:JsonType<T>, withOverride:Bool, tab:String = "\t") {
+	public function printMethodImplementation<T>(field:JsonClassField, concreteType:JsonType<T>, withOverride:Bool, tab:String = "\t") {
 		var buf = new StringBuf();
 		final signature = concreteType.extractFunctionSignature();
 		final lineBreak = if (functionFormatting.placeOpenBraceOnNewLine) "\n" else " ";
@@ -259,7 +259,43 @@ class DisplayPrinter {
 		return buf.toString();
 	}
 
+	public function printVarImplementation<T>(field:JsonClassField, args:{read:JsonVarAccess<Dynamic>, write:JsonVarAccess<Dynamic>},
+			concreteType:JsonType<T>, tab:String = "\t") {
+		var buf = new StringBuf();
+		if (field.isPublic) {
+			buf.add("public ");
+		} else if (functionFormatting.explicitPrivate) {
+			buf.add("private ");
+		}
+		if (field.isFinalField()) {
+			buf.add("final ");
+			buf.add(field.name);
+		} else {
+			buf.add("var ");
+			buf.add(field.name);
+			buf.add(printAccessors(args));
+		}
+		buf.add(":");
+		buf.add(printType(field.type));
+		buf.add(";\n");
+		return buf.toString();
+	}
+
+	public function printClassFieldImplementation<T>(field:JsonClassField, concreteType:JsonType<T>, withOverride:Bool, tab:String = "\t") {
+		return switch (field.kind.kind) {
+			case FMethod: printMethodImplementation(field, concreteType, withOverride, tab);
+			case FVar: printVarImplementation(field, field.kind.args, concreteType, tab);
+		}
+	}
+
 	static final castRegex = ~/^(cast )+/;
+
+	function printAccessors(args:{read:JsonVarAccess<Dynamic>, write:JsonVarAccess<Dynamic>}) {
+		final read = printAccessor(args.read, true);
+		final write = printAccessor(args.write, false);
+		var accessors = if ((read != null && write != null) && (read != "default" || write != "default")) '($read, $write)' else "";
+		return accessors;
+	}
 
 	public function printClassFieldDefinition<T0, T1, T2>(occurrence:ClassFieldOccurrence<T0>, concreteType:JsonType<T1>, isEnumAbstractField:Bool) {
 		final field = occurrence.field;
@@ -277,10 +313,7 @@ class DisplayPrinter {
 			case FVar:
 				final inlineKeyword = if (kind.args.write.kind == AccInline) "inline " else "";
 				final keyword = if (kind.args.write.kind == AccCtor || field.isFinalField()) "final" else "var";
-				final read = printAccessor(kind.args.read, true);
-				final write = printAccessor(kind.args.write, false);
-				var accessors = if ((read != null && write != null)
-					&& (read != "default" || write != "default")) '($read, $write)' else "";
+				var accessors = printAccessors(kind.args);
 				// structure fields get some special treatment
 				if (occurrence.origin.isStructure()) {
 					access = "";
