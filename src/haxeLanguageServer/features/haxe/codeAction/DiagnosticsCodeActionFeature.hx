@@ -362,6 +362,9 @@ class DiagnosticsCodeActionFeature implements CodeActionContributor {
 				diagnostics: [diagnostic]
 			});
 		}
+		if (actions.length > 0) {
+			actions[0].isPreferred = true;
+		}
 		return actions;
 	}
 }
