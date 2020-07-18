@@ -10,4 +10,5 @@ enum abstract CompilerMetadata(String) to String {
 	final Value = ":value";
 	final Deprecated = ":deprecated";
 	final NoCompletion = ":noCompletion";
+	final Overload = ":overload";
 }

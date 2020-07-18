@@ -232,7 +232,7 @@ class DisplayPrinter {
 		var buf = new StringBuf();
 		final signature = concreteType.extractFunctionSignature();
 		final lineBreak = if (functionFormatting.placeOpenBraceOnNewLine) "\n" else " ";
-		if (field.meta.exists(meta -> meta.name == ":overload")) {
+		if (field.meta.hasMeta(Overload)) {
 			buf.add("@:overload ");
 		}
 		if (field.isPublic) {
