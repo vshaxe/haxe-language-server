@@ -345,7 +345,7 @@ class DiagnosticsCodeActionFeature implements CodeActionContributor {
 			dotPaths = dotPaths.filterDuplicates((a, b) -> a == b);
 			allDotPaths = allDotPaths.concat(dotPaths);
 			edits.push(createImportsEdit(document, determineImportPosition(document), dotPaths, importConfig.style));
-			actions.push({
+			actions.unshift({
 				title: "Implement fields for " + cause,
 				kind: QuickFix,
 				edit: WorkspaceEditHelper.create(context, params, edits),
