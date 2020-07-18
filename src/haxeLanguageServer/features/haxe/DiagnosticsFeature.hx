@@ -303,7 +303,8 @@ typedef MissingFieldDiagnostic = {
 }
 
 typedef MissingFieldDiagnostics = {
-	var classPath:JsonTypePath;
+	var moduleType:JsonModuleType<Dynamic>;
+	var moduleFile:String;
 	var entries:Array<MissingFieldDiagnostic>;
 }
 

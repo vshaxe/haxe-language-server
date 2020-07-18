@@ -1,5 +1,7 @@
 package haxeLanguageServer.features.haxe.codeAction;
 
+import haxe.display.JsonModuleTypes;
+import haxe.ds.Option;
 import haxeLanguageServer.Configuration;
 import haxeLanguageServer.features.haxe.DiagnosticsFeature.*;
 import haxeLanguageServer.features.haxe.DiagnosticsFeature;
@@ -14,6 +16,10 @@ import tokentree.TokenTree;
 
 using Lambda;
 using tokentree.utils.TokenTreeCheckUtils;
+
+private enum FieldInsertionMode {
+	IntoClass(rangeClass:Range, rangeEnd:Range);
+}
 
 class DiagnosticsCodeActionFeature implements CodeActionContributor {
 	final context:Context;
@@ -275,52 +281,62 @@ class DiagnosticsCodeActionFeature implements CodeActionContributor {
 		if (tokens == null) {
 			return [];
 		}
-		var className = args.classPath.typeName;
-		var classToken:Null<TokenTree> = null;
-		var classTokens = tokens.tree.filterCallback((token, _) -> {
-			return switch (token.tok) {
-				case Kwd(KwdClass):
-					FOUND_SKIP_SUBTREE;
-				case Sharp(_):
-					GO_DEEPER;
-				case _:
-					SKIP_SUBTREE;
-			}
-		});
-		for (token in classTokens) {
-			var nameToken = token.getNameToken();
-			if (nameToken == null) {
-				continue;
-			}
-			var name = nameToken.getName();
-			if (name == className) {
-				classToken = token;
-			}
-		}
-		if (classToken == null) {
-			return [];
+		var rangeClass;
+		var rangeFieldInsertion;
+		switch (args.moduleType.kind) {
+			case Class:
+				var className = args.moduleType.name;
+				var classToken:Null<TokenTree> = null;
+				var classTokens = tokens.tree.filterCallback((token, _) -> {
+					return switch (token.tok) {
+						case Kwd(KwdClass):
+							FOUND_SKIP_SUBTREE;
+						case Sharp(_):
+							GO_DEEPER;
+						case _:
+							SKIP_SUBTREE;
+					}
+				});
+				for (token in classTokens) {
+					var nameToken = token.getNameToken();
+					if (nameToken == null) {
+						continue;
+					}
+					var name = nameToken.getName();
+					if (name == className) {
+						classToken = token;
+					}
+				}
+				if (classToken == null) {
+					return [];
+				} else {
+					var pos = tokens.getPos(classToken);
+					rangeClass = document.rangeAt(pos.min, pos.min);
+					var pos = tokens.getTreePos(classToken);
+					rangeFieldInsertion = document.rangeAt(pos.max - 1, pos.max - 1);
+				}
+			case _:
+				return [];
 		}
 
 		var actions:Array<CodeAction> = [];
 		final importConfig = context.config.user.codeGeneration.imports;
 		final fieldFormatting = context.config.user.codeGeneration.functions.field;
 		final printer = new DisplayPrinter(false, if (importConfig.enableAutoImports) Shadowed else Qualified, fieldFormatting);
-		var pos = tokens.getPos(classToken);
-		var rangeClass = document.rangeAt(pos.min, pos.min);
-		var pos = tokens.getTreePos(classToken);
-		var rangeEnd = document.rangeAt(pos.max - 1, pos.max - 1);
 		var allEdits = [];
 		var allDotPaths = [];
 		for (entry in args.entries) {
 			var withOverride = false;
 			var title = switch (entry.cause.kind) {
 				case AbstractParent:
-					actions.push({
-						title: "Make abstract",
-						kind: QuickFix,
-						edit: WorkspaceEditHelper.create(context, params, [{range: rangeClass, newText: "abstract "}]),
-						diagnostics: [diagnostic]
-					});
+					if (rangeClass != null) {
+						actions.push({
+							title: "Make abstract",
+							kind: QuickFix,
+							edit: WorkspaceEditHelper.create(context, params, [{range: rangeClass, newText: "abstract "}]),
+							diagnostics: [diagnostic]
+						});
+					}
 					withOverride = true;
 					'Implement methods for ${printer.printPathWithParams(entry.cause.args.parent)}';
 				case ImplementedInterface:
@@ -335,7 +351,7 @@ class DiagnosticsCodeActionFeature implements CodeActionContributor {
 				buf.add("\n\t");
 				buf.add(printer.printClassFieldImplementation(field.field, field.type, withOverride));
 				var edit = {
-					range: rangeEnd,
+					range: rangeFieldInsertion,
 					newText: buf.toString()
 				};
 				edits.push(edit);
