@@ -283,9 +283,9 @@ class DiagnosticsCodeActionFeature implements CodeActionContributor {
 		}
 		var rangeClass;
 		var rangeFieldInsertion;
+		var className = args.moduleType.name;
 		switch (args.moduleType.kind) {
 			case Class:
-				var className = args.moduleType.name;
 				var classToken:Null<TokenTree> = null;
 				var classTokens = tokens.tree.filterCallback((token, _) -> {
 					return switch (token.tok) {
@@ -343,6 +343,13 @@ class DiagnosticsCodeActionFeature implements CodeActionContributor {
 					'Implement fields for ${printer.printPathWithParams(entry.cause.args.parent)}';
 				case PropertyAccessor:
 					'Implement ${entry.cause.args.isGetter ? "getter" : "setter"} for ${entry.cause.args.property.name}';
+				case FieldAccess:
+					// There's only one field in this case... I think
+					var field = entry.fields[0];
+					if (field == null) {
+						return [];
+					}
+					'Add ${field.field.name} to $className';
 			}
 			var edits = [];
 			final getQualified = printer.collectQualifiedPaths();
