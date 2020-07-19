@@ -12,6 +12,7 @@ import haxeLanguageServer.helper.ImportHelper;
 import haxeLanguageServer.helper.TypeHelper;
 import haxeLanguageServer.helper.WorkspaceEditHelper;
 import haxeLanguageServer.protocol.DisplayPrinter;
+import sys.FileSystem;
 import tokentree.TokenTree;
 
 using Lambda;
@@ -273,9 +274,15 @@ class DiagnosticsCodeActionFeature implements CodeActionContributor {
 		if (args == null) {
 			return [];
 		}
-		var document = context.documents.getHaxe(params.textDocument.uri);
+		final uri = new FsPath(args.moduleFile).toUri();
+		var document = context.documents.getHaxe(uri);
 		if (document == null) {
-			return [];
+			// This is a bad pattern, but null-safety is trolling me hard with everything else...
+			if (!FileSystem.exists(args.moduleFile)) {
+				return [];
+			}
+			final content = sys.io.File.getContent(args.moduleFile);
+			document = new HaxeDocument(uri, "haxe", 4, content);
 		}
 		var tokens = document.tokens;
 		if (tokens == null) {
@@ -333,7 +340,7 @@ class DiagnosticsCodeActionFeature implements CodeActionContributor {
 						actions.push({
 							title: "Make abstract",
 							kind: QuickFix,
-							edit: WorkspaceEditHelper.create(context, params, [{range: rangeClass, newText: "abstract "}]),
+							edit: WorkspaceEditHelper._create(document, [{range: rangeClass, newText: "abstract "}]),
 							diagnostics: [diagnostic]
 						});
 					}
@@ -373,7 +380,7 @@ class DiagnosticsCodeActionFeature implements CodeActionContributor {
 			actions.unshift({
 				title: title,
 				kind: QuickFix,
-				edit: WorkspaceEditHelper.create(context, params, edits),
+				edit: WorkspaceEditHelper._create(document, edits),
 				diagnostics: [diagnostic]
 			});
 		}
@@ -383,7 +390,7 @@ class DiagnosticsCodeActionFeature implements CodeActionContributor {
 			actions.unshift({
 				title: "Implement all missing fields",
 				kind: QuickFix,
-				edit: WorkspaceEditHelper.create(context, params, allEdits),
+				edit: WorkspaceEditHelper._create(document, allEdits),
 				diagnostics: [diagnostic]
 			});
 		}
