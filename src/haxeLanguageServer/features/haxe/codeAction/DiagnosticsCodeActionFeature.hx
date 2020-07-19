@@ -376,7 +376,9 @@ class DiagnosticsCodeActionFeature implements CodeActionContributor {
 			var dotPaths = getQualified();
 			dotPaths = dotPaths.filterDuplicates((a, b) -> a == b);
 			allDotPaths = allDotPaths.concat(dotPaths);
-			edits.push(createImportsEdit(document, determineImportPosition(document), dotPaths, importConfig.style));
+			if (dotPaths.length > 0) {
+				edits.push(createImportsEdit(document, determineImportPosition(document), dotPaths, importConfig.style));
+			}
 			actions.unshift({
 				title: title,
 				kind: QuickFix,
@@ -386,7 +388,9 @@ class DiagnosticsCodeActionFeature implements CodeActionContributor {
 		}
 		if (args.entries.length > 1) {
 			allDotPaths = allDotPaths.filterDuplicates((a, b) -> a == b);
-			allEdits.push(createImportsEdit(document, determineImportPosition(document), allDotPaths, importConfig.style));
+			if (allDotPaths.length > 0) {
+				allEdits.push(createImportsEdit(document, determineImportPosition(document), allDotPaths, importConfig.style));
+			}
 			actions.unshift({
 				title: "Implement all missing fields",
 				kind: QuickFix,
