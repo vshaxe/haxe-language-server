@@ -233,7 +233,7 @@ class DisplayPrinter {
 		final signature = concreteType.extractFunctionSignature();
 		final lineBreak = if (functionFormatting.placeOpenBraceOnNewLine) "\n" else " ";
 		if (field.meta.hasMeta(Overload)) {
-			buf.add("@:overload ");
+			buf.add("overload ");
 		}
 		if (field.scope == Static) {
 			buf.add("static ");
