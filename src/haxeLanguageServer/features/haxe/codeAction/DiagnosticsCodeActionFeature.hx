@@ -379,12 +379,23 @@ class DiagnosticsCodeActionFeature implements CodeActionContributor {
 			if (dotPaths.length > 0) {
 				edits.push(createImportsEdit(document, determineImportPosition(document), dotPaths, importConfig.style));
 			}
-			actions.unshift({
+			final codeAction:CodeAction = {
 				title: title,
 				kind: QuickFix,
 				edit: WorkspaceEditHelper._create(document, edits),
 				diagnostics: [diagnostic]
-			});
+			};
+			if (entry.cause.kind == FieldAccess) {
+				codeAction.command = {
+					title: "Highlight Insertion",
+					command: "haxe.codeAction.highlightInsertion",
+					arguments: [
+						document.uri.toString(),
+						rangeFieldInsertion
+					]
+				}
+			}
+			actions.unshift(codeAction);
 		}
 		if (args.entries.length > 1) {
 			allDotPaths = allDotPaths.filterDuplicates((a, b) -> a == b);
