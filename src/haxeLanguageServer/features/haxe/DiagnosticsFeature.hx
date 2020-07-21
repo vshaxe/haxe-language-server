@@ -234,7 +234,8 @@ class DiagnosticsFeature {
 		}
 
 		// hide inactive blocks that are contained within other inactive blocks
-		diagnostics = diagnostics.filter(a -> !diagnostics.exists(b -> a != b && a.range != null && b.range != null && b.range.contains(a.range)));
+		diagnostics = diagnostics.filter(a -> a.kind != (cast InactiveBlock)
+			|| !diagnostics.exists(b -> a != b && a.range != null && b.range != null && b.range.contains(a.range)));
 
 		return diagnostics;
 	}
