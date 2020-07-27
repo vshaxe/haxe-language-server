@@ -67,8 +67,8 @@ class PositionAnalyzer {
 		inline function isType(tok:TokenDef) {
 			return tok.match(Kwd(KwdClass | KwdInterface | KwdAbstract | KwdEnum | KwdTypedef));
 		}
-		var typeToken = null;
-		var fieldToken = null;
+		var typeToken:Null<TokenTree> = null;
+		var fieldToken:Null<TokenTree> = null;
 		var hasBlockParent = false;
 
 		var parent = token.access();
