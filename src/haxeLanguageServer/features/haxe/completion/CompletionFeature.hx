@@ -1,5 +1,6 @@
 package haxeLanguageServer.features.haxe.completion;
 
+import haxeLanguageServer.helper.SemVer;
 import haxe.display.Display.CompletionParams as HaxeCompletionParams;
 import haxe.display.Display;
 import haxe.display.JsonModuleTypes;
@@ -305,7 +306,11 @@ class CompletionFeature {
 				}
 			}
 		}
-		final keywords:Array<KeywordKind> = [Public, Private, Extern, Final, Static, Dynamic, Override, Inline, Macro, Abstract];
+		final keywords:Array<KeywordKind> = [Public, Private, Extern, Final, Static, Dynamic, Override, Inline, Macro];
+		if (context.haxeServer.haxeVersion >= new SemVer(4, 2, 0)) {
+			keywords.push(Abstract);
+			keywords.push(Overload);
+		}
 		for (keyword in keywords) {
 			results.push(create(keyword));
 		}
