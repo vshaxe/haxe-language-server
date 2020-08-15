@@ -114,8 +114,18 @@ private final DefineVersions:Map<String, VersionInfo> = {
 		},
 		"OldConstructorInline" => {
 			until: v4_1_0
+		},
+		"JvmCompressionLevel" => {
+			since: v4_2_0
+		},
+		"JvmDynamicLevel" => {
+			since: v4_2_0
 		}
 	];
+}
+
+private function integers(from:Int, to:Int):EnumValues {
+	return [for (i in from...to + 1) {name: Std.string(i)}];
 }
 
 private final DefineEnums:Map<String, EnumValues> = [
@@ -132,7 +142,13 @@ private final DefineEnums:Map<String, EnumValues> = [
 		{name: "micro", description: "Micro Framework"},
 		{name: "compact", description: "Compact Framework"}
 	],
-	"SwfCompressLevel" => [for (i in 0...9) {name: Std.string(i + 1)}]
+	"SwfCompressLevel" => integers(1, 9),
+	"JvmCompressionLevel" => integers(0, 9),
+	"JvmDynamicLevel" => [
+		{name: "1", description: "field read/write optimization (default)"},
+		{name: "0", description: "none"},
+		{name: "2", description: "compile-time method closures"},
+	]
 ];
 
 function getDefines(includeReserved:Bool):ReadOnlyArray<Define> {
@@ -497,6 +513,18 @@ private final Defines:ReadOnlyArray<DefineData> = [
 		"name": "Jvm",
 		"define": "jvm",
 		"doc": "Generate jvm directly.",
+		"platforms": ["java"]
+	},
+	{
+		"name": "JvmCompressionLevel",
+		"define": "jvm.compression-level",
+		"doc": "Set the compression level of the generated file between 0 (no compression) and 9 (highest compression). Default: 6",
+		"platforms": ["java"]
+	},
+	{
+		"name": "JvmDynamicLevel",
+		"define": "jvm.dynamic-level",
+		"doc": "Controls the amount of dynamic support code being generated. 0 = none, 1 = field read/write optimization (default), 2 = compile-time method closures",
 		"platforms": ["java"]
 	},
 	{
