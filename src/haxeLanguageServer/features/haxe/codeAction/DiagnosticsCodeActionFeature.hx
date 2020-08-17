@@ -334,29 +334,35 @@ class DiagnosticsCodeActionFeature implements CodeActionContributor {
 		var allDotPaths = [];
 		for (entry in args.entries) {
 			var withOverride = false;
-			var title = switch (entry.cause.kind) {
-				case AbstractParent:
-					if (rangeClass != null) {
-						actions.push({
-							title: "Make abstract",
-							kind: QuickFix,
-							edit: WorkspaceEditHelper._create(document, [{range: rangeClass, newText: "abstract "}]),
-							diagnostics: [diagnostic]
-						});
-					}
-					withOverride = true;
-					'Implement methods for ${printer.printPathWithParams(entry.cause.args.parent)}';
-				case ImplementedInterface:
-					'Implement fields for ${printer.printPathWithParams(entry.cause.args.parent)}';
-				case PropertyAccessor:
-					'Implement ${entry.cause.args.isGetter ? "getter" : "setter"} for ${entry.cause.args.property.name}';
-				case FieldAccess:
-					// There's only one field in this case... I think
-					var field = entry.fields[0];
-					if (field == null) {
-						return [];
-					}
-					'Add ${field.field.name} to $className';
+			function getTitle<T>(cause:MissingFieldCause<T>) {
+				return switch (cause.kind) {
+					case AbstractParent:
+						if (rangeClass != null) {
+							actions.push({
+								title: "Make abstract",
+								kind: QuickFix,
+								edit: WorkspaceEditHelper._create(document, [{range: rangeClass, newText: "abstract "}]),
+								diagnostics: [diagnostic]
+							});
+						}
+						withOverride = true;
+						Some('Implement methods for ${printer.printPathWithParams(cause.args.parent)}');
+					case ImplementedInterface:
+						Some('Implement fields for ${printer.printPathWithParams(cause.args.parent)}');
+					case PropertyAccessor:
+						Some('Implement ${cause.args.isGetter ? "getter" : "setter"} for ${cause.args.property.name}');
+					case FieldAccess:
+						// There's only one field in this case... I think
+						var field = entry.fields[0];
+						if (field == null) {
+							return None;
+						}
+						Some('Add ${field.field.name} to $className');
+				}
+			}
+			final title = switch (getTitle(entry.cause)) {
+				case Some(title): title;
+				case None: return [];
 			}
 			var edits = [];
 			final getQualified = printer.collectQualifiedPaths();
@@ -389,10 +395,7 @@ class DiagnosticsCodeActionFeature implements CodeActionContributor {
 				codeAction.command = {
 					title: "Highlight Insertion",
 					command: "haxe.codeAction.highlightInsertion",
-					arguments: [
-						document.uri.toString(),
-						rangeFieldInsertion
-					]
+					arguments: [document.uri.toString(), rangeFieldInsertion]
 				}
 			}
 			actions.unshift(codeAction);
