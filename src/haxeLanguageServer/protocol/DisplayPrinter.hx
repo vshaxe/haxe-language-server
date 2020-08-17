@@ -228,7 +228,8 @@ class DisplayPrinter {
 		}
 	}
 
-	public function printMethodImplementation<T>(field:JsonClassField, concreteType:JsonType<T>, withOverride:Bool, tab:String = "\t") {
+	public function printMethodImplementation<T>(field:JsonClassField, concreteType:JsonType<T>, withOverride:Bool, expressions:Array<String>,
+			tab:String = "\t") {
 		var buf = new StringBuf();
 		final signature = concreteType.extractFunctionSignature();
 		final lineBreak = if (functionFormatting.placeOpenBraceOnNewLine) "\n" else " ";
@@ -249,12 +250,16 @@ class DisplayPrinter {
 		buf.add(printEmptyFunctionDefinition(field.name, signature, field.params));
 		buf.add(lineBreak);
 		buf.add("{");
-		if (!signature.ret.isVoid()) {
+		if (expressions.length > 0) {
+			for (expr in expressions) {
+				buf.add("\n");
+				buf.add(indent);
+				buf.add(tab);
+				buf.add(tab);
+				buf.add(expr);
+				buf.add(";");
+			}
 			buf.add("\n");
-			buf.add(indent);
-			buf.add(tab);
-			buf.add(tab);
-			buf.add("throw new haxe.exceptions.NotImplementedException();\n");
 			buf.add(indent);
 			buf.add(tab);
 		}
@@ -284,9 +289,10 @@ class DisplayPrinter {
 		return buf.toString();
 	}
 
-	public function printClassFieldImplementation<T>(field:JsonClassField, concreteType:JsonType<T>, withOverride:Bool, tab:String = "\t") {
+	public function printClassFieldImplementation<T>(field:JsonClassField, concreteType:JsonType<T>, withOverride:Bool, expressions:Array<String>,
+			tab:String = "\t") {
 		return switch (field.kind.kind) {
-			case FMethod: printMethodImplementation(field, concreteType, withOverride, tab);
+			case FMethod: printMethodImplementation(field, concreteType, withOverride, expressions, tab);
 			case FVar: printVarImplementation(field, field.kind.args, concreteType, tab);
 		}
 	}

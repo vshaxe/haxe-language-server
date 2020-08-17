@@ -333,6 +333,7 @@ class DiagnosticsCodeActionFeature implements CodeActionContributor {
 		var allEdits = [];
 		var allDotPaths = [];
 		for (entry in args.entries) {
+			var fields = entry.fields.copy();
 			var withOverride = false;
 			function getTitle<T>(cause:MissingFieldCause<T>) {
 				return switch (cause.kind) {
@@ -353,11 +354,58 @@ class DiagnosticsCodeActionFeature implements CodeActionContributor {
 						Some('Implement ${cause.args.isGetter ? "getter" : "setter"} for ${cause.args.property.name}');
 					case FieldAccess:
 						// There's only one field in this case... I think
-						var field = entry.fields[0];
+						var field = fields[0];
 						if (field == null) {
 							return None;
 						}
 						Some('Add ${field.field.name} to $className');
+					case FinalFields:
+						final funArgs = [];
+						final assignments = [];
+						cause.args.fields.sort((cf1, cf2) -> cf1.pos.min - cf2.pos.min);
+						for (field in cause.args.fields) {
+							funArgs.push({
+								name: field.name,
+								opt: false,
+								t: field.type
+							});
+							final name = field.name;
+							assignments.push('this.$name = $name');
+						}
+						final ctorField:JsonClassField = {
+							name: "new",
+							type: {
+								kind: TFun,
+								args: {
+									args: funArgs,
+									ret: {
+										kind: TMono,
+										args: null
+									}
+								}
+							},
+							isPublic: true,
+							isFinal: false,
+							params: [],
+							meta: [],
+							kind: {
+								kind: FMethod,
+								args: MethNormal
+							},
+							pos: args.moduleType.pos,
+							doc: null,
+							overloads: [],
+							scope: Constructor,
+							expr: {
+								string: assignments.join("\n")
+							}
+						}
+						fields.push({
+							field: ctorField,
+							type: ctorField.type,
+							unique: false
+						});
+						Some('Add constructor to $className');
 				}
 			}
 			final title = switch (getTitle(entry.cause)) {
@@ -366,10 +414,18 @@ class DiagnosticsCodeActionFeature implements CodeActionContributor {
 			}
 			var edits = [];
 			final getQualified = printer.collectQualifiedPaths();
-			for (field in entry.fields) {
+			for (field in fields) {
 				var buf = new StringBuf();
 				buf.add("\n\t");
-				buf.add(printer.printClassFieldImplementation(field.field, field.type, withOverride));
+				final expressions = [];
+				if (field.field.expr != null) {
+					for (expr in field.field.expr.string.split("\n")) {
+						expressions.push(expr);
+					}
+				} else if (!field.type.extractFunctionSignature().ret.isVoid()) {
+					expressions.push("throw new haxe.exceptions.NotImplementedException()");
+				}
+				buf.add(printer.printClassFieldImplementation(field.field, field.type, withOverride, expressions));
 				var edit = {
 					range: rangeFieldInsertion,
 					newText: buf.toString()
