@@ -203,7 +203,7 @@ class DiagnosticsCodeActionFeature implements CodeActionContributor {
 	}
 
 	function createRemovableCodeActions(params:CodeActionParams, diagnostic:Diagnostic):Array<CodeAction> {
-		final range = diagnostics.getArguments(params.textDocument.uri, RemovableCode, diagnostic.range) !.range;
+		final range = diagnostics.getArguments(params.textDocument.uri, RemovableCode, diagnostic.range)!.range;
 		if (range == null) {
 			return [];
 		}
@@ -297,11 +297,11 @@ class DiagnosticsCodeActionFeature implements CodeActionContributor {
 				var classTokens = tokens.tree.filterCallback((token, _) -> {
 					return switch (token.tok) {
 						case Kwd(KwdClass):
-							FOUND_SKIP_SUBTREE;
+							FoundSkipSubtree;
 						case Sharp(_):
-							GO_DEEPER;
+							GoDeeper;
 						case _:
-							SKIP_SUBTREE;
+							SkipSubtree;
 					}
 				});
 				for (token in classTokens) {

@@ -1,12 +1,12 @@
 package haxeLanguageServer.features.haxe.completion;
 
-import haxeLanguageServer.helper.SemVer;
 import haxe.display.Display.CompletionParams as HaxeCompletionParams;
 import haxe.display.Display;
 import haxe.display.JsonModuleTypes;
 import haxe.extern.EitherType;
 import haxeLanguageServer.helper.DocHelper;
 import haxeLanguageServer.helper.ImportHelper;
+import haxeLanguageServer.helper.SemVer;
 import haxeLanguageServer.helper.Set;
 import haxeLanguageServer.helper.TextEditCompletionItem;
 import haxeLanguageServer.helper.VscodeCommands;
@@ -128,7 +128,7 @@ class CompletionFeature {
 	static final dollarPattern = ~/(\$+)$/;
 
 	function isInterpolationPosition(token:Null<TokenTree>, doc, pos, text):Bool {
-		final inMacroReification = token.access().findParent(t -> t.is(Kwd(KwdMacro)).exists()).exists();
+		final inMacroReification = token.access().findParent(t -> t.matches(Kwd(KwdMacro)).exists()).exists();
 		final stringKind = PositionAnalyzer.getStringKind(token, doc, pos);
 
 		if (stringKind != SingleQuote) {

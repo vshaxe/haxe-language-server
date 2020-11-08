@@ -35,7 +35,7 @@ class TokenTreeManager {
 
 	static function createTokenTree(bytes:Bytes, tokens:Array<Token>):TokenTree {
 		try {
-			TokenStream.MODE = RELAXED;
+			TokenStream.MODE = Relaxed;
 			return TokenTreeBuilder.buildTokenTree(tokens, ByteData.ofBytes(bytes));
 		} catch (e) {
 			throw 'failed to create token tree: $e';

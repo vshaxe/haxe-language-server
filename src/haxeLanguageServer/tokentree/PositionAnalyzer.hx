@@ -1,8 +1,8 @@
 package haxeLanguageServer.tokentree;
 
 import haxeLanguageServer.tokentree.TokenContext;
-import haxeparser.Data.TokenDef;
 import tokentree.TokenTree;
+import tokentree.TokenTreeDef;
 import tokentree.utils.TokenTreeCheckUtils;
 
 using tokentree.TokenTreeAccessHelper;
@@ -23,20 +23,20 @@ class PositionAnalyzer {
 		var result:Null<TokenTree> = null;
 		tokens.tree.filterCallback(function(token:TokenTree, _) {
 			if (found) {
-				return SKIP_SUBTREE;
+				return SkipSubtree;
 			}
 			final tokenPos = document.rangeAt2(tokens.getPos(token));
 			if (tokenPos.containsPos(pos)) {
 				result = token;
 				found = true;
-				return SKIP_SUBTREE;
+				return SkipSubtree;
 			}
 			final tokenTreePos = document.rangeAt2(tokens.getTreePos(token));
 			if (tokenTreePos.containsPos(pos)) {
 				result = token;
-				return GO_DEEPER;
+				return GoDeeper;
 			}
-			return SKIP_SUBTREE;
+			return SkipSubtree;
 		});
 		return result;
 	}
@@ -64,7 +64,7 @@ class PositionAnalyzer {
 		if (token == null || tokens == null) {
 			return Root(BeforePackage);
 		}
-		inline function isType(tok:TokenDef) {
+		inline function isType(tok:TokenTreeDef) {
 			return tok.match(Kwd(KwdClass | KwdInterface | KwdAbstract | KwdEnum | KwdTypedef));
 		}
 		var typeToken:Null<TokenTree> = null;
@@ -74,7 +74,7 @@ class PositionAnalyzer {
 		var parent = token.access();
 		while (parent.exists() && parent.token != null && parent.token.tok != null) {
 			switch parent.token.tok {
-				case BrOpen if (TokenTreeCheckUtils.getBrOpenType(parent.token) == BLOCK):
+				case BrOpen if (TokenTreeCheckUtils.getBrOpenType(parent.token) == Block):
 					hasBlockParent = true;
 				case tok if (isType(tok) && hasBlockParent):
 					typeToken = parent.token;

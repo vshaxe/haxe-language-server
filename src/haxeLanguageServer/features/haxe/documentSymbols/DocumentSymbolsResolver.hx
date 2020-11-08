@@ -65,7 +65,7 @@ class DocumentSymbolsResolver {
 
 			switch token.tok {
 				case Kwd(KwdClass):
-					var name = token.getNameToken() !.getName();
+					var name = token.getNameToken()!.getName();
 					if (name == null && token.isTypeMacroClass()) {
 						name = "<macro class>";
 					}
@@ -94,12 +94,12 @@ class DocumentSymbolsResolver {
 					}
 
 				case Kwd(KwdFunction), Kwd(KwdVar), Kwd(KwdFinal):
-					final currentLevel = switch stack.level {
+					final currentLevel:SymbolLevel = switch stack.level {
 						case Root, Type(_): Field;
 						case Field, Expression: Expression;
 					};
-					switch token.getFieldType(PRIVATE) {
-						case FUNCTION(name, _, _, _, _, _, _):
+					switch token.getFieldType(Private) {
+						case Function(name, _, _, _, _, _, _):
 							if (name == null) {
 								name = "<anonymous function>";
 							}
@@ -113,7 +113,7 @@ class DocumentSymbolsResolver {
 							}
 							add(token, kind, currentLevel, name);
 
-						case VAR(name, _, isStatic, isInline, _, _):
+						case Var(name, _, isStatic, isInline, _, _):
 							if (currentLevel == Expression) {
 								final children = token.children;
 								if (children != null) {
@@ -136,14 +136,14 @@ class DocumentSymbolsResolver {
 								add(token, kind, currentLevel, name);
 							}
 
-						case PROP(name, _, _, _, _):
+						case Prop(name, _, _, _, _):
 							add(token, Property, currentLevel, name);
 
-						case UNKNOWN:
+						case Unknown:
 					}
 
 				case Kwd(KwdFor), Kwd(KwdCatch):
-					final ident:Null<TokenTree> = token.access().firstChild().is(POpen).firstChild().isCIdent().token;
+					final ident:Null<TokenTree> = token.access().firstChild().matches(POpen).firstChild().isCIdent().token;
 					if (ident != null) {
 						add(ident, Variable, Expression, false);
 					}
@@ -152,15 +152,15 @@ class DocumentSymbolsResolver {
 					switch stack.getParentTypeKind() {
 						case null:
 						case Enum:
-							if (token.access().parent().is(BrOpen).exists()) {
+							if (token.access().parent().matches(BrOpen).exists()) {
 								add(token, EnumMember, Field);
 							}
 						case Struct:
 							var parent = token.access().parent();
-							if (parent.is(Question).exists()) {
+							if (parent.matches(Question).exists()) {
 								parent = parent.parent();
 							}
-							if (parent.is(BrOpen).exists()) {
+							if (parent.matches(BrOpen).exists()) {
 								add(token, Field, Field);
 							}
 						case _:
@@ -168,7 +168,7 @@ class DocumentSymbolsResolver {
 
 				case _:
 			}
-			return GO_DEEPER;
+			return GoDeeper;
 		});
 		return stack.root.children;
 	}

@@ -93,7 +93,7 @@ class FoldingRangeResolver {
 
 					// everything except `#end` starts a range
 					if (sharp == "if" || sharp == "else" || sharp == "elseif") {
-						final pClose:Null<TokenTree> = token.access().firstChild().is(POpen).lastChild().is(PClose).token;
+						final pClose:Null<TokenTree> = token.access().firstChild().matches(POpen).lastChild().matches(PClose).token;
 						final pos = if (pClose == null) tokens.getPos(token) else tokens.getPos(pClose);
 						final start = document.positionAt(pos.max);
 						start.character++;
@@ -102,7 +102,7 @@ class FoldingRangeResolver {
 
 				case _:
 			}
-			return GO_DEEPER;
+			return GoDeeper;
 		});
 
 		if (lastImport != null && firstImport != lastImport) {

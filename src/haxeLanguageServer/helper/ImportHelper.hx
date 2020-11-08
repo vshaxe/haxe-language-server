@@ -91,7 +91,7 @@ function determineImportPosition(document:HaxeDocument):ImportPosition {
 				firstImport = tree;
 			case _:
 		}
-		return SKIP_SUBTREE;
+		return SkipSubtree;
 	});
 
 	return if (firstImport != null) {

@@ -34,10 +34,10 @@ class ExtractTypeFeature implements CodeActionContributor {
 			final types:Array<TokenTree> = tokens.tree.filterCallback(function(token:TokenTree, index:Int):FilterResult {
 				switch token.tok {
 					case Kwd(KwdClass), Kwd(KwdInterface), Kwd(KwdEnum), Kwd(KwdAbstract), Kwd(KwdTypedef):
-						return FOUND_SKIP_SUBTREE;
+						return FoundSkipSubtree;
 					default:
 				}
-				return GO_DEEPER;
+				return GoDeeper;
 			});
 			final lastImport:Null<TokenTree> = getLastImportToken(tokens.tree);
 			if (isInsideConditional(lastImport))
@@ -124,9 +124,9 @@ class ExtractTypeFeature implements CodeActionContributor {
 			switch token.tok {
 				case Kwd(KwdPackage):
 					pack = token;
-					return SKIP_SUBTREE;
+					return SkipSubtree;
 				default:
-					return SKIP_SUBTREE;
+					return SkipSubtree;
 			}
 		});
 		if (pack == null)
@@ -147,10 +147,10 @@ class ExtractTypeFeature implements CodeActionContributor {
 		final imports:Array<TokenTree> = tree.filterCallback(function(token:TokenTree, index:Int):FilterResult {
 			switch token.tok {
 				case Kwd(KwdImport), Kwd(KwdUsing):
-					return FOUND_SKIP_SUBTREE;
+					return FoundSkipSubtree;
 				default:
 			}
-			return GO_DEEPER;
+			return GoDeeper;
 		});
 		return imports.pop();
 	}

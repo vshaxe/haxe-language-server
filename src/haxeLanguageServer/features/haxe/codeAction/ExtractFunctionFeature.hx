@@ -54,7 +54,7 @@ class ExtractFunctionFeature implements CodeActionContributor {
 			var hasReturn:Bool = false;
 			parentOfStart.filterCallback(function(token:TokenTree, index:Int):FilterResult {
 				if (lastToken == null || token.index > lastToken.index)
-					return SKIP_SUBTREE;
+					return SkipSubtree;
 				switch token.tok {
 					case Const(CIdent(s)):
 						if (token.index >= tokenStart.index && token.index <= tokenEnd.index && !rangeIdents.contains(s))
@@ -67,12 +67,12 @@ class ExtractFunctionFeature implements CodeActionContributor {
 							hasReturn = true;
 					case Kwd(KwdVar):
 						if (token.index >= tokenStart.index)
-							return GO_DEEPER;
+							return GoDeeper;
 						if (token.index >= parentOfStart.index && token.index <= lastToken.index)
 							varTokens.push(token);
 					default:
 				}
-				return GO_DEEPER;
+				return GoDeeper;
 			});
 
 			var returnSpec:String = "";
@@ -112,8 +112,8 @@ class ExtractFunctionFeature implements CodeActionContributor {
 			func = 'static $func';
 		}
 
-		call = FormatterHelper.formatText(doc, context, call, TokenTreeEntryPoint.FIELD_LEVEL);
-		func = FormatterHelper.formatText(doc, context, func, TokenTreeEntryPoint.FIELD_LEVEL);
+		call = FormatterHelper.formatText(doc, context, call, TokenTreeEntryPoint.FieldLevel);
+		func = FormatterHelper.formatText(doc, context, func, TokenTreeEntryPoint.FieldLevel);
 		func = func.split("\n").map(s -> indent + s).join("\n");
 		final edits:Array<TextEdit> = [];
 

@@ -24,11 +24,11 @@ class OrganizeImportsFeature {
 			final imports:Array<TokenTree> = tokens.tree.filterCallback(function(token:TokenTree, index:Int):FilterResult {
 				switch token.tok {
 					case Kwd(KwdImport) | Kwd(KwdUsing):
-						return FOUND_SKIP_SUBTREE;
+						return FoundSkipSubtree;
 					case Kwd(KwdPackage):
 						final child = token.getFirstChild();
 						if (child == null) {
-							return SKIP_SUBTREE;
+							return SkipSubtree;
 						}
 						switch child.tok {
 							case Kwd(_):
@@ -37,11 +37,11 @@ class OrganizeImportsFeature {
 								packageName = s;
 							default:
 						}
-						return SKIP_SUBTREE;
+						return SkipSubtree;
 					case Sharp(_):
-						return GO_DEEPER;
+						return GoDeeper;
 					default:
-						return SKIP_SUBTREE;
+						return SkipSubtree;
 				}
 			});
 
@@ -152,7 +152,7 @@ class OrganizeImportsFeature {
 		final newUsings:String = importGroup.usings.map(i -> i.text).join("\n");
 		final delim:String = (importGroup.imports.length > 0 && importGroup.usings.length > 0) ? "\n" : "";
 
-		final newText:String = FormatterHelper.formatText(doc, context, newImports + delim + newUsings, TokenTreeEntryPoint.TYPE_LEVEL);
+		final newText:String = FormatterHelper.formatText(doc, context, newImports + delim + newUsings, TokenTreeEntryPoint.TypeLevel);
 		final edits:Array<TextEdit> = [];
 
 		// remove all existing imports/usings from group
@@ -254,6 +254,7 @@ private enum abstract ImportType(Int) {
 	final StdLib;
 	final Library;
 	final Project;
+
 	@:op(a < b)
 	public function opLt(val:ImportType):Bool;
 

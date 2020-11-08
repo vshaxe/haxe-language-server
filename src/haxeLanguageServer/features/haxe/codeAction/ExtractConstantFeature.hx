@@ -81,9 +81,9 @@ class ExtractConstantFeature implements CodeActionContributor {
 		final occurrences:Array<TokenTree> = type.filterCallback(function(token:TokenTree, index:Int):FilterResult {
 			return switch token.tok {
 				case Const(CString(s)):
-					if (s == text) FOUND_SKIP_SUBTREE else GO_DEEPER;
+					if (s == text) FoundSkipSubtree else GoDeeper;
 				default:
-					GO_DEEPER;
+					GoDeeper;
 			}
 		});
 
@@ -91,7 +91,7 @@ class ExtractConstantFeature implements CodeActionContributor {
 
 		// insert const into type body
 		final prefix:String = doc.getText({start: {line: constInsertPos.line, character: 0}, end: constInsertPos});
-		final newConstText:String = FormatterHelper.formatText(doc, context, 'static inline final $name = $fullText;', FIELD_LEVEL) + '\n$prefix';
+		final newConstText:String = FormatterHelper.formatText(doc, context, 'static inline final $name = $fullText;', FieldLevel) + '\n$prefix';
 		edits.push(WorkspaceEditHelper.insertText(constInsertPos, newConstText));
 
 		// replace all occurrences with const name
@@ -127,7 +127,7 @@ class ExtractConstantFeature implements CodeActionContributor {
 					case At:
 						return true;
 					case DblDot:
-						return atToken.access().parent().is(At).exists();
+						return atToken.access().parent().matches(At).exists();
 					default:
 						return false;
 				}
@@ -139,7 +139,7 @@ class ExtractConstantFeature implements CodeActionContributor {
 				if (varToken != null) {
 					switch varToken.tok {
 						case Kwd(KwdVar | KwdFinal):
-							final typeToken:Null<TokenTree> = varToken.access().parent().is(BrOpen).parent().isCIdent().parent().token;
+							final typeToken:Null<TokenTree> = varToken.access().parent().matches(BrOpen).parent().isCIdent().parent().token;
 							if (typeToken == null) {
 								return false;
 							}
