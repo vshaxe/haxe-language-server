@@ -28,13 +28,25 @@ class ExpectedTypeCompletion {
 			return [];
 		}
 
+		final types = [];
+
 		final expectedTypeFollowed:Null<JsonType<TType>> = toplevel.expectedTypeFollowed;
-		if (expectedTypeFollowed == null) {
-			return [];
+		if (expectedTypeFollowed != null) {
+			for (type in expectedTypeFollowed.resolveTypes()) {
+				types.push(type);
+			}
 		}
+		#if (haxe_ver > 4.1)
+		if (toplevel.compatibleTypes != null) {
+			for (type in toplevel.compatibleTypes) {
+				for (type in type.resolveTypes()) {
+					types.push(type);
+				}
+			}
+		}
+		#end
 
 		var items:Array<ExpectedTypeCompletionItem> = [];
-		final types = expectedTypeFollowed.resolveTypes();
 		for (type in types) {
 			items = items.concat(createItemsForType(type, data));
 		}
