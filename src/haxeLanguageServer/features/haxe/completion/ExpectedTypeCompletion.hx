@@ -36,7 +36,6 @@ class ExpectedTypeCompletion {
 				types.push(type);
 			}
 		}
-		#if (haxe_ver > 4.1)
 		if (toplevel.compatibleTypes != null) {
 			for (type in toplevel.compatibleTypes) {
 				for (type in type.resolveTypes()) {
@@ -44,7 +43,6 @@ class ExpectedTypeCompletion {
 				}
 			}
 		}
-		#end
 
 		var items:Array<ExpectedTypeCompletionItem> = [];
 		for (type in types) {
