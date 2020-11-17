@@ -107,6 +107,9 @@ class HoverFeature {
 				argument += ":" + printer.printType(expected.type);
 			}
 			result.additionalSections = ['*for argument `$argument`*'];
+			if (expected.name.doc != null) {
+				result.additionalSections.push(DocHelper.markdownFormat(expected.name.doc));
+			}
 		}
 
 		return result;
