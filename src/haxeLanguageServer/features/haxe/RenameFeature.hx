@@ -16,6 +16,7 @@ class RenameFeature {
 	public function new(context:Context) {
 		this.context = context;
 
+		// TODO abort if there are unsaved documents (rename operates on fs, so positions might be off)
 		context.languageServerProtocol.onRequest(RenameRequest.type, onRename);
 	}
 
