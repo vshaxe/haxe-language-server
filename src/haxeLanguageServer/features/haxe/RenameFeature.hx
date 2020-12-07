@@ -40,11 +40,11 @@ class RenameFeature {
 		};
 
 		// TODO use workspace source folders or maybe a different config
-		refactor.TraverseSources.traverseSources(["src", "test"], usageContext);
+		refactor.discover.TraverseSources.traverseSources(["src", "test"], usageContext);
 		usageContext.usageCollector.updateImportHx(usageContext);
 		var editList:EditList = new EditList();
 
-		var result:refactor.actions.RefactorResult = refactor.actions.Refactor.refactor({
+		var result:refactor.RefactorResult = refactor.Refactor.refactor({
 			nameMap: usageContext.nameMap,
 			fileList: usageContext.fileList,
 			what: {
