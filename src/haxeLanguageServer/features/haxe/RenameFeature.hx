@@ -1,20 +1,23 @@
 package haxeLanguageServer.features.haxe;
 
+import jsonrpc.CancellationToken;
+import jsonrpc.ResponseError;
+import jsonrpc.Types.NoData;
 #if debug
 import haxe.extern.EitherType;
 #else
 import haxe.DynamicAccess;
 import haxeLanguageServer.hxParser.RenameResolver;
 #end
-import jsonrpc.CancellationToken;
-import jsonrpc.ResponseError;
-import jsonrpc.Types.NoData;
 
 class RenameFeature {
 	final context:Context;
+	final converter:Haxe3DisplayOffsetConverter;
 
 	public function new(context:Context) {
 		this.context = context;
+
+		converter = new Haxe3DisplayOffsetConverter();
 
 		// TODO abort if there are unsaved documents (rename operates on fs, so positions might be off)
 		context.languageServerProtocol.onRequest(RenameRequest.type, onRename);
@@ -51,12 +54,12 @@ class RenameFeature {
 			what: {
 				fileName: fileName,
 				toName: params.newName,
-				pos: doc.offsetAt(params.position)
+				pos: converter.characterOffsetToByteOffset(doc.content, doc.offsetAt(params.position))
 			},
 			forRealExecute: true,
 			docFactory: function(fileName:String) {
 				var fullFileName:String = haxe.io.Path.join([Sys.getCwd(), fileName]);
-				return new EditDoc(fullFileName, editList, context);
+				return new EditDoc(fullFileName, editList, context, converter);
 			}
 		});
 		switch (result) {
@@ -99,7 +102,7 @@ class RenameFeature {
 			if (declaration.uri != uri) {
 				return invalidRename();
 			}
-			final parseTree = doc.parseTree;
+			final parseTree = @:nullSafety(Off) doc.parseTree;
 			if (parseTree == null) {
 				return reject.noTokens();
 			}
@@ -136,11 +139,13 @@ class EditDoc implements refactor.edits.IEditableDocument {
 	var edits:Array<TextEdit>;
 	var renames:Array<RenameFile>;
 	final context:Context;
+	final converter:Haxe3DisplayOffsetConverter;
 
-	public function new(fileName:String, list:EditList, context:Context) {
+	public function new(fileName:String, list:EditList, context:Context, converter:Haxe3DisplayOffsetConverter) {
 		this.fileName = fileName;
 		this.list = list;
 		this.context = context;
+		this.converter = converter;
 		edits = [];
 		renames = [];
 	}
@@ -168,6 +173,7 @@ class EditDoc implements refactor.edits.IEditableDocument {
 
 	function posToRange(pos:refactor.discover.IdentifierPos):Range {
 		var doc = context.documents.getHaxe(new FsPath(fileName).toUri());
+
 		if (doc == null) {
 			// document currently not loaded -> load and find line number and character pos to build edit Range
 			var content:String = sys.io.File.getContent(fileName);
@@ -178,18 +184,22 @@ class EditDoc implements refactor.edits.IEditableDocument {
 			var endPos:Null<Position> = null;
 			var curLineStart:Int = 0;
 			var curLine:Int = 0;
+
+			var startOffset:Int = converter.byteOffsetToCharacterOffset(content, pos.start);
+			var endOffset:Int = converter.byteOffsetToCharacterOffset(content, pos.end);
+
 			for (line in lines) {
 				var length:Int = line.length;
-				if (pos.start > curLineStart + length) {
+				if (startOffset > curLineStart + length) {
 					curLineStart += length + separatorLength;
 					curLine++;
 					continue;
 				}
-				if (pos.start >= curLineStart && pos.start < curLineStart + length) {
-					startPos = {line: curLine, character: pos.start - curLineStart};
+				if (startOffset >= curLineStart && startOffset < curLineStart + length) {
+					startPos = {line: curLine, character: startOffset - curLineStart};
 				}
-				if (pos.end >= curLineStart && pos.end < curLineStart + length) {
-					endPos = {line: curLine, character: pos.end - curLineStart};
+				if (endOffset >= curLineStart && endOffset < curLineStart + length) {
+					endPos = {line: curLine, character: endOffset - curLineStart};
 					break;
 				}
 				curLineStart += length + separatorLength;
@@ -200,7 +210,7 @@ class EditDoc implements refactor.edits.IEditableDocument {
 			}
 			return {start: cast startPos, end: cast endPos};
 		}
-		return doc.rangeAt(pos.start, pos.end);
+		return doc.rangeAt(converter.byteOffsetToCharacterOffset(doc.content, pos.start), converter.byteOffsetToCharacterOffset(doc.content, pos.end));
 	}
 
 	function detectLineSeparator(code:String):String {
