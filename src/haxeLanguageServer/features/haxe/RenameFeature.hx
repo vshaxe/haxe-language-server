@@ -29,7 +29,10 @@ class RenameFeature {
 
 		#if debug
 		var fileName:String = uri.toFsPath().toString();
-		fileName = fileName.substr(fileName.indexOf("src"));
+		var workspacePath:String = context.workspacePath.toString();
+		if (fileName.startsWith(workspacePath)) {
+			fileName = fileName.substr(workspacePath.length + 1);
+		}
 
 		if (doc == null || !uri.isFile()) {
 			return reject.noFittingDocument(uri);
@@ -48,7 +51,7 @@ class RenameFeature {
 		usageContext.usageCollector.updateImportHx(usageContext);
 		var editList:EditList = new EditList();
 
-		var result:refactor.RefactorResult = refactor.Refactor.refactor({
+		var result:refactor.RefactorResult = refactor.Refactor.rename({
 			nameMap: usageContext.nameMap,
 			fileList: usageContext.fileList,
 			what: {
