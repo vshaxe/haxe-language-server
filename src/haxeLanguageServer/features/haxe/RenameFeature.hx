@@ -179,6 +179,7 @@ class EditDoc implements refactor.edits.IEditableDocument {
 
 		if (doc == null) {
 			// document currently not loaded -> load and find line number and character pos to build edit Range
+			trace(fileName);
 			var content:String = sys.io.File.getContent(fileName);
 			var lineSeparator:String = detectLineSeparator(content);
 			var separatorLength:Int = lineSeparator.length;
@@ -192,9 +193,9 @@ class EditDoc implements refactor.edits.IEditableDocument {
 			var endOffset:Int = converter.byteOffsetToCharacterOffset(content, pos.end);
 
 			for (line in lines) {
-				var length:Int = line.length;
+				var length:Int = line.length + separatorLength;
 				if (startOffset > curLineStart + length) {
-					curLineStart += length + separatorLength;
+					curLineStart += length;
 					curLine++;
 					continue;
 				}
@@ -205,7 +206,7 @@ class EditDoc implements refactor.edits.IEditableDocument {
 					endPos = {line: curLine, character: endOffset - curLineStart};
 					break;
 				}
-				curLineStart += length + separatorLength;
+				curLineStart += length;
 				curLine++;
 			}
 			if ((startPos == null) || (endPos == null)) {
