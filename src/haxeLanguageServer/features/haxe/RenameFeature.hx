@@ -179,7 +179,6 @@ class EditDoc implements refactor.edits.IEditableDocument {
 
 		if (doc == null) {
 			// document currently not loaded -> load and find line number and character pos to build edit Range
-			trace(fileName);
 			var content:String = sys.io.File.getContent(fileName);
 			var lineSeparator:String = detectLineSeparator(content);
 			var separatorLength:Int = lineSeparator.length;
