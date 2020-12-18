@@ -19,7 +19,6 @@ class RenameFeature {
 
 		converter = new Haxe3DisplayOffsetConverter();
 
-		// TODO abort if there are unsaved documents (rename operates on fs, so positions might be off)
 		context.languageServerProtocol.onRequest(RenameRequest.type, onRename);
 	}
 
@@ -46,8 +45,15 @@ class RenameFeature {
 			type: null
 		};
 
-		// TODO use workspace source folders or maybe a different config
-		refactor.discover.TraverseSources.traverseSources(["src", "test"], usageContext);
+		// TODO abort if there are unsaved documents (rename operates on fs, so positions might be off)
+
+		// TODO use workspace / compilation server source folders or maybe a user config
+		var srcFolders:Array<String> = ["src", "test"];
+		if (context.config.user.renameSourcFolders != null) {
+			srcFolders = context.config.user.renameSourcFolders;
+		}
+
+		refactor.discover.TraverseSources.traverseSources(srcFolders, usageContext);
 		usageContext.usageCollector.updateImportHx(usageContext);
 		var editList:EditList = new EditList();
 
@@ -63,6 +69,9 @@ class RenameFeature {
 			docFactory: function(fileName:String) {
 				var fullFileName:String = haxe.io.Path.join([Sys.getCwd(), fileName]);
 				return new EditDoc(fullFileName, editList, context, converter);
+			},
+			verboseLog: function(text:String) {
+				trace('[rename] $text');
 			}
 		});
 		switch (result) {
