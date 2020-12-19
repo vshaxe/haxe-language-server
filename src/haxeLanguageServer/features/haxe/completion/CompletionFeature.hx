@@ -401,9 +401,9 @@ class CompletionFeature {
 				}
 				final shadowed = if (!resolution.isQualified) " (shadowed)" else "";
 				if (printedOrigin != null) {
-					detail + "\n" + printedOrigin + shadowed;
+					detail + "\n " + printedOrigin + shadowed;
 				} else {
-					detail + "\n" + shadowed;
+					detail + "\n " + shadowed;
 				}
 			},
 			textEdit: {
