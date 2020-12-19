@@ -359,9 +359,9 @@ final HxmlFlags = {
 						9., 10., 10.1, 10.2, 10.3, 11., 11.1, 11.2, 11.3, 11.4, 11.5, 11.6, 11.7, 11.8, 11.9, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 19.0,
 						20.0, 21.0, 22.0, 23.0, 24.0, 25.0, 26.0, 27.0, 28.0, 29.0, 31.0, 32.0
 					].map(version -> {
-							name: Std.string(version),
-							description: null
-						})),
+						name: Std.string(version),
+						description: null
+					})),
 				},
 				description: "change the SWF version"
 			},

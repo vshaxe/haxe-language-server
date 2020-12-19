@@ -320,6 +320,7 @@ enum abstract DiagnosticKind<T>(Int) from Int to Int {
 	final DeprecationWarning:DiagnosticKind<String>;
 	final InactiveBlock:DiagnosticKind<Void>;
 	final MissingFields:DiagnosticKind<MissingFieldDiagnostics>;
+
 	public inline function new(i:Int) {
 		this = i;
 	}

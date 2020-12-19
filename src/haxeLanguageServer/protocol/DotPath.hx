@@ -18,6 +18,7 @@ enum abstract DotPath(String) {
 	final Haxe_Extern_EitherType = "haxe.extern.EitherType";
 	final Haxe_Ds_Map = "haxe.ds.Map";
 	final Haxe_Ds_ReadOnlyArray = "haxe.ds.ReadOnlyArray";
+
 	function new(dotPath) {
 		this = dotPath;
 	}

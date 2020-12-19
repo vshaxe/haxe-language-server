@@ -29,7 +29,7 @@ class OrganizeImportsFeatureTest extends Test implements IOrganizeImportsFeature
 		final doc = new HaxeDocument(new DocumentUri("file://" + fileName + ".edittest"), "haxe", 4, content);
 		return OrganizeImportsFeature.organizeImports(doc, context, []);
 	}
-} 
+}
 
 @:autoBuild(testcases.EditTestCaseMacro.build("test/testcases/organizeImports"))
 private interface IOrganizeImportsFeatureTestCases {}
