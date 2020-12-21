@@ -282,7 +282,7 @@ class DiagnosticsCodeActionFeature implements CodeActionContributor {
 				return [];
 			}
 			final content = sys.io.File.getContent(args.moduleFile);
-			document = new HaxeDocument(uri, "haxe", 4, content);
+			document = new HaxeDocument(uri, "haxe", 0, content);
 		}
 		var tokens = document.tokens;
 		if (tokens == null) {
@@ -386,6 +386,7 @@ class DiagnosticsCodeActionFeature implements CodeActionContributor {
 							},
 							isPublic: true,
 							isFinal: false,
+							isAbstract: false,
 							params: [],
 							meta: [],
 							kind: {
