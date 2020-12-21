@@ -348,9 +348,10 @@ class DisplayPrinter {
 					case MethMacro: "macro ";
 				}
 				final finalKeyword = if (field.isFinalField()) "final " else "";
+				final abstractKeyword = if (field.isAbstract) "abstract " else "";
 				final methodSignature = concreteType.extractFunctionSignature();
 				final definition = printEmptyFunctionDefinition(name, methodSignature, field.params);
-				'$access$staticKeyword$finalKeyword$methodKind$definition';
+				'$access$staticKeyword$finalKeyword$abstractKeyword$methodKind$definition';
 		};
 	}
 
@@ -398,6 +399,8 @@ class DisplayPrinter {
 			components.push("final");
 		if (type.isExtern)
 			components.push("extern");
+		if (type.isAbstract)
+			components.push("abstract");
 		components.push(switch type.kind {
 			case Class: "class";
 			case Interface: "interface";
