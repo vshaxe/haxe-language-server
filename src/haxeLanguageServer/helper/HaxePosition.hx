@@ -1,6 +1,7 @@
 package haxeLanguageServer.helper;
 
 import languageServerProtocol.Types.Location;
+
 using Safety;
 
 class HaxePosition {

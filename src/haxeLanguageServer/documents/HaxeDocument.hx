@@ -56,7 +56,7 @@ class HaxeDocument extends TextDocument {
 			try {
 				_tokens = TokenTreeManager.create(content);
 			} catch (e) {
-				trace('$uri: $e');
+				// trace('$uri: $e');
 			}
 		}
 		return _tokens;
