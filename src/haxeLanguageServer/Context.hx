@@ -399,6 +399,9 @@ class Context {
 	}
 
 	function onDidChangeActiveTextEditor(params:{uri:DocumentUri}) {
+		if (activeEditor != null && diagnostics != null) {
+			diagnostics.clearDiagnostics(activeEditor);
+		}
 		activeEditor = params.uri;
 		final document = documents.getHaxe(params.uri);
 		if (document == null) {
