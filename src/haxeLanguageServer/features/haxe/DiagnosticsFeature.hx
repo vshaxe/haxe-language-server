@@ -8,7 +8,10 @@ import haxeLanguageServer.LanguageServerMethods;
 import haxeLanguageServer.helper.PathHelper;
 import haxeLanguageServer.protocol.DisplayPrinter;
 import haxeLanguageServer.server.DisplayResult;
+import js.Node.clearImmediate;
+import js.Node.setImmediate;
 import js.node.ChildProcess;
+import js.node.Timers.Immediate;
 
 using Lambda;
 
@@ -21,6 +24,7 @@ class DiagnosticsFeature {
 
 	final context:Context;
 	final diagnosticsArguments:Map<DocumentUri, DiagnosticsMap<Any>>;
+	final pendingRequests:Map<DocumentUri, Immediate>;
 	final errorUri:DocumentUri;
 
 	var haxelibPath:Null<FsPath>;
@@ -28,6 +32,7 @@ class DiagnosticsFeature {
 	public function new(context:Context) {
 		this.context = context;
 		diagnosticsArguments = new Map();
+		pendingRequests = new Map();
 		errorUri = new FsPath(Path.join([context.workspacePath.toString(), "Error"])).toUri();
 
 		ChildProcess.exec(context.config.haxelib.executable + " config", (error, stdout, stderr) -> haxelibPath = new FsPath(stdout.trim()));
@@ -241,6 +246,7 @@ class DiagnosticsFeature {
 	}
 
 	public function clearDiagnostics(uri:DocumentUri) {
+		removePendingRequest(uri);
 		if (diagnosticsArguments.remove(uri)) {
 			context.languageServerProtocol.sendNotification(PublishDiagnosticsNotification.type, {uri: uri, diagnostics: []});
 		}
@@ -251,11 +257,30 @@ class DiagnosticsFeature {
 			clearDiagnostics(uri);
 			return;
 		}
+		// we delay the actual request because in some cases `clearDiagnostics` will be called right away,
+		// and since diagnostics call is rather expensive, we don't want to make redundant invokations
+		// one scenario where this happens is vscode document preview, see https://github.com/microsoft/vscode/issues/78453
+		removePendingRequest(uri);
+		pendingRequests[uri] = setImmediate(invokePendingRequest, uri);
+	}
+
+	function invokePendingRequest(uri:DocumentUri) {
+		pendingRequests.remove(uri);
 		final doc:Null<HaxeDocument> = context.documents.getHaxe(uri);
 		if (doc != null) {
 			final onResolve = context.startTimer("@diagnostics");
+			// TODO: we should probably pass a cancellation token here, that would be cancelled from clearDiagnostics,
+			// sounds like it should help if we switch between active editors fast and we get queued diagnostics requests
 			context.callDisplay("@diagnostics", [doc.uri.toFsPath() + "@0@diagnostics"], null, null, processDiagnosticsReply.bind(uri, onResolve),
 				processErrorReply.bind(uri));
+		}
+	}
+
+	function removePendingRequest(uri:DocumentUri) {
+		var immediate = pendingRequests[uri];
+		if (immediate != null) {
+			pendingRequests.remove(uri);
+			clearImmediate(immediate);
 		}
 	}
 
