@@ -57,9 +57,9 @@ class DiagnosticsFeature {
 	function processErrorReply(uri:Null<DocumentUri>, error:String) {
 		if (!extractDiagnosticsFromHaxeError(uri, error) && !extractDiagnosticsFromHaxeError2(error)) {
 			if (uri != null) {
-				clearDiagnostics(uri);
+				clearDiagnosticsOnClient(uri);
 			}
-			clearDiagnostics(errorUri);
+			clearDiagnosticsOnClient(errorUri);
 		}
 		trace(error);
 	}
@@ -135,7 +135,7 @@ class DiagnosticsFeature {
 	}
 
 	function processDiagnosticsReply(uri:Null<DocumentUri>, onResolve:(result:Dynamic, ?debugInfo:String) -> Void, result:DisplayResult) {
-		clearDiagnostics(errorUri);
+		clearDiagnosticsOnClient(errorUri);
 		final data:Array<HaxeDiagnosticResponse<Any>> = switch result {
 			case DResult(s):
 				try {
@@ -201,7 +201,7 @@ class DiagnosticsFeature {
 
 		inline function removeOldDiagnostics(uri:DocumentUri) {
 			if (!sent.exists(uri))
-				clearDiagnostics(uri);
+				clearDiagnosticsOnClient(uri);
 		}
 
 		if (uri == null) {
@@ -247,6 +247,10 @@ class DiagnosticsFeature {
 
 	public function clearDiagnostics(uri:DocumentUri) {
 		removePendingRequest(uri);
+		clearDiagnosticsOnClient(uri);
+	}
+
+	function clearDiagnosticsOnClient(uri:DocumentUri) {
 		if (diagnosticsArguments.remove(uri)) {
 			context.languageServerProtocol.sendNotification(PublishDiagnosticsNotification.type, {uri: uri, diagnostics: []});
 		}
@@ -254,7 +258,7 @@ class DiagnosticsFeature {
 
 	public function publishDiagnostics(uri:DocumentUri) {
 		if (!uri.isFile() || isPathFiltered(uri.toFsPath())) {
-			clearDiagnostics(uri);
+			clearDiagnosticsOnClient(uri);
 			return;
 		}
 		// we delay the actual request because in some cases `clearDiagnostics` will be called right away,
