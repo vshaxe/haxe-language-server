@@ -11,7 +11,6 @@ import haxeLanguageServer.server.DisplayResult;
 import js.Node.clearImmediate;
 import js.Node.setImmediate;
 import js.node.ChildProcess;
-import js.node.Timers.Immediate;
 import jsonrpc.CancellationToken;
 
 using Lambda;
