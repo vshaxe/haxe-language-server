@@ -386,6 +386,7 @@ class DiagnosticsCodeActionFeature implements CodeActionContributor {
 							},
 							isPublic: true,
 							isFinal: false,
+							isAbstract: false,
 							params: [],
 							meta: [],
 							kind: {
