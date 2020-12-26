@@ -11,7 +11,7 @@ import haxeLanguageServer.server.DisplayResult;
 import js.Node.clearImmediate;
 import js.Node.setImmediate;
 import js.node.ChildProcess;
-import js.node.Timers.Immediate;
+import jsonrpc.CancellationToken;
 
 using Lambda;
 
@@ -24,7 +24,7 @@ class DiagnosticsFeature {
 
 	final context:Context;
 	final diagnosticsArguments:Map<DocumentUri, DiagnosticsMap<Any>>;
-	final pendingRequests:Map<DocumentUri, Immediate>;
+	final pendingRequests:Map<DocumentUri, CancellationTokenSource>;
 	final errorUri:DocumentUri;
 
 	var haxelibPath:Null<FsPath>;
@@ -246,7 +246,7 @@ class DiagnosticsFeature {
 	}
 
 	public function clearDiagnostics(uri:DocumentUri) {
-		removePendingRequest(uri);
+		cancelPendingRequest(uri);
 		clearDiagnosticsOnClient(uri);
 	}
 
@@ -261,30 +261,37 @@ class DiagnosticsFeature {
 			clearDiagnosticsOnClient(uri);
 			return;
 		}
+		cancelPendingRequest(uri);
+		var tokenSource = new CancellationTokenSource();
 		// we delay the actual request because in some cases `clearDiagnostics` will be called right away,
 		// and since diagnostics call is rather expensive, we don't want to make redundant invokations
 		// one scenario where this happens is vscode document preview, see https://github.com/microsoft/vscode/issues/78453
-		removePendingRequest(uri);
-		pendingRequests[uri] = setImmediate(invokePendingRequest, uri);
+		var immediate = setImmediate(invokePendingRequest, uri, tokenSource.token);
+		tokenSource.token.setCallback(clearImmediate.bind(immediate)); // will be re-set by callDisplay later
+		pendingRequests[uri] = tokenSource;
 	}
 
-	function invokePendingRequest(uri:DocumentUri) {
-		pendingRequests.remove(uri);
+	function invokePendingRequest(uri:DocumentUri, token:CancellationToken) {
 		final doc:Null<HaxeDocument> = context.documents.getHaxe(uri);
 		if (doc != null) {
 			final onResolve = context.startTimer("@diagnostics");
-			// TODO: we should probably pass a cancellation token here, that would be cancelled from clearDiagnostics,
-			// sounds like it should help if we switch between active editors fast and we get queued diagnostics requests
-			context.callDisplay("@diagnostics", [doc.uri.toFsPath() + "@0@diagnostics"], null, null, processDiagnosticsReply.bind(uri, onResolve),
-				processErrorReply.bind(uri));
+			context.callDisplay("@diagnostics", [doc.uri.toFsPath() + "@0@diagnostics"], null, token, result -> {
+				pendingRequests.remove(uri);
+				processDiagnosticsReply(uri, onResolve, result);
+			}, error -> {
+				pendingRequests.remove(uri);
+				processErrorReply(uri, error);
+			});
+		} else {
+			pendingRequests.remove(uri);
 		}
 	}
 
-	function removePendingRequest(uri:DocumentUri) {
-		var immediate = pendingRequests[uri];
-		if (immediate != null) {
+	function cancelPendingRequest(uri:DocumentUri) {
+		var tokenSource = pendingRequests[uri];
+		if (tokenSource != null) {
 			pendingRequests.remove(uri);
-			clearImmediate(immediate);
+			tokenSource.cancel();
 		}
 	}
 
