@@ -42,6 +42,7 @@ class RenameFeature {
 			usageCollector: new refactor.discover.UsageCollector(),
 			nameMap: new refactor.discover.NameMap(),
 			fileList: new refactor.discover.FileList(),
+			typeList: new refactor.discover.TypeList(),
 			type: null
 		};
 
@@ -60,6 +61,7 @@ class RenameFeature {
 		var result:refactor.RefactorResult = refactor.Refactor.rename({
 			nameMap: usageContext.nameMap,
 			fileList: usageContext.fileList,
+			typeList: usageContext.typeList,
 			what: {
 				fileName: fileName,
 				toName: params.newName,
