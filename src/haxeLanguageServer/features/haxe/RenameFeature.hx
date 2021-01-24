@@ -43,7 +43,8 @@ class RenameFeature {
 			nameMap: new refactor.discover.NameMap(),
 			fileList: new refactor.discover.FileList(),
 			typeList: new refactor.discover.TypeList(),
-			type: null
+			type: null,
+			cache: null
 		};
 
 		// TODO abort if there are unsaved documents (rename operates on fs, so positions might be off)
