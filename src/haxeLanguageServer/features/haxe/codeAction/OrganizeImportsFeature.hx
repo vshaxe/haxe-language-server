@@ -66,7 +66,8 @@ class OrganizeImportsFeature {
 					groupCount++;
 				}
 
-				final range:Range = doc.rangeAt2(tokens.getTreePos(i));
+				// get full line, including trailing comments
+				final range:Range = doc.lineRangeAt(tokens.getTreePos(i).min);
 				var isUnused:Bool = false;
 				for (r in unusedRanges) {
 					if (r.contains(range)) {
