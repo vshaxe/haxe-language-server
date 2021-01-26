@@ -70,6 +70,24 @@ class TextDocument {
 		return rangeAt(pos.min, pos.max);
 	}
 
+	/**
+		returns a range instance spanning the line at offset
+	**/
+	public function lineRangeAt(offsetInLine:Int):Range {
+		var start:Position = positionAt(offsetInLine);
+		var line:String = lineAt(start.line);
+		return {
+			start: {
+				line: start.line,
+				character: 0
+			},
+			end: {
+				line: start.line,
+				character: line.rtrim().length
+			}
+		};
+	}
+
 	public function lineAt(line:Int):String {
 		final lineOffsets = getLineOffsets();
 		if (line >= lineOffsets.length)
