@@ -13,9 +13,11 @@ import haxeLanguageServer.hxParser.RenameResolver;
 class RenameFeature {
 	final context:Context;
 	final converter:Haxe3DisplayOffsetConverter;
+	final cache:refactor.cache.IFileCache;
 
 	public function new(context:Context) {
 		this.context = context;
+		cache = new refactor.cache.MemCache();
 
 		converter = new Haxe3DisplayOffsetConverter();
 
@@ -44,7 +46,7 @@ class RenameFeature {
 			fileList: new refactor.discover.FileList(),
 			typeList: new refactor.discover.TypeList(),
 			type: null,
-			cache: null
+			cache: cache
 		};
 
 		// TODO abort if there are unsaved documents (rename operates on fs, so positions might be off)
@@ -188,7 +190,6 @@ class EditDoc implements refactor.edits.IEditableDocument {
 
 	function posToRange(pos:refactor.discover.IdentifierPos):Range {
 		var doc = context.documents.getHaxe(new FsPath(fileName).toUri());
-
 		if (doc == null) {
 			// document currently not loaded -> load and find line number and character pos to build edit Range
 			var content:String = sys.io.File.getContent(fileName);
