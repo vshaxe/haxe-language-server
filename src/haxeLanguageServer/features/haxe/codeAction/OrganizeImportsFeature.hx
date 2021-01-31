@@ -151,9 +151,10 @@ class OrganizeImportsFeature {
 
 		ArraySort.sort(importGroup.usings, sortFunc);
 		final newUsings:String = importGroup.usings.map(i -> i.text).join("\n");
-		final delim:String = (importGroup.imports.length > 0 && importGroup.usings.length > 0) ? "\n" : "";
+		final importDelim:String = (importGroup.imports.length > 0) ? "\n" : "";
+		final usingDelim:String = (importGroup.usings.length > 0) ? "\n" : "";
 
-		final newText:String = FormatterHelper.formatText(doc, context, newImports + delim + newUsings, TokenTreeEntryPoint.TypeLevel);
+		final newText:String = FormatterHelper.formatText(doc, context, newImports + importDelim + newUsings + usingDelim, TokenTreeEntryPoint.TypeLevel);
 		final edits:Array<TextEdit> = [];
 
 		// remove all existing imports/usings from group
