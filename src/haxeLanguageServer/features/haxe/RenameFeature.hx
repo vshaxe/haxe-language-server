@@ -81,19 +81,19 @@ class RenameFeature {
 		});
 		switch (result) {
 			case NoChange:
-				trace("nothing to do");
+				trace("[rename] no change");
 				reject(ResponseError.internalError("no change"));
 			case NotFound:
-				trace("could not find identifier at " + params.position);
+				trace("[rename] could not find identifier at " + params.position);
 				reject(ResponseError.internalError("could not find identifier at " + params.position));
-			case Unsupported:
-				trace("refactoring not supported at " + params.position);
-				reject(ResponseError.internalError("refactoring not supported at " + params.position));
+			case Unsupported(name):
+				trace("[rename] refactoring not supported for " + name);
+				reject(ResponseError.internalError("refactoring not supported for " + name));
 			case DryRun:
-				trace("dry run");
+				trace("[rename] dry run");
 				reject(ResponseError.internalError("dry run"));
 			case Done:
-				trace("changes were made");
+				trace("[rename] successful");
 				resolve({documentChanges: editList.documentChanges});
 		}
 		#else
