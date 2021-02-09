@@ -24,16 +24,16 @@ abstract class DisplayOffsetConverter {
 class Haxe3DisplayOffsetConverter extends DisplayOffsetConverter {
 	public function new() {}
 
-	override function positionCharToZeroBasedColumn(char:Int):Int {
+	function positionCharToZeroBasedColumn(char:Int):Int {
 		return char;
 	}
 
-	override function byteOffsetToCharacterOffset(string:String, byteOffset:Int):Int {
+	function byteOffsetToCharacterOffset(string:String, byteOffset:Int):Int {
 		final buf = new js.node.Buffer(string, "utf-8");
 		return buf.toString("utf-8", 0, byteOffset).length;
 	}
 
-	override function characterOffsetToByteOffset(string:String, offset:Int):Int {
+	function characterOffsetToByteOffset(string:String, offset:Int):Int {
 		if (offset == 0)
 			return 0;
 		else if (offset == string.length)
@@ -46,15 +46,15 @@ class Haxe3DisplayOffsetConverter extends DisplayOffsetConverter {
 class Haxe4DisplayOffsetConverter extends DisplayOffsetConverter {
 	public function new() {}
 
-	override function positionCharToZeroBasedColumn(char:Int):Int {
+	function positionCharToZeroBasedColumn(char:Int):Int {
 		return char - 1;
 	}
 
-	override function byteOffsetToCharacterOffset(_, offset:Int):Int {
+	function byteOffsetToCharacterOffset(_, offset:Int):Int {
 		return offset;
 	}
 
-	override function characterOffsetToByteOffset(_, offset:Int):Int {
+	function characterOffsetToByteOffset(_, offset:Int):Int {
 		return offset;
 	}
 }
