@@ -2,8 +2,6 @@ package haxeLanguageServer.helper;
 
 import languageServerProtocol.Types.Location;
 
-using Safety;
-
 class HaxePosition {
 	static final positionRe = ~/^(.+):(\d+): (?:lines (\d+)-(\d+)|character(?:s (\d+)-| )(\d+))$/;
 	static final properFileNameCaseCache = new Map<FsPath, FsPath>();

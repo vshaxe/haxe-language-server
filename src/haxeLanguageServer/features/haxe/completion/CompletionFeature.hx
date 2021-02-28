@@ -22,7 +22,6 @@ import languageServerProtocol.Types.CompletionItemKind;
 import languageServerProtocol.protocol.Protocol.CompletionParams;
 import tokentree.TokenTree;
 
-using Safety;
 using tokentree.TokenTreeAccessHelper;
 
 enum abstract CompletionItemOrigin(Int) {

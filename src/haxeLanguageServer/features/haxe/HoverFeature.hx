@@ -10,8 +10,6 @@ import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
 
-using Safety;
-
 class HoverFeature {
 	final context:Context;
 

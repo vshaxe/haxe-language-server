@@ -16,10 +16,14 @@ function getDocumentation<T>(item:DisplayItem<T>):JsonDoc {
 	}
 }
 
-function extractFunctionSignatureOrThrow<T>(type:JsonType<T>) {
+function extractFunctionSignatureOrThrow<T>(type:JsonType<T>):JsonFunctionSignature {
+	return extractFunctionSignature(type).sure();
+}
+
+function extractFunctionSignature<T>(type:JsonType<T>):Null<JsonFunctionSignature> {
 	return switch removeNulls(type).type {
 		case {kind: TFun, args: args}: args;
-		case _: throw "function expected";
+		case _: null;
 	}
 }
 

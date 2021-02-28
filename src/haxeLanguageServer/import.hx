@@ -5,6 +5,7 @@ import languageServerProtocol.Types;
 import languageServerProtocol.protocol.Protocol;
 
 using StringTools;
+using Safety;
 using haxeLanguageServer.extensions.ArrayExtensions;
 using haxeLanguageServer.extensions.DocumentUriExtensions;
 using haxeLanguageServer.extensions.FsPathExtensions;
