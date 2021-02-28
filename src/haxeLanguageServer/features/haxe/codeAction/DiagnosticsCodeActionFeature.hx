@@ -421,7 +421,7 @@ class DiagnosticsCodeActionFeature implements CodeActionContributor {
 					for (expr in field.field.expr.string.split("\n")) {
 						expressions.push(expr);
 					}
-				} else if (!field.type.extractFunctionSignature().ret.isVoid()) {
+				} else if (!field.type.extractFunctionSignatureOrThrow().ret.isVoid()) {
 					expressions.push("throw new haxe.exceptions.NotImplementedException()");
 				}
 				buf.add(printer.printClassFieldImplementation(field.field, field.type, false, expressions));

@@ -43,7 +43,7 @@ function createFunctionImportsEdit<T>(doc:TextDocument, result:ImportPosition, c
 		return [];
 	}
 	var paths = [];
-	final signature = type.extractFunctionSignature();
+	final signature = type.extractFunctionSignatureOrThrow();
 	if (formatting.argumentTypeHints && (!formatting.useArrowSyntax || signature.args.length != 1)) {
 		paths = paths.concat(signature.args.map(arg -> arg.t.resolveImports()).flatten().array());
 	}

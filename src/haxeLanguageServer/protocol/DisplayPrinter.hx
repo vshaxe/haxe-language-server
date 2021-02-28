@@ -213,7 +213,7 @@ class DisplayPrinter {
 		if (!field.isPublic && !functionFormatting.explicitPrivate) {
 			access = "";
 		}
-		final signature = concreteType.extractFunctionSignature();
+		final signature = concreteType.extractFunctionSignatureOrThrow();
 		final returnKeyword = if (signature.ret.isVoid()) "" else "return ";
 		final arguments = printCallArguments(signature, arg -> arg.name);
 		final lineBreak = if (functionFormatting.placeOpenBraceOnNewLine) "\n" else " ";
@@ -231,7 +231,7 @@ class DisplayPrinter {
 	public function printMethodImplementation<T>(field:JsonClassField, concreteType:JsonType<T>, withOverride:Bool, expressions:Array<String>,
 			tab:String = "\t") {
 		var buf = new StringBuf();
-		final signature = concreteType.extractFunctionSignature();
+		final signature = concreteType.extractFunctionSignatureOrThrow();
 		final lineBreak = if (functionFormatting.placeOpenBraceOnNewLine) "\n" else " ";
 		if (field.meta.hasMeta(Overload)) {
 			buf.add("overload ");
@@ -349,7 +349,7 @@ class DisplayPrinter {
 				}
 				final finalKeyword = if (field.isFinalField()) "final " else "";
 				final abstractKeyword = if (field.isAbstract) "abstract " else "";
-				final methodSignature = concreteType.extractFunctionSignature();
+				final methodSignature = concreteType.extractFunctionSignatureOrThrow();
 				final definition = printEmptyFunctionDefinition(name, methodSignature, field.params);
 				'$access$staticKeyword$finalKeyword$abstractKeyword$methodKind$definition';
 		};
@@ -372,7 +372,7 @@ class DisplayPrinter {
 		return switch local.origin {
 			case LocalFunction:
 				final inlineKeyword = if (local.isInline) "inline " else "";
-				inlineKeyword + printEmptyFunctionDefinition(local.name, concreteType.extractFunctionSignature(),
+				inlineKeyword + printEmptyFunctionDefinition(local.name, concreteType.extractFunctionSignatureOrThrow(),
 					if (local.extra == null) null else local.extra.params);
 			case other:
 				var keyword = if (local.isFinal) "final " else "var ";

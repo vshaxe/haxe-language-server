@@ -16,7 +16,7 @@ function getDocumentation<T>(item:DisplayItem<T>):JsonDoc {
 	}
 }
 
-function extractFunctionSignature<T>(type:JsonType<T>) {
+function extractFunctionSignatureOrThrow<T>(type:JsonType<T>) {
 	return switch removeNulls(type).type {
 		case {kind: TFun, args: args}: args;
 		case _: throw "function expected";
