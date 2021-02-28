@@ -161,7 +161,7 @@ class DisplayPrinter {
 		final nullRemoval = arg.t.removeNulls();
 		final concreteType = if (functionFormatting.explicitNull || !arg.opt) arg.t else nullRemoval.type;
 
-		var argument = (if (arg.opt) "?" else "") + arg.name;
+		var argument = (if (arg.opt && arg.value == null) "?" else "") + arg.name;
 		if (functionFormatting.argumentTypeHints && (concreteType.kind != TMono || arg.name == "")) {
 			argument += (arg.name == "" ? "" : ":") + printTypeRec(concreteType);
 		}
