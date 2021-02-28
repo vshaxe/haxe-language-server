@@ -413,6 +413,7 @@ class DiagnosticsCodeActionFeature implements CodeActionContributor {
 			}
 			var edits = [];
 			final getQualified = printer.collectQualifiedPaths();
+			fields.sort((a, b) -> a.field.pos.min - b.field.pos.min);
 			for (field in fields) {
 				var buf = new StringBuf();
 				buf.add("\n\t");
