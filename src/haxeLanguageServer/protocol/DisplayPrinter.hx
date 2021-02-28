@@ -236,13 +236,13 @@ class DisplayPrinter {
 		if (field.meta.hasMeta(Overload)) {
 			buf.add("overload ");
 		}
-		if (field.scope == Static) {
-			buf.add("static ");
-		}
 		if (field.isPublic) {
 			buf.add("public ");
 		} else if (functionFormatting.explicitPrivate) {
 			buf.add("private ");
+		}
+		if (field.scope == Static) {
+			buf.add("static ");
 		}
 		if (withOverride) {
 			buf.add("override ");
@@ -274,6 +274,9 @@ class DisplayPrinter {
 			buf.add("public ");
 		} else if (functionFormatting.explicitPrivate) {
 			buf.add("private ");
+		}
+		if (field.scope == Static) {
+			buf.add("static ");
 		}
 		if (field.isFinalField()) {
 			buf.add("final ");
