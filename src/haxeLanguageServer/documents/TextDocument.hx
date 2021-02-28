@@ -59,14 +59,14 @@ class TextDocument {
 		return {line: line, character: offset - lineOffsets[line]};
 	}
 
-	public function rangeAt(startOffset:Int, endOffset:Int):Range {
+	overload public extern inline function rangeAt(startOffset:Int, endOffset:Int):Range {
 		return {
 			start: positionAt(startOffset),
 			end: positionAt(endOffset)
 		};
 	}
 
-	public inline function rangeAt2(pos:haxe.macro.Expr.Position):Range {
+	overload public extern inline function rangeAt(pos:haxe.macro.Expr.Position):Range {
 		return rangeAt(pos.min, pos.max);
 	}
 

@@ -71,7 +71,7 @@ class ExtractTypeFeature implements CodeActionContributor {
 					// expand pos.min to capture doc comment
 					pos.min = tokens.getPos(docComment).min;
 				}
-				final typeRange = doc.rangeAt2(pos);
+				final typeRange = doc.rangeAt(pos);
 				if (params.range.intersection(typeRange) == null) {
 					// no overlap between selection / cursor pos and Haxe type
 					continue;
@@ -114,7 +114,7 @@ class ExtractTypeFeature implements CodeActionContributor {
 		final pos = tokens.getTreePos(lastImport);
 		pos.min = 0;
 
-		final range = doc.rangeAt2(pos);
+		final range = doc.rangeAt(pos);
 		range.end.line++;
 		range.end.character = 0;
 		final fileHeader:String = doc.getText(range);
@@ -132,7 +132,7 @@ class ExtractTypeFeature implements CodeActionContributor {
 		if (pack == null)
 			return fileHeader + "\n";
 
-		var packText:String = doc.getText(doc.rangeAt2(tokens.getTreePos(pack)));
+		var packText:String = doc.getText(doc.rangeAt(tokens.getTreePos(pack)));
 		packText = packText.replace("package ", "");
 		packText = packText.replace(";", "").trim();
 		if (packText.length <= 0)

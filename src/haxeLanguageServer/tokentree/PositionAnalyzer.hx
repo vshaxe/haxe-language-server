@@ -25,13 +25,13 @@ class PositionAnalyzer {
 			if (found) {
 				return SkipSubtree;
 			}
-			final tokenPos = document.rangeAt2(tokens.getPos(token));
+			final tokenPos = document.rangeAt(tokens.getPos(token));
 			if (tokenPos.containsPos(pos)) {
 				result = token;
 				found = true;
 				return SkipSubtree;
 			}
-			final tokenTreePos = document.rangeAt2(tokens.getTreePos(token));
+			final tokenTreePos = document.rangeAt(tokens.getTreePos(token));
 			if (tokenTreePos.containsPos(pos)) {
 				result = token;
 				return GoDeeper;
@@ -128,7 +128,7 @@ class PositionAnalyzer {
 			return Root(pos);
 		}
 		for (child in root.children) {
-			final childPos = document.rangeAt2(tokens.getPos(child));
+			final childPos = document.rangeAt(tokens.getPos(child));
 			if (childPos.start.isAfter(completionPosition)) {
 				break;
 			}

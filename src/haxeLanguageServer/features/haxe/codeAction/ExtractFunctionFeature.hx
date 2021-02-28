@@ -161,7 +161,7 @@ class ExtractFunctionFeature implements CodeActionContributor {
 	}
 
 	function detectIndent(doc:HaxeDocument, functionToken:TokenTree):String {
-		final functionRange:Range = doc.rangeAt2(functionToken.pos);
+		final functionRange:Range = doc.rangeAt(functionToken.pos);
 		functionRange.start.character = 0;
 
 		final text:String = doc.getText(functionRange);

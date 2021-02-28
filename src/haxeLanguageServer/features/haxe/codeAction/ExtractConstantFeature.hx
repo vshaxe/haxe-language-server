@@ -55,7 +55,7 @@ class ExtractConstantFeature implements CodeActionContributor {
 			return null;
 
 		// skip string literals with interpolation
-		final fullText:String = doc.getText(doc.rangeAt2(tokens.getPos(token)));
+		final fullText:String = doc.getText(doc.rangeAt(tokens.getPos(token)));
 		if (fullText.startsWith("'") && ~/[$]/g.match(text))
 			return null;
 
@@ -96,7 +96,7 @@ class ExtractConstantFeature implements CodeActionContributor {
 
 		// replace all occurrences with const name
 		for (occurrence in occurrences) {
-			edits.push(WorkspaceEditHelper.replaceText(doc.rangeAt2(tokens.getPos(occurrence)), name));
+			edits.push(WorkspaceEditHelper.replaceText(doc.rangeAt(tokens.getPos(occurrence)), name));
 		}
 
 		final textEdit:TextDocumentEdit = WorkspaceEditHelper.textDocumentEdit(uri, edits);
