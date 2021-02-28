@@ -3,12 +3,12 @@ package haxeLanguageServer.helper;
 import haxe.DynamicAccess;
 
 class WorkspaceEditHelper {
-	public static function create(context:Context, params:CodeActionParams, edits:Array<TextEdit>):WorkspaceEdit {
+	overload public static extern inline function create(context:Context, params:CodeActionParams, edits:Array<TextEdit>):WorkspaceEdit {
 		final doc = context.documents.getHaxe(params.textDocument.uri);
-		return _create(doc, edits);
+		return create(doc, edits);
 	}
 
-	public static function _create(doc:Null<TextDocument>, edits:Array<TextEdit>):WorkspaceEdit {
+	overload public static extern inline function create(doc:Null<TextDocument>, edits:Array<TextEdit>):WorkspaceEdit {
 		final changes = new DynamicAccess<Array<TextEdit>>();
 		if (doc != null) {
 			changes[doc.uri.toString()] = edits;

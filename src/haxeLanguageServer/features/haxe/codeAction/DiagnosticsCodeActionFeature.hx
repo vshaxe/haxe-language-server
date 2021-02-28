@@ -345,7 +345,7 @@ class DiagnosticsCodeActionFeature implements CodeActionContributor {
 							actions.push({
 								title: "Make abstract",
 								kind: QuickFix,
-								edit: WorkspaceEditHelper._create(document, [{range: rangeClass, newText: "abstract "}]),
+								edit: WorkspaceEditHelper.create(document, [{range: rangeClass, newText: "abstract "}]),
 								diagnostics: [diagnostic]
 							});
 						}
@@ -453,7 +453,7 @@ class DiagnosticsCodeActionFeature implements CodeActionContributor {
 			final codeAction:CodeAction = {
 				title: title,
 				kind: QuickFix,
-				edit: WorkspaceEditHelper._create(document, edits),
+				edit: WorkspaceEditHelper.create(document, edits),
 				diagnostics: [diagnostic]
 			};
 			if (entry.cause.kind == FieldAccess) {
@@ -473,7 +473,7 @@ class DiagnosticsCodeActionFeature implements CodeActionContributor {
 			actions.unshift({
 				title: "Implement all missing fields",
 				kind: QuickFix,
-				edit: WorkspaceEditHelper._create(document, allEdits),
+				edit: WorkspaceEditHelper.create(document, allEdits),
 				diagnostics: [diagnostic]
 			});
 		}
