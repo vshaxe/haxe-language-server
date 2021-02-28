@@ -228,25 +228,32 @@ class DisplayPrinter {
 		}
 	}
 
-	public function printMethodImplementation<T>(field:JsonClassField, concreteType:JsonType<T>, withOverride:Bool, expressions:Array<String>,
-			tab:String = "\t") {
+	function printCommonFieldModifiers(buf:StringBuf, field:JsonClassField, moduleLevelField:Bool) {
+		if (field.isPublic) {
+			if (!moduleLevelField) {
+				buf.add("public ");
+			}
+		} else if (functionFormatting.explicitPrivate) {
+			buf.add("private ");
+		}
+		if (field.scope == Static && !moduleLevelField) {
+			buf.add("static ");
+		}
+	}
+
+	public function printMethodImplementation<T>(field:JsonClassField, concreteType:JsonType<T>, withOverride:Bool, moduleLevelField:Bool,
+			expressions:Array<String>, tab:String = "\t") {
 		var buf = new StringBuf();
 		final signature = concreteType.extractFunctionSignatureOrThrow();
 		final lineBreak = if (functionFormatting.placeOpenBraceOnNewLine) "\n" else " ";
 		if (field.meta.hasMeta(Overload)) {
 			buf.add("overload ");
 		}
-		if (field.isPublic) {
-			buf.add("public ");
-		} else if (functionFormatting.explicitPrivate) {
-			buf.add("private ");
-		}
-		if (field.scope == Static) {
-			buf.add("static ");
-		}
 		if (withOverride) {
 			buf.add("override ");
 		}
+		printCommonFieldModifiers(buf, field, moduleLevelField);
+
 		buf.add(printEmptyFunctionDefinition(field.name, signature, field.params));
 		buf.add(lineBreak);
 		buf.add("{");
@@ -268,16 +275,10 @@ class DisplayPrinter {
 	}
 
 	public function printVarImplementation<T>(field:JsonClassField, args:{read:JsonVarAccess<Dynamic>, write:JsonVarAccess<Dynamic>},
-			concreteType:JsonType<T>, tab:String = "\t") {
+			concreteType:JsonType<T>, moduleLevelField:Bool) {
 		var buf = new StringBuf();
-		if (field.isPublic) {
-			buf.add("public ");
-		} else if (functionFormatting.explicitPrivate) {
-			buf.add("private ");
-		}
-		if (field.scope == Static) {
-			buf.add("static ");
-		}
+		printCommonFieldModifiers(buf, field, moduleLevelField);
+
 		if (field.isFinalField()) {
 			buf.add("final ");
 			buf.add(field.name);
@@ -292,11 +293,11 @@ class DisplayPrinter {
 		return buf.toString();
 	}
 
-	public function printClassFieldImplementation<T>(field:JsonClassField, concreteType:JsonType<T>, withOverride:Bool, expressions:Array<String>,
-			tab:String = "\t") {
+	public function printClassFieldImplementation<T>(field:JsonClassField, concreteType:JsonType<T>, withOverride:Bool, moduleLevelField:Bool,
+			expressions:Array<String>, tab:String = "\t") {
 		return switch (field.kind.kind) {
-			case FMethod: printMethodImplementation(field, concreteType, withOverride, expressions, tab);
-			case FVar: printVarImplementation(field, field.kind.args, concreteType, tab);
+			case FMethod: printMethodImplementation(field, concreteType, withOverride, moduleLevelField, expressions, tab);
+			case FVar: printVarImplementation(field, field.kind.args, concreteType, moduleLevelField);
 		}
 	}
 

@@ -2,6 +2,7 @@ package haxeLanguageServer.features.haxe.codeAction;
 
 import haxe.display.JsonModuleTypes;
 import haxe.ds.Option;
+import haxe.io.Path;
 import haxeLanguageServer.Configuration;
 import haxeLanguageServer.features.haxe.DiagnosticsFeature.*;
 import haxeLanguageServer.features.haxe.DiagnosticsFeature;
@@ -290,6 +291,7 @@ class DiagnosticsCodeActionFeature implements CodeActionContributor {
 		}
 		var rangeClass;
 		var rangeFieldInsertion;
+		var moduleLevelField = false;
 		var className = args.moduleType.name;
 		switch (args.moduleType.kind) {
 			case Class:
@@ -315,7 +317,9 @@ class DiagnosticsCodeActionFeature implements CodeActionContributor {
 					}
 				}
 				if (classToken == null) {
-					return [];
+					moduleLevelField = true;
+					final lastPos = document.content.length - 1;
+					rangeFieldInsertion = document.rangeAt(lastPos, lastPos);
 				} else {
 					var pos = tokens.getPos(classToken);
 					rangeClass = document.rangeAt(pos.min, pos.min);
@@ -356,7 +360,12 @@ class DiagnosticsCodeActionFeature implements CodeActionContributor {
 						if (field == null) {
 							return None;
 						}
-						Some('Add ${field.field.name} to $className');
+						final target = if (moduleLevelField) {
+							Path.withoutDirectory(args.moduleFile).replace(".hx", "");
+						} else {
+							className;
+						}
+						Some('Add ${field.field.name} to $target');
 					case FinalFields:
 						final funArgs = [];
 						final assignments = [];
@@ -416,7 +425,7 @@ class DiagnosticsCodeActionFeature implements CodeActionContributor {
 			fields.sort((a, b) -> a.field.pos.min - b.field.pos.min);
 			for (field in fields) {
 				var buf = new StringBuf();
-				buf.add("\n\t");
+				buf.add(if (moduleLevelField) "\n\n" else "\n\t");
 				final expressions = [];
 				if (field.field.expr != null) {
 					for (expr in field.field.expr.string.split("\n")) {
@@ -425,7 +434,7 @@ class DiagnosticsCodeActionFeature implements CodeActionContributor {
 				} else if (field.type.extractFunctionSignature().check(f -> !f.ret.isVoid())) {
 					expressions.push("throw new haxe.exceptions.NotImplementedException()");
 				}
-				buf.add(printer.printClassFieldImplementation(field.field, field.type, false, expressions));
+				buf.add(printer.printClassFieldImplementation(field.field, field.type, false, moduleLevelField, expressions));
 				var edit = {
 					range: rangeFieldInsertion,
 					newText: buf.toString()
