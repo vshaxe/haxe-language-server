@@ -334,7 +334,6 @@ class DiagnosticsCodeActionFeature implements CodeActionContributor {
 		var allDotPaths = [];
 		for (entry in args.entries) {
 			var fields = entry.fields.copy();
-			var withOverride = false;
 			function getTitle<T>(cause:MissingFieldCause<T>) {
 				return switch (cause.kind) {
 					case AbstractParent:
@@ -346,7 +345,6 @@ class DiagnosticsCodeActionFeature implements CodeActionContributor {
 								diagnostics: [diagnostic]
 							});
 						}
-						withOverride = true;
 						Some('Implement methods for ${printer.printPathWithParams(cause.args.parent)}');
 					case ImplementedInterface:
 						Some('Implement fields for ${printer.printPathWithParams(cause.args.parent)}');
@@ -426,7 +424,7 @@ class DiagnosticsCodeActionFeature implements CodeActionContributor {
 				} else if (!field.type.extractFunctionSignature().ret.isVoid()) {
 					expressions.push("throw new haxe.exceptions.NotImplementedException()");
 				}
-				buf.add(printer.printClassFieldImplementation(field.field, field.type, withOverride, expressions));
+				buf.add(printer.printClassFieldImplementation(field.field, field.type, false, expressions));
 				var edit = {
 					range: rangeFieldInsertion,
 					newText: buf.toString()
