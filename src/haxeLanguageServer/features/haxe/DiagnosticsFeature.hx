@@ -162,25 +162,27 @@ class DiagnosticsFeature {
 
 			final uri = file.toUri();
 			final argumentsMap = diagnosticsArguments[uri] = new DiagnosticsMap();
+			final doc = context.documents.getHaxe(uri);
 
 			final newDiagnostics = filterRelevantDiagnostics(data.diagnostics);
 			final diagnostics = new Array<Diagnostic>();
 			for (hxDiag in newDiagnostics) {
 				final kind:Int = hxDiag.kind;
+				final range:Range = if (hxDiag.range == null) {
+					// range is not optional in the LSP yet
+					{
+						start: {line: 0, character: 0},
+						end: {line: 0, character: 0}
+					}
+				} else {
+					hxDiag.range;
+				};
 				final diag:Diagnostic = {
-					range: if (hxDiag.range == null) {
-						// range is not optional in the LSP yet
-						{
-							start: {line: 0, character: 0},
-							end: {line: 0, character: 0}
-						}
-					} else {
-						hxDiag.range;
-					},
+					range: range,
 					source: DiagnosticsSource,
 					code: kind,
 					severity: hxDiag.severity,
-					message: hxDiag.kind.getMessage(hxDiag.args)
+					message: hxDiag.kind.getMessage(doc, hxDiag.args, range)
 				}
 				if (kind == RemovableCode || kind == UnusedImport || diag.message.contains("has no effect") || kind == InactiveBlock) {
 					diag.severity = Hint;
@@ -361,10 +363,15 @@ enum abstract DiagnosticKind<T>(Int) from Int to Int {
 		this = i;
 	}
 
-	public function getMessage(args:T) {
+	public function getMessage(doc:Null<HaxeDocument>, args:T, range:Range) {
 		return switch (this : DiagnosticKind<T>) {
 			case UnusedImport: "Unused import/using";
-			case UnresolvedIdentifier: "Unresolved identifier";
+			case UnresolvedIdentifier:
+				final message = 'Unknown identifier';
+				if (doc != null) {
+					message += ' : ${doc.getText(range)}';
+				}
+				message;
 			case CompilerError: args.trim();
 			case RemovableCode: args.description;
 			case ParserError: args;
