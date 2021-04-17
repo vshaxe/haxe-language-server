@@ -85,7 +85,7 @@ class HaxeServer {
 		for (key => value in from) {
 			if (Sys.systemName() == "Windows") {
 				// compare case-insensitive, but preserve the original casing
-				for (initialKey => _ in to) {
+				for (initialKey in to.keys()) {
 					if (key.toLowerCase() == initialKey.toLowerCase()) {
 						key = initialKey;
 						break;
