@@ -83,6 +83,15 @@ class HaxeServer {
 	function mergeEnvs(from:DynamicAccess<String>, to:DynamicAccess<String>) {
 		@:nullSafety(Off)
 		for (key => value in from) {
+			if (Sys.systemName() == "Windows") {
+				// compare case-insensitive, but preserve the original casing
+				for (initialKey in to.keys()) {
+					if (key.toLowerCase() == initialKey.toLowerCase()) {
+						key = initialKey;
+						break;
+					}
+				}
+			}
 			to[key] = value;
 		}
 	}
