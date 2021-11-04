@@ -367,7 +367,7 @@ enum abstract DiagnosticKind<T>(Int) from Int to Int {
 		return switch (this : DiagnosticKind<T>) {
 			case UnusedImport: "Unused import/using";
 			case UnresolvedIdentifier:
-				final message = 'Unknown identifier';
+				var message = 'Unknown identifier';
 				if (doc != null) {
 					message += ' : ${doc.getText(range)}';
 				}
