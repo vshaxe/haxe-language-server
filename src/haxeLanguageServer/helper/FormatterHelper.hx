@@ -5,12 +5,17 @@ import tokentree.TokenTreeBuilder;
 
 class FormatterHelper {
 	public static function formatText(doc:TextDocument, context:Context, code:String, entryPoint:TokenTreeEntryPoint):String {
-		final config = Formatter.loadConfig(if (doc.uri.isFile()) {
-			doc.uri.toFsPath().toString();
+		var path;
+		var origin;
+		if (doc.uri.isFile()) {
+			path = doc.uri.toFsPath().toString();
+			origin = SourceFile(path);
 		} else {
-			context.workspacePath.toString();
-		});
-		switch Formatter.format(Code(code), config, null, entryPoint) {
+			path = context.workspacePath.toString();
+			origin = Snippet;
+		}
+		final config = Formatter.loadConfig(path);
+		switch Formatter.format(Code(code, origin), config, null, entryPoint) {
 			case Success(formattedCode):
 				return formattedCode;
 			case Failure(_):

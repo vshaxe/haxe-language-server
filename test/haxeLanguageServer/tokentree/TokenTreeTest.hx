@@ -1,6 +1,7 @@
 package haxeLanguageServer.tokentree;
 
 import haxe.Json;
+import haxe.PosInfos;
 import haxeLanguageServer.documents.HaxeDocument;
 import haxeLanguageServer.features.haxe.documentSymbols.DocumentSymbolsResolver;
 import haxeLanguageServer.features.haxe.foldingRange.FoldingRangeResolver;
@@ -18,7 +19,7 @@ class TokenTreeTest extends Test {
 		});
 	}
 
-	function compareOutput(basePath:String, resolve:(document:HaxeDocument) -> Dynamic) {
+	function compareOutput(basePath:String, resolve:(document:HaxeDocument) -> Dynamic, ?pos:PosInfos) {
 		final inputPath = '$basePath/Input.hx';
 
 		var content = sys.io.File.getContent(inputPath);
@@ -32,6 +33,6 @@ class TokenTreeTest extends Test {
 		final expected = stringify(Json.parse(sys.io.File.getContent('$basePath/Expected.json')));
 
 		// use "Compare Active File With..." and select Actual.json and Expected.json for debugging
-		Assert.isTrue(actual == expected);
+		Assert.equals(expected, actual, pos);
 	}
 }

@@ -119,7 +119,7 @@ class ExtractTypeFeature implements CodeActionContributor {
 		range.end.character = 0;
 		final fileHeader:String = doc.getText(range);
 
-		var pack:Null<TokenTree>;
+		var pack:Null<TokenTree> = null;
 		tokens.tree.filterCallback(function(token:TokenTree, index:Int):FilterResult {
 			switch token.tok {
 				case Kwd(KwdPackage):

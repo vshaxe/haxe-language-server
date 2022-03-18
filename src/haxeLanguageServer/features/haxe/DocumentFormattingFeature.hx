@@ -36,11 +36,16 @@ class DocumentFormattingFeature {
 			return reject.noTokens();
 		}
 
-		final config = Formatter.loadConfig(if (doc.uri.isFile()) {
-			doc.uri.toFsPath().toString();
+		var path;
+		var origin;
+		if (doc.uri.isFile()) {
+			path = doc.uri.toFsPath().toString();
+			origin = SourceFile(path);
 		} else {
-			context.workspacePath.toString();
-		});
+			path = context.workspacePath.toString();
+			origin = Snippet;
+		}
+		final config = Formatter.loadConfig(path);
 		var inputRange:Null<FormatterInputRange> = null;
 		if (range != null) {
 			range.start.character = 0;
@@ -53,7 +58,7 @@ class DocumentFormattingFeature {
 				endPos: convert(range.end)
 			}
 		}
-		final result = Formatter.format(Tokens(tokens.list, tokens.tree, tokens.bytes), config, inputRange);
+		final result = Formatter.format(Tokens(tokens.list, tokens.tree, tokens.bytes, origin), config, inputRange);
 		switch result {
 			case Success(formattedCode):
 				final range:Range = if (range == null) {
