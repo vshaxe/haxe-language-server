@@ -579,7 +579,7 @@ class CompletionFeature {
 				range: data.replaceRange,
 				newText: if (autoImport) unqualifiedName else qualifiedName
 			},
-			sortText: sortText + unqualifiedName
+			sortText: unqualifiedName + sortText
 		};
 
 		if (isImportCompletion) {
