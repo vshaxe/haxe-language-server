@@ -49,6 +49,8 @@ class Context {
 	public final haxeDisplayProtocol:Protocol;
 
 	public var documents(default, null):TextDocuments;
+	public var latestActiveFilePackage = "";
+
 	@:nullSafety(Off) public var haxeServer:HaxeServer;
 	@:nullSafety(Off) public var workspacePath(default, null):FsPath;
 	@:nullSafety(Off) public var capabilities(default, null):ClientCapabilities;
@@ -409,6 +411,19 @@ class Context {
 		if (timeSinceOpened > 0.1) {
 			publishDiagnostics(params.uri);
 		}
+		updateActiveEditorPackage(activeEditor);
+	}
+
+	function updateActiveEditorPackage(uri:DocumentUri):Void {
+		if (!uri.isHaxeFile()) {
+			latestActiveFilePackage = "";
+			return;
+		}
+		determinePackage.onDeterminePackage({fsPath: uri.toFsPath().toString()}, null, result -> {
+			latestActiveFilePackage = result.pack;
+		}, error -> {
+			latestActiveFilePackage = "";
+		});
 	}
 
 	function publishDiagnostics(uri:DocumentUri) {

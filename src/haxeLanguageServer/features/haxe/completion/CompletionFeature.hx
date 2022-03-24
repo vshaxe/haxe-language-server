@@ -555,6 +555,23 @@ class CompletionFeature {
 		final pathPrinting = if (isImportCompletion) Always else Qualified;
 		final qualifiedName = new DisplayPrinter(pathPrinting).printPath(type.path); // unqualifiedName or dotPath depending on importStatus
 
+		final activePackage = context.latestActiveFilePackage;
+		var sortText = if (containerName == activePackage) {
+			// same package
+			"00";
+		} else if (containerName.length == 0) {
+			// non-shadowed std classes
+			"01";
+		} else {
+			// everything else based on package deepness
+			final diff = if (activePackage.startsWith(containerName)) {
+				containerName.replace(activePackage, "");
+			} else {
+				containerName;
+			}
+			final length = diff.split(".").length;
+			'${length + 2}'.lpad("0", 2);
+		}
 		final item:TextEditCompletionItem = {
 			label: unqualifiedName + if (containerName == "") "" else " - " + dotPath,
 			kind: getKindForModuleType(type),
@@ -562,7 +579,7 @@ class CompletionFeature {
 				range: data.replaceRange,
 				newText: if (autoImport) unqualifiedName else qualifiedName
 			},
-			sortText: unqualifiedName
+			sortText: sortText + unqualifiedName
 		};
 
 		if (isImportCompletion) {
