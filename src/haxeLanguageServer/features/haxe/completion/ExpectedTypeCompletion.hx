@@ -116,18 +116,20 @@ class ExpectedTypeCompletion {
 					});
 				} else {
 					items.push({
-						label: "{all fields...}",
-						detail: "Generate object literal\n(all fields)",
-						insertText: allFields,
-						insertTextFormat: Snippet,
-						code: printer.printObjectLiteral(anon, singleLine, false, false)
-					});
-					items.push({
 						label: "{required fields...}",
 						detail: "Generate object literal\n(only required fields)",
+						sortText: std.String.fromCharCode("0".code - 2),
 						insertText: requiredFields,
 						insertTextFormat: Snippet,
 						code: printer.printObjectLiteral(anon, singleLine, true, false)
+					});
+					items.push({
+						label: "{all fields...}",
+						detail: "Generate object literal\n(all fields)",
+						sortText: std.String.fromCharCode("0".code - 1),
+						insertText: allFields,
+						insertTextFormat: Snippet,
+						code: printer.printObjectLiteral(anon, singleLine, false, false)
 					});
 				}
 			case TFun:
@@ -150,7 +152,7 @@ class ExpectedTypeCompletion {
 		final item:CompletionItem = {
 			label: data.label,
 			detail: data.detail,
-			sortText: "0",
+			sortText: data.sortText == null ? "0" : data.sortText,
 			kind: Snippet,
 			textEdit: {
 				newText: data.insertText,
@@ -181,4 +183,5 @@ private typedef ExpectedTypeCompletionItem = {
 	final insertTextFormat:InsertTextFormat;
 	var ?code:String;
 	final ?additionalTextEdits:Array<TextEdit>;
+	var ?sortText:String;
 }
