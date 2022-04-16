@@ -1,23 +1,28 @@
 package haxeLanguageServer.features.haxe;
 
+import haxe.PosInfos;
+import haxe.display.Display.DisplayMethods;
+import haxe.display.Display.HoverDisplayItemOccurence;
+import haxe.extern.EitherType;
+import haxeLanguageServer.protocol.DotPath.getDotPath;
+import js.lib.Promise;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
-#if debug
-import haxe.extern.EitherType;
-#else
-import haxe.DynamicAccess;
-import haxeLanguageServer.hxParser.RenameResolver;
-#end
+import refactor.ITypeList;
+import refactor.ITyper;
+import refactor.rename.RenameHelper.TypeHintType;
 
 class RenameFeature {
 	final context:Context;
 	final converter:Haxe3DisplayOffsetConverter;
 	final cache:refactor.cache.IFileCache;
+	final typer:LanguageServerTyper;
 
 	public function new(context:Context) {
 		this.context = context;
 		cache = new refactor.cache.MemCache();
+		typer = new LanguageServerTyper(context);
 
 		converter = new Haxe3DisplayOffsetConverter();
 
@@ -28,7 +33,6 @@ class RenameFeature {
 		final uri = params.textDocument.uri;
 		final doc = context.documents.getHaxe(uri);
 
-		#if debug
 		var fileName:String = uri.toFsPath().toString();
 		var workspacePath:String = context.workspacePath.toString();
 		if (fileName.startsWith(workspacePath)) {
@@ -48,11 +52,12 @@ class RenameFeature {
 			type: null,
 			cache: cache
 		};
+		typer.typeList = usageContext.typeList;
 
 		// TODO abort if there are unsaved documents (rename operates on fs, so positions might be off)
 
-		// TODO use workspace / compilation server source folders or maybe a user config
-		var srcFolders:Array<String> = ["src", "test"];
+		// TODO use workspace / compilation server source folders
+		var srcFolders:Array<String> = ["src", "Source", "test", "tests"];
 		if (context.config.user.renameSourcFolders != null) {
 			srcFolders = context.config.user.renameSourcFolders;
 		}
@@ -61,7 +66,7 @@ class RenameFeature {
 		usageContext.usageCollector.updateImportHx(usageContext);
 		var editList:EditList = new EditList();
 
-		var result:refactor.RefactorResult = refactor.Refactor.rename({
+		refactor.Refactor.rename({
 			nameMap: usageContext.nameMap,
 			fileList: usageContext.fileList,
 			typeList: usageContext.typeList,
@@ -75,69 +80,35 @@ class RenameFeature {
 				var fullFileName:String = haxe.io.Path.join([Sys.getCwd(), fileName]);
 				return new EditDoc(fullFileName, editList, context, converter);
 			},
-			verboseLog: function(text:String) {
+			verboseLog: function(text:String, ?pos:PosInfos) {
 				trace('[rename] $text');
+			},
+			typer: typer
+		}).then((result:refactor.RefactorResult) -> {
+			switch (result) {
+				case NoChange:
+					trace("[rename] no change");
+					reject(ResponseError.internalError("no change"));
+				case NotFound:
+					trace('[rename] could not find identifier at "$fileName@${params.position}"');
+					reject(ResponseError.internalError('could not find identifier at "$fileName@${params.position}"'));
+				case Unsupported(name):
+					trace('[rename] refactoring not supported for "$name"');
+					reject(ResponseError.internalError('refactoring not supported for "$name"'));
+				case DryRun:
+					trace("[rename] dry run");
+					reject(ResponseError.internalError("dry run"));
+				case Done:
+					trace("[rename] successful");
+					resolve({documentChanges: editList.documentChanges});
 			}
+		}).catchError((msg) -> {
+			trace('[rename] error: $msg');
+			reject(ResponseError.internalError('$msg'));
 		});
-		switch (result) {
-			case NoChange:
-				trace("[rename] no change");
-				reject(ResponseError.internalError("no change"));
-			case NotFound:
-				trace("[rename] could not find identifier at " + params.position);
-				reject(ResponseError.internalError("could not find identifier at " + params.position));
-			case Unsupported(name):
-				trace("[rename] refactoring not supported for " + name);
-				reject(ResponseError.internalError("refactoring not supported for " + name));
-			case DryRun:
-				trace("[rename] dry run");
-				reject(ResponseError.internalError("dry run"));
-			case Done:
-				trace("[rename] successful");
-				resolve({documentChanges: editList.documentChanges});
-		}
-		#else
-		if (!~/[_A-Za-z]\w*/.match(params.newName)) {
-			return reject(ResponseError.internalError("'" + params.newName + "' is not a valid identifier name."));
-		}
-
-		function invalidRename() {
-			reject(ResponseError.internalError("Only local variables and function parameters can be renamed."));
-		}
-
-		context.gotoDefinition.onGotoDefinition(params, token, function(locations) {
-			function noDeclaration() {
-				reject(ResponseError.internalError("No declaration found."));
-			}
-			if (locations == null) {
-				return noDeclaration();
-			}
-			final declaration = locations[0];
-			if (declaration == null) {
-				return noDeclaration();
-			}
-			if (declaration.uri != uri) {
-				return invalidRename();
-			}
-			final parseTree = @:nullSafety(Off) doc.parseTree;
-			if (parseTree == null) {
-				return reject.noTokens();
-			}
-			final resolver = new RenameResolver(declaration.range, params.newName);
-			resolver.walkFile(parseTree, Root);
-			if (resolver.edits.length == 0) {
-				return invalidRename();
-			}
-
-			final changes = new haxe.DynamicAccess();
-			changes[uri.toString()] = resolver.edits;
-			resolve({changes: changes});
-		}, _ -> invalidRename());
-		#end
 	}
 }
 
-#if debug
 class EditList {
 	public var documentChanges:Array<EitherType<TextDocumentEdit, EitherType<CreateFile, EitherType<RenameFile, DeleteFile>>>>;
 
@@ -260,4 +231,80 @@ class EditDoc implements refactor.edits.IEditableDocument {
 		}
 	}
 }
-#end
+
+class LanguageServerTyper implements ITyper {
+	final context:Context;
+
+	public var typeList:Null<ITypeList>;
+
+	public function new(context:Context) {
+		this.context = context;
+	}
+
+	public function resolveType(fileName:String, pos:Int):Promise<Null<TypeHintType>> {
+		final params = {
+			file: cast fileName,
+			offset: pos,
+			wasAutoTriggered: true
+		};
+		trace('[rename] requesting type info for $fileName@$pos');
+		var promise = new Promise(function(resolve:(value:Null<TypeHintType>) -> Void, reject) {
+			context.callHaxeMethod(DisplayMethods.Hover, params, null, function(hover) {
+				if (hover == null) {
+					trace('[rename] received no type info for $fileName@$pos');
+					resolve(null);
+				} else {
+					resolve(buildTypeHint(hover, '$fileName@$pos'));
+				}
+				return null;
+			}, reject.handler());
+		});
+		return promise;
+	}
+
+	function buildTypeHint<T>(item:HoverDisplayItemOccurence<T>, location:String):Null<TypeHintType> {
+		if (typeList == null) {
+			return null;
+		}
+		var reg = ~/Class<(.*)>/;
+
+		var type = item?.item?.type;
+		if (type == null) {
+			return null;
+		}
+		var path = type?.args?.path;
+		if (path == null) {
+			return null;
+		}
+		if (path.moduleName == "StdTypes" && path.typeName == "Null") {
+			var params = type?.args?.params;
+			if (params == null) {
+				return null;
+			}
+			type = params[0];
+			if (type == null) {
+				return null;
+			}
+			path = type?.args?.path;
+			if (path == null) {
+				return null;
+			}
+		}
+		if (reg.match(path.typeName)) {
+			var fullPath = reg.matched(1);
+			var parts = fullPath.split(".");
+			if (parts.length <= 0) {
+				return null;
+			}
+			@:nullSafety(Off)
+			path.typeName = parts.pop();
+			path.pack = parts;
+		}
+		var fullPath = '${getDotPath(type)}';
+		trace('[rename] received type $fullPath for $location');
+		if (fullPath == "StdTypes.Null") {
+			trace(type);
+		}
+		return typeList.makeTypeHintType(fullPath);
+	}
+}
