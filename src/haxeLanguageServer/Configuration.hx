@@ -82,7 +82,7 @@ typedef UserConfig = {
 	var postfixCompletion:PostfixCompletionConfig;
 	var importsSortOrder:ImportsSortOrderConfig;
 	var maxCompletionItems:Int;
-	var renameSourcFolders:Array<String>;
+	var renameSourceFolders:Array<String>;
 }
 
 private typedef InitOptions = {
@@ -162,7 +162,7 @@ class Configuration {
 		},
 		importsSortOrder: AllAlphabetical,
 		maxCompletionItems: 1000,
-		renameSourcFolders: ["src", "test"]
+		renameSourceFolders: ["src", "Source", "test", "tests"]
 	};
 
 	final onDidChange:(kind:ConfigurationKind) -> Void;

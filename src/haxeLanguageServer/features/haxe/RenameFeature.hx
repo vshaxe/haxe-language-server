@@ -58,8 +58,8 @@ class RenameFeature {
 
 		// TODO use workspace / compilation server source folders
 		var srcFolders:Array<String> = ["src", "Source", "test", "tests"];
-		if (context.config.user.renameSourcFolders != null) {
-			srcFolders = context.config.user.renameSourcFolders;
+		if (context.config.user.renameSourceFolders != null) {
+			srcFolders = context.config.user.renameSourceFolders;
 		}
 
 		refactor.discover.TraverseSources.traverseSources(srcFolders, usageContext);
