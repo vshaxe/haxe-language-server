@@ -268,16 +268,16 @@ class LanguageServerTyper implements ITyper {
 		}
 		var reg = ~/Class<(.*)>/;
 
-		var type = item?.item?.type;
+		var type = item!.item!.type;
 		if (type == null) {
 			return null;
 		}
-		var path = type?.args?.path;
+		var path = type!.args!.path;
 		if (path == null) {
 			return null;
 		}
 		if (path.moduleName == "StdTypes" && path.typeName == "Null") {
-			var params = type?.args?.params;
+			var params = type!.args!.params;
 			if (params == null) {
 				return null;
 			}
@@ -285,7 +285,7 @@ class LanguageServerTyper implements ITyper {
 			if (type == null) {
 				return null;
 			}
-			path = type?.args?.path;
+			path = type!.args!.path;
 			if (path == null) {
 				return null;
 			}
@@ -302,9 +302,6 @@ class LanguageServerTyper implements ITyper {
 		}
 		var fullPath = '${getDotPath(type)}';
 		trace('[rename] received type $fullPath for $location');
-		if (fullPath == "StdTypes.Null") {
-			trace(type);
-		}
 		return typeList.makeTypeHintType(fullPath);
 	}
 }
