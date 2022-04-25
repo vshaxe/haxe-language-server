@@ -96,6 +96,7 @@ class CompletionFeature {
 	}
 
 	static final autoTriggerOnSpacePattern = ~/(\b(import|using|extends|implements|from|to|case|new|cast|override)|(->)) $/;
+	static final reCaseOrDefault = ~/\b(case|default)\b[^:]*:$/;
 
 	function isValidCompletionPosition(token:Null<TokenTree>, doc:HaxeDocument, params:CompletionParams, text:String):Bool {
 		if (token == null) {
@@ -113,6 +114,7 @@ class CompletionFeature {
 		}
 		return switch params.context.triggerCharacter {
 			case null: true;
+			case ":" if (reCaseOrDefault.match(text)): false;
 			case ">" if (!isAfterArrow(text)): false;
 			case " " if (!autoTriggerOnSpacePattern.match(text)): false;
 			case "$" if (!isInterpolationPosition(token, doc, params.position, text)): false;
