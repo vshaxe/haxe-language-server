@@ -1,5 +1,6 @@
 package haxeLanguageServer.features.haxe;
 
+import byte.ByteData;
 import haxe.PosInfos;
 import haxe.display.Display.DisplayMethods;
 import haxe.display.Display.HoverDisplayItemOccurence;
@@ -9,9 +10,11 @@ import js.lib.Promise;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
+import refactor.CanRefactorResult;
 import refactor.ITypeList;
 import refactor.ITyper;
 import refactor.rename.RenameHelper.TypeHintType;
+import tokentree.TokenTree;
 
 class RenameFeature {
 	final context:Context;
@@ -26,7 +29,56 @@ class RenameFeature {
 
 		converter = new Haxe3DisplayOffsetConverter();
 
+		context.languageServerProtocol.onRequest(PrepareRenameRequest.type, onPrepareRename);
 		context.languageServerProtocol.onRequest(RenameRequest.type, onRename);
+	}
+
+	function onPrepareRename(params:PrepareRenameParams, token:CancellationToken, resolve:PrepareRenameResult->Void, reject:ResponseError<NoData>->Void) {
+		final uri = params.textDocument.uri;
+
+		final doc = context.documents.getHaxe(uri);
+		if (doc == null || !uri.isFile()) {
+			return reject.noFittingDocument(uri);
+		}
+		var fileName:String = uri.toFsPath().toString();
+
+		var usageContext:refactor.discover.UsageContext = makeUsageContext();
+		var editList:EditList = new EditList();
+
+		usageContext.fileName = fileName;
+		var root:Null<TokenTree> = doc!.tokens!.tree;
+		if (root == null) {
+			usageContext.usageCollector.parseFile(ByteData.ofString(doc.content), usageContext);
+		} else {
+			usageContext.usageCollector.parseFileWithTokens(root, usageContext);
+		}
+		refactor.Refactor.canRename({
+			nameMap: usageContext.nameMap,
+			fileList: usageContext.fileList,
+			typeList: usageContext.typeList,
+			what: {
+				fileName: fileName,
+				toName: "",
+				pos: converter.characterOffsetToByteOffset(doc.content, doc.offsetAt(params.position))
+			},
+			verboseLog: function(text:String, ?pos:PosInfos) {
+				trace('[rename] $text');
+			},
+			typer: typer
+		}).then((result:CanRefactorResult) -> {
+			if (result == null) {
+				reject(ResponseError.internalError('xxx'));
+			}
+			var editDoc = new EditDoc(fileName, editList, context, converter);
+			@:nullSafety(Off)
+			resolve(cast {
+				range: editDoc.posToRange(result.pos),
+				placeholder: result.name
+			});
+		}).catchError((msg) -> {
+			trace('[canRename] error: $msg');
+			reject(ResponseError.internalError('$msg'));
+		});
 	}
 
 	function onRename(params:RenameParams, token:CancellationToken, resolve:WorkspaceEdit->Void, reject:ResponseError<NoData>->Void) {
@@ -42,16 +94,7 @@ class RenameFeature {
 		if (doc == null || !uri.isFile()) {
 			return reject.noFittingDocument(uri);
 		}
-		var usageContext:refactor.discover.UsageContext = {
-			fileName: "",
-			file: null,
-			usageCollector: new refactor.discover.UsageCollector(),
-			nameMap: new refactor.discover.NameMap(),
-			fileList: new refactor.discover.FileList(),
-			typeList: new refactor.discover.TypeList(),
-			type: null,
-			cache: cache
-		};
+		var usageContext:refactor.discover.UsageContext = makeUsageContext();
 		typer.typeList = usageContext.typeList;
 
 		// TODO abort if there are unsaved documents (rename operates on fs, so positions might be off)
@@ -107,6 +150,19 @@ class RenameFeature {
 			reject(ResponseError.internalError('$msg'));
 		});
 	}
+
+	function makeUsageContext():refactor.discover.UsageContext {
+		return {
+			fileName: "",
+			file: null,
+			usageCollector: new refactor.discover.UsageCollector(),
+			nameMap: new refactor.discover.NameMap(),
+			fileList: new refactor.discover.FileList(),
+			typeList: new refactor.discover.TypeList(),
+			type: null,
+			cache: cache
+		};
+	}
 }
 
 class EditList {
@@ -159,7 +215,7 @@ class EditDoc implements refactor.edits.IEditableDocument {
 		}
 	}
 
-	function posToRange(pos:refactor.discover.IdentifierPos):Range {
+	public function posToRange(pos:refactor.discover.IdentifierPos):Range {
 		var doc = context.documents.getHaxe(new FsPath(fileName).toUri());
 		if (doc == null) {
 			// document currently not loaded -> load and find line number and character pos to build edit Range

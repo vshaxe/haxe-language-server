@@ -241,7 +241,7 @@ class Context {
 		}
 
 		if (textDocument!.rename!.dynamicRegistration == true) {
-			register(RenameRequest.type, haxeSelector);
+			register(RenameRequest.type, {documentSelector: haxeSelector, prepareProvider: true});
 		} else {
 			capabilities.renameProvider = true;
 		}
