@@ -2,9 +2,9 @@ package haxeLanguageServer.documents;
 
 import haxe.Timer;
 
-typedef OnTextDocumentChangeListener = TextDocument->Array<TextDocumentContentChangeEvent>->Int->Void;
+typedef OnTextDocumentChangeListener = HxTextDocument->Array<TextDocumentContentChangeEvent>->Int->Void;
 
-class TextDocument {
+class HxTextDocument {
 	public final uri:DocumentUri;
 	public final languageId:String;
 	public final openTimestamp:Float;
@@ -115,7 +115,10 @@ class TextDocument {
 		return re.matched(0);
 	}
 
-	public function getText(range:Range) {
+	public function getText(?range:Range) {
+		if (range == null) {
+			return content;
+		}
 		return content.substring(offsetAt(range.start), offsetAt(range.end));
 	}
 

@@ -25,7 +25,7 @@ class GotoImplementationFeature {
 	}
 
 	function handleJsonRpc(params:TextDocumentPositionParams, token:CancellationToken, resolve:Definition->Void, reject:ResponseError<NoData>->Void,
-			doc:TextDocument, offset:Int) {
+			doc:HxTextDocument, offset:Int) {
 		context.callHaxeMethod(DisplayMethods.GotoImplementation, {file: doc.uri.toFsPath(), contents: doc.content, offset: offset}, token, locations -> {
 			resolve(locations.map(location -> {
 				{

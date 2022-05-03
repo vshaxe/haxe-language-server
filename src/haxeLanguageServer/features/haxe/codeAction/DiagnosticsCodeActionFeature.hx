@@ -289,7 +289,7 @@ class DiagnosticsCodeActionFeature implements CodeActionContributor {
 		if (tokens == null) {
 			return [];
 		}
-		var rangeClass;
+		var rangeClass:Null<Range> = null;
 		var rangeFieldInsertion;
 		var moduleLevelField = false;
 		var className = args.moduleType.name;
@@ -342,6 +342,7 @@ class DiagnosticsCodeActionFeature implements CodeActionContributor {
 				return switch (cause.kind) {
 					case AbstractParent:
 						if (rangeClass != null) {
+							@:nullSafety(Off)
 							actions.push({
 								title: "Make abstract",
 								kind: QuickFix,

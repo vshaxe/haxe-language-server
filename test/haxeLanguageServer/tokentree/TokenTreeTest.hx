@@ -19,7 +19,7 @@ class TokenTreeTest extends Test {
 		});
 	}
 
-	function compareOutput(basePath:String, resolve:(document:HaxeDocument) -> Dynamic, ?pos:PosInfos) {
+	function compareOutput(basePath:String, resolve:(document:HaxeDocument) -> Null<Dynamic>, ?pos:PosInfos) {
 		final inputPath = '$basePath/Input.hx';
 
 		var content = sys.io.File.getContent(inputPath);

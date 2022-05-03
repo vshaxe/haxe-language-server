@@ -2,7 +2,7 @@ package haxeLanguageServer;
 
 import haxe.display.Protocol.Response;
 import jsonrpc.Types;
-import languageServerProtocol.Types.DocumentUri;
+import languageServerProtocol.textdocument.TextDocument;
 
 /**
 	Custom, Haxe-Language-Server-specific methods that are not part of the Language Server Protocol.

@@ -26,7 +26,7 @@ class GotoDefinitionFeature {
 	}
 
 	function handleJsonRpc(params:TextDocumentPositionParams, token:CancellationToken, resolve:Definition->Void, reject:ResponseError<NoData>->Void,
-			doc:TextDocument, offset:Int) {
+			doc:HxTextDocument, offset:Int) {
 		context.callHaxeMethod(DisplayMethods.GotoDefinition, {file: doc.uri.toFsPath(), contents: doc.content, offset: offset}, token, function(locations) {
 			resolve(locations.map(location -> {
 				{
@@ -39,13 +39,13 @@ class GotoDefinitionFeature {
 	}
 
 	function handleLegacy(params:TextDocumentPositionParams, token:CancellationToken, resolve:Definition->Void, reject:ResponseError<NoData>->Void,
-			doc:TextDocument, offset:Int) {
+			doc:HxTextDocument, offset:Int) {
 		final bytePos = context.displayOffsetConverter.characterOffsetToByteOffset(doc.content, offset);
 		final args = ['${doc.uri.toFsPath()}@$bytePos@position'];
 		context.callDisplay("@position", args, doc.content, token, function(r) {
 			switch r {
 				case DCancelled:
-					resolve(null);
+					resolve([]);
 				case DResult(data):
 					final xml = try Xml.parse(data).firstElement() catch (_:Any) null;
 					if (xml == null)

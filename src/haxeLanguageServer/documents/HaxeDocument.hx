@@ -3,7 +3,7 @@ package haxeLanguageServer.documents;
 import haxeLanguageServer.tokentree.TokenTreeManager;
 import hxParser.ParseTree;
 
-class HaxeDocument extends TextDocument {
+class HaxeDocument extends HxTextDocument {
 	public var parseTree(get, never):Null<File>;
 	public var tokens(get, never):Null<TokenTreeManager>;
 

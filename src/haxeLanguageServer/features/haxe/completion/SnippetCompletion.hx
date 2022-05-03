@@ -13,7 +13,7 @@ import languageServerProtocol.protocol.Protocol.CompletionParams;
 using haxe.io.Path;
 
 typedef SnippetCompletionContextData = {
-	final doc:TextDocument;
+	final doc:HxTextDocument;
 	final params:CompletionParams;
 	final replaceRange:Range;
 	final tokenContext:TokenContext;

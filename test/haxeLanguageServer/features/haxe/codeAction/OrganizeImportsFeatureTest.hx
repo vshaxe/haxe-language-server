@@ -22,8 +22,8 @@ class OrganizeImportsFeatureTest extends Test implements IOrganizeImportsFeature
 
 	@:access(haxeLanguageServer.Configuration)
 	function makeEdits(content:String, fileName:String, importsSortOrder:ImportsSortOrderConfig):Array<TextEdit> {
-		final context = new Context(new Protocol(null));
-		final settings = Reflect.copy(Configuration.DefaultUserSettings);
+		final context = new Context(new Protocol((_, _) -> {}));
+		final settings = cast Reflect.copy(Configuration.DefaultUserSettings);
 		settings.importsSortOrder = importsSortOrder;
 		context.config.user = settings;
 		final doc = new HaxeDocument(new DocumentUri("file://" + fileName + ".edittest"), "haxe", 4, content);

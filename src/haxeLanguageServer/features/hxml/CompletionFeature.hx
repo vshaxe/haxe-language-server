@@ -5,7 +5,6 @@ import haxeLanguageServer.features.hxml.HxmlContextAnalyzer;
 import haxeLanguageServer.features.hxml.data.Defines;
 import haxeLanguageServer.features.hxml.data.Flags;
 import haxeLanguageServer.features.hxml.data.Shared;
-import haxeLanguageServer.helper.TextEditCompletionItem;
 import haxeLanguageServer.helper.VscodeCommands;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
@@ -61,12 +60,13 @@ class CompletionFeature {
 	function createFlagCompletion(range:Range, textAfter:String):Array<CompletionItem> {
 		final items = [];
 		function addFlag(flag:Flag, name:String) {
-			final item:TextEditCompletionItem = {
+			final textEdit:TextEdit = {
+				range: range,
+				newText: name
+			};
+			final item:CompletionItem = {
 				label: name,
-				textEdit: {
-					range: range,
-					newText: name
-				},
+				textEdit: textEdit,
 				filterText: name,
 				kind: Function,
 				documentation: {
@@ -79,14 +79,14 @@ class CompletionFeature {
 			if (arg != null) {
 				item.label += " " + arg.name;
 				if (textAfter.charAt(0) != " ") {
-					item.textEdit.newText += " ";
+					textEdit.newText += " ";
 				}
 				if (arg.insertion != null) {
 					var insertion = arg.insertion;
 					if (!insertion.contains("$")) {
 						insertion = '$${1:$insertion}';
 					}
-					item.textEdit.newText += insertion;
+					textEdit.newText += insertion;
 				}
 				if (arg.kind != null) {
 					item.command = TriggerSuggest;
@@ -124,20 +124,21 @@ class CompletionFeature {
 		final haxeVersion = context.haxeServer.haxeVersion;
 		return getDefines(false).map(define -> {
 			final name = define.getRealName();
-			final item:TextEditCompletionItem = {
+			final textEdit:TextEdit = {
+				range: range,
+				newText: name
+			};
+			final item:CompletionItem = {
 				label: name,
 				kind: Constant,
-				textEdit: {
-					range: range,
-					newText: name
-				},
+				textEdit: textEdit,
 				documentation: {
 					kind: MarkDown,
 					value: define.printDetails(haxeVersion)
 				}
 			}
 			if (define.hasParams()) {
-				item.textEdit.newText += "=";
+				textEdit.newText += "=";
 				item.command = TriggerSuggest;
 			}
 			if (!define.isAvailable(haxeVersion)) {

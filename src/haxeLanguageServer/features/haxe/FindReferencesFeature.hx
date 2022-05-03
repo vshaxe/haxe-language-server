@@ -26,7 +26,7 @@ class FindReferencesFeature {
 	}
 
 	function handleJsonRpc(params:TextDocumentPositionParams, token:CancellationToken, resolve:Null<Array<Location>>->Void,
-			reject:ResponseError<NoData>->Void, doc:TextDocument, offset:Int) {
+			reject:ResponseError<NoData>->Void, doc:HxTextDocument, offset:Int) {
 		context.callHaxeMethod(DisplayMethods.FindReferences, {
 			file: doc.uri.toFsPath(),
 			contents: doc.content,
@@ -44,7 +44,7 @@ class FindReferencesFeature {
 	}
 
 	function handleLegacy(params:TextDocumentPositionParams, token:CancellationToken, resolve:Null<Array<Location>>->Void, reject:ResponseError<NoData>->Void,
-			doc:TextDocument, offset:Int) {
+			doc:HxTextDocument, offset:Int) {
 		final bytePos = context.displayOffsetConverter.characterOffsetToByteOffset(doc.content, doc.offsetAt(params.position));
 		final args = ['${doc.uri.toFsPath()}@$bytePos@usage'];
 		context.callDisplay("@usage", args, doc.content, token, function(r) {

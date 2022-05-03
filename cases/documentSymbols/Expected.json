@@ -314,7 +314,9 @@
 				"character": 11
 			}
 		},
-		"deprecated": true,
+		"tags": [
+			1
+		],
 		"children": [
 			{
 				"name": "CONSTANT",
@@ -339,7 +341,9 @@
 						"character": 27
 					}
 				},
-				"deprecated": true
+				"tags": [
+					1
+				]
 			},
 			{
 				"name": "variable",
@@ -534,7 +538,9 @@
 						"character": 24
 					}
 				},
-				"deprecated": true
+				"tags": [
+					1
+				]
 			},
 			{
 				"name": "foo",

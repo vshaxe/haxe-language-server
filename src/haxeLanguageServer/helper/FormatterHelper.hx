@@ -4,7 +4,7 @@ import formatter.Formatter;
 import tokentree.TokenTreeBuilder;
 
 class FormatterHelper {
-	public static function formatText(doc:TextDocument, context:Context, code:String, entryPoint:TokenTreeEntryPoint):String {
+	public static function formatText(doc:HxTextDocument, context:Context, code:String, entryPoint:TokenTreeEntryPoint):String {
 		var path;
 		var origin;
 		if (doc.uri.isFile()) {

@@ -343,7 +343,7 @@ while (i-- > 0) {
 		return null;
 	}
 
-	function createPostfixCompletionItem(data:PostfixCompletionItem, doc:TextDocument, removeRange:Range, replaceRange:Range):CompletionItem {
+	function createPostfixCompletionItem(data:PostfixCompletionItem, doc:HxTextDocument, removeRange:Range, replaceRange:Range):CompletionItem {
 		if (data.eat != null) {
 			final pos = replaceRange.end;
 			final nextChar = doc.getText({start: pos, end: pos.translate(0, 1)});

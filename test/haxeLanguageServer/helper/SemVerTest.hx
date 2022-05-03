@@ -1,6 +1,7 @@
 package haxeLanguageServer.helper;
 
 class SemVerTest extends Test {
+	@:nullSafety(Off)
 	function spec() {
 		SemVer.parse("3.4.7") == new SemVer(3, 4, 7);
 		SemVer.parse("4.0.0 (git build master @ 2344f233a)") == new SemVer(4, 0, 0);
