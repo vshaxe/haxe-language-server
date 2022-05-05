@@ -61,7 +61,7 @@ class WorkspaceSymbolsFeature {
 		return result;
 	}
 
-	function makeRequest(label:String, args:Array<String>, doc:Null<TextDocument>, token:CancellationToken, resolve:Array<SymbolInformation>->Void,
+	function makeRequest(label:String, args:Array<String>, doc:Null<HxTextDocument>, token:CancellationToken, resolve:Array<SymbolInformation>->Void,
 			reject:ResponseError<NoData>->Void) {
 		final onResolve = context.startTimer("@workspace-symbols");
 		context.callDisplay(label, args, doc == null ? null : doc.content, token, function(r) {
@@ -116,8 +116,8 @@ class WorkspaceSymbolsFeature {
 		if (entry.containerName != null) {
 			result.containerName = entry.containerName;
 		}
-		if (entry.isDeprecated != null) {
-			result.deprecated = entry.isDeprecated;
+		if (entry.isDeprecated != null && entry.isDeprecated) {
+			result.tags = [Deprecated];
 		}
 		return result;
 	}

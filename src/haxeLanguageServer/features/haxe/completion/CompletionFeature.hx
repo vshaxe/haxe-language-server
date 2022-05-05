@@ -8,7 +8,6 @@ import haxeLanguageServer.helper.DocHelper;
 import haxeLanguageServer.helper.ImportHelper;
 import haxeLanguageServer.helper.SemVer;
 import haxeLanguageServer.helper.Set;
-import haxeLanguageServer.helper.TextEditCompletionItem;
 import haxeLanguageServer.helper.VscodeCommands;
 import haxeLanguageServer.protocol.CompilerMetadata;
 import haxeLanguageServer.protocol.DisplayPrinter;
@@ -507,7 +506,11 @@ class CompletionFeature {
 		final occurrence:EnumFieldOccurrence<T> = item.args;
 		final field:JsonEnumField = occurrence.field;
 		final name = field.name;
-		final result:TextEditCompletionItem = {
+		final textEdit:TextEdit = {
+			newText: name,
+			range: data.replaceRange
+		};
+		final result:CompletionItem = {
 			label: name,
 			kind: EnumMember,
 			detail: {
@@ -519,16 +522,13 @@ class CompletionFeature {
 					definition;
 				}
 			},
-			textEdit: {
-				newText: name,
-				range: data.replaceRange
-			}
+			textEdit: textEdit
 		};
 
 		if (data.mode.kind == Pattern) {
 			var field = printer.printEnumField(field, item.type, true, false);
 			field = maybeInsertPatternColon(field, data);
-			result.textEdit.newText = field;
+			textEdit.newText = field;
 			result.insertTextFormat = Snippet;
 			result.command = TriggerParameterHints;
 		}
@@ -572,18 +572,19 @@ class CompletionFeature {
 			final length = diff.split(".").length;
 			'${length + 2}'.lpad("0", 2);
 		}
-		final item:TextEditCompletionItem = {
+		final textEdit:TextEdit = {
+			range: data.replaceRange,
+			newText: if (autoImport) unqualifiedName else qualifiedName
+		};
+		final item:CompletionItem = {
 			label: unqualifiedName + if (containerName == "") "" else " - " + dotPath,
 			kind: getKindForModuleType(type),
-			textEdit: {
-				range: data.replaceRange,
-				newText: if (autoImport) unqualifiedName else qualifiedName
-			},
+			textEdit: textEdit,
 			sortText: unqualifiedName + sortText
 		};
 
 		if (isImportCompletion) {
-			item.textEdit.newText = maybeInsert(item.textEdit.newText, ";", data.lineAfter);
+			textEdit.newText = maybeInsert(textEdit.newText, ";", data.lineAfter);
 		} else if (importConfig.enableAutoImports && type.path.importStatus == Unimported) {
 			final edit = createImportsEdit(data.doc, data.importPosition, [dotPath], importConfig.style);
 			item.additionalTextEdits = [edit];
@@ -592,7 +593,7 @@ class CompletionFeature {
 		if (snippetSupport) {
 			switch data.mode.kind {
 				case TypeHint | Extends | Implements | StructExtension if (type.hasMandatoryTypeParameters()):
-					item.textEdit.newText += "<$1>";
+					textEdit.newText += "<$1>";
 					item.insertTextFormat = Snippet;
 					item.command = TriggerSuggest;
 				case _:
@@ -602,7 +603,7 @@ class CompletionFeature {
 		if (data.mode.kind == StructExtension && data.mode.args != null) {
 			final completionData:StructExtensionCompletion = data.mode.args;
 			if (!completionData.isIntersectionType) {
-				item.textEdit.newText = maybeInsert(item.textEdit.newText, ",", data.lineAfter);
+				textEdit.newText = maybeInsert(textEdit.newText, ",", data.lineAfter);
 			}
 		}
 
@@ -668,13 +669,14 @@ class CompletionFeature {
 	}
 
 	function createKeywordCompletionItem(keyword:Keyword, data:CompletionContextData):CompletionItem {
-		final item:TextEditCompletionItem = {
+		final textEdit:TextEdit = {
+			newText: keyword.name,
+			range: data.replaceRange
+		};
+		final item:CompletionItem = {
 			label: keyword.name,
 			kind: Keyword,
-			textEdit: {
-				newText: keyword.name,
-				range: data.replaceRange
-			}
+			textEdit: textEdit
 		}
 
 		if (data.mode.kind == TypeRelation || keyword.name == New || keyword.name == Inline) {
@@ -689,19 +691,19 @@ class CompletionFeature {
 		}
 
 		inline function maybeAddSpace() {
-			item.textEdit.newText = maybeInsert(item.textEdit.newText, " ", data.lineAfter);
+			textEdit.newText = maybeInsert(textEdit.newText, " ", data.lineAfter);
 		}
 
 		switch keyword.name {
 			case Extends | Implements:
-				item.textEdit.newText += " ";
+				textEdit.newText += " ";
 			// TODO: make it configurable for these, since not all code styles want spaces there
 			case Else | Do | Switch:
 				maybeAddSpace();
 			case If | For | While | Catch:
 				if (snippetSupport) {
 					item.insertTextFormat = Snippet;
-					item.textEdit.newText = '${keyword.name} ($1)';
+					textEdit.newText = '${keyword.name} ($1)';
 				} else {
 					maybeAddSpace();
 				}

@@ -3,9 +3,10 @@ import haxe.ds.ReadOnlyArray;
 import haxeLanguageServer.documents.*;
 import languageServerProtocol.Types;
 import languageServerProtocol.protocol.Protocol;
+import languageServerProtocol.textdocument.TextDocument;
 
-using StringTools;
 using Safety;
+using StringTools;
 using haxeLanguageServer.extensions.ArrayExtensions;
 using haxeLanguageServer.extensions.DocumentUriExtensions;
 using haxeLanguageServer.extensions.FsPathExtensions;

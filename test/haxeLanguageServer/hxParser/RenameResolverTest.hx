@@ -14,7 +14,11 @@ class RenameResolverTest extends Test {
 		final newName = "newName";
 		final resolver = new RenameResolver(declaration, newName);
 		final parseTree = new HaxeDocument(new DocumentUri("file:///c:/"), "haxe", 0, code).parseTree;
-		resolver.walkFile(parseTree, Root);
+		if (parseTree != null) {
+			resolver.walkFile(parseTree, Root);
+		} else {
+			Assert.fail("parseTree is null");
+		}
 
 		if (expected == null) {
 			final expectedEdits = [

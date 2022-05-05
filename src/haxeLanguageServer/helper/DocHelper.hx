@@ -113,7 +113,7 @@ class DocHelper {
 		@param doc referenced document
 		@param range selected range inside document
 	**/
-	public static function untrimRange(doc:TextDocument, range:Range) {
+	public static function untrimRange(doc:HxTextDocument, range:Range) {
 		final startLine = doc.lineAt(range.start.line);
 		if (reStartsWhitespace.match(startLine.substring(0, range.start.character)))
 			range = {

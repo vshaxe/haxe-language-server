@@ -1,3 +1,3 @@
 package haxeLanguageServer.documents;
 
-class HxmlDocument extends TextDocument {}
+class HxmlDocument extends HxTextDocument {}

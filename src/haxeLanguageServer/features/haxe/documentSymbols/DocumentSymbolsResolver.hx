@@ -58,7 +58,7 @@ class DocumentSymbolsResolver {
 					selectionRange: rangeAt(tokens.getPos(nameToken))
 				};
 				if (token.isDeprecated()) {
-					symbol.deprecated = true;
+					symbol.tags = [Deprecated];
 				}
 				stack.addSymbol(level, symbol, opensScope);
 			}

@@ -19,7 +19,7 @@ class ExtractConstantFeatureTest extends Test implements IExtractConstantFeature
 
 	@:access(haxeLanguageServer.features.haxe.codeAction.ExtractConstantFeature)
 	function makeEdits(content:String, fileName:String, range:Range):Array<TextEdit> {
-		final context = new Context(new Protocol(null));
+		final context = new Context(new Protocol((_, _) -> {}));
 		final uri = new DocumentUri("file://" + fileName + ".edittest");
 		final doc = new HaxeDocument(uri, "haxe", 4, content);
 
@@ -27,9 +27,14 @@ class ExtractConstantFeatureTest extends Test implements IExtractConstantFeature
 
 		final actions:Array<CodeAction> = extractConst.extractConstant(doc, uri, range);
 		Assert.equals(1, actions.length);
+		Assert.notNull(actions[0].edit);
+		@:nullSafety(Off) {
+			Assert.notNull(actions[0].edit.documentChanges);
+			Assert.equals(1, actions[0].edit.documentChanges.length);
 
-		final docEdit:TextDocumentEdit = cast actions[0].edit.documentChanges[0];
-		return docEdit.edits;
+			final docEdit:TextDocumentEdit = actions[0].edit.documentChanges[0];
+			return docEdit.edits;
+		}
 	}
 }
 

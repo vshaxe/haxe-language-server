@@ -132,7 +132,7 @@ class OrganizeImportsFeature {
 		return Library;
 	}
 
-	static function organizeImportGroups(doc:TextDocument, context:Context, importGroups:Map<Int, ImportGroup>):Array<TextEdit> {
+	static function organizeImportGroups(doc:HxTextDocument, context:Context, importGroups:Map<Int, ImportGroup>):Array<TextEdit> {
 		var edits:Array<TextEdit> = [];
 		for (group in importGroups) {
 			edits = edits.concat(organizeImportGroup(doc, context, group));
@@ -140,7 +140,7 @@ class OrganizeImportsFeature {
 		return edits;
 	}
 
-	static function organizeImportGroup(doc:TextDocument, context:Context, importGroup:ImportGroup):Array<TextEdit> {
+	static function organizeImportGroup(doc:HxTextDocument, context:Context, importGroup:ImportGroup):Array<TextEdit> {
 		final sortFunc:Null<ImportSortFunction> = determineSortFunction(context);
 		if (sortFunc == null) {
 			return [];
@@ -180,7 +180,7 @@ class OrganizeImportsFeature {
 		}
 	}
 
-	static function makeImportEdit(doc:TextDocument, range:Range, isLast:Bool):TextEdit {
+	static function makeImportEdit(doc:HxTextDocument, range:Range, isLast:Bool):TextEdit {
 		// TODO move marker to beginning of next line assumes imports are one line each
 		// maybe look at document whitespace and remove all trailing?
 		range.end.line++;

@@ -8,7 +8,7 @@ class WorkspaceEditHelper {
 		return create(doc, edits);
 	}
 
-	overload public static extern inline function create(doc:Null<TextDocument>, edits:Array<TextEdit>):WorkspaceEdit {
+	overload public static extern inline function create(doc:Null<HxTextDocument>, edits:Array<TextEdit>):WorkspaceEdit {
 		final changes = new DynamicAccess<Array<TextEdit>>();
 		if (doc != null) {
 			changes[doc.uri.toString()] = edits;

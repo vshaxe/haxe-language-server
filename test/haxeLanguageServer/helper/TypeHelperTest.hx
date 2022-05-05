@@ -12,7 +12,8 @@ class TypeHelperTest extends Test {
 				Assert.equals("flixel.FlxObject", args[0].type);
 				Assert.isNull(args[0].opt);
 				Assert.equals("String", args[1].type);
-				Assert.isTrue(args[1].opt);
+				Assert.notNull(args[1].opt);
+				Assert.isTrue(args[1].opt ?? false);
 				Assert.equals(2, args.length);
 				Assert.equals("Void", ret);
 			case _:
@@ -59,7 +60,7 @@ class TypeHelperTest extends Test {
 		assert("(a:String, b:Bool) ->", "String -> Bool -> Void", true);
 	}
 
-	function assertPrintedEquals(parser:String->DisplayType, expected:String, functionType:String, formatting) {
+	function assertPrintedEquals(parser:String->Null<DisplayType>, expected:String, functionType:String, formatting) {
 		final parsed = parseFunctionArgumentType(functionType);
 		switch parsed {
 			case DisplayType.DTFunction(args, ret):

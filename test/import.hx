@@ -1,6 +1,7 @@
 import haxe.display.FsPath;
 import languageServerProtocol.Types;
 import languageServerProtocol.protocol.Protocol;
+import languageServerProtocol.textdocument.TextDocument;
 import utest.Assert;
 import utest.Test;
 

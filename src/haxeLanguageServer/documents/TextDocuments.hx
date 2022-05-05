@@ -4,11 +4,11 @@ package haxeLanguageServer.documents;
 class TextDocuments {
 	public static inline final syncKind = TextDocumentSyncKind.Incremental;
 
-	final documents = new Map<DocumentUri, TextDocument>();
+	final documents = new Map<DocumentUri, HxTextDocument>();
 
 	public function new() {}
 
-	public inline function iterator():Iterator<TextDocument> {
+	public inline function iterator():Iterator<HxTextDocument> {
 		return documents.iterator();
 	}
 

@@ -20,7 +20,7 @@ class CompletionFeatureLegacy {
 	}
 
 	public function handle(params:CompletionParams, token:CancellationToken, resolve:Null<EitherType<Array<CompletionItem>, CompletionList>>->Void,
-			reject:ResponseError<NoData>->Void, doc:TextDocument, offset:Int, textBefore:String, _) {
+			reject:ResponseError<NoData>->Void, doc:HxTextDocument, offset:Int, textBefore:String, _) {
 		if (contextSupport && isInvalidCompletionPosition(params.context, textBefore)) {
 			return resolve({items: [], isIncomplete: false});
 		}
@@ -65,7 +65,7 @@ class CompletionFeatureLegacy {
 		};
 	}
 
-	function parseToplevelCompletion(x:Xml, position:Position, textBefore:String, doc:TextDocument):Array<CompletionItem> {
+	function parseToplevelCompletion(x:Xml, position:Position, textBefore:String, doc:HxTextDocument):Array<CompletionItem> {
 		final result = [];
 		final timers = [];
 		for (el in x.elements()) {
@@ -114,7 +114,7 @@ class CompletionFeatureLegacy {
 		return result.concat(timers);
 	}
 
-	static function toplevelKindToCompletionItemKind(kind:String, type:String):CompletionItemKind {
+	static function toplevelKindToCompletionItemKind(kind:String, type:String):Null<CompletionItemKind> {
 		function isFunction()
 			return type != null && parseDisplayType(type).match(DTFunction(_));
 
@@ -255,14 +255,14 @@ class CompletionFeatureLegacy {
 		return name.startsWith("@TIME") || name.startsWith("@TOTAL");
 	}
 
-	static function formatType(type:String, name:String, kind:CompletionItemKind):String {
+	static function formatType(type:String, name:String, kind:Null<CompletionItemKind>):String {
 		return switch kind {
 			case Method: name + prepareSignature(type);
 			default: type;
 		}
 	}
 
-	static function fieldKindToCompletionItemKind(kind:String):CompletionItemKind {
+	static function fieldKindToCompletionItemKind(kind:String):Null<CompletionItemKind> {
 		return switch kind {
 			case "var": Field;
 			case "method": Method;

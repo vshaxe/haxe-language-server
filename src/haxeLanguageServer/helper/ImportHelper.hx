@@ -16,7 +16,7 @@ typedef ImportPosition = {
 	final insertLineAfter:Bool;
 }
 
-function createImportsEdit(doc:TextDocument, result:ImportPosition, paths:Array<String>, style:ImportStyle):TextEdit {
+function createImportsEdit(doc:HxTextDocument, result:ImportPosition, paths:Array<String>, style:ImportStyle):TextEdit {
 	if (style == Module) {
 		paths = paths.map(TypeHelper.getModule);
 	}
@@ -36,7 +36,7 @@ function createImportsEdit(doc:TextDocument, result:ImportPosition, paths:Array<
 	return importData;
 }
 
-function createFunctionImportsEdit<T>(doc:TextDocument, result:ImportPosition, context:Context, type:JsonType<T>,
+function createFunctionImportsEdit<T>(doc:HxTextDocument, result:ImportPosition, context:Context, type:JsonType<T>,
 		formatting:FunctionFormattingConfig):Array<TextEdit> {
 	final importConfig = context.config.user.codeGeneration.imports;
 	if (!importConfig.enableAutoImports) {
