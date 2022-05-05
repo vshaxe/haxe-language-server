@@ -26,9 +26,6 @@ class ColorProviderFeature {
 		if (doc == null) {
 			return reject.noFittingDocument(uri);
 		}
-		if (doc.tokens == null) {
-			return reject.noTokens();
-		}
 		final colors:Array<ColorInformation> = computer.compute(doc);
 		resolve(colors);
 		onResolve(null, colors.length + " colors");
@@ -41,9 +38,6 @@ class ColorProviderFeature {
 		final doc = context.documents.getHaxe(uri);
 		if (doc == null) {
 			return reject.noFittingDocument(uri);
-		}
-		if (doc.tokens == null) {
-			return reject.noTokens();
 		}
 		var hex = toHexColor(Math.round(params.color.alpha * 255), Math.round(params.color.red * 255), Math.round(params.color.green * 255),
 			Math.round(params.color.blue * 255));
