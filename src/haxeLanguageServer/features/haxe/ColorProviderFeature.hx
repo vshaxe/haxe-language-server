@@ -82,7 +82,7 @@ private class ColorComputer {
 
 	public function new() {}
 
-	public function compute(document:TextDocument):Array<ColorInformation> {
+	public function compute(document:HaxeDocument):Array<ColorInformation> {
 		var text = document.getText();
 		final colors:Array<ColorInformation> = [];
 
@@ -109,7 +109,7 @@ private class ColorComputer {
 		return colors;
 	}
 
-	function toRange(document:TextDocument, offset:Int, length:Int):Range {
+	function toRange(document:HaxeDocument, offset:Int, length:Int):Range {
 		return {
 			start: document.positionAt(offset),
 			end: document.positionAt(offset + length)
