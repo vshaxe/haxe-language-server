@@ -257,8 +257,8 @@ class Context {
 		}
 
 		if (textDocument!.colorProvider!.dynamicRegistration == true) {
+			// this registration covers both documentColor and colorPresentation
 			register(DocumentColorRequest.type, haxeSelector);
-			register(ColorPresentationRequest.type, haxeSelector);
 		} else {
 			capabilities.colorProvider = true;
 		}
