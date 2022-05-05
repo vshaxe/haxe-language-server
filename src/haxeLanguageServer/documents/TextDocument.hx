@@ -115,7 +115,9 @@ class TextDocument {
 		return re.matched(0);
 	}
 
-	public function getText(range:Range) {
+	public function getText(?range:Range) {
+		if (range == null)
+			return content;
 		return content.substring(offsetAt(range.start), offsetAt(range.end));
 	}
 
