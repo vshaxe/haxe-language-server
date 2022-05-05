@@ -42,8 +42,8 @@ class ColorProviderFeature {
 		var hex = toHexColor(Math.round(params.color.alpha * 255), Math.round(params.color.red * 255), Math.round(params.color.green * 255),
 			Math.round(params.color.blue * 255));
 		final size = params.range.end.character - params.range.start.character;
-		// do not add alpha to 0xRRGGBB
-		if (size == 6 + 2) {
+		// do not add alpha to 0xRRGGBB if alpha has not changed
+		if (size == 6 + 2 && params.color.alpha == 1) {
 			hex = hex.substr(2);
 		}
 		final color:ColorPresentation = {
