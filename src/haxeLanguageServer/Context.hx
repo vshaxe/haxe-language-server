@@ -11,6 +11,7 @@ import haxeLanguageServer.LanguageServerMethods.MethodResult;
 import haxeLanguageServer.features.CompletionFeature;
 import haxeLanguageServer.features.HoverFeature;
 import haxeLanguageServer.features.haxe.CodeLensFeature;
+import haxeLanguageServer.features.haxe.ColorProviderFeature;
 import haxeLanguageServer.features.haxe.DeterminePackageFeature;
 import haxeLanguageServer.features.haxe.DiagnosticsFeature;
 import haxeLanguageServer.features.haxe.DocumentFormattingFeature;
@@ -31,6 +32,8 @@ import jsonrpc.CancellationToken;
 import jsonrpc.Protocol;
 import jsonrpc.ResponseError;
 import jsonrpc.Types;
+import languageServerProtocol.protocol.ColorProvider.ColorPresentationRequest;
+import languageServerProtocol.protocol.ColorProvider.DocumentColorRequest;
 import languageServerProtocol.protocol.FoldingRange.FoldingRangeRequest;
 import languageServerProtocol.protocol.Implementation;
 import languageServerProtocol.protocol.Messages.ProtocolRequestType;
@@ -142,6 +145,7 @@ class Context {
 		new DocumentSymbolsFeature(this);
 		new FoldingRangeFeature(this);
 		new DocumentFormattingFeature(this);
+		new ColorProviderFeature(this);
 
 		final textDocument = capabilities!.textDocument;
 		final workspace = capabilities!.workspace;
@@ -247,6 +251,13 @@ class Context {
 			register(FoldingRangeRequest.type, haxeSelector);
 		} else {
 			capabilities.foldingRangeProvider = true;
+		}
+
+		if (textDocument!.colorProvider!.dynamicRegistration == true) {
+			// this registration covers both documentColor and colorPresentation
+			register(DocumentColorRequest.type, haxeSelector);
+		} else {
+			capabilities.colorProvider = true;
 		}
 
 		resolve({capabilities: capabilities});
@@ -412,7 +423,8 @@ class Context {
 	}
 
 	function updateActiveEditorPackage(uri:DocumentUri):Void {
-		if (!uri.isHaxeFile()) {
+		// editor selection can happen before server initialization
+		if (determinePackage == null || !uri.isHaxeFile()) {
 			latestActiveFilePackage = "";
 			return;
 		}
