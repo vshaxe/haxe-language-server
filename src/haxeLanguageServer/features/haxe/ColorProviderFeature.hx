@@ -77,8 +77,8 @@ class ColorProviderFeature {
 }
 
 private class ColorComputer {
-	final argbHexRegex = ~/0x([A-Fa-f0-9]{8})/g;
-	final rgbHexRegex = ~/0x([A-Fa-f0-9]{6})/g;
+	final argbHexRegex = ~/0x([A-Fa-f0-9]{8})(\W|$)/g;
+	final rgbHexRegex = ~/0x([A-Fa-f0-9]{6})(\W|$)/g;
 
 	public function new() {}
 
@@ -90,20 +90,20 @@ private class ColorComputer {
 			final color = fromArgb(r.matched(1));
 			final p = r.matchedPos();
 			colors.push({
-				range: toRange(document, p.pos, p.len),
+				range: toRange(document, p.pos, p.len - 1),
 				color: color
 			});
 			// replace to random value with same length
-			return "0xAARRGGBB";
+			return "0xAARRGGBB" + r.matched(2);
 		});
 		text = rgbHexRegex.map(text, r -> {
 			final color = fromRgb(r.matched(1));
 			final p = r.matchedPos();
 			colors.push({
-				range: toRange(document, p.pos, p.len),
+				range: toRange(document, p.pos, p.len - 1),
 				color: color
 			});
-			return "0xRRGGBB";
+			return "0xRRGGBB" + r.matched(2);
 		});
 
 		return colors;
