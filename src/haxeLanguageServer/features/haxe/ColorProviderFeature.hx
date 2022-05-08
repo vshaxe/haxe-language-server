@@ -11,6 +11,7 @@ import languageServerProtocol.protocol.ColorProvider.DocumentColorRequest;
 class ColorProviderFeature {
 	final context:Context;
 	final computer:ColorComputer;
+	final upperCaseHexRegex = ~/0x([A-F0-9]{6})/g;
 
 	public function new(context) {
 		this.context = context;
@@ -45,6 +46,10 @@ class ColorProviderFeature {
 		// do not add alpha to 0xRRGGBB if alpha has not changed
 		if (size == 6 + 2 && params.color.alpha == 1) {
 			hex = hex.substr(2);
+		}
+		final originalText = doc.getText(params.range);
+		if (!upperCaseHexRegex.match(originalText)) {
+			hex = hex.toLowerCase();
 		}
 		final color:ColorPresentation = {
 			label: '0x${hex}',
