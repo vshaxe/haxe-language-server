@@ -223,7 +223,7 @@ class CompletionFeature {
 			final importPosition = determineImportPosition(doc);
 			final indent = doc.indentAt(params.position.line);
 			// the replaceRanges sent by Haxe are only trustworthy in some cases (https://github.com/HaxeFoundation/haxe/issues/8669)
-			if (mode == Metadata || mode == Toplevel || mode == TypeHint) {
+			if (mode == Metadata || mode == Toplevel) {
 				if (result.replaceRange != null) {
 					replaceRange = result.replaceRange;
 				}
