@@ -189,6 +189,21 @@ class CompletionFeature {
 		};
 
 		function createCompletionWithoutHaxeResponse() {
+			final token:Null<TokenTree> = doc.tokens!.getTokenAtOffset(doc.offsetAt(replaceRange.start));
+			// disable snippets/keywords completion in unwanted places
+			if (token != null && token.parent != null) {
+				switch token.parent.tok {
+					case Kwd(KwdCase):
+						if (token.tok == DblDot) {
+							resolve({
+								items: [],
+								isIncomplete: false
+							});
+							return;
+						}
+					case _:
+				}
+			}
 			final keywords = createFieldKeywordItems(tokenContext, replaceRange, lineAfter);
 			if (snippetSupport) {
 				snippetCompletion.createItems({
