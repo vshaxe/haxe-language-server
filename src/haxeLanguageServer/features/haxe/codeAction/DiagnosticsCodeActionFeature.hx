@@ -293,9 +293,9 @@ class DiagnosticsCodeActionFeature implements CodeActionContributor {
 		var rangeFieldInsertion;
 		var moduleLevelField = false;
 		var className = args.moduleType.name;
+		var classToken:Null<TokenTree> = null;
 		switch (args.moduleType.kind) {
 			case Class:
-				var classToken:Null<TokenTree> = null;
 				var classTokens = tokens.tree.filterCallback((token, _) -> {
 					return switch (token.tok) {
 						case Kwd(KwdClass):
@@ -436,6 +436,22 @@ class DiagnosticsCodeActionFeature implements CodeActionContributor {
 					expressions.push("throw new haxe.exceptions.NotImplementedException()");
 				}
 				buf.add(printer.printClassFieldImplementation(field.field, field.type, false, moduleLevelField, expressions));
+
+				if (classToken != null) {
+					if (field.type.kind != TFun) {
+						final range = getNewVariablePosition(document, classToken, field.field.scope);
+						if (range != null)
+							rangeFieldInsertion = range;
+					} else {
+						final funToken = tokens!.getTokenAtOffset(document.offsetAt(diagnostic.range.start));
+						if (funToken != null) {
+							final range = getNewClassFunctionPos(document, classToken, funToken, field.field.scope);
+							if (range != null)
+								rangeFieldInsertion = range;
+						}
+					}
+				}
+
 				var edit = {
 					range: rangeFieldInsertion,
 					newText: buf.toString()
@@ -482,5 +498,52 @@ class DiagnosticsCodeActionFeature implements CodeActionContributor {
 			actions[0].isPreferred = true;
 		}
 		return actions;
+	}
+
+	function getNewVariablePosition(document:HaxeDocument, classToken:TokenTree, fieldScope:JsonClassFieldScope):Null<Range> {
+		final brOpen = classToken!.getFirstChild()!.getFirstChild();
+		if (brOpen == null) {
+			return null;
+		}
+		// add statics to the top
+		if (fieldScope == Static) {
+			final pos = brOpen.getPos();
+			return document.rangeAt(pos.min + 1, pos.min + 1);
+		}
+		// find place for field before first function in class
+		for (i => token in brOpen.children) {
+			if (token.tok.match(Kwd(KwdFunction))) {
+				final prev = token.previousSibling;
+				// if function is first add var at the top
+				if (prev == null) {
+					final pos = brOpen.getPos();
+					return document.rangeAt(pos.min + 1, pos.min + 1);
+				}
+				final pos = prev.getPos();
+				return document.rangeAt(pos.max, pos.max);
+			}
+		}
+		return null;
+	}
+
+	function getNewClassFunctionPos(document:HaxeDocument, classToken:TokenTree, callToken:TokenTree, fieldScope:JsonClassFieldScope):Null<Range> {
+		final brOpen = classToken!.getFirstChild()!.getFirstChild();
+		if (brOpen == null) {
+			return null;
+		}
+		if (brOpen.filter([callToken.tok], First).length == 0)
+			return null;
+
+		// find place for function after current function in class
+		final callPos = callToken.getPos();
+		for (i => token in brOpen.children) {
+			final tokenPos = token.getPos();
+			if (callPos.min < tokenPos.min || callPos.min > tokenPos.max)
+				continue;
+			if (token.tok.match(Kwd(KwdFunction))) {
+				return document.rangeAt(tokenPos.max + 1, tokenPos.max + 1);
+			}
+		}
+		return null;
 	}
 }
