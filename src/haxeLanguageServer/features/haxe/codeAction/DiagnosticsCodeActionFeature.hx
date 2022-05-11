@@ -17,6 +17,7 @@ import sys.FileSystem;
 import tokentree.TokenTree;
 
 using Lambda;
+using tokentree.TokenTreeAccessHelper;
 using tokentree.utils.TokenTreeCheckUtils;
 
 private enum FieldInsertionMode {
@@ -439,13 +440,13 @@ class DiagnosticsCodeActionFeature implements CodeActionContributor {
 
 				if (classToken != null) {
 					if (field.type.kind != TFun) {
-						final range = getNewVariablePosition(document, classToken, field.field.scope);
+						final range = getNewVariablePos(document, classToken, field.field.scope);
 						if (range != null)
 							rangeFieldInsertion = range;
 					} else {
 						final funToken = tokens!.getTokenAtOffset(document.offsetAt(diagnostic.range.start));
 						if (funToken != null) {
-							final range = getNewClassFunctionPos(document, classToken, funToken, field.field.scope);
+							final range = getNewClassFunctionPos(document, classToken, funToken);
 							if (range != null)
 								rangeFieldInsertion = range;
 						}
@@ -500,34 +501,28 @@ class DiagnosticsCodeActionFeature implements CodeActionContributor {
 		return actions;
 	}
 
-	function getNewVariablePosition(document:HaxeDocument, classToken:TokenTree, fieldScope:JsonClassFieldScope):Null<Range> {
-		final brOpen = classToken!.getFirstChild()!.getFirstChild();
+	function getNewVariablePos(document:HaxeDocument, classToken:TokenTree, fieldScope:JsonClassFieldScope):Null<Range> {
+		final brOpen = classToken.access().firstChild().firstOf(BrOpen)!.token;
 		if (brOpen == null) {
 			return null;
 		}
 		// add statics to the top
 		if (fieldScope == Static) {
-			final pos = brOpen.getPos();
-			return document.rangeAt(pos.min + 1, pos.min + 1);
+			return document.rangeAt(brOpen.pos.max, brOpen.pos.max);
 		}
 		// find place for field before first function in class
-		for (i => token in brOpen.children) {
-			if (token.tok.match(Kwd(KwdFunction))) {
-				final prev = token.previousSibling;
-				// if function is first add var at the top
-				if (prev == null) {
-					final pos = brOpen.getPos();
-					return document.rangeAt(pos.min + 1, pos.min + 1);
-				}
-				final pos = prev.getPos();
-				return document.rangeAt(pos.max, pos.max);
-			}
+		final firstFun = brOpen.access().firstOf(Kwd(KwdFunction));
+		final prev = firstFun!.token!.previousSibling;
+		// if function is first add var at the top
+		if (prev == null) {
+			return document.rangeAt(brOpen.pos.max, brOpen.pos.max);
 		}
-		return null;
+		final pos = prev.getPos();
+		return document.rangeAt(pos.max, pos.max);
 	}
 
-	function getNewClassFunctionPos(document:HaxeDocument, classToken:TokenTree, callToken:TokenTree, fieldScope:JsonClassFieldScope):Null<Range> {
-		final brOpen = classToken!.getFirstChild()!.getFirstChild();
+	function getNewClassFunctionPos(document:HaxeDocument, classToken:TokenTree, callToken:TokenTree):Null<Range> {
+		final brOpen = classToken.access().firstChild().firstOf(BrOpen)!.token;
 		if (brOpen == null) {
 			return null;
 		}
