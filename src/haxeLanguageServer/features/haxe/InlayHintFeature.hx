@@ -59,8 +59,8 @@ class InlayHintFeature {
 		trace('[inlayHints] requesting inlay hints for $fileName lines ${params.range.start.line}-${params.range.end.line}');
 
 		var promises:Array<Promise<InlayHint>> = [];
-		promises = promises.concat(findAllVars(doc, fileName, root, startPos, endPos));
-		promises = promises.concat(findAllPOpens(doc, fileName, root, startPos, endPos));
+		promises = promises.concat(findAllVars(doc, fileName, root, startPos, endPos, token));
+		promises = promises.concat(findAllPOpens(doc, fileName, root, startPos, endPos, token));
 
 		Promise.all(promises).then(function(inlayHints:Array<InlayHint>) {
 			var hints:Array<InlayHint> = [];
@@ -77,7 +77,7 @@ class InlayHintFeature {
 		});
 	}
 
-	function findAllVars(doc:HaxeDocument, fileName:String, root:TokenTree, startPos:Int, endPos:Int):Array<Promise<InlayHint>> {
+	function findAllVars(doc:HaxeDocument, fileName:String, root:TokenTree, startPos:Int, endPos:Int, token:CancellationToken):Array<Promise<InlayHint>> {
 		var promises:Array<Promise<InlayHint>> = [];
 		var allVars:Array<TokenTree> = root.filterCallback(function(token:TokenTree, _) {
 			if (startPos > token.pos.min) {
@@ -133,7 +133,7 @@ class InlayHintFeature {
 				promises.push(Promise.resolve(hint));
 				continue;
 			}
-			promises.push(resolveType(fileName, nameToken.pos.min, buildTypeHint).then(function(type) {
+			promises.push(resolveType(fileName, nameToken.pos.min, buildTypeHint, token).then(function(type) {
 				if (type == null) {
 					return Promise.resolve();
 				}
@@ -160,7 +160,7 @@ class InlayHintFeature {
 		return promises;
 	}
 
-	function findAllPOpens(doc:HaxeDocument, fileName:String, root:TokenTree, startPos:Int, endPos:Int):Array<Promise<InlayHint>> {
+	function findAllPOpens(doc:HaxeDocument, fileName:String, root:TokenTree, startPos:Int, endPos:Int, token:CancellationToken):Array<Promise<InlayHint>> {
 		var promises:Array<Promise<InlayHint>> = [];
 		var allPOpens:Array<TokenTree> = root.filterCallback(function(token:TokenTree, _) {
 			if (startPos > token.pos.min) {
@@ -180,15 +180,15 @@ class InlayHintFeature {
 			switch (TokenTreeCheckUtils.getPOpenType(pOpen)) {
 				case At | SwitchCondition | WhileCondition | IfCondition | SharpCondition | Catch | ForLoop | Expression:
 				case Parameter:
-					promises = promises.concat(makeFunctionInlayHints(doc, fileName, pOpen));
+					promises = promises.concat(makeFunctionInlayHints(doc, fileName, pOpen, token));
 				case Call:
-					promises = promises.concat(makeCallInlayHints(doc, fileName, pOpen));
+					promises = promises.concat(makeCallInlayHints(doc, fileName, pOpen, token));
 			}
 		}
 		return promises;
 	}
 
-	function makeFunctionInlayHints(doc:HaxeDocument, fileName:String, pOpen:TokenTree):Array<Promise<InlayHint>> {
+	function makeFunctionInlayHints(doc:HaxeDocument, fileName:String, pOpen:TokenTree, token:CancellationToken):Array<Promise<InlayHint>> {
 		var promises:Array<Promise<InlayHint>> = [];
 
 		if (pOpen.access().parent().firstOf(DblDot).exists()) {
@@ -209,7 +209,7 @@ class InlayHintFeature {
 		}
 
 		var insertPos = pClose.pos.max;
-		promises.push(resolveType(fileName, pOpen.pos.min, buildReturnTypeHint).then(function(type) {
+		promises.push(resolveType(fileName, pOpen.pos.min, buildReturnTypeHint, token).then(function(type) {
 			if (type == null) {
 				return Promise.resolve();
 			}
@@ -236,7 +236,7 @@ class InlayHintFeature {
 		return promises;
 	}
 
-	function makeCallInlayHints(doc:HaxeDocument, fileName:String, pOpen:TokenTree):Array<Promise<InlayHint>> {
+	function makeCallInlayHints(doc:HaxeDocument, fileName:String, pOpen:TokenTree, token:CancellationToken):Array<Promise<InlayHint>> {
 		var promises:Array<Promise<InlayHint>> = [];
 
 		var pClose:Null<TokenTree> = pOpen.access().firstOf(PClose).token;
@@ -248,6 +248,11 @@ class InlayHintFeature {
 		}
 		@:nullSafety(Off)
 		for (paramChild in pOpen.children) {
+			switch (paramChild.tok) {
+				case PClose:
+					continue;
+				default:
+			}
 			var insertPos = paramChild.pos.min;
 			var hoverTarget = findHoverTarget(paramChild);
 
@@ -257,7 +262,7 @@ class InlayHintFeature {
 				continue;
 			}
 
-			promises.push(resolveType(fileName, hoverTarget.pos.min, buildParameterName).then(function(type) {
+			promises.push(resolveType(fileName, hoverTarget.pos.min, buildParameterName, token).then(function(type) {
 				if (type == null) {
 					return Promise.resolve();
 				}
@@ -284,7 +289,7 @@ class InlayHintFeature {
 			return token;
 		}
 		switch (token.tok) {
-			case Kwd(KwdFunction) | Comma:
+			case Kwd(_) | Comma:
 				return token;
 			default:
 		}
@@ -304,14 +309,14 @@ class InlayHintFeature {
 		}
 	}
 
-	public function resolveType<T>(fileName:String, pos:Int, printFunc:TypePrintFunc<T>):Promise<Null<String>> {
+	public function resolveType<T>(fileName:String, pos:Int, printFunc:TypePrintFunc<T>, token:CancellationToken):Promise<Null<String>> {
 		final params = {
 			file: cast fileName,
 			offset: pos,
 			wasAutoTriggered: true
 		};
 		var promise = new Promise(function(resolve:(value:Null<String>) -> Void, reject) {
-			context.callHaxeMethod(DisplayMethods.Hover, params, null, function(hover) {
+			context.callHaxeMethod(DisplayMethods.Hover, params, token, function(hover) {
 				if (hover == null) {
 					resolve(null);
 				} else {
