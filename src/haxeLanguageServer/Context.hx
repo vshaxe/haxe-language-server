@@ -19,6 +19,7 @@ import haxeLanguageServer.features.haxe.FindReferencesFeature;
 import haxeLanguageServer.features.haxe.GotoDefinitionFeature;
 import haxeLanguageServer.features.haxe.GotoImplementationFeature;
 import haxeLanguageServer.features.haxe.GotoTypeDefinitionFeature;
+import haxeLanguageServer.features.haxe.InlayHintFeature;
 import haxeLanguageServer.features.haxe.RenameFeature;
 import haxeLanguageServer.features.haxe.SignatureHelpFeature;
 import haxeLanguageServer.features.haxe.WorkspaceSymbolsFeature;
@@ -36,6 +37,7 @@ import languageServerProtocol.protocol.ColorProvider.ColorPresentationRequest;
 import languageServerProtocol.protocol.ColorProvider.DocumentColorRequest;
 import languageServerProtocol.protocol.FoldingRange.FoldingRangeRequest;
 import languageServerProtocol.protocol.Implementation;
+import languageServerProtocol.protocol.InlayHints;
 import languageServerProtocol.protocol.Messages.ProtocolRequestType;
 import languageServerProtocol.protocol.Progress;
 import languageServerProtocol.protocol.TypeDefinition.TypeDefinitionRequest;
@@ -146,6 +148,7 @@ class Context {
 		new FoldingRangeFeature(this);
 		new DocumentFormattingFeature(this);
 		new ColorProviderFeature(this);
+		new InlayHintFeature(this);
 
 		final textDocument = capabilities!.textDocument;
 		final workspace = capabilities!.workspace;
@@ -264,6 +267,12 @@ class Context {
 			register(DocumentColorRequest.type, haxeSelector);
 		} else {
 			capabilities.colorProvider = true;
+		}
+
+		if (textDocument!.inlayHint!.dynamicRegistration == true) {
+			register(InlayHintRequest.type, haxeSelector);
+		} else {
+			capabilities.inlayHintProvider = true;
 		}
 
 		resolve({capabilities: capabilities});
