@@ -139,7 +139,7 @@ class InlayHintFeature {
 				}
 				var text = ':$type';
 				var hint:InlayHint = {
-					position: doc.positionAt(insertPos),
+					position: doc.positionAt(converter.byteOffsetToCharacterOffset(doc.content, insertPos)),
 					label: text,
 					kind: Type,
 					textEdits: [
@@ -215,7 +215,7 @@ class InlayHintFeature {
 			}
 			var text = ':$type';
 			var hint:InlayHint = {
-				position: doc.positionAt(insertPos),
+				position: doc.positionAt(converter.byteOffsetToCharacterOffset(doc.content, insertPos)),
 				label: text,
 				kind: Type,
 				textEdits: [
@@ -263,7 +263,7 @@ class InlayHintFeature {
 				}
 				var text = '$type:';
 				var hint:InlayHint = {
-					position: doc.positionAt(insertPos),
+					position: doc.positionAt(converter.byteOffsetToCharacterOffset(doc.content, insertPos)),
 					label: text,
 					kind: Parameter,
 					paddingRight: true,
