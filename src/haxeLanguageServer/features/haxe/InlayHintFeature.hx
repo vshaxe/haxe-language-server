@@ -33,7 +33,6 @@ class InlayHintFeature {
 			explicitNull: true
 		});
 
-		context.languageServerProtocol.onRequest(HaxeInlayHintRequest.type, onInlayHint);
 		context.languageServerProtocol.onRequest(InlayHintRequest.type, onInlayHint);
 		context.languageServerProtocol.onRequest(InlayHintResolveRequest.type, onInlayHintResolve);
 		context.languageServerProtocol.onRequest(InlayHintRefreshRequest.type, onInlayHintRefresh);
