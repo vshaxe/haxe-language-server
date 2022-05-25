@@ -129,6 +129,6 @@ class SignatureHelpFeature {
 				value: DocHelper.markdownFormat(documentation)
 			};
 		}
-		return null;
+		return "";
 	}
 }
