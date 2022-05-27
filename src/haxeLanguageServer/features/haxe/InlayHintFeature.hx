@@ -1,5 +1,6 @@
 package haxeLanguageServer.features.haxe;
 
+import haxe.Timer;
 import haxe.display.Display;
 import haxeLanguageServer.protocol.DisplayPrinter;
 import js.lib.Promise;
@@ -17,6 +18,7 @@ class InlayHintFeature {
 	final converter:Haxe3DisplayOffsetConverter;
 	final printer:DisplayPrinter;
 	final cache:InlayHintCache;
+	final hoverRequests:Array<HoverRequestContext<Any>> = [];
 
 	public function new(context:Context) {
 		this.context = context;
@@ -49,13 +51,17 @@ class InlayHintFeature {
 
 		var startPos = doc.offsetAt(params.range.start);
 		var endPos = doc.offsetAt(params.range.end);
+		var startTime = Timer.stamp();
 
 		var inlayHints:Array<InlayHint> = [];
 		var root:Null<TokenTree> = doc!.tokens!.tree;
 		if (root == null) {
 			return reject.noFittingDocument(uri);
 		}
+		#if debug
 		trace('[inlayHints] requesting inlay hints for $fileName lines ${params.range.start.line}-${params.range.end.line}');
+		#end
+		removeCancelledRequests();
 
 		var promises:Array<Promise<InlayHint>> = [];
 		promises = promises.concat(findAllVars(doc, fileName, root, startPos, endPos, token));
@@ -69,7 +75,8 @@ class InlayHintFeature {
 				}
 				hints.push(hint);
 			}
-			trace("[inlayHints] done");
+			var endTime = Timer.stamp();
+			trace("[inlayHints] took " + Math.round((endTime - startTime) * 1000) / 1000 + "s");
 			resolve(hints);
 		}).catchError(function(_) {
 			return Promise.resolve();
@@ -309,22 +316,64 @@ class InlayHintFeature {
 	}
 
 	public function resolveType<T>(fileName:String, pos:Int, printFunc:TypePrintFunc<T>, token:CancellationToken):Promise<Null<String>> {
-		final params = {
-			file: cast fileName,
-			offset: pos,
-			wasAutoTriggered: true
-		};
+		var newRequest:HoverRequestContext<T> = {
+			params: cast {
+				file: cast fileName,
+				offset: pos
+			},
+			printFunc: printFunc,
+			token: token,
+			resolve: null
+		}
 		var promise = new Promise(function(resolve:(value:Null<String>) -> Void, reject) {
-			context.callHaxeMethod(DisplayMethods.Hover, params, token, function(hover) {
-				if (hover == null) {
-					resolve(null);
-				} else {
-					resolve(printFunc(hover));
-				}
-				return null;
-			}, reject.handler());
+			newRequest.resolve = resolve;
 		});
+		hoverRequests.push(newRequest);
+		if (hoverRequests.length != 1) {
+			return promise;
+		}
+		requestHover(newRequest);
 		return promise;
+	}
+
+	function requestHover<T>(request:HoverRequestContext<T>) {
+		if (request.token.canceled) {
+			hoverRequests.shift();
+			nextHover();
+			return;
+		}
+
+		context.callHaxeMethod(DisplayMethods.Hover, request.params, request.token, function(hover) {
+			if (request.resolve != null) {
+				if (hover == null) {
+					request.resolve(null);
+				} else {
+					request.resolve(request.printFunc(hover));
+				}
+			}
+			hoverRequests.shift();
+			nextHover();
+			return null;
+		}, function(msg) {
+			nextHover();
+			return;
+		});
+	}
+
+	function nextHover() {
+		if (hoverRequests.length <= 0) {
+			return;
+		}
+		requestHover(hoverRequests[0]);
+	}
+
+	function removeCancelledRequests() {
+		while (hoverRequests.length > 0) {
+			if (!hoverRequests[0].token.canceled) {
+				return;
+			}
+			hoverRequests.shift();
+		}
 	}
 
 	function buildParameterName<T>(hover:HoverDisplayItemOccurence<T>):Null<String> {
@@ -375,8 +424,10 @@ class InlayHintFeature {
 			return null;
 		}
 
+		// somehow faster than `return fileCache.get('$position.$tokenIndex');`?
 		var key = '$position.$tokenIndex';
-		return fileCache.get(key);
+		var hint = fileCache.get(key);
+		return hint;
 	}
 
 	function cacheHint(fileName:String, tokenIndex:Int, position:Int, hint:InlayHint) {
@@ -392,3 +443,10 @@ class InlayHintFeature {
 
 typedef TypePrintFunc<T> = (hover:HoverDisplayItemOccurence<T>) -> Null<String>;
 typedef InlayHintCache = Map<String, Map<String, InlayHint>>;
+
+typedef HoverRequestContext<T> = {
+	var params:PositionParams;
+	var printFunc:TypePrintFunc<T>;
+	var token:CancellationToken;
+	var ?resolve:(value:Null<String>) -> Void;
+}
