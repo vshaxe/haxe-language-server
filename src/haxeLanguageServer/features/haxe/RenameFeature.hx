@@ -34,6 +34,8 @@ class RenameFeature {
 	}
 
 	function onPrepareRename(params:PrepareRenameParams, token:CancellationToken, resolve:PrepareRenameResult->Void, reject:ResponseError<NoData>->Void) {
+		final onResolve:(?result:Null<Dynamic>, ?debugInfo:Null<String>) -> Void = context.startTimer("textDocument/prepareRename");
+
 		final uri = params.textDocument.uri;
 
 		final doc = context.documents.getHaxe(uri);
@@ -67,7 +69,7 @@ class RenameFeature {
 			typer: typer
 		}).then((result:CanRefactorResult) -> {
 			if (result == null) {
-				reject(ResponseError.internalError('xxx'));
+				reject(ResponseError.internalError("cannot rename identifier"));
 			}
 			var editDoc = new EditDoc(fileName, editList, context, converter);
 			@:nullSafety(Off)
@@ -75,6 +77,7 @@ class RenameFeature {
 				range: editDoc.posToRange(result.pos),
 				placeholder: result.name
 			});
+			onResolve();
 		}).catchError((msg) -> {
 			trace('[canRename] error: $msg');
 			reject(ResponseError.internalError('$msg'));
@@ -82,6 +85,7 @@ class RenameFeature {
 	}
 
 	function onRename(params:RenameParams, token:CancellationToken, resolve:WorkspaceEdit->Void, reject:ResponseError<NoData>->Void) {
+		final onResolve:(?result:Null<Dynamic>, ?debugInfo:Null<String>) -> Void = context.startTimer("textDocument/rename");
 		final uri = params.textDocument.uri;
 		final doc = context.documents.getHaxe(uri);
 
@@ -124,7 +128,9 @@ class RenameFeature {
 				return new EditDoc(fullFileName, editList, context, converter);
 			},
 			verboseLog: function(text:String, ?pos:PosInfos) {
+				#if debug
 				trace('[rename] $text');
+				#end
 			},
 			typer: typer
 		}).then((result:refactor.RefactorResult) -> {
@@ -142,9 +148,9 @@ class RenameFeature {
 					trace("[rename] dry run");
 					reject(ResponseError.internalError("dry run"));
 				case Done:
-					trace("[rename] successful");
 					resolve({documentChanges: editList.documentChanges});
 			}
+			onResolve();
 		}).catchError((msg) -> {
 			trace('[rename] error: $msg');
 			reject(ResponseError.internalError('$msg'));
@@ -303,11 +309,15 @@ class LanguageServerTyper implements ITyper {
 			offset: pos,
 			wasAutoTriggered: true
 		};
+		#if debug
 		trace('[rename] requesting type info for $fileName@$pos');
+		#end
 		var promise = new Promise(function(resolve:(value:Null<TypeHintType>) -> Void, reject) {
 			context.callHaxeMethod(DisplayMethods.Hover, params, null, function(hover) {
 				if (hover == null) {
+					#if debug
 					trace('[rename] received no type info for $fileName@$pos');
+					#end
 					resolve(null);
 				} else {
 					resolve(buildTypeHint(hover, '$fileName@$pos'));
@@ -357,7 +367,9 @@ class LanguageServerTyper implements ITyper {
 			path.pack = parts;
 		}
 		var fullPath = '${getDotPath(type)}';
+		#if debug
 		trace('[rename] received type $fullPath for $location');
+		#end
 		return typeList.makeTypeHintType(fullPath);
 	}
 }
