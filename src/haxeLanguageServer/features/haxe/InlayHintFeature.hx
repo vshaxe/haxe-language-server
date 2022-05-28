@@ -1,6 +1,5 @@
 package haxeLanguageServer.features.haxe;
 
-import haxe.Timer;
 import haxe.display.Display;
 import haxeLanguageServer.protocol.DisplayPrinter;
 import js.lib.Promise;
@@ -36,11 +35,10 @@ class InlayHintFeature {
 		});
 
 		context.languageServerProtocol.onRequest(InlayHintRequest.type, onInlayHint);
-		context.languageServerProtocol.onRequest(InlayHintResolveRequest.type, onInlayHintResolve);
-		context.languageServerProtocol.onRequest(InlayHintRefreshRequest.type, onInlayHintRefresh);
 	}
 
 	function onInlayHint(params:InlayHintParams, token:CancellationToken, resolve:Array<InlayHint>->Void, reject:ResponseError<NoData>->Void) {
+		final onResolve:(?result:Null<Dynamic>, ?debugInfo:Null<String>) -> Void = context.startTimer("textDocument/inlayHint");
 		final uri = params.textDocument.uri;
 		final doc = context.documents.getHaxe(uri);
 		if (doc == null) {
@@ -51,7 +49,6 @@ class InlayHintFeature {
 
 		var startPos = doc.offsetAt(params.range.start);
 		var endPos = doc.offsetAt(params.range.end);
-		var startTime = Timer.stamp();
 
 		var inlayHints:Array<InlayHint> = [];
 		var root:Null<TokenTree> = doc!.tokens!.tree;
@@ -75,9 +72,8 @@ class InlayHintFeature {
 				}
 				hints.push(hint);
 			}
-			var endTime = Timer.stamp();
-			trace("[inlayHints] took " + Math.round((endTime - startTime) * 1000) / 1000 + "s");
 			resolve(hints);
+			onResolve();
 		}).catchError(function(_) {
 			return Promise.resolve();
 		});
@@ -257,6 +253,8 @@ class InlayHintFeature {
 			switch (paramChild.tok) {
 				case PClose:
 					continue;
+				case Const(CIdent("_")):
+					continue;
 				default:
 			}
 			var insertPos = paramChild.pos.min;
@@ -271,6 +269,9 @@ class InlayHintFeature {
 			promises.push(resolveType(fileName, hoverTarget.pos.min, buildParameterName, token).then(function(type) {
 				if (type == null) {
 					return Promise.resolve();
+				}
+				if (type == "") {
+					type = "<unnamed>";
 				}
 				var text = '$type:';
 				var hint:InlayHint = {
@@ -355,6 +356,10 @@ class InlayHintFeature {
 			nextHover();
 			return null;
 		}, function(msg) {
+			if (request.resolve != null) {
+				request.resolve(null);
+			}
+			hoverRequests.shift();
 			nextHover();
 			return;
 		});
@@ -394,16 +399,6 @@ class InlayHintFeature {
 			return null;
 		}
 		return printer.printType(type);
-	}
-
-	function onInlayHintResolve(params:InlayHint, token:CancellationToken, resolve:InlayHint->Void, reject:ResponseError<NoData>->Void) {
-		trace("onInlayHintResolve for " + params.label + " " + params.position);
-		return reject.noTokens();
-	}
-
-	function onInlayHintRefresh(params:NoData, token:CancellationToken, resolve:NoData->Void, reject:ResponseError<NoData>->Void) {
-		trace("onInlayHintRefresh");
-		return reject.noTokens();
 	}
 
 	function registerChangeHandler(doc:HaxeDocument, fileName:String) {
