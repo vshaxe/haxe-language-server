@@ -135,7 +135,8 @@ class InlayHintFeature {
 				promises.push(Promise.resolve(hint));
 				continue;
 			}
-			promises.push(resolveType(fileName, nameToken.pos.min, buildTypeHint, token).then(function(type) {
+			var pos = converter.byteOffsetToCharacterOffset(doc.content, nameToken.pos.min);
+			promises.push(resolveType(fileName, pos, buildTypeHint, token).then(function(type) {
 				if (type == null) {
 					return Promise.resolve();
 				}
@@ -211,7 +212,8 @@ class InlayHintFeature {
 		}
 
 		var insertPos = pClose.pos.max;
-		promises.push(resolveType(fileName, pOpen.pos.min, buildReturnTypeHint, token).then(function(type) {
+		var pos = converter.byteOffsetToCharacterOffset(doc.content, pOpen.pos.min);
+		promises.push(resolveType(fileName, pos, buildReturnTypeHint, token).then(function(type) {
 			if (type == null) {
 				return Promise.resolve();
 			}
@@ -252,8 +254,10 @@ class InlayHintFeature {
 		for (paramChild in pOpen.children) {
 			switch (paramChild.tok) {
 				case PClose:
-					continue;
+					return promises;
 				case Const(CIdent("_")):
+					continue;
+				case Binop(_):
 					continue;
 				default:
 			}
@@ -266,7 +270,8 @@ class InlayHintFeature {
 				continue;
 			}
 
-			promises.push(resolveType(fileName, hoverTarget.pos.min, buildParameterName, token).then(function(type) {
+			var pos = converter.byteOffsetToCharacterOffset(doc.content, hoverTarget.pos.min);
+			promises.push(resolveType(fileName, pos, buildParameterName, token).then(function(type) {
 				if (type == null) {
 					return Promise.resolve();
 				}
@@ -292,11 +297,24 @@ class InlayHintFeature {
 	}
 
 	function findHoverTarget(token:TokenTree):TokenTree {
+		var lastBinop:Null<TokenTree> = null;
+		while (token.nextSibling != null) {
+			switch (token.nextSibling.tok) {
+				case Binop(_):
+					token = token.nextSibling;
+					lastBinop = token;
+				default:
+					break;
+			}
+		}
+		if (lastBinop != null) {
+			return lastBinop;
+		}
 		if (!token.hasChildren()) {
 			return token;
 		}
 		switch (token.tok) {
-			case Kwd(_) | Comma:
+			case Kwd(_) | Comma | BrOpen | BkOpen:
 				return token;
 			default:
 		}
