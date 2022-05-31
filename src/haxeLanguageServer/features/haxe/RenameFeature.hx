@@ -104,7 +104,7 @@ class RenameFeature {
 		// TODO abort if there are unsaved documents (rename operates on fs, so positions might be off)
 
 		// TODO use workspace / compilation server source folders
-		var srcFolders:Array<String> = ["src", "Source", "test", "tests"];
+		var srcFolders:Array<String> = ["src", "source", "Source", "test", "tests"];
 		if (context.config.user.renameSourceFolders != null) {
 			srcFolders = context.config.user.renameSourceFolders;
 		}
@@ -150,7 +150,7 @@ class RenameFeature {
 				case Done:
 					resolve({documentChanges: editList.documentChanges});
 			}
-			onResolve();
+			onResolve(null, editList.documentChanges.length + " changes");
 		}).catchError((msg) -> {
 			trace('[rename] error: $msg');
 			reject(ResponseError.internalError('$msg'));

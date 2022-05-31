@@ -21,7 +21,7 @@ class ColorProviderFeature {
 	}
 
 	function onDocumentColor(params:DocumentColorParams, token:CancellationToken, resolve:Array<ColorInformation>->Void, reject:ResponseError<NoData>->Void) {
-		final onResolve = context.startTimer("haxe/documentColor");
+		final onResolve = context.startTimer("textDocument/documentColor");
 		final uri = params.textDocument.uri;
 		final doc = context.documents.getHaxe(uri);
 		if (doc == null) {
@@ -34,7 +34,7 @@ class ColorProviderFeature {
 
 	function onColorPresentation(params:ColorPresentationParams, token:CancellationToken, resolve:Array<ColorPresentation>->Void,
 			reject:ResponseError<NoData>->Void) {
-		final onResolve = context.startTimer("haxe/colorPresentation");
+		final onResolve = context.startTimer("textDocument/colorPresentation");
 		final uri = params.textDocument.uri;
 		final doc = context.documents.getHaxe(uri);
 		if (doc == null) {

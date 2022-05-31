@@ -26,7 +26,7 @@ class DocumentFormattingFeature {
 	}
 
 	function format(uri:DocumentUri, range:Null<Range>, resolve:Array<TextEdit>->Void, reject:ResponseError<NoData>->Void) {
-		final onResolve = context.startTimer("haxe/formatting");
+		final onResolve = context.startTimer("textDocument/formatting");
 		final doc:Null<HaxeDocument> = context.documents.getHaxe(uri);
 		if (doc == null) {
 			return reject.noFittingDocument(uri);
@@ -71,7 +71,7 @@ class DocumentFormattingFeature {
 				}
 				final edits = [{range: range, newText: formattedCode}];
 				resolve(edits);
-				onResolve();
+				onResolve(null, edits.length + " changes");
 			case Failure(errorMessage):
 				reject(ResponseError.internalError(errorMessage));
 			case Disabled:
