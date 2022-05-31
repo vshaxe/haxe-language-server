@@ -73,7 +73,7 @@ class InlayHintFeature {
 				hints.push(hint);
 			}
 			resolve(hints);
-			onResolve();
+			onResolve(null, hints.length + " hints");
 		}).catchError(function(_) {
 			return Promise.resolve();
 		});
@@ -314,7 +314,7 @@ class InlayHintFeature {
 			return token;
 		}
 		switch (token.tok) {
-			case Kwd(_) | Comma | BrOpen | BkOpen:
+			case Kwd(_) | Comma | BrOpen:
 				return token;
 			default:
 		}

@@ -14,7 +14,7 @@ class FoldingRangeFeature {
 	}
 
 	function onFoldingRange(params:FoldingRangeParams, token:CancellationToken, resolve:Array<FoldingRange>->Void, reject:ResponseError<NoData>->Void) {
-		final onResolve = context.startTimer("haxe/foldingRange");
+		final onResolve = context.startTimer("textDocument/foldingRange");
 		final uri = params.textDocument.uri;
 		final doc = context.documents.getHaxe(uri);
 		if (doc == null) {

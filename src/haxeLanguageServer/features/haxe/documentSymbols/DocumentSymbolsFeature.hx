@@ -17,7 +17,7 @@ class DocumentSymbolsFeature {
 
 	function onDocumentSymbols(params:DocumentSymbolParams, token:CancellationToken, resolve:Null<Array<EitherType<SymbolInformation, DocumentSymbol>>>->Void,
 			reject:ResponseError<NoData>->Void) {
-		final onResolve = context.startTimer("haxe/documentSymbol");
+		final onResolve = context.startTimer("textDocument/documentSymbol");
 		final uri = params.textDocument.uri;
 		final doc = context.documents.getHaxe(uri);
 		if (doc == null) {

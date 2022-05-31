@@ -162,7 +162,7 @@ class Configuration {
 		},
 		importsSortOrder: AllAlphabetical,
 		maxCompletionItems: 1000,
-		renameSourceFolders: ["src", "Source", "test", "tests"]
+		renameSourceFolders: ["src", "source", "Source", "test", "tests"]
 	};
 
 	final onDidChange:(kind:ConfigurationKind) -> Void;
