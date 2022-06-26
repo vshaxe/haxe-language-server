@@ -14,7 +14,7 @@ class GotoDefinitionFeature {
 		context.languageServerProtocol.onRequest(DefinitionRequest.type, onGotoDefinition);
 	}
 
-	public function onGotoDefinition(params:TextDocumentPositionParams, token:CancellationToken, resolve:Definition->Void,
+	public function onGotoDefinition(params:TextDocumentPositionParams, token:CancellationToken, resolve:Array<DefinitionLink>->Void,
 			reject:ResponseError<NoData>->Void) {
 		final uri = params.textDocument.uri;
 		final doc = context.documents.getHaxe(uri);
@@ -25,20 +25,48 @@ class GotoDefinitionFeature {
 		handle(params, token, resolve, reject, doc, doc.offsetAt(params.position));
 	}
 
-	function handleJsonRpc(params:TextDocumentPositionParams, token:CancellationToken, resolve:Definition->Void, reject:ResponseError<NoData>->Void,
-			doc:HxTextDocument, offset:Int) {
-		context.callHaxeMethod(DisplayMethods.GotoDefinition, {file: doc.uri.toFsPath(), contents: doc.content, offset: offset}, token, function(locations) {
+	function handleJsonRpc(params:TextDocumentPositionParams, token:CancellationToken, resolve:Array<DefinitionLink>->Void,
+			reject:ResponseError<NoData>->Void, doc:HxTextDocument, offset:Int) {
+		context.callHaxeMethod(DisplayMethods.GotoDefinition, {
+			file: doc.uri.toFsPath(),
+			contents: doc.content,
+			offset: offset
+		}, token, function(locations) {
 			resolve(locations.map(location -> {
-				{
-					uri: location.file.toUri(),
-					range: location.range
+				final document = getHaxeDocument(location.file.toUri());
+				final tokens = document!.tokens;
+				var previewDeclarationRange = location.range;
+				if (document != null && tokens != null) {
+					final targetToken = tokens!.getTokenAtOffset(document.offsetAt(location.range.start));
+					final pos = targetToken!.parent!.getPos();
+					if (pos != null)
+						previewDeclarationRange = document.rangeAt(pos.min, pos.max);
 				}
+
+				final link:DefinitionLink = {
+					targetUri: location.file.toUri(),
+					targetRange: previewDeclarationRange,
+					targetSelectionRange: location.range,
+				};
+				link;
 			}));
 			return null;
 		}, reject.handler());
 	}
 
-	function handleLegacy(params:TextDocumentPositionParams, token:CancellationToken, resolve:Definition->Void, reject:ResponseError<NoData>->Void,
+	function getHaxeDocument(uri:DocumentUri):Null<HaxeDocument> {
+		var document = context.documents.getHaxe(uri);
+		if (document == null) {
+			final path = uri.toFsPath().toString();
+			if (!sys.FileSystem.exists(path))
+				return null;
+			final content = sys.io.File.getContent(path);
+			document = new HaxeDocument(uri, "haxe", 0, content);
+		}
+		return document;
+	}
+
+	function handleLegacy(params:TextDocumentPositionParams, token:CancellationToken, resolve:Array<DefinitionLink>->Void, reject:ResponseError<NoData>->Void,
 			doc:HxTextDocument, offset:Int) {
 		final bytePos = context.displayOffsetConverter.characterOffsetToByteOffset(doc.content, offset);
 		final args = ['${doc.uri.toFsPath()}@$bytePos@position'];
@@ -54,7 +82,7 @@ class GotoDefinitionFeature {
 					final positions = [for (el in xml.elements()) el.firstChild().nodeValue];
 					if (positions.length == 0)
 						resolve([]);
-					final results = [];
+					final results:Array<DefinitionLink> = [];
 					for (pos in positions) {
 						// no cache because this right now only returns one position
 						final location = HaxePosition.parse(pos, doc, null, context.displayOffsetConverter);
@@ -62,7 +90,11 @@ class GotoDefinitionFeature {
 							trace("Got invalid position: " + pos);
 							continue;
 						}
-						results.push(location);
+						results.push({
+							targetUri: location.uri,
+							targetRange: location.range,
+							targetSelectionRange: location.range
+						});
 					}
 					resolve(results);
 			}
