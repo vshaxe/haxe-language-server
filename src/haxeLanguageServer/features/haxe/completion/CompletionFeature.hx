@@ -577,6 +577,8 @@ class CompletionFeature {
 		} else if (containerName.length == 0) {
 			// non-shadowed std classes
 			"01";
+		} else if (type.meta.hasMeta(Deprecated)) {
+			"09";
 		} else {
 			// everything else based on package deepness
 			final diff = if (activePackage.startsWith(containerName)) {
