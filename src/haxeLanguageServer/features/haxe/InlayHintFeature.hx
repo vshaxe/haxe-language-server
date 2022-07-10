@@ -19,6 +19,11 @@ class InlayHintFeature {
 	final cache:InlayHintCache;
 	final hoverRequests:Array<HoverRequestContext<Any>> = [];
 
+	var inlayHintsVariableTypes:Bool = true;
+	var inlayHintsParameterNames:Bool = true;
+	var inlayHintsParameterTypes:Bool = false;
+	var inlayHintsFunctionReturnTypes:Bool = true;
+
 	public function new(context:Context) {
 		this.context = context;
 
@@ -60,17 +65,37 @@ class InlayHintFeature {
 		#end
 		removeCancelledRequests();
 
-		var promises:Array<Promise<InlayHint>> = [];
-		promises = promises.concat(findAllVars(doc, fileName, root, startPos, endPos, token));
-		promises = promises.concat(findAllPOpens(doc, fileName, root, startPos, endPos, token));
+		inlayHintsVariableTypes = context.config.user?.inlayHints?.variableTypes ?? true;
+		inlayHintsParameterNames = context.config.user?.inlayHints?.parameterNames ?? true;
+		inlayHintsParameterTypes = context.config.user?.inlayHints?.parameterTypes ?? false;
+		inlayHintsFunctionReturnTypes = context.config.user?.inlayHints?.functionReturnTypes ?? true;
 
-		Promise.all(promises).then(function(inlayHints:Array<InlayHint>) {
+		if (!inlayHintsVariableTypes && !inlayHintsParameterNames && !inlayHintsParameterTypes && !inlayHintsFunctionReturnTypes) {
+			resolve([]);
+			onResolve(null, "disabled");
+			return;
+		}
+
+		var promises:Array<Promise<Array<InlayHint>>> = [];
+		if (inlayHintsVariableTypes) {
+			promises = promises.concat(findAllVars(doc, fileName, root, startPos, endPos, token));
+		}
+		if (inlayHintsParameterNames || inlayHintsFunctionReturnTypes || inlayHintsParameterTypes) {
+			promises = promises.concat(findAllPOpens(doc, fileName, root, startPos, endPos, token));
+		}
+
+		if (promises.length <= 0) {
+			resolve([]);
+			onResolve(null, "0 hints");
+			return;
+		}
+		Promise.all(promises).then(function(inlayHints:Array<Array<InlayHint>>) {
 			var hints:Array<InlayHint> = [];
-			for (hint in inlayHints) {
-				if (hint == null) {
+			for (hintList in inlayHints) {
+				if (hintList == null) {
 					continue;
 				}
-				hints.push(hint);
+				hints = hints.concat(hintList);
 			}
 			resolve(hints);
 			onResolve(null, hints.length + " hints");
@@ -79,8 +104,9 @@ class InlayHintFeature {
 		});
 	}
 
-	function findAllVars(doc:HaxeDocument, fileName:String, root:TokenTree, startPos:Int, endPos:Int, token:CancellationToken):Array<Promise<InlayHint>> {
-		var promises:Array<Promise<InlayHint>> = [];
+	function findAllVars(doc:HaxeDocument, fileName:String, root:TokenTree, startPos:Int, endPos:Int,
+			token:CancellationToken):Array<Promise<Array<InlayHint>>> {
+		var promises:Array<Promise<Array<InlayHint>>> = [];
 		var allVars:Array<TokenTree> = root.filterCallback(function(token:TokenTree, _) {
 			if (startPos > token.pos.min) {
 				return GoDeeper;
@@ -132,30 +158,17 @@ class InlayHintFeature {
 			}
 			var hint = hintFromCache(fileName, nameToken.index, nameToken.pos.min);
 			if (hint != null) {
-				promises.push(Promise.resolve(hint));
+				promises.push(cast Promise.resolve([hint]));
 				continue;
 			}
 			var pos = converter.byteOffsetToCharacterOffset(doc.content, nameToken.pos.min);
-			promises.push(resolveType(fileName, pos, buildTypeHint, token).then(function(type) {
-				if (type == null) {
+			promises.push(resolveType(fileName, pos, token).then(function(hover) {
+				if (hover == null) {
 					return Promise.resolve();
 				}
-				var text = ':$type';
-				var hint:InlayHint = {
-					position: doc.positionAt(converter.byteOffsetToCharacterOffset(doc.content, insertPos)),
-					label: text,
-					kind: Type,
-					textEdits: [
-						{
-							range: doc.rangeAt(insertPos, insertPos),
-							newText: text
-						}
-					],
-					paddingRight: false,
-					paddingLeft: true
-				};
+				var hint = makeTypeHint(doc, hover, insertPos, buildTypeHint);
 				cacheHint(fileName, nameToken.index, nameToken.pos.min, hint);
-				return Promise.resolve(hint);
+				return Promise.resolve([hint]);
 			}).catchError(function(_) {
 				return Promise.resolve();
 			}));
@@ -163,8 +176,9 @@ class InlayHintFeature {
 		return promises;
 	}
 
-	function findAllPOpens(doc:HaxeDocument, fileName:String, root:TokenTree, startPos:Int, endPos:Int, token:CancellationToken):Array<Promise<InlayHint>> {
-		var promises:Array<Promise<InlayHint>> = [];
+	function findAllPOpens(doc:HaxeDocument, fileName:String, root:TokenTree, startPos:Int, endPos:Int,
+			token:CancellationToken):Array<Promise<Array<InlayHint>>> {
+		var promises:Array<Promise<Array<InlayHint>>> = [];
 		var allPOpens:Array<TokenTree> = root.filterCallback(function(token:TokenTree, _) {
 			if (startPos > token.pos.min) {
 				return GoDeeper;
@@ -183,16 +197,20 @@ class InlayHintFeature {
 			switch (TokenTreeCheckUtils.getPOpenType(pOpen)) {
 				case At | SwitchCondition | WhileCondition | IfCondition | SharpCondition | Catch | ForLoop | Expression:
 				case Parameter:
-					promises = promises.concat(makeFunctionInlayHints(doc, fileName, pOpen, token));
+					if (inlayHintsFunctionReturnTypes) {
+						promises = promises.concat(makeFunctionInlayHints(doc, fileName, pOpen, token));
+					}
 				case Call:
-					promises = promises.concat(makeCallInlayHints(doc, fileName, pOpen, token));
+					if (inlayHintsParameterNames || inlayHintsParameterTypes) {
+						promises = promises.concat(makeCallInlayHints(doc, fileName, pOpen, token));
+					}
 			}
 		}
 		return promises;
 	}
 
-	function makeFunctionInlayHints(doc:HaxeDocument, fileName:String, pOpen:TokenTree, token:CancellationToken):Array<Promise<InlayHint>> {
-		var promises:Array<Promise<InlayHint>> = [];
+	function makeFunctionInlayHints(doc:HaxeDocument, fileName:String, pOpen:TokenTree, token:CancellationToken):Array<Promise<Array<InlayHint>>> {
+		var promises:Array<Promise<Array<InlayHint>>> = [];
 
 		if (pOpen.access().parent().firstOf(DblDot).exists()) {
 			return promises;
@@ -207,32 +225,19 @@ class InlayHintFeature {
 
 		var hint = hintFromCache(fileName, pOpen.index, pOpen.pos.min);
 		if (hint != null) {
-			promises.push(Promise.resolve(hint));
+			promises.push(cast Promise.resolve([hint]));
 			return promises;
 		}
 
 		var insertPos = pClose.pos.max;
 		var pos = converter.byteOffsetToCharacterOffset(doc.content, pOpen.pos.min);
-		promises.push(resolveType(fileName, pos, buildReturnTypeHint, token).then(function(type) {
-			if (type == null) {
+		promises.push(resolveType(fileName, pos, token).then(function(hover) {
+			if (hover == null) {
 				return Promise.resolve();
 			}
-			var text = ':$type';
-			var hint:InlayHint = {
-				position: doc.positionAt(converter.byteOffsetToCharacterOffset(doc.content, insertPos)),
-				label: text,
-				kind: Type,
-				textEdits: [
-					{
-						range: doc.rangeAt(insertPos, insertPos),
-						newText: text
-					}
-				],
-				paddingRight: false,
-				paddingLeft: true
-			};
+			var hint = makeTypeHint(doc, hover, insertPos, buildReturnTypeHint);
 			cacheHint(fileName, pOpen.index, pOpen.pos.min, hint);
-			return Promise.resolve(hint);
+			return Promise.resolve([hint]);
 		}).catchError(function(_) {
 			return Promise.resolve();
 		}));
@@ -240,8 +245,27 @@ class InlayHintFeature {
 		return promises;
 	}
 
-	function makeCallInlayHints(doc:HaxeDocument, fileName:String, pOpen:TokenTree, token:CancellationToken):Array<Promise<InlayHint>> {
-		var promises:Array<Promise<InlayHint>> = [];
+	function makeTypeHint<T>(doc:HaxeDocument, hover:HoverDisplayItemOccurence<T>, insertPos:Int, printFunc:TypePrintFunc<T>):InlayHint {
+		var type = printFunc(hover);
+		var text = ':$type';
+		var hint:InlayHint = {
+			position: doc.positionAt(converter.byteOffsetToCharacterOffset(doc.content, insertPos)),
+			label: text,
+			kind: Type,
+			textEdits: [
+				{
+					range: doc.rangeAt(insertPos, insertPos),
+					newText: text
+				}
+			],
+			paddingRight: false,
+			paddingLeft: true
+		};
+		return hint;
+	}
+
+	function makeCallInlayHints(doc:HaxeDocument, fileName:String, pOpen:TokenTree, token:CancellationToken):Array<Promise<Array<InlayHint>>> {
+		var promises:Array<Promise<Array<InlayHint>>> = [];
 
 		var pClose:Null<TokenTree> = pOpen.access().firstOf(PClose).token;
 		if (pClose == null) {
@@ -261,33 +285,67 @@ class InlayHintFeature {
 					continue;
 				default:
 			}
-			var insertPos = paramChild.pos.min;
+			var insertPos:Int = paramChild.pos.min;
+			var typeInsertPos = findParamTypePos(paramChild);
 			var hoverTarget = findHoverTarget(paramChild);
 
-			var hint = hintFromCache(fileName, hoverTarget.index, hoverTarget.pos.min);
-			if (hint != null) {
-				promises.push(Promise.resolve(hint));
+			var cachedHints:Array<InlayHint> = [];
+			if (inlayHintsParameterNames) {
+				var hint = hintFromCache(fileName, hoverTarget.index, hoverTarget.pos.min);
+				if (hint != null) {
+					cachedHints.push(hint);
+				}
+			}
+			if (inlayHintsParameterTypes) {
+				var hint = hintFromCache(fileName, hoverTarget.index, typeInsertPos);
+				if (hint != null) {
+					cachedHints.push(hint);
+				}
+			}
+			if (cachedHints.length > 0) {
+				promises.push(Promise.resolve(cachedHints));
 				continue;
 			}
 
 			var pos = converter.byteOffsetToCharacterOffset(doc.content, hoverTarget.pos.min);
-			promises.push(resolveType(fileName, pos, buildParameterName, token).then(function(type) {
-				if (type == null) {
+			promises.push(resolveType(fileName, pos, token).then(function(hover) {
+				if (hover == null) {
 					return Promise.resolve();
 				}
-				if (type == "") {
-					type = "<unnamed>";
+				var hints:Array<InlayHint> = [];
+				if (inlayHintsParameterNames) {
+					var name = buildParameterName(hover);
+					if (name == "") {
+						name = "<unnamed>";
+					}
+					var text = '$name:';
+					var nameHint:InlayHint = {
+						position: doc.positionAt(converter.byteOffsetToCharacterOffset(doc.content, insertPos)),
+						label: text,
+						kind: Parameter,
+						paddingRight: true,
+						paddingLeft: false
+					};
+					cacheHint(fileName, hoverTarget.index, hoverTarget.pos.min, nameHint);
+					hints.push(nameHint);
 				}
-				var text = '$type:';
-				var hint:InlayHint = {
-					position: doc.positionAt(converter.byteOffsetToCharacterOffset(doc.content, insertPos)),
-					label: text,
-					kind: Parameter,
-					paddingRight: true,
-					paddingLeft: false
-				};
-				cacheHint(fileName, hoverTarget.index, hoverTarget.pos.min, hint);
-				return Promise.resolve(hint);
+
+				if (inlayHintsParameterTypes) {
+					var type = buildTypeHint(hover);
+					if (type != "") {
+						var text = ' /* $type */';
+						var typeHint:InlayHint = {
+							position: doc.positionAt(converter.byteOffsetToCharacterOffset(doc.content, typeInsertPos)),
+							label: text,
+							kind: Type,
+							paddingRight: false,
+							paddingLeft: true
+						};
+						cacheHint(fileName, hoverTarget.index, typeInsertPos, typeHint);
+						hints.push(typeHint);
+					}
+				}
+				return Promise.resolve(hints);
 			}).catchError(function(_) {
 				return Promise.resolve();
 			}));
@@ -334,17 +392,33 @@ class InlayHintFeature {
 		}
 	}
 
-	public function resolveType<T>(fileName:String, pos:Int, printFunc:TypePrintFunc<T>, token:CancellationToken):Promise<Null<String>> {
+	function findParamTypePos(token:TokenTree):Int {
+		var lastChild = token.getLastChild();
+		if (lastChild == null) {
+			return token.pos.max;
+		}
+		if (lastChild.tok.match(Comma)) {
+			if (lastChild.previousSibling == null) {
+				return token.pos.max;
+			}
+			lastChild = lastChild.previousSibling;
+		}
+		if (lastChild == null) {
+			return token.pos.max;
+		}
+		return lastChild.getPos().max;
+	}
+
+	public function resolveType<T>(fileName:String, pos:Int, token:CancellationToken):Promise<Null<HoverDisplayItemOccurence<T>>> {
 		var newRequest:HoverRequestContext<T> = {
 			params: cast {
 				file: cast fileName,
 				offset: pos
 			},
-			printFunc: printFunc,
 			token: token,
 			resolve: null
 		}
-		var promise = new Promise(function(resolve:(value:Null<String>) -> Void, reject) {
+		var promise = new Promise(function(resolve:(hover:Null<HoverDisplayItemOccurence<T>>) -> Void, reject) {
 			newRequest.resolve = resolve;
 		});
 		hoverRequests.push(newRequest);
@@ -367,7 +441,7 @@ class InlayHintFeature {
 				if (hover == null) {
 					request.resolve(null);
 				} else {
-					request.resolve(request.printFunc(hover));
+					request.resolve(hover);
 				}
 			}
 			hoverRequests.shift();
@@ -423,6 +497,7 @@ class InlayHintFeature {
 		if (cache.exists(fileName)) {
 			return;
 		}
+		doc.removeUpdateListener(onDocChange);
 		doc.addUpdateListener(onDocChange);
 	}
 
@@ -459,7 +534,6 @@ typedef InlayHintCache = Map<String, Map<String, InlayHint>>;
 
 typedef HoverRequestContext<T> = {
 	var params:PositionParams;
-	var printFunc:TypePrintFunc<T>;
 	var token:CancellationToken;
-	var ?resolve:(value:Null<String>) -> Void;
+	var ?resolve:(hover:Null<HoverDisplayItemOccurence<T>>) -> Void;
 }
