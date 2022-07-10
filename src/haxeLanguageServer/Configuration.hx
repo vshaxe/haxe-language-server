@@ -67,6 +67,13 @@ enum abstract ImportsSortOrderConfig(String) {
 	final NonProjectThenProject = "non-project -> project";
 }
 
+private typedef InlayHintConfig = {
+	var variableTypes:Bool;
+	var parameterNames:Bool;
+	var parameterTypes:Bool;
+	var functionReturnTypes:Bool;
+}
+
 typedef UserConfig = {
 	var enableCodeLens:Bool;
 	var enableDiagnostics:Bool;
@@ -83,6 +90,7 @@ typedef UserConfig = {
 	var importsSortOrder:ImportsSortOrderConfig;
 	var maxCompletionItems:Int;
 	var renameSourceFolders:Array<String>;
+	var inlayHints:InlayHintConfig;
 }
 
 private typedef InitOptions = {
@@ -162,7 +170,13 @@ class Configuration {
 		},
 		importsSortOrder: AllAlphabetical,
 		maxCompletionItems: 1000,
-		renameSourceFolders: ["src", "source", "Source", "test", "tests"]
+		renameSourceFolders: ["src", "source", "Source", "test", "tests"],
+		inlayHints: {
+			variableTypes: true,
+			parameterNames: true,
+			parameterTypes: false,
+			functionReturnTypes: true
+		}
 	};
 
 	final onDidChange:(kind:ConfigurationKind) -> Void;
