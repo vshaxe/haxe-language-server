@@ -76,7 +76,7 @@ class InlayHintFeature {
 			return;
 		}
 
-		var promises:Array<Promise<Array<InlayHint>>> = [];
+		var promises:PromisedInlayHintResults = [];
 		if (inlayHintsVariableTypes) {
 			promises = promises.concat(findAllVars(doc, fileName, root, startPos, endPos, token));
 		}
@@ -104,9 +104,8 @@ class InlayHintFeature {
 		});
 	}
 
-	function findAllVars(doc:HaxeDocument, fileName:String, root:TokenTree, startPos:Int, endPos:Int,
-			token:CancellationToken):Array<Promise<Array<InlayHint>>> {
-		var promises:Array<Promise<Array<InlayHint>>> = [];
+	function findAllVars(doc:HaxeDocument, fileName:String, root:TokenTree, startPos:Int, endPos:Int, token:CancellationToken):PromisedInlayHintResults {
+		var promises:PromisedInlayHintResults = [];
 		var allVars:Array<TokenTree> = root.filterCallback(function(token:TokenTree, _) {
 			if (startPos > token.pos.min) {
 				return GoDeeper;
@@ -176,9 +175,8 @@ class InlayHintFeature {
 		return promises;
 	}
 
-	function findAllPOpens(doc:HaxeDocument, fileName:String, root:TokenTree, startPos:Int, endPos:Int,
-			token:CancellationToken):Array<Promise<Array<InlayHint>>> {
-		var promises:Array<Promise<Array<InlayHint>>> = [];
+	function findAllPOpens(doc:HaxeDocument, fileName:String, root:TokenTree, startPos:Int, endPos:Int, token:CancellationToken):PromisedInlayHintResults {
+		var promises:PromisedInlayHintResults = [];
 		var allPOpens:Array<TokenTree> = root.filterCallback(function(token:TokenTree, _) {
 			if (startPos > token.pos.min) {
 				return GoDeeper;
@@ -209,8 +207,8 @@ class InlayHintFeature {
 		return promises;
 	}
 
-	function makeFunctionInlayHints(doc:HaxeDocument, fileName:String, pOpen:TokenTree, token:CancellationToken):Array<Promise<Array<InlayHint>>> {
-		var promises:Array<Promise<Array<InlayHint>>> = [];
+	function makeFunctionInlayHints(doc:HaxeDocument, fileName:String, pOpen:TokenTree, token:CancellationToken):PromisedInlayHintResults {
+		var promises:PromisedInlayHintResults = [];
 
 		if (pOpen.access().parent().firstOf(DblDot).exists()) {
 			return promises;
@@ -264,8 +262,8 @@ class InlayHintFeature {
 		return hint;
 	}
 
-	function makeCallInlayHints(doc:HaxeDocument, fileName:String, pOpen:TokenTree, token:CancellationToken):Array<Promise<Array<InlayHint>>> {
-		var promises:Array<Promise<Array<InlayHint>>> = [];
+	function makeCallInlayHints(doc:HaxeDocument, fileName:String, pOpen:TokenTree, token:CancellationToken):PromisedInlayHintResults {
+		var promises:PromisedInlayHintResults = [];
 
 		var pClose:Null<TokenTree> = pOpen.access().firstOf(PClose).token;
 		if (pClose == null) {
@@ -531,6 +529,7 @@ class InlayHintFeature {
 
 typedef TypePrintFunc<T> = (hover:HoverDisplayItemOccurence<T>) -> Null<String>;
 typedef InlayHintCache = Map<String, Map<String, InlayHint>>;
+typedef PromisedInlayHintResults = Array<Promise<Array<InlayHint>>>;
 
 typedef HoverRequestContext<T> = {
 	var params:PositionParams;
