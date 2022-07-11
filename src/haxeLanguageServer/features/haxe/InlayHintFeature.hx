@@ -313,6 +313,9 @@ class InlayHintFeature {
 				var hints:Array<InlayHint> = [];
 				if (inlayHintsParameterNames) {
 					var name = buildParameterName(hover);
+					if (name == null) {
+						return Promise.resolve();
+					}
 					if (name == "") {
 						name = "<unnamed>";
 					}
@@ -330,6 +333,9 @@ class InlayHintFeature {
 
 				if (inlayHintsParameterTypes) {
 					var type = buildTypeHint(hover);
+					if (type == null) {
+						return Promise.resolve(hints);
+					}
 					if (type != "") {
 						var text = ' /* $type */';
 						var typeHint:InlayHint = {
