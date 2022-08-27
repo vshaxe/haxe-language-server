@@ -166,8 +166,11 @@ class InlayHintFeature {
 					return Promise.resolve();
 				}
 				var hint = makeTypeHint(doc, hover, insertPos, buildTypeHint);
+				if (hint == null) {
+					return Promise.resolve();
+				}
 				cacheHint(fileName, nameToken.index, nameToken.pos.min, hint);
-				return Promise.resolve([hint]);
+				return Promise.resolve(cast [hint]);
 			}).catchError(function(_) {
 				return Promise.resolve();
 			}));
@@ -234,8 +237,11 @@ class InlayHintFeature {
 				return Promise.resolve();
 			}
 			var hint = makeTypeHint(doc, hover, insertPos, buildReturnTypeHint);
+			if (hint == null) {
+				return Promise.resolve();
+			}
 			cacheHint(fileName, pOpen.index, pOpen.pos.min, hint);
-			return Promise.resolve([hint]);
+			return Promise.resolve(cast [hint]);
 		}).catchError(function(_) {
 			return Promise.resolve();
 		}));
@@ -243,8 +249,11 @@ class InlayHintFeature {
 		return promises;
 	}
 
-	function makeTypeHint<T>(doc:HaxeDocument, hover:HoverDisplayItemOccurence<T>, insertPos:Int, printFunc:TypePrintFunc<T>):InlayHint {
+	function makeTypeHint<T>(doc:HaxeDocument, hover:HoverDisplayItemOccurence<T>, insertPos:Int, printFunc:TypePrintFunc<T>):Null<InlayHint> {
 		var type = printFunc(hover);
+		if (type == null) {
+			return null;
+		}
 		var text = ':$type';
 		var hint:InlayHint = {
 			position: doc.positionAt(converter.byteOffsetToCharacterOffset(doc.content, insertPos)),
@@ -376,6 +385,7 @@ class InlayHintFeature {
 			return token;
 		}
 		switch (token.tok) {
+			case Kwd(KwdThis):
 			case Kwd(_) | Comma | BrOpen:
 				return token;
 			default:
