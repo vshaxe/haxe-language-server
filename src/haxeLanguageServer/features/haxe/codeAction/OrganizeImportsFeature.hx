@@ -154,7 +154,13 @@ class OrganizeImportsFeature {
 		final importDelim:String = (importGroup.imports.length > 0) ? "\n" : "";
 		final usingDelim:String = (importGroup.usings.length > 0) ? "\n" : "";
 
-		final newText:String = FormatterHelper.formatText(doc, context, newImports + importDelim + newUsings + usingDelim, TokenTreeEntryPoint.TypeLevel);
+		var newText:String = FormatterHelper.formatText(doc, context, newImports + importDelim + newUsings + usingDelim, TokenTreeEntryPoint.TypeLevel);
+
+		// add final newline in case it was stripped by the formatter configuration
+		if (newText.charCodeAt(newText.length - 1) != "\n".code) {
+			newText += "\n";
+		}
+
 		final edits:Array<TextEdit> = [];
 
 		// remove all existing imports/usings from group
