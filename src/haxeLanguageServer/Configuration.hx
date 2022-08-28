@@ -72,6 +72,7 @@ private typedef InlayHintConfig = {
 	var parameterNames:Bool;
 	var parameterTypes:Bool;
 	var functionReturnTypes:Bool;
+	var conditionals:Bool;
 }
 
 typedef UserConfig = {
@@ -175,7 +176,8 @@ class Configuration {
 			variableTypes: true,
 			parameterNames: true,
 			parameterTypes: false,
-			functionReturnTypes: true
+			functionReturnTypes: true,
+			conditionals: false
 		}
 	};
 

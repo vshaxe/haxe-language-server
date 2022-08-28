@@ -23,6 +23,7 @@ class InlayHintFeature {
 	var inlayHintsParameterNames:Bool = true;
 	var inlayHintsParameterTypes:Bool = false;
 	var inlayHintsFunctionReturnTypes:Bool = true;
+	var inlayHintsConditionls:Bool = false;
 
 	public function new(context:Context) {
 		this.context = context;
@@ -69,8 +70,9 @@ class InlayHintFeature {
 		inlayHintsParameterNames = context.config.user?.inlayHints?.parameterNames ?? true;
 		inlayHintsParameterTypes = context.config.user?.inlayHints?.parameterTypes ?? false;
 		inlayHintsFunctionReturnTypes = context.config.user?.inlayHints?.functionReturnTypes ?? true;
+		inlayHintsConditionls = context.config.user?.inlayHints?.conditionals ?? true;
 
-		if (!inlayHintsVariableTypes && !inlayHintsParameterNames && !inlayHintsParameterTypes && !inlayHintsFunctionReturnTypes) {
+		if (!inlayHintsVariableTypes && !inlayHintsParameterNames && !inlayHintsParameterTypes && !inlayHintsFunctionReturnTypes && !inlayHintsConditionls) {
 			resolve([]);
 			onResolve(null, "disabled");
 			return;
@@ -82,6 +84,9 @@ class InlayHintFeature {
 		}
 		if (inlayHintsParameterNames || inlayHintsFunctionReturnTypes || inlayHintsParameterTypes) {
 			promises = promises.concat(findAllPOpens(doc, fileName, root, startPos, endPos, token));
+		}
+		if (inlayHintsConditionls) {
+			promises = promises.concat(findAllConditionals(doc, fileName, root, startPos, endPos, token));
 		}
 
 		if (promises.length <= 0) {
@@ -102,6 +107,73 @@ class InlayHintFeature {
 		}).catchError(function(_) {
 			return Promise.resolve();
 		});
+	}
+
+	function findAllConditionals(doc:HaxeDocument, fileName:String, root:TokenTree, startPos:Int, endPos:Int,
+			token:CancellationToken):PromisedInlayHintResults {
+		var promises:PromisedInlayHintResults = [];
+		var allConditionals:Array<TokenTree> = root.filterCallback(function(token:TokenTree, _) {
+			if (startPos > token.pos.min) {
+				return GoDeeper;
+			}
+			if (endPos < token.pos.min) {
+				return GoDeeper;
+			}
+			return switch (token.tok) {
+				case Sharp("end"):
+					FoundSkipSubtree;
+				default:
+					GoDeeper;
+			}
+		});
+		for (c in allConditionals) {
+			var parent = c.parent;
+			while (parent != null) {
+				switch (parent.tok) {
+					case Sharp("if"):
+						break;
+					default:
+						parent = parent.parent;
+				}
+			}
+			if (parent == null) {
+				continue;
+			}
+
+			var conditionToken:Null<TokenTree> = parent.getFirstChild();
+			if (conditionToken == null) {
+				continue;
+			}
+			var pos = conditionToken.getPos();
+			var conditionStart = converter.byteOffsetToCharacterOffset(doc.content, pos.min);
+			var conditionEnd = converter.byteOffsetToCharacterOffset(doc.content, pos.max);
+			var text = " // " + doc.content.substring(conditionStart, conditionEnd);
+
+			var insertPos = converter.byteOffsetToCharacterOffset(doc.content, c.pos.max);
+			var indexOfText = doc.content.indexOf(text, insertPos);
+			if (indexOfText - insertPos >= 0 && indexOfText - insertPos < 5) {
+				continue;
+			}
+
+			var hint:InlayHint = {
+				position: doc.positionAt(insertPos),
+				label: text,
+				kind: Type,
+				textEdits: [
+					{
+						range: doc.rangeAt(insertPos, insertPos),
+						newText: text
+					}
+				],
+				paddingRight: false,
+				paddingLeft: true
+			};
+			if (hint == null) {
+				continue;
+			}
+			promises.push(Promise.resolve(cast [hint]));
+		}
+		return promises;
 	}
 
 	function findAllVars(doc:HaxeDocument, fileName:String, root:TokenTree, startPos:Int, endPos:Int, token:CancellationToken):PromisedInlayHintResults {
