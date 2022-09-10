@@ -214,9 +214,9 @@ class InlayHintFeature {
 				continue;
 			}
 			var insertPos = nameToken.pos.max;
-			if (nameToken.hasChildren()) {
-				@:nullSafety(Off)
-				for (child in nameToken.children) {
+			var childs = nameToken.children;
+			if (childs != null) {
+				for (child in childs) {
 					switch (child.tok) {
 						case At:
 						case POpen:
@@ -353,8 +353,11 @@ class InlayHintFeature {
 		if (pClose.pos.min == pOpen.pos.max) {
 			return promises;
 		}
-		@:nullSafety(Off)
-		for (paramChild in pOpen.children) {
+		var childs = pOpen.children;
+		if (childs == null) {
+			return promises;
+		}
+		for (paramChild in childs) {
 			switch (paramChild.tok) {
 				case PClose:
 					return promises;
