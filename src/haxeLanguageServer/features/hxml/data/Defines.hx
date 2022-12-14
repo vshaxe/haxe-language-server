@@ -13,7 +13,8 @@ abstract Define(DefineData) from DefineData {
 			platforms: cast this.platforms,
 			parameters: cast this.params,
 			targets: [],
-			internal: false
+			internal: false,
+			origin: cast this.origin
 		});
 		final info = DefineVersions[this.name];
 		final since = info!.since;
@@ -75,6 +76,7 @@ private typedef DefineData = {
 	final ?params:ReadOnlyArray<String>;
 	final ?links:ReadOnlyArray<String>;
 	final ?reserved:Bool;
+	final ?origin:String;
 }
 
 typedef VersionInfo = {
