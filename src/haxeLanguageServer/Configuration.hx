@@ -92,6 +92,8 @@ typedef UserConfig = {
 	var maxCompletionItems:Int;
 	var renameSourceFolders:Array<String>;
 	var inlayHints:InlayHintConfig;
+	var enableServerRecording:Bool;
+	var serverRecordingPath:String;
 }
 
 private typedef InitOptions = {
@@ -178,7 +180,9 @@ class Configuration {
 			parameterTypes: false,
 			functionReturnTypes: true,
 			conditionals: false
-		}
+		},
+		enableServerRecording: false,
+		serverRecordingPath: ".haxelsp/recording/"
 	};
 
 	final onDidChange:(kind:ConfigurationKind) -> Void;

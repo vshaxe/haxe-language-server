@@ -28,6 +28,7 @@ import haxeLanguageServer.features.haxe.documentSymbols.DocumentSymbolsFeature;
 import haxeLanguageServer.features.haxe.foldingRange.FoldingRangeFeature;
 import haxeLanguageServer.server.DisplayResult;
 import haxeLanguageServer.server.HaxeServer;
+import haxeLanguageServer.server.ServerRecording;
 import js.Node.process;
 import jsonrpc.CancellationToken;
 import jsonrpc.Protocol;
@@ -52,6 +53,7 @@ class Context {
 	public var documents(default, null):TextDocuments;
 	public var latestActiveFilePackage = "";
 
+	public var serverRecording(default, null):ServerRecording;
 	@:nullSafety(Off) public var haxeServer:HaxeServer;
 	@:nullSafety(Off) public var workspacePath(default, null):FsPath;
 	@:nullSafety(Off) public var capabilities(default, null):ClientCapabilities;
@@ -68,6 +70,7 @@ class Context {
 
 	public function new(languageServerProtocol) {
 		this.languageServerProtocol = languageServerProtocol;
+		serverRecording = @:nullSafety(Off) new ServerRecording(this);
 		haxeDisplayProtocol = new Protocol(@:nullSafety(Off) writeMessage);
 		haxeServer = @:nullSafety(Off) new HaxeServer(this);
 		documents = new TextDocuments();
@@ -387,6 +390,7 @@ class Context {
 	function onDidChangeTextDocument(event:DidChangeTextDocumentParams) {
 		final uri = event.textDocument.uri;
 		if (isUriSupported(uri)) {
+			serverRecording.onDidChangeTextDocument(event);
 			invalidateFile(uri);
 			documents.onDidChangeTextDocument(event);
 		}
@@ -412,9 +416,11 @@ class Context {
 		for (change in event.changes) {
 			switch change.type {
 				case Created:
+					serverRecording.onFileCreation(change);
 					callFileParamsMethod(change.uri, ServerMethods.ModuleCreated);
 				case Deleted:
 					diagnostics.clearDiagnostics(change.uri);
+					serverRecording.onFileDeletion(change);
 					invalidateFile(change.uri);
 				case _:
 			}
@@ -481,12 +487,19 @@ class Context {
 	public function callHaxeMethod<P, R>(method:HaxeRequestMethod<P, Response<R>>, ?params:P, ?token:CancellationToken, callback:(result:R) -> Null<String>,
 			errback:(error:String) -> Void) {
 		final beforeCallTime = Date.now().getTime();
+
+		// TODO: this is hacky
+		var id = @:privateAccess haxeDisplayProtocol.nextRequestId + 1;
+		if (method == "initialize") serverRecording.start();
+
 		haxeDisplayProtocol.sendRequest(cast method, params, token, function(response) {
 			final arrivalTime = Date.now().getTime();
 			if (!config.sendMethodResults) {
 				callback(response.result);
 				return;
 			}
+
+			serverRecording.onServerResponse(id, method, response);
 
 			final beforeProcessingTime = Date.now().getTime();
 			final debugInfo:Null<String> = try {
@@ -512,12 +525,15 @@ class Context {
 			};
 			languageServerProtocol.sendNotification(LanguageServerMethods.DidRunMethod, methodResult);
 		}, function(error:ResponseErrorData) {
-			errback(if (error.data != null) error.data[0].message else "unknown error");
+			var err = if (error.data != null) error.data[0].message else "unknown error";
+			serverRecording.onServerError(id, method, err);
+			errback(err);
 		});
 	}
 
 	public function callDisplay(label:String, args:Array<String>, ?stdin:String, ?token:CancellationToken, callback:DisplayResult->Void,
 			errback:(error:String) -> Void, includeDisplayArguments:Bool = true) {
+
 		var actualArgs = [];
 		if (includeDisplayArguments) {
 			actualArgs = actualArgs.concat([

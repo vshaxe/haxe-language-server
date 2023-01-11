@@ -284,6 +284,7 @@ class HaxeServer {
 					switch result {
 						case DResult(data):
 							socket.write(data);
+							context.serverRecording.onCompilationResult(data);
 						case DCancelled:
 					}
 					socket.end();
@@ -347,6 +348,7 @@ class HaxeServer {
 	}
 
 	function onExit(connection:HaxeConnection) {
+		// TODO: log crash
 		stopProgress();
 		crashes++;
 		if (crashes < 3) {
@@ -383,6 +385,7 @@ class HaxeServer {
 	public function process(label:String, args:Array<String>, ?token:CancellationToken, cancellable:Bool, ?stdin:String, handler:ResultHandler) {
 		// create a request object
 		final request = new DisplayRequest(label, args, token, cancellable, stdin, handler);
+		context.serverRecording.onDisplayRequest(label, args);
 
 		// if the request is cancellable, set a cancel callback to remove request from queue
 		if (token != null) {
