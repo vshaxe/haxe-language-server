@@ -1,6 +1,8 @@
 package haxeLanguageServer.features.haxe.documentSymbols;
 
 import haxeLanguageServer.features.haxe.documentSymbols.SymbolStack;
+import languageServerProtocol.Types.DocumentSymbol;
+import languageServerProtocol.Types.SymbolKind;
 import tokentree.TokenTree;
 
 using tokentree.TokenTreeAccessHelper;

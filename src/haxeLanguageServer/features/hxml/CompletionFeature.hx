@@ -9,6 +9,8 @@ import haxeLanguageServer.helper.VscodeCommands;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
+import languageServerProtocol.Types.CompletionItem;
+import languageServerProtocol.Types.CompletionList;
 import sys.FileSystem;
 
 using Lambda;

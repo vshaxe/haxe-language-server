@@ -4,6 +4,7 @@ import haxeLanguageServer.server.DisplayResult;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
+import languageServerProtocol.Types.CodeLens;
 
 class CodeLensFeature {
 	final context:Context;

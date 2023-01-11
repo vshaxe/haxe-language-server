@@ -5,6 +5,8 @@ import haxeLanguageServer.helper.DocHelper.printCodeBlock;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
+import languageServerProtocol.Types.Hover;
+import languageServerProtocol.Types.MarkupKind;
 
 class HoverFeature {
 	final context:Context;

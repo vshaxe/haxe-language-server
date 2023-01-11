@@ -6,6 +6,7 @@ import js.lib.Promise;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
+import languageServerProtocol.Types.InlayHint;
 import languageServerProtocol.protocol.InlayHints;
 import tokentree.TokenTree;
 import tokentree.utils.TokenTreeCheckUtils;

@@ -13,6 +13,8 @@ import haxeLanguageServer.helper.ImportHelper;
 import haxeLanguageServer.helper.TypeHelper;
 import haxeLanguageServer.helper.WorkspaceEditHelper;
 import haxeLanguageServer.protocol.DisplayPrinter;
+import languageServerProtocol.Types.CodeAction;
+import languageServerProtocol.Types.Diagnostic;
 import sys.FileSystem;
 import tokentree.TokenTree;
 

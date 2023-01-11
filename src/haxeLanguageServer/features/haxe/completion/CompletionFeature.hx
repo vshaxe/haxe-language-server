@@ -18,6 +18,9 @@ import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
 import languageServerProtocol.Types.CompletionItem;
 import languageServerProtocol.Types.CompletionItemKind;
+import languageServerProtocol.Types.CompletionList;
+import languageServerProtocol.Types.MarkupContent;
+import languageServerProtocol.Types.MarkupKind;
 import languageServerProtocol.protocol.Protocol.CompletionParams;
 import tokentree.TokenTree;
 

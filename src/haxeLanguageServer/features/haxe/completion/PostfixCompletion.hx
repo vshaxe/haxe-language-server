@@ -8,7 +8,9 @@ import haxeLanguageServer.helper.SnippetHelper;
 import haxeLanguageServer.helper.VscodeCommands;
 import haxeLanguageServer.protocol.DisplayPrinter;
 import haxeLanguageServer.protocol.DotPath;
+import languageServerProtocol.Types.Command;
 import languageServerProtocol.Types.CompletionItem;
+import languageServerProtocol.Types.InsertTextFormat;
 
 using Lambda;
 

@@ -13,6 +13,11 @@ import haxeLanguageServer.protocol.DisplayPrinter;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
+import languageServerProtocol.Types.MarkupContent;
+import languageServerProtocol.Types.MarkupKind;
+import languageServerProtocol.Types.ParameterInformation;
+import languageServerProtocol.Types.SignatureHelp;
+import languageServerProtocol.Types.SignatureInformation;
 
 class SignatureHelpFeature {
 	final context:Context;

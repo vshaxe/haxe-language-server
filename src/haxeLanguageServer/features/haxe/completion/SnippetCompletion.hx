@@ -8,6 +8,7 @@ import haxeLanguageServer.helper.Set;
 import haxeLanguageServer.helper.SnippetHelper;
 import haxeLanguageServer.tokentree.TokenContext;
 import js.lib.Promise;
+import languageServerProtocol.Types.CompletionItem;
 import languageServerProtocol.protocol.Protocol.CompletionParams;
 
 using haxe.io.Path;
