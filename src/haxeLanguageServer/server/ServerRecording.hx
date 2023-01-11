@@ -14,19 +14,18 @@ class ServerRecording {
 	static inline var ID:String = "current";
 	static inline var LOG_FILE:String = "repro.log";
 
-	final context:Context;
-	var startTime:Float;
-	var enabled:Bool;
-	var recordingPath:String;
+	var context:Null<Context>;
+	var enabled:Bool = false;
+	var startTime:Float = -1;
+	var recordingPath:Null<String>;
 
-	public function new(context:Context) {
-		this.context = context;
-	}
+	public function new() {}
 
 	// TODO: expose function to save current recording (usually before restarting
 	// language server, so maybe add an optional parameter to do both?)
 
-	public function start():Void {
+	public function start(context:Context):Void {
+		this.context = context;
 		if (!context.config.user.enableServerRecording) return;
 
 		enabled = false;
@@ -40,7 +39,7 @@ class ServerRecording {
 	@:noCompletion
 	function doStart():Void {
 		startTime = Date.now().getTime();
-		var root = Path.join([recordingPath, ID]);
+		var root = Path.join([recordingPath.sure(), ID]);
 
 		// TODO: params only available with node v12?
 		try FileSystem.createDirectory(root) catch (_) {
@@ -60,7 +59,7 @@ class ServerRecording {
 
 		// TODO: add exact Haxe version?
 
-		appendLines(makeEntry(Local, 'root', context.workspacePath.toString()));
+		appendLines(makeEntry(Local, 'root', context.sure().workspacePath.toString()));
 		prepareGitState(root);
 
 		appendLines(makeEntry(Local, 'start'));
@@ -76,7 +75,7 @@ class ServerRecording {
 		command("git", ["diff", "--output", patch, "--patch"]);
 		appendLines(makeEntry(Local, 'applyGitPatch'));
 
-		var recordingRelRoot = Path.isAbsolute(recordingPath) ? "" : recordingPath;
+		var recordingRelRoot = Path.isAbsolute(recordingPath.sure()) ? "" : recordingPath.sure();
 		if (recordingRelRoot.startsWith("./") || recordingRelRoot.startsWith("../")) recordingRelRoot = "";
 		recordingRelRoot = recordingRelRoot.split("/")[0] + "/";
 
@@ -110,7 +109,7 @@ class ServerRecording {
 		// TODO: this is very hacky...
 		var id = switch (label) {
 			case "cache build" | "compilation" | "@diagnostics": null;
-			case _: @:privateAccess context.haxeDisplayProtocol.nextRequestId;
+			case _: @:privateAccess context.sure().haxeDisplayProtocol.nextRequestId;
 		};
 
 		appendLines(
@@ -193,7 +192,7 @@ class ServerRecording {
 	function print(open:String->FileOutput, ...lines:String):Void {
 		if (lines.length == 0) return;
 
-		var fpath = Path.join([recordingPath, ID, LOG_FILE]);
+		var fpath = Path.join([recordingPath.sure(), ID, LOG_FILE]);
 		var f = open(fpath);
 		for (l in lines) f.writeString('$l\n');
 		f.close();

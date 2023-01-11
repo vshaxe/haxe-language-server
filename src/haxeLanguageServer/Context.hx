@@ -70,7 +70,7 @@ class Context {
 
 	public function new(languageServerProtocol) {
 		this.languageServerProtocol = languageServerProtocol;
-		serverRecording = @:nullSafety(Off) new ServerRecording(this);
+		serverRecording = new ServerRecording();
 		haxeDisplayProtocol = new Protocol(@:nullSafety(Off) writeMessage);
 		haxeServer = @:nullSafety(Off) new HaxeServer(this);
 		documents = new TextDocuments();
@@ -490,7 +490,7 @@ class Context {
 
 		// TODO: this is hacky
 		var id = @:privateAccess haxeDisplayProtocol.nextRequestId + 1;
-		if (method == "initialize") serverRecording.start();
+		if (method == "initialize") serverRecording.start(this);
 
 		haxeDisplayProtocol.sendRequest(cast method, params, token, function(response) {
 			final arrivalTime = Date.now().getTime();
