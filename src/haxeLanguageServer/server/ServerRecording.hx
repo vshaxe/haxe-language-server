@@ -17,6 +17,7 @@ class ServerRecording {
 	static inline var ID:String = "current";
 	static inline var LOG_FILE:String = "repro.log";
 	static inline var UNTRACKED_DIR:String = "untracked";
+	static inline var NEWFILES_DIR:String = "newfiles";
 
 	var enabled(get, set):Bool;
 	var _enabled:Bool = false;
@@ -26,6 +27,7 @@ class ServerRecording {
 		return get_enabled();
 	}
 
+	var fileCreationIndex:Int = 1;
 	var startTime:Float = -1;
 	var context:Null<Context>;
 	var recordingRoot:Null<String>;
@@ -220,12 +222,20 @@ class ServerRecording {
 	public function onFileCreation(event:FileEvent) {
 		if (!enabled) return;
 
-		// TODO: add file content if any
+		var path = event.uri.toFsPath().toString();
+		var content = File.getContent(path);
+		var id = content == "" ? 0 : fileCreationIndex++;
 
 		appendLines(
-			makeEntry(Local, 'fileCreated'),
+			makeEntry(Local, 'fileCreated', id),
 			Json.stringify(event)
 		);
+
+		if (id > 0) {
+			ensureNewfilesDir();
+			var path = Path.join([recordingPath.sure(), NEWFILES_DIR, '$id.contents']);
+			File.saveContent(path, content);
+		}
 	}
 
 	public function onFileDeletion(event:FileEvent) {
@@ -256,6 +266,11 @@ class ServerRecording {
 		var delta = Date.now().getTime() - startTime;
 		var ts = Math.round(delta/10) / 10;
 		return '+${ts}s $dir $command' + (id == null ? '' : ' $id') + (name == null ? '' : ' "$name"');
+	}
+
+	function ensureNewfilesDir():Void {
+		var path = Path.join([recordingPath.sure(), NEWFILES_DIR]);
+		if (!FileSystem.exists(path)) FileSystem.createDirectory(path);
 	}
 
 	@:noCompletion
