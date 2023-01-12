@@ -489,8 +489,7 @@ class Context {
 			errback:(error:String) -> Void) {
 		final beforeCallTime = Date.now().getTime();
 
-		// TODO: this is hacky
-		var id = @:privateAccess haxeDisplayProtocol.nextRequestId + 1;
+		var id = @:privateAccess haxeDisplayProtocol.nextRequestId; // ew..
 		if (method == "initialize") serverRecording.start(this);
 
 		haxeDisplayProtocol.sendRequest(cast method, params, token, function(response) {

@@ -181,10 +181,10 @@ class ServerRecording {
 	public function onDisplayRequest(label:String, args:Array<String>):Void {
 		if (!enabled) return;
 
-		// TODO: this is very hacky...
 		var id = switch (label) {
+			// TODO: catch more special cases
 			case "cache build" | "compilation" | "@diagnostics": null;
-			case _: @:privateAccess context.sure().haxeDisplayProtocol.nextRequestId;
+			case _: @:privateAccess context.sure().haxeDisplayProtocol.nextRequestId - 1; // ew..
 		};
 
 		appendLines(
