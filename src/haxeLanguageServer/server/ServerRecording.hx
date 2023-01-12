@@ -16,6 +16,7 @@ using StringTools;
 class ServerRecording {
 	static inline var ID:String = "current";
 	static inline var LOG_FILE:String = "repro.log";
+	static inline var UNTRACKED_DIR:String = "untracked";
 
 	var enabled(get, set):Bool;
 	var _enabled:Bool = false;
@@ -27,6 +28,7 @@ class ServerRecording {
 
 	var startTime:Float = -1;
 	var context:Null<Context>;
+	var recordingRoot:Null<String>;
 	var recordingPath:Null<String>;
 
 	public function new() {}
@@ -39,11 +41,11 @@ class ServerRecording {
 		if (!context.config.user.enableServerRecording) return;
 
 		enabled = false;
-		recordingPath = context.config.user.serverRecordingPath;
+		recordingRoot = context.config.user.serverRecordingPath;
+		recordingPath = Path.join([recordingRoot, ID]);
 
-		var root = Path.join([recordingPath, ID]);
 		// TODO: error handling here
-		(cast js.node.Fs).rmdir(root, {recursive: true, force: true}, (_) -> doStart());
+		(cast js.node.Fs).rmdir(recordingPath.sure(), {recursive: true, force: true}, (_) -> doStart());
 	}
 
 	public function export(
@@ -60,7 +62,7 @@ class ServerRecording {
 		}
 
 		appendLines("# Export requested ...");
-		var dest = params?.dest == null ? recordingPath.sure() : params.sure().dest;
+		var dest = params?.dest == null ? recordingRoot.sure() : params.sure().dest;
 
 		if (!FileSystem.isDirectory(dest)) {
 			appendLines('# Failed to export to $dest');
@@ -80,8 +82,7 @@ class ServerRecording {
 			// See https://nodejs.org/api/fs.html#fscpsrc-dest-options-callback
 			// TODO: this is new API (16.7.0) so we should probably be using something else here
 			// (especially since it's marked as experimental...)
-			var root = Path.join([recordingPath.sure(), ID]);
-			(cast js.node.Fs).cp(root, path, {
+			(cast js.node.Fs).cp(recordingPath.sure(), path, {
 				errorOnExists: true,
 				recursive: true,
 				preserveTimestamps: true
@@ -99,10 +100,9 @@ class ServerRecording {
 	@:noCompletion
 	function doStart():Void {
 		startTime = Date.now().getTime();
-		var root = Path.join([recordingPath.sure(), ID]);
 
 		// TODO: params only available with node v12?
-		try FileSystem.createDirectory(root) catch (_) {
+		try FileSystem.createDirectory(recordingPath.sure()) catch (_) {
 			// TODO: report error
 			enabled = false;
 		}
@@ -120,22 +120,29 @@ class ServerRecording {
 		// TODO: add exact Haxe version?
 
 		appendLines(makeEntry(Local, 'root', context.sure().workspacePath.toString()));
-		prepareGitState(root);
+		prepareGitState();
 
 		appendLines(makeEntry(Local, 'start'));
 		enabled = true;
 	}
 
 	// TODO: error handling (especially when not in a git repository...)
-	function prepareGitState(root:String):Void {
-		var revision = command("git", ["rev-parse", "HEAD"]).out;
-		appendLines(makeEntry(Local, 'checkoutGitRef'), revision);
+	function prepareGitState():Void {
+		var revision = command("git", ["rev-parse", "HEAD"]);
 
-		var patch = Path.join([root, "status.patch"]);
+		// Not a git repository, abort
+		if (revision.code != 0) {
+			appendLines("# Warning: not in a git repository, you will have to manage initial sources state yourself.");
+			return;
+		}
+
+		appendLines(makeEntry(Local, 'checkoutGitRef'), revision.out);
+
+		var patch = Path.join([recordingPath.sure(), "status.patch"]);
 		command("git", ["diff", "--output", patch, "--patch"]);
 		appendLines(makeEntry(Local, 'applyGitPatch'));
 
-		var recordingRelRoot = Path.isAbsolute(recordingPath.sure()) ? "" : recordingPath.sure();
+		var recordingRelRoot = Path.isAbsolute(recordingRoot.sure()) ? "" : recordingRoot.sure();
 		if (recordingRelRoot.startsWith("./") || recordingRelRoot.startsWith("../")) recordingRelRoot = "";
 		recordingRelRoot = recordingRelRoot.split("/")[0] + "/";
 
@@ -149,7 +156,7 @@ class ServerRecording {
 		if (untracked.length > 0) {
 			appendLines(makeEntry(Local, 'addGitUntracked'));
 
-			FileSystem.createDirectory(Path.join([root, "untracked"]));
+			FileSystem.createDirectory(Path.join([recordingPath.sure(), UNTRACKED_DIR]));
 			for (f in untracked) {
 				// See https://nodejs.org/api/fs.html#fscpsrc-dest-options-callback
 				// TODO: this is new API (16.7.0) so we should probably be using something else here
@@ -159,7 +166,7 @@ class ServerRecording {
 				// - starting Haxe LSP shouldn't take long
 				// - if we're not blocking and copy takes too much time, we might end up
 				//   with wrong data if it gets modified before we copy it
-				(cast js.node.Fs).cp(f, Path.join([root, "untracked", f]), {recursive: true}, function(err) {});
+				(cast js.node.Fs).cp(f, Path.join([recordingPath.sure(), UNTRACKED_DIR, f]), {recursive: true}, function(err) {});
 			}
 		}
 	}
@@ -253,7 +260,7 @@ class ServerRecording {
 	function print(open:String->FileOutput, ...lines:String):Void {
 		if (lines.length == 0) return;
 
-		var fpath = Path.join([recordingPath.sure(), ID, LOG_FILE]);
+		var fpath = Path.join([recordingRoot.sure(), ID, LOG_FILE]);
 		var f = open(fpath);
 		for (l in lines) f.writeString('$l\n');
 		f.close();
