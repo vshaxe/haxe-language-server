@@ -169,7 +169,7 @@ class ServerRecording {
 				// - if we're not blocking and copy takes too much time, we might end up
 				//   with wrong data if it gets modified before we copy it
 				(cast js.node.Fs).cp(f, Path.join([recordingPath.sure(), UNTRACKED_DIR, f]), {recursive: true}, function(err) {
-					appendLines("# Warning: error while saving untracked file $f: ${err.message}");
+					if (err != null) appendLines('# Warning: error while saving untracked file $f: ${err.message}');
 				});
 			}
 		}
