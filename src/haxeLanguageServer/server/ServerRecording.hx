@@ -168,7 +168,10 @@ class ServerRecording {
 				// - starting Haxe LSP shouldn't take long
 				// - if we're not blocking and copy takes too much time, we might end up
 				//   with wrong data if it gets modified before we copy it
-				(cast js.node.Fs).cp(f, Path.join([recordingPath.sure(), UNTRACKED_DIR, f]), {recursive: true}, function(err) {
+				if (f.startsWith('"')) f = f.substr(1);
+				if (f.endsWith('"')) f = f.substr(0, f.length - 1);
+				var fpath = Path.join([recordingPath.sure(), UNTRACKED_DIR, f]);
+				(cast js.node.Fs).cp(f, fpath, {recursive: true}, function(err) {
 					if (err != null) appendLines('# Warning: error while saving untracked file $f: ${err.message}');
 				});
 			}
