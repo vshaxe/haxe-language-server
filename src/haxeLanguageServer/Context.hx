@@ -87,6 +87,7 @@ class Context {
 
 		languageServerProtocol.onNotification(LanguageServerMethods.DidChangeActiveTextEditor, onDidChangeActiveTextEditor);
 		languageServerProtocol.onRequest(LanguageServerMethods.RunMethod, runMethod);
+		languageServerProtocol.onRequest(LanguageServerMethods.ExportServerRecording, serverRecording.export);
 	}
 
 	function writeMessage(message:Message, token:Null<CancellationToken>) {

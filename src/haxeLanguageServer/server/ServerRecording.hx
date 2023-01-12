@@ -8,15 +8,25 @@ import sys.io.File;
 import sys.io.FileOutput;
 import sys.FileSystem;
 
+import jsonrpc.CancellationToken;
+import jsonrpc.ResponseError;
+
 using StringTools;
 
 class ServerRecording {
 	static inline var ID:String = "current";
 	static inline var LOG_FILE:String = "repro.log";
 
-	var context:Null<Context>;
-	var enabled:Bool = false;
+	var enabled(get, set):Bool;
+	var _enabled:Bool = false;
+	function get_enabled():Bool return _enabled && context != null;
+	function set_enabled(v:Bool):Bool {
+		_enabled = v;
+		return get_enabled();
+	}
+
 	var startTime:Float = -1;
+	var context:Null<Context>;
 	var recordingPath:Null<String>;
 
 	public function new() {}
@@ -34,6 +44,56 @@ class ServerRecording {
 		var root = Path.join([recordingPath, ID]);
 		// TODO: error handling here
 		(cast js.node.Fs).rmdir(root, {recursive: true, force: true}, (_) -> doStart());
+	}
+
+	public function export(
+		params:Null<{dest:String}>,
+		token:CancellationToken,
+		resolve:String->Void,
+		reject:ResponseError<String>->Void
+	):Void {
+		if (!enabled) {
+			return reject(new ResponseError(
+				ResponseError.InternalError,
+				"Was not recording haxe server"
+			));
+		}
+
+		appendLines("# Export requested ...");
+		var dest = params?.dest == null ? recordingPath.sure() : params.sure().dest;
+
+		if (!FileSystem.isDirectory(dest)) {
+			appendLines('# Failed to export to $dest');
+			return reject(new ResponseError(
+				ResponseError.InvalidParams,
+				"Server recording export path should be a directory"
+			));
+		}
+
+		// Could use startTime here I guess, but it does seem a bit weird to me
+		var recordingKey = DateTools.format(Date.now(), "%Y%m%d-%H%M%S");
+		try {
+			var path = Path.join([dest, recordingKey]);
+			appendLines('# Exporting to $path ...');
+			FileSystem.createDirectory(path);
+
+			// See https://nodejs.org/api/fs.html#fscpsrc-dest-options-callback
+			// TODO: this is new API (16.7.0) so we should probably be using something else here
+			// (especially since it's marked as experimental...)
+			var root = Path.join([recordingPath.sure(), ID]);
+			(cast js.node.Fs).cp(root, path, {
+				errorOnExists: true,
+				recursive: true,
+				preserveTimestamps: true
+			}, function(err) {
+				if (err != null)
+					return reject(new ResponseError(ResponseError.InternalError, Std.string(err), err));
+
+				resolve('Exported server recording to $path');
+			});
+		} catch (e) {
+			reject(new ResponseError(ResponseError.InternalError, e.message));
+		}
 	}
 
 	@:noCompletion
@@ -93,6 +153,7 @@ class ServerRecording {
 			for (f in untracked) {
 				// See https://nodejs.org/api/fs.html#fscpsrc-dest-options-callback
 				// TODO: this is new API (16.7.0) so we should probably be using something else here
+				// (especially since it's marked as experimental...)
 				// TODO: also, this is async but we're currently skipping waiting **and errors**
 				// We might also want to do something about long copy times here, because:
 				// - starting Haxe LSP shouldn't take long

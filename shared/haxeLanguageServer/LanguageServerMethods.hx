@@ -79,6 +79,11 @@ class LanguageServerMethods {
 		This request is sent from the server to the client to get a list of available libraries.
 	**/
 	static inline final ListLibraries = new RequestType<Null<NoData>, Array<{name:String}>, NoData>("haxe/listLibraries");
+
+	/**
+		This request is sent from the client to the server to export current server recording.
+	**/
+	static inline final ExportServerRecording = new RequestType<Null<{dest:String}>, String, String>("haxe/exportServerRecording");
 }
 
 typedef MethodResult = {
