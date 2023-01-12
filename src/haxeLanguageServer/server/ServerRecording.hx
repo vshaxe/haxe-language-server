@@ -161,12 +161,14 @@ class ServerRecording {
 				// See https://nodejs.org/api/fs.html#fscpsrc-dest-options-callback
 				// TODO: this is new API (16.7.0) so we should probably be using something else here
 				// (especially since it's marked as experimental...)
-				// TODO: also, this is async but we're currently skipping waiting **and errors**
+				// TODO: also, this is async but we're currently skipping waiting
 				// We might also want to do something about long copy times here, because:
 				// - starting Haxe LSP shouldn't take long
 				// - if we're not blocking and copy takes too much time, we might end up
 				//   with wrong data if it gets modified before we copy it
-				(cast js.node.Fs).cp(f, Path.join([recordingPath.sure(), UNTRACKED_DIR, f]), {recursive: true}, function(err) {});
+				(cast js.node.Fs).cp(f, Path.join([recordingPath.sure(), UNTRACKED_DIR, f]), {recursive: true}, function(err) {
+					appendLines("# Warning: error while saving untracked file $f: ${err.message}");
+				});
 			}
 		}
 	}
