@@ -35,9 +35,6 @@ class ServerRecording {
 
 	public function new() {}
 
-	// TODO: expose function to save current recording (usually before restarting
-	// language server, so maybe add an optional parameter to do both?)
-
 	public function start(context:Context):Void {
 		this.context = context;
 		if (!context.config.user.enableServerRecording) return;
@@ -103,9 +100,8 @@ class ServerRecording {
 	function doStart():Void {
 		startTime = Date.now().getTime();
 
-		// TODO: params only available with node v12?
 		try FileSystem.createDirectory(recordingPath.sure()) catch (_) {
-			// TODO: report error
+			// TODO: report error (how? custom LSP notification?)
 			enabled = false;
 		}
 
@@ -128,14 +124,15 @@ class ServerRecording {
 		enabled = true;
 	}
 
-	// TODO: error handling (especially when not in a git repository...)
+	// TODO: better error handling
 	function prepareGitState():Void {
 		var revision = command("git", ["rev-parse", "HEAD"]);
 
-		// Not a git repository, abort
 		if (revision.code != 0) {
-			appendLines("# Warning: not in a git repository, you will have to manage initial sources state yourself.");
-			return;
+			return appendLines(
+				"# Warning: not in a git repository, " +
+				"you will have to manage initial sources state yourself."
+			);
 		}
 
 		appendLines(makeEntry(Local, 'checkoutGitRef'), revision.out);
@@ -173,6 +170,7 @@ class ServerRecording {
 				var fpath = Path.join([recordingPath.sure(), UNTRACKED_DIR, f]);
 				(cast js.node.Fs).cp(f, fpath, {recursive: true}, function(err) {
 					if (err != null) appendLines('# Warning: error while saving untracked file $f: ${err.message}');
+					else appendLines('# Untracked files copied successfully');
 				});
 			}
 		}
@@ -182,7 +180,7 @@ class ServerRecording {
 		if (!enabled) return;
 
 		var id = switch (label) {
-			// TODO: catch more special cases
+			// TODO: catch more special cases that don't use internal id
 			case "cache build" | "compilation" | "@diagnostics": null;
 			case _: @:privateAccess context.sure().haxeDisplayProtocol.nextRequestId - 1; // ew..
 		};
@@ -207,9 +205,7 @@ class ServerRecording {
 
 		appendLines(
 			makeEntry(In, 'serverError', id, method),
-			"<<EOF",
-			error,
-			"EOF"
+			"<<EOF", error, "EOF"
 		);
 	}
 
@@ -256,9 +252,7 @@ class ServerRecording {
 
 		appendLines(
 			makeEntry(In, 'compilationResult', fail ? "failed" : null),
-			"<<EOF",
-			res,
-			"EOF"
+			"<<EOF", res, "EOF"
 		);
 	}
 
@@ -266,11 +260,11 @@ class ServerRecording {
 	function appendLines(...lines:String):Void print(f -> File.append(f), ...lines);
 
 	function makeEntry(dir:ComDirection, command:String, ?id:Int, ?name:String):String {
-		var delta = Date.now().getTime() - startTime;
-		var ts = Math.round(delta/10) / 10;
+		var ts = Math.round((Date.now().getTime() - startTime) / 10) / 10;
 		return '+${ts}s $dir $command' + (id == null ? '' : ' $id') + (name == null ? '' : ' "$name"');
 	}
 
+	// TODO: error handling
 	function ensureNewfilesDir():Void {
 		var path = Path.join([recordingPath.sure(), NEWFILES_DIR]);
 		if (!FileSystem.exists(path)) FileSystem.createDirectory(path);
@@ -296,10 +290,4 @@ class ServerRecording {
 				: (p.stderr:Buffer).toString().trim()
 		};
 	}
-}
-
-enum abstract ComDirection(String) to String {
-	var In = "<";
-	var Out = ">";
-	var Local = "-";
 }
