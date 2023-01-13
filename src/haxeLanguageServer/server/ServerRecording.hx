@@ -60,7 +60,7 @@ class ServerRecording {
 			));
 		}
 
-		appendLines("# Export requested ...");
+		appendLines(withTiming("# Export requested ..."));
 		var dest = params?.dest == null ? recordingRoot.sure() : params.sure().dest;
 
 		if (!FileSystem.isDirectory(dest)) {
@@ -169,8 +169,8 @@ class ServerRecording {
 				if (f.endsWith('"')) f = f.substr(0, f.length - 1);
 				var fpath = Path.join([recordingPath.sure(), UNTRACKED_DIR, f]);
 				(cast js.node.Fs).cp(f, fpath, {recursive: true}, function(err) {
-					if (err != null) appendLines('# Warning: error while saving untracked file $f: ${err.message}');
-					else appendLines('# Untracked files copied successfully');
+					if (err != null) appendLines(withTiming('# Warning: error while saving untracked file $f: ${err.message}'));
+					else appendLines(withTiming('# Untracked files copied successfully'));
 				});
 			}
 		}
@@ -260,8 +260,12 @@ class ServerRecording {
 	function appendLines(...lines:String):Void print(f -> File.append(f), ...lines);
 
 	function makeEntry(dir:ComDirection, command:String, ?id:Int, ?name:String):String {
+		return withTiming('$dir $command' + (id == null ? '' : ' $id') + (name == null ? '' : ' "$name"'));
+	}
+
+	function withTiming(msg:String):String {
 		var ts = Math.round((Date.now().getTime() - startTime) / 10) / 10;
-		return '+${ts}s $dir $command' + (id == null ? '' : ' $id') + (name == null ? '' : ' "$name"');
+		return '+${ts}s $msg';
 	}
 
 	// TODO: error handling
