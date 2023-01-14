@@ -13,11 +13,23 @@ class TextDocuments {
 	}
 
 	public inline function getHaxe(uri:DocumentUri):Null<HaxeDocument> {
-		return @:nullSafety(Off) Std.downcast(documents[uri], HaxeDocument);
+		var doc:Null<HaxeDocument> = Std.downcast(documents[uri], HaxeDocument);
+		if (doc == null && uri.isHaxeFile()) {
+			// document not opened via client, load it directly from disk
+			// see https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_didOpen
+			doc = new HaxeDocument(uri, "hx", 1, sys.io.File.getContent(uri.toFsPath().toString()));
+		}
+		return doc;
 	}
 
 	public inline function getHxml(uri:DocumentUri):Null<HxmlDocument> {
-		return @:nullSafety(Off) Std.downcast(documents[uri], HxmlDocument);
+		var doc:Null<HxmlDocument> = Std.downcast(documents[uri], HxmlDocument);
+		if (doc == null && uri.isHxmlFile()) {
+			// document not (yet) loaded via client, load it directly from disk
+			// see https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_didOpen
+			doc = new HxmlDocument(uri, "hxml", 1, sys.io.File.getContent(uri.toFsPath().toString()));
+		}
+		return doc;
 	}
 
 	function onDidOpenTextDocument(event:DidOpenTextDocumentParams) {
