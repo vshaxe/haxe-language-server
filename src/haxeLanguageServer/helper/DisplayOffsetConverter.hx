@@ -29,7 +29,7 @@ class Haxe3DisplayOffsetConverter extends DisplayOffsetConverter {
 	}
 
 	function byteOffsetToCharacterOffset(string:String, byteOffset:Int):Int {
-		final buf = new js.node.Buffer(string, "utf-8");
+		final buf = Buffer.from(string, "utf-8");
 		return buf.toString("utf-8", 0, byteOffset).length;
 	}
 
