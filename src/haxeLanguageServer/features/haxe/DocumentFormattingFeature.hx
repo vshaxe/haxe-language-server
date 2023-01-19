@@ -69,9 +69,11 @@ class DocumentFormattingFeature {
 				} else {
 					range;
 				}
-				final edits = [{range: range, newText: formattedCode}];
-				resolve(edits);
-				onResolve(null, edits.length + " changes");
+				if (doc.getText(range) != formattedCode) {
+					final edits = [{range: range, newText: formattedCode}];
+					resolve(edits);
+					onResolve(null, edits.length + " changes");
+				}
 			case Failure(errorMessage):
 				reject(ResponseError.internalError(errorMessage));
 			case Disabled:
