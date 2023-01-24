@@ -14,6 +14,25 @@ abstract class DisplayOffsetConverter {
 		return if (haxeVersion >= new SemVer(4, 0, 0)) new Haxe4DisplayOffsetConverter() else new Haxe3DisplayOffsetConverter();
 	}
 
+	public function byteRangeToCharacterRange(range:Range, doc:HxTextDocument):Range {
+		return {
+			start: {
+				line: range.start.line,
+				character: byteOffsetToCharacterOffset(
+					doc.lineAt(range.start.line),
+					range.start.character
+				)
+			},
+			end: {
+				line: range.end.line,
+				character: byteOffsetToCharacterOffset(
+					doc.lineAt(range.end.line),
+					range.end.character
+				)
+			}
+		};
+	}
+
 	public abstract function positionCharToZeroBasedColumn(char:Int):Int;
 
 	public abstract function byteOffsetToCharacterOffset(string:String, byteOffset:Int):Int;

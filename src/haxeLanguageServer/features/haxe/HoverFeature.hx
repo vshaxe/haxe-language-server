@@ -34,25 +34,7 @@ class HoverFeature {
 			if (hover == null) {
 				resolve(null);
 			} else {
-				final range:Range = {
-					final startPosition = {
-						line: hover.range.start.line,
-						character: context.displayOffsetConverter.byteOffsetToCharacterOffset(
-							doc.lineAt(hover.range.start.line),
-							hover.range.start.character
-						)
-					}
-
-					final endPosition = {
-						line: hover.range.end.line,
-						character: context.displayOffsetConverter.byteOffsetToCharacterOffset(
-							doc.lineAt(hover.range.end.line),
-							hover.range.end.character
-						)
-					};
-
-					{start: startPosition, end: endPosition};
-				};
+				final range = context.displayOffsetConverter.byteRangeToCharacterRange(hover.range, doc);
 				resolve(createHover(printContent(doc, hover), hover.item.getDocumentation(), range));
 			}
 			return null;
