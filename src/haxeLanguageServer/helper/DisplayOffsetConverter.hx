@@ -79,11 +79,14 @@ class Haxe4DisplayOffsetConverter extends DisplayOffsetConverter {
 
 	function offsetSurrogates(string:String, offset:Int, direction:Int):Int {
 		var ret = offset;
-		var i = 0;
-		while (i < string.length && i < offset) {
-			var ch = string.charCodeAt(i).sure();
-			if (ch > 0xD800 && ch < 0xDC00) ret += direction;
-			i++;
+		var i = 0, j = 0;
+		while (j < string.length && i < offset) {
+			var ch = string.charCodeAt(j).sure();
+			if (ch >= 0xD800 && ch < 0xDC00) {
+				ret += direction;
+				j++;
+			}
+			i++; j++;
 		}
 		return ret;
 	}
