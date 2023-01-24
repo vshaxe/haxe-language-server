@@ -21,7 +21,8 @@ class GotoTypeDefinitionFeature {
 		if (doc == null || !uri.isFile()) {
 			return reject.noFittingDocument(uri);
 		}
-		context.callHaxeMethod(DisplayMethods.GotoTypeDefinition, {file: uri.toFsPath(), contents: doc.content, offset: doc.offsetAt(params.position)}, token,
+		final offset = context.displayOffsetConverter.characterOffsetToByteOffset(doc.content, doc.offsetAt(params.position));
+		context.callHaxeMethod(DisplayMethods.GotoTypeDefinition, {file: uri.toFsPath(), contents: doc.content, offset: offset}, token,
 			locations -> {
 				resolve(locations.map(location -> {
 					{
