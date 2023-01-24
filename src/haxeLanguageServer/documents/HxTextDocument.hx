@@ -31,14 +31,34 @@ class HxTextDocument {
 		for (event in events) {
 			if (event.range == null) {
 				content = event.text;
-			} else {
-				final before = content.substring(0, offsetAt(event.range.start));
-				final after = content.substring(offsetAt(event.range.end));
-				content = before + event.text + after;
 				lineOffsets = null;
+			} else {
+				final startOffset = offsetAt(event.range.start);
+				final endOffset = offsetAt(event.range.end);
+				final before = content.substring(0, startOffset);
+				final after = content.substring(endOffset);
+				content = before + event.text + after;
+
+				// Update offsets
+				final startLine = Std.int(Math.max(event.range.start.line, 0));
+				final endLine = Std.int(Math.max(event.range.end.line, 0));
+				final addedLineOffsets = computeLineOffsets(event.text, false, startOffset);
+
+				if (endLine - startLine == addedLineOffsets.length) {
+					for (i in 0...addedLineOffsets.length) {
+						lineOffsets.sure()[i + startLine + 1] = addedLineOffsets[i];
+					}
+				} else {
+					lineOffsets = lineOffsets.sure().slice(0, startLine + 1).concat(addedLineOffsets).concat(lineOffsets.sure().slice(endLine + 1));
+				}
+
+				final diff = event.text.length - (endOffset - startOffset);
+				if (diff != 0) {
+					for (i in (startLine + 1 + addedLineOffsets.length)...lineOffsets.sure().length)
+						lineOffsets.sure()[i] = lineOffsets.sure()[i] + diff;
+				}
 			}
 		}
-		lineOffsets = null;
 	}
 
 	public function positionAt(offset:Int):Position {
@@ -136,26 +156,23 @@ class HxTextDocument {
 
 	function getLineOffsets():Array<Int> {
 		if (lineOffsets == null) {
-			final offsets = [];
-			final text = content;
-			var isLineStart = true;
-			var i = 0;
-			while (i < text.length) {
-				if (isLineStart) {
-					offsets.push(i);
-					isLineStart = false;
-				}
-				final ch = text.charCodeAt(i);
-				isLineStart = (ch == '\r'.code || ch == '\n'.code);
-				if (ch == '\r'.code && i + 1 < text.length && text.charCodeAt(i + 1) == '\n'.code)
-					i++;
-				i++;
-			}
-			if (isLineStart && text.length > 0)
-				offsets.push(text.length);
-			return lineOffsets = offsets;
+			lineOffsets = computeLineOffsets(content, true);
 		}
 		return lineOffsets;
+	}
+
+	function computeLineOffsets(text:String, isLineStart:Bool, offset:Int = 0):Array<Int> {
+		final offsets = isLineStart ? [offset] : [];
+		var i = 0;
+		while (i < text.length) {
+			final ch = text.charCodeAt(i);
+			if (ch == '\r'.code && i + 1 < text.length && text.charCodeAt(i + 1) == '\n'.code)
+				i++;
+
+			i++;
+			if (ch == '\r'.code || ch == '\n'.code) offsets.push(offset + i);
+		}
+		return offsets;
 	}
 
 	inline function get_lineCount()
