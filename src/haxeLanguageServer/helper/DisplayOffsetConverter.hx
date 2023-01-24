@@ -50,11 +50,22 @@ class Haxe4DisplayOffsetConverter extends DisplayOffsetConverter {
 		return char - 1;
 	}
 
-	function byteOffsetToCharacterOffset(_, offset:Int):Int {
-		return offset;
+	function byteOffsetToCharacterOffset(string:String, offset:Int):Int {
+		return inline offsetSurrogates(string, offset, 1);
 	}
 
-	function characterOffsetToByteOffset(_, offset:Int):Int {
-		return offset;
+	function characterOffsetToByteOffset(string:String, offset:Int):Int {
+		return inline offsetSurrogates(string, offset, -1);
+	}
+
+	function offsetSurrogates(string:String, offset:Int, direction:Int):Int {
+		var ret = offset;
+		var i = 0;
+		while (i < string.length && i < offset) {
+			var ch = string.charCodeAt(i).sure();
+			if (ch > 0xD800 && ch < 0xDC00) ret += direction;
+			i++;
+		}
+		return ret;
 	}
 }
