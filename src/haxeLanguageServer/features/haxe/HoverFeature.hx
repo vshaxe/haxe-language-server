@@ -34,23 +34,22 @@ class HoverFeature {
 			if (hover == null) {
 				resolve(null);
 			} else {
-				// Fixup range if line contains surrogates
 				final range:Range = {
-					final startPosition = doc.positionAt(doc.offsetAt(hover.range.start));
-					final endPosition = doc.positionAt(doc.offsetAt(hover.range.end));
-					final endCharacter = endPosition.character;
+					final startPosition = {
+						line: hover.range.start.line,
+						character: context.displayOffsetConverter.byteOffsetToCharacterOffset(
+							doc.lineAt(hover.range.start.line),
+							hover.range.start.character
+						)
+					}
 
-					endPosition.character = context.displayOffsetConverter.byteOffsetToCharacterOffset(
-						doc.lineAt(startPosition.line),
-						endPosition.character
-					);
-
-					startPosition.character = startPosition.line == endPosition.line
-						? endPosition.character - (endCharacter - startPosition.character)
-						: context.displayOffsetConverter.byteOffsetToCharacterOffset(
-							doc.lineAt(startPosition.line),
-							startPosition.character
-						);
+					final endPosition = {
+						line: hover.range.end.line,
+						character: context.displayOffsetConverter.byteOffsetToCharacterOffset(
+							doc.lineAt(hover.range.end.line),
+							hover.range.end.character
+						)
+					};
 
 					{start: startPosition, end: endPosition};
 				};
