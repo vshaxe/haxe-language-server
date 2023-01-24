@@ -34,7 +34,27 @@ class HoverFeature {
 			if (hover == null) {
 				resolve(null);
 			} else {
-				resolve(createHover(printContent(doc, hover), hover.item.getDocumentation(), hover.range));
+				// Fixup range if line contains surrogates
+				final range:Range = {
+					final startPosition = doc.positionAt(doc.offsetAt(hover.range.start));
+					final endPosition = doc.positionAt(doc.offsetAt(hover.range.end));
+					final endCharacter = endPosition.character;
+
+					endPosition.character = context.displayOffsetConverter.byteOffsetToCharacterOffset(
+						doc.lineAt(startPosition.line),
+						endPosition.character
+					);
+
+					startPosition.character = startPosition.line == endPosition.line
+						? endPosition.character - (endCharacter - startPosition.character)
+						: context.displayOffsetConverter.byteOffsetToCharacterOffset(
+							doc.lineAt(startPosition.line),
+							startPosition.character
+						);
+
+					{start: startPosition, end: endPosition};
+				};
+				resolve(createHover(printContent(doc, hover), hover.item.getDocumentation(), range));
 			}
 			return null;
 		}, reject.handler());
