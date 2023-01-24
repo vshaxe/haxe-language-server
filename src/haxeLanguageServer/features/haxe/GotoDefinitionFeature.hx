@@ -22,7 +22,8 @@ class GotoDefinitionFeature {
 			return reject.noFittingDocument(uri);
 		}
 		final handle = if (context.haxeServer.supports(DisplayMethods.GotoDefinition)) handleJsonRpc else handleLegacy;
-		handle(params, token, resolve, reject, doc, doc.offsetAt(params.position));
+		final offset = context.displayOffsetConverter.characterOffsetToByteOffset(doc.content, doc.offsetAt(params.position));
+		handle(params, token, resolve, reject, doc, offset);
 	}
 
 	function handleJsonRpc(params:TextDocumentPositionParams, token:CancellationToken, resolve:Array<DefinitionLink>->Void,
@@ -68,8 +69,7 @@ class GotoDefinitionFeature {
 
 	function handleLegacy(params:TextDocumentPositionParams, token:CancellationToken, resolve:Array<DefinitionLink>->Void, reject:ResponseError<NoData>->Void,
 			doc:HxTextDocument, offset:Int) {
-		final bytePos = context.displayOffsetConverter.characterOffsetToByteOffset(doc.content, offset);
-		final args = ['${doc.uri.toFsPath()}@$bytePos@position'];
+		final args = ['${doc.uri.toFsPath()}@$offset@position'];
 		context.callDisplay("@position", args, doc.content, token, function(r) {
 			switch r {
 				case DCancelled:
