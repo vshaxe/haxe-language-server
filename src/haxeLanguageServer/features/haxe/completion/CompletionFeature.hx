@@ -243,7 +243,7 @@ class CompletionFeature {
 				case Metadata | Toplevel if (result.replaceRange != null):
 					replaceRange = result.replaceRange;
 
-				case New | Toplevel:
+				case New | Toplevel | TypeHint | TypeRelation:
 					final pathPattern = ~/\w+(\.\w+)*$/;
 					pathPattern.match(textBefore);
 					replaceRange.start = params.position.translate(0, -pathPattern.matched(0).length);
