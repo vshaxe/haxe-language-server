@@ -245,8 +245,9 @@ class CompletionFeature {
 
 				case New | Toplevel | Implements | Extends | TypeHint | TypeRelation:
 					final pathPattern = ~/\w+(\.\w+)*$/;
-					pathPattern.match(textBefore);
-					replaceRange.start = params.position.translate(0, -pathPattern.matched(0).length);
+					if (pathPattern.match(textBefore)) {
+						replaceRange.start = params.position.translate(0, -pathPattern.matched(0).length);
+					}
 
 				case _:
 			}
