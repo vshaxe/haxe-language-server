@@ -98,7 +98,7 @@ class ServerRecording {
 
 	@:noCompletion
 	function doStart():Void {
-		startTime = Date.now().getTime();
+		var now = Date.now();
 
 		try FileSystem.createDirectory(recordingPath.sure()) catch (_) {
 			// TODO: report error (how? custom LSP notification?)
@@ -120,7 +120,12 @@ class ServerRecording {
 		appendLines(makeEntry(Local, 'root', context.sure().workspacePath.toString()));
 		prepareGitState();
 
-		appendLines(makeEntry(Local, 'start'));
+		appendLines(
+			makeEntry(Local, 'start'),
+			'# Started ${DateTools.format(now, "%Y-%m-%d %H:%M:%S")}'
+		);
+
+		startTime = now.getTime();
 		enabled = true;
 	}
 
