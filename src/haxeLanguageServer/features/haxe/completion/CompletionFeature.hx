@@ -609,7 +609,8 @@ class CompletionFeature {
 
 		if (snippetSupport) {
 			switch data.mode.kind {
-				case TypeHint | Extends | Implements | StructExtension if (type.hasMandatoryTypeParameters()):
+				case TypeHint | Extends | Implements | StructExtension
+				if (data.lineAfter.charCodeAt(0) != '<'.code && type.hasMandatoryTypeParameters()):
 					textEdit.newText += "<$1>";
 					item.insertTextFormat = Snippet;
 					item.command = TriggerSuggest;
