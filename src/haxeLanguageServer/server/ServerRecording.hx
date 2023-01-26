@@ -32,6 +32,7 @@ class ServerRecording {
 	var context:Null<Context>;
 	var recordingRoot:Null<String>;
 	var recordingPath:Null<String>;
+	var recordingRelativeRoot(get, never):Null<String>;
 
 	public function new() {}
 
@@ -118,7 +119,11 @@ class ServerRecording {
 		// TODO: add exact Haxe version?
 
 		appendLines(makeEntry(Local, 'root', context.sure().workspacePath.toString()));
-		prepareGitState();
+
+		// VCS - Detect git / svn and apply corresponding process
+		var vcsReady = prepareGitState();
+		if (!vcsReady) vcsReady = prepareSvnState();
+		if (!vcsReady) appendLines(withTiming('# Could not detect version control, initial state not guaranteed.'));
 
 		appendLines(
 			makeEntry(Local, 'start'),
@@ -130,15 +135,9 @@ class ServerRecording {
 	}
 
 	// TODO: better error handling
-	function prepareGitState():Void {
+	function prepareGitState():Bool {
 		var revision = command("git", ["rev-parse", "HEAD"]);
-
-		if (revision.code != 0) {
-			return appendLines(
-				"# Warning: not in a git repository, " +
-				"you will have to manage initial sources state yourself."
-			);
-		}
+		if (revision.code != 0) return false;
 
 		appendLines(makeEntry(Local, 'checkoutGitRef'), revision.out);
 
@@ -146,16 +145,12 @@ class ServerRecording {
 		command("git", ["diff", "--output", patch, "--patch"]);
 		appendLines(makeEntry(Local, 'applyGitPatch'));
 
-		var recordingRelRoot = Path.isAbsolute(recordingRoot.sure()) ? "" : recordingRoot.sure();
-		if (recordingRelRoot.startsWith("./") || recordingRelRoot.startsWith("../")) recordingRelRoot = "";
-		recordingRelRoot = recordingRelRoot.split("/")[0] + "/";
-
 		// Get untracked files (other than recording folder)
 		var untracked = command("git", ["status", "--porcelain"]).out
 			.split("\n")
 			.filter(l -> l.startsWith('?? '))
 			.map(l -> l.substr(3))
-			.filter(l -> l != recordingRelRoot && l != ".haxelib" && l != "dump");
+			.filter(l -> l != recordingRelativeRoot.sure() && l != ".haxelib" && l != "dump");
 
 		if (untracked.length > 0) {
 			appendLines(makeEntry(Local, 'addGitUntracked'));
@@ -179,6 +174,34 @@ class ServerRecording {
 				});
 			}
 		}
+
+		return true;
+	}
+
+	// TODO: better error handling
+	function prepareSvnState():Bool {
+		var revision = command("svn", ["info", "--show-item", "revision"]);
+		if (revision.code != 0) return false;
+
+		appendLines(makeEntry(Local, 'checkoutSvnRevision'), revision.out);
+
+		var status = command("svn", ["status"]);
+		var untracked = [for (line in status.out.split('\n')) {
+			if (line.charCodeAt(0) != '?'.code) continue;
+			line.substr(1).trim();
+		}];
+
+		for (f in untracked) command("svn", ["add", f]);
+
+		var patch = command("svn", ["diff", "--depth=infinity", "--patch-compatible"]);
+		if (patch.out.trim().length > 0) {
+			File.saveContent(Path.join([recordingPath.sure(), "status.patch"]), patch.out);
+			appendLines(makeEntry(Local, 'applySvnPatch'));
+		}
+
+		for (f in untracked) command("svn", ["rm", "--keep-local", f]);
+
+		return true;
 	}
 
 	public function onDisplayRequest(label:String, args:Array<String>):Void {
@@ -298,5 +321,13 @@ class ServerRecording {
 				? (p.stdout :Buffer).toString().trim()
 				: (p.stderr:Buffer).toString().trim()
 		};
+	}
+
+	function get_recordingRelativeRoot():Null<String> {
+		if (recordingRoot == null) return null;
+
+		var ret = Path.isAbsolute(recordingRoot.sure()) ? "" : recordingRoot.sure();
+		if (ret.startsWith("./") || ret.startsWith("../")) ret = "";
+		return ret.split("/")[0] + "/";
 	}
 }
