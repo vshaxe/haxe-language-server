@@ -237,11 +237,19 @@ class CompletionFeature {
 			}
 			final importPosition = determineImportPosition(doc);
 			final indent = doc.indentAt(params.position.line);
-			// the replaceRanges sent by Haxe are only trustworthy in some cases (https://github.com/HaxeFoundation/haxe/issues/8669)
-			if (mode == Metadata || mode == Toplevel || mode == New) {
-				if (result.replaceRange != null) {
+
+			switch (mode) {
+				// the replaceRanges sent by Haxe are only trustworthy in some cases (https://github.com/HaxeFoundation/haxe/issues/8669)
+				case Metadata | Toplevel if (result.replaceRange != null):
 					replaceRange = result.replaceRange;
-				}
+
+				case New | Toplevel | Implements | Extends | TypeHint | TypeRelation:
+					final pathPattern = ~/\w+(\.\w+)*$/;
+					if (pathPattern.match(textBefore)) {
+						replaceRange.start = params.position.translate(0, -pathPattern.matched(0).length);
+					}
+
+				case _:
 			}
 
 			final displayItems = result.items;
