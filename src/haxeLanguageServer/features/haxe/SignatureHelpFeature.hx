@@ -48,7 +48,7 @@ class SignatureHelpFeature {
 		final params = {
 			file: doc.uri.toFsPath(),
 			contents: doc.content,
-			offset: doc.offsetAt(params.position),
+			offset: context.displayOffsetConverter.characterOffsetToByteOffset(doc.content, doc.offsetAt(params.position)),
 			wasAutoTriggered: wasAutoTriggered
 		}
 		context.callHaxeMethod(DisplayMethods.SignatureHelp, params, token, function(result) {

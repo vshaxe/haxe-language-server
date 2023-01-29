@@ -14,6 +14,25 @@ abstract class DisplayOffsetConverter {
 		return if (haxeVersion >= new SemVer(4, 0, 0)) new Haxe4DisplayOffsetConverter() else new Haxe3DisplayOffsetConverter();
 	}
 
+	public function byteRangeToCharacterRange(range:Range, doc:HxTextDocument):Range {
+		return {
+			start: {
+				line: range.start.line,
+				character: byteOffsetToCharacterOffset(
+					doc.lineAt(range.start.line),
+					range.start.character
+				)
+			},
+			end: {
+				line: range.end.line,
+				character: byteOffsetToCharacterOffset(
+					doc.lineAt(range.end.line),
+					range.end.character
+				)
+			}
+		};
+	}
+
 	public abstract function positionCharToZeroBasedColumn(char:Int):Int;
 
 	public abstract function byteOffsetToCharacterOffset(string:String, byteOffset:Int):Int;
@@ -50,11 +69,25 @@ class Haxe4DisplayOffsetConverter extends DisplayOffsetConverter {
 		return char - 1;
 	}
 
-	function byteOffsetToCharacterOffset(_, offset:Int):Int {
-		return offset;
+	function byteOffsetToCharacterOffset(string:String, offset:Int):Int {
+		return inline offsetSurrogates(string, offset, 1);
 	}
 
-	function characterOffsetToByteOffset(_, offset:Int):Int {
-		return offset;
+	function characterOffsetToByteOffset(string:String, offset:Int):Int {
+		return inline offsetSurrogates(string, offset, -1);
+	}
+
+	function offsetSurrogates(string:String, offset:Int, direction:Int):Int {
+		var ret = offset;
+		var i = 0, j = 0;
+		while (j < string.length && i < offset) {
+			var ch = string.charCodeAt(j).sure();
+			if (ch >= 0xD800 && ch < 0xDC00) {
+				ret += direction;
+				j++;
+			}
+			i++; j++;
+		}
+		return ret;
 	}
 }

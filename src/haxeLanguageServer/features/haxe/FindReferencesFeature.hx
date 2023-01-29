@@ -22,7 +22,8 @@ class FindReferencesFeature {
 			return reject.noFittingDocument(uri);
 		}
 		final handle = if (context.haxeServer.supports(DisplayMethods.FindReferences)) handleJsonRpc else handleLegacy;
-		handle(params, token, resolve, reject, doc, doc.offsetAt(params.position));
+		final offset = context.displayOffsetConverter.characterOffsetToByteOffset(doc.content, doc.offsetAt(params.position));
+		handle(params, token, resolve, reject, doc, offset);
 	}
 
 	function handleJsonRpc(params:TextDocumentPositionParams, token:CancellationToken, resolve:Null<Array<Location>>->Void,
@@ -45,8 +46,7 @@ class FindReferencesFeature {
 
 	function handleLegacy(params:TextDocumentPositionParams, token:CancellationToken, resolve:Null<Array<Location>>->Void, reject:ResponseError<NoData>->Void,
 			doc:HxTextDocument, offset:Int) {
-		final bytePos = context.displayOffsetConverter.characterOffsetToByteOffset(doc.content, doc.offsetAt(params.position));
-		final args = ['${doc.uri.toFsPath()}@$bytePos@usage'];
+		final args = ['${doc.uri.toFsPath()}@$offset@usage'];
 		context.callDisplay("@usage", args, doc.content, token, function(r) {
 			switch r {
 				case DCancelled:

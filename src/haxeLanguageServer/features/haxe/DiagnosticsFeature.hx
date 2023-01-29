@@ -175,7 +175,7 @@ class DiagnosticsFeature {
 						end: {line: 0, character: 0}
 					}
 				} else {
-					hxDiag.range;
+					context.displayOffsetConverter.byteRangeToCharacterRange(hxDiag.range, doc);
 				};
 				final diag:Diagnostic = {
 					range: range,

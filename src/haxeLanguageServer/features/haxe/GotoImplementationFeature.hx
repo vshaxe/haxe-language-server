@@ -21,7 +21,8 @@ class GotoImplementationFeature {
 		if (doc == null || !uri.isFile()) {
 			return reject.noFittingDocument(uri);
 		}
-		handleJsonRpc(params, token, resolve, reject, doc, doc.offsetAt(params.position));
+		final offset = context.displayOffsetConverter.characterOffsetToByteOffset(doc.content, doc.offsetAt(params.position));
+		handleJsonRpc(params, token, resolve, reject, doc, offset);
 	}
 
 	function handleJsonRpc(params:TextDocumentPositionParams, token:CancellationToken, resolve:Definition->Void, reject:ResponseError<NoData>->Void,
