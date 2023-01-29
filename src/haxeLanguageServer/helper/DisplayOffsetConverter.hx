@@ -18,17 +18,11 @@ abstract class DisplayOffsetConverter {
 		return {
 			start: {
 				line: range.start.line,
-				character: byteOffsetToCharacterOffset(
-					doc.lineAt(range.start.line),
-					range.start.character
-				)
+				character: byteOffsetToCharacterOffset(doc.lineAt(range.start.line), range.start.character)
 			},
 			end: {
 				line: range.end.line,
-				character: byteOffsetToCharacterOffset(
-					doc.lineAt(range.end.line),
-					range.end.character
-				)
+				character: byteOffsetToCharacterOffset(doc.lineAt(range.end.line), range.end.character)
 			}
 		};
 	}
@@ -70,11 +64,13 @@ class Haxe4DisplayOffsetConverter extends DisplayOffsetConverter {
 	}
 
 	function byteOffsetToCharacterOffset(string:String, offset:Int):Int {
-		return inline offsetSurrogates(string, offset, 1);
+		return
+		inline offsetSurrogates(string, offset, 1);
 	}
 
 	function characterOffsetToByteOffset(string:String, offset:Int):Int {
-		return inline offsetSurrogates(string, offset, -1);
+		return
+		inline offsetSurrogates(string, offset, -1);
 	}
 
 	function offsetSurrogates(string:String, offset:Int, direction:Int):Int {
@@ -86,7 +82,8 @@ class Haxe4DisplayOffsetConverter extends DisplayOffsetConverter {
 				ret += direction;
 				j++;
 			}
-			i++; j++;
+			i++;
+			j++;
 		}
 		return ret;
 	}

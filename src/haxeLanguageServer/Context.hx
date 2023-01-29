@@ -33,7 +33,6 @@ import jsonrpc.CancellationToken;
 import jsonrpc.Protocol;
 import jsonrpc.ResponseError;
 import jsonrpc.Types;
-import languageServerProtocol.protocol.ColorProvider.ColorPresentationRequest;
 import languageServerProtocol.protocol.ColorProvider.DocumentColorRequest;
 import languageServerProtocol.protocol.FoldingRange.FoldingRangeRequest;
 import languageServerProtocol.protocol.Implementation;

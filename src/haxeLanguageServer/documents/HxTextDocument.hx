@@ -49,7 +49,10 @@ class HxTextDocument {
 						lineOffsets.sure()[i + startLine + 1] = addedLineOffsets[i];
 					}
 				} else {
-					lineOffsets = lineOffsets.sure().slice(0, startLine + 1).concat(addedLineOffsets).concat(lineOffsets.sure().slice(endLine + 1));
+					lineOffsets = lineOffsets.sure()
+						.slice(0, startLine + 1)
+						.concat(addedLineOffsets)
+						.concat(lineOffsets.sure().slice(endLine + 1));
 				}
 
 				final diff = event.text.length - (endOffset - startOffset);
@@ -170,7 +173,8 @@ class HxTextDocument {
 				i++;
 
 			i++;
-			if (ch == '\r'.code || ch == '\n'.code) offsets.push(offset + i);
+			if (ch == '\r'.code || ch == '\n'.code)
+				offsets.push(offset + i);
 		}
 		return offsets;
 	}
