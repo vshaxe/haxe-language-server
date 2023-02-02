@@ -169,36 +169,41 @@ class ServerRecording {
 		// TODO: apply filters
 		command("git", ["diff", "--output", patch, "--patch"]);
 
-		// Get untracked files (other than recording folder)
-		// TODO: apply filters
-		var untracked = command("git", ["status", "--porcelain"]).out
-			.split("\n")
-			.filter(l -> l.startsWith('?? '))
-			.map(l -> l.substr(3))
-			.filter(l -> l != recordingRelativeRoot.sure() && l != ".haxelib" && l != "dump");
+		var hasUntracked = false;
+		if (!config.excludeUntracked) {
+			// Get untracked files (other than recording folder)
+			// TODO: apply filters
+			var untracked = command("git", ["status", "--porcelain"]).out
+				.split("\n")
+				.filter(l -> l.startsWith('?? '))
+				.map(l -> l.substr(3))
+				.filter(l -> l != recordingRelativeRoot.sure() && l != ".haxelib" && l != "dump");
 
-		if (untracked.length > 0) {
-			FileSystem.createDirectory(untrackedDestination);
-			for (f in untracked) {
-				// See https://nodejs.org/api/fs.html#fscpsrc-dest-options-callback
-				// TODO: this is new API (16.7.0) so we should probably be using something else here
-				// (especially since it's marked as experimental...)
-				// TODO: also, this is async but we're currently skipping waiting
-				// We might also want to do something about long copy times here, because:
-				// - starting Haxe LSP shouldn't take long
-				// - if we're not blocking and copy takes too much time, we might end up
-				//   with wrong data if it gets modified before we copy it
-				if (f.startsWith('"')) f = f.substr(1);
-				if (f.endsWith('"')) f = f.substr(0, f.length - 1);
-				var fpath = Path.join([untrackedDestination, f]);
-				(cast js.node.Fs).cp(f, fpath, {recursive: true}, function(err) {
-					if (err != null) appendLines(withTiming('# Warning: error while saving untracked file $f: ${err.message}'));
-					else appendLines(withTiming('# Untracked files copied successfully'));
-				});
+			if (untracked.length > 0) {
+				hasUntracked = true;
+				FileSystem.createDirectory(untrackedDestination);
+
+				for (f in untracked) {
+					// See https://nodejs.org/api/fs.html#fscpsrc-dest-options-callback
+					// TODO: this is new API (16.7.0) so we should probably be using something else here
+					// (especially since it's marked as experimental...)
+					// TODO: also, this is async but we're currently skipping waiting
+					// We might also want to do something about long copy times here, because:
+					// - starting Haxe LSP shouldn't take long
+					// - if we're not blocking and copy takes too much time, we might end up
+					//   with wrong data if it gets modified before we copy it
+					if (f.startsWith('"')) f = f.substr(1);
+					if (f.endsWith('"')) f = f.substr(0, f.length - 1);
+					var fpath = Path.join([untrackedDestination, f]);
+					(cast js.node.Fs).cp(f, fpath, {recursive: true}, function(err) {
+						if (err != null) appendLines(withTiming('# Warning: error while saving untracked file $f: ${err.message}'));
+						else appendLines(withTiming('# Untracked files copied successfully'));
+					});
+				}
 			}
 		}
 
-		return Git(revision.out, true, untracked.length > 0);
+		return Git(revision.out, true, hasUntracked);
 	}
 
 	// TODO: better error handling
@@ -207,10 +212,13 @@ class ServerRecording {
 		if (revision.code != 0) return None;
 
 		var status = command("svn", ["status"]);
-		var untracked = [for (line in status.out.split('\n')) {
-			if (line.charCodeAt(0) != '?'.code) continue;
-			line.substr(1).trim();
-		}];
+		var untracked = [];
+		if (!config.excludeUntracked) {
+			untracked =[for (line in status.out.split('\n')) {
+				if (line.charCodeAt(0) != '?'.code) continue;
+				line.substr(1).trim();
+			}];
+		}
 
 		for (f in untracked) command("svn", ["add", f]);
 		var patch = command("svn", ["diff", "--depth=infinity", "--patch-compatible"]);
