@@ -117,6 +117,8 @@ class ServerRecording {
 			'# TODO: short header with instructions',
 			makeEntry(Local, 'userConfig'),
 			Json.stringify(context.config.user),
+			makeEntry(Local, 'serverRecordingConfig'),
+			Json.stringify({watch: config.watch, exclude: config.exclude, excludeUntracked: config.excludeUntracked}),
 			makeEntry(Local, 'displayServer'),
 			Json.stringify(context.config.displayServer),
 			makeEntry(Local, 'displayArguments'),
