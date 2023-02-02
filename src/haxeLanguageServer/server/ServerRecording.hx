@@ -15,7 +15,6 @@ import jsonrpc.ResponseError;
 using StringTools;
 
 class ServerRecording {
-	static inline var ID:String = "current";
 	static inline var LOG_FILE:String = "repro.log";
 	static inline var UNTRACKED_DIR:String = "untracked";
 	static inline var NEWFILES_DIR:String = "newfiles";
@@ -81,6 +80,12 @@ class ServerRecording {
 			appendLines('# Exporting to $path ...');
 			FileSystem.createDirectory(path);
 
+			// Save end vcs status
+			// Note that untracked files will be copied asynchronously to target
+			// directory and won't always all be ready when the notification is
+			// sent.
+			getVcsState("end.patch", Path.join([path, "endUntracked"]));
+
 			// See https://nodejs.org/api/fs.html#fscpsrc-dest-options-callback
 			// TODO: this is new API (16.7.0) so we should probably be using something else here
 			// (especially since it's marked as experimental...)
@@ -123,9 +128,19 @@ class ServerRecording {
 		appendLines(makeEntry(Local, 'root', context.sure().workspacePath.toString()));
 
 		// VCS - Detect git / svn and apply corresponding process
-		var vcsReady = prepareGitState();
-		if (!vcsReady) vcsReady = prepareSvnState();
-		if (!vcsReady) appendLines(withTiming('# Could not detect version control, initial state not guaranteed.'));
+		switch getVcsState("status.patch", Path.join([recordingPath, UNTRACKED_DIR])) {
+			case None:
+				appendLines(withTiming('# Could not detect version control, initial state not guaranteed.'));
+
+			case Git(ref, hasPatch, hasUntracked):
+				appendLines(makeEntry(Local, 'checkoutGitRef'), ref);
+				if (hasPatch) appendLines(makeEntry(Local, 'applyGitPatch'));
+				if (hasUntracked) appendLines(makeEntry(Local, 'addGitUntracked'));
+
+			case Svn(rev, hasPatch):
+				appendLines(makeEntry(Local, 'checkoutSvnRevision'), rev);
+				if (hasPatch) appendLines(makeEntry(Local, 'applySvnPatch'));
+		}
 
 		appendLines(
 			makeEntry(Local, 'start'),
@@ -136,18 +151,24 @@ class ServerRecording {
 		enabled = true;
 	}
 
+	function getVcsState(patchOutput:String, untrackedDestination:String):VcsState {
+		var ret = None;
+		ret = getGitState(patchOutput, untrackedDestination);
+		if (ret.match(None)) ret = getSvnState(patchOutput);
+		return ret;
+	}
+
 	// TODO: better error handling
-	function prepareGitState():Bool {
+	function getGitState(patchOutput:String, untrackedDestination:String):VcsState {
 		var revision = command("git", ["rev-parse", "HEAD"]);
-		if (revision.code != 0) return false;
+		if (revision.code != 0) return None;
 
-		appendLines(makeEntry(Local, 'checkoutGitRef'), revision.out);
-
-		var patch = Path.join([recordingPath, "status.patch"]);
+		var patch = Path.join([recordingPath, patchOutput]);
+		// TODO: apply filters
 		command("git", ["diff", "--output", patch, "--patch"]);
-		appendLines(makeEntry(Local, 'applyGitPatch'));
 
 		// Get untracked files (other than recording folder)
+		// TODO: apply filters
 		var untracked = command("git", ["status", "--porcelain"]).out
 			.split("\n")
 			.filter(l -> l.startsWith('?? '))
@@ -155,9 +176,7 @@ class ServerRecording {
 			.filter(l -> l != recordingRelativeRoot.sure() && l != ".haxelib" && l != "dump");
 
 		if (untracked.length > 0) {
-			appendLines(makeEntry(Local, 'addGitUntracked'));
-
-			FileSystem.createDirectory(Path.join([recordingPath, UNTRACKED_DIR]));
+			FileSystem.createDirectory(untrackedDestination);
 			for (f in untracked) {
 				// See https://nodejs.org/api/fs.html#fscpsrc-dest-options-callback
 				// TODO: this is new API (16.7.0) so we should probably be using something else here
@@ -169,7 +188,7 @@ class ServerRecording {
 				//   with wrong data if it gets modified before we copy it
 				if (f.startsWith('"')) f = f.substr(1);
 				if (f.endsWith('"')) f = f.substr(0, f.length - 1);
-				var fpath = Path.join([recordingPath, UNTRACKED_DIR, f]);
+				var fpath = Path.join([untrackedDestination, f]);
 				(cast js.node.Fs).cp(f, fpath, {recursive: true}, function(err) {
 					if (err != null) appendLines(withTiming('# Warning: error while saving untracked file $f: ${err.message}'));
 					else appendLines(withTiming('# Untracked files copied successfully'));
@@ -177,15 +196,13 @@ class ServerRecording {
 			}
 		}
 
-		return true;
+		return Git(revision.out, true, untracked.length > 0);
 	}
 
 	// TODO: better error handling
-	function prepareSvnState():Bool {
+	function getSvnState(patchOutput:String):VcsState {
 		var revision = command("svn", ["info", "--show-item", "revision"]);
-		if (revision.code != 0) return false;
-
-		appendLines(makeEntry(Local, 'checkoutSvnRevision'), revision.out);
+		if (revision.code != 0) return None;
 
 		var status = command("svn", ["status"]);
 		var untracked = [for (line in status.out.split('\n')) {
@@ -194,16 +211,12 @@ class ServerRecording {
 		}];
 
 		for (f in untracked) command("svn", ["add", f]);
-
 		var patch = command("svn", ["diff", "--depth=infinity", "--patch-compatible"]);
-		if (patch.out.trim().length > 0) {
-			File.saveContent(Path.join([recordingPath, "status.patch"]), patch.out);
-			appendLines(makeEntry(Local, 'applySvnPatch'));
-		}
-
+		var hasPatch = patch.out.trim().length > 0;
+		if (hasPatch) File.saveContent(Path.join([recordingPath, patchOutput]), patch.out);
 		for (f in untracked) command("svn", ["rm", "--keep-local", f]);
 
-		return true;
+		return Svn(revision.out, hasPatch);
 	}
 
 	public function onDisplayRequest(label:String, args:Array<String>):Void {
@@ -338,4 +351,11 @@ class ServerRecording {
 		}
 		return recordingRelativeRoot;
 	}
+}
+
+enum VcsState {
+	None;
+	// Note: hasPatch will always be true for Git (for now at least)
+	Git(ref:String, hasPatch:Bool, hasUntracked:Bool);
+	Svn(rev:String, hasPatch:Bool);
 }
