@@ -166,14 +166,12 @@ class ServerRecording {
 		if (revision.code != 0) return None;
 
 		var patch = Path.join([recordingPath, patchOutput]);
-		// TODO: apply filters
-		command("git", ["diff", "--output", patch, "--patch"]);
+		command("git", applyGitExcludes(["diff", "--output", patch, "--patch"]));
 
 		var hasUntracked = false;
 		if (!config.excludeUntracked) {
 			// Get untracked files (other than recording folder)
-			// TODO: apply filters
-			var untracked = command("git", ["status", "--porcelain"]).out
+			var untracked = command("git", applyGitExcludes(["status", "--porcelain"])).out
 				.split("\n")
 				.filter(l -> l.startsWith('?? '))
 				.map(l -> l.substr(3))
@@ -206,21 +204,48 @@ class ServerRecording {
 		return Git(revision.out, true, hasUntracked);
 	}
 
+	function applyGitExcludes(args:Array<String>):Array<String> {
+		if (config.exclude.length == 0) return args;
+
+		args.push("--");
+		args.push(".");
+		for (ex in config.exclude) args.push(':^$ex');
+		return args;
+	}
+
 	// TODO: better error handling
 	function getSvnState(patchOutput:String):VcsState {
 		var revision = command("svn", ["info", "--show-item", "revision"]);
 		if (revision.code != 0) return None;
 
+		var hasExcludes = config.exclude.length > 0;
 		var status = command("svn", ["status"]);
 		var untracked = [];
+
 		if (!config.excludeUntracked) {
-			untracked =[for (line in status.out.split('\n')) {
+			untracked = [for (line in status.out.split('\n')) {
 				if (line.charCodeAt(0) != '?'.code) continue;
-				line.substr(1).trim();
+				var entry = line.substr(1).trim();
+
+				if (hasExcludes) {
+					var excluded = false;
+
+					for (ex in config.exclude) {
+						if (entry.startsWith(ex)) {
+							excluded = true;
+							break;
+						}
+					}
+
+					if (excluded) continue;
+				}
+
+				entry;
 			}];
 		}
 
 		for (f in untracked) command("svn", ["add", f]);
+		// TODO: ignore changes in excluded files
 		var patch = command("svn", ["diff", "--depth=infinity", "--patch-compatible"]);
 		var hasPatch = patch.out.trim().length > 0;
 		if (hasPatch) File.saveContent(Path.join([recordingPath, patchOutput]), patch.out);
