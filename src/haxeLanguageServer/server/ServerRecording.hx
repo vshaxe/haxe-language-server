@@ -8,6 +8,7 @@ import sys.io.File;
 import sys.io.FileOutput;
 import sys.FileSystem;
 
+import haxeLanguageServer.Configuration.ServerRecordingConfig;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 
@@ -30,22 +31,23 @@ class ServerRecording {
 	var fileCreationIndex:Int = 1;
 	var startTime:Float = -1;
 	var context:Null<Context>;
-	var recordingRoot:Null<String>;
-	var recordingPath:Null<String>;
-	var recordingRelativeRoot(get, never):Null<String>;
+	var config:ServerRecordingConfig = @:privateAccess Configuration.DefaultUserSettings.serverRecording;
+	var recordingPath(get,null):String = "";
+	var recordingRelativeRoot(get, null):String = "";
 
 	public function new() {}
 
 	public function start(context:Context):Void {
 		this.context = context;
-		if (!context.config.user.enableServerRecording) return;
+		this.config = context.config.user.serverRecording;
+		if (!config.enabled) return;
 
 		enabled = false;
-		recordingRoot = context.config.user.serverRecordingPath;
-		recordingPath = Path.join([recordingRoot, ID]);
+		recordingPath = "";
+		recordingRelativeRoot = "";
 
 		// TODO: error handling here
-		(cast js.node.Fs).rmdir(recordingPath.sure(), {recursive: true, force: true}, (_) -> doStart());
+		(cast js.node.Fs).rmdir(recordingPath, {recursive: true, force: true}, (_) -> doStart());
 	}
 
 	public function export(
@@ -62,7 +64,7 @@ class ServerRecording {
 		}
 
 		appendLines(withTiming("# Export requested ..."));
-		var dest = params?.dest == null ? recordingRoot.sure() : params.sure().dest;
+		var dest = params?.dest == null ? config.path : params.sure().dest;
 
 		if (!FileSystem.isDirectory(dest)) {
 			appendLines('# Failed to export to $dest');
@@ -82,7 +84,7 @@ class ServerRecording {
 			// See https://nodejs.org/api/fs.html#fscpsrc-dest-options-callback
 			// TODO: this is new API (16.7.0) so we should probably be using something else here
 			// (especially since it's marked as experimental...)
-			(cast js.node.Fs).cp(recordingPath.sure(), path, {
+			(cast js.node.Fs).cp(recordingPath, path, {
 				errorOnExists: true,
 				recursive: true,
 				preserveTimestamps: true
@@ -101,7 +103,7 @@ class ServerRecording {
 	function doStart():Void {
 		var now = Date.now();
 
-		try FileSystem.createDirectory(recordingPath.sure()) catch (_) {
+		try FileSystem.createDirectory(recordingPath) catch (_) {
 			// TODO: report error (how? custom LSP notification?)
 			enabled = false;
 		}
@@ -141,7 +143,7 @@ class ServerRecording {
 
 		appendLines(makeEntry(Local, 'checkoutGitRef'), revision.out);
 
-		var patch = Path.join([recordingPath.sure(), "status.patch"]);
+		var patch = Path.join([recordingPath, "status.patch"]);
 		command("git", ["diff", "--output", patch, "--patch"]);
 		appendLines(makeEntry(Local, 'applyGitPatch'));
 
@@ -155,7 +157,7 @@ class ServerRecording {
 		if (untracked.length > 0) {
 			appendLines(makeEntry(Local, 'addGitUntracked'));
 
-			FileSystem.createDirectory(Path.join([recordingPath.sure(), UNTRACKED_DIR]));
+			FileSystem.createDirectory(Path.join([recordingPath, UNTRACKED_DIR]));
 			for (f in untracked) {
 				// See https://nodejs.org/api/fs.html#fscpsrc-dest-options-callback
 				// TODO: this is new API (16.7.0) so we should probably be using something else here
@@ -167,7 +169,7 @@ class ServerRecording {
 				//   with wrong data if it gets modified before we copy it
 				if (f.startsWith('"')) f = f.substr(1);
 				if (f.endsWith('"')) f = f.substr(0, f.length - 1);
-				var fpath = Path.join([recordingPath.sure(), UNTRACKED_DIR, f]);
+				var fpath = Path.join([recordingPath, UNTRACKED_DIR, f]);
 				(cast js.node.Fs).cp(f, fpath, {recursive: true}, function(err) {
 					if (err != null) appendLines(withTiming('# Warning: error while saving untracked file $f: ${err.message}'));
 					else appendLines(withTiming('# Untracked files copied successfully'));
@@ -195,7 +197,7 @@ class ServerRecording {
 
 		var patch = command("svn", ["diff", "--depth=infinity", "--patch-compatible"]);
 		if (patch.out.trim().length > 0) {
-			File.saveContent(Path.join([recordingPath.sure(), "status.patch"]), patch.out);
+			File.saveContent(Path.join([recordingPath, "status.patch"]), patch.out);
 			appendLines(makeEntry(Local, 'applySvnPatch'));
 		}
 
@@ -260,7 +262,7 @@ class ServerRecording {
 
 		if (id > 0) {
 			ensureNewfilesDir();
-			var path = Path.join([recordingPath.sure(), NEWFILES_DIR, '$id.contents']);
+			var path = Path.join([recordingPath, NEWFILES_DIR, '$id.contents']);
 			File.saveContent(path, content);
 		}
 	}
@@ -298,7 +300,7 @@ class ServerRecording {
 
 	// TODO: error handling
 	function ensureNewfilesDir():Void {
-		var path = Path.join([recordingPath.sure(), NEWFILES_DIR]);
+		var path = Path.join([recordingPath, NEWFILES_DIR]);
 		if (!FileSystem.exists(path)) FileSystem.createDirectory(path);
 	}
 
@@ -306,7 +308,7 @@ class ServerRecording {
 	function print(open:String->FileOutput, ...lines:String):Void {
 		if (lines.length == 0) return;
 
-		var fpath = Path.join([recordingRoot.sure(), ID, LOG_FILE]);
+		var fpath = Path.join([recordingPath, LOG_FILE]);
 		var f = open(fpath);
 		for (l in lines) f.writeString('$l\n');
 		f.close();
@@ -323,11 +325,17 @@ class ServerRecording {
 		};
 	}
 
-	function get_recordingRelativeRoot():Null<String> {
-		if (recordingRoot == null) return null;
+	function get_recordingPath():String {
+		if (recordingPath == "") recordingPath = Path.join([config.path, "current"]);
+		return recordingPath;
+	}
 
-		var ret = Path.isAbsolute(recordingRoot.sure()) ? "" : recordingRoot.sure();
-		if (ret.startsWith("./") || ret.startsWith("../")) ret = "";
-		return ret.split("/")[0] + "/";
+	function get_recordingRelativeRoot():String {
+		if (recordingRelativeRoot == "") {
+			var ret = Path.isAbsolute(config.path) ? "" : config.path;
+			if (ret.startsWith("./") || ret.startsWith("../")) ret = "";
+			recordingRelativeRoot = ret.split("/")[0] + "/";
+		}
+		return recordingRelativeRoot;
 	}
 }
