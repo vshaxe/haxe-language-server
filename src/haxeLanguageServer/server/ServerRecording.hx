@@ -1,5 +1,6 @@
 package haxeLanguageServer.server;
 
+import haxeLanguageServer.helper.FsHelper;
 import haxe.Json;
 import haxe.io.Path;
 import js.node.Buffer;
@@ -17,7 +18,7 @@ using StringTools;
 class ServerRecording {
 	static inline var LOG_FILE:String = "repro.log";
 	static inline var UNTRACKED_DIR:String = "untracked";
-	static inline var NEWFILES_DIR:String = "newfiles";
+	static inline var FILE_CONTENTS_DIR:String = "files";
 
 	var enabled(get, set):Bool;
 	var _enabled:Bool = false;
@@ -27,7 +28,7 @@ class ServerRecording {
 		return get_enabled();
 	}
 
-	var fileCreationIndex:Int = 1;
+	var fsEventIndex:Int = 1;
 	var startTime:Float = -1;
 	var context:Null<Context>;
 	var config:ServerRecordingConfig = @:privateAccess Configuration.DefaultUserSettings.serverRecording;
@@ -86,25 +87,94 @@ class ServerRecording {
 			// sent.
 			getVcsState("end.patch", Path.join([path, "endUntracked"]));
 
-			// See https://nodejs.org/api/fs.html#fscpsrc-dest-options-callback
-			// TODO: this is new API (16.7.0) so we should probably be using something else here
-			// (especially since it's marked as experimental...)
-			(cast js.node.Fs).cp(recordingPath, path, {
-				errorOnExists: true,
-				recursive: true,
-				preserveTimestamps: true
-			}, function(err) {
-				if (err != null)
-					return reject(new ResponseError(ResponseError.InternalError, Std.string(err), err));
-
-				resolve('Exported server recording to $path');
-			});
+			FsHelper.cp(recordingPath, path)
+			.then((_) -> resolve('Exported server recording to $path'))
+			.catchError((err) -> reject(new ResponseError(ResponseError.InternalError, Std.string(err), err)));
 		} catch (e) {
 			reject(new ResponseError(ResponseError.InternalError, e.message));
 		}
 	}
 
-	@:noCompletion
+	public function onDisplayRequest(label:String, args:Array<String>):Void {
+		if (!enabled) return;
+
+		var id = switch (label) {
+			// TODO: catch more special cases that don't use internal id
+			case "cache build" | "compilation" | "@diagnostics": null;
+			case _: @:privateAccess context.sure().haxeDisplayProtocol.nextRequestId - 1; // ew..
+		};
+
+		appendLines(
+			makeEntry(Out, 'serverRequest', id, label),
+			Json.stringify(args)
+		);
+	}
+
+	public function onServerResponse(id:Int, method:String, response:{}):Void {
+		if (!enabled) return;
+
+		appendLines(
+			makeEntry(In, 'serverResponse', id, method),
+			Json.stringify(response)
+		);
+	}
+
+	public function onServerError(id:Int, method:String, error:String):Void {
+		if (!enabled) return;
+
+		appendLines(
+			makeEntry(In, 'serverError', id, method),
+			"<<EOF", error, "EOF"
+		);
+	}
+
+	public function onDidChangeTextDocument(event:DidChangeTextDocumentParams) {
+		if (!enabled) return;
+
+		appendLines(
+			makeEntry(Local, 'didChangeTextDocument'),
+			Json.stringify(event)
+		);
+	}
+
+	public function onFileEvent(event:FileEvent):Void {
+		final kind = switch (event.type) {
+			case Changed: "fileChanged";
+			case Created: "fileCreated";
+			case Deleted: "fileDeleted";
+		};
+
+		final path = event.uri.toFsPath().toString();
+		final id = switch (event.type) {
+			case Deleted: 0;
+			case Changed | Created:
+				final stat = FileSystem.stat(path);
+				stat.size == 0 ? 0 : fsEventIndex++;
+		}
+
+		appendLines(makeEntry(Local, kind, id), '"${event.uri.toFsPath().toString()}"');
+
+		if (id > 0) {
+			ensureFileContentsDir();
+			// TODO: debounce (but make sure not to "merge" with next event on same file occuring
+			// after a server request that would need current changes)
+			FsHelper.cp(path, Path.join([recordingPath, FILE_CONTENTS_DIR, '$id.contents']));
+		}
+	}
+
+	public function onCompilationResult(res:String) {
+		if (!enabled) return;
+
+		res = res.trim();
+		var fail = res.endsWith(String.fromCharCode(2));
+		if (fail) res = res.substr(0, res.length - 1).trim();
+
+		appendLines(
+			makeEntry(In, 'compilationResult', fail ? "failed" : null),
+			"<<EOF", res, "EOF"
+		);
+	}
+
 	function doStart():Void {
 		var now = Date.now();
 
@@ -182,21 +252,13 @@ class ServerRecording {
 				FileSystem.createDirectory(untrackedDestination);
 
 				for (f in untracked) {
-					// See https://nodejs.org/api/fs.html#fscpsrc-dest-options-callback
-					// TODO: this is new API (16.7.0) so we should probably be using something else here
-					// (especially since it's marked as experimental...)
-					// TODO: also, this is async but we're currently skipping waiting
-					// We might also want to do something about long copy times here, because:
-					// - starting Haxe LSP shouldn't take long
-					// - if we're not blocking and copy takes too much time, we might end up
-					//   with wrong data if it gets modified before we copy it
 					if (f.startsWith('"')) f = f.substr(1);
 					if (f.endsWith('"')) f = f.substr(0, f.length - 1);
 					var fpath = Path.join([untrackedDestination, f]);
-					(cast js.node.Fs).cp(f, fpath, {recursive: true}, function(err) {
-						if (err != null) appendLines(withTiming('# Warning: error while saving untracked file $f: ${err.message}'));
-						else appendLines(withTiming('# Untracked files copied successfully'));
-					});
+
+					FsHelper.cp(f, fpath)
+					.then((_) -> appendLines(withTiming('# Untracked files copied successfully')))
+					.catchError((err) -> appendLines(withTiming('# Warning: error while saving untracked file $f: ${err.message}')));
 				}
 			}
 		}
@@ -254,86 +316,6 @@ class ServerRecording {
 		return Svn(revision.out, hasPatch);
 	}
 
-	public function onDisplayRequest(label:String, args:Array<String>):Void {
-		if (!enabled) return;
-
-		var id = switch (label) {
-			// TODO: catch more special cases that don't use internal id
-			case "cache build" | "compilation" | "@diagnostics": null;
-			case _: @:privateAccess context.sure().haxeDisplayProtocol.nextRequestId - 1; // ew..
-		};
-
-		appendLines(
-			makeEntry(Out, 'serverRequest', id, label),
-			Json.stringify(args)
-		);
-	}
-
-	public function onServerResponse(id:Int, method:String, response:{}):Void {
-		if (!enabled) return;
-
-		appendLines(
-			makeEntry(In, 'serverResponse', id, method),
-			Json.stringify(response)
-		);
-	}
-
-	public function onServerError(id:Int, method:String, error:String):Void {
-		if (!enabled) return;
-
-		appendLines(
-			makeEntry(In, 'serverError', id, method),
-			"<<EOF", error, "EOF"
-		);
-	}
-
-	public function onDidChangeTextDocument(event:DidChangeTextDocumentParams) {
-		if (!enabled) return;
-
-		appendLines(
-			makeEntry(Local, 'didChangeTextDocument'),
-			Json.stringify(event)
-		);
-	}
-
-	public function onFileCreation(event:FileEvent) {
-		if (!enabled) return;
-
-		var path = event.uri.toFsPath().toString();
-		var content = File.getContent(path);
-		var id = content == "" ? 0 : fileCreationIndex++;
-
-		appendLines(
-			makeEntry(Local, 'fileCreated', id),
-			Json.stringify(event)
-		);
-
-		if (id > 0) {
-			ensureNewfilesDir();
-			var path = Path.join([recordingPath, NEWFILES_DIR, '$id.contents']);
-			File.saveContent(path, content);
-		}
-	}
-
-	public function onFileDeletion(event:FileEvent) {
-		if (!enabled) return;
-
-		appendLines(makeEntry(Local, 'fileDeleted'));
-	}
-
-	public function onCompilationResult(res:String) {
-		if (!enabled) return;
-
-		res = res.trim();
-		var fail = res.endsWith(String.fromCharCode(2));
-		if (fail) res = res.substr(0, res.length - 1).trim();
-
-		appendLines(
-			makeEntry(In, 'compilationResult', fail ? "failed" : null),
-			"<<EOF", res, "EOF"
-		);
-	}
-
 	function writeLines(...lines:String):Void print(f -> File.write(f), ...lines);
 	function appendLines(...lines:String):Void print(f -> File.append(f), ...lines);
 
@@ -347,8 +329,8 @@ class ServerRecording {
 	}
 
 	// TODO: error handling
-	function ensureNewfilesDir():Void {
-		var path = Path.join([recordingPath, NEWFILES_DIR]);
+	function ensureFileContentsDir():Void {
+		var path = Path.join([recordingPath, FILE_CONTENTS_DIR]);
 		if (!FileSystem.exists(path)) FileSystem.createDirectory(path);
 	}
 
