@@ -28,12 +28,17 @@ class GotoImplementationFeature {
 	function handleJsonRpc(params:TextDocumentPositionParams, token:CancellationToken, resolve:Definition->Void, reject:ResponseError<NoData>->Void,
 			doc:HxTextDocument, offset:Int) {
 		context.callHaxeMethod(DisplayMethods.GotoImplementation, {file: doc.uri.toFsPath(), contents: doc.content, offset: offset}, token, locations -> {
-			resolve(locations.map(location -> {
-				{
-					uri: location.file.toUri(),
-					range: location.range
+			resolve([
+				for (location in locations) {
+					if (location == null)
+						continue;
+
+					{
+						uri: location.file.toUri(),
+						range: location.range
+					}
 				}
-			}));
+			]);
 			return null;
 		}, reject.handler());
 	}

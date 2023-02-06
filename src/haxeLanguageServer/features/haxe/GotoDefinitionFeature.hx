@@ -33,24 +33,31 @@ class GotoDefinitionFeature {
 			contents: doc.content,
 			offset: offset
 		}, token, function(locations) {
-			resolve(locations.map(location -> {
-				final document = getHaxeDocument(location.file.toUri());
-				final tokens = document!.tokens;
-				var previewDeclarationRange = location.range;
-				if (document != null && tokens != null) {
-					final targetToken = tokens!.getTokenAtOffset(document.offsetAt(location.range.start));
-					final pos = targetToken!.parent!.getPos();
-					if (pos != null)
-						previewDeclarationRange = document.rangeAt(pos.min, pos.max);
-				}
+			resolve([
+				for (location in locations) {
+					if (location == null)
+						continue;
 
-				final link:DefinitionLink = {
-					targetUri: location.file.toUri(),
-					targetRange: previewDeclarationRange,
-					targetSelectionRange: location.range,
-				};
-				link;
-			}));
+					final document = getHaxeDocument(location.file.toUri());
+					final tokens = document!.tokens;
+					var previewDeclarationRange = location.range;
+					if (document != null && tokens != null) {
+						final targetToken = tokens!.getTokenAtOffset(document.offsetAt(location.range.start));
+						final pos = targetToken!.parent!.getPos();
+						if (pos != null)
+							previewDeclarationRange = document.rangeAt(pos.min, pos.max);
+					}
+
+					final link:DefinitionLink = {
+						targetUri: location.file.toUri(),
+						targetRange: previewDeclarationRange,
+						targetSelectionRange: location.range,
+					};
+
+					link;
+				}
+			]);
+
 			return null;
 		}, reject.handler());
 	}

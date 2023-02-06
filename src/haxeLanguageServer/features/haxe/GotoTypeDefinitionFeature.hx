@@ -23,12 +23,17 @@ class GotoTypeDefinitionFeature {
 		}
 		final offset = context.displayOffsetConverter.characterOffsetToByteOffset(doc.content, doc.offsetAt(params.position));
 		context.callHaxeMethod(DisplayMethods.GotoTypeDefinition, {file: uri.toFsPath(), contents: doc.content, offset: offset}, token, locations -> {
-			resolve(locations.map(location -> {
-				{
-					uri: location.file.toUri(),
-					range: location.range
+			resolve([
+				for (location in locations) {
+					if (location == null)
+						continue;
+
+					{
+						uri: location.file.toUri(),
+						range: location.range
+					}
 				}
-			}));
+			]);
 			return null;
 		}, reject.handler());
 	}

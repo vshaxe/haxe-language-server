@@ -34,12 +34,17 @@ class FindReferencesFeature {
 			offset: offset,
 			kind: WithBaseAndDescendants
 		}, token, locations -> {
-			resolve(locations.filter(location -> location != null).map(location -> {
-				{
-					uri: location.file.toUri(),
-					range: location.range
+			resolve([
+				for (location in locations) {
+					if (location == null)
+						continue;
+
+					{
+						uri: location.file.toUri(),
+						range: location.range
+					}
 				}
-			}));
+			]);
 			return null;
 		}, reject.handler());
 	}
