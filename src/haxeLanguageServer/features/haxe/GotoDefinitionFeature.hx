@@ -38,10 +38,12 @@ class GotoDefinitionFeature {
 				final tokens = document!.tokens;
 				var previewDeclarationRange = location.range;
 				if (document != null && tokens != null) {
-					final targetToken = tokens!.getTokenAtOffset(document.offsetAt(location.range.start));
-					final pos = targetToken!.parent!.getPos();
-					if (pos != null)
-						previewDeclarationRange = document.rangeAt(pos.min, pos.max);
+					final targetToken = tokens!.getTokenAtOffset(document.offsetAt(location.range.start))!.parent;
+					if (targetToken!.tok != Root) {
+						final pos = targetToken!.getPos();
+						if (pos != null)
+							previewDeclarationRange = document.rangeAt(pos.min, pos.max);
+					}
 				}
 
 				final link:DefinitionLink = {
