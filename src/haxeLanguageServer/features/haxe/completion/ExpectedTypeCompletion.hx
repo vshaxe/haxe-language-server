@@ -103,6 +103,7 @@ class ExpectedTypeCompletion {
 			case TAnonymous:
 				// TODO: support @:structInit
 				final anon = concreteType.args;
+				anon.fields.sort((f1, f2) -> f1.name < f2.name ? -1 : 1);
 				final singleLine = data.mode.kind == Pattern;
 				final allFields = printer.printObjectLiteral(anon, singleLine, false, true);
 				final requiredFields = printer.printObjectLiteral(anon, singleLine, true, true);
