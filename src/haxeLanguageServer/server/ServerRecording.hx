@@ -1,17 +1,16 @@
 package haxeLanguageServer.server;
 
-import haxeLanguageServer.helper.FsHelper;
 import haxe.Json;
 import haxe.io.Path;
-import js.node.Buffer;
-import js.node.ChildProcess;
+import jsonrpc.CancellationToken;
+import jsonrpc.ResponseError;
 import sys.io.File;
 import sys.io.FileOutput;
 import sys.FileSystem;
 
 import haxeLanguageServer.Configuration.ServerRecordingConfig;
-import jsonrpc.CancellationToken;
-import jsonrpc.ResponseError;
+import haxeLanguageServer.helper.FsHelper;
+import haxeLanguageServer.server.ServerRecordingTools.getVcsState;
 
 using StringTools;
 
@@ -33,7 +32,6 @@ class ServerRecording {
 	var context:Null<Context>;
 	var config:ServerRecordingConfig = @:privateAccess Configuration.DefaultUserSettings.serverRecording;
 	var recordingPath(get,null):String = "";
-	var recordingRelativeRoot(get, null):String = "";
 
 	public function new() {}
 
@@ -44,7 +42,6 @@ class ServerRecording {
 
 		enabled = false;
 		recordingPath = "";
-		recordingRelativeRoot = "";
 
 		// TODO: error handling here
 		(cast js.node.Fs).rmdir(recordingPath, {recursive: true, force: true}, (_) -> doStart());
@@ -85,7 +82,19 @@ class ServerRecording {
 			// Note that untracked files will be copied asynchronously to target
 			// directory and won't always all be ready when the notification is
 			// sent.
-			getVcsState("end.patch", Path.join([path, "endUntracked"]));
+			var vcsState = getVcsState(
+				Path.join([recordingPath, "end.patch"]),
+				Path.join([path, "endUntracked"]),
+				config
+			);
+
+			switch vcsState {
+				case Git(_, _, _, untrackedCopy):
+					untrackedCopy
+					.then((_) -> appendLines(withTiming('# Untracked files copied successfully')))
+					.catchError((err) -> appendLines(withTiming('# Warning: error while saving untracked file: ${err.message}')));
+				case _:
+			}
 
 			FsHelper.cp(recordingPath, path)
 			.then((_) -> resolve('Exported server recording to $path'))
@@ -200,14 +209,23 @@ class ServerRecording {
 		appendLines(makeEntry(Local, 'root', context.sure().workspacePath.toString()));
 
 		// VCS - Detect git / svn and apply corresponding process
-		switch getVcsState("status.patch", Path.join([recordingPath, UNTRACKED_DIR])) {
+		var vcsState = getVcsState(
+			Path.join([recordingPath, "status.patch"]),
+			Path.join([recordingPath, UNTRACKED_DIR]),
+			config
+		);
+
+		switch vcsState {
 			case None:
 				appendLines(withTiming('# Could not detect version control, initial state not guaranteed.'));
 
-			case Git(ref, hasPatch, hasUntracked):
+			case Git(ref, hasPatch, hasUntracked, untrackedCopy):
 				appendLines(makeEntry(Local, 'checkoutGitRef'), ref);
 				if (hasPatch) appendLines(makeEntry(Local, 'applyGitPatch'));
 				if (hasUntracked) appendLines(makeEntry(Local, 'addGitUntracked'));
+				untrackedCopy
+				.then((_) -> appendLines(withTiming('# Untracked files copied successfully')))
+				.catchError((err) -> appendLines(withTiming('# Warning: error while saving untracked file: ${err.message}')));
 
 			case Svn(rev, hasPatch):
 				appendLines(makeEntry(Local, 'checkoutSvnRevision'), rev);
@@ -221,99 +239,6 @@ class ServerRecording {
 
 		startTime = now.getTime();
 		enabled = true;
-	}
-
-	function getVcsState(patchOutput:String, untrackedDestination:String):VcsState {
-		var ret = None;
-		ret = getGitState(patchOutput, untrackedDestination);
-		if (ret.match(None)) ret = getSvnState(patchOutput);
-		return ret;
-	}
-
-	// TODO: better error handling
-	function getGitState(patchOutput:String, untrackedDestination:String):VcsState {
-		var revision = command("git", ["rev-parse", "HEAD"]);
-		if (revision.code != 0) return None;
-
-		var patch = Path.join([recordingPath, patchOutput]);
-		command("git", applyGitExcludes(["diff", "--output", patch, "--patch"]));
-
-		var hasUntracked = false;
-		if (!config.excludeUntracked) {
-			// Get untracked files (other than recording folder)
-			var untracked = command("git", applyGitExcludes(["status", "--porcelain"])).out
-				.split("\n")
-				.filter(l -> l.startsWith('?? '))
-				.map(l -> l.substr(3))
-				.filter(l -> l != recordingRelativeRoot.sure() && l != ".haxelib" && l != "dump");
-
-			if (untracked.length > 0) {
-				hasUntracked = true;
-				FileSystem.createDirectory(untrackedDestination);
-
-				for (f in untracked) {
-					if (f.startsWith('"')) f = f.substr(1);
-					if (f.endsWith('"')) f = f.substr(0, f.length - 1);
-					var fpath = Path.join([untrackedDestination, f]);
-
-					FsHelper.cp(f, fpath)
-					.then((_) -> appendLines(withTiming('# Untracked files copied successfully')))
-					.catchError((err) -> appendLines(withTiming('# Warning: error while saving untracked file $f: ${err.message}')));
-				}
-			}
-		}
-
-		return Git(revision.out, true, hasUntracked);
-	}
-
-	function applyGitExcludes(args:Array<String>):Array<String> {
-		if (config.exclude.length == 0) return args;
-
-		args.push("--");
-		args.push(".");
-		for (ex in config.exclude) args.push(':^$ex');
-		return args;
-	}
-
-	// TODO: better error handling
-	function getSvnState(patchOutput:String):VcsState {
-		var revision = command("svn", ["info", "--show-item", "revision"]);
-		if (revision.code != 0) return None;
-
-		var hasExcludes = config.exclude.length > 0;
-		var status = command("svn", ["status"]);
-		var untracked = [];
-
-		if (!config.excludeUntracked) {
-			untracked = [for (line in status.out.split('\n')) {
-				if (line.charCodeAt(0) != '?'.code) continue;
-				var entry = line.substr(1).trim();
-
-				if (hasExcludes) {
-					var excluded = false;
-
-					for (ex in config.exclude) {
-						if (entry.startsWith(ex)) {
-							excluded = true;
-							break;
-						}
-					}
-
-					if (excluded) continue;
-				}
-
-				entry;
-			}];
-		}
-
-		for (f in untracked) command("svn", ["add", f]);
-		// TODO: ignore changes in excluded files
-		var patch = command("svn", ["diff", "--depth=infinity", "--patch-compatible"]);
-		var hasPatch = patch.out.trim().length > 0;
-		if (hasPatch) File.saveContent(Path.join([recordingPath, patchOutput]), patch.out);
-		for (f in untracked) command("svn", ["rm", "--keep-local", f]);
-
-		return Svn(revision.out, hasPatch);
 	}
 
 	function writeLines(...lines:String):Void print(f -> File.write(f), ...lines);
@@ -344,35 +269,8 @@ class ServerRecording {
 		f.close();
 	}
 
-	function command(cmd:String, args:Array<String>) {
-		var p = ChildProcess.spawnSync(cmd, args);
-
-		return {
-			code: p.status,
-			out: p.status == 0
-				? (p.stdout :Buffer).toString().trim()
-				: (p.stderr:Buffer).toString().trim()
-		};
-	}
-
 	function get_recordingPath():String {
 		if (recordingPath == "") recordingPath = Path.join([config.path, "current"]);
 		return recordingPath;
 	}
-
-	function get_recordingRelativeRoot():String {
-		if (recordingRelativeRoot == "") {
-			var ret = Path.isAbsolute(config.path) ? "" : config.path;
-			if (ret.startsWith("./") || ret.startsWith("../")) ret = "";
-			recordingRelativeRoot = ret.split("/")[0] + "/";
-		}
-		return recordingRelativeRoot;
-	}
-}
-
-enum VcsState {
-	None;
-	// Note: hasPatch will always be true for Git (for now at least)
-	Git(ref:String, hasPatch:Bool, hasUntracked:Bool);
-	Svn(rev:String, hasPatch:Bool);
 }
