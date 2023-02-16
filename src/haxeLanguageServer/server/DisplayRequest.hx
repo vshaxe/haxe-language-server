@@ -6,6 +6,7 @@ import jsonrpc.CancellationToken;
 class DisplayRequest {
 	public final label:String;
 	public final cancellable:Bool;
+	public final creationTime:Float;
 	// these are used for the queue
 	public var prev:Null<DisplayRequest>;
 	public var next:Null<DisplayRequest>;
@@ -24,6 +25,7 @@ class DisplayRequest {
 		this.cancellable = cancellable;
 		this.stdin = stdin;
 		this.handler = handler;
+		this.creationTime = Date.now().getTime();
 	}
 
 	public function prepareBody():Buffer {

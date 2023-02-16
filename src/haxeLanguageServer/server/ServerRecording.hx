@@ -14,6 +14,8 @@ import haxeLanguageServer.server.ServerRecordingTools.getVcsState;
 
 using StringTools;
 
+@:access(haxeLanguageServer.Configuration)
+@:access(haxeLanguageServer.server.DisplayRequest)
 class ServerRecording {
 	static inline var LOG_FILE:String = "repro.log";
 	static inline var UNTRACKED_DIR:String = "untracked";
@@ -30,7 +32,7 @@ class ServerRecording {
 	var fsEventIndex:Int = 1;
 	var startTime:Float = -1;
 	var context:Null<Context>;
-	var config:ServerRecordingConfig = @:privateAccess Configuration.DefaultUserSettings.serverRecording;
+	var config:ServerRecordingConfig = Configuration.DefaultUserSettings.serverRecording;
 	var recordingPath(get,null):String = "";
 
 	public function new() {}
@@ -104,35 +106,58 @@ class ServerRecording {
 		}
 	}
 
-	public function onDisplayRequest(label:String, args:Array<String>):Void {
-		if (!enabled) return;
+	public function onDisplayRequestQueued(request:DisplayRequest):Void {
+		// Log requests being queued at the beginning too
+		if (config == null || !config.enabled) return;
 
-		var id = switch (label) {
-			// TODO: catch more special cases that don't use internal id
-			case "cache build" | "compilation" | "@diagnostics": null;
-			case _: @:privateAccess context.sure().haxeDisplayProtocol.nextRequestId - 1; // ew..
-		};
+		appendLines(makeEntry(Local, 'serverRequestQueued', extractRequestId(request.args), request.label));
+	}
+
+	public function onDisplayRequestCancelled(request:DisplayRequest):Void {
+		// Log requests being queued at the beginning too
+		if (config == null || !config.enabled) return;
 
 		appendLines(
-			makeEntry(Out, 'serverRequest', id, label),
-			Json.stringify(args)
+			makeEntry(Local, 'serverRequestCancelled', extractRequestId(request.args), request.label),
+			Json.stringify(request.args)
 		);
 	}
 
-	public function onServerResponse(id:Int, method:String, response:{}):Void {
+	public function onDisplayRequest(request:DisplayRequest):Void {
 		if (!enabled) return;
 
+		var delta = Date.now().getTime() - request.creationTime;
+		var id = extractRequestId(request.args);
+
+		if (delta > 5) appendLines(makeEntry(Ignored, 'Request has been queued for $delta ms'));
+		appendLines(makeEntry(Out, 'serverRequest', id, request.label), Json.stringify(request.args));
+	}
+
+	public function onServerMessage(request:DisplayRequest, message:String):Void {
+		if (!enabled) return;
+
+		var delta = Date.now().getTime() - request.creationTime;
+		appendLines(makeEntry(Ignored, 'Request total time: $delta ms'));
+
+		request.processResult(message, onServerResponse.bind(request), onServerError.bind(request));
+	}
+
+	function onServerResponse(request:DisplayRequest, response:DisplayResult):Void {
+		if (!enabled) return;
+		var id = extractRequestId(request.args);
+
 		appendLines(
-			makeEntry(In, 'serverResponse', id, method),
+			makeEntry(In, 'serverResponse', id, request.label),
 			Json.stringify(response)
 		);
 	}
 
-	public function onServerError(id:Int, method:String, error:String):Void {
+	function onServerError(request:DisplayRequest, error:String):Void {
 		if (!enabled) return;
+		var id = extractRequestId(request.args);
 
 		appendLines(
-			makeEntry(In, 'serverError', id, method),
+			makeEntry(In, 'serverError', id, request.label),
 			"<<EOF", error, "EOF"
 		);
 	}
@@ -272,5 +297,11 @@ class ServerRecording {
 	function get_recordingPath():String {
 		if (recordingPath == "") recordingPath = Path.join([config.path, "current"]);
 		return recordingPath;
+	}
+
+	function extractRequestId(args:Array<String>):Null<Int> {
+		var len = args.length;
+		if (len < 2 || args[len - 2] != "--display") return null;
+		return try Json.parse(args[len - 1]).id catch (_) null;
 	}
 }
