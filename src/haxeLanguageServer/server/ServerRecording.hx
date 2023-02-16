@@ -17,6 +17,7 @@ using StringTools;
 @:access(haxeLanguageServer.Configuration)
 @:access(haxeLanguageServer.server.DisplayRequest)
 class ServerRecording {
+	static inline var REPRO_VERSION:Float = 1.1;
 	static inline var LOG_FILE:String = "repro.log";
 	static inline var UNTRACKED_DIR:String = "untracked";
 	static inline var FILE_CONTENTS_DIR:String = "files";
@@ -222,7 +223,7 @@ class ServerRecording {
 			makeEntry(Local, 'userConfig'),
 			Json.stringify(context.config.user),
 			makeEntry(Local, 'serverRecordingConfig'),
-			Json.stringify({watch: config.watch, exclude: config.exclude, excludeUntracked: config.excludeUntracked}),
+			Json.stringify({watch: config.watch, exclude: config.exclude, excludeUntracked: config.excludeUntracked, version: REPRO_VERSION}),
 			makeEntry(Local, 'displayServer'),
 			Json.stringify(context.config.displayServer),
 			makeEntry(Local, 'displayArguments'),
