@@ -52,11 +52,11 @@ class ServerRecording {
 			));
 		}
 
-		appendLines(withTiming("# Export requested ..."));
+		appendLines(makeEntry(Comment, 'Export requested ...'));
 		var dest = params?.dest == null ? config.path : params.sure().dest;
 
 		if (!FileSystem.isDirectory(dest)) {
-			appendLines('# Failed to export to $dest');
+			appendLines(makeEntry(Comment, 'Failed to export to $dest'));
 			return reject(new ResponseError(
 				ResponseError.InvalidParams,
 				"Server recording export path should be a directory"
@@ -67,7 +67,7 @@ class ServerRecording {
 		var recordingKey = DateTools.format(Date.now(), "%Y%m%d-%H%M%S");
 		try {
 			var path = Path.join([dest, recordingKey]);
-			appendLines('# Exporting to $path ...');
+			appendLines(makeEntry(Comment, 'Exporting to $path ...'));
 			FileSystem.createDirectory(path);
 
 			// Save end vcs status
@@ -83,8 +83,8 @@ class ServerRecording {
 			switch vcsState {
 				case Git(_, _, _, untrackedCopy):
 					untrackedCopy
-					.then((_) -> appendLines(withTiming('# Untracked files copied successfully')))
-					.catchError((err) -> appendLines(withTiming('# Warning: error while saving untracked file: ${err.message}')));
+					.then((_) -> appendLines(makeEntry(Comment, 'Untracked files copied successfully')))
+					.catchError((err) -> appendLines(makeEntry(Comment, 'Warning: error while saving untracked file: ${err.message}')));
 				case _:
 			}
 
@@ -119,7 +119,7 @@ class ServerRecording {
 		var delta = Date.now().getTime() - request.creationTime;
 		var id = extractRequestId(request.args);
 
-		if (delta > 5) appendLines(makeEntry(Ignored, 'Request has been queued for $delta ms'));
+		if (delta > 5) appendLines(makeEntry(Comment, 'Request has been queued for $delta ms'));
 		appendLines(makeEntry(Out, 'serverRequest', id, request.label), Json.stringify(request.args));
 	}
 
@@ -127,7 +127,7 @@ class ServerRecording {
 		if (!enabled) return;
 
 		var delta = Date.now().getTime() - request.creationTime;
-		appendLines(makeEntry(Ignored, 'Request total time: $delta ms'));
+		appendLines(makeEntry(Comment, 'Request total time: $delta ms'));
 
 		request.processResult(message, onServerResponse.bind(request), onServerError.bind(request));
 	}
@@ -230,8 +230,8 @@ class ServerRecording {
 			ready = false;
 		}
 
-		writeLines('# See https://github.com/kLabz/haxerepro for instructions');
-		if (restartReason != null) appendLines('# Restart reason: $restartReason');
+		writeLines(makeEntry(Comment, 'See https://github.com/kLabz/haxerepro for instructions'));
+		if (restartReason != null) appendLines(makeEntry(Comment, 'Restart reason: $restartReason'));
 
 		appendLines(
 			makeEntry(Local, 'userConfig'),
@@ -257,15 +257,15 @@ class ServerRecording {
 
 		switch vcsState {
 			case None:
-				appendLines(withTiming('# Could not detect version control, initial state not guaranteed.'));
+				appendLines(makeEntry(Comment, 'Could not detect version control, initial state not guaranteed.'));
 
 			case Git(ref, hasPatch, hasUntracked, untrackedCopy):
 				appendLines(makeEntry(Local, 'checkoutGitRef'), ref);
 				if (hasPatch) appendLines(makeEntry(Local, 'applyGitPatch'));
 				if (hasUntracked) appendLines(makeEntry(Local, 'addGitUntracked'));
 				untrackedCopy
-				.then((_) -> appendLines(withTiming('# Untracked files copied successfully')))
-				.catchError((err) -> appendLines(withTiming('# Warning: error while saving untracked file: ${err.message}')));
+				.then((_) -> appendLines(makeEntry(Comment, 'Untracked files copied successfully')))
+				.catchError((err) -> appendLines(makeEntry(Comment, 'Warning: error while saving untracked file: ${err.message}')));
 
 			case Svn(rev, hasPatch):
 				appendLines(makeEntry(Local, 'checkoutSvnRevision'), rev);
@@ -274,7 +274,7 @@ class ServerRecording {
 
 		appendLines(
 			makeEntry(Local, 'start'),
-			'# Started ${DateTools.format(now, "%Y-%m-%d %H:%M:%S")}'
+			makeEntry(Comment, 'Started ${DateTools.format(now, "%Y-%m-%d %H:%M:%S")}')
 		);
 
 		startTime = now.getTime();
@@ -284,7 +284,7 @@ class ServerRecording {
 	function writeLines(...lines:String):Void print(f -> File.write(f), ...lines);
 	function appendLines(...lines:String):Void print(f -> File.append(f), ...lines);
 
-	function makeEntry(dir:ComDirection, command:String, ?id:Int, ?name:String):String {
+	function makeEntry(dir:ServerRecordingEntryKind, command:String, ?id:Int, ?name:String):String {
 		return withTiming('$dir $command' + (id == null ? '' : ' $id') + (name == null ? '' : ' "$name"'));
 	}
 
