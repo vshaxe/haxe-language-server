@@ -6,7 +6,6 @@ import languageServerProtocol.textdocument.TextDocument;
 
 using Safety;
 using StringTools;
-
 using haxeLanguageServer.extensions.ArrayExtensions;
 using haxeLanguageServer.extensions.DocumentUriExtensions;
 using haxeLanguageServer.extensions.FsPathExtensions;

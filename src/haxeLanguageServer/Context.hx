@@ -491,7 +491,6 @@ class Context {
 	public function callHaxeMethod<P, R>(method:HaxeRequestMethod<P, Response<R>>, ?params:P, ?token:CancellationToken, callback:(result:R) -> Null<String>,
 			errback:(error:String) -> Void) {
 		final beforeCallTime = Date.now().getTime();
-
 		haxeDisplayProtocol.sendRequest(cast method, params, token, function(response) {
 			final arrivalTime = Date.now().getTime();
 			if (!config.sendMethodResults) {
@@ -529,7 +528,6 @@ class Context {
 
 	public function callDisplay(label:String, args:Array<String>, ?stdin:String, ?token:CancellationToken, callback:DisplayResult->Void,
 			errback:(error:String) -> Void, includeDisplayArguments:Bool = true) {
-
 		var actualArgs = [];
 		if (includeDisplayArguments) {
 			actualArgs = actualArgs.concat([
