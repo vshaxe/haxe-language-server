@@ -1,9 +1,9 @@
 package haxeLanguageServer.server;
 
 import haxe.io.Path;
+import js.lib.Promise;
 import js.node.Buffer;
 import js.node.ChildProcess;
-import js.lib.Promise;
 import sys.FileSystem;
 import sys.io.File;
 
@@ -22,9 +22,7 @@ function command(cmd:String, args:Array<String>) {
 
 	return {
 		code: p.status,
-		out: p.status == 0
-			? (p.stdout :Buffer).toString().trim()
-			: (p.stderr:Buffer).toString().trim()
+		out: ((p.status == 0 ? p.stdout : p.stderr) :Buffer).toString().trim()
 	};
 }
 
@@ -39,7 +37,6 @@ function getVcsState(
 	return ret;
 }
 
-// TODO: better error handling
 function getGitState(
 	patchOutput:String,
 	untrackedDestination:String,
@@ -89,7 +86,6 @@ function applyGitExcludes(args:Array<String>, config:ServerRecordingConfig):Arra
 	return args;
 }
 
-// TODO: better error handling
 function getSvnState(patchOutput:String, config:ServerRecordingConfig):VcsState {
 	var revision = command("svn", ["info", "--show-item", "revision"]);
 	if (revision.code != 0) return None;
@@ -121,7 +117,6 @@ function getSvnState(patchOutput:String, config:ServerRecordingConfig):VcsState 
 	}
 
 	for (f in untracked) command("svn", ["add", f]);
-	// TODO: ignore changes in excluded files
 	var patch = command("svn", ["diff", "--depth=infinity", "--patch-compatible"]);
 	var hasPatch = patch.out.trim().length > 0;
 	if (hasPatch) File.saveContent(patchOutput, patch.out);

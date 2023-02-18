@@ -46,10 +46,7 @@ class ServerRecording {
 		reject:ResponseError<String>->Void
 	):Void {
 		if (!enabled) {
-			return reject(new ResponseError(
-				ResponseError.InternalError,
-				"Was not recording haxe server"
-			));
+			return reject(new ResponseError(ResponseError.InternalError, "Was not recording haxe server"));
 		}
 
 		appendLines(makeEntry(Comment, 'Export requested ...'));
