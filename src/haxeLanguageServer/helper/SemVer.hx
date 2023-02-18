@@ -76,4 +76,11 @@ abstract SemVer(Version) from Version {
 	public function toString() {
 		return '$major.$minor.$patch';
 	}
+
+	public function toFullVersion() {
+		var ret = inline toString();
+		if (pre != null) ret += '-' + pre;
+		if (build != null) ret += '+' + build;
+		return ret;
+	}
 }

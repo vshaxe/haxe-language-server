@@ -253,12 +253,11 @@ class ServerRecording {
 			makeEntry(Local, 'displayServer'),
 			Json.stringify(context.config.displayServer),
 			makeEntry(Local, 'displayArguments'),
-			Json.stringify(context.config.displayArguments)
+			Json.stringify(context.config.displayArguments),
+			makeEntry(Local, 'haxe'),
+			context.haxeServer.haxeVersion.toFullVersion(),
+			makeEntry(Local, 'root', workspace)
 		);
-
-		// TODO: add exact Haxe version?
-
-		appendLines(makeEntry(Local, 'root', workspace));
 
 		// VCS - Detect git / svn and apply corresponding process
 		var vcsState = getVcsState(
