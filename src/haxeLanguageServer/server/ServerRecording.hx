@@ -25,12 +25,12 @@ class ServerRecording {
 
 	var ready:Bool = false;
 	var enabled(get, never):Bool;
-	function get_enabled():Bool return ready && config != null && config.enabled;
+	function get_enabled():Bool return ready && config.enabled;
 
-	var fsEventIndex:Int = 1;
 	var startTime:Float = -1;
-	var config:ServerRecordingConfig = Configuration.DefaultUserSettings.serverRecording;
+	var fsEventIndex:Int = 1;
 	var recordingPath(get,null):String = "";
+	var config:ServerRecordingConfig = Configuration.DefaultUserSettings.serverRecording;
 
 	public function new() {}
 
@@ -184,8 +184,6 @@ class ServerRecording {
 
 		if (id > 0) {
 			ensureFileContentsDir();
-			// TODO: debounce (but make sure not to "merge" with next event on same file occuring
-			// after a server request that would need current changes)
 			FsHelper.cp(path, Path.join([recordingPath, FILE_CONTENTS_DIR, '$id.contents']));
 		}
 	}
@@ -206,6 +204,7 @@ class ServerRecording {
 	function restart(context:Context, ?reason:String = null):Void {
 		ready = false;
 		recordingPath = "";
+		fsEventIndex = 1;
 
 		var config = context.config.user?.serverRecording;
 		if (config == null) return;
@@ -213,8 +212,8 @@ class ServerRecording {
 		this.config = config;
 		if (!config.enabled) return;
 
-		// TODO: cleanup function call (add FsHelper.rmdir?)
 		// TODO: error handling here
+		// TODO: cleanup function call (add FsHelper.rmdir?)
 		(cast js.node.Fs).rmdir(
 			recordingPath,
 			{recursive: true, force: true},
@@ -230,7 +229,7 @@ class ServerRecording {
 			ready = false;
 		}
 
-		writeLines('# TODO: short header with instructions');
+		writeLines('# See https://github.com/kLabz/haxerepro for instructions');
 		if (restartReason != null) appendLines('# Restart reason: $restartReason');
 
 		appendLines(

@@ -28,7 +28,6 @@ class FsHelper {
 		return Promise.all(promises).then((_) -> null);
 	}
 
-	// TODO: real async version
 	public static function copyFile(source:String, destination:String):Promise<Void> {
 		var dir = Path.directory(destination);
 		if (!FileSystem.exists(dir)) FileSystem.createDirectory(dir);
