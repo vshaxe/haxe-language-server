@@ -134,6 +134,10 @@ class ServerRecording {
 
 	function onServerResponse(request:DisplayRequest, response:DisplayResult):Void {
 		if (!enabled) return;
+
+		// Compilation result is handled separately
+		if (request.label == "compilation") return;
+
 		var id = extractRequestId(request.args);
 
 		appendLines(
