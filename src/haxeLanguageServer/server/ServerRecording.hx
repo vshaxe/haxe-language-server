@@ -213,35 +213,47 @@ class ServerRecording {
 		this.config = config;
 		if (!config.enabled) return;
 
-		// TODO: error handling here
-		// TODO: cleanup function call (add FsHelper.rmdir?)
-		(cast js.node.Fs).rmdir(
-			recordingPath,
-			{recursive: true, force: true},
-			(_) -> start(context.config, context.workspacePath.toString(), reason)
-		);
+		FsHelper.rmdir(recordingPath)
+		.then((_) -> start(context, reason))
+		.catchError((_) -> {
+			context.languageServerProtocol.sendNotification(
+				ShowMessageNotification.type,
+				{type: MessageType.Warning, message: 'Server recording disabled: could not remove previous files.'}
+			);
+		});
 	}
 
-	function start(configuration:Configuration, workspace:String, restartReason:Null<String>):Void {
+	function start(context:Context, restartReason:Null<String>):Void {
 		var now = Date.now();
+		var workspace = context.workspacePath.toString();
 
 		try FileSystem.createDirectory(recordingPath) catch (_) {
-			// TODO: report error (how? custom LSP notification?)
-			ready = false;
+			return context.languageServerProtocol.sendNotification(
+				ShowMessageNotification.type,
+				{type: MessageType.Warning, message: 'Server recording disabled: could not create recording directory.'}
+			);
 		}
 
-		writeLines(makeEntry(Comment, 'See https://github.com/kLabz/haxerepro for instructions'));
+		try {
+			writeLines(makeEntry(Comment, 'See https://github.com/kLabz/haxerepro for instructions'));
+		} catch (_) {
+			return context.languageServerProtocol.sendNotification(
+				ShowMessageNotification.type,
+				{type: MessageType.Warning, message: 'Server recording disabled: could not write server logs file.'}
+			);
+		}
+
 		if (restartReason != null) appendLines(makeEntry(Comment, 'Restart reason: $restartReason'));
 
 		appendLines(
 			makeEntry(Local, 'userConfig'),
-			Json.stringify(configuration.user),
+			Json.stringify(context.config.user),
 			makeEntry(Local, 'serverRecordingConfig'),
 			Json.stringify({watch: config.watch, exclude: config.exclude, excludeUntracked: config.excludeUntracked, version: REPRO_VERSION}),
 			makeEntry(Local, 'displayServer'),
-			Json.stringify(configuration.displayServer),
+			Json.stringify(context.config.displayServer),
 			makeEntry(Local, 'displayArguments'),
-			Json.stringify(configuration.displayArguments)
+			Json.stringify(context.config.displayArguments)
 		);
 
 		// TODO: add exact Haxe version?
