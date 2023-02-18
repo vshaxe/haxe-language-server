@@ -523,8 +523,7 @@ class Context {
 			};
 			languageServerProtocol.sendNotification(LanguageServerMethods.DidRunMethod, methodResult);
 		}, function(error:ResponseErrorData) {
-			var err = if (error.data != null) error.data[0].message else "unknown error";
-			errback(err);
+			errback(if (error.data != null) error.data[0].message else "unknown error");
 		});
 	}
 
