@@ -15,6 +15,7 @@ import haxeLanguageServer.server.ServerRecordingTools.getVcsState;
 using StringTools;
 
 @:access(haxeLanguageServer.Configuration)
+@:access(haxeLanguageServer.Context)
 @:access(haxeLanguageServer.server.DisplayRequest)
 class ServerRecording {
 	static inline var REPRO_VERSION:Float = 1.1;
@@ -22,32 +23,20 @@ class ServerRecording {
 	static inline var UNTRACKED_DIR:String = "untracked";
 	static inline var FILE_CONTENTS_DIR:String = "files";
 
-	var enabled(get, set):Bool;
-	var _enabled:Bool = false;
-	function get_enabled():Bool return _enabled && context != null;
-	function set_enabled(v:Bool):Bool {
-		_enabled = v;
-		return get_enabled();
-	}
+	var ready:Bool = false;
+	var enabled(get, never):Bool;
+	function get_enabled():Bool return ready && config != null && config.enabled;
 
 	var fsEventIndex:Int = 1;
 	var startTime:Float = -1;
-	var context:Null<Context>;
 	var config:ServerRecordingConfig = Configuration.DefaultUserSettings.serverRecording;
 	var recordingPath(get,null):String = "";
 
 	public function new() {}
 
-	public function start(context:Context):Void {
-		this.context = context;
-		this.config = context.config.user.serverRecording;
-		if (!config.enabled) return;
-
-		enabled = false;
-		recordingPath = "";
-
-		// TODO: error handling here
-		(cast js.node.Fs).rmdir(recordingPath, {recursive: true, force: true}, (_) -> doStart());
+	public function onInitialize(context:Context):Void restart(context);
+	public function restartServer(reason:String, context:Context):Void {
+		restart(context, context.initialized ? reason : null);
 	}
 
 	public function export(
@@ -210,29 +199,50 @@ class ServerRecording {
 		);
 	}
 
-	function doStart():Void {
+	function restart(context:Context, ?reason:String = null):Void {
+		ready = false;
+		recordingPath = "";
+
+		var config = context.config.user?.serverRecording;
+		if (config == null) return;
+
+		this.config = config;
+		if (!config.enabled) return;
+
+		// TODO: cleanup function call (add FsHelper.rmdir?)
+		// TODO: error handling here
+		(cast js.node.Fs).rmdir(
+			recordingPath,
+			{recursive: true, force: true},
+			(_) -> start(context.config, context.workspacePath.toString(), reason)
+		);
+	}
+
+	function start(configuration:Configuration, workspace:String, restartReason:Null<String>):Void {
 		var now = Date.now();
 
 		try FileSystem.createDirectory(recordingPath) catch (_) {
 			// TODO: report error (how? custom LSP notification?)
-			enabled = false;
+			ready = false;
 		}
 
-		writeLines(
-			'# TODO: short header with instructions',
+		writeLines('# TODO: short header with instructions');
+		if (restartReason != null) appendLines('# Restart reason: $restartReason');
+
+		appendLines(
 			makeEntry(Local, 'userConfig'),
-			Json.stringify(context.config.user),
+			Json.stringify(configuration.user),
 			makeEntry(Local, 'serverRecordingConfig'),
 			Json.stringify({watch: config.watch, exclude: config.exclude, excludeUntracked: config.excludeUntracked, version: REPRO_VERSION}),
 			makeEntry(Local, 'displayServer'),
-			Json.stringify(context.config.displayServer),
+			Json.stringify(configuration.displayServer),
 			makeEntry(Local, 'displayArguments'),
-			Json.stringify(context.config.displayArguments)
+			Json.stringify(configuration.displayArguments)
 		);
 
 		// TODO: add exact Haxe version?
 
-		appendLines(makeEntry(Local, 'root', context.sure().workspacePath.toString()));
+		appendLines(makeEntry(Local, 'root', workspace));
 
 		// VCS - Detect git / svn and apply corresponding process
 		var vcsState = getVcsState(
@@ -264,7 +274,7 @@ class ServerRecording {
 		);
 
 		startTime = now.getTime();
-		enabled = true;
+		ready = true;
 	}
 
 	function writeLines(...lines:String):Void print(f -> File.write(f), ...lines);

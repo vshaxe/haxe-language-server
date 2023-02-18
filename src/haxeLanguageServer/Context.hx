@@ -152,6 +152,7 @@ class Context {
 		}
 		capabilities = params.capabilities;
 		config.onInitialize(params);
+		serverRecording.onInitialize(this);
 
 		new DocumentSymbolsFeature(this);
 		new FoldingRangeFeature(this);
@@ -342,6 +343,8 @@ class Context {
 	}
 
 	function restartServer(reason:String) {
+		serverRecording.restartServer(reason, this);
+
 		if (!initialized) {
 			haxeServer.start(function() {
 				onServerStarted();
@@ -488,7 +491,6 @@ class Context {
 	public function callHaxeMethod<P, R>(method:HaxeRequestMethod<P, Response<R>>, ?params:P, ?token:CancellationToken, callback:(result:R) -> Null<String>,
 			errback:(error:String) -> Void) {
 		final beforeCallTime = Date.now().getTime();
-		if (method == "initialize") serverRecording.start(this);
 
 		haxeDisplayProtocol.sendRequest(cast method, params, token, function(response) {
 			final arrivalTime = Date.now().getTime();
