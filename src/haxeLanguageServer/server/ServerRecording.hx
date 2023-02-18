@@ -204,6 +204,7 @@ class ServerRecording {
 	function restart(context:Context, ?reason:String = null):Void {
 		ready = false;
 		recordingPath = "";
+		startTime = -1;
 		fsEventIndex = 1;
 
 		var config = context.config.user?.serverRecording;
@@ -288,6 +289,7 @@ class ServerRecording {
 	}
 
 	function withTiming(msg:String):String {
+		if (startTime == -1) return msg;
 		var ts = Math.round((Date.now().getTime() - startTime) / 10) / 10;
 		return '+${ts}s $msg';
 	}
