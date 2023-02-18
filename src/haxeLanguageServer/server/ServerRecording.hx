@@ -273,10 +273,14 @@ class ServerRecording {
 			case Git(ref, hasPatch, hasUntracked, untrackedCopy):
 				appendLines(makeEntry(Local, 'checkoutGitRef'), ref);
 				if (hasPatch) appendLines(makeEntry(Local, 'applyGitPatch'));
-				if (hasUntracked) appendLines(makeEntry(Local, 'addGitUntracked'));
-				untrackedCopy
-				.then((_) -> appendLines(makeEntry(Comment, 'Untracked files copied successfully')))
-				.catchError((err) -> appendLines(makeEntry(Comment, 'Warning: error while saving untracked file: ${err.message}')));
+
+				if (hasUntracked) {
+					appendLines(makeEntry(Local, 'addGitUntracked'));
+
+					untrackedCopy
+					.then((_) -> appendLines(makeEntry(Comment, 'Untracked files copied successfully')))
+					.catchError((err) -> appendLines(makeEntry(Comment, 'Warning: error while saving untracked file: ${err.message}')));
+				}
 
 			case Svn(rev, hasPatch):
 				appendLines(makeEntry(Local, 'checkoutSvnRevision'), rev);
@@ -305,7 +309,6 @@ class ServerRecording {
 		return '+${ts}s $msg';
 	}
 
-	// TODO: error handling
 	function ensureFileContentsDir():Void {
 		var path = Path.join([recordingPath, FILE_CONTENTS_DIR]);
 		if (!FileSystem.exists(path)) FileSystem.createDirectory(path);
