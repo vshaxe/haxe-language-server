@@ -9,7 +9,7 @@ import sys.io.File;
 class FsHelper {
 	public static function cp(source:String, destination:String):Promise<Void> {
 		var promises = new Array<Promise<Void>>();
-		var stats = Fs.statSync(source);
+		var stats = Fs.lstatSync(source);
 
 		if (stats.isDirectory()) {
 			if (!FileSystem.exists(destination)) FileSystem.createDirectory(destination);
@@ -26,6 +26,26 @@ class FsHelper {
 		}
 
 		return Promise.all(promises).then((_) -> null);
+	}
+
+	public static function rmdir(path:String):Promise<Void> {
+		try {
+			if (!Fs.existsSync(path)) return Promise.resolve();
+
+			var stats = Fs.lstatSync(path);
+			if (!stats.isDirectory()) return rmFile(path);
+
+			return Promise.all([
+				for (f in Fs.readdirSync(path)) rmdir(Path.join([path, f]))
+			]).then((_) -> Fs.rmdirSync(path));
+		} catch (err) {
+			return Promise.reject(err);
+		}
+	}
+
+	public static function rmFile(path:String):Promise<Void> {
+		Fs.unlinkSync(path);
+		return Promise.resolve();
 	}
 
 	public static function copyFile(source:String, destination:String):Promise<Void> {
