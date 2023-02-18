@@ -18,7 +18,7 @@ using StringTools;
 @:access(haxeLanguageServer.Context)
 @:access(haxeLanguageServer.server.DisplayRequest)
 class ServerRecording {
-	static inline var REPRO_VERSION:Float = 1.1;
+	static inline var REPRO_VERSION:Float = 1.2;
 	static inline var LOG_FILE:String = "repro.log";
 	static inline var UNTRACKED_DIR:String = "untracked";
 	static inline var FILE_CONTENTS_DIR:String = "files";
@@ -135,25 +135,32 @@ class ServerRecording {
 	function onServerResponse(request:DisplayRequest, response:DisplayResult):Void {
 		if (!enabled) return;
 
-		// Compilation result is handled separately
-		if (request.label == "compilation") return;
+		switch (response) {
+			case DCancelled:
 
-		var id = extractRequestId(request.args);
+			case DResult(msg):
+				switch (request.label) {
+					case "compilation" | "cache build":
+						appendLines(makeEntry(In, 'compilationResult'), "<<EOF", msg, "EOF");
 
-		appendLines(
-			makeEntry(In, 'serverResponse', id, request.label),
-			Json.stringify(response)
-		);
+					case _:
+						var id = extractRequestId(request.args);
+						appendLines(makeEntry(In, 'serverResponse', id, request.label), msg);
+				}
+		}
 	}
 
 	function onServerError(request:DisplayRequest, error:String):Void {
 		if (!enabled) return;
-		var id = extractRequestId(request.args);
 
-		appendLines(
-			makeEntry(In, 'serverError', id, request.label),
-			"<<EOF", error, "EOF"
-		);
+		switch (request.label) {
+			case "compilation" | "cache build":
+				appendLines(makeEntry(In, 'compilationError'), "<<EOF", error, "EOF");
+
+			case _:
+				var id = extractRequestId(request.args);
+				appendLines(makeEntry(In, 'serverError', id, request.label), "<<EOF", error, "EOF");
+		}
 	}
 
 	public function onDidChangeTextDocument(event:DidChangeTextDocumentParams) {
@@ -186,19 +193,6 @@ class ServerRecording {
 			ensureFileContentsDir();
 			FsHelper.cp(path, Path.join([recordingPath, FILE_CONTENTS_DIR, '$id.contents']));
 		}
-	}
-
-	public function onCompilationResult(res:String) {
-		if (!enabled) return;
-
-		res = res.trim();
-		var fail = res.endsWith(String.fromCharCode(2));
-		if (fail) res = res.substr(0, res.length - 1).trim();
-
-		appendLines(
-			makeEntry(In, 'compilationResult', fail ? "failed" : null),
-			"<<EOF", res, "EOF"
-		);
 	}
 
 	function restart(context:Context, ?reason:String = null):Void {

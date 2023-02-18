@@ -284,7 +284,6 @@ class HaxeServer {
 					switch result {
 						case DResult(data):
 							socket.write(data);
-							context.serverRecording.onCompilationResult(data);
 						case DCancelled:
 					}
 					socket.end();
