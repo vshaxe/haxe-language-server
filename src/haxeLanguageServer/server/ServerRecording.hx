@@ -120,6 +120,12 @@ class ServerRecording {
 		appendLines(makeEntry(Out, 'serverRequest', id, request.label), Json.stringify(request.args));
 	}
 
+	public function onServerLog(message:String):Void {
+		if (!enabled) return;
+
+		appendLines(makeEntry(In, "serverLog"), "<<EOF", message, "EOF");
+	}
+
 	public function onServerMessage(request:DisplayRequest, message:String):Void {
 		if (!enabled) return;
 

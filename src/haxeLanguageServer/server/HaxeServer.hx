@@ -189,7 +189,12 @@ class HaxeServer {
 		final startConnection = if (useSocket) SocketConnection.start else StdioConnection.start;
 		trace("Haxe Path: " + config.path);
 		spawnOptions.env["HAXE_COMPLETION_SERVER"] = "1";
-		startConnection(config.path, config.arguments, spawnOptions, onMessage, onExit, onHaxeStarted);
+		startConnection(config.path, config.arguments, spawnOptions, log, onMessage, onExit, onHaxeStarted);
+	}
+
+	function log(msg:String):Void {
+		trace(msg);
+		context.serverRecording.onServerLog(msg);
 	}
 
 	function configure() {
