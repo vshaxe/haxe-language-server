@@ -64,6 +64,8 @@ class Context {
 	var initialized = false;
 	var progressId = 0;
 
+	var invalidated = new Map<String, Bool>();
+
 	public function new(languageServerProtocol) {
 		this.languageServerProtocol = languageServerProtocol;
 		haxeDisplayProtocol = new Protocol(@:nullSafety(Off) writeMessage);
@@ -134,6 +136,10 @@ class Context {
 
 	public inline function sendLogMessage(type:MessageType, message:String) {
 		languageServerProtocol.sendNotification(LogMessageNotification.type, {type: type, message: message});
+	}
+
+	public function resetInvalidatedFiles():Void {
+		invalidated = [];
 	}
 
 	function onInitialize(params:InitializeParams, _, resolve:InitializeResult->Void, _) {
@@ -381,7 +387,10 @@ class Context {
 	function onDidChangeTextDocument(event:DidChangeTextDocumentParams) {
 		final uri = event.textDocument.uri;
 		if (isUriSupported(uri)) {
-			callFileParamsMethod(uri, ServerMethods.Invalidate);
+			if (!invalidated.exists(uri.toString())) {
+				callFileParamsMethod(uri, ServerMethods.Invalidate);
+				invalidated.set(uri.toString(), true);
+			}
 			documents.onDidChangeTextDocument(event);
 		}
 	}
@@ -408,7 +417,10 @@ class Context {
 					callFileParamsMethod(change.uri, ServerMethods.ModuleCreated);
 				case Deleted:
 					diagnostics.clearDiagnostics(change.uri);
-					callFileParamsMethod(change.uri, ServerMethods.Invalidate);
+					if (!invalidated.exists(change.uri.toString())) {
+						callFileParamsMethod(change.uri, ServerMethods.Invalidate);
+						invalidated.set(change.uri.toString(), true);
+					}
 				case _:
 			}
 		}
