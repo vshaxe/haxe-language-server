@@ -387,10 +387,7 @@ class Context {
 	function onDidChangeTextDocument(event:DidChangeTextDocumentParams) {
 		final uri = event.textDocument.uri;
 		if (isUriSupported(uri)) {
-			if (!invalidated.exists(uri.toString())) {
-				callFileParamsMethod(uri, ServerMethods.Invalidate);
-				invalidated.set(uri.toString(), true);
-			}
+			invalidateFile(uri);
 			documents.onDidChangeTextDocument(event);
 		}
 	}
@@ -407,6 +404,7 @@ class Context {
 		final uri = event.textDocument.uri;
 		if (isUriSupported(uri)) {
 			publishDiagnostics(uri);
+			invalidated.remove(uri.toString());
 		}
 	}
 
@@ -417,12 +415,16 @@ class Context {
 					callFileParamsMethod(change.uri, ServerMethods.ModuleCreated);
 				case Deleted:
 					diagnostics.clearDiagnostics(change.uri);
-					if (!invalidated.exists(change.uri.toString())) {
-						callFileParamsMethod(change.uri, ServerMethods.Invalidate);
-						invalidated.set(change.uri.toString(), true);
-					}
+					invalidateFile(change.uri);
 				case _:
 			}
+		}
+	}
+
+	function invalidateFile(uri:DocumentUri) {
+		if (!invalidated.exists(uri.toString())) {
+			callFileParamsMethod(uri, ServerMethods.Invalidate);
+			invalidated.set(uri.toString(), true);
 		}
 	}
 
