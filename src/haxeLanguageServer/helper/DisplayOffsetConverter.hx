@@ -64,13 +64,11 @@ class Haxe4DisplayOffsetConverter extends DisplayOffsetConverter {
 	}
 
 	function byteOffsetToCharacterOffset(string:String, offset:Int):Int {
-		return
-		inline offsetSurrogates(string, offset, 1);
+		return inline offsetSurrogates(string, offset, 1);
 	}
 
 	function characterOffsetToByteOffset(string:String, offset:Int):Int {
-		return
-		inline offsetSurrogates(string, offset, -1);
+		return inline offsetSurrogates(string, offset, -1);
 	}
 
 	function offsetSurrogates(string:String, offset:Int, direction:Int):Int {
