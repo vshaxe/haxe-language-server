@@ -73,8 +73,8 @@ class StdioConnection extends HaxeConnection {
 		return buffer.getContent();
 	}
 
-	public static function start(path:String, arguments:Array<String>, spawnOptions:ChildProcessSpawnOptions, logger:String->Void,
-			onMessage:String->Void, onExit:HaxeConnection->Void, callback:HaxeConnection->Void) {
+	public static function start(path:String, arguments:Array<String>, spawnOptions:ChildProcessSpawnOptions, logger:String->Void, onMessage:String->Void,
+			onExit:HaxeConnection->Void, callback:HaxeConnection->Void) {
 		trace("Using --wait stdio");
 		final process = ChildProcess.spawn(path, arguments.concat(["--wait", "stdio"]), spawnOptions);
 		callback(new StdioConnection(process, logger, onMessage, onExit));
@@ -117,8 +117,8 @@ class SocketConnection extends HaxeConnection {
 		return lastErrorOutput;
 	}
 
-	public static function start(path:String, arguments:Array<String>, spawnOptions:ChildProcessSpawnOptions, logger:String->Void,
-			onMessage:String->Void, onExit:HaxeConnection->Void, callback:HaxeConnection->Void) {
+	public static function start(path:String, arguments:Array<String>, spawnOptions:ChildProcessSpawnOptions, logger:String->Void, onMessage:String->Void,
+			onExit:HaxeConnection->Void, callback:HaxeConnection->Void) {
 		trace("Using --server-connect");
 		final server = Net.createServer();
 		server.listen(0, function() {
