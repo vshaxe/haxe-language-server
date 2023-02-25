@@ -189,7 +189,12 @@ class HaxeServer {
 		final startConnection = if (useSocket) SocketConnection.start else StdioConnection.start;
 		trace("Haxe Path: " + config.path);
 		spawnOptions.env["HAXE_COMPLETION_SERVER"] = "1";
-		startConnection(config.path, config.arguments, spawnOptions, onMessage, onExit, onHaxeStarted);
+		startConnection(config.path, config.arguments, spawnOptions, log, onMessage, onExit, onHaxeStarted);
+	}
+
+	function log(msg:String):Void {
+		trace(msg);
+		context.serverRecording.onServerLog(msg);
 	}
 
 	function configure() {
@@ -373,6 +378,7 @@ class HaxeServer {
 	function onMessage(msg:String) {
 		if (currentRequest != null) {
 			final request = currentRequest;
+			context.serverRecording.onServerMessage(request, msg);
 			currentRequest = null;
 			request.onData(msg);
 			updateRequestQueue();
@@ -389,6 +395,8 @@ class HaxeServer {
 			token.setCallback(function() {
 				if (request == currentRequest)
 					return; // currently processing requests can't be canceled
+
+				context.serverRecording.onDisplayRequestCancelled(request);
 
 				// remove from the queue
 				if (request == requestsHead)
@@ -415,6 +423,10 @@ class HaxeServer {
 			requestsTail = request;
 		}
 
+		if (currentRequest != null) {
+			context.serverRecording.onDisplayRequestQueued(request);
+		}
+
 		// process the queue
 		checkQueue();
 		updateRequestQueue();
@@ -439,6 +451,7 @@ class HaxeServer {
 			currentRequest = requestsHead;
 			requestsHead = currentRequest.next;
 			updateRequestQueue();
+			context.serverRecording.onDisplayRequest(currentRequest);
 			haxeConnection.send(currentRequest.prepareBody());
 		}
 	}

@@ -1,5 +1,7 @@
 package haxeLanguageServer.features.haxe.foldingRange;
 
+import languageServerProtocol.Types.FoldingRange;
+import languageServerProtocol.Types.FoldingRangeKind;
 import tokentree.TokenTree;
 
 using tokentree.TokenTreeAccessHelper;

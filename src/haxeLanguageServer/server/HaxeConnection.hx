@@ -14,11 +14,13 @@ class HaxeConnection {
 
 	final buffer = new MessageBuffer();
 	final onMessage:String->Void;
+	final logger:String->Void;
 	final process:ChildProcessObject;
 	var nextMessageLength = -1;
 
-	function new(process, onMessage, onExit) {
+	function new(process, logger, onMessage, onExit) {
 		this.process = process;
+		this.logger = logger;
 		this.onMessage = onMessage;
 		process.on(ChildProcessEvent.Exit, (_, _) -> onExit(this));
 	}
@@ -35,7 +37,7 @@ class HaxeConnection {
 	}
 
 	function onStdout(buf:Buffer) {
-		trace(reTrailingNewline.replace(buf.toString(), ""));
+		logger(reTrailingNewline.replace(buf.toString(), ""));
 	}
 
 	function onData(data:Buffer) {
@@ -57,8 +59,8 @@ class HaxeConnection {
 }
 
 class StdioConnection extends HaxeConnection {
-	function new(process, onMessage, onExit) {
-		super(process, onMessage, onExit);
+	function new(process, logger, onMessage, onExit) {
+		super(process, logger, onMessage, onExit);
 		process.stdout.on(ReadableEvent.Data, onStdout);
 		process.stderr.on(ReadableEvent.Data, onData);
 	}
@@ -71,11 +73,11 @@ class StdioConnection extends HaxeConnection {
 		return buffer.getContent();
 	}
 
-	public static function start(path:String, arguments:Array<String>, spawnOptions:ChildProcessSpawnOptions, onMessage:String->Void,
+	public static function start(path:String, arguments:Array<String>, spawnOptions:ChildProcessSpawnOptions, logger:String->Void, onMessage:String->Void,
 			onExit:HaxeConnection->Void, callback:HaxeConnection->Void) {
 		trace("Using --wait stdio");
 		final process = ChildProcess.spawn(path, arguments.concat(["--wait", "stdio"]), spawnOptions);
-		callback(new StdioConnection(process, onMessage, onExit));
+		callback(new StdioConnection(process, logger, onMessage, onExit));
 	}
 }
 
@@ -83,8 +85,8 @@ class SocketConnection extends HaxeConnection {
 	var socket:Null<Socket>;
 	var lastErrorOutput:String = "";
 
-	function new(process, onMessage, onExit) {
-		super(process, onMessage, onExit);
+	function new(process, logger, onMessage, onExit) {
+		super(process, logger, onMessage, onExit);
 		process.stdout.on(ReadableEvent.Data, onStdout);
 		process.stderr.on(ReadableEvent.Data, onStderr);
 	}
@@ -108,21 +110,21 @@ class SocketConnection extends HaxeConnection {
 
 	function onStderr(buf:Buffer) {
 		lastErrorOutput = buf.toString();
-		trace(HaxeConnection.reTrailingNewline.replace(lastErrorOutput, ""));
+		logger(HaxeConnection.reTrailingNewline.replace(lastErrorOutput, ""));
 	}
 
 	override function getLastErrorOutput():String {
 		return lastErrorOutput;
 	}
 
-	public static function start(path:String, arguments:Array<String>, spawnOptions:ChildProcessSpawnOptions, onMessage:String->Void,
+	public static function start(path:String, arguments:Array<String>, spawnOptions:ChildProcessSpawnOptions, logger:String->Void, onMessage:String->Void,
 			onExit:HaxeConnection->Void, callback:HaxeConnection->Void) {
 		trace("Using --server-connect");
 		final server = Net.createServer();
 		server.listen(0, function() {
 			final port = server.address().port;
 			final process = ChildProcess.spawn(path, arguments.concat(["--server-connect", '127.0.0.1:$port']), spawnOptions);
-			final connection = new SocketConnection(process, onMessage, onExit);
+			final connection = new SocketConnection(process, logger, onMessage, onExit);
 			server.on(ServerEvent.Connection, function(socket) {
 				trace("Haxe connected!");
 				server.close();

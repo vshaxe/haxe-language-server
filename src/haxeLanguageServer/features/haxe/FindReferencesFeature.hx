@@ -5,6 +5,7 @@ import haxeLanguageServer.helper.HaxePosition;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
+import languageServerProtocol.Types.Location;
 
 class FindReferencesFeature {
 	final context:Context;

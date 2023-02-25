@@ -3,6 +3,7 @@ package haxeLanguageServer.features.haxe.codeAction;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
+import languageServerProtocol.Types.CodeAction;
 
 interface CodeActionContributor {
 	function createCodeActions(params:CodeActionParams):Array<CodeAction>;

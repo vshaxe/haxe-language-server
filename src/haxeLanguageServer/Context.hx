@@ -28,6 +28,7 @@ import haxeLanguageServer.features.haxe.documentSymbols.DocumentSymbolsFeature;
 import haxeLanguageServer.features.haxe.foldingRange.FoldingRangeFeature;
 import haxeLanguageServer.server.DisplayResult;
 import haxeLanguageServer.server.HaxeServer;
+import haxeLanguageServer.server.ServerRecording;
 import js.Node.process;
 import jsonrpc.CancellationToken;
 import jsonrpc.Protocol;
@@ -52,6 +53,7 @@ class Context {
 	public var documents(default, null):TextDocuments;
 	public var latestActiveFilePackage = "";
 
+	public var serverRecording(default, null):ServerRecording;
 	@:nullSafety(Off) public var haxeServer:HaxeServer;
 	@:nullSafety(Off) public var workspacePath(default, null):FsPath;
 	@:nullSafety(Off) public var capabilities(default, null):ClientCapabilities;
@@ -68,6 +70,7 @@ class Context {
 
 	public function new(languageServerProtocol) {
 		this.languageServerProtocol = languageServerProtocol;
+		serverRecording = new ServerRecording();
 		haxeDisplayProtocol = new Protocol(@:nullSafety(Off) writeMessage);
 		haxeServer = @:nullSafety(Off) new HaxeServer(this);
 		documents = new TextDocuments();
@@ -84,6 +87,7 @@ class Context {
 
 		languageServerProtocol.onNotification(LanguageServerMethods.DidChangeActiveTextEditor, onDidChangeActiveTextEditor);
 		languageServerProtocol.onRequest(LanguageServerMethods.RunMethod, runMethod);
+		languageServerProtocol.onRequest(LanguageServerMethods.ExportServerRecording, serverRecording.export);
 	}
 
 	function writeMessage(message:Message, token:Null<CancellationToken>) {
@@ -148,6 +152,7 @@ class Context {
 		}
 		capabilities = params.capabilities;
 		config.onInitialize(params);
+		serverRecording.onInitialize(this);
 
 		new DocumentSymbolsFeature(this);
 		new FoldingRangeFeature(this);
@@ -338,6 +343,8 @@ class Context {
 	}
 
 	function restartServer(reason:String) {
+		serverRecording.restartServer(reason, this);
+
 		if (!initialized) {
 			haxeServer.start(function() {
 				onServerStarted();
@@ -387,6 +394,7 @@ class Context {
 	function onDidChangeTextDocument(event:DidChangeTextDocumentParams) {
 		final uri = event.textDocument.uri;
 		if (isUriSupported(uri)) {
+			serverRecording.onDidChangeTextDocument(event);
 			invalidateFile(uri);
 			documents.onDidChangeTextDocument(event);
 		}
@@ -410,6 +418,8 @@ class Context {
 
 	function onDidChangeWatchedFiles(event:DidChangeWatchedFilesParams) {
 		for (change in event.changes) {
+			serverRecording.onFileEvent(change);
+
 			switch change.type {
 				case Created:
 					callFileParamsMethod(change.uri, ServerMethods.ModuleCreated);

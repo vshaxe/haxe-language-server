@@ -5,6 +5,7 @@ import haxeLanguageServer.features.hxml.HoverFeature as HxmlHoverFeature;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
+import languageServerProtocol.Types.Hover;
 
 class HoverFeature {
 	final haxe:HaxeHoverFeature;

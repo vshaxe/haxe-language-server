@@ -1,6 +1,7 @@
 package haxeLanguageServer.features.haxe.documentSymbols;
 
 import haxe.display.Display.DisplayModuleTypeKind;
+import languageServerProtocol.Types.DocumentSymbol;
 
 /** (_not_ a video game level, simn) **/
 enum SymbolLevel {

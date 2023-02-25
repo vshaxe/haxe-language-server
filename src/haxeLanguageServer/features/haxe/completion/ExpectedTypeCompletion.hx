@@ -8,6 +8,8 @@ import haxeLanguageServer.helper.DocHelper;
 import haxeLanguageServer.helper.ImportHelper;
 import haxeLanguageServer.helper.SnippetHelper;
 import haxeLanguageServer.protocol.DisplayPrinter;
+import languageServerProtocol.Types.CompletionItem;
+import languageServerProtocol.Types.InsertTextFormat;
 
 class ExpectedTypeCompletion {
 	final context:Context;

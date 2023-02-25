@@ -1,6 +1,10 @@
 package haxeLanguageServer.helper;
 
 import haxe.DynamicAccess;
+import languageServerProtocol.Types.CreateFile;
+import languageServerProtocol.Types.CreateFileKind;
+import languageServerProtocol.Types.TextDocumentEdit;
+import languageServerProtocol.Types.WorkspaceEdit;
 
 class WorkspaceEditHelper {
 	overload public static extern inline function create(context:Context, params:CodeActionParams, edits:Array<TextEdit>):WorkspaceEdit {

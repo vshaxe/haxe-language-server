@@ -4,6 +4,8 @@ import haxeLanguageServer.helper.HaxePosition;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
+import languageServerProtocol.Types.SymbolInformation;
+import languageServerProtocol.Types.SymbolKind;
 
 private enum abstract ModuleSymbolKind(Int) {
 	final Class = 1;

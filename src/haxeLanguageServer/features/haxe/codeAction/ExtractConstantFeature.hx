@@ -4,6 +4,8 @@ import haxeLanguageServer.features.haxe.codeAction.CodeActionFeature.CodeActionC
 import haxeLanguageServer.helper.FormatterHelper;
 import haxeLanguageServer.helper.WorkspaceEditHelper;
 import haxeLanguageServer.tokentree.TokenTreeManager;
+import languageServerProtocol.Types.CodeAction;
+import languageServerProtocol.Types.TextDocumentEdit;
 import tokentree.TokenTree;
 
 using tokentree.TokenTreeAccessHelper;

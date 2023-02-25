@@ -3,6 +3,7 @@ package haxeLanguageServer.features.haxe.foldingRange;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
+import languageServerProtocol.Types.FoldingRange;
 import languageServerProtocol.protocol.FoldingRange;
 
 class FoldingRangeFeature {

@@ -4,6 +4,8 @@ import haxe.extern.EitherType;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
+import languageServerProtocol.Types.DocumentSymbol;
+import languageServerProtocol.Types.SymbolInformation;
 
 using Lambda;
 

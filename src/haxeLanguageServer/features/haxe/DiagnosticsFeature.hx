@@ -12,6 +12,8 @@ import js.Node.clearImmediate;
 import js.Node.setImmediate;
 import js.node.ChildProcess;
 import jsonrpc.CancellationToken;
+import languageServerProtocol.Types.Diagnostic;
+import languageServerProtocol.Types.DiagnosticSeverity;
 
 using Lambda;
 

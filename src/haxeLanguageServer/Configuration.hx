@@ -75,6 +75,14 @@ private typedef InlayHintConfig = {
 	var conditionals:Bool;
 }
 
+typedef ServerRecordingConfig = {
+	var enabled:Bool;
+	var path:String;
+	var exclude:Array<String>;
+	var excludeUntracked:Bool;
+	var watch:Array<String>;
+}
+
 typedef UserConfig = {
 	var enableCodeLens:Bool;
 	var enableDiagnostics:Bool;
@@ -92,6 +100,7 @@ typedef UserConfig = {
 	var maxCompletionItems:Int;
 	var renameSourceFolders:Array<String>;
 	var inlayHints:InlayHintConfig;
+	var serverRecording:ServerRecordingConfig;
 }
 
 private typedef InitOptions = {
@@ -178,6 +187,13 @@ class Configuration {
 			parameterTypes: false,
 			functionReturnTypes: true,
 			conditionals: false
+		},
+		serverRecording: {
+			enabled: false,
+			path: ".haxelsp/recording/",
+			exclude: [],
+			excludeUntracked: false,
+			watch: []
 		}
 	};
 

@@ -6,6 +6,8 @@ import haxeLanguageServer.features.hxml.CompletionFeature as HxmlCompletionFeatu
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
+import languageServerProtocol.Types.CompletionItem;
+import languageServerProtocol.Types.CompletionList;
 
 class CompletionFeature {
 	final haxe:HaxeCompletionFeature;
