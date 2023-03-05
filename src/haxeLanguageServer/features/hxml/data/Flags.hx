@@ -299,7 +299,7 @@ final HxmlFlags = {
 			{
 				name: "--debug",
 				deprecatedNames: ["-debug"],
-				description: "turn on verbose mode"
+				description: "add debug information to the compiled code"
 			},
 			// `prompt` omitted; doesn't seem too useful in hxml
 			{
