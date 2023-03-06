@@ -80,8 +80,7 @@ class RenameFeature {
 				reject(ResponseError.internalError("cannot rename identifier"));
 			}
 			var editDoc = new EditDoc(fileName, editList, context, converter);
-			@:nullSafety(Off)
-			resolve(cast {
+			resolve({
 				range: editDoc.posToRange(result.pos),
 				placeholder: result.name
 			});
