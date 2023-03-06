@@ -41,25 +41,25 @@ class RenameFeature {
 
 	function onPrepareRename(params:PrepareRenameParams, token:CancellationToken, resolve:PrepareRenameResult->Void, reject:ResponseError<NoData>->Void) {
 		final onResolve:(?result:Null<Dynamic>, ?debugInfo:Null<String>) -> Void = context.startTimer("textDocument/prepareRename");
-
 		final uri = params.textDocument.uri;
-
 		final doc = context.documents.getHaxe(uri);
 		if (doc == null || !uri.isFile()) {
 			return reject.noFittingDocument(uri);
 		}
+
 		var fileName:String = uri.toFsPath().toString();
 
-		var usageContext:refactor.discover.UsageContext = makeUsageContext();
-		var editList:EditList = new EditList();
-
+		final usageContext:refactor.discover.UsageContext = makeUsageContext();
 		usageContext.fileName = fileName;
+
 		var root:Null<TokenTree> = doc!.tokens!.tree;
 		if (root == null) {
 			usageContext.usageCollector.parseFile(ByteData.ofString(doc.content), usageContext);
 		} else {
 			usageContext.usageCollector.parseFileWithTokens(root, usageContext);
 		}
+
+		final editList:EditList = new EditList();
 		refactor.Refactor.canRename({
 			nameMap: usageContext.nameMap,
 			fileList: usageContext.fileList,
@@ -70,7 +70,9 @@ class RenameFeature {
 				pos: converter.characterOffsetToByteOffset(doc.content, doc.offsetAt(params.position))
 			},
 			verboseLog: function(text:String, ?pos:PosInfos) {
-				trace('[rename] $text');
+				#if debug
+				trace('[canRename] $text');
+				#end
 			},
 			typer: typer
 		}).then((result:CanRefactorResult) -> {
@@ -94,17 +96,17 @@ class RenameFeature {
 		final onResolve:(?result:Null<Dynamic>, ?debugInfo:Null<String>) -> Void = context.startTimer("textDocument/rename");
 		final uri = params.textDocument.uri;
 		final doc = context.documents.getHaxe(uri);
+		if (doc == null || !uri.isFile()) {
+			return reject.noFittingDocument(uri);
+		}
 
 		var fileName:String = uri.toFsPath().toString();
-		var workspacePath:String = context.workspacePath.toString();
+		final workspacePath:String = context.workspacePath.toString();
 		if (fileName.startsWith(workspacePath)) {
 			fileName = fileName.substr(workspacePath.length + 1);
 		}
 
-		if (doc == null || !uri.isFile()) {
-			return reject.noFittingDocument(uri);
-		}
-		var usageContext:refactor.discover.UsageContext = makeUsageContext();
+		final usageContext:refactor.discover.UsageContext = makeUsageContext();
 		typer.typeList = usageContext.typeList;
 
 		// TODO abort if there are unsaved documents (rename operates on fs, so positions might be off)
@@ -117,8 +119,8 @@ class RenameFeature {
 
 		refactor.discover.TraverseSources.traverseSources(srcFolders, usageContext);
 		usageContext.usageCollector.updateImportHx(usageContext);
-		var editList:EditList = new EditList();
 
+		final editList:EditList = new EditList();
 		refactor.Refactor.rename({
 			nameMap: usageContext.nameMap,
 			fileList: usageContext.fileList,
