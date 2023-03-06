@@ -10,8 +10,10 @@ import languageServerProtocol.Types.DefinitionLink;
 class GotoDefinitionFeature {
 	final context:Context;
 
-	public function new(context) {
+	public function new(context, listen = true) {
 		this.context = context;
+		if (!listen)
+			return;
 		context.languageServerProtocol.onRequest(DefinitionRequest.type, onGotoDefinition);
 	}
 

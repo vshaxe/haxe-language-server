@@ -292,7 +292,7 @@ class InlayHintFeature {
 		if (pOpen.access().parent().matches(Kwd(KwdNew)).exists()) {
 			return promises;
 		}
-		var pClose:Null<TokenTree> = pOpen.access().firstOf(PClose).token;
+		var pClose:Null<TokenTree> = pOpen.access().firstOf(PClose)!.token;
 		if (pClose == null) {
 			return promises;
 		}

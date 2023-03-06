@@ -1,11 +1,15 @@
 package haxeLanguageServer.features.haxe.codeAction;
 
+import haxe.display.Display.DisplayItem;
+import haxe.display.Display.DisplayMethods;
+import haxe.display.Display.HoverDisplayItemOccurence;
 import haxe.display.JsonModuleTypes;
 import haxe.ds.Option;
 import haxe.io.Path;
 import haxeLanguageServer.Configuration;
 import haxeLanguageServer.features.haxe.DiagnosticsFeature.*;
 import haxeLanguageServer.features.haxe.DiagnosticsFeature;
+import haxeLanguageServer.features.haxe.InlayHintFeature.HoverRequestContext;
 import haxeLanguageServer.features.haxe.codeAction.CodeActionFeature;
 import haxeLanguageServer.features.haxe.codeAction.OrganizeImportsFeature;
 import haxeLanguageServer.helper.DocHelper;
@@ -13,7 +17,10 @@ import haxeLanguageServer.helper.ImportHelper;
 import haxeLanguageServer.helper.TypeHelper;
 import haxeLanguageServer.helper.WorkspaceEditHelper;
 import haxeLanguageServer.protocol.DisplayPrinter;
+import js.lib.Promise;
+import jsonrpc.CancellationToken;
 import languageServerProtocol.Types.CodeAction;
+import languageServerProtocol.Types.DefinitionLink;
 import languageServerProtocol.Types.Diagnostic;
 import sys.FileSystem;
 import tokentree.TokenTree;
@@ -212,7 +219,143 @@ class DiagnosticsCodeActionFeature implements CodeActionContributor {
 			});
 		}
 
+		final tooManyArgsRe = ~/Too many arguments([\w.]*)/;
+		if (tooManyArgsRe.match(arg)) {
+			final document = context.documents.getHaxe(params.textDocument.uri);
+			final replacement = document.getText(diagnostic.range);
+			actions.push({
+				title: "Add argument",
+				data: CodeActionFeature.addResolveData(MissingArg(action -> createMissingArgumentsAction(action, params, diagnostic))),
+				kind: QuickFix,
+				diagnostics: [diagnostic],
+				isPreferred: true,
+			});
+		}
 		return actions;
+	}
+
+	function createMissingArgumentsAction(action:CodeAction, params:CodeActionParams, diagnostic:Diagnostic):Null<Promise<CodeAction>> {
+		final document = context.documents.getHaxe(params.textDocument.uri);
+		if (document == null)
+			return null;
+		var fileName:String = document.uri.toFsPath().toString();
+		final pos = document.offsetAt(diagnostic.range.start);
+		var tokenSource = new CancellationTokenSource();
+		final gotoDefinition = new GotoDefinitionFeature(context, false);
+
+		final argToken = document.tokens!.getTokenAtOffset(document.offsetAt(diagnostic.range.start));
+		if (argToken == null)
+			return null;
+		final funPos = getCallNamePos(document, argToken);
+		if (funPos == null)
+			return null;
+		final gotoPromise = new Promise(function(resolve:(hover:Array<DefinitionLink>) -> Void, reject) {
+			gotoDefinition.onGotoDefinition({
+				textDocument: params.textDocument,
+				position: funPos.start
+			}, tokenSource.token, array -> {
+				resolve(array);
+			}, error -> reject(error));
+		});
+		final hoverPromise = makeHoverRequest(fileName, pos, tokenSource.token);
+
+		final actionPromise = Promise.all([gotoPromise, hoverPromise]).then(results -> {
+			final definitions:Array<DefinitionLink> = results[0];
+			// TODO investigate multiple definitions case
+			final definition = definitions[0] ?? return action;
+			final hover:HoverDisplayItemOccurence<Dynamic> = results[1];
+			final printer = new DisplayPrinter(true, Qualified, {
+				argumentTypeHints: true,
+				returnTypeHint: Always,
+				useArrowSyntax: true,
+				placeOpenBraceOnNewLine: false,
+				explicitPublic: true,
+				explicitPrivate: true,
+				explicitNull: true
+			});
+			final item = hover.item;
+			final itemType = item.type;
+			if (itemType == null)
+				return action;
+			final type = itemType.removeNulls().type;
+			final typeHint = printer.printType(type);
+			final definitionDoc = context.documents.getHaxe(definition.targetUri);
+			if (definitionDoc == null)
+				return action;
+			final definitonFunToken = definitionDoc.tokens!.getTokenAtOffset(definitionDoc.offsetAt(definition.targetSelectionRange.start));
+			final argRange = functionNewArgPos(definitionDoc, definitonFunToken) ?? return action;
+			final hadCommaAtEnd = functionArgsEndsWithComma(definitionDoc, definitonFunToken);
+			final argName = generateArgName(item);
+			var arg = '$argName';
+			if (typeHint != "?")
+				arg += ':$typeHint';
+			if (functionArgsCount(definitionDoc, definitonFunToken) > 0) {
+				arg = hadCommaAtEnd ? ' $arg' : ', $arg';
+			}
+			action.edit = WorkspaceEditHelper.create(definitionDoc, [{range: argRange, newText: arg}]);
+			action.command = {
+				title: "Highlight Insertion",
+				command: "haxe.codeAction.highlightInsertion",
+				arguments: [definitionDoc.uri.toString(), argRange]
+			}
+			return action;
+		});
+		return actionPromise;
+	}
+
+	function generateArgName(item:DisplayItem<Dynamic>):String {
+		switch item.kind {
+			case Literal:
+			case AnonymousStructure:
+				return "obj";
+			case Expression:
+				if (item.type!.kind == TFun)
+					return "callback";
+			case _:
+				return item.args!.name ?? "arg";
+		}
+		final dotPath = item.type!.getDotPath() ?? return "arg";
+		return switch dotPath {
+			case Std_Bool: "bool";
+			case Std_Int, Std_UInt: "i";
+			case Std_Float: "f";
+			case Std_String: "s";
+			case Std_Array, Haxe_Ds_ReadOnlyArray: "arr";
+			case Std_EReg: "regExp";
+			case Std_Dynamic: "value";
+			case Haxe_Ds_Map: "map";
+			case _: "arg";
+		}
+	}
+
+	function makeHoverRequest<T>(fileName:String, pos:Int, token:CancellationToken):Promise<Null<HoverDisplayItemOccurence<T>>> {
+		var request:HoverRequestContext<T> = {
+			params: cast {
+				file: cast fileName,
+				offset: pos
+			},
+			token: token,
+			resolve: null
+		}
+		var promise = new Promise(function(resolve:(hover:Null<HoverDisplayItemOccurence<T>>) -> Void, reject) {
+			request.resolve = resolve;
+		});
+		context.callHaxeMethod(DisplayMethods.Hover, request.params, request.token, function(hover) {
+			if (request.resolve != null) {
+				if (hover == null) {
+					request.resolve(null);
+				} else {
+					request.resolve(hover);
+				}
+			}
+			return null;
+		}, function(msg) {
+			if (request.resolve != null) {
+				request.resolve(null);
+			}
+			return;
+		});
+		return promise;
 	}
 
 	function createRemovableCodeActions(params:CodeActionParams, diagnostic:Diagnostic):Array<CodeAction> {
@@ -551,5 +694,66 @@ class DiagnosticsCodeActionFeature implements CodeActionContributor {
 			}
 		}
 		return null;
+	}
+
+	function getCallNamePos(document:HaxeDocument, argToken:TokenTree):Null<Range> {
+		final parent = argToken.access().findParent(helper -> {
+			return switch (helper!.token!.tok) {
+				case Const(CIdent(_)): true;
+				case _: false;
+			}
+		});
+		if (parent == null) {
+			return null;
+		}
+		final tokenPos = parent.token.pos;
+		return document.rangeAt(tokenPos.min, tokenPos.max);
+	}
+
+	function getFunctionPOpen(funIdent:Null<TokenTree>):Null<TokenTree> {
+		if (funIdent == null)
+			return null;
+		// Check for: var foo:()->Void = ...
+		final isFunction = switch (funIdent!.parent!.tok) {
+			case Kwd(KwdFunction): true;
+			case _: false;
+		}
+		if (!isFunction) {
+			funIdent = funIdent.getFirstChild() ?? return null;
+		}
+		final pOpen = funIdent.access().firstOf(POpen)!.token;
+		return pOpen;
+	}
+
+	function functionNewArgPos(document:HaxeDocument, funIdent:Null<TokenTree>):Null<Range> {
+		final pOpen = getFunctionPOpen(funIdent);
+		if (pOpen == null) {
+			return null;
+		}
+		final pClose = pOpen.access().firstOf(PClose)!.token;
+		if (pClose == null) {
+			return null;
+		}
+		return document.rangeAt(pClose.pos.min, pClose.pos.min);
+	}
+
+	function functionArgsCount(document:HaxeDocument, funIdent:Null<TokenTree>):Int {
+		final pOpen = getFunctionPOpen(funIdent) ?? return 0;
+		final args = pOpen.filterCallback((tree, depth) -> {
+			if (depth == 0)
+				GoDeeper;
+			else
+				tree.isCIdent() ? FoundSkipSubtree : SkipSubtree;
+		});
+		return args.length;
+	}
+
+	function functionArgsEndsWithComma(document:HaxeDocument, funIdent:Null<TokenTree>):Bool {
+		final pOpen = getFunctionPOpen(funIdent) ?? return false;
+		final maybeComma = pOpen.getLastChild()!.getLastChild();
+		if (maybeComma == null) {
+			return false;
+		}
+		return maybeComma.matches(Comma);
 	}
 }
