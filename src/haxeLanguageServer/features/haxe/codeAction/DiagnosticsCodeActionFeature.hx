@@ -285,7 +285,15 @@ class DiagnosticsCodeActionFeature implements CodeActionContributor {
 			final definitonFunToken = definitionDoc.tokens!.getTokenAtOffset(definitionDoc.offsetAt(definition.targetSelectionRange.start));
 			final argRange = functionNewArgPos(definitionDoc, definitonFunToken) ?? return action;
 			final hadCommaAtEnd = functionArgsEndsWithComma(definitionDoc, definitonFunToken);
-			final argName = generateArgName(item);
+			var argName = generateArgName(item);
+			final argNames = getArgsNames(definitionDoc, definitonFunToken);
+			for (i in 1...10) {
+				final name = argName + (i == 1 ? "" : '$i');
+				if (!argNames.contains(name)) {
+					argName = name;
+					break;
+				}
+			}
 			var arg = '$argName';
 			if (typeHint != "?")
 				arg += ':$typeHint';
@@ -326,6 +334,17 @@ class DiagnosticsCodeActionFeature implements CodeActionContributor {
 			case Haxe_Ds_Map: "map";
 			case _: "arg";
 		}
+	}
+
+	function getArgsNames(document:HaxeDocument, funIdent:Null<TokenTree>):Array<String> {
+		final pOpen = getFunctionPOpen(funIdent) ?? return [];
+		final args = pOpen.filterCallback((tree, depth) -> {
+			if (depth == 0)
+				GoDeeper;
+			else
+				tree.isCIdent() ? FoundSkipSubtree : SkipSubtree;
+		});
+		return args.map(tree -> tree.toString());
 	}
 
 	function makeHoverRequest<T>(fileName:String, pos:Int, token:CancellationToken):Promise<Null<HoverDisplayItemOccurence<T>>> {
