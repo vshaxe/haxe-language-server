@@ -22,6 +22,9 @@ import refactor.ITyper;
 import refactor.rename.RenameHelper.TypeHintType;
 import tokentree.TokenTree;
 
+using Lambda;
+using haxeLanguageServer.helper.PathHelper;
+
 class RenameFeature {
 	final context:Context;
 	final converter:Haxe3DisplayOffsetConverter;
@@ -41,45 +44,46 @@ class RenameFeature {
 
 	function onPrepareRename(params:PrepareRenameParams, token:CancellationToken, resolve:PrepareRenameResult->Void, reject:ResponseError<NoData>->Void) {
 		final onResolve:(?result:Null<Dynamic>, ?debugInfo:Null<String>) -> Void = context.startTimer("textDocument/prepareRename");
-
 		final uri = params.textDocument.uri;
-
 		final doc = context.documents.getHaxe(uri);
 		if (doc == null || !uri.isFile()) {
 			return reject.noFittingDocument(uri);
 		}
-		var fileName:String = uri.toFsPath().toString();
 
-		var usageContext:refactor.discover.UsageContext = makeUsageContext();
-		var editList:EditList = new EditList();
+		final filePath:FsPath = uri.toFsPath();
 
-		usageContext.fileName = fileName;
+		final usageContext:refactor.discover.UsageContext = makeUsageContext();
+		usageContext.fileName = filePath.toString();
+
 		var root:Null<TokenTree> = doc!.tokens!.tree;
 		if (root == null) {
 			usageContext.usageCollector.parseFile(ByteData.ofString(doc.content), usageContext);
 		} else {
 			usageContext.usageCollector.parseFileWithTokens(root, usageContext);
 		}
+
+		final editList:EditList = new EditList();
 		refactor.Refactor.canRename({
 			nameMap: usageContext.nameMap,
 			fileList: usageContext.fileList,
 			typeList: usageContext.typeList,
 			what: {
-				fileName: fileName,
+				fileName: filePath.toString(),
 				toName: "",
 				pos: converter.characterOffsetToByteOffset(doc.content, doc.offsetAt(params.position))
 			},
 			verboseLog: function(text:String, ?pos:PosInfos) {
-				trace('[rename] $text');
+				#if debug
+				trace('[canRename] $text');
+				#end
 			},
 			typer: typer
 		}).then((result:CanRefactorResult) -> {
 			if (result == null) {
 				reject(ResponseError.internalError("cannot rename identifier"));
 			}
-			var editDoc = new EditDoc(fileName, editList, context, converter);
-			@:nullSafety(Off)
-			resolve(cast {
+			var editDoc = new EditDoc(filePath, editList, context, converter);
+			resolve({
 				range: editDoc.posToRange(result.pos),
 				placeholder: result.name
 			});
@@ -94,17 +98,13 @@ class RenameFeature {
 		final onResolve:(?result:Null<Dynamic>, ?debugInfo:Null<String>) -> Void = context.startTimer("textDocument/rename");
 		final uri = params.textDocument.uri;
 		final doc = context.documents.getHaxe(uri);
-
-		var fileName:String = uri.toFsPath().toString();
-		var workspacePath:String = context.workspacePath.toString();
-		if (fileName.startsWith(workspacePath)) {
-			fileName = fileName.substr(workspacePath.length + 1);
-		}
-
 		if (doc == null || !uri.isFile()) {
 			return reject.noFittingDocument(uri);
 		}
-		var usageContext:refactor.discover.UsageContext = makeUsageContext();
+
+		final filePath:FsPath = uri.toFsPath();
+
+		final usageContext:refactor.discover.UsageContext = makeUsageContext();
 		typer.typeList = usageContext.typeList;
 
 		// TODO abort if there are unsaved documents (rename operates on fs, so positions might be off)
@@ -114,25 +114,24 @@ class RenameFeature {
 		if (context.config.user.renameSourceFolders != null) {
 			srcFolders = context.config.user.renameSourceFolders;
 		}
+		final workspacePath = context.workspacePath.normalize();
+		srcFolders = srcFolders.map(f -> workspacePath + "/" + f);
 
 		refactor.discover.TraverseSources.traverseSources(srcFolders, usageContext);
 		usageContext.usageCollector.updateImportHx(usageContext);
-		var editList:EditList = new EditList();
 
+		final editList:EditList = new EditList();
 		refactor.Refactor.rename({
 			nameMap: usageContext.nameMap,
 			fileList: usageContext.fileList,
 			typeList: usageContext.typeList,
 			what: {
-				fileName: fileName,
+				fileName: filePath.toString(),
 				toName: params.newName,
 				pos: converter.characterOffsetToByteOffset(doc.content, doc.offsetAt(params.position))
 			},
 			forRealExecute: true,
-			docFactory: function(fileName:String) {
-				var fullFileName:String = haxe.io.Path.join([Sys.getCwd(), fileName]);
-				return new EditDoc(fullFileName, editList, context, converter);
-			},
+			docFactory: (filePath:String) -> new EditDoc(new FsPath(filePath), editList, context, converter),
 			verboseLog: function(text:String, ?pos:PosInfos) {
 				#if debug
 				trace('[rename] $text');
@@ -145,8 +144,8 @@ class RenameFeature {
 					trace("[rename] no change");
 					reject(ResponseError.internalError("no change"));
 				case NotFound:
-					trace('[rename] could not find identifier at "$fileName@${params.position}"');
-					reject(ResponseError.internalError('could not find identifier at "$fileName@${params.position}"'));
+					trace('[rename] could not find identifier at "$filePath@${params.position}"');
+					reject(ResponseError.internalError('could not find identifier at "$filePath@${params.position}"'));
 				case Unsupported(name):
 					trace('[rename] refactoring not supported for "$name"');
 					reject(ResponseError.internalError('refactoring not supported for "$name"'));
@@ -191,14 +190,14 @@ class EditList {
 
 class EditDoc implements refactor.edits.IEditableDocument {
 	var list:EditList;
-	var fileName:String;
+	var filePath:FsPath;
 	var edits:Array<TextEdit>;
 	var renames:Array<RenameFile>;
 	final context:Context;
 	final converter:Haxe3DisplayOffsetConverter;
 
-	public function new(fileName:String, list:EditList, context:Context, converter:Haxe3DisplayOffsetConverter) {
-		this.fileName = fileName;
+	public function new(filePath:FsPath, list:EditList, context:Context, converter:Haxe3DisplayOffsetConverter) {
+		this.filePath = filePath;
 		this.list = list;
 		this.context = context;
 		this.converter = converter;
@@ -208,11 +207,11 @@ class EditDoc implements refactor.edits.IEditableDocument {
 
 	public function addChange(edit:refactor.edits.FileEdit) {
 		switch (edit) {
-			case Move(newFileName):
+			case Move(newFilePath):
 				renames.push({
 					kind: RenameFileKind.Kind,
-					oldUri: new FsPath(fileName).toUri(),
-					newUri: new FsPath(haxe.io.Path.join([Sys.getCwd(), newFileName])).toUri(),
+					oldUri: filePath.toUri(),
+					newUri: new FsPath(newFilePath).toUri(),
 					options: {
 						overwrite: false,
 						ignoreIfExists: false
@@ -228,10 +227,10 @@ class EditDoc implements refactor.edits.IEditableDocument {
 	}
 
 	public function posToRange(pos:refactor.discover.IdentifierPos):Range {
-		var doc = context.documents.getHaxe(new FsPath(fileName).toUri());
+		var doc = context.documents.getHaxe(filePath.toUri());
 		if (doc == null) {
 			// document currently not loaded -> load and find line number and character pos to build edit Range
-			var content:String = sys.io.File.getContent(fileName);
+			var content:String = sys.io.File.getContent(filePath.toString());
 			var lineSeparator:String = detectLineSeparator(content);
 			var separatorLength:Int = lineSeparator.length;
 			var lines:Array<String> = content.split(lineSeparator);
@@ -261,7 +260,7 @@ class EditDoc implements refactor.edits.IEditableDocument {
 				curLine++;
 			}
 			if ((startPos == null) || (endPos == null)) {
-				throw '$fileName not found';
+				throw '$filePath not found';
 			}
 			return {start: cast startPos, end: cast endPos};
 		}
@@ -289,7 +288,7 @@ class EditDoc implements refactor.edits.IEditableDocument {
 	public function endEdits() {
 		list.addEdit({
 			textDocument: {
-				uri: new FsPath(fileName).toUri(),
+				uri: filePath.toUri(),
 				version: null
 			},
 			edits: edits
@@ -309,24 +308,24 @@ class LanguageServerTyper implements ITyper {
 		this.context = context;
 	}
 
-	public function resolveType(fileName:String, pos:Int):Promise<Null<TypeHintType>> {
+	public function resolveType(filePath:String, pos:Int):Promise<Null<TypeHintType>> {
 		final params = {
-			file: cast fileName,
+			file: new FsPath(filePath),
 			offset: pos,
 			wasAutoTriggered: true
 		};
 		#if debug
-		trace('[rename] requesting type info for $fileName@$pos');
+		trace('[rename] requesting type info for $filePath@$pos');
 		#end
 		var promise = new Promise(function(resolve:(value:Null<TypeHintType>) -> Void, reject) {
 			context.callHaxeMethod(DisplayMethods.Hover, params, null, function(hover) {
 				if (hover == null) {
 					#if debug
-					trace('[rename] received no type info for $fileName@$pos');
+					trace('[rename] received no type info for $filePath@$pos');
 					#end
 					resolve(null);
 				} else {
-					resolve(buildTypeHint(hover, '$fileName@$pos'));
+					resolve(buildTypeHint(hover, '$filePath@$pos'));
 				}
 				return null;
 			}, reject.handler());
