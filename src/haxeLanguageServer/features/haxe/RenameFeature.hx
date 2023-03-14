@@ -5,6 +5,7 @@ import haxe.PosInfos;
 import haxe.display.Display.DisplayMethods;
 import haxe.display.Display.HoverDisplayItemOccurence;
 import haxe.extern.EitherType;
+import haxe.io.Path;
 import haxeLanguageServer.protocol.DotPath.getDotPath;
 import js.lib.Promise;
 import jsonrpc.CancellationToken;
@@ -115,7 +116,7 @@ class RenameFeature {
 			srcFolders = context.config.user.renameSourceFolders;
 		}
 		final workspacePath = context.workspacePath.normalize();
-		srcFolders = srcFolders.map(f -> workspacePath + "/" + f);
+		srcFolders = srcFolders.map(f -> Path.join([workspacePath.toString(), f]));
 
 		refactor.discover.TraverseSources.traverseSources(srcFolders, usageContext);
 		usageContext.usageCollector.updateImportHx(usageContext);
