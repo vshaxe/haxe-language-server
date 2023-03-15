@@ -194,10 +194,19 @@ class DiagnosticsCodeActionFeature implements CodeActionContributor {
 
 		if (context.haxeServer.haxeVersion.major >= 4 // unsuitable error range before Haxe 4
 			&& arg.contains("should be declared with 'override' since it is inherited from superclass")) {
+			var pos = diagnostic.range.start;
+			final document = context.documents.getHaxe(params.textDocument.uri);
+			if (document.tokens != null) {
+				// Resolve parent token to add "override" before "fnunction" instead of function name
+				final funPos = document.tokens!.getTokenAtOffset(document.offsetAt(diagnostic.range.start))!.parent!.pos!.min;
+				if (funPos != null) {
+					pos = document.positionAt(funPos);
+				}
+			}
 			actions.push({
 				title: "Add override keyword",
 				kind: QuickFix,
-				edit: WorkspaceEditHelper.create(context, params, [{range: diagnostic.range.start.toRange(), newText: "override "}]),
+				edit: WorkspaceEditHelper.create(context, params, [{range: pos.toRange(), newText: "override "}]),
 				diagnostics: [diagnostic],
 				isPreferred: true
 			});
