@@ -223,9 +223,12 @@ class DiagnosticsCodeActionFeature implements CodeActionContributor {
 		if (tooManyArgsRe.match(arg)) {
 			final document = context.documents.getHaxe(params.textDocument.uri);
 			final replacement = document.getText(diagnostic.range);
+			final data:CodeActionResolveData = {
+				enumId: CodeActionFeature.addResolveData(MissingArg(action -> createMissingArgumentsAction(action, params, diagnostic)))
+			};
 			actions.push({
 				title: "Add argument",
-				data: CodeActionFeature.addResolveData(MissingArg(action -> createMissingArgumentsAction(action, params, diagnostic))),
+				data: data,
 				kind: QuickFix,
 				diagnostics: [diagnostic],
 				isPreferred: true,
@@ -241,7 +244,6 @@ class DiagnosticsCodeActionFeature implements CodeActionContributor {
 		var fileName:String = document.uri.toFsPath().toString();
 		final pos = document.offsetAt(diagnostic.range.start);
 		var tokenSource = new CancellationTokenSource();
-		final gotoDefinition = new GotoDefinitionFeature(context, false);
 
 		final argToken = document.tokens!.getTokenAtOffset(document.offsetAt(diagnostic.range.start));
 		if (argToken == null)
@@ -250,7 +252,7 @@ class DiagnosticsCodeActionFeature implements CodeActionContributor {
 		if (funPos == null)
 			return null;
 		final gotoPromise = new Promise(function(resolve:(hover:Array<DefinitionLink>) -> Void, reject) {
-			gotoDefinition.onGotoDefinition({
+			context.gotoDefinition.onGotoDefinition({
 				textDocument: params.textDocument,
 				position: funPos.start
 			}, tokenSource.token, array -> {

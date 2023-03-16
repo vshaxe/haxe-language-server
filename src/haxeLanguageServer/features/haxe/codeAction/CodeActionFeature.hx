@@ -10,13 +10,17 @@ interface CodeActionContributor {
 	function createCodeActions(params:CodeActionParams):Array<CodeAction>;
 }
 
-enum CodeActionResolveData {
+enum CodeActionResolveEnum {
 	MissingArg(callback:(action:CodeAction) -> Null<Promise<CodeAction>>);
+}
+
+typedef CodeActionResolveData = {
+	?enumId:Int
 }
 
 class CodeActionFeature {
 	public static inline final SourceSortImports = "source.sortImports";
-	static final resolveCallbacks:Array<Null<CodeActionResolveData>> = [];
+	static final resolveCallbacks:Array<Null<CodeActionResolveEnum>> = [];
 
 	final context:Context;
 	final contributors:Array<CodeActionContributor> = [];
@@ -54,23 +58,26 @@ class CodeActionFeature {
 	}
 
 	function onCodeActionResolve(action:CodeAction, token:CancellationToken, resolve:CodeAction->Void, reject:ResponseError<NoData>->Void) {
-		final index = action.data;
-		if (index == null || !(index is Int)) {
-			throw "action.data should be Int index of resolve callback";
+		final data:Null<CodeActionResolveData> = action.data;
+		final enumId = data!.enumId;
+		if (enumId != null) {
+			final data = resolveCallbacks[enumId];
+			if (data == null)
+				throw 'resolveCallbacks[$enumId] is null';
+			switch data {
+				case MissingArg(callback):
+					final promise = callback(action);
+					promise!.then(action -> {
+						resolve(action);
+					});
+			}
+			return;
 		}
-		final data = resolveCallbacks[index];
-		if (data == null)
-			throw 'resolveCallbacks[$index] is null';
-		switch data {
-			case MissingArg(callback):
-				final promise = callback(action);
-				promise!.then(action -> {
-					resolve(action);
-				});
-		}
+
+		resolve(action);
 	}
 
-	public static function addResolveData(data:CodeActionResolveData):Int {
+	public static function addResolveData(data:CodeActionResolveEnum):Int {
 		var i = resolveCallbacks.indexOf(null);
 		if (i == -1)
 			i = resolveCallbacks.length;
