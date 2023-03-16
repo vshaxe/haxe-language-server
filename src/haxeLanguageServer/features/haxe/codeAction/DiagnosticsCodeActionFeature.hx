@@ -231,7 +231,7 @@ class DiagnosticsCodeActionFeature implements CodeActionContributor {
 				data: data,
 				kind: QuickFix,
 				diagnostics: [diagnostic],
-				isPreferred: true,
+				isPreferred: false,
 			});
 		}
 		return actions;
