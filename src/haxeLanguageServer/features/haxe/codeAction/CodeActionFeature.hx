@@ -69,6 +69,13 @@ class CodeActionFeature {
 					final promise = callback(action);
 					promise!.then(action -> {
 						resolve(action);
+						final command = action.command;
+						if (command == null)
+							return;
+						context.languageServerProtocol.sendNotification(LanguageServerMethods.ExecuteClientCommand, {
+							command: command.command,
+							arguments: command.arguments ?? []
+						});
 					});
 			}
 			return;
