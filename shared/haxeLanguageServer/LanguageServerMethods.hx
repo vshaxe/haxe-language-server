@@ -84,6 +84,11 @@ class LanguageServerMethods {
 		This request is sent from the client to the server to export current server recording.
 	**/
 	static inline final ExportServerRecording = new RequestType<Null<{dest:String}>, String, String>("haxe/exportServerRecording");
+
+	/**
+		This notification is sent from the server to the client to execute command on client.
+	**/
+	static inline final ExecuteClientCommand = new NotificationType<{command:String, arguments:Array<Any>}>("haxe/executeClientCommand");
 }
 
 typedef MethodResult = {
