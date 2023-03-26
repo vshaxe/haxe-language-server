@@ -7,5 +7,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - run: npm install
+    - run: npm ci
     - run: npx lix run vshaxe-build -t language-server -t language-server-tests
