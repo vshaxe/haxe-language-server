@@ -22,7 +22,7 @@ However, you can also build it as a standalone project like so:
 ```
 git clone https://github.com/vshaxe/haxe-language-server
 cd haxe-language-server
-npm install
+npm ci
 npx lix run vshaxe-build -t language-server
 ```
 

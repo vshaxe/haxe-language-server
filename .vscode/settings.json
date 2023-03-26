@@ -6,6 +6,7 @@
 			"source.sortImports": true
 		}
 	},
+	"haxe.executable": "auto",
 	"haxe.importsSortOrder": "all-alphabetical",
 	"haxeTestExplorer.testCommand": [
 		"npx",
