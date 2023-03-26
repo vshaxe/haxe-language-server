@@ -32,7 +32,13 @@ class CodeActionFeature {
 
 		context.registerCapability(CodeActionRequest.type, {
 			documentSelector: Context.haxeSelector,
-			codeActionKinds: [QuickFix, SourceOrganizeImports, SourceSortImports, RefactorExtract, RefactorRewrite],
+			codeActionKinds: [
+				QuickFix,
+				SourceOrganizeImports,
+				SourceSortImports,
+				RefactorExtract,
+				RefactorRewrite
+			],
 			resolveProvider: true
 		});
 		context.languageServerProtocol.onRequest(CodeActionRequest.type, onCodeAction);

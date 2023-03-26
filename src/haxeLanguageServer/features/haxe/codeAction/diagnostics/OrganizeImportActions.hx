@@ -6,7 +6,6 @@ import haxeLanguageServer.features.haxe.codeAction.OrganizeImportsFeature;
 import haxeLanguageServer.helper.DocHelper;
 import languageServerProtocol.Types.CodeAction;
 
-// import haxeLanguageServer.features.haxe.DiagnosticsFeature;
 class OrganizeImportActions {
 	public static function createOrganizeImportActions(context:Context, params:CodeActionParams, existingActions:Array<CodeAction>):Array<CodeAction> {
 		var shouldQuickFix:Bool = true;
