@@ -60,8 +60,8 @@ class Context {
 	@:nullSafety(Off) public var displayOffsetConverter(default, null):DisplayOffsetConverter;
 	@:nullSafety(Off) public var gotoDefinition(default, null):GotoDefinitionFeature;
 	@:nullSafety(Off) public var determinePackage(default, null):DeterminePackageFeature;
+	@:nullSafety(Off) public var diagnostics(default, null):DiagnosticsFeature;
 
-	@:nullSafety(Off) var diagnostics:DiagnosticsFeature;
 	var activeEditor:Null<DocumentUri>;
 	var initialized = false;
 	var progressId = 0;
@@ -359,7 +359,7 @@ class Context {
 				determinePackage = new DeterminePackageFeature(this);
 				new RenameFeature(this);
 				diagnostics = new DiagnosticsFeature(this);
-				new CodeActionFeature(this, diagnostics);
+				new CodeActionFeature(this);
 				new CodeLensFeature(this);
 				new WorkspaceSymbolsFeature(this);
 

@@ -20,6 +20,9 @@ class ExtractFunctionFeature implements CodeActionContributor {
 	}
 
 	public function createCodeActions(params:CodeActionParams):Array<CodeAction> {
+		if ((params.context.only != null) && (!params.context.only.contains(RefactorExtract))) {
+			return [];
+		}
 		final doc = context.documents.getHaxe(params.textDocument.uri);
 		if (doc == null) {
 			return [];

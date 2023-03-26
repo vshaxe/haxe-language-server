@@ -1,43 +1,45 @@
 package haxeLanguageServer.features.haxe.codeAction;
 
-import js.lib.Promise;
+import haxeLanguageServer.features.haxe.codeAction.diagnostics.MissingArgumentsAction;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
 import languageServerProtocol.Types.CodeAction;
+import languageServerProtocol.Types.Diagnostic;
 
 interface CodeActionContributor {
 	function createCodeActions(params:CodeActionParams):Array<CodeAction>;
 }
 
-enum CodeActionResolveEnum {
-	MissingArg(callback:(action:CodeAction) -> Null<Promise<CodeAction>>);
+enum CodeActionResolveType {
+	MissingArg;
 }
 
 typedef CodeActionResolveData = {
-	?enumId:Int
+	?type:CodeActionResolveType,
+	params:CodeActionParams,
+	diagnostic:Diagnostic
 }
 
 class CodeActionFeature {
 	public static inline final SourceSortImports = "source.sortImports";
-	static final resolveCallbacks:Array<Null<CodeActionResolveEnum>> = [];
 
 	final context:Context;
 	final contributors:Array<CodeActionContributor> = [];
 
-	public function new(context, diagnostics) {
+	public function new(context) {
 		this.context = context;
 
 		context.registerCapability(CodeActionRequest.type, {
 			documentSelector: Context.haxeSelector,
-			codeActionKinds: [QuickFix, SourceOrganizeImports, SourceSortImports, RefactorExtract],
-			resolveProvider: true,
+			codeActionKinds: [QuickFix, SourceOrganizeImports, SourceSortImports, RefactorExtract, RefactorRewrite],
+			resolveProvider: true
 		});
 		context.languageServerProtocol.onRequest(CodeActionRequest.type, onCodeAction);
 		context.languageServerProtocol.onRequest(CodeActionResolveRequest.type, onCodeActionResolve);
 
 		registerContributor(new ExtractConstantFeature(context));
-		registerContributor(new DiagnosticsCodeActionFeature(context, diagnostics));
+		registerContributor(new DiagnosticsCodeActionFeature(context));
 		#if debug
 		registerContributor(new ExtractTypeFeature(context));
 		registerContributor(new ExtractFunctionFeature(context));
@@ -49,7 +51,6 @@ class CodeActionFeature {
 	}
 
 	function onCodeAction(params:CodeActionParams, token:CancellationToken, resolve:Array<CodeAction>->Void, reject:ResponseError<NoData>->Void) {
-		resolveCallbacks.resize(0);
 		var codeActions = [];
 		for (contributor in contributors) {
 			codeActions = codeActions.concat(contributor.createCodeActions(params));
@@ -59,36 +60,32 @@ class CodeActionFeature {
 
 	function onCodeActionResolve(action:CodeAction, token:CancellationToken, resolve:CodeAction->Void, reject:ResponseError<NoData>->Void) {
 		final data:Null<CodeActionResolveData> = action.data;
-		final enumId = data!.enumId;
-		if (enumId != null) {
-			final data = resolveCallbacks[enumId];
-			if (data == null)
-				throw 'resolveCallbacks[$enumId] is null';
-			switch data {
-				case MissingArg(callback):
-					final promise = callback(action);
-					promise!.then(action -> {
-						resolve(action);
-						final command = action.command;
-						if (command == null)
-							return;
-						context.languageServerProtocol.sendNotification(LanguageServerMethods.ExecuteClientCommand, {
-							command: command.command,
-							arguments: command.arguments ?? []
-						});
-					});
-			}
+		final type = data!.type;
+		final params = data!.params;
+		final diagnostic = data!.diagnostic;
+		if (params == null || diagnostic == null) {
+			resolve(action);
 			return;
 		}
-
-		resolve(action);
-	}
-
-	public static function addResolveData(data:CodeActionResolveEnum):Int {
-		var i = resolveCallbacks.indexOf(null);
-		if (i == -1)
-			i = resolveCallbacks.length;
-		resolveCallbacks[i] = data;
-		return i;
+		switch (type) {
+			case null:
+				resolve(action);
+			case MissingArg:
+				final promise = MissingArgumentsAction.createMissingArgumentsAction(context, action, params, diagnostic);
+				if (promise == null) {
+					reject(ResponseError.internalError("failed to resolve missing arguments action"));
+					return;
+				}
+				promise.then(action -> {
+					resolve(action);
+					final command = action.command;
+					if (command == null)
+						return;
+					context.languageServerProtocol.sendNotification(LanguageServerMethods.ExecuteClientCommand, {
+						command: command.command,
+						arguments: command.arguments ?? []
+					});
+				}).catchError((e) -> reject(e));
+		}
 	}
 }

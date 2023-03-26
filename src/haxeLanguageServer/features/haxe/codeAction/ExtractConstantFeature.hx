@@ -18,6 +18,9 @@ class ExtractConstantFeature implements CodeActionContributor {
 	}
 
 	public function createCodeActions(params:CodeActionParams):Array<CodeAction> {
+		if ((params.context.only != null) && (!params.context.only.contains(RefactorExtract))) {
+			return [];
+		}
 		final uri = params.textDocument.uri;
 		final doc = context.documents.getHaxe(uri);
 		return extractConstant(doc, uri, params.range);
