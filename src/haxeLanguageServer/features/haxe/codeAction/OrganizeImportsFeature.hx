@@ -25,6 +25,12 @@ class OrganizeImportsFeature {
 				switch token.tok {
 					case Kwd(KwdImport) | Kwd(KwdUsing):
 						return FoundSkipSubtree;
+					case CommentLine(s):
+						s = s.ltrim();
+						if (s.startsWith("import ") || s.startsWith("using ")) {
+							return FoundSkipSubtree;
+						}
+						return SkipSubtree;
 					case Kwd(KwdPackage):
 						final child = token.getFirstChild();
 						if (child == null) {
@@ -80,11 +86,13 @@ class OrganizeImportsFeature {
 				}
 
 				final type:ImportType = determineImportType(i, packageName);
+				var text:String = doc.getText(range);
 				switch i.tok {
 					case Kwd(KwdImport):
 						group.imports.push({
 							token: i,
-							text: doc.getText(range),
+							text: text,
+							sortText: text,
 							type: type,
 							range: range
 						});
@@ -92,11 +100,34 @@ class OrganizeImportsFeature {
 					case Kwd(KwdUsing):
 						group.usings.push({
 							token: i,
-							text: doc.getText(range),
+							text: text,
+							sortText: text,
 							type: type,
 							range: range
 						});
 						group.lastIndex = i.index;
+					case CommentLine(s):
+						s = s.ltrim();
+						if (s.startsWith("import ")) {
+							group.imports.push({
+								token: i,
+								text: text,
+								sortText: s,
+								type: type,
+								range: range
+							});
+							group.lastIndex = i.index;
+						}
+						if (s.startsWith("using ")) {
+							group.usings.push({
+								token: i,
+								text: text,
+								sortText: s,
+								type: type,
+								range: range
+							});
+							group.lastIndex = i.index;
+						}
 					default:
 				}
 			}
@@ -107,19 +138,41 @@ class OrganizeImportsFeature {
 	}
 
 	static function determineImportType(token:TokenTree, packageName:Null<String>):ImportType {
-		final child:Null<TokenTree> = token.getFirstChild();
-		if (child == null) {
-			return Project;
-		}
 		var topLevelPack:String;
-		switch child.tok {
-			case Kwd(_):
-				topLevelPack = '$child';
-			case Const(CIdent(s)):
-				topLevelPack = s;
+		switch (token.tok) {
+			case CommentLine(s):
+				s = s.ltrim();
+				if (s.startsWith("import ")) {
+					s = s.substr(7);
+				}
+				if (s.startsWith("using ")) {
+					s = s.substr(6);
+				}
+				var index = s.indexOf(".");
+				if (index < 0) {
+					index = s.indexOf(";");
+					topLevelPack = s;
+					if (index > 0) {
+						topLevelPack = s.substring(0, index);
+					}
+				} else {
+					topLevelPack = s.substring(0, index);
+				}
 			default:
-				return Project;
+				final child:Null<TokenTree> = token.getFirstChild();
+				if (child == null) {
+					return Project;
+				}
+				switch child.tok {
+					case Kwd(_):
+						topLevelPack = '$child';
+					case Const(CIdent(s)):
+						topLevelPack = s;
+					default:
+						return Project;
+				}
 		}
+
 		if (stdLibPackages.contains(topLevelPack)) {
 			return StdLib;
 		}
@@ -207,10 +260,10 @@ class OrganizeImportsFeature {
 	}
 
 	static function sortImportsAllAlpha(a:ImportInfo, b:ImportInfo):Int {
-		if (a.text < b.text) {
+		if (a.sortText < b.sortText) {
 			return -1;
 		}
-		if (a.text > b.text) {
+		if (a.sortText > b.sortText) {
 			return 1;
 		}
 		return 0;
@@ -223,10 +276,10 @@ class OrganizeImportsFeature {
 		if (a.type > b.type) {
 			return 1;
 		}
-		if (a.text < b.text) {
+		if (a.sortText < b.sortText) {
 			return -1;
 		}
-		if (a.text > b.text) {
+		if (a.sortText > b.sortText) {
 			return 1;
 		}
 		return 0;
@@ -254,6 +307,7 @@ private typedef ImportGroup = {
 private typedef ImportInfo = {
 	final token:TokenTree;
 	final text:String;
+	final sortText:String;
 	var type:ImportType;
 	final range:Range;
 }
