@@ -163,11 +163,13 @@ class Context {
 		final textDocument = capabilities!.textDocument;
 		final workspace = capabilities!.workspace;
 		final registrations = new Array<Registration>();
-		function register<P, R, PR, E, RO>(method:ProtocolRequestType<P, R, PR, E, RO>, ?selector:DocumentSelector, ?registerOptions:RO) {
+		function register<P, R, PR, E, RO>(method:ProtocolRequestType<P, R, PR, E, RO>, ?registerId:String, ?selector:DocumentSelector, ?registerOptions:RO) {
 			if (registerOptions == null) {
 				registerOptions = cast {documentSelector: selector};
 			}
-			registrations.push({id: method, method: method, registerOptions: registerOptions});
+
+			final id = registerId ?? '$method';
+			registrations.push({id: id, method: method, registerOptions: registerOptions});
 		}
 
 		final capabilities:ServerCapabilities = {
@@ -182,12 +184,12 @@ class Context {
 
 		final completionTriggerCharacters = [".", "@", ":", " ", ">", "$"];
 		if (textDocument!.completion!.dynamicRegistration == true) {
-			register(CompletionRequest.type, {
+			register(CompletionRequest.type, "haxeDocument/completion", {
 				documentSelector: haxeSelector,
 				triggerCharacters: completionTriggerCharacters,
 				resolveProvider: true
 			});
-			register(CompletionRequest.type, {
+			register(CompletionRequest.type, "hxmlDocument/completion", {
 				documentSelector: hxmlSelector,
 				triggerCharacters: ["-", "/", "\\", "=", " "],
 				resolveProvider: true
@@ -218,8 +220,8 @@ class Context {
 		}
 
 		if (textDocument!.hover!.dynamicRegistration == true) {
-			register(HoverRequest.type, haxeSelector);
-			register(HoverRequest.type, hxmlSelector);
+			register(HoverRequest.type, "haxeDocument/hover", haxeSelector);
+			register(HoverRequest.type, "hxmlDocument/hover", hxmlSelector);
 		} else {
 			capabilities.hoverProvider = true;
 		}
@@ -319,11 +321,11 @@ class Context {
 		}
 	}
 
-	public function registerCapability<P, R, PR, E, RO>(method:ProtocolRequestType<P, R, PR, E, RO>, registerOptions:RO) {
+	public function registerCapability<P, R, PR, E, RO>(method:ProtocolRequestType<P, R, PR, E, RO>, ?registerId:String, registerOptions:RO) {
 		languageServerProtocol.sendRequest(RegistrationRequest.type, {
 			registrations: [
 				{
-					id: method,
+					id: registerId ?? '$method',
 					method: method,
 					registerOptions: registerOptions
 				}
@@ -331,11 +333,11 @@ class Context {
 		}, null, _ -> {}, error -> trace(error));
 	}
 
-	public function unregisterCapability(method:String) {
+	public function unregisterCapability(method:String, ?registerId:String) {
 		languageServerProtocol.sendRequest(UnregistrationRequest.type, {
 			unregisterations: [
 				{
-					id: method,
+					id: registerId ?? '$method',
 					method: method
 				}
 			]
