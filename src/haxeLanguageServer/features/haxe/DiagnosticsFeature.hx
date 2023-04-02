@@ -14,6 +14,7 @@ import js.node.ChildProcess;
 import jsonrpc.CancellationToken;
 import languageServerProtocol.Types.Diagnostic;
 import languageServerProtocol.Types.DiagnosticSeverity;
+import languageServerProtocol.Types.Location;
 
 using Lambda;
 
@@ -184,7 +185,14 @@ class DiagnosticsFeature {
 					source: DiagnosticsSource,
 					code: kind,
 					severity: hxDiag.severity,
-					message: hxDiag.kind.getMessage(doc, hxDiag.args, range)
+					message: hxDiag.kind.getMessage(doc, hxDiag.args, range),
+					relatedInformation: hxDiag.relatedInformation?.map(rel -> {
+						location: {
+							uri: rel.location.file.toUri(),
+							range: rel.location.range,
+						},
+						message: rel.message
+					})
 				}
 				if (kind == RemovableCode || kind == UnusedImport || diag.message.contains("has no effect") || kind == InactiveBlock) {
 					diag.severity = Hint;
@@ -398,6 +406,16 @@ private typedef HaxeDiagnostic<T> = {
 	final ?range:Range;
 	final severity:DiagnosticSeverity;
 	final args:T;
+	final relatedInformation:Null<Array<HaxeDiagnosticRelatedInformation>>;
+}
+
+private typedef HaxeDiagnosticRelatedInformation = {
+	final location:{
+		final file:FsPath;
+		final range:Range;
+	};
+	final message:String;
+	final depth:Int;
 }
 
 private typedef HaxeDiagnosticResponse<T> = {
