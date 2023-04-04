@@ -26,29 +26,57 @@ class ParserErrorActions {
 
 		if (arg.contains("Missing ;")) {
 			final document = context.documents.getHaxe(params.textDocument.uri);
-			var errRange:Null<Range> = getMissingSemicolonPos(document, diagnostic.range.start);
+			final errRange = getMissingSemicolonPos(document, diagnostic.range.start);
 			if (errRange != null) {
-				actions.push({
-					title: "Add missing ;",
-					kind: QuickFix,
-					edit: WorkspaceEditHelper.create(context, params, [{range: (errRange : Range), newText: ";"}]),
-					diagnostics: [diagnostic],
-					isPreferred: true
-				});
+				final errRange:Range = errRange;
+				final hasSemicolon = document.characterAt(errRange.start.translate(0, -1)) == ";";
+				if (!hasSemicolon) { // do not generate `;;`
+					actions.push({
+						title: "Add missing ;",
+						kind: QuickFix,
+						edit: WorkspaceEditHelper.create(context, params, [{range: errRange, newText: ";"}]),
+						diagnostics: [diagnostic],
+						isPreferred: true
+					});
+				}
+			}
+		}
+
+		if (arg.contains("Expected }")) {
+			final document = context.documents.getHaxe(params.textDocument.uri);
+			final token = document!.tokens!.getTokenAtOffset(document.offsetAt(diagnostic.range.end));
+			final prevToken = getPrevNonCommentSibling(token);
+			if (prevToken != null) {
+				final prevToken = getLastNonCommentToken(prevToken);
+				switch [prevToken!.tok, token!.tok] {
+					case [Semicolon, Semicolon]:
+						actions.push({
+							title: "Remove reduntant ;",
+							kind: QuickFix,
+							edit: WorkspaceEditHelper.create(context, params, [{range: diagnostic.range, newText: ""}]),
+							diagnostics: [diagnostic],
+							isPreferred: true
+						});
+					case _:
+				}
 			}
 		}
 
 		if (arg.contains("Expected , or ]")) {
 			final document = context.documents.getHaxe(params.textDocument.uri);
-			var errRange:Null<Range> = getMissingSemicolonPos(document, diagnostic.range.start);
+			final errRange:Null<Range> = getMissingSemicolonPos(document, diagnostic.range.start);
 			if (errRange != null) {
-				actions.push({
-					title: "Add missing ,",
-					kind: QuickFix,
-					edit: WorkspaceEditHelper.create(context, params, [{range: (errRange : Range), newText: ","}]),
-					diagnostics: [diagnostic],
-					isPreferred: true
-				});
+				final errRange:Range = errRange;
+				final hasComma = document.characterAt(errRange.start.translate(0, -1)) == ",";
+				if (!hasComma) { // do not generate `,,`
+					actions.push({
+						title: "Add missing ,",
+						kind: QuickFix,
+						edit: WorkspaceEditHelper.create(context, params, [{range: errRange, newText: ","}]),
+						diagnostics: [diagnostic],
+						isPreferred: true
+					});
+				}
 			}
 		}
 
@@ -67,9 +95,7 @@ class ParserErrorActions {
 		if (prev == null || prev.tok.match(Sharp(_)))
 			return null;
 		final last = getLastNonCommentToken(prev);
-		final pos = last!.getPos();
-		if (pos == null)
-			return null;
+		final pos = last.getPos();
 		return document.rangeAt(pos.max, pos.max);
 	}
 
@@ -80,16 +106,27 @@ class ParserErrorActions {
 		return token;
 	}
 
-	static function getLastNonCommentToken(token:TokenTree):Null<TokenTree> {
-		var lastChild:Null<TokenTree> = token.getLastChild();
-		while (lastChild != null) {
-			var newLast:Null<TokenTree> = lastChild.getLastChild();
-			if (newLast!.isComment() == true)
-				newLast = getPrevNonCommentSibling(newLast);
+	static function getLastNonCommentToken(token:TokenTree):TokenTree {
+		var lastChild:TokenTree = token;
+		while (true) {
+			final newLast = getLastNonCommentChild(lastChild);
 			if (newLast == null) {
 				return lastChild;
 			}
 			lastChild = newLast;
+		}
+		return lastChild;
+	}
+
+	static function getLastNonCommentChild(token:TokenTree):Null<TokenTree> {
+		final children = token.children;
+		if (children == null)
+			return null;
+		var i = children.length;
+		while (i-- > 0) {
+			final child = children[i];
+			if (child!.isComment() == false)
+				return child;
 		}
 		return null;
 	}
