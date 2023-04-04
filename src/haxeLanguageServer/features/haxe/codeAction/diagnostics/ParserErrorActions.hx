@@ -1,6 +1,5 @@
 package haxeLanguageServer.features.haxe.codeAction.diagnostics;
 
-import languageServerProtocol.Types.CodeActionKind;
 import tokentree.TokenTree;
 
 class ParserErrorActions {
@@ -18,7 +17,7 @@ class ParserErrorActions {
 			final document = context.documents.getHaxe(params.textDocument.uri);
 			actions.push({
 				title: "Change to final",
-				kind: CodeActionKind.QuickFix + ".auto",
+				kind: QuickFix,
 				edit: WorkspaceEditHelper.create(context, params, [{range: diagnostic.range, newText: "final"}]),
 				diagnostics: [diagnostic],
 				isPreferred: true
@@ -31,7 +30,7 @@ class ParserErrorActions {
 			if (errRange != null) {
 				actions.push({
 					title: "Add missing ;",
-					kind: CodeActionKind.QuickFix + ".auto",
+					kind: QuickFix,
 					edit: WorkspaceEditHelper.create(context, params, [{range: (errRange : Range), newText: ";"}]),
 					diagnostics: [diagnostic],
 					isPreferred: true
@@ -45,7 +44,7 @@ class ParserErrorActions {
 			if (errRange != null) {
 				actions.push({
 					title: "Add missing ,",
-					kind: CodeActionKind.QuickFix + ".auto",
+					kind: QuickFix,
 					edit: WorkspaceEditHelper.create(context, params, [{range: (errRange : Range), newText: ","}]),
 					diagnostics: [diagnostic],
 					isPreferred: true
