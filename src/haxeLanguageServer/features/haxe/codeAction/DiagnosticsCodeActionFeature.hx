@@ -5,6 +5,7 @@ import haxeLanguageServer.features.haxe.codeAction.CodeActionFeature;
 import haxeLanguageServer.features.haxe.codeAction.diagnostics.CompilerErrorActions;
 import haxeLanguageServer.features.haxe.codeAction.diagnostics.MissingFieldsActions;
 import haxeLanguageServer.features.haxe.codeAction.diagnostics.OrganizeImportActions;
+import haxeLanguageServer.features.haxe.codeAction.diagnostics.ParserErrorActions;
 import haxeLanguageServer.features.haxe.codeAction.diagnostics.RemovableCodeActions;
 import haxeLanguageServer.features.haxe.codeAction.diagnostics.UnresolvedIdentifierActions;
 import haxeLanguageServer.features.haxe.codeAction.diagnostics.UnusedImportActions;
@@ -40,6 +41,7 @@ class DiagnosticsCodeActionFeature implements CodeActionContributor {
 				case UnresolvedIdentifier: UnresolvedIdentifierActions.createUnresolvedIdentifierActions(context, params, diagnostic);
 				case CompilerError: CompilerErrorActions.createCompilerErrorActions(context, params, diagnostic);
 				case RemovableCode: RemovableCodeActions.createRemovableCodeActions(context, params, diagnostic);
+				case ParserError: ParserErrorActions.createParserErrorActions(context, params, diagnostic);
 				case MissingFields: MissingFieldsActions.createMissingFieldsActions(context, params, diagnostic);
 				case _: [];
 			});
