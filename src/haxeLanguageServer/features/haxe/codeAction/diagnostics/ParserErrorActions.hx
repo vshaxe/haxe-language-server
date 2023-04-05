@@ -58,6 +58,14 @@ class ParserErrorActions {
 							diagnostics: [diagnostic],
 							isPreferred: true
 						});
+					case [Comma, Comma]:
+						actions.push({
+							title: "Remove reduntant ,",
+							kind: CodeActionKind.QuickFix + ".auto",
+							edit: WorkspaceEditHelper.create(context, params, [{range: diagnostic.range, newText: ""}]),
+							diagnostics: [diagnostic],
+							isPreferred: true
+						});
 					case _:
 				}
 			}
