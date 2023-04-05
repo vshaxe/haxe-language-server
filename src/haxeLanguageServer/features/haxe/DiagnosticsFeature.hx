@@ -24,6 +24,7 @@ class DiagnosticsFeature {
 	public static inline final OrganizeImportsUsingsTitle = "Organize imports/usings";
 	public static inline final RemoveUnusedImportUsingTitle = "Remove unused import/using";
 	public static inline final RemoveAllUnusedImportsUsingsTitle = "Remove all unused imports/usings";
+	public static inline final FixAllTitle = "Fix All";
 
 	final context:Context;
 	final diagnosticsArguments:Map<DocumentUri, DiagnosticsMap<Any>>;

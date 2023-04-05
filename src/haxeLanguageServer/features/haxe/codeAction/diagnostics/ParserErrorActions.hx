@@ -1,5 +1,6 @@
 package haxeLanguageServer.features.haxe.codeAction.diagnostics;
 
+import languageServerProtocol.Types.CodeActionKind;
 import tokentree.TokenTree;
 
 class ParserErrorActions {
@@ -17,7 +18,7 @@ class ParserErrorActions {
 			final document = context.documents.getHaxe(params.textDocument.uri);
 			actions.push({
 				title: "Change to final",
-				kind: QuickFix,
+				kind: CodeActionKind.QuickFix + ".auto",
 				edit: WorkspaceEditHelper.create(context, params, [{range: diagnostic.range, newText: "final"}]),
 				diagnostics: [diagnostic],
 				isPreferred: true
@@ -33,7 +34,7 @@ class ParserErrorActions {
 				if (!hasSemicolon) { // do not generate `;;`
 					actions.push({
 						title: "Add missing ;",
-						kind: QuickFix,
+						kind: CodeActionKind.QuickFix + ".auto",
 						edit: WorkspaceEditHelper.create(context, params, [{range: errRange, newText: ";"}]),
 						diagnostics: [diagnostic],
 						isPreferred: true
@@ -52,7 +53,7 @@ class ParserErrorActions {
 					case [Semicolon, Semicolon]:
 						actions.push({
 							title: "Remove reduntant ;",
-							kind: QuickFix,
+							kind: CodeActionKind.QuickFix + ".auto",
 							edit: WorkspaceEditHelper.create(context, params, [{range: diagnostic.range, newText: ""}]),
 							diagnostics: [diagnostic],
 							isPreferred: true
@@ -71,7 +72,7 @@ class ParserErrorActions {
 				if (!hasComma) { // do not generate `,,`
 					actions.push({
 						title: "Add missing ,",
-						kind: QuickFix,
+						kind: CodeActionKind.QuickFix + ".auto",
 						edit: WorkspaceEditHelper.create(context, params, [{range: errRange, newText: ","}]),
 						diagnostics: [diagnostic],
 						isPreferred: true
