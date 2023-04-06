@@ -32,6 +32,8 @@ class RenameFeature {
 	final cache:refactor.cache.IFileCache;
 	final typer:LanguageServerTyper;
 
+	static final HINT_SETTINGS = " - check `haxe.renameSourceFolders` setting (see https://github.com/vshaxe/vshaxe/wiki/Rename-Symbol)";
+
 	public function new(context:Context) {
 		this.context = context;
 		cache = new refactor.cache.MemCache();
@@ -145,8 +147,8 @@ class RenameFeature {
 					trace("[rename] no change");
 					reject(ResponseError.internalError("no change"));
 				case NotFound:
-					trace('[rename] could not find identifier at "$filePath@${params.position}"');
-					reject(ResponseError.internalError('could not find identifier at "$filePath@${params.position}"'));
+					trace('[rename] could not find identifier at "$filePath@${params.position}"$HINT_SETTINGS');
+					reject(ResponseError.internalError('could not find identifier at "$filePath@${params.position}"$HINT_SETTINGS'));
 				case Unsupported(name):
 					trace('[rename] refactoring not supported for "$name"');
 					reject(ResponseError.internalError('refactoring not supported for "$name"'));
@@ -158,8 +160,8 @@ class RenameFeature {
 			}
 			onResolve(null, editList.documentChanges.length + " changes");
 		}).catchError((msg) -> {
-			trace('[rename] error: $msg');
-			reject(ResponseError.internalError('$msg'));
+			trace('[rename] error: $msg$HINT_SETTINGS');
+			reject(ResponseError.internalError('$msg$HINT_SETTINGS'));
 		});
 	}
 
