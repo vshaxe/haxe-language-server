@@ -44,6 +44,7 @@ class CodeActionFeature {
 		context.languageServerProtocol.onRequest(CodeActionRequest.type, onCodeAction);
 		context.languageServerProtocol.onRequest(CodeActionResolveRequest.type, onCodeActionResolve);
 
+		registerContributor(new ExtractVarFeature(context));
 		registerContributor(new ExtractConstantFeature(context));
 		registerContributor(new DiagnosticsCodeActionFeature(context));
 		#if debug
