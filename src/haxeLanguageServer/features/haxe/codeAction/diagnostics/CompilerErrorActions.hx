@@ -85,6 +85,23 @@ class CompilerErrorActions {
 				isPreferred: false
 			});
 		}
+
+		if (arg.contains("Cannot assign to final") || arg.contains("This expression cannot be accessed for writing")) {
+			final document = context.documents.getHaxe(params.textDocument.uri);
+			final replacement = document.getText(diagnostic.range);
+			final data:CodeActionResolveData = {
+				type: ChangeFinalToVar,
+				params: params,
+				diagnostic: diagnostic
+			};
+			actions.push({
+				title: "Change final to var",
+				data: data,
+				kind: QuickFix,
+				diagnostics: [diagnostic],
+				isPreferred: false
+			});
+		}
 		return actions;
 	}
 }

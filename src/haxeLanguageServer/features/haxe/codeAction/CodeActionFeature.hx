@@ -1,5 +1,6 @@
 package haxeLanguageServer.features.haxe.codeAction;
 
+import haxeLanguageServer.features.haxe.codeAction.diagnostics.ChangeFinalToVarAction;
 import haxeLanguageServer.features.haxe.codeAction.diagnostics.MissingArgumentsAction;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
@@ -13,6 +14,7 @@ interface CodeActionContributor {
 
 enum CodeActionResolveType {
 	MissingArg;
+	ChangeFinalToVar;
 }
 
 typedef CodeActionResolveData = {
@@ -76,8 +78,14 @@ class CodeActionFeature {
 		switch (type) {
 			case null:
 				resolve(action);
-			case MissingArg:
-				final promise = MissingArgumentsAction.createMissingArgumentsAction(context, action, params, diagnostic);
+			case MissingArg, ChangeFinalToVar:
+				final promise = switch type {
+					case MissingArg:
+						MissingArgumentsAction.createMissingArgumentsAction(context, action, params, diagnostic);
+					case ChangeFinalToVar:
+						ChangeFinalToVarAction.createChangeFinalToVarAction(context, action, params, diagnostic);
+					case _: null;
+				}
 				if (promise == null) {
 					reject(ResponseError.internalError("failed to resolve missing arguments action"));
 					return;
