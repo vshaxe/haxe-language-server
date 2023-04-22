@@ -34,6 +34,8 @@ class GotoDefinitionFeature {
 			contents: doc.content,
 			offset: offset
 		}, token, function(locations) {
+			if (locations == null)
+				locations = [];
 			resolve(locations.map(location -> {
 				final document = getHaxeDocument(location.file.toUri());
 				final tokens = document!.tokens;
