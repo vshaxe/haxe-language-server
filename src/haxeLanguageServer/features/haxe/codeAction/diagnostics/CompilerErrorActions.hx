@@ -1,5 +1,7 @@
 package haxeLanguageServer.features.haxe.codeAction.diagnostics;
 
+import languageServerProtocol.Types.CodeActionKind;
+
 class CompilerErrorActions {
 	public static function createCompilerErrorActions(context:Context, params:CodeActionParams, diagnostic:Diagnostic):Array<CodeAction> {
 		if ((params.context.only != null) && (!params.context.only.contains(QuickFix))) {
@@ -40,7 +42,7 @@ class CompilerErrorActions {
 				final replacement = document.getText(diagnostic.range).replace(is, shouldBe);
 				actions.push({
 					title: "Change to " + replacement,
-					kind: QuickFix,
+					kind: CodeActionKind.QuickFix + ".auto",
 					edit: WorkspaceEditHelper.create(context, params, [{range: diagnostic.range, newText: replacement}]),
 					diagnostics: [diagnostic],
 					isPreferred: true
@@ -61,7 +63,7 @@ class CompilerErrorActions {
 			}
 			actions.push({
 				title: "Add override keyword",
-				kind: QuickFix,
+				kind: CodeActionKind.QuickFix + ".auto",
 				edit: WorkspaceEditHelper.create(context, params, [{range: pos.toRange(), newText: "override "}]),
 				diagnostics: [diagnostic],
 				isPreferred: true

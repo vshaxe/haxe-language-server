@@ -3,6 +3,7 @@ package haxeLanguageServer.features.haxe.codeAction;
 import haxeLanguageServer.features.haxe.DiagnosticsFeature;
 import haxeLanguageServer.features.haxe.codeAction.CodeActionFeature;
 import haxeLanguageServer.features.haxe.codeAction.diagnostics.CompilerErrorActions;
+import haxeLanguageServer.features.haxe.codeAction.diagnostics.FixAllAction;
 import haxeLanguageServer.features.haxe.codeAction.diagnostics.MissingFieldsActions;
 import haxeLanguageServer.features.haxe.codeAction.diagnostics.OrganizeImportActions;
 import haxeLanguageServer.features.haxe.codeAction.diagnostics.ParserErrorActions;
@@ -47,6 +48,7 @@ class DiagnosticsCodeActionFeature implements CodeActionContributor {
 			});
 		}
 		actions = OrganizeImportActions.createOrganizeImportActions(context, params, actions).concat(actions);
+		actions = FixAllAction.createFixAllAction(context, params, actions).concat(actions);
 		actions = actions.filterDuplicates((a, b) -> a.title == b.title);
 		return actions;
 	}

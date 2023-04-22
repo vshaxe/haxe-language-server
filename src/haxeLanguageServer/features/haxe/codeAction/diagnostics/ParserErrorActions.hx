@@ -1,5 +1,6 @@
 package haxeLanguageServer.features.haxe.codeAction.diagnostics;
 
+import languageServerProtocol.Types.CodeActionKind;
 import tokentree.TokenTree;
 
 class ParserErrorActions {
@@ -13,11 +14,41 @@ class ParserErrorActions {
 			return actions;
 		}
 
+		if (arg.contains("modifier is not supported for module-level fields")) {
+			final document = context.documents.getHaxe(params.textDocument.uri);
+			final nextText = document.content.substr(document.offsetAt(diagnostic.range.end));
+			final isAuto = nextText.split("{").length == nextText.split("}").length;
+			final token = document!.tokens!.getTokenAtOffset(document.offsetAt(diagnostic.range.end));
+			var range = diagnostic.range;
+			if (token != null) {
+				for (sib in [token.previousSibling, token.nextSibling]) {
+					if (sib == null)
+						continue;
+					if (sib.tok.match(Kwd(KwdStatic)) || sib.tok.match(Kwd(KwdPublic))) {
+						range = range.union(document.rangeAt(sib.pos.min, sib.pos.max));
+					}
+				}
+			}
+			range.end = range.end.translate(0, 1);
+			actions.push({
+				title: "Remove reduntant modifiers",
+				kind: CodeActionKind.QuickFix + (isAuto ? ".auto" : ""),
+				edit: WorkspaceEditHelper.create(context, params, [
+					{
+						range: range,
+						newText: ""
+					}
+				]),
+				diagnostics: [diagnostic],
+				isPreferred: true
+			});
+		}
+
 		if (arg.contains("`final var` is not supported, use `final` instead")) {
 			final document = context.documents.getHaxe(params.textDocument.uri);
 			actions.push({
 				title: "Change to final",
-				kind: QuickFix,
+				kind: CodeActionKind.QuickFix + ".auto",
 				edit: WorkspaceEditHelper.create(context, params, [{range: diagnostic.range, newText: "final"}]),
 				diagnostics: [diagnostic],
 				isPreferred: true
@@ -33,7 +64,7 @@ class ParserErrorActions {
 				if (!hasSemicolon) { // do not generate `;;`
 					actions.push({
 						title: "Add missing ;",
-						kind: QuickFix,
+						kind: CodeActionKind.QuickFix + ".auto",
 						edit: WorkspaceEditHelper.create(context, params, [{range: errRange, newText: ";"}]),
 						diagnostics: [diagnostic],
 						isPreferred: true
@@ -52,7 +83,15 @@ class ParserErrorActions {
 					case [Semicolon, Semicolon]:
 						actions.push({
 							title: "Remove reduntant ;",
-							kind: QuickFix,
+							kind: CodeActionKind.QuickFix + ".auto",
+							edit: WorkspaceEditHelper.create(context, params, [{range: diagnostic.range, newText: ""}]),
+							diagnostics: [diagnostic],
+							isPreferred: true
+						});
+					case [Comma, Comma]:
+						actions.push({
+							title: "Remove reduntant ,",
+							kind: CodeActionKind.QuickFix + ".auto",
 							edit: WorkspaceEditHelper.create(context, params, [{range: diagnostic.range, newText: ""}]),
 							diagnostics: [diagnostic],
 							isPreferred: true
@@ -71,7 +110,7 @@ class ParserErrorActions {
 				if (!hasComma) { // do not generate `,,`
 					actions.push({
 						title: "Add missing ,",
-						kind: QuickFix,
+						kind: CodeActionKind.QuickFix + ".auto",
 						edit: WorkspaceEditHelper.create(context, params, [{range: errRange, newText: ","}]),
 						diagnostics: [diagnostic],
 						isPreferred: true

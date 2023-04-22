@@ -23,6 +23,7 @@ typedef CodeActionResolveData = {
 
 class CodeActionFeature {
 	public static inline final SourceSortImports = "source.sortImports";
+	public static inline final SourceFixAll = "source.fixAll";
 
 	final context:Context;
 	final contributors:Array<CodeActionContributor> = [];
@@ -37,7 +38,8 @@ class CodeActionFeature {
 				SourceOrganizeImports,
 				SourceSortImports,
 				RefactorExtract,
-				RefactorRewrite
+				RefactorRewrite,
+				SourceFixAll
 			],
 			resolveProvider: true
 		});
