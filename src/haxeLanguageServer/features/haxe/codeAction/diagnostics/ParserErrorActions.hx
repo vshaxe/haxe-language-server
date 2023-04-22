@@ -31,7 +31,7 @@ class ParserErrorActions {
 			}
 			range.end = range.end.translate(0, 1);
 			actions.push({
-				title: "Remove reduntant modifiers",
+				title: "Remove redundant modifiers",
 				kind: CodeActionKind.QuickFix + (isAuto ? ".auto" : ""),
 				edit: WorkspaceEditHelper.create(context, params, [
 					{
@@ -82,7 +82,7 @@ class ParserErrorActions {
 				switch [prevToken!.tok, token!.tok] {
 					case [Semicolon, Semicolon]:
 						actions.push({
-							title: "Remove reduntant ;",
+							title: "Remove redundant ;",
 							kind: CodeActionKind.QuickFix + ".auto",
 							edit: WorkspaceEditHelper.create(context, params, [{range: diagnostic.range, newText: ""}]),
 							diagnostics: [diagnostic],
@@ -90,7 +90,7 @@ class ParserErrorActions {
 						});
 					case [Comma, Comma]:
 						actions.push({
-							title: "Remove reduntant ,",
+							title: "Remove redundant ,",
 							kind: CodeActionKind.QuickFix + ".auto",
 							edit: WorkspaceEditHelper.create(context, params, [{range: diagnostic.range, newText: ""}]),
 							diagnostics: [diagnostic],
