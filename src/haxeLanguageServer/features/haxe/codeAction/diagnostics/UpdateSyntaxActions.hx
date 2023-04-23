@@ -5,11 +5,14 @@ import haxeLanguageServer.features.haxe.codeAction.CodeActionFeature;
 import haxeLanguageServer.features.haxe.codeAction.OrganizeImportsFeature;
 import haxeLanguageServer.helper.DocHelper;
 import haxeLanguageServer.helper.FormatterHelper;
+import haxeLanguageServer.helper.SemVer;
 import languageServerProtocol.Types.CodeAction;
 import tokentree.TokenTree;
 
 class UpdateSyntaxActions {
 	public static function createUpdateSyntaxActions(context:Context, params:CodeActionParams, existingActions:Array<CodeAction>):Array<CodeAction> {
+		if (!(context.haxeServer.haxeVersion >= new SemVer(4, 3, 0)))
+			return [];
 		final uri = params.textDocument.uri;
 		final doc = context.documents.getHaxe(uri) ?? return [];
 		final actions:Array<CodeAction> = [];
