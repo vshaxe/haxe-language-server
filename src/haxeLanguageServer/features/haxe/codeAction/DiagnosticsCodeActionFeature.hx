@@ -10,6 +10,7 @@ import haxeLanguageServer.features.haxe.codeAction.diagnostics.ParserErrorAction
 import haxeLanguageServer.features.haxe.codeAction.diagnostics.RemovableCodeActions;
 import haxeLanguageServer.features.haxe.codeAction.diagnostics.UnresolvedIdentifierActions;
 import haxeLanguageServer.features.haxe.codeAction.diagnostics.UnusedImportActions;
+import haxeLanguageServer.features.haxe.codeAction.diagnostics.UpdateSyntaxActions;
 import languageServerProtocol.Types.CodeAction;
 
 using Lambda;
@@ -48,6 +49,7 @@ class DiagnosticsCodeActionFeature implements CodeActionContributor {
 			});
 		}
 		actions = OrganizeImportActions.createOrganizeImportActions(context, params, actions).concat(actions);
+		actions = UpdateSyntaxActions.createUpdateSyntaxActions(context, params, actions).concat(actions);
 		actions = FixAllAction.createFixAllAction(context, params, actions).concat(actions);
 		actions = actions.filterDuplicates((a, b) -> a.title == b.title);
 		return actions;
