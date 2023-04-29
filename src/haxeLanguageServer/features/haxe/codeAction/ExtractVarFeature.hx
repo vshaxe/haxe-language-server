@@ -191,7 +191,7 @@ class ExtractVarFeature implements CodeActionContributor {
 		for (token in tokens) {
 			if (token == null)
 				continue;
-			final range = doc.rangeAt(token.pos.min, token.pos.max);
+			final range = doc.rangeAt(token.pos.min, token.pos.max, true);
 			if (fullRange == null) {
 				fullRange = range;
 				continue;
@@ -206,7 +206,7 @@ class ExtractVarFeature implements CodeActionContributor {
 		switch parent.tok {
 			case Kwd(KwdNew):
 				return parent;
-			case Dot:
+			case Dot, QuestionDot:
 				final prevToken = parent.parent ?? return token;
 				if (!token.isCIdent())
 					return token;
@@ -229,7 +229,7 @@ class ExtractVarFeature implements CodeActionContributor {
 		var parent:Null<TokenTree> = token.parent;
 		while (parent != null) {
 			switch parent.tok {
-				case Dot:
+				case Dot, QuestionDot:
 					// skip to start of foo.bar.baz
 					if (parent.parent!.isCIdent() == true) {
 						parent = parent.parent ?? return [];
@@ -240,8 +240,9 @@ class ExtractVarFeature implements CodeActionContributor {
 							return [];
 						case _:
 							// end of a.b expr is inside of Dot
-							final hasDot = token.getFirstChild()!.tok == Dot;
-							final last = hasDot ? token.getFirstChild() : token;
+							final first = token.getFirstChild();
+							final hasDot = first!.tok == Dot || first!.tok == QuestionDot;
+							final last = hasDot ? first : token;
 							return [token, getLastNonCommaToken(last)];
 					}
 				case POpen, BkOpen:
@@ -257,7 +258,7 @@ class ExtractVarFeature implements CodeActionContributor {
 						return [];
 					if (firstChild == null)
 						return tokens;
-					final hasDot = firstChild.tok == Dot;
+					final hasDot = firstChild.tok == Dot || firstChild.tok == QuestionDot;
 					final isCall = firstChild.tok == POpen;
 					final isNew = token.tok.match(Kwd(KwdNew));
 					var lastParent = (hasDot || isCall || isNew) ? firstChild : token;

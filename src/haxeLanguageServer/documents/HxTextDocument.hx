@@ -64,7 +64,10 @@ class HxTextDocument {
 		}
 	}
 
-	public function positionAt(offset:Int):Position {
+	public function positionAt(offset:Int, isUtf8 = false):Position {
+		if (isUtf8) {
+			offset = utf8Offset(content, offset, 1);
+		}
 		offset = Std.int(Math.max(Math.min(offset, content.length), 0));
 
 		final lineOffsets = getLineOffsets();
@@ -82,15 +85,15 @@ class HxTextDocument {
 		return {line: line, character: offset - lineOffsets[line]};
 	}
 
-	overload public extern inline function rangeAt(startOffset:Int, endOffset:Int):Range {
+	overload public extern inline function rangeAt(startOffset:Int, endOffset:Int, isUtf8 = false):Range {
 		return {
-			start: positionAt(startOffset),
-			end: positionAt(endOffset)
+			start: positionAt(startOffset, isUtf8),
+			end: positionAt(endOffset, isUtf8)
 		};
 	}
 
-	overload public extern inline function rangeAt(pos:haxe.macro.Expr.Position):Range {
-		return rangeAt(pos.min, pos.max);
+	overload public extern inline function rangeAt(pos:haxe.macro.Expr.Position, isUtf8 = false):Range {
+		return rangeAt(pos.min, pos.max, isUtf8);
 	}
 
 	/**
@@ -181,4 +184,31 @@ class HxTextDocument {
 
 	inline function get_lineCount()
 		return getLineOffsets().length;
+
+	function utf8Offset(string:String, offset:Int, direction:Int):Int {
+		var ret = offset;
+		var i = 0, j = 0;
+		while (j < string.length && i < offset) {
+			var ch = string.charCodeAt(j).sure();
+			if (ch >= 0x0000 && ch <= 0x007F) {
+				// 1
+			} else if (ch >= 0x0080 && ch <= 0x07FF) {
+				// 2
+				ret -= direction;
+			} else if (ch >= 0xD800 && ch < 0xDC00) {
+				// surrogate pair
+				ret -= direction * 2;
+				j++;
+			} else if (ch >= 0x0800 && ch <= 0xFFFF) {
+				// 3
+				ret -= direction * 2;
+			} else if (ch >= 0x10000 && ch <= 0x10FFFF) {
+				// 4
+				ret -= direction * 3;
+			} else {} // invalid char
+			i++;
+			j++;
+		}
+		return ret;
+	}
 }

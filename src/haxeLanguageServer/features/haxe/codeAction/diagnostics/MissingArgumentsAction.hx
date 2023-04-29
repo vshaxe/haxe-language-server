@@ -168,7 +168,7 @@ class MissingArgumentsAction {
 			return null;
 		}
 		final tokenPos = parent.token.pos;
-		return document.rangeAt(tokenPos.min, tokenPos.max);
+		return document.rangeAt(tokenPos.min, tokenPos.max, true);
 	}
 
 	static function getFunctionPOpen(funIdent:Null<TokenTree>):Null<TokenTree> {
@@ -195,7 +195,7 @@ class MissingArgumentsAction {
 		if (pClose == null) {
 			return null;
 		}
-		return document.rangeAt(pClose.pos.min, pClose.pos.min);
+		return document.rangeAt(pClose.pos.min, pClose.pos.min, true);
 	}
 
 	static function functionArgsCount(document:HaxeDocument, funIdent:Null<TokenTree>):Int {
