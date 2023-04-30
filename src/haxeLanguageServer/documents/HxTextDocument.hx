@@ -64,8 +64,8 @@ class HxTextDocument {
 		}
 	}
 
-	public function positionAt(offset:Int, isUtf8 = false):Position {
-		if (isUtf8) {
+	public function positionAt(offset:Int, offsetKind:DocumentOffsetKind = Utf16):Position {
+		if (offsetKind == Utf8) {
 			offset = utf8Offset(content, offset, 1);
 		}
 		offset = Std.int(Math.max(Math.min(offset, content.length), 0));
@@ -85,15 +85,15 @@ class HxTextDocument {
 		return {line: line, character: offset - lineOffsets[line]};
 	}
 
-	overload public extern inline function rangeAt(startOffset:Int, endOffset:Int, isUtf8 = false):Range {
+	overload public extern inline function rangeAt(startOffset:Int, endOffset:Int, offsetKind:DocumentOffsetKind = Utf16):Range {
 		return {
-			start: positionAt(startOffset, isUtf8),
-			end: positionAt(endOffset, isUtf8)
+			start: positionAt(startOffset, offsetKind),
+			end: positionAt(endOffset, offsetKind)
 		};
 	}
 
-	overload public extern inline function rangeAt(pos:haxe.macro.Expr.Position, isUtf8 = false):Range {
-		return rangeAt(pos.min, pos.max, isUtf8);
+	overload public extern inline function rangeAt(pos:haxe.macro.Expr.Position, offsetKind:DocumentOffsetKind = Utf16):Range {
+		return rangeAt(pos.min, pos.max, offsetKind);
 	}
 
 	/**

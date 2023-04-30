@@ -191,7 +191,7 @@ class ExtractVarFeature implements CodeActionContributor {
 		for (token in tokens) {
 			if (token == null)
 				continue;
-			final range = doc.rangeAt(token.pos.min, token.pos.max, true);
+			final range = doc.rangeAt(token.pos.min, token.pos.max, Utf8);
 			if (fullRange == null) {
 				fullRange = range;
 				continue;

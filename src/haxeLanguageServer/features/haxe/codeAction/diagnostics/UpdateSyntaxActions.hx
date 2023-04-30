@@ -50,7 +50,7 @@ class UpdateSyntaxActions {
 		final prev = ifToken.previousSibling ?? return;
 		final varIdent = getIdentAssignToken(doc, prev) ?? return;
 		final varIdentEnd = getIdentEnd(varIdent);
-		final varIdentRange = doc.rangeAt(varIdent.pos, true).union(doc.rangeAt(varIdentEnd.pos, true));
+		final varIdentRange = doc.rangeAt(varIdent.pos, Utf8).union(doc.rangeAt(varIdentEnd.pos, Utf8));
 		final varNameName = doc.getText(varIdentRange);
 		if (varNameName != ifVarName)
 			return;
@@ -65,9 +65,9 @@ class UpdateSyntaxActions {
 		if (!value.endsWith(";"))
 			value += ";";
 		final prevValueToken = varIdent.getFirstChild()!.getFirstChild() ?? return;
-		final prevValueRange = doc.rangeAt(prevValueToken.getPos(), true);
+		final prevValueRange = doc.rangeAt(prevValueToken.getPos(), Utf8);
 		final prevValue = doc.getText(prevValueRange);
-		final replaceRange = prevValueRange.union(doc.rangeAt(ifToken.getPos(), true));
+		final replaceRange = prevValueRange.union(doc.rangeAt(ifToken.getPos(), Utf8));
 		actions.push({
 			title: "Change to ?? operator",
 			kind: QuickFix,
@@ -90,7 +90,7 @@ class UpdateSyntaxActions {
 		var value = doc.getText(ranges.value);
 		if (!value.endsWith(";"))
 			value += ";";
-		final replaceRange = doc.rangeAt(ifToken.getPos(), true);
+		final replaceRange = doc.rangeAt(ifToken.getPos(), Utf8);
 		actions.push({
 			title: "Change to ??= operator",
 			kind: QuickFix,
@@ -107,7 +107,7 @@ class UpdateSyntaxActions {
 	static function addSaveNavIfNotNullAction(context:Context, params:CodeActionParams, actions:Array<CodeAction>, doc:HaxeDocument, ifToken:TokenTree,
 			ifVarName:String) {
 		final ident = getSingleLineIfBodyExpr(ifToken) ?? return;
-		final varName = doc.getText(doc.rangeAt(ident.getPos(), true));
+		final varName = doc.getText(doc.rangeAt(ident.getPos(), Utf8));
 		if (!varName.startsWith(ifVarName))
 			return;
 		var accessPart = varName.replace(ifVarName, "");
@@ -119,7 +119,7 @@ class UpdateSyntaxActions {
 		}
 		if (!accessPart.endsWith(";"))
 			accessPart += ";";
-		final replaceRange = doc.rangeAt(ifToken.getPos(), true);
+		final replaceRange = doc.rangeAt(ifToken.getPos(), Utf8);
 		actions.push({
 			title: "Change to ?. operator",
 			kind: QuickFix,
@@ -151,7 +151,7 @@ class UpdateSyntaxActions {
 		var ident = getSingleLineIfBodyExpr(ifToken) ?? cast return null;
 		switch ident.tok {
 			case Kwd(KwdReturn | KwdBreak | KwdContinue | KwdThrow):
-				return doc.rangeAt(ident.getPos(), true);
+				return doc.rangeAt(ident.getPos(), Utf8);
 			case _:
 				return null;
 		}
@@ -177,7 +177,7 @@ class UpdateSyntaxActions {
 		final kwdNull = opEq.getFirstChild() ?? cast return null;
 		switch [opEq.tok, kwdNull.tok] {
 			case [Binop(OpEq), Kwd(KwdNull)]:
-				return doc.rangeAt(ident.pos, true).union(doc.rangeAt(identEnd.pos, true));
+				return doc.rangeAt(ident.pos, Utf8).union(doc.rangeAt(identEnd.pos, Utf8));
 			case _:
 				return null;
 		}
@@ -191,7 +191,7 @@ class UpdateSyntaxActions {
 		final kwdNull = opNotEq.getFirstChild() ?? cast return null;
 		switch [opNotEq.tok, kwdNull.tok] {
 			case [Binop(OpNotEq), Kwd(KwdNull)]:
-				return doc.rangeAt(ident.pos, true).union(doc.rangeAt(identEnd.pos, true));
+				return doc.rangeAt(ident.pos, Utf8).union(doc.rangeAt(identEnd.pos, Utf8));
 			case _:
 				return null;
 		}
@@ -205,8 +205,8 @@ class UpdateSyntaxActions {
 		switch opAssign.tok {
 			case Binop(OpAssign):
 				return {
-					varName: doc.rangeAt(ident2.pos, true).union(doc.rangeAt(ident2End.pos, true)),
-					value: doc.rangeAt(value.getPos(), true)
+					varName: doc.rangeAt(ident2.pos, Utf8).union(doc.rangeAt(ident2End.pos, Utf8)),
+					value: doc.rangeAt(value.getPos(), Utf8)
 				};
 			case _:
 				return null;

@@ -92,7 +92,7 @@ class ExtractFunctionFeature implements CodeActionContributor {
 			newParams = newParams.concat(localVarsToParameter(varTokens, text, rangeIdents));
 
 			final action:Null<CodeAction> = makeExtractFunctionChanges(doc, doc.uri, params, text, isStatic, newParams, returnSpec, indent,
-				doc.positionAt(lastToken.pos.max + 1, true));
+				doc.positionAt(lastToken.pos.max + 1, Utf8));
 			if (action == null)
 				return [];
 			[action];
@@ -167,7 +167,7 @@ class ExtractFunctionFeature implements CodeActionContributor {
 	}
 
 	function detectIndent(doc:HaxeDocument, functionToken:TokenTree):String {
-		final functionRange:Range = doc.rangeAt(functionToken.pos, true);
+		final functionRange:Range = doc.rangeAt(functionToken.pos, Utf8);
 		functionRange.start.character = 0;
 
 		final text:String = doc.getText(functionRange);
