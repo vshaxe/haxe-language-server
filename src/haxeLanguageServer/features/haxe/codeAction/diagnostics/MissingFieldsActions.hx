@@ -184,7 +184,10 @@ class MissingFieldsActions {
 					var id = 0;
 					final args = signature!.args ?? [];
 					for (arg in args) {
-						var argName = MissingArgumentsAction.genArgNameFromJsonType(arg.t);
+						var argName = arg.name;
+						if (argName.startsWith("arg") && argName.length == 4) {
+							argName = MissingArgumentsAction.genArgNameFromJsonType(arg.t);
+						}
 						for (i in 1...10) {
 							final name = argName + (i == 1 ? "" : '$i');
 							if (!argNames.contains(name)) {
