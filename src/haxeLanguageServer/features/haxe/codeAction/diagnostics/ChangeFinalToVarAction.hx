@@ -8,7 +8,7 @@ import tokentree.TokenTree;
 class ChangeFinalToVarAction {
 	public static function createChangeFinalToVarAction(context:Context, action:CodeAction, params:CodeActionParams,
 			diagnostic:Diagnostic):Null<Promise<CodeAction>> {
-		if ((params.context.only != null) && (!params.context.only.contains(RefactorRewrite))) {
+		if ((params.context.only != null) && (!params.context.only.contains(RefactorExtract))) {
 			return null;
 		}
 		final document = context.documents.getHaxe(params.textDocument.uri);

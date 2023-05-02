@@ -82,7 +82,7 @@ class CompilerErrorActions {
 			actions.push({
 				title: "Add argument",
 				data: data,
-				kind: RefactorRewrite,
+				kind: QuickFix,
 				diagnostics: [diagnostic],
 				isPreferred: false
 			});
@@ -99,7 +99,7 @@ class CompilerErrorActions {
 			actions.push({
 				title: "Change final to var",
 				data: data,
-				kind: QuickFix,
+				kind: RefactorExtract,
 				diagnostics: [diagnostic],
 				isPreferred: false
 			});
