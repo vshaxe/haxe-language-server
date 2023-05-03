@@ -99,7 +99,7 @@ class CompilerErrorActions {
 			actions.push({
 				title: "Change final to var",
 				data: data,
-				kind: RefactorExtract,
+				kind: QuickFix,
 				diagnostics: [diagnostic],
 				isPreferred: false
 			});
