@@ -3,6 +3,7 @@ package haxeLanguageServer.features.haxe.codeAction.diagnostics;
 import haxe.display.Display.DisplayItem;
 import haxe.display.Display.DisplayMethods;
 import haxe.display.Display.HoverDisplayItemOccurence;
+import haxe.display.JsonModuleTypes.JsonType;
 import haxeLanguageServer.features.haxe.InlayHintFeature.HoverRequestContext;
 import haxeLanguageServer.protocol.DisplayPrinter;
 import js.lib.Promise;
@@ -13,7 +14,7 @@ import tokentree.TokenTree;
 class MissingArgumentsAction {
 	public static function createMissingArgumentsAction(context:Context, action:CodeAction, params:CodeActionParams,
 			diagnostic:Diagnostic):Null<Promise<CodeAction>> {
-		if ((params.context.only != null) && (!params.context.only.contains(RefactorRewrite))) {
+		if ((params.context.only != null) && (!params.context.only.contains(QuickFix))) {
 			return null;
 		}
 		final document = context.documents.getHaxe(params.textDocument.uri);
@@ -58,7 +59,8 @@ class MissingArgumentsAction {
 			if (itemType == null)
 				return action;
 			final type = itemType.removeNulls().type;
-			final typeHint = printer.printType(type);
+			var typeHint = printer.printType(type);
+			typeHint = ~/Null<Null<(.+?)>>/g.replace(typeHint, "Null<$1>");
 			final definitionDoc = context.documents.getHaxe(definition.targetUri);
 			if (definitionDoc == null)
 				return action;
@@ -74,17 +76,28 @@ class MissingArgumentsAction {
 					break;
 				}
 			}
+			final isSnippet = context.hasClientCommandSupport("haxe.codeAction.insertSnippet");
 			var arg = '$argName';
+			if (isSnippet)
+				arg = '$${1:$arg}';
 			if (typeHint != "?")
 				arg += ':$typeHint';
 			if (functionArgsCount(definitionDoc, definitonFunToken) > 0) {
 				arg = hadCommaAtEnd ? ' $arg' : ', $arg';
 			}
-			action.edit = WorkspaceEditHelper.create(definitionDoc, [{range: argRange, newText: arg}]);
-			action.command = {
-				title: "Highlight Insertion",
-				command: "haxe.codeAction.highlightInsertion",
-				arguments: [definitionDoc.uri.toString(), argRange]
+			if (isSnippet) {
+				action.command = {
+					title: "Insert Snippet",
+					command: "haxe.codeAction.insertSnippet",
+					arguments: [definitionDoc.uri.toString(), argRange, arg]
+				}
+			} else {
+				action.edit = WorkspaceEditHelper.create(definitionDoc, [{range: argRange, newText: arg}]);
+				action.command = {
+					title: "Highlight Insertion",
+					command: "haxe.codeAction.highlightInsertion",
+					arguments: [definitionDoc.uri.toString(), argRange]
+				}
 			}
 			return action;
 		});
@@ -102,7 +115,11 @@ class MissingArgumentsAction {
 			case _:
 				return item.args!.name ?? "arg";
 		}
-		final dotPath = item.type!.getDotPath() ?? return "arg";
+		return genArgNameFromJsonType(item.type);
+	}
+
+	public static function genArgNameFromJsonType(type:Null<JsonType<Dynamic>>):String {
+		final dotPath = type!.getDotPath() ?? return "arg";
 		return switch dotPath {
 			case Std_Bool: "bool";
 			case Std_Int, Std_UInt: "i";

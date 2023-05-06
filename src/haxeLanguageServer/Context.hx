@@ -7,6 +7,8 @@ import haxe.display.Protocol.HaxeResponseErrorData;
 import haxe.display.Protocol.Methods as HaxeMethods;
 import haxe.display.Protocol.Response;
 import haxe.display.Server.ServerMethods;
+import haxeLanguageServer.Configuration.ExperimentalCapabilities;
+import haxeLanguageServer.Configuration.InitOptions;
 import haxeLanguageServer.LanguageServerMethods.MethodResult;
 import haxeLanguageServer.features.CompletionFeature;
 import haxeLanguageServer.features.HoverFeature;
@@ -151,6 +153,12 @@ class Context {
 			workspacePath = params.rootUri.toFsPath();
 		}
 		capabilities = params.capabilities;
+		capabilities.experimental ??= {}
+		final initOptions:Null<InitOptions> = params.initializationOptions;
+		final experimentals = initOptions!.experimentalClientCapabilities;
+		if (experimentals != null) {
+			capabilities.experimental.supportedCommands = experimentals.supportedCommands;
+		}
 		config.onInitialize(params);
 		serverRecording.onInitialize(this);
 
@@ -342,6 +350,12 @@ class Context {
 				}
 			]
 		}, null, _ -> {}, error -> trace(error));
+	}
+
+	public function hasClientCommandSupport(command:String):Bool {
+		final experimental:ExperimentalCapabilities = capabilities.experimental ?? return false;
+		final supportedCommands = experimental.supportedCommands ?? return false;
+		return supportedCommands.contains(command);
 	}
 
 	function restartServer(reason:String) {

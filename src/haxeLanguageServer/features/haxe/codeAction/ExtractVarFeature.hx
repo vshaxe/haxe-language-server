@@ -9,6 +9,7 @@ import languageServerProtocol.Types.TextDocumentEdit;
 import tokentree.TokenTree;
 import tokentree.utils.TokenTreeCheckUtils;
 
+using Lambda;
 using tokentree.TokenTreeAccessHelper;
 
 class ExtractVarFeature implements CodeActionContributor {
@@ -147,24 +148,43 @@ class ExtractVarFeature implements CodeActionContributor {
 		if (extractionRange == null)
 			return null;
 		final fullText = doc.getText(extractionRange);
+		// insert var before parent
 		final varInsertPos:Position = doc.positionAt(tokens.getTreePos(parent).min);
 
-		final edits:Array<TextEdit> = [];
-		// insert var before parent
+		final isSnippet = context.hasClientCommandSupport("haxe.codeAction.insertSnippet");
+		if (isSnippet)
+			name = '$${1:$name}';
+		// indentation before var pos
 		final prefix:String = doc.getText({start: {line: varInsertPos.line, character: 0}, end: varInsertPos});
-		final newConstText:String = FormatterHelper.formatText(doc, context, 'final $name = $fullText;', ExpressionLevel) + '$prefix';
-		edits.push(WorkspaceEditHelper.insertText(varInsertPos, newConstText));
+		var exprText = FormatterHelper.formatText(doc, context, '$fullText;', ExpressionLevel);
+		exprText = exprText.split("\n").mapi((i, s) -> i == 0 ? s : '$prefix$s').join("\n");
+		final newConstText:String = 'final $name = $exprText';
 
-		edits.push(WorkspaceEditHelper.replaceText(extractionRange, name));
+		var fullText = newConstText;
+		fullText += doc.getText({
+			start: doc.positionAt(doc.offsetAt(varInsertPos)),
+			end: doc.positionAt(doc.offsetAt(extractionRange.start))
+		});
+		fullText += name;
+		if (isSnippet)
+			fullText += "$0";
 
-		final textEdit:TextDocumentEdit = WorkspaceEditHelper.textDocumentEdit(uri, edits);
-		return {
+		final editRange = varInsertPos.toRange().union(extractionRange);
+		final action:CodeAction = {
 			title: "Extract to var in enclosing scope",
 			kind: RefactorExtract,
-			edit: {
-				documentChanges: [textEdit]
+		}
+		if (isSnippet) {
+			action.command = {
+				title: "Insert Snippet",
+				command: "haxe.codeAction.insertSnippet",
+				arguments: [uri.toString(), editRange, fullText]
 			}
-		};
+		} else {
+			final edit = WorkspaceEditHelper.replaceText(editRange, fullText);
+			action.edit = WorkspaceEditHelper.create(doc, [edit]);
+		}
+		return action;
 	}
 
 	function findParentInLocalScope(token:TokenTree):Null<TokenTree> {

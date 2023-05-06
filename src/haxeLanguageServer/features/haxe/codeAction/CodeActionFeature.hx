@@ -29,6 +29,7 @@ class CodeActionFeature {
 
 	final context:Context;
 	final contributors:Array<CodeActionContributor> = [];
+	final hasCommandResolveSupport:Bool;
 
 	public function new(context) {
 		this.context = context;
@@ -45,6 +46,7 @@ class CodeActionFeature {
 			],
 			resolveProvider: true
 		});
+		hasCommandResolveSupport = context.capabilities.textDocument!.codeAction!.resolveSupport!.properties.contains("command");
 		context.languageServerProtocol.onRequest(CodeActionRequest.type, onCodeAction);
 		context.languageServerProtocol.onRequest(CodeActionResolveRequest.type, onCodeActionResolve);
 
@@ -96,7 +98,7 @@ class CodeActionFeature {
 				promise.then(action -> {
 					resolve(action);
 					final command = action.command;
-					if (command == null)
+					if (command == null || hasCommandResolveSupport)
 						return;
 					context.languageServerProtocol.sendNotification(LanguageServerMethods.ExecuteClientCommand, {
 						command: command.command,

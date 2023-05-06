@@ -103,11 +103,16 @@ typedef UserConfig = {
 	var serverRecording:ServerRecordingConfig;
 }
 
-private typedef InitOptions = {
+typedef ExperimentalCapabilities = {
+	?supportedCommands:Array<String>
+}
+
+typedef InitOptions = {
 	var displayServerConfig:DisplayServerConfig;
 	var displayArguments:Array<String>;
 	var haxelibConfig:HaxelibConfig;
 	var sendMethodResults:Bool;
+	var experimentalClientCapabilities:ExperimentalCapabilities;
 }
 
 enum ConfigurationKind {
@@ -132,7 +137,10 @@ class Configuration {
 		haxelibConfig: {
 			executable: "haxelib"
 		},
-		sendMethodResults: false
+		sendMethodResults: false,
+		experimentalClientCapabilities: {
+			supportedCommands: []
+		}
 	};
 
 	static final DefaultUserSettings:UserConfig = {

@@ -78,6 +78,8 @@ class MissingFieldsActions {
 		final fieldFormatting = context.config.user.codeGeneration.functions.field;
 		final printer = new DisplayPrinter(false, if (importConfig.enableAutoImports) Shadowed else Qualified, fieldFormatting);
 		var allEdits = [];
+		final isSnippet = context.hasClientCommandSupport("haxe.codeAction.insertSnippet");
+		var snippetEdit:Null<TextEdit> = null;
 		var allDotPaths = [];
 		for (entry in args.entries) {
 			var fields = entry.fields.copy();
@@ -164,7 +166,8 @@ class MissingFieldsActions {
 				case Some(title): title;
 				case None: return [];
 			}
-			var edits = [];
+			final edits = [];
+			var snippetEditId = -1;
 			final getQualified = printer.collectQualifiedPaths();
 			fields.sort((a, b) -> a.field.pos.min - b.field.pos.min);
 			for (field in fields) {
@@ -175,8 +178,32 @@ class MissingFieldsActions {
 					for (expr in field.field.expr.string.split("\n")) {
 						expressions.push(expr);
 					}
-				} else if (field.type.extractFunctionSignature().check(f -> !f.ret.isVoid())) {
-					expressions.push("throw new haxe.exceptions.NotImplementedException()");
+				} else {
+					final signature = field.type.extractFunctionSignature();
+					final argNames = [];
+					var id = 0;
+					final args = signature!.args ?? [];
+					for (arg in args) {
+						var argName = arg.name;
+						if (argName.startsWith("arg") && argName.length == 4) {
+							argName = MissingArgumentsAction.genArgNameFromJsonType(arg.t);
+						}
+						for (i in 1...10) {
+							final name = argName + (i == 1 ? "" : '$i');
+							if (!argNames.contains(name)) {
+								argNames.push(argName);
+								argName = name;
+								break;
+							}
+						}
+						id++;
+						final isSnippet = isSnippet && snippetEditId == -1;
+						arg.name = isSnippet ? '$${$id:$argName}' : argName;
+					}
+					snippetEditId = edits.length;
+					if (signature.check(f -> !f.ret.isVoid())) {
+						expressions.push("throw new haxe.exceptions.NotImplementedException()");
+					}
 				}
 				buf.add(printer.printClassFieldImplementation(field.field, field.type, false, moduleLevelField, expressions));
 
@@ -213,14 +240,28 @@ class MissingFieldsActions {
 			final codeAction:CodeAction = {
 				title: title,
 				kind: QuickFix,
-				edit: WorkspaceEditHelper.create(document, edits),
 				diagnostics: [diagnostic]
 			};
-			if (entry.cause.kind == FieldAccess) {
+			snippetEdit = edits[snippetEditId];
+			if (snippetEdit != null) {
+				var text = snippetEdit.newText;
+				final matchBodyExpr = ~/({\n[\t ]+)(.+)\n/;
+				if (matchBodyExpr.match(text)) {
+					text = matchBodyExpr.replace(text, '$1$${0:$2}\n');
+				}
 				codeAction.command = {
-					title: "Highlight Insertion",
-					command: "haxe.codeAction.highlightInsertion",
-					arguments: [document.uri.toString(), rangeFieldInsertion]
+					title: "Insert Snippet",
+					command: "haxe.codeAction.insertSnippet",
+					arguments: [document.uri.toString(), rangeFieldInsertion, text]
+				}
+			} else {
+				codeAction.edit = WorkspaceEditHelper.create(document, edits);
+				if (entry.cause.kind == FieldAccess) {
+					codeAction.command = {
+						title: "Highlight Insertion",
+						command: "haxe.codeAction.highlightInsertion",
+						arguments: [document.uri.toString(), rangeFieldInsertion]
+					}
 				}
 			}
 			actions.unshift(codeAction);
@@ -230,12 +271,23 @@ class MissingFieldsActions {
 			if (allDotPaths.length > 0) {
 				allEdits.push(createImportsEdit(document, determineImportPosition(document), allDotPaths, importConfig.style));
 			}
-			actions.unshift({
+			final action:CodeAction = {
 				title: "Implement all missing fields",
 				kind: QuickFix,
-				edit: WorkspaceEditHelper.create(document, allEdits),
 				diagnostics: [diagnostic]
-			});
+			};
+			if (snippetEdit != null) {
+				final item = allEdits.find(item -> item.newText == snippetEdit.newText);
+				if (item != null)
+					allEdits.remove(item);
+				action.command = {
+					title: "Insert Snippet",
+					command: "haxe.codeAction.insertSnippet",
+					arguments: [document.uri.toString(), snippetEdit.range, snippetEdit.newText]
+				}
+			}
+			action.edit = WorkspaceEditHelper.create(document, allEdits);
+			actions.unshift(action);
 		}
 		if (actions.length > 0) {
 			actions[0].isPreferred = true;

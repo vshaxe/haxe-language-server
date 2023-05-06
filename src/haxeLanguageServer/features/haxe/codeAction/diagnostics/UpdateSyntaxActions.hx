@@ -74,11 +74,33 @@ class UpdateSyntaxActions {
 			edit: WorkspaceEditHelper.create(context, params, [
 				{
 					range: replaceRange,
-					newText: '$prevValue ?? $value'
-					// newText: FormatterHelper.formatText(doc, context, '$ifName ??= $value', ExpressionLevel);
+					newText: '$prevValue ?? ${multilineIndent(doc, context, value, replaceRange.start)}'
 				}
 			]),
 		});
+	}
+
+	static function multilineIndent(doc:HaxeDocument, context:Context, value:String, pos:Position):String {
+		if (!value.contains("\n"))
+			return value;
+		value = FormatterHelper.formatText(doc, context, value, ExpressionLevel);
+		final line = doc.lineAt(pos.line);
+		final count = lineIndentationCount(line);
+		if (count == 0)
+			return value;
+		final prefix = "".rpad(line.charAt(0), count);
+		value = value.split("\n").mapi((i, s) -> i == 0 ? s : '$prefix$s').join("\n");
+		return value;
+	}
+
+	static function lineIndentationCount(s:String):Int {
+		var spaces = 0;
+		for (i => _ in s) {
+			if (!s.isSpace(i))
+				break;
+			spaces++;
+		}
+		return spaces;
 	}
 
 	static function addNullCoalAssignAction(context:Context, params:CodeActionParams, actions:Array<CodeAction>, doc:HaxeDocument, ifToken:TokenTree,
@@ -97,8 +119,7 @@ class UpdateSyntaxActions {
 			edit: WorkspaceEditHelper.create(context, params, [
 				{
 					range: replaceRange,
-					newText: '$ifVarName ??= $value'
-					// newText: FormatterHelper.formatText(doc, context, '$ifName ??= $value', ExpressionLevel);
+					newText: '$ifVarName ??= ${multilineIndent(doc, context, value, replaceRange.start)}'
 				}
 			]),
 		});
@@ -127,7 +148,6 @@ class UpdateSyntaxActions {
 				{
 					range: replaceRange,
 					newText: '$ifVarName$accessPart'
-					// newText: FormatterHelper.formatText(doc, context, '$ifName ??= $value', ExpressionLevel);
 				}
 			]),
 		});
