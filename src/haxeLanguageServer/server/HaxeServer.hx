@@ -16,6 +16,8 @@ import js.node.net.Socket.SocketEvent;
 import jsonrpc.CancellationToken;
 import sys.FileSystem;
 
+using haxeLanguageServer.server.HaxeServer;
+
 class HaxeServer {
 	final context:Context;
 	var haxeConnection:Null<HaxeConnection>;
@@ -51,12 +53,12 @@ class HaxeServer {
 					return error('Path to Haxe executable is not valid: \'$haxePath\'. Please check your settings.');
 				}
 			}
-			return error('Error starting Haxe server: ${checkRun.error}');
+			return error('Error starting Haxe server: ${checkRun.error.message.clean()}');
 		}
 
-		var output = (checkRun.stderr : Buffer).toString().trim();
+		var output = (checkRun.stderr : Buffer).toString().trim().clean();
 		if (output == "") {
-			output = (checkRun.stdout : Buffer).toString().trim(); // haxe 4.0 prints -version output to stdout instead
+			output = (checkRun.stdout : Buffer).toString().trim().clean(); // haxe 4.0 prints -version output to stdout instead
 		}
 
 		if (checkRun.status != 0) {
@@ -228,7 +230,7 @@ class HaxeServer {
 				context.languageServerProtocol.sendNotification(LanguageServerMethods.CacheBuildFailed);
 			}
 			stopProgress();
-			trace("Failed - try fixing the error(s) and restarting the language server:\n\n" + error);
+			trace("Failed - try fixing the error(s) and restarting the language server:\n\n" + error.clean());
 		}));
 	}
 
@@ -243,7 +245,7 @@ class HaxeServer {
 			return result.files + " files";
 		}, function(error) {
 			stopProgress();
-			trace("Failed - " + error);
+			trace("Failed - " + error.clean());
 		});
 	}
 
@@ -472,4 +474,7 @@ class HaxeServer {
 		}
 		context.languageServerProtocol.sendNotification(LanguageServerMethods.DidChangeRequestQueue, {queue: queue});
 	}
+
+	static var stripAnsi = ~/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g;
+	static function clean(str:String):String return stripAnsi.replace(str, "");
 }
