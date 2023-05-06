@@ -19,7 +19,6 @@ import languageServerProtocol.Types.Location;
 using Lambda;
 
 class DiagnosticsFeature {
-	public static inline final DiagnosticsSource = "diagnostics";
 	public static inline final SortImportsUsingsTitle = "Sort imports/usings";
 	public static inline final OrganizeImportsUsingsTitle = "Organize imports/usings";
 	public static inline final RemoveUnusedImportUsingTitle = "Remove unused import/using";
@@ -109,7 +108,6 @@ class DiagnosticsFeature {
 
 		final diag = {
 			range: {start: position, end: endPosition},
-			source: DiagnosticsSource,
 			severity: DiagnosticSeverity.Error,
 			message: problemMatcher.matched(7)
 		};
@@ -124,7 +122,6 @@ class DiagnosticsFeature {
 		}
 		final diag = {
 			range: {start: {line: 0, character: 0}, end: {line: 0, character: 0}},
-			source: DiagnosticsSource,
 			severity: DiagnosticSeverity.Error,
 			message: problemMatcher.matched(2)
 		};
@@ -183,8 +180,7 @@ class DiagnosticsFeature {
 				};
 				final diag:Diagnostic = {
 					range: range,
-					source: DiagnosticsSource,
-					code: kind,
+					code: hxDiag.code,
 					severity: hxDiag.severity,
 					message: hxDiag.kind.getMessage(doc, hxDiag.args, range),
 					relatedInformation: hxDiag.relatedInformation?.map(rel -> {
@@ -405,6 +401,7 @@ enum abstract DiagnosticKind<T>(Int) from Int to Int {
 private typedef HaxeDiagnostic<T> = {
 	final kind:DiagnosticKind<T>;
 	final ?range:Range;
+	final ?code:String;
 	final severity:DiagnosticSeverity;
 	final args:T;
 	final relatedInformation:Null<Array<HaxeDiagnosticRelatedInformation>>;
