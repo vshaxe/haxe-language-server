@@ -12,6 +12,7 @@ import haxeLanguageServer.helper.FsHelper;
 import haxeLanguageServer.server.ServerRecordingTools.getVcsState;
 
 using StringTools;
+using haxeLanguageServer.helper.StringHelper;
 
 @:access(haxeLanguageServer.Configuration)
 @:access(haxeLanguageServer.Context)
@@ -138,7 +139,7 @@ class ServerRecording {
 			case DResult(msg):
 				switch (request.label) {
 					case "compilation" | "cache build":
-						appendLines(makeEntry(In, 'compilationResult'), "<<EOF", msg, "EOF");
+						appendLines(makeEntry(In, 'compilationResult'), "<<EOF", msg.clean(), "EOF");
 
 					case _:
 						var id = extractRequestId(request.args);
