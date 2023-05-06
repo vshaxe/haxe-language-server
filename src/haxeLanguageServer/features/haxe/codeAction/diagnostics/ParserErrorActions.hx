@@ -25,7 +25,7 @@ class ParserErrorActions {
 					if (sib == null)
 						continue;
 					if (sib.tok.match(Kwd(KwdStatic)) || sib.tok.match(Kwd(KwdPublic))) {
-						range = range.union(document.rangeAt(sib.pos.min, sib.pos.max));
+						range = range.union(document.rangeAt(sib.pos.min, sib.pos.max, Utf8));
 					}
 				}
 			}
@@ -135,7 +135,7 @@ class ParserErrorActions {
 			return null;
 		final last = getLastNonCommentToken(prev);
 		final pos = last.getPos();
-		return document.rangeAt(pos.max, pos.max);
+		return document.rangeAt(pos.max, pos.max, Utf8);
 	}
 
 	static function getPrevNonCommentSibling(token:Null<TokenTree>):Null<TokenTree> {
