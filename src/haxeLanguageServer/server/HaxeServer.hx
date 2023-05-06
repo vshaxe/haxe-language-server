@@ -475,6 +475,8 @@ class HaxeServer {
 		context.languageServerProtocol.sendNotification(LanguageServerMethods.DidChangeRequestQueue, {queue: queue});
 	}
 
-	static var stripAnsi = ~/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g;
-	static function clean(str:String):String return stripAnsi.replace(str, "");
+	static var stripAnsi = new EReg("[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]", "g");
+
+	static function clean(str:String):String
+		return stripAnsi.replace(str, "");
 }
