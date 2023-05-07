@@ -2,7 +2,6 @@ package haxeLanguageServer.features.haxe.codeAction.diagnostics;
 
 import haxeLanguageServer.features.haxe.DiagnosticsFeature.DiagnosticKind;
 import haxeLanguageServer.features.haxe.codeAction.CodeActionFeature;
-import haxeLanguageServer.features.haxe.codeAction.OrganizeImportsFeature;
 import haxeLanguageServer.helper.DocHelper;
 import haxeLanguageServer.helper.FormatterHelper;
 import haxeLanguageServer.helper.SemVer;
@@ -40,6 +39,13 @@ class UpdateSyntaxActions {
 				// `a.b?.c`
 				addSaveNavIfNotNullAction(context, params, actions, doc, ifToken, ifVarName);
 			}
+		}
+
+		final questionToken = getNullCheckTernaryExpr(token);
+		if (questionToken != null) {
+			// `a == null ? 0 : a` to
+			// `a ?? 0`
+			addTernaryNullCheckAction(context, params, actions, doc, questionToken);
 		}
 
 		return actions;
@@ -132,7 +138,6 @@ class UpdateSyntaxActions {
 		if (!varName.startsWith(ifVarName))
 			return;
 		var accessPart = varName.replace(ifVarName, "");
-		trace(varName, ifVarName);
 		if (!accessPart.startsWith("?.")) {
 			if (!accessPart.startsWith("."))
 				return;
@@ -148,6 +153,47 @@ class UpdateSyntaxActions {
 				{
 					range: replaceRange,
 					newText: '$ifVarName$accessPart'
+				}
+			]),
+		});
+	}
+
+	static function addTernaryNullCheckAction(context:Context, params:CodeActionParams, actions:Array<CodeAction>, doc:HaxeDocument, questionToken:TokenTree) {
+		final binopToken = questionToken.parent!.parent ?? return;
+		final ifIdentEnd = binopToken.parent ?? return;
+		final ifIdentStart = preDotToken(ifIdentEnd);
+
+		final firstOpStart = questionToken.getFirstChild() ?? return;
+		final colon = firstOpStart.nextSibling ?? return;
+		final secondOpStart = colon.getFirstChild() ?? return;
+		final secondOpEnd = getLastNonCommaToken(secondOpStart) ?? return;
+
+		final ifIdentRange = doc.rangeAt(ifIdentStart.pos).union(doc.rangeAt(ifIdentEnd.pos));
+		final firstRange = doc.rangeAt(firstOpStart.getPos());
+		final secondRange = doc.rangeAt(secondOpStart.pos).union(doc.rangeAt(secondOpEnd.pos));
+		final isEq = binopToken.matches(Binop(OpEq));
+
+		final condText = doc.getText(ifIdentRange);
+		final firstText = doc.getText(firstRange);
+		final secondText = doc.getText(secondRange);
+		if (isEq) {
+			if (condText != secondText)
+				return;
+		} else {
+			if (condText != firstText)
+				return;
+		}
+		final replaceRange = doc.rangeAt(ifIdentStart.getPos());
+		var value = isEq ? firstText : secondText;
+		if (!value.endsWith(";"))
+			value += ";";
+		actions.push({
+			title: "Change to ?? operator",
+			kind: QuickFix,
+			edit: WorkspaceEditHelper.create(context, params, [
+				{
+					range: replaceRange,
+					newText: '$condText ?? ${multilineIndent(doc, context, value, replaceRange.start)}'
 				}
 			]),
 		});
@@ -186,6 +232,37 @@ class UpdateSyntaxActions {
 				return token;
 			token = token.parent;
 		}
+		return null;
+	}
+
+	static function getNullCheckTernaryExpr(token:Null<TokenTree>):Null<TokenTree> {
+		for (i in 0...10) {
+			if (token == null)
+				return null;
+			if (token.tok.match(Binop(OpEq | OpNotEq))) {
+				final kwdNull = token.getFirstChild() ?? cast return null;
+				if (kwdNull.matches(Kwd(KwdNull)) == false)
+					return null;
+				final questionToken = kwdNull.getFirstChild() ?? cast return null;
+				if (questionToken!.matches(Question) == false)
+					return null;
+				return questionToken;
+			}
+			token = token.parent;
+		}
+		return null;
+	}
+
+	static function getTernaryNullCheckRanges(questionToken:TokenTree):Null<{ifVar:Range, ifNull:Range, ifNotNull:Range}> {
+		final t = questionToken.access()
+			.firstChild()
+			.matches(Kwd(KwdNull))
+			.nextSibling()
+			.matches(Question)
+			.child(1)
+			.matches(DblDot);
+		if (t.exists() == false)
+			return null;
 		return null;
 	}
 
@@ -246,8 +323,41 @@ class UpdateSyntaxActions {
 
 	static function getIdentEnd(ident:TokenTree):TokenTree {
 		final child = ident.getFirstChild() ?? return ident;
-		if (child.tok.match(Dot | Question | Const(CIdent(_))))
+		if (child.tok.match(Dot | QuestionDot | Question | Const(CIdent(_))))
 			return getIdentEnd(child);
 		return ident;
+	}
+
+	static function preDotToken(token:TokenTree):TokenTree {
+		final parent = token.parent ?? return token;
+		switch parent.tok {
+			case Kwd(KwdNew):
+				return parent;
+			case QuestionDot, Dot:
+				final prevToken = parent.parent ?? return token;
+				if (!token.isCIdent())
+					return token;
+				return preDotToken(prevToken);
+			case _:
+		}
+		return token;
+	}
+
+	static function getLastToken(token:Null<TokenTree>):Null<TokenTree> {
+		if (token == null)
+			return null;
+		return TokenTreeCheckUtils.getLastToken(token);
+	}
+
+	static function getLastNonCommaToken(token:Null<TokenTree>):Null<TokenTree> {
+		var last = getLastToken(token);
+		if (last == null)
+			return last;
+		if (last.tok == Comma || last.tok == Semicolon) {
+			last = last.previousSibling ?? return last.parent;
+			// [Dot(...), Semicolon] case
+			return getLastNonCommaToken(last);
+		}
+		return last;
 	}
 }

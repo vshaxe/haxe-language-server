@@ -306,8 +306,11 @@ class ExtractVarFeature implements CodeActionContributor {
 		var last = getLastToken(token);
 		if (last == null)
 			return last;
-		if (last.tok == Comma || last.tok == Semicolon)
-			last = last.previousSibling ?? last.parent;
+		if (last.tok == Comma || last.tok == Semicolon) {
+			last = last.previousSibling ?? return last.parent;
+			// [Dot(...), Semicolon] case
+			return getLastNonCommaToken(last);
+		}
 		return last;
 	}
 }
