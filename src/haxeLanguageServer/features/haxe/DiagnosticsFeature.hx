@@ -183,6 +183,7 @@ class DiagnosticsFeature {
 					code: hxDiag.code,
 					severity: hxDiag.severity,
 					message: hxDiag.kind.getMessage(doc, hxDiag.args, range),
+					data: {kind: hxDiag.kind},
 					relatedInformation: hxDiag.relatedInformation?.map(rel -> {
 						location: {
 							uri: rel.location.file.toUri(),
