@@ -34,7 +34,7 @@ class DiagnosticsCodeActionFeature implements CodeActionContributor {
 		}
 		var actions:Array<CodeAction> = [];
 		for (diagnostic in params.context.diagnostics) {
-			final kind = diagnostic?.data?.kind;
+			final kind = diagnostic.data?.kind;
 			if (kind == null || !(kind is Int)) { // our codes are int, so we don't handle other stuff
 				continue;
 			}
