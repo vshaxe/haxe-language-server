@@ -34,10 +34,11 @@ class DiagnosticsCodeActionFeature implements CodeActionContributor {
 		}
 		var actions:Array<CodeAction> = [];
 		for (diagnostic in params.context.diagnostics) {
-			if (diagnostic.code == null || !(diagnostic.code is Int)) { // our codes are int, so we don't handle other stuff
+			final kind = diagnostic?.data?.kind;
+			if (kind == null || !(kind is Int)) { // our codes are int, so we don't handle other stuff
 				continue;
 			}
-			final code = new DiagnosticKind<T>(diagnostic.code);
+			final code = new DiagnosticKind<T>(kind);
 			actions = actions.concat(switch code {
 				case UnusedImport: UnusedImportActions.createUnusedImportActions(context, params, diagnostic);
 				case UnresolvedIdentifier: UnresolvedIdentifierActions.createUnresolvedIdentifierActions(context, params, diagnostic);
