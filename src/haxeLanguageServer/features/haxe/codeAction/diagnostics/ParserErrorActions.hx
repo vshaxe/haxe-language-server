@@ -77,9 +77,9 @@ class ParserErrorActions {
 			final document = context.documents.getHaxe(params.textDocument.uri);
 			final token = document!.tokens!.getTokenAtOffset(document.offsetAt(diagnostic.range.end));
 			final prevToken = getPrevNonCommentSibling(token);
-			if (prevToken != null) {
+			if (prevToken != null && token != null) {
 				final prevToken = getLastNonCommentToken(prevToken);
-				switch [prevToken!.tok, token!.tok] {
+				switch [prevToken.tok, token.tok] {
 					case [Semicolon, Semicolon]:
 						actions.push({
 							title: "Remove redundant ;",
@@ -96,6 +96,32 @@ class ParserErrorActions {
 							diagnostics: [diagnostic],
 							isPreferred: true
 						});
+					case [_, Semicolon]:
+						// fix {b: value;} structure
+						final colon = token.previousSibling ?? return actions;
+						final field = colon.parent ?? return actions;
+						final brOpen = field.parent ?? return actions;
+						if (colon.tok == DblDot && field.tok.match(Const(_)) && brOpen.tok == BrOpen) {
+							actions.push({
+								title: "Replace ; with ,",
+								kind: CodeActionKind.QuickFix + ".auto",
+								edit: WorkspaceEditHelper.create(context, params, [{range: diagnostic.range, newText: ","}]),
+								diagnostics: [diagnostic],
+								isPreferred: true
+							});
+						}
+					case [prevTok, _] if (!prevTok.match(Comma | BrOpen)):
+						// fix {a: 0 b: 0} structure
+						if (isAnonStructureField(token)) {
+							final prevRange = document.rangeAt(prevToken.pos.max, prevToken.pos.max);
+							actions.push({
+								title: "Add missing ,",
+								kind: CodeActionKind.QuickFix + ".auto",
+								edit: WorkspaceEditHelper.create(context, params, [{range: prevRange, newText: ","}]),
+								diagnostics: [diagnostic],
+								isPreferred: true
+							});
+						}
 					case _:
 				}
 			}
@@ -168,5 +194,24 @@ class ParserErrorActions {
 				return child;
 		}
 		return null;
+	}
+
+	static function isAnonStructure(brToken:TokenTree):Bool {
+		if (brToken.tok == BrClose)
+			brToken = brToken.parent ?? return false;
+		final first = brToken!.getFirstChild() ?? return false;
+		final colon = first.getFirstChild() ?? return false;
+		if (colon.tok.match(DblDot) && !colon.nextSibling!.tok.match(Semicolon)) {
+			return true;
+		}
+		return false;
+	}
+
+	static function isAnonStructureField(token:TokenTree):Bool {
+		final parent = token.parent ?? return false;
+		if (!isAnonStructure(parent))
+			return false;
+		final colon = token.getFirstChild() ?? return false;
+		return colon.tok.match(DblDot);
 	}
 }
