@@ -39,6 +39,8 @@ class UpdateSyntaxActions {
 				// `a.b?.c`
 				addSaveNavIfNotNullAction(context, params, actions, doc, ifToken, ifVarName);
 			}
+
+			addIfInvertAction(context, params, actions, doc, ifToken);
 		}
 
 		final questionToken = getNullCheckTernaryExpr(token);
@@ -86,8 +88,8 @@ class UpdateSyntaxActions {
 		});
 	}
 
-	static function multilineIndent(doc:HaxeDocument, context:Context, value:String, pos:Position):String {
-		if (!value.contains("\n"))
+	static function multilineIndent(doc:HaxeDocument, context:Context, value:String, pos:Position, isSameLine = true):String {
+		if (!value.contains("\n") && isSameLine)
 			return value;
 		value = FormatterHelper.formatText(doc, context, value, ExpressionLevel);
 		final line = doc.lineAt(pos.line);
@@ -95,7 +97,9 @@ class UpdateSyntaxActions {
 		if (count == 0)
 			return value;
 		final prefix = "".rpad(line.charAt(0), count);
-		value = value.split("\n").mapi((i, s) -> i == 0 ? s : '$prefix$s').join("\n");
+		value = value.split("\n").mapi((i, s) -> {
+			(isSameLine && i == 0) ? s : '$prefix$s';
+		}).join("\n");
 		return value;
 	}
 
@@ -156,6 +160,191 @@ class UpdateSyntaxActions {
 				}
 			]),
 		});
+	}
+
+	static function addIfInvertAction(context:Context, params:CodeActionParams, actions:Array<CodeAction>, doc:HaxeDocument, ifToken:TokenTree) {
+		var deadEndText = if (TokenTreeUtils.isInFunctionScope(ifToken)) {
+			final brOpen = ifToken.parent ?? return;
+			final returnToken = getBlockReturn(brOpen);
+			if (returnToken != null) {
+				doc.getText(doc.rangeAt(returnToken.getPos(), Utf8));
+			} else {
+				"return;";
+			}
+		} else if (TokenTreeUtils.isInLoopScope(ifToken)) {
+			"continue;";
+		} else return;
+		// only invert `if` if there is no code after it in scope
+		function sibFilter(sib:TokenTree):Bool {
+			if (sib.isComment())
+				return false;
+			if (sib.tok.match(Kwd(KwdReturn | KwdThrow)))
+				return false;
+			if (sib.tok.match(BrClose))
+				return false;
+			return true;
+		}
+		if (filterNextSibling(ifToken, sibFilter) != null)
+			return;
+
+		final pOpen = ifToken.getFirstChild() ?? return;
+		var ifBody = pOpen.nextSibling ?? return;
+		final replaceRange = doc.rangeAt(ifToken.getPos(), Utf8);
+
+		var elseToken = ifBody.nextSibling;
+		var elseBody = elseToken!.getFirstChild();
+		if (elseToken!.matches(Kwd(KwdElse)) && elseBody != null) {
+			final hasReturn = getBlockReturn(elseBody) != null;
+			// no need for second `return`/`continue`
+			if (hasReturn)
+				deadEndText = '';
+			var elseBodyText = getBlockText(doc, elseBody) + '\n$deadEndText';
+			elseBodyText = '{\n$elseBodyText\n}';
+			elseBodyText = multilineIndent(doc, context, elseBodyText.trim(), replaceRange.start);
+			elseBodyText = elseBodyText.rtrim();
+			deadEndText = elseBodyText;
+		}
+
+		final cond = invertCondition(pOpen);
+		// trace(cond);
+
+		var ifBodyText = getBlockText(doc, ifBody);
+		ifBodyText = multilineIndent(doc, context, ifBodyText.trim(), replaceRange.start, false);
+		ifBodyText = ifBodyText.rtrim();
+
+		actions.push({
+			title: "Invert if expression",
+			kind: RefactorRewrite,
+			edit: WorkspaceEditHelper.create(context, params, [
+				{
+					range: replaceRange,
+					newText: 'if ($cond) $deadEndText\n$ifBodyText'
+				}
+			]),
+		});
+	}
+
+	static function getBlockReturn(brOpen:TokenTree):Null<TokenTree> {
+		final maybeReturn = brOpen.getLastChild()!.previousSibling ?? cast return null;
+		if (!maybeReturn.tok.match(Kwd(KwdReturn | KwdThrow)))
+			return null;
+		return maybeReturn;
+	}
+
+	static function getBlockText(doc:HaxeDocument, block:TokenTree):String {
+		final range = doc.rangeAt(block.getPos(), Utf8);
+		var blockText = doc.getText(range);
+		if (block.tok == BrOpen && !TokenTreeUtils.isAnonStructure(block)) {
+			final reg = ~/\{((.|\n)*)\}/g;
+			if (reg.match(blockText)) {
+				blockText = reg.matched(1);
+			}
+		}
+		return blockText.trim();
+	}
+
+	static function filterNextSibling(token:Null<TokenTree>, filter:(sib:TokenTree) -> Bool):Null<TokenTree> {
+		var token = token ?? cast return null;
+		while (true) {
+			token = token.nextSibling ?? cast return null;
+			if (!filter(token))
+				continue;
+			return token;
+		}
+	}
+
+	static function invertCondition(pOpen:TokenTree):String {
+		var buf = "";
+		var current = pOpen.getFirstChild() ?? return buf;
+		final pClose = pOpen.getLastChild() ?? return buf;
+		final waitBrs = [];
+		var expr = "";
+		// do not invert rhs values if op is already inverted
+		var isInverted = false;
+		while (current != pClose) {
+			if (waitBrs.length > 0) {
+				if (current.matches(waitBrs[waitBrs.length - 1])) {
+					waitBrs.pop();
+				}
+				expr += switch current.tok {
+					case POpen, BkOpen, BrOpen:
+						final close = getClosingBracketTok(current.tok);
+						if (close != null) {
+							waitBrs.push(close);
+						}
+						current.toString();
+					case Binop(_), Arrow, Question, DblDot:
+						final e = current.toString();
+						' $e ';
+					case _: current.toString();
+				}
+				current = flatNextToken(current) ?? return buf + expr;
+				continue;
+			}
+			switch current.tok {
+				case Unop(OpNot):
+					expr += isInverted ? "!" : "";
+					isInverted = true;
+				case Kwd(KwdTrue):
+					expr += isInverted ? "true" : "false";
+					isInverted = true;
+				case Kwd(KwdFalse):
+					expr += isInverted ? "false" : "true";
+					isInverted = true;
+				case Binop(OpEq):
+					final op = isInverted ? "==" : "!=";
+					buf += '$expr $op ';
+					expr = "";
+					isInverted = true;
+				case Binop(OpNotEq):
+					final op = isInverted ? "!=" : "==";
+					buf += '$expr $op ';
+					expr = "";
+					isInverted = true;
+				case Binop(OpBoolAnd):
+					final e = isInverted ? expr : '!$expr';
+					buf += '$e || ';
+					expr = "";
+					isInverted = false;
+				case Binop(OpBoolOr):
+					final e = isInverted ? expr : '!$expr';
+					buf += '$e && ';
+					expr = "";
+					isInverted = false;
+				case POpen, BkOpen, BrOpen:
+					final close = getClosingBracketTok(current.tok);
+					if (close != null) {
+						waitBrs.push(close);
+					}
+					expr += current.toString();
+				case _:
+					expr += current.toString();
+			}
+			current = flatNextToken(current) ?? return buf + expr;
+		}
+		final e = isInverted ? expr : '!$expr';
+		return '$buf$e';
+	}
+
+	static function getClosingBracketTok(tok:tokentree.TokenTreeDef):Null<tokentree.TokenTreeDef> {
+		return switch tok {
+			case POpen: PClose;
+			case BkOpen: BkClose;
+			case BrOpen: BrClose;
+			case _: null;
+		}
+	}
+
+	static function flatNextToken(current:TokenTree):Null<TokenTree> {
+		final child = current.getFirstChild();
+		if (child != null)
+			return child;
+		while (true) {
+			final next = current.nextSibling;
+			if (next != null)
+				return next;
+			current = current.parent ?? cast return null;
+		}
 	}
 
 	static function addTernaryNullCheckAction(context:Context, params:CodeActionParams, actions:Array<CodeAction>, doc:HaxeDocument, questionToken:TokenTree) {
@@ -250,19 +439,6 @@ class UpdateSyntaxActions {
 			}
 			token = token.parent;
 		}
-		return null;
-	}
-
-	static function getTernaryNullCheckRanges(questionToken:TokenTree):Null<{ifVar:Range, ifNull:Range, ifNotNull:Range}> {
-		final t = questionToken.access()
-			.firstChild()
-			.matches(Kwd(KwdNull))
-			.nextSibling()
-			.matches(Question)
-			.child(1)
-			.matches(DblDot);
-		if (t.exists() == false)
-			return null;
 		return null;
 	}
 
