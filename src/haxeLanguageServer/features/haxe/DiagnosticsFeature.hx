@@ -189,7 +189,7 @@ class DiagnosticsFeature {
 							uri: rel.location.file.toUri(),
 							range: rel.location.range,
 						},
-						message: rel.message
+						message: convertIndentation(rel.message, rel.depth)
 					})
 				}
 				if (kind == RemovableCode || kind == UnusedImport || diag.message.contains("has no effect") || kind == InactiveBlock) {
@@ -253,6 +253,23 @@ class DiagnosticsFeature {
 			|| !diagnostics.exists(b -> a != b && a.range != null && b.range != null && b.range.contains(a.range)));
 
 		return diagnostics;
+	}
+
+	function convertIndentation(msg:String, depth:Int):String {
+		if (msg.startsWith("... ")) {
+			msg = msg.substr(4);
+			depth++;
+		}
+
+		if (depth < 2)
+			return msg;
+
+		final buf = new StringBuf();
+		for (_ in 1...depth)
+			buf.add("⋅⋅⋅");
+		buf.add(" ");
+		buf.add(msg);
+		return buf.toString();
 	}
 
 	public function clearDiagnostics(uri:DocumentUri) {
