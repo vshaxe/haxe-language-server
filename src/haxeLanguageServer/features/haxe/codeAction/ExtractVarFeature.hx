@@ -36,18 +36,18 @@ class ExtractVarFeature implements CodeActionContributor {
 			switch token.tok {
 				case Const(_):
 					final token = preDotToken(token);
-					if (isFunctionScope(token))
+					if (TokenTreeUtils.isInFunctionScope(token))
 						return [];
 					if (isTypeHint(token))
 						return [];
 					// disallow full obj extraction when cursor is in `{nam|e: value}`
-					if (isAnonStructureField(token))
+					if (TokenTreeUtils.isAnonStructureField(token))
 						return [];
 					if (isFieldAssign(token))
 						return [];
 					final action:Null<CodeAction> = makeExtractVarAction(doc, tokens, uri, token, range);
 					if (action == null) [] else [action];
-				case BrOpen, BrClose if (isAnonStructure(token)):
+				case BrOpen, BrClose if (TokenTreeUtils.isAnonStructure(token)):
 					final action:Null<CodeAction> = makeExtractVarAction(doc, tokens, uri, token, range);
 					if (action == null) [] else [action];
 				case BkOpen, BkClose:
@@ -82,36 +82,6 @@ class ExtractVarFeature implements CodeActionContributor {
 			parent = parent.parent;
 		}
 		return false;
-	}
-
-	function isFunctionScope(token:TokenTree):Bool {
-		final brOpen = token.parent ?? return false;
-		if (brOpen.tok != BrOpen)
-			return false;
-		final name = brOpen.parent ?? return false;
-		if (name.tok.match(Kwd(_) | Arrow))
-			return true;
-		final fun = name.parent ?? return false;
-		return fun.tok.match(Kwd(_));
-	}
-
-	function isAnonStructure(brToken:TokenTree):Bool {
-		if (brToken.tok == BrClose)
-			brToken = brToken.parent ?? return false;
-		final first = brToken!.getFirstChild() ?? return false;
-		final colon = first.getFirstChild() ?? return false;
-		if (colon.tok.match(DblDot) && !colon.nextSibling!.tok.match(Semicolon)) {
-			return true;
-		}
-		return false;
-	}
-
-	function isAnonStructureField(token:TokenTree):Bool {
-		final parent = token.parent ?? return false;
-		if (!isAnonStructure(parent))
-			return false;
-		final colon = token.getFirstChild() ?? return false;
-		return colon.tok.match(DblDot);
 	}
 
 	function makeExtractVarAction(doc:HaxeDocument, tokens:TokenTreeManager, uri:DocumentUri, token:TokenTree, range:Range):Null<CodeAction> {
@@ -194,7 +164,7 @@ class ExtractVarFeature implements CodeActionContributor {
 				case Kwd(KwdFunction | KwdCase | KwdFor):
 					return null;
 				case BrOpen:
-					if (!isAnonStructure(parent))
+					if (!TokenTreeUtils.isAnonStructure(parent))
 						return token;
 				default:
 			}
