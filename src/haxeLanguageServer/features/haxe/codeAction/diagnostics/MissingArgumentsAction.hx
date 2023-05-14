@@ -21,7 +21,7 @@ class MissingArgumentsAction {
 		if (document == null)
 			return null;
 		var fileName:String = document.uri.toFsPath().toString();
-		final pos = document.offsetAt(diagnostic.range.start);
+		final pos = document.offsetAt(diagnostic.range.end) - 1;
 		var tokenSource = new CancellationTokenSource();
 
 		final argToken = document.tokens!.getTokenAtOffset(document.offsetAt(diagnostic.range.start));
@@ -109,6 +109,8 @@ class MissingArgumentsAction {
 			case Literal:
 			case AnonymousStructure:
 				return "obj";
+			case ClassField:
+				return item.args!.field!.name ?? "arg";
 			case Expression:
 				if (item.type!.kind == TFun)
 					return "callback";
