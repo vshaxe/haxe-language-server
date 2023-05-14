@@ -56,21 +56,7 @@ class ParserErrorActions {
 		}
 
 		if (arg.contains("Missing ;")) {
-			final document = context.documents.getHaxe(params.textDocument.uri);
-			final errRange = getMissingSemicolonPos(document, diagnostic.range.start);
-			if (errRange != null) {
-				final errRange:Range = errRange;
-				final hasSemicolon = document.characterAt(errRange.start.translate(0, -1)) == ";";
-				if (!hasSemicolon) { // do not generate `;;`
-					actions.push({
-						title: "Add missing ;",
-						kind: CodeActionKind.QuickFix + ".auto",
-						edit: WorkspaceEditHelper.create(context, params, [{range: errRange, newText: ";"}]),
-						diagnostics: [diagnostic],
-						isPreferred: true
-					});
-				}
-			}
+			createMissingSemicolonAction(context, params, diagnostic, actions);
 		}
 
 		if (arg.contains("Expected }")) {
@@ -146,6 +132,24 @@ class ParserErrorActions {
 		}
 
 		return actions;
+	}
+
+	static function createMissingSemicolonAction(context:Context, params:CodeActionParams, diagnostic:Diagnostic, actions:Array<CodeAction>):Void {
+		final document = context.documents.getHaxe(params.textDocument.uri);
+		final errRange = getMissingSemicolonPos(document, diagnostic.range.start);
+		if (errRange == null)
+			return;
+		final errRange:Range = errRange;
+		final hasSemicolon = document.characterAt(errRange.start.translate(0, -1)) == ";";
+		if (!hasSemicolon) { // do not generate `;;`
+			actions.push({
+				title: "Add missing ;",
+				kind: CodeActionKind.QuickFix + ".auto",
+				edit: WorkspaceEditHelper.create(context, params, [{range: errRange, newText: ";"}]),
+				diagnostics: [diagnostic],
+				isPreferred: true
+			});
+		}
 	}
 
 	static function getMissingSemicolonPos(document:HaxeDocument, errPos:Position):Null<Range> {

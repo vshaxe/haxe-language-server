@@ -5,6 +5,7 @@ import languageServerProtocol.textdocument.TextDocument;
 import utest.Assert;
 import utest.Test;
 
+using Lambda;
 using StringTools;
 using haxeLanguageServer.extensions.ArrayExtensions;
 using haxeLanguageServer.extensions.DocumentUriExtensions;

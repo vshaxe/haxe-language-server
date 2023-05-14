@@ -30,33 +30,30 @@ class ExtractVarFeature implements CodeActionContributor {
 
 	function extractVar(doc:HaxeDocument, uri:DocumentUri, range:Range):Array<CodeAction> {
 		final tokens = doc.tokens ?? return [];
-		return try {
-			// only look at token at range start
-			final token = tokens.getTokenAtOffset(doc.offsetAt(range.start)) ?? return [];
-			switch token.tok {
-				case Const(_):
-					final token = preDotToken(token);
-					if (TokenTreeUtils.isInFunctionScope(token))
-						return [];
-					if (isTypeHint(token))
-						return [];
-					// disallow full obj extraction when cursor is in `{nam|e: value}`
-					if (TokenTreeUtils.isAnonStructureField(token))
-						return [];
-					if (isFieldAssign(token))
-						return [];
-					final action:Null<CodeAction> = makeExtractVarAction(doc, tokens, uri, token, range);
-					if (action == null) [] else [action];
-				case BrOpen, BrClose if (TokenTreeUtils.isAnonStructure(token)):
-					final action:Null<CodeAction> = makeExtractVarAction(doc, tokens, uri, token, range);
-					if (action == null) [] else [action];
-				case BkOpen, BkClose:
-					final action:Null<CodeAction> = makeExtractVarAction(doc, tokens, uri, token, range);
-					if (action == null) [] else [action];
-				default: [];
-			}
-		} catch (e) {
-			[];
+		// only look at token at range start
+		final token = tokens.getTokenAtOffset(doc.offsetAt(range.start)) ?? return [];
+		switch token.tok {
+			case Const(_):
+				final token = preDotToken(token);
+				if (TokenTreeUtils.isInFunctionScope(token))
+					return [];
+				if (isTypeHint(token))
+					return [];
+				// disallow full obj extraction when cursor is in `{nam|e: value}`
+				if (TokenTreeUtils.isAnonStructureField(token))
+					return [];
+				if (isFieldAssign(token))
+					return [];
+				final action:Null<CodeAction> = makeExtractVarAction(doc, tokens, uri, token, range);
+				return action == null ? [] : [action];
+			case BrOpen, BrClose if (TokenTreeUtils.isAnonStructure(token)):
+				final action:Null<CodeAction> = makeExtractVarAction(doc, tokens, uri, token, range);
+				return action == null ? [] : [action];
+			case BkOpen, BkClose:
+				final action:Null<CodeAction> = makeExtractVarAction(doc, tokens, uri, token, range);
+				return action == null ? [] : [action];
+			default:
+				return [];
 		}
 	}
 
