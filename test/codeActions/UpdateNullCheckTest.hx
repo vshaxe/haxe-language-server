@@ -94,4 +94,27 @@ class UpdateNullCheckTest extends DisplayTestCase {
 		applyTextEdit(actions.find(a -> a.title == "Change to ?? operator").edit);
 		eq(ctx.result, ctx.doc.content);
 	}
+
+	/**
+		function main() {
+			var token = null;
+			if (token != null) {
+				token.setCallback(function() {
+					trace("foo");
+				});
+			}{-1-}
+		}
+		---
+		function main() {
+			var token = null;
+			token?.setCallback(function() {
+				trace("foo");
+			});
+		}
+	**/
+	function testMultilineSafeNav() {
+		final actions = UpdateSyntaxActions.createUpdateSyntaxActions(ctx.context, codeActionParams(pos(1).toRange()), []);
+		applyTextEdit(actions.find(a -> a.title == "Change to ?. operator").edit);
+		eq(ctx.result, ctx.doc.content);
+	}
 }

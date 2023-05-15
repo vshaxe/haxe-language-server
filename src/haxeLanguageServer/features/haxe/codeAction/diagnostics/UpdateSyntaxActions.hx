@@ -150,13 +150,14 @@ class UpdateSyntaxActions {
 		if (!accessPart.endsWith(";"))
 			accessPart += ";";
 		final replaceRange = doc.rangeAt(ifToken.getPos(), Utf8);
+		final value = multilineIndent(doc, context, accessPart, replaceRange.start).rtrim();
 		actions.push({
 			title: "Change to ?. operator",
 			kind: QuickFix,
 			edit: WorkspaceEditHelper.create(context, params, [
 				{
 					range: replaceRange,
-					newText: '$ifVarName$accessPart'
+					newText: '$ifVarName$value'
 				}
 			]),
 		});
