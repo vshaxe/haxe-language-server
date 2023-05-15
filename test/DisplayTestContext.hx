@@ -1,3 +1,5 @@
+import haxe.io.Path;
+import haxeLanguageServer.Configuration;
 import haxeLanguageServer.Context;
 import haxeLanguageServer.documents.HaxeDocument;
 import haxeLanguageServer.features.haxe.DiagnosticsFeature;
@@ -6,6 +8,7 @@ import haxeLanguageServer.helper.DisplayOffsetConverter;
 import haxeLanguageServer.helper.SemVer;
 import jsonrpc.Protocol;
 import languageServerProtocol.textdocument.TextDocument;
+import sys.FileSystem;
 
 using StringTools;
 
@@ -21,12 +24,22 @@ class DisplayTestContext {
 	public final doc:HaxeDocument;
 	public final result:Null<String>;
 
+	final cacheFolder:String;
+
 	public function new(path:String, fieldName:String, sources:Array<String>, markers:Map<Int, Int>) {
 		this.fieldName = fieldName;
 		this.markers = markers;
 
-		context = new Context(new Protocol((msg, token) -> {}));
-		uri = new DocumentUri("file://" + fieldName + ".codeActionTest");
+		context = new Context(new Protocol((msg, token) -> {
+			// trace(msg);
+		}));
+		final serverPath = FileSystem.fullPath(".");
+		final currentFile = Path.join([serverPath, path]);
+		final actionsFolder = Path.directory(currentFile);
+
+		cacheFolder = Path.join([actionsFolder, "_cache"]);
+		final name = Path.withoutDirectory(currentFile) + ".actionTest";
+		uri = new DocumentUri("file://" + '$cacheFolder/${name}');
 		doc = new HaxeDocument(uri, "haxe", 4, sources[0]);
 		result = sources[1];
 
@@ -34,12 +47,43 @@ class DisplayTestContext {
 		context.haxeServer.haxeVersion = new SemVer(4, 3, 0);
 		context.haxeServer.supportedMethods = ["display/definition"];
 		context.capabilities ??= {};
+		context.workspacePath = new DocumentUri("file://" + cacheFolder).toFsPath();
 
 		final docs = context.documents.documents;
-		docs[uri] = new HaxeDocument(uri, "hx", 1, doc.content);
+		docs[uri] = doc;
 
 		context.gotoDefinition = new GotoDefinitionFeature(context);
 		context.displayOffsetConverter = DisplayOffsetConverter.create(context.haxeServer.haxeVersion);
+	}
+
+	public function startServer(callback:() -> Void):Void {
+		context.config.onInitialize({
+			processId: null,
+			rootPath: null,
+			rootUri: context.workspacePath.toUri(),
+			capabilities: {}
+		});
+		@:privateAccess
+		context.config.user = Configuration.DefaultUserSettings;
+		@:privateAccess
+		context.config.sendMethodResults = true;
+		final path = Path.join([Sys.environment()["HAXEPATH"], "haxe"]);
+		context.config.displayServer.path = path;
+		context.haxeServer.start(() -> {
+			callback();
+		});
+	}
+
+	public function cacheFile():Void {
+		if (!FileSystem.exists(cacheFolder))
+			FileSystem.createDirectory(cacheFolder);
+		sys.io.File.saveContent(uri.toFsPath().toString(), doc.content);
+	}
+
+	public function removeCacheFile():Void {
+		if (!FileSystem.exists(cacheFolder))
+			FileSystem.createDirectory(cacheFolder);
+		FileSystem.deleteFile(uri.toFsPath().toString());
 	}
 
 	public function pos(id:Int):Position {

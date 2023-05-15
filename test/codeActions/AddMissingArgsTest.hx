@@ -8,7 +8,7 @@ class AddMissingArgsTest extends DisplayTestCase {
 	/**
 		function main() {
 			var x = {y: 1};
-			foo(x{-1-}.y);
+			foo({-1-}x.y{-2-});
 		}
 		function foo() {}
 		---
@@ -20,19 +20,23 @@ class AddMissingArgsTest extends DisplayTestCase {
 	**/
 	@:timeout(500)
 	function test(async:utest.Async) {
-		var action:CodeAction = {title: ""};
-		final params = codeActionParams(pos(1).toRange());
-		final diag = createDiagnostic(pos(1).toRange());
-		final action:Null<Promise<CodeAction>> = MissingArgumentsAction.createMissingArgumentsAction(ctx.context, action, params, diag);
-		assert(action != null);
-		async.done();
-		// TODO hangs on gotoDefinition request, needs more client simulation hacks in DisplayTestContext
-		// action.then(action -> {
-		// 	applyTextEdit(action.edit);
-		// 	eq(ctx.result, ctx.doc.content);
-		// 	async.done();
-		// }, (err) -> {
-		// 	throw err;
-		// });
+		ctx.cacheFile();
+		ctx.startServer(() -> {
+			var action:CodeAction = {title: ""};
+			// diagnostics selects full arg range
+			final params = codeActionParams(range(1, 2));
+			final diag = createDiagnostic(range(1, 2));
+			final action:Null<Promise<CodeAction>> = MissingArgumentsAction.createMissingArgumentsAction(ctx.context, action, params, diag);
+			assert(action != null);
+			action.then(action -> {
+				ctx.removeCacheFile();
+				applyTextEdit(action.edit);
+				eq(ctx.result, ctx.doc.content);
+				async.done();
+			}, (err) -> {
+				ctx.removeCacheFile();
+				throw err;
+			});
+		});
 	}
 }
