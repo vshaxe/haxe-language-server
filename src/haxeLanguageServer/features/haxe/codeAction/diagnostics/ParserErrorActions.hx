@@ -136,7 +136,7 @@ class ParserErrorActions {
 
 	static function createMissingSemicolonAction(context:Context, params:CodeActionParams, diagnostic:Diagnostic, actions:Array<CodeAction>):Void {
 		final document = context.documents.getHaxe(params.textDocument.uri);
-		final errRange = getMissingSemicolonPos(document, diagnostic.range.start);
+		final errRange = getMissingSemicolonPos(document, diagnostic.range.start.translate(0, 1));
 		if (errRange == null)
 			return;
 		final errRange:Range = errRange;

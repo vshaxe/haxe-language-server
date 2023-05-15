@@ -15,6 +15,7 @@ using StringTools;
 @:access(haxeLanguageServer.documents.TextDocuments)
 @:access(haxeLanguageServer.Context)
 @:access(haxeLanguageServer.server.HaxeServer)
+@:access(haxeLanguageServer.Configuration)
 class DisplayTestContext {
 	var markers:Map<Int, Int>;
 	var fieldName:String;
@@ -63,9 +64,7 @@ class DisplayTestContext {
 			rootUri: context.workspacePath.toUri(),
 			capabilities: {}
 		});
-		@:privateAccess
 		context.config.user = Configuration.DefaultUserSettings;
-		@:privateAccess
 		context.config.sendMethodResults = true;
 		final path = Path.join([Sys.environment()["HAXEPATH"], "haxe"]);
 		context.config.displayServer.path = path;

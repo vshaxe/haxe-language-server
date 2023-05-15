@@ -21,4 +21,26 @@ class FixParserErrorTest extends DisplayTestCase {
 		applyTextEdit(actions[0].edit);
 		eq(ctx.result, ctx.doc.content);
 	}
+
+	/**
+		function main() {
+			{[]{-1-}}
+			trace(1){-2-});
+		}
+		---
+		function main() {
+			{[];}
+			trace(1););
+		}
+	**/
+	function testOnelines():Void {
+		for (i in [2, 1]) {
+			final params = codeActionParams(pos(i).toRange());
+			final diag = createDiagnostic(pos(i).toRange());
+			final actions = [];
+			ParserErrorActions.createMissingSemicolonAction(ctx.context, params, diag, actions);
+			applyTextEdit(actions[0].edit);
+		}
+		eq(ctx.result, ctx.doc.content);
+	}
 }
