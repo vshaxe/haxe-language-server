@@ -203,4 +203,41 @@ class IfInvertTest extends DisplayTestCase {
 		applyTextEdit(actions[0].edit);
 		eq(ctx.result, ctx.doc.content);
 	}
+
+	/**
+		function main() {
+			var foo = 0;
+			if (foo > 1000 / foo || foo <= foo + 1) {
+				foo = 0;{-1-}
+			}
+		}
+		---
+		function main() {
+			var foo = 0;
+			if (foo <= 1000 / foo && foo > foo + 1) return;
+			foo = 0;
+		}
+	**/
+	function testOpGt():Void {
+		final actions = UpdateSyntaxActions.createUpdateSyntaxActions(ctx.context, codeActionParams(pos(1).toRange()), []);
+		applyTextEdit(actions[0].edit);
+		eq(ctx.result, ctx.doc.content);
+	}
+
+	/**
+		function main() {
+			var foo = 0;
+			if (foo <= 0) {}{-1-}
+		}
+		---
+		function main() {
+			var foo = 0;
+			if (foo > 0) return;
+		}
+	**/
+	function testLte():Void {
+		final actions = UpdateSyntaxActions.createUpdateSyntaxActions(ctx.context, codeActionParams(pos(1).toRange()), []);
+		applyTextEdit(actions[0].edit);
+		eq(ctx.result, ctx.doc.content);
+	}
 }
