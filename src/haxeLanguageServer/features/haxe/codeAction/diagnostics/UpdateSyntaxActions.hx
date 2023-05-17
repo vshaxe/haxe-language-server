@@ -150,13 +150,14 @@ class UpdateSyntaxActions {
 		if (!accessPart.endsWith(";"))
 			accessPart += ";";
 		final replaceRange = doc.rangeAt(ifToken.getPos(), Utf8);
+		final value = multilineIndent(doc, context, accessPart, replaceRange.start).rtrim();
 		actions.push({
 			title: "Change to ?. operator",
 			kind: QuickFix,
 			edit: WorkspaceEditHelper.create(context, params, [
 				{
 					range: replaceRange,
-					newText: '$ifVarName$accessPart'
+					newText: '$ifVarName$value'
 				}
 			]),
 		});
@@ -211,6 +212,8 @@ class UpdateSyntaxActions {
 		var ifBodyText = getBlockText(doc, ifBody);
 		ifBodyText = multilineIndent(doc, context, ifBodyText.trim(), replaceRange.start, false);
 		ifBodyText = ifBodyText.rtrim();
+		if (ifBodyText.length > 0)
+			ifBodyText = '\n$ifBodyText';
 
 		actions.push({
 			title: "Invert if expression",
@@ -218,7 +221,7 @@ class UpdateSyntaxActions {
 			edit: WorkspaceEditHelper.create(context, params, [
 				{
 					range: replaceRange,
-					newText: 'if ($cond) $deadEndText\n$ifBodyText'
+					newText: 'if ($cond) $deadEndText$ifBodyText'
 				}
 			]),
 		});
@@ -261,6 +264,11 @@ class UpdateSyntaxActions {
 		var expr = "";
 		// do not invert rhs values if op is already inverted
 		var isInverted = false;
+		inline function invBinop(op:String) {
+			buf += '$expr $op ';
+			expr = "";
+			isInverted = true;
+		}
 		while (current != pClose) {
 			if (waitBrs.length > 0) {
 				if (current.matches(waitBrs[waitBrs.length - 1])) {
@@ -292,15 +300,17 @@ class UpdateSyntaxActions {
 					expr += isInverted ? "false" : "true";
 					isInverted = true;
 				case Binop(OpEq):
-					final op = isInverted ? "==" : "!=";
-					buf += '$expr $op ';
-					expr = "";
-					isInverted = true;
+					invBinop(isInverted ? "==" : "!=");
 				case Binop(OpNotEq):
-					final op = isInverted ? "!=" : "==";
-					buf += '$expr $op ';
-					expr = "";
-					isInverted = true;
+					invBinop(isInverted ? "!=" : "==");
+				case Binop(OpLt):
+					invBinop(isInverted ? "<" : ">=");
+				case Binop(OpGt):
+					invBinop(isInverted ? ">" : "<=");
+				case Binop(OpLte):
+					invBinop(isInverted ? "<=" : ">");
+				case Binop(OpGte):
+					invBinop(isInverted ? ">=" : "<");
 				case Binop(OpBoolAnd):
 					final e = isInverted ? expr : '!$expr';
 					buf += '$e || ';
@@ -317,6 +327,8 @@ class UpdateSyntaxActions {
 						waitBrs.push(close);
 					}
 					expr += current.toString();
+				case Binop(_):
+					expr += ' ${current.toString()} ';
 				case _:
 					expr += current.toString();
 			}
