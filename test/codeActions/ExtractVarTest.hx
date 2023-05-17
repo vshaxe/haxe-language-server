@@ -50,4 +50,27 @@ class ExtractVarTest extends DisplayTestCase {
 		applyTextEdit(actions[0].edit);
 		eq(ctx.result, ctx.doc.content);
 	}
+
+	/**
+		static function outerHeight(el:Element):Float {
+			final style = window.getComputedStyle(el);
+			return (el.getBoundingClientRect().height
+				+ Std.pars{-1-}eFloat(style.marginTop)
+				+ Std.parseFloat(style.marginBottom));
+		}
+		---
+		static function outerHeight(el:Element):Float {
+			final style = window.getComputedStyle(el);
+			final parseFloat = Std.parseFloat(style.marginTop);
+			return (el.getBoundingClientRect().height
+				+ parseFloat
+				+ Std.parseFloat(style.marginBottom));
+		}
+	**/
+	function testReturnCall():Void {
+		final feature = new ExtractVarFeature(ctx.context);
+		final actions:Array<CodeAction> = feature.extractVar(ctx.doc, ctx.uri, pos(1).toRange());
+		applyTextEdit(actions[0].edit);
+		eq(ctx.result, ctx.doc.content);
+	}
 }
