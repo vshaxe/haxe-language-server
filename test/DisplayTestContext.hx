@@ -101,6 +101,20 @@ class DisplayTestContext {
 		return doc.getText(range(id, id2));
 	}
 
+	public function getRegexRanges(regex:EReg):Array<Range> {
+		final ranges:Array<Range> = [];
+		var text = doc.getText();
+		regex.map(text, reg -> {
+			final p = reg.matchedPos();
+			ranges.push({
+				start: doc.positionAt(p.pos),
+				end: doc.positionAt(p.pos + p.len)
+			});
+			return reg.matched(0);
+		});
+		return ranges;
+	}
+
 	public function createDiagnostic(range:Range, msg:String):Diagnostic {
 		return {
 			range: range,

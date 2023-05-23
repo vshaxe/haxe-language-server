@@ -18,6 +18,10 @@ class DisplayTestCase implements utest.ITest {
 		return ctx.range(id, id2);
 	}
 
+	inline function getRegexRanges(regex:EReg):Array<Range> {
+		return ctx.getRegexRanges(regex);
+	}
+
 	inline function rangeText(id:Int, id2:Int):String {
 		return ctx.rangeText(id, id2);
 	}

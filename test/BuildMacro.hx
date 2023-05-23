@@ -42,7 +42,8 @@ class BuildMacro {
 
 			switch (field.kind) {
 				case FFun(f) if (f.expr != null):
-					f.expr = macro @:pos(f.expr.pos) {
+					// f.expr = macro @:pos(f.expr.pos) {
+					f.expr = macro {
 						ctx = new DisplayTestContext($v{filename}, $v{field.name}, $v{sources}, $markers);
 						${f.expr}
 					};
