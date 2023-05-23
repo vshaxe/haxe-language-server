@@ -6,6 +6,7 @@ import js.lib.Promise;
 @:access(haxeLanguageServer.features.haxe.codeAction.diagnostics.MissingArgumentsAction)
 class AddMissingArgsTest extends DisplayTestCase {
 	/**
+		import haxe.io.Bytes;
 		function main() {
 			var x = {y: 1};
 			foo0(x);
@@ -18,7 +19,10 @@ class AddMissingArgsTest extends DisplayTestCase {
 			foo7(true);
 			foo8(null);
 			foo9(haxe.format.JsonParser.parse);
+			foo10(bytes());
+			foo11(new Bytes(10, null));
 		}
+		function bytes():Bytes return null;
 		function foo0() {}
 		function foo1() {}
 		function foo2() {}
@@ -29,7 +33,10 @@ class AddMissingArgsTest extends DisplayTestCase {
 		function foo7() {}
 		function foo8() {}
 		function foo9() {}
+		function foo10() {}
+		function foo11() {}
 		---
+		import haxe.io.Bytes;
 		function main() {
 			var x = {y: 1};
 			foo0(x);
@@ -42,7 +49,10 @@ class AddMissingArgsTest extends DisplayTestCase {
 			foo7(true);
 			foo8(null);
 			foo9(haxe.format.JsonParser.parse);
+			foo10(bytes());
+			foo11(new Bytes(10, null));
 		}
+		function bytes():Bytes return null;
 		function foo0(x:{y:Int}) {}
 		function foo1(y:Int) {}
 		function foo2(obj:{y:Int}) {}
@@ -53,6 +63,8 @@ class AddMissingArgsTest extends DisplayTestCase {
 		function foo7(bool:Bool) {}
 		function foo8(arg) {}
 		function foo9(parse:(str:String) -> Dynamic) {}
+		function foo10(arg:Bytes) {}
+		function foo11(arg:Bytes) {}
 	**/
 	@:timeout(500)
 	function test(async:utest.Async) {

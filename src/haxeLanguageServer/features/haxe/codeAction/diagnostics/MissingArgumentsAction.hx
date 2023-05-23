@@ -47,6 +47,8 @@ class MissingArgumentsAction {
 				// hover on start of arg for better type hint
 				hoverPos = document.offsetAt(diagnostic.range.start);
 			}
+		} else if (argToken.matches(Kwd(KwdNew))) {
+			hoverPos = argToken.getFirstChild()!.pos!.min ?? hoverPos;
 		}
 		final hoverPromise = makeHoverRequest(context, fileName, hoverPos, tokenSource.token);
 
