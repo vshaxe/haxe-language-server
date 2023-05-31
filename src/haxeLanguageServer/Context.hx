@@ -473,6 +473,7 @@ class Context {
 		if (timeSinceOpened > 0.1) {
 			publishDiagnostics(params.uri);
 		}
+		invalidated.remove(activeEditor.toString());
 		updateActiveEditorPackage(activeEditor);
 	}
 
