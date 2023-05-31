@@ -137,6 +137,8 @@ class UpdateSyntaxActions {
 
 	static function addSaveNavIfNotNullAction(context:Context, params:CodeActionParams, actions:Array<CodeAction>, doc:HaxeDocument, ifToken:TokenTree,
 			ifVarName:String) {
+		if (getElseBody(ifToken) != null)
+			return;
 		final ident = getSingleLineIfBodyExpr(ifToken) ?? return;
 		final varName = doc.getText(doc.rangeAt(ident.getPos(), Utf8));
 		if (!varName.startsWith(ifVarName))
@@ -161,6 +163,15 @@ class UpdateSyntaxActions {
 				}
 			]),
 		});
+	}
+
+	static function getElseBody(ifToken:TokenTree):Null<TokenTree> {
+		final pOpen = ifToken.getFirstChild() ?? cast return null;
+		final ifBody = pOpen.nextSibling ?? cast return null;
+		final elseToken = ifBody.nextSibling ?? cast return null;
+		if (!elseToken.matches(Kwd(KwdElse)))
+			return null;
+		return elseToken.getFirstChild();
 	}
 
 	static function addIfInvertAction(context:Context, params:CodeActionParams, actions:Array<CodeAction>, doc:HaxeDocument, ifToken:TokenTree) {
@@ -189,12 +200,11 @@ class UpdateSyntaxActions {
 			return;
 
 		final pOpen = ifToken.getFirstChild() ?? return;
-		var ifBody = pOpen.nextSibling ?? return;
+		final ifBody = pOpen.nextSibling ?? return;
 		final replaceRange = doc.rangeAt(ifToken.getPos(), Utf8);
 
-		var elseToken = ifBody.nextSibling;
-		var elseBody = elseToken!.getFirstChild();
-		if (elseToken!.matches(Kwd(KwdElse)) && elseBody != null) {
+		final elseBody = getElseBody(ifToken);
+		if (elseBody != null) {
 			final hasReturn = getBlockReturn(elseBody) != null;
 			// no need for second `return`/`continue`
 			if (hasReturn)
