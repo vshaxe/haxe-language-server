@@ -20,11 +20,9 @@ class MissingArgumentsAction {
 		final document = context.documents.getHaxe(params.textDocument.uri);
 		if (document == null)
 			return null;
-		var fileName:String = document.uri.toFsPath().toString();
-		final pos = document.offsetAt(diagnostic.range.end) - 1;
-		var tokenSource = new CancellationTokenSource();
+		final tokenSource = new CancellationTokenSource();
 
-		final argToken = document.tokens!.getTokenAtOffset(document.offsetAt(diagnostic.range.start));
+		final argToken = document.tokens!.getTokenAtOffset(document.offsetAt(diagnostic.range.start) + 1);
 		if (argToken == null)
 			return null;
 		final funPos = getCallNamePos(document, argToken);
@@ -38,7 +36,21 @@ class MissingArgumentsAction {
 				resolve(array);
 			}, error -> reject(error));
 		});
-		final hoverPromise = makeHoverRequest(context, fileName, pos, tokenSource.token);
+
+		final fileName:String = document.uri.toFsPath().toString();
+		var hoverPos = document.offsetAt(diagnostic.range.end) - 1;
+		if (isFunctionInArg(argToken)) {
+			if (isSingleArgArrowFunction(argToken)) {
+				// hover on `->` token
+				hoverPos = argToken.getFirstChild()!.pos!.min ?? hoverPos;
+			} else {
+				// hover on start of arg for better type hint
+				hoverPos = document.offsetAt(diagnostic.range.start);
+			}
+		} else if (argToken.matches(Kwd(KwdNew))) {
+			hoverPos = argToken.getFirstChild()!.pos!.min ?? hoverPos;
+		}
+		final hoverPromise = makeHoverRequest(context, fileName, hoverPos, tokenSource.token);
 
 		final actionPromise = Promise.all([gotoPromise, hoverPromise]).then(results -> {
 			final definitions:Array<DefinitionLink> = results[0];
@@ -102,6 +114,21 @@ class MissingArgumentsAction {
 			return action;
 		});
 		return actionPromise;
+	}
+
+	static function isFunctionInArg(argToken:TokenTree):Bool {
+		if (argToken.tok == POpen) {
+			// trace(argToken.tok, argToken.children);
+			return argToken.getPOpenType() == Parameter;
+		}
+		if (isSingleArgArrowFunction(argToken)) {
+			return true;
+		}
+		return argToken.matches(Kwd(KwdFunction));
+	}
+
+	static function isSingleArgArrowFunction(argToken:TokenTree):Bool {
+		return argToken.isCIdent() && argToken.getFirstChild()!.tok == Arrow;
 	}
 
 	static function generateArgName(item:DisplayItem<Dynamic>):String {

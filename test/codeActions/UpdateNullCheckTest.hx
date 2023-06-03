@@ -102,7 +102,9 @@ class UpdateNullCheckTest extends DisplayTestCase {
 				token.setCallback(function() {
 					trace("foo");
 				});
-			}{-1-}
+			}{-3-}
+			if (a != null) a.b = 0;{-2-}
+			if (a != null) a.b = 0 else a.b = 1;{-1-}
 		}
 		---
 		function main() {
@@ -110,10 +112,16 @@ class UpdateNullCheckTest extends DisplayTestCase {
 			token?.setCallback(function() {
 				trace("foo");
 			});
+			a?.b = 0;
+			if (a != null) a.b = 0 else a.b = 1;
 		}
 	**/
-	function testMultilineSafeNav() {
+	function testSafeNav() {
 		final actions = UpdateSyntaxActions.createUpdateSyntaxActions(ctx.context, codeActionParams(pos(1).toRange()), []);
+		arrayEq(actions.filter(a -> a.title == "Change to ?. operator"), []);
+		final actions = UpdateSyntaxActions.createUpdateSyntaxActions(ctx.context, codeActionParams(pos(2).toRange()), []);
+		applyTextEdit(actions.find(a -> a.title == "Change to ?. operator").edit);
+		final actions = UpdateSyntaxActions.createUpdateSyntaxActions(ctx.context, codeActionParams(pos(3).toRange()), []);
 		applyTextEdit(actions.find(a -> a.title == "Change to ?. operator").edit);
 		eq(ctx.result, ctx.doc.content);
 	}
