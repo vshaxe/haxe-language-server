@@ -472,6 +472,7 @@ class Context {
 		final timeSinceOpened = haxe.Timer.stamp() - document.openTimestamp;
 		if (timeSinceOpened > 0.1) {
 			publishDiagnostics(params.uri);
+			invalidated.remove(activeEditor.toString());
 		}
 		updateActiveEditorPackage(activeEditor);
 	}
