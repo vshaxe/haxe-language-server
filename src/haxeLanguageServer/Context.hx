@@ -61,6 +61,7 @@ class Context {
 	@:nullSafety(Off) public var capabilities(default, null):ClientCapabilities;
 	@:nullSafety(Off) public var displayOffsetConverter(default, null):DisplayOffsetConverter;
 	@:nullSafety(Off) public var gotoDefinition(default, null):GotoDefinitionFeature;
+	@:nullSafety(Off) public var findReferences(default, null):FindReferencesFeature;
 	@:nullSafety(Off) public var determinePackage(default, null):DeterminePackageFeature;
 	@:nullSafety(Off) public var diagnostics(default, null):DiagnosticsFeature;
 
@@ -371,7 +372,7 @@ class Context {
 				gotoDefinition = new GotoDefinitionFeature(this);
 				new GotoImplementationFeature(this);
 				new GotoTypeDefinitionFeature(this);
-				new FindReferencesFeature(this);
+				findReferences = new FindReferencesFeature(this);
 				determinePackage = new DeterminePackageFeature(this);
 				new RenameFeature(this);
 				diagnostics = new DiagnosticsFeature(this);

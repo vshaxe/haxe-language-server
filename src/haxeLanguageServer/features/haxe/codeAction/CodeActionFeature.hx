@@ -1,5 +1,6 @@
 package haxeLanguageServer.features.haxe.codeAction;
 
+import haxeLanguageServer.features.haxe.codeAction.diagnostics.AddTypeHintActions;
 import haxeLanguageServer.features.haxe.codeAction.diagnostics.ChangeFinalToVarAction;
 import haxeLanguageServer.features.haxe.codeAction.diagnostics.MissingArgumentsAction;
 import jsonrpc.CancellationToken;
@@ -15,12 +16,13 @@ interface CodeActionContributor {
 enum CodeActionResolveType {
 	MissingArg;
 	ChangeFinalToVar;
+	AddTypeHint;
 }
 
 typedef CodeActionResolveData = {
 	?type:CodeActionResolveType,
 	params:CodeActionParams,
-	diagnostic:Diagnostic
+	?diagnostic:Diagnostic
 }
 
 class CodeActionFeature {
@@ -76,19 +78,28 @@ class CodeActionFeature {
 		final type = data!.type;
 		final params = data!.params;
 		final diagnostic = data!.diagnostic;
-		if (params == null || diagnostic == null) {
+		if (type == null || params == null) {
 			resolve(action);
 			return;
 		}
 		switch (type) {
-			case null:
-				resolve(action);
 			case MissingArg, ChangeFinalToVar:
+				// async actions from diagnostic errors
+				if (diagnostic == null) {
+					resolve(action);
+					return;
+				}
+			case AddTypeHint:
+		}
+		switch (type) {
+			case MissingArg, ChangeFinalToVar, AddTypeHint:
 				final promise = switch type {
 					case MissingArg:
 						MissingArgumentsAction.createMissingArgumentsAction(context, action, params, diagnostic);
 					case ChangeFinalToVar:
 						ChangeFinalToVarAction.createChangeFinalToVarAction(context, action, params, diagnostic);
+					case AddTypeHint:
+						AddTypeHintActions.createAddTypeHintAction(context, action, params);
 					case _: null;
 				}
 				if (promise == null) {

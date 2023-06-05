@@ -16,6 +16,19 @@ class TokenTreeUtils {
 		return fun.tok.match(Kwd(KwdFunction));
 	}
 
+	public static function isFunctionArg(token:TokenTree):Bool {
+		final pOpen = token.parent ?? return false;
+		if (pOpen.tok != POpen)
+			return false;
+		final name = pOpen.parent ?? return false;
+		// `function() {}` or `() -> {}`
+		if (name.tok.match(Kwd(KwdFunction) | Arrow))
+			return true;
+		final fun = name.parent ?? return false;
+		// `function name() {}`
+		return fun.tok.match(Kwd(KwdFunction));
+	}
+
 	public static function isInLoopScope(token:TokenTree):Bool {
 		var kwd = token.parent ?? return false;
 		if (kwd.tok == BrOpen)

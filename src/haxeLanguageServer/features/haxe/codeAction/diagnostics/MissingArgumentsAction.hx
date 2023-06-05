@@ -28,7 +28,7 @@ class MissingArgumentsAction {
 		final funPos = getCallNamePos(document, argToken);
 		if (funPos == null)
 			return null;
-		final gotoPromise = new Promise(function(resolve:(hover:Array<DefinitionLink>) -> Void, reject) {
+		final gotoPromise = new Promise(function(resolve:(definitions:Array<DefinitionLink>) -> Void, reject) {
 			context.gotoDefinition.onGotoDefinition({
 				textDocument: params.textDocument,
 				position: funPos.start
@@ -54,25 +54,10 @@ class MissingArgumentsAction {
 
 		final actionPromise = Promise.all([gotoPromise, hoverPromise]).then(results -> {
 			final definitions:Array<DefinitionLink> = results[0];
-			// TODO investigate multiple definitions case
 			final definition = definitions[0] ?? return action;
 			final hover:HoverDisplayItemOccurence<Dynamic> = results[1];
-			final printer = new DisplayPrinter(true, Qualified, {
-				argumentTypeHints: true,
-				returnTypeHint: Always,
-				useArrowSyntax: true,
-				placeOpenBraceOnNewLine: false,
-				explicitPublic: true,
-				explicitPrivate: true,
-				explicitNull: true
-			});
 			final item = hover.item;
-			final itemType = item.type;
-			if (itemType == null)
-				return action;
-			final type = itemType.removeNulls().type;
-			var typeHint = printer.printType(type);
-			typeHint = ~/Null<Null<(.+?)>>/g.replace(typeHint, "Null<$1>");
+			final typeHint = printTypeHint(item) ?? return action;
 			final definitionDoc = context.documents.getHaxe(definition.targetUri);
 			if (definitionDoc == null)
 				return action;
@@ -114,6 +99,25 @@ class MissingArgumentsAction {
 			return action;
 		});
 		return actionPromise;
+	}
+
+	public static function printTypeHint(item:DisplayItem<Dynamic>):Null<String> {
+		final printer = new DisplayPrinter(true, Qualified, {
+			argumentTypeHints: true,
+			returnTypeHint: Always,
+			useArrowSyntax: true,
+			placeOpenBraceOnNewLine: false,
+			explicitPublic: true,
+			explicitPrivate: true,
+			explicitNull: true
+		});
+		final itemType = item.type;
+		if (itemType == null)
+			return null;
+		final type = itemType.removeNulls().type;
+		var typeHint = printer.printType(type);
+		typeHint = ~/Null<Null<(.+?)>>/g.replace(typeHint, "Null<$1>");
+		return typeHint;
 	}
 
 	static function isFunctionInArg(argToken:TokenTree):Bool {
@@ -173,7 +177,8 @@ class MissingArgumentsAction {
 		return args.map(tree -> tree.toString());
 	}
 
-	static function makeHoverRequest<T>(context:Context, fileName:String, pos:Int, token:CancellationToken):Promise<Null<HoverDisplayItemOccurence<T>>> {
+	public static function makeHoverRequest<T>(context:Context, fileName:String, pos:Int,
+			token:CancellationToken):Promise<Null<HoverDisplayItemOccurence<T>>> {
 		var request:HoverRequestContext<T> = {
 			params: cast {
 				file: cast fileName,

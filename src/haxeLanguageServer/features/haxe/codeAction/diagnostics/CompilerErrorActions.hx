@@ -72,8 +72,6 @@ class CompilerErrorActions {
 
 		final tooManyArgsRe = ~/Too many arguments([\w.]*)/;
 		if (tooManyArgsRe.match(arg)) {
-			final document = context.documents.getHaxe(params.textDocument.uri);
-			final replacement = document.getText(diagnostic.range);
 			final data:CodeActionResolveData = {
 				type: MissingArg,
 				params: params,
@@ -89,8 +87,6 @@ class CompilerErrorActions {
 		}
 
 		if (arg.contains("Cannot assign to final") || arg.contains("This expression cannot be accessed for writing")) {
-			final document = context.documents.getHaxe(params.textDocument.uri);
-			final replacement = document.getText(diagnostic.range);
 			final data:CodeActionResolveData = {
 				type: ChangeFinalToVar,
 				params: params,

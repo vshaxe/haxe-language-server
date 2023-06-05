@@ -15,7 +15,7 @@ class FindReferencesFeature {
 		context.languageServerProtocol.onRequest(ReferencesRequest.type, onFindReferences);
 	}
 
-	function onFindReferences(params:TextDocumentPositionParams, token:CancellationToken, resolve:Null<Array<Location>>->Void,
+	public function onFindReferences(params:TextDocumentPositionParams, token:CancellationToken, resolve:Null<Array<Location>>->Void,
 			reject:ResponseError<NoData>->Void) {
 		final uri = params.textDocument.uri;
 		final doc = context.documents.getHaxe(uri);
