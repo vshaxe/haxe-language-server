@@ -28,10 +28,7 @@ class MissingFieldsActions {
 			final content = sys.io.File.getContent(args.moduleFile);
 			document = new HaxeDocument(uri, "haxe", 0, content);
 		}
-		var tokens = document.tokens;
-		if (tokens == null) {
-			return [];
-		}
+		var tokens = document.tokens ?? return [];
 		var rangeClass:Null<Range> = null;
 		var rangeFieldInsertion;
 		var moduleLevelField = false;
@@ -39,55 +36,40 @@ class MissingFieldsActions {
 		var classToken:Null<TokenTree> = null;
 		switch (args.moduleType.kind) {
 			case Class:
-				var classTokens = tokens.tree.filterCallback((token, _) -> {
-					return switch (token.tok) {
-						case Kwd(KwdClass):
-							FoundSkipSubtree;
-						case Sharp(_):
-							GoDeeper;
-						case _:
-							SkipSubtree;
-					}
-				});
-				for (token in classTokens) {
-					var nameToken = token.getNameToken();
-					if (nameToken == null) {
-						continue;
-					}
-					var name = nameToken.getName();
-					if (name == className) {
-						classToken = token;
-					}
-				}
+				classToken = getClassToken(tokens.tree, className);
 				if (classToken == null) {
 					moduleLevelField = true;
 					final lastPos = document.content.length - 1;
 					rangeFieldInsertion = document.rangeAt(lastPos, lastPos, Utf8);
 				} else {
-					var pos = tokens.getPos(classToken);
+					final pos = tokens.getPos(classToken);
 					rangeClass = document.rangeAt(pos.min, pos.min, Utf8);
-					var pos = tokens.getTreePos(classToken);
+					final pos = tokens.getTreePos(classToken);
 					rangeFieldInsertion = document.rangeAt(pos.max - 1, pos.max - 1, Utf8);
 				}
 			case _:
 				return [];
 		}
 
-		var actions:Array<CodeAction> = [];
+		final actions:Array<CodeAction> = [];
 		final importConfig = context.config.user.codeGeneration.imports;
 		final fieldFormatting = context.config.user.codeGeneration.functions.field;
 		final printer = new DisplayPrinter(false, if (importConfig.enableAutoImports) Shadowed else Qualified, fieldFormatting);
-		var allEdits = [];
+		final allEdits:Array<TextEdit> = [];
 		final isSnippet = context.hasClientCommandSupport("haxe.codeAction.insertSnippet");
 		var snippetEdit:Null<TextEdit> = null;
-		var allDotPaths = [];
+		var allDotPaths:Array<String> = [];
+		// iterate all `MissingFields` diagnostic errors
 		for (entry in args.entries) {
+			// list of missing fields
 			var fields = entry.fields.copy();
 			function getTitle<T>(cause:MissingFieldCause<T>) {
 				return switch (cause.kind) {
 					case AbstractParent:
+						// suggest `class` to `abstract class` action
+						// or generate all missing fields for class that extends abstract class
 						if (rangeClass != null) {
-							@:nullSafety(Off)
+							final rangeClass:Range = rangeClass;
 							actions.push({
 								title: "Make abstract",
 								kind: QuickFix,
@@ -102,10 +84,7 @@ class MissingFieldsActions {
 						Some('Implement ${cause.args.isGetter ? "getter" : "setter"} for ${cause.args.property.name}');
 					case FieldAccess:
 						// There's only one field in this case... I think
-						var field = fields[0];
-						if (field == null) {
-							return None;
-						}
+						final field = fields[0] ?? return None;
 						final target = if (moduleLevelField) {
 							Path.withoutDirectory(args.moduleFile).replace(".hx", "");
 						} else {
@@ -113,8 +92,13 @@ class MissingFieldsActions {
 						}
 						Some('Add ${field.field.name} to $target');
 					case FinalFields:
-						final funArgs = [];
-						final assignments = [];
+						// generate constructor for cases like:
+						// class Foo {
+						// 	final bar:Int;
+						// }
+						// with field args and `this.arg = arg` in body
+						final funArgs:Array<JsonFunctionArgument> = [];
+						final assignments:Array<String> = [];
 						cause.args.fields.sort((cf1, cf2) -> cf1.pos.min - cf2.pos.min);
 						for (field in cause.args.fields) {
 							funArgs.push({
@@ -125,35 +109,7 @@ class MissingFieldsActions {
 							final name = field.name;
 							assignments.push('this.$name = $name');
 						}
-						final ctorField:JsonClassField = {
-							name: "new",
-							type: {
-								kind: TFun,
-								args: {
-									args: funArgs,
-									ret: {
-										kind: TMono,
-										args: null
-									}
-								}
-							},
-							isPublic: true,
-							isFinal: false,
-							isAbstract: false,
-							params: [],
-							meta: [],
-							kind: {
-								kind: FMethod,
-								args: MethNormal
-							},
-							pos: args.moduleType.pos,
-							doc: null,
-							overloads: [],
-							scope: Constructor,
-							expr: {
-								string: assignments.join("\n")
-							}
-						}
+						final ctorField = makeCtorJsonField(funArgs, assignments, args.moduleType.pos);
 						fields.push({
 							field: ctorField,
 							type: ctorField.type,
@@ -166,41 +122,31 @@ class MissingFieldsActions {
 				case Some(title): title;
 				case None: return [];
 			}
-			final edits = [];
+			final edits:Array<TextEdit> = [];
+			// make only one edit in snippet mode, other as text
 			var snippetEditId = -1;
 			final getQualified = printer.collectQualifiedPaths();
 			fields.sort((a, b) -> a.field.pos.min - b.field.pos.min);
+
 			for (field in fields) {
 				var buf = new StringBuf();
 				buf.add(if (moduleLevelField) "\n\n" else "\n\t");
-				final expressions = [];
+				final expressions:Array<String> = [];
 				if (field.field.expr != null) {
 					for (expr in field.field.expr.string.split("\n")) {
 						expressions.push(expr);
 					}
 				} else {
 					final signature = field.type.extractFunctionSignature();
-					final argNames = [];
-					var id = 0;
-					final args = signature!.args ?? [];
-					for (arg in args) {
-						var argName = arg.name;
-						if (argName.startsWith("arg") && argName.length == 4) {
-							argName = MissingArgumentsAction.genArgNameFromJsonType(arg.t);
+					final args = signature!.args;
+					if (args != null) {
+						final isSnippetArgs = isSnippet && snippetEditId == -1;
+						// hack to generate ${1:arg} snippet ranges for new function args
+						renameGeneratedFunctionArgs(args, isSnippetArgs);
+						if (isSnippetArgs) {
+							snippetEditId = edits.length;
 						}
-						for (i in 1...10) {
-							final name = argName + (i == 1 ? "" : '$i');
-							if (!argNames.contains(name)) {
-								argNames.push(name);
-								argName = name;
-								break;
-							}
-						}
-						id++;
-						final isSnippet = isSnippet && snippetEditId == -1;
-						arg.name = isSnippet ? '$${$id:$argName}' : argName;
 					}
-					snippetEditId = edits.length;
 					if (signature.check(f -> !f.ret.isVoid())) {
 						expressions.push("throw new haxe.exceptions.NotImplementedException()");
 					}
@@ -222,7 +168,7 @@ class MissingFieldsActions {
 					}
 				}
 
-				var edit = {
+				final edit:TextEdit = {
 					range: rangeFieldInsertion,
 					newText: buf.toString()
 				};
@@ -231,6 +177,7 @@ class MissingFieldsActions {
 					allEdits.push(edit);
 				}
 			}
+
 			var dotPaths = getQualified();
 			dotPaths = dotPaths.filterDuplicates((a, b) -> a == b);
 			allDotPaths = allDotPaths.concat(dotPaths);
@@ -244,6 +191,7 @@ class MissingFieldsActions {
 			};
 			snippetEdit = edits[snippetEditId];
 			if (snippetEdit != null) {
+				// wrap generated function body to `{0:...}` snippet range
 				var text = snippetEdit.newText;
 				final matchBodyExpr = ~/({\n[\t ]+)(.+)\n/;
 				if (matchBodyExpr.match(text)) {
@@ -266,6 +214,8 @@ class MissingFieldsActions {
 			}
 			actions.unshift(codeAction);
 		}
+
+		// generate all missing fields action only if there is more than one diagnostic error
 		if (args.entries.length > 1) {
 			allDotPaths = allDotPaths.filterDuplicates((a, b) -> a == b);
 			if (allDotPaths.length > 0) {
@@ -293,6 +243,82 @@ class MissingFieldsActions {
 			actions[0].isPreferred = true;
 		}
 		return actions;
+	}
+
+	static function getClassToken(tree:TokenTree, className:String):Null<TokenTree> {
+		final classTokens = tree.filterCallback((token, _) -> {
+			return switch (token.tok) {
+				case Kwd(KwdClass):
+					FoundSkipSubtree;
+				case Sharp(_):
+					GoDeeper;
+				case _:
+					SkipSubtree;
+			}
+		});
+		for (token in classTokens) {
+			final nameToken = token.getNameToken() ?? continue;
+			if (nameToken.getName() == className) {
+				return token;
+			}
+		}
+		return null;
+	}
+
+	static function makeCtorJsonField(funArgs:Array<JsonFunctionArgument>, assignments:Array<String>, pos:JsonPos):JsonClassField {
+		final ctorField:JsonClassField = {
+			name: "new",
+			type: {
+				kind: TFun,
+				args: {
+					args: funArgs,
+					ret: {
+						kind: TMono,
+						args: null
+					}
+				}
+			},
+			isPublic: true,
+			isFinal: false,
+			isAbstract: false,
+			params: [],
+			meta: [],
+			kind: {
+				kind: FMethod,
+				args: MethNormal
+			},
+			pos: pos,
+			doc: null,
+			overloads: [],
+			scope: Constructor,
+			expr: {
+				string: assignments.join("\n")
+			}
+		}
+		return ctorField;
+	}
+
+	static function renameGeneratedFunctionArgs(args:Array<JsonFunctionArgument>, isSnippetArgs:Bool) {
+		final argNames = [];
+		var id = 0;
+		for (arg in args) {
+			var argName = arg.name;
+			if (argName.startsWith("arg") && argName.length == 4) {
+				argName = MissingArgumentsAction.genArgNameFromJsonType(arg.t);
+			}
+			for (i in 1...10) {
+				final name = argName + (i == 1 ? "" : '$i');
+				if (!argNames.contains(name)) {
+					argNames.push(name);
+					argName = name;
+					break;
+				}
+			}
+			id++;
+			if (arg.name.startsWith("${"))
+				continue;
+			arg.name = isSnippetArgs ? '$${$id:$argName}' : argName;
+		}
 	}
 
 	static function getNewVariablePos(document:HaxeDocument, classToken:TokenTree, fieldScope:JsonClassFieldScope):Null<Range> {
