@@ -3,6 +3,7 @@ import haxeLanguageServer.Configuration;
 import haxeLanguageServer.Context;
 import haxeLanguageServer.documents.HaxeDocument;
 import haxeLanguageServer.features.haxe.DiagnosticsFeature;
+import haxeLanguageServer.features.haxe.FindReferencesFeature;
 import haxeLanguageServer.features.haxe.GotoDefinitionFeature;
 import haxeLanguageServer.helper.DisplayOffsetConverter;
 import haxeLanguageServer.helper.SemVer;
@@ -54,6 +55,7 @@ class DisplayTestContext {
 		docs[uri] = doc;
 
 		context.gotoDefinition = new GotoDefinitionFeature(context);
+		context.findReferences = new FindReferencesFeature(context);
 		context.displayOffsetConverter = DisplayOffsetConverter.create(context.haxeServer.haxeVersion);
 	}
 

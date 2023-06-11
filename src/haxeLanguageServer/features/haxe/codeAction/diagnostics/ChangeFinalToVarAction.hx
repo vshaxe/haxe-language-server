@@ -19,7 +19,7 @@ class ChangeFinalToVarAction {
 		final varToken = document.tokens!.getTokenAtOffset(document.offsetAt(diagnostic.range.start));
 		if (varToken == null)
 			return null;
-		final gotoPromise = new Promise(function(resolve:(hover:Array<DefinitionLink>) -> Void, reject) {
+		final gotoPromise = new Promise(function(resolve:(definitions:Array<DefinitionLink>) -> Void, reject) {
 			context.gotoDefinition.onGotoDefinition({
 				textDocument: params.textDocument,
 				position: document.positionAt(varToken.pos.min, Utf8)

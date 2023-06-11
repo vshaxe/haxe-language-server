@@ -83,6 +83,7 @@ class AddMissingArgsTest extends DisplayTestCase {
 			function pickAndApply(callback:() -> Void):Void {
 				if (ranges.length == 0) {
 					callback();
+					return;
 				}
 				final range = ranges.shift();
 				final params = codeActionParams(range);
