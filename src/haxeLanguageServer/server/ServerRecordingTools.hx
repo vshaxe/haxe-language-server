@@ -17,22 +17,13 @@ enum VcsState {
 	Svn(rev:String, hasPatch:Bool);
 }
 
-function hasBinaryInPath(bin:String) {
-	final envPath = Node.process.env["PATH"] ?? "";
-	// .COM;.EXE;.BAT;.CMD;...
-	final envExt = Node.process.env["PATHEXT"] ?? "";
-	final delimiter = js.node.Path.delimiter;
-	final paths = ~/["]+/g.replace(envPath, "").split(delimiter).map(chunk -> {
-		return envExt.split(delimiter).map(ext -> {
-			return Path.join([chunk, bin + ext]);
-		});
-	});
-	final paths = Lambda.flatten(paths).filterDuplicates((a, b) -> a == b);
-	for (path in paths) {
-		if (FileSystem.exists(path))
-			return true;
+function hasCommand(bin:String) {
+	try {
+		command(bin, []);
+		return true;
+	} catch (e) {
+		return false;
 	}
-	return false;
 }
 
 function command(cmd:String, args:Array<String>) {
@@ -53,7 +44,7 @@ function getVcsState(patchOutput:String, untrackedDestination:String, config:Ser
 }
 
 function getGitState(patchOutput:String, untrackedDestination:String, config:ServerRecordingConfig):VcsState {
-	if (!hasBinaryInPath("git"))
+	if (!hasCommand("git"))
 		return None;
 	var revision = command("git", ["rev-parse", "HEAD"]);
 	if (revision.code != 0)
@@ -106,7 +97,7 @@ function applyGitExcludes(args:Array<String>, config:ServerRecordingConfig):Arra
 }
 
 function getSvnState(patchOutput:String, config:ServerRecordingConfig):VcsState {
-	if (!hasBinaryInPath("svn"))
+	if (!hasCommand("svn"))
 		return None;
 	var revision = command("svn", ["info", "--show-item", "revision"]);
 	if (revision.code != 0)
