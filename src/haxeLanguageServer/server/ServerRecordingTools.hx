@@ -1,19 +1,29 @@
 package haxeLanguageServer.server;
 
 import haxe.io.Path;
+import haxeLanguageServer.Configuration.ServerRecordingConfig;
+import haxeLanguageServer.helper.FsHelper;
+import js.Node;
 import js.lib.Promise;
 import js.node.Buffer;
 import js.node.ChildProcess;
 import sys.FileSystem;
 import sys.io.File;
-import haxeLanguageServer.Configuration.ServerRecordingConfig;
-import haxeLanguageServer.helper.FsHelper;
 
 enum VcsState {
 	None;
 	// Note: hasPatch will always be true for Git (for now at least)
 	Git(ref:String, hasPatch:Bool, hasUntracked:Bool, untrackedCopy:Promise<Void>);
 	Svn(rev:String, hasPatch:Bool);
+}
+
+function hasCommand(bin:String) {
+	try {
+		command(bin, []);
+		return true;
+	} catch (e) {
+		return false;
+	}
 }
 
 function command(cmd:String, args:Array<String>) {
@@ -34,6 +44,8 @@ function getVcsState(patchOutput:String, untrackedDestination:String, config:Ser
 }
 
 function getGitState(patchOutput:String, untrackedDestination:String, config:ServerRecordingConfig):VcsState {
+	if (!hasCommand("git"))
+		return None;
 	var revision = command("git", ["rev-parse", "HEAD"]);
 	if (revision.code != 0)
 		return None;
@@ -85,6 +97,8 @@ function applyGitExcludes(args:Array<String>, config:ServerRecordingConfig):Arra
 }
 
 function getSvnState(patchOutput:String, config:ServerRecordingConfig):VcsState {
+	if (!hasCommand("svn"))
+		return None;
 	var revision = command("svn", ["info", "--show-item", "revision"]);
 	if (revision.code != 0)
 		return None;
