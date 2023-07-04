@@ -379,9 +379,9 @@ class UpdateSyntaxActions {
 		final secondOpStart = colon.getFirstChild() ?? return;
 		final secondOpEnd = getLastNonCommaToken(secondOpStart) ?? return;
 
-		final ifIdentRange = doc.rangeAt(ifIdentStart.pos).union(doc.rangeAt(ifIdentEnd.pos));
-		final firstRange = doc.rangeAt(firstOpStart.getPos());
-		final secondRange = doc.rangeAt(secondOpStart.pos).union(doc.rangeAt(secondOpEnd.pos));
+		final ifIdentRange = doc.rangeAt(ifIdentStart.pos, Utf8).union(doc.rangeAt(ifIdentEnd.pos, Utf8));
+		final firstRange = doc.rangeAt(firstOpStart.getPos(), Utf8);
+		final secondRange = doc.rangeAt(secondOpStart.pos, Utf8).union(doc.rangeAt(secondOpEnd.pos, Utf8));
 		final isEq = binopToken.matches(Binop(OpEq));
 
 		final condText = doc.getText(ifIdentRange);
@@ -394,7 +394,7 @@ class UpdateSyntaxActions {
 			if (condText != firstText)
 				return;
 		}
-		final replaceRange = doc.rangeAt(ifIdentStart.getPos());
+		final replaceRange = doc.rangeAt(ifIdentStart.getPos(), Utf8);
 		var value = isEq ? firstText : secondText;
 		if (!value.endsWith(";"))
 			value += ";";

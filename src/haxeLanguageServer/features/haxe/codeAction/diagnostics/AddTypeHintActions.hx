@@ -47,7 +47,7 @@ class AddTypeHintActions {
 			// check return type hint
 			if (nameToken.access().firstOf(DblDot) != null)
 				return actions;
-			params.range = doc.rangeAt(nameToken.pos);
+			params.range = doc.rangeAt(nameToken.pos, Utf8);
 		}
 
 		final data:CodeActionResolveData = {
@@ -122,7 +122,7 @@ class AddTypeHintActions {
 				// (`x = 1` is Int on hover, but `var x = 1` is not)
 				final isVarDecl = isVarDecl(locToken);
 				if (!isVarDecl && child.tok.match(Binop(OpAssign | OpAssignOp(_)))) {
-					location.range = locDoc.rangeAt(child.pos);
+					location.range = locDoc.rangeAt(child.pos, Utf8);
 				}
 			}
 

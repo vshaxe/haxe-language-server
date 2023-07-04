@@ -99,7 +99,7 @@ class ParserErrorActions {
 					case [prevTok, _] if (!prevTok.match(Comma | BrOpen)):
 						// fix {a: 0 b: 0} structure
 						if (isAnonStructureField(token)) {
-							final prevRange = document.rangeAt(prevToken.pos.max, prevToken.pos.max);
+							final prevRange = document.rangeAt(prevToken.pos.max, prevToken.pos.max, Utf8);
 							actions.push({
 								title: "Add missing ,",
 								kind: CodeActionKind.QuickFix + ".auto",
