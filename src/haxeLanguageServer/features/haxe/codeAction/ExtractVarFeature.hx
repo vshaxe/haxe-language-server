@@ -207,9 +207,18 @@ class ExtractVarFeature implements CodeActionContributor {
 		if (token.tok == BrClose || token.tok == BkClose) {
 			token = token.parent ?? return [];
 		}
+		// extract full object/array
 		switch token.tok {
-			case BrOpen, BkOpen: // extract full object/array
+			case BrOpen:
 				return [token, getLastNonCommaToken(token)];
+			case BkOpen:
+				final parent = token.parent ?? return [];
+				final isArrAccess = parent.isCIdent() || parent.matches(BkOpen);
+				if (!isArrAccess) {
+					return [token, getLastNonCommaToken(token)];
+				} else {
+					token = parent;
+				}
 			case _:
 		}
 
