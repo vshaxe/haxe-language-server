@@ -6,7 +6,6 @@
 			"name": "language-server",
 			"args": {
 				"haxelibs": [
-					"haxe-hxparser",
 					"hxparse",
 					"haxeparser",
 					"tokentree",
@@ -43,7 +42,6 @@
 			"name": "language-server-tests",
 			"args": {
 				"haxelibs": [
-					"haxe-hxparser",
 					"hxparse",
 					"haxeparser",
 					"tokentree",

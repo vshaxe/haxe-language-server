@@ -2,7 +2,6 @@ package;
 
 import haxeLanguageServer.features.haxe.codeAction.*;
 import haxeLanguageServer.helper.*;
-import haxeLanguageServer.hxParser.*;
 import haxeLanguageServer.protocol.*;
 import haxeLanguageServer.tokentree.*;
 import utest.Runner;
@@ -18,7 +17,6 @@ class TestMain {
 			new PositionHelperTest(),
 			new RangeHelperTest(),
 			new TypeHelperTest(),
-			new RenameResolverTest(),
 			new ExtensionsTest(),
 			new ExtractConstantFeatureTest(),
 			new OrganizeImportsFeatureTest(),
