@@ -321,7 +321,7 @@ private enum abstract ImportType(Int) {
 	public function opLt(val:ImportType):Bool;
 
 	@:op(a > b)
-	public function opLt(val:ImportType):Bool;
+	public function opGt(val:ImportType):Bool;
 }
 
 private typedef ImportSortFunction = (a:ImportInfo, b:ImportInfo) -> Int;
