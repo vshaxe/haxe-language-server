@@ -13,8 +13,7 @@ class DeterminePackageFeature {
 		context.languageServerProtocol.onRequest(LanguageServerMethods.DeterminePackage, onDeterminePackage);
 	}
 
-	public function onDeterminePackage(params:{fsPath:String}, token:Null<CancellationToken>, resolve:{pack:String}->Void,
-			reject:ResponseError<NoData>->Void) {
+	public function onDeterminePackage(params:{fsPath:String}, token:Null<CancellationToken>, resolve:{pack:String}->Void, reject:ResponseError<NoData>->Void) {
 		final handle = if (context.haxeServer.supports(DisplayMethods.DeterminePackage)) handleJsonRpc else handleLegacy;
 		handle(new FsPath(params.fsPath), token, resolve, reject);
 	}

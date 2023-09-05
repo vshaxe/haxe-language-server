@@ -177,8 +177,7 @@ class MissingArgumentsAction {
 		return args.map(tree -> tree.toString());
 	}
 
-	public static function makeHoverRequest<T>(context:Context, fileName:String, pos:Int,
-			token:CancellationToken):Promise<Null<HoverDisplayItemOccurence<T>>> {
+	public static function makeHoverRequest<T>(context:Context, fileName:String, pos:Int, token:CancellationToken):Promise<Null<HoverDisplayItemOccurence<T>>> {
 		var request:HoverRequestContext<T> = {
 			params: cast {
 				file: cast fileName,

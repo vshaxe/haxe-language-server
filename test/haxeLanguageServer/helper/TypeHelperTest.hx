@@ -43,14 +43,12 @@ class TypeHelperTest extends Test {
 		assertPrintedEquals(parseDisplayType, "function(a:String, b:Bool)", "String -> Bool -> Void",
 			{argumentTypeHints: true, returnTypeHint: NonVoid, useArrowSyntax: false});
 
-		assertPrintedEquals(parseDisplayType, "function():String", "Void -> String",
-			{argumentTypeHints: true, returnTypeHint: NonVoid, useArrowSyntax: false});
+		assertPrintedEquals(parseDisplayType, "function():String", "Void -> String", {argumentTypeHints: true, returnTypeHint: NonVoid, useArrowSyntax: false});
 	}
 
 	function testPrintArrowFunctionDeclaration() {
 		function assert(expected, functionType, argumentTypeHints = false) {
-			assertPrintedEquals(parseDisplayType, expected, functionType,
-				{argumentTypeHints: argumentTypeHints, returnTypeHint: Always, useArrowSyntax: true});
+			assertPrintedEquals(parseDisplayType, expected, functionType, {argumentTypeHints: argumentTypeHints, returnTypeHint: Always, useArrowSyntax: true});
 		}
 
 		assert("() ->", "Void -> Void");

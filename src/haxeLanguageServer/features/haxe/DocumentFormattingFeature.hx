@@ -15,8 +15,7 @@ class DocumentFormattingFeature {
 		context.languageServerProtocol.onRequest(DocumentRangeFormattingRequest.type, onDocumentRangeFormatting);
 	}
 
-	function onDocumentFormatting(params:DocumentFormattingParams, token:CancellationToken, resolve:Array<TextEdit>->Void,
-			reject:ResponseError<NoData>->Void) {
+	function onDocumentFormatting(params:DocumentFormattingParams, token:CancellationToken, resolve:Array<TextEdit>->Void, reject:ResponseError<NoData>->Void) {
 		format(params.textDocument.uri, null, resolve, reject);
 	}
 
