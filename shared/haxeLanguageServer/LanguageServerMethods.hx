@@ -41,9 +41,9 @@ class LanguageServerMethods {
 	static inline final DidChangeActiveTextEditor = new NotificationType<{uri:DocumentUri}>("haxe/didChangeActiveTextEditor");
 
 	/**
-		This notification is sent from the server to the client when the display port has changed.
+		This notification is sent from the server to the client when the display host / port has changed.
 	**/
-	static inline final DidChangeDisplayPort = new NotificationType<{port:Int}>("haxe/didChangeDisplayPort");
+	static inline final DidChangeDisplayPort = new NotificationType<ServerAddress>("haxe/didChangeDisplayPort");
 
 	/**
 		This notification is sent from the server to the client when a Haxe JSON-RPC method was executed.
@@ -109,4 +109,9 @@ typedef AdditionalTimes = {
 	final arrival:Float;
 	final beforeProcessing:Float;
 	final afterProcessing:Float;
+}
+
+typedef ServerAddress = {
+	host:String,
+	port:Int
 }

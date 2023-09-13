@@ -5,6 +5,7 @@ import haxe.Json;
 import haxe.display.Protocol;
 import haxe.display.Server.ServerMethods;
 import haxe.io.Path;
+import haxeLanguageServer.LanguageServerMethods.ServerAddress;
 import haxeLanguageServer.helper.SemVer;
 import haxeLanguageServer.server.HaxeConnection;
 import js.lib.Promise;
@@ -165,11 +166,12 @@ class HaxeServer {
 			});
 
 			final displayPort = context.config.user.displayPort;
+			final displayHost = context.config.user.displayHost ?? "127.0.0.1";
 			if (socketListener == null && displayPort != null) {
 				if (displayPort == "auto") {
-					getAvailablePort(6000).then(startSocketServer);
+					getAvailablePort(displayHost, 6000).then(startSocketServer);
 				} else {
-					startSocketServer(displayPort);
+					startSocketServer({host: displayHost, port: displayPort});
 				}
 			} else {
 				starting = false;
@@ -266,11 +268,11 @@ class HaxeServer {
 	}
 
 	// https://gist.github.com/mikeal/1840641#gistcomment-2337132
-	function getAvailablePort(startingAt:Int):Promise<Int> {
-		function getNextAvailablePort(currentPort:Int, cb:Int->Void) {
+	function getAvailablePort(host:String, startingAt:Int):Promise<ServerAddress> {
+		function getNextAvailablePort(currentPort:Int, cb:ServerAddress->Void) {
 			final server = Net.createServer();
-			server.listen(currentPort, "localhost", () -> {
-				server.once(ServerEvent.Close, cb.bind(currentPort));
+			server.listen(currentPort, host, () -> {
+				server.once(ServerEvent.Close, cb.bind({host: host, port: currentPort}));
 				server.close();
 			});
 			server.on(ServerEvent.Error, _ -> getNextAvailablePort(currentPort + 1, cb));
@@ -278,7 +280,7 @@ class HaxeServer {
 		return new Promise((resolve, reject) -> getNextAvailablePort(startingAt, resolve));
 	}
 
-	public function startSocketServer(port:Int) {
+	public function startSocketServer(address:ServerAddress) {
 		if (socketListener != null) {
 			socketListener.close();
 		}
@@ -305,9 +307,9 @@ class HaxeServer {
 				trace("Socket error: " + err);
 			});
 		});
-		socketListener.listen(port, "localhost");
-		trace('Listening on port $port');
-		context.languageServerProtocol.sendNotification(LanguageServerMethods.DidChangeDisplayPort, {port: port});
+		socketListener.listen(address.port, address.host);
+		trace('Listening on port ${address.host}:${address.port}');
+		context.languageServerProtocol.sendNotification(LanguageServerMethods.DidChangeDisplayPort, address);
 
 		starting = false;
 		checkRestart();

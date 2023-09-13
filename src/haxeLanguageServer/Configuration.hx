@@ -89,6 +89,7 @@ typedef UserConfig = {
 	var enableServerView:Bool;
 	var enableSignatureHelpDocumentation:Bool;
 	var diagnosticsPathFilter:String;
+	var displayHost:String;
 	var displayPort:EitherType<Int, String>;
 	var buildCompletionCache:Bool;
 	var enableCompletionCacheWarning:Bool;
@@ -150,6 +151,7 @@ class Configuration {
 		enableServerView: false,
 		enableSignatureHelpDocumentation: true,
 		diagnosticsPathFilter: "${workspaceRoot}",
+		displayHost: null,
 		displayPort: null,
 		buildCompletionCache: true,
 		enableCompletionCacheWarning: true,
