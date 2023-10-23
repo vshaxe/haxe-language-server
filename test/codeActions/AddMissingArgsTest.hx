@@ -139,4 +139,41 @@ class AddMissingArgsTest extends DisplayTestCase {
 			});
 		});
 	}
+
+	/**
+		function main() {
+			new Foo({-1-}1{-2-});
+		}
+		class Foo {
+			public function new() {}
+		}
+		---
+		function main() {
+			new Foo(1);
+		}
+		class Foo {
+			public function new(i:Int) {}
+		}
+	**/
+	@:timeout(500)
+	function testConstructorArg(async:utest.Async) {
+		ctx.cacheFile();
+		ctx.startServer(() -> {
+			var action:CodeAction = {title: ""};
+			// diagnostics selects full arg range
+			final params = codeActionParams(range(1, 2));
+			final diag = createDiagnostic(range(1, 2));
+			final action:Null<Promise<CodeAction>> = MissingArgumentsAction.createMissingArgumentsAction(ctx.context, action, params, diag);
+			assert(action != null);
+			action.then(action -> {
+				ctx.removeCacheFile();
+				applyTextEdit(action.edit);
+				eq(ctx.result, ctx.doc.content);
+				async.done();
+			}, (err) -> {
+				ctx.removeCacheFile();
+				throw err;
+			});
+		});
+	}
 }
