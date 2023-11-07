@@ -209,8 +209,12 @@ class MissingArgumentsAction {
 
 	static function getCallNamePos(document:HaxeDocument, argToken:TokenTree):Null<Range> {
 		final parent = argToken.access().findParent(helper -> {
-			return switch (helper!.token!.tok) {
-				case Const(CIdent(_)): true;
+			final token = helper?.token ?? return false;
+			return switch (token.tok) {
+				case Const(CIdent(_)):
+					final parent = token.parent ?? return false;
+					!parent.matches(Kwd(KwdNew));
+				case Kwd(KwdNew): true;
 				case _: false;
 			}
 		});
