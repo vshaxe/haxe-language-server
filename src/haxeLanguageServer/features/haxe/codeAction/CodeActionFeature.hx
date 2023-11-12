@@ -3,6 +3,7 @@ package haxeLanguageServer.features.haxe.codeAction;
 import haxeLanguageServer.features.haxe.codeAction.diagnostics.AddTypeHintActions;
 import haxeLanguageServer.features.haxe.codeAction.diagnostics.ChangeFinalToVarAction;
 import haxeLanguageServer.features.haxe.codeAction.diagnostics.MissingArgumentsAction;
+import haxeLanguageServer.helper.SemVer;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
@@ -49,6 +50,13 @@ class CodeActionFeature {
 			resolveProvider: true
 		});
 		hasCommandResolveSupport = context.capabilities.textDocument!.codeAction!.resolveSupport!.properties.contains("command");
+		if (!hasCommandResolveSupport) {
+			// hack for vscode versions around 1.84
+			// they have support, but don't have "command" field
+			final ver = context.getVscodeVersion();
+			if (ver != null)
+				hasCommandResolveSupport = ver >= new SemVer(1, 81, 0);
+		}
 		context.languageServerProtocol.onRequest(CodeActionRequest.type, onCodeAction);
 		context.languageServerProtocol.onRequest(CodeActionResolveRequest.type, onCodeActionResolve);
 

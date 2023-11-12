@@ -106,7 +106,14 @@ typedef UserConfig = {
 }
 
 typedef ExperimentalCapabilities = {
-	?supportedCommands:Array<String>
+	/**
+		List of supported commands on client, like `"codeAction.insertSnippet"`,
+		to generate snippets in code actions, instead of simple text edits
+	**/
+	var ?supportedCommands:Array<String>;
+
+	/** Optional field for vscode, can help to workaround some vscode/lsp bugs. **/
+	var ?vscodeVersion:String;
 }
 
 typedef InitOptions = {

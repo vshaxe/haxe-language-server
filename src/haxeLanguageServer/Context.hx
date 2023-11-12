@@ -28,6 +28,7 @@ import haxeLanguageServer.features.haxe.WorkspaceSymbolsFeature;
 import haxeLanguageServer.features.haxe.codeAction.CodeActionFeature;
 import haxeLanguageServer.features.haxe.documentSymbols.DocumentSymbolsFeature;
 import haxeLanguageServer.features.haxe.foldingRange.FoldingRangeFeature;
+import haxeLanguageServer.helper.SemVer;
 import haxeLanguageServer.server.DisplayResult;
 import haxeLanguageServer.server.HaxeServer;
 import haxeLanguageServer.server.ServerRecording;
@@ -159,6 +160,7 @@ class Context {
 		final experimentals = initOptions!.experimentalClientCapabilities;
 		if (experimentals != null) {
 			capabilities.experimental.supportedCommands = experimentals.supportedCommands;
+			capabilities.experimental.vscodeVersion = experimentals.vscodeVersion;
 		}
 		config.onInitialize(params);
 		serverRecording.onInitialize(this);
@@ -357,6 +359,12 @@ class Context {
 		final experimental:ExperimentalCapabilities = capabilities.experimental ?? return false;
 		final supportedCommands = experimental.supportedCommands ?? return false;
 		return supportedCommands.contains(command);
+	}
+
+	public function getVscodeVersion():Null<SemVer> {
+		final experimental:ExperimentalCapabilities = capabilities.experimental ?? return null;
+		final str = experimental.vscodeVersion ?? return null;
+		return SemVer.parse(str);
 	}
 
 	function restartServer(reason:String) {
