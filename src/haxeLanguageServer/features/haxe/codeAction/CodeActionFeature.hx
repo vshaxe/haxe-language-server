@@ -48,7 +48,8 @@ class CodeActionFeature {
 			],
 			resolveProvider: true
 		});
-		hasCommandResolveSupport = context.capabilities.textDocument!.codeAction!.resolveSupport!.properties.contains("command");
+		var resolveSupportProperties = context.capabilities.textDocument!.codeAction!.resolveSupport!.properties;
+		hasCommandResolveSupport = resolveSupportProperties != null ? resolveSupportProperties.contains("command") : false;
 		context.languageServerProtocol.onRequest(CodeActionRequest.type, onCodeAction);
 		context.languageServerProtocol.onRequest(CodeActionResolveRequest.type, onCodeActionResolve);
 
