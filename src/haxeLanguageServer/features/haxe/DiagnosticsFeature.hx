@@ -192,7 +192,7 @@ class DiagnosticsFeature {
 						message: convertIndentation(rel.message, rel.depth)
 					})
 				}
-				if (kind == RemovableCode || kind == UnusedImport || diag.message.contains("has no effect") || kind == InactiveBlock) {
+				if (kind == ReplaceableCode || kind == UnusedImport || diag.message.contains("has no effect") || kind == InactiveBlock) {
 					diag.severity = Hint;
 					diag.tags = [Unnecessary];
 				}
@@ -374,11 +374,17 @@ typedef MissingFieldDiagnostics = {
 	var entries:Array<MissingFieldDiagnostic>;
 }
 
+typedef ReplaceableCode = {
+	var description:String;
+	var range:Range;
+	var ?newCode:String;
+}
+
 enum abstract DiagnosticKind<T>(Int) from Int to Int {
 	final UnusedImport:DiagnosticKind<Void>;
 	final UnresolvedIdentifier:DiagnosticKind<Array<{kind:UnresolvedIdentifierSuggestion, name:String}>>;
 	final CompilerError:DiagnosticKind<String>;
-	final RemovableCode:DiagnosticKind<{description:String, range:Range}>;
+	final ReplaceableCode:DiagnosticKind<ReplaceableCode>;
 	final ParserError:DiagnosticKind<String>;
 	final DeprecationWarning:DiagnosticKind<String>;
 	final InactiveBlock:DiagnosticKind<Void>;
@@ -398,7 +404,7 @@ enum abstract DiagnosticKind<T>(Int) from Int to Int {
 				}
 				message;
 			case CompilerError: args.trim();
-			case RemovableCode: args.description;
+			case ReplaceableCode: args.description;
 			case ParserError: args;
 			case DeprecationWarning: args;
 			case InactiveBlock: "Inactive conditional compilation block";
