@@ -112,8 +112,8 @@ typedef ExperimentalCapabilities = {
 	**/
 	var ?supportedCommands:Array<String>;
 
-	/** Optional field for vscode, can help to workaround some vscode/lsp bugs. **/
-	var ?vscodeVersion:String;
+	/** Forces resolve support for code actions `command` property **/
+	var ?forceCommandResolveSupport:Bool;
 }
 
 typedef InitOptions = {

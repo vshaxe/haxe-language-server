@@ -49,13 +49,9 @@ class CodeActionFeature {
 			],
 			resolveProvider: true
 		});
-		hasCommandResolveSupport = context.capabilities.textDocument!.codeAction!.resolveSupport!.properties.contains("command");
+		hasCommandResolveSupport = context.capabilities.textDocument!.codeAction!.resolveSupport!.properties!.contains("command") ?? false;
 		if (!hasCommandResolveSupport) {
-			// hack for vscode versions around 1.84
-			// they have support, but don't have "command" field
-			final ver = context.getVscodeVersion();
-			if (ver != null)
-				hasCommandResolveSupport = ver >= new SemVer(1, 81, 0);
+			hasCommandResolveSupport = context.experimental?.forceCommandResolveSupport ?? false;
 		}
 		context.languageServerProtocol.onRequest(CodeActionRequest.type, onCodeAction);
 		context.languageServerProtocol.onRequest(CodeActionResolveRequest.type, onCodeActionResolve);
