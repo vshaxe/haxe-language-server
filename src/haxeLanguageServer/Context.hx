@@ -28,7 +28,6 @@ import haxeLanguageServer.features.haxe.WorkspaceSymbolsFeature;
 import haxeLanguageServer.features.haxe.codeAction.CodeActionFeature;
 import haxeLanguageServer.features.haxe.documentSymbols.DocumentSymbolsFeature;
 import haxeLanguageServer.features.haxe.foldingRange.FoldingRangeFeature;
-import haxeLanguageServer.helper.SemVer;
 import haxeLanguageServer.server.DisplayResult;
 import haxeLanguageServer.server.HaxeServer;
 import haxeLanguageServer.server.ServerRecording;

@@ -3,7 +3,6 @@ package haxeLanguageServer.features.haxe.codeAction;
 import haxeLanguageServer.features.haxe.codeAction.diagnostics.AddTypeHintActions;
 import haxeLanguageServer.features.haxe.codeAction.diagnostics.ChangeFinalToVarAction;
 import haxeLanguageServer.features.haxe.codeAction.diagnostics.MissingArgumentsAction;
-import haxeLanguageServer.helper.SemVer;
 import jsonrpc.CancellationToken;
 import jsonrpc.ResponseError;
 import jsonrpc.Types.NoData;
