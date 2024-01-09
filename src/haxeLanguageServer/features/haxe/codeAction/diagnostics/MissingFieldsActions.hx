@@ -153,24 +153,29 @@ class MissingFieldsActions {
 				}
 				buf.add(printer.printClassFieldImplementation(field.field, field.type, false, moduleLevelField, expressions));
 
+				final isFunctionField = field.type.kind == TFun;
 				if (classToken != null) {
-					if (field.type.kind != TFun) {
-						final range = getNewVariablePos(document, classToken, field.field.scope);
-						if (range != null)
-							rangeFieldInsertion = range;
+					if (!isFunctionField) {
+						final pos = getNewVariablePos(document, classToken, field.field.scope);
+						if (pos != null)
+							rangeFieldInsertion = pos.toRange();
 					} else {
 						final funToken = tokens!.getTokenAtOffset(document.offsetAt(diagnostic.range.start));
 						if (funToken != null) {
-							final range = getNewClassFunctionPos(document, classToken, funToken);
-							if (range != null)
-								rangeFieldInsertion = range;
+							final pos = getNewClassFunctionPos(document, classToken, funToken);
+							if (pos != null)
+								rangeFieldInsertion = pos.toRange();
 						}
 					}
 				}
 
+				var bufStr = buf.toString();
+				// keep additional newline only for added functions
+				if (!isFunctionField && bufStr.endsWith("\n"))
+					bufStr = bufStr.substr(0, bufStr.length - 1);
 				final edit:TextEdit = {
 					range: rangeFieldInsertion,
-					newText: buf.toString()
+					newText: bufStr
 				};
 				edits.push(edit);
 				if (field.unique) {
@@ -321,27 +326,30 @@ class MissingFieldsActions {
 		}
 	}
 
-	static function getNewVariablePos(document:HaxeDocument, classToken:TokenTree, fieldScope:JsonClassFieldScope):Null<Range> {
+	static function getNewVariablePos(document:HaxeDocument, classToken:TokenTree, fieldScope:JsonClassFieldScope):Null<Position> {
 		final brOpen = classToken.access().firstChild().firstOf(BrOpen)!.token;
 		if (brOpen == null) {
 			return null;
 		}
 		// add statics to the top
 		if (fieldScope == Static) {
-			return document.rangeAt(brOpen.pos.max, brOpen.pos.max, Utf8);
+			return document.positionAt(brOpen.pos.max, Utf8);
 		}
 		// find place for field before first function in class
 		final firstFun = brOpen.access().firstOf(Kwd(KwdFunction));
-		final prev = firstFun!.token!.previousSibling;
+		var prev = firstFun!.token!.previousSibling;
+		while (prev != null && prev.isComment()) {
+			prev = prev.previousSibling;
+		}
 		// if function is first add var at the top
 		if (prev == null) {
-			return document.rangeAt(brOpen.pos.max, brOpen.pos.max, Utf8);
+			return document.positionAt(brOpen.pos.max, Utf8);
 		}
 		final pos = prev.getPos();
-		return document.rangeAt(pos.max, pos.max, Utf8);
+		return document.positionAt(pos.max, Utf8);
 	}
 
-	static function getNewClassFunctionPos(document:HaxeDocument, classToken:TokenTree, callToken:TokenTree):Null<Range> {
+	static function getNewClassFunctionPos(document:HaxeDocument, classToken:TokenTree, callToken:TokenTree):Null<Position> {
 		final brOpen = classToken.access().firstChild().firstOf(BrOpen)!.token;
 		if (brOpen == null) {
 			return null;
@@ -356,7 +364,7 @@ class MissingFieldsActions {
 			if (callPos.min < tokenPos.min || callPos.min > tokenPos.max)
 				continue;
 			if (token.tok.match(Kwd(KwdFunction))) {
-				return document.rangeAt(tokenPos.max + 1, tokenPos.max + 1, Utf8);
+				return document.positionAt(tokenPos.max + 1, Utf8);
 			}
 		}
 		return null;
