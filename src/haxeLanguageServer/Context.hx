@@ -64,6 +64,7 @@ class Context {
 	@:nullSafety(Off) public var findReferences(default, null):FindReferencesFeature;
 	@:nullSafety(Off) public var determinePackage(default, null):DeterminePackageFeature;
 	@:nullSafety(Off) public var diagnostics(default, null):DiagnosticsFeature;
+	public var experimental(default, null):Null<ExperimentalCapabilities>;
 
 	var activeEditor:Null<DocumentUri>;
 	var initialized = false;
@@ -154,12 +155,8 @@ class Context {
 			workspacePath = params.rootUri.toFsPath();
 		}
 		capabilities = params.capabilities;
-		capabilities.experimental ??= {}
 		final initOptions:Null<InitOptions> = params.initializationOptions;
-		final experimentals = initOptions!.experimentalClientCapabilities;
-		if (experimentals != null) {
-			capabilities.experimental.supportedCommands = experimentals.supportedCommands;
-		}
+		experimental = initOptions!.experimentalClientCapabilities ?? {};
 		config.onInitialize(params);
 		serverRecording.onInitialize(this);
 
@@ -354,8 +351,7 @@ class Context {
 	}
 
 	public function hasClientCommandSupport(command:String):Bool {
-		final experimental:ExperimentalCapabilities = capabilities.experimental ?? return false;
-		final supportedCommands = experimental.supportedCommands ?? return false;
+		final supportedCommands = experimental?.supportedCommands ?? return false;
 		return supportedCommands.contains(command);
 	}
 

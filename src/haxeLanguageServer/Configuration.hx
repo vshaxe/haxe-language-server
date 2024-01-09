@@ -106,7 +106,14 @@ typedef UserConfig = {
 }
 
 typedef ExperimentalCapabilities = {
-	?supportedCommands:Array<String>
+	/**
+		List of supported commands on client, like `"codeAction.insertSnippet"`,
+		to generate snippets in code actions, instead of simple text edits
+	**/
+	var ?supportedCommands:Array<String>;
+
+	/** Forces resolve support for code actions `command` property **/
+	var ?forceCommandResolveSupport:Bool;
 }
 
 typedef InitOptions = {

@@ -48,7 +48,10 @@ class CodeActionFeature {
 			],
 			resolveProvider: true
 		});
-		hasCommandResolveSupport = context.capabilities.textDocument!.codeAction!.resolveSupport!.properties.contains("command");
+		hasCommandResolveSupport = context.capabilities.textDocument!.codeAction!.resolveSupport!.properties!.contains("command") ?? false;
+		if (!hasCommandResolveSupport) {
+			hasCommandResolveSupport = context.experimental?.forceCommandResolveSupport ?? false;
+		}
 		context.languageServerProtocol.onRequest(CodeActionRequest.type, onCodeAction);
 		context.languageServerProtocol.onRequest(CodeActionResolveRequest.type, onCodeActionResolve);
 
