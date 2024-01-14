@@ -395,7 +395,8 @@ class HaxeServer {
 			msg = msg.split("\x01\n\x01").join("\n");
 
 			// Remove initial \x01 that will eat next newline char
-			if (StringTools.startsWith(msg, "\x01")) msg = msg.substr(1);
+			if (StringTools.startsWith(msg, "\x01"))
+				msg = msg.substr(1);
 
 			context.serverRecording.onServerMessage(request, msg);
 			currentRequest = null;
