@@ -383,21 +383,6 @@ class HaxeServer {
 	function onMessage(msg:String) {
 		if (currentRequest != null) {
 			final request = currentRequest;
-
-			// Unify last line ending with in-between lines
-			msg = msg + "\x01";
-
-			// Haxe 5.0 / nightlies
-			// Since https://github.com/HaxeFoundation/haxe/pull/11459
-			msg = msg.split("\n\x01\n\x01").join("\n");
-
-			// Haxe <= 4.3.x
-			msg = msg.split("\x01\n\x01").join("\n");
-
-			// Remove initial \x01 that will eat next newline char
-			if (StringTools.startsWith(msg, "\x01"))
-				msg = msg.substr(1);
-
 			context.serverRecording.onServerMessage(request, msg);
 			currentRequest = null;
 			request.onData(msg);
