@@ -27,6 +27,8 @@ jobs:
       run: |
         haxe -version
         haxelib list
+        haxelib state save install-new.hxml
+        diff install.hxml install-new.hxml
 
     - name: Build Haxe LSP
       run: haxe build.hxml
