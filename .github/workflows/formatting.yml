@@ -19,6 +19,7 @@ jobs:
     - name: Install dependencies
       run: |
         npm ci
+        haxelib newrepo
         haxelib state load install.hxml
 
     - name: Check dependencies

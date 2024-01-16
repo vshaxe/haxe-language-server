@@ -1,12 +1,4 @@
 -lib hxnodejs
--D analyzer-optimize
--D js-unflatten
--D js-es=6
--cp src
--cp shared
--D JSTACK_FORMAT=vscode
-# -D uglifyjs_overwrite
--lib haxe-hxparser
 -lib hxparse
 -lib haxeparser
 -lib tokentree
@@ -15,13 +7,25 @@
 -lib json2object
 -lib language-server-protocol
 -lib vscode-json-rpc
-# -lib uglifyjs
+-lib uglifyjs
 -lib safety
+
+-cp src
+-cp shared
+
 --macro haxeLanguageServer.Init.run()
 --macro Safety.safeNavigation('haxeLanguageServer')
 --macro nullSafety('haxeLanguageServer')
+
+-D analyzer-optimize
+-D js-unflatten
+-D js-es=6
+-D JSTACK_FORMAT=vscode
+-D uglifyjs_overwrite
+-D message.reporting=pretty
+-dce full
 -debug
--dce=full
--js bin/server.js
+
 -main haxeLanguageServer.Main
+-js bin/server.js
 
