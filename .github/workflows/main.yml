@@ -8,7 +8,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        haxe: [latest, "2024-01-16_development_ba140a7", "2024-01-11_development_dec37b3"]
+        haxe: [latest, "2024-01-16_development_3dbee4f"]
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v2
