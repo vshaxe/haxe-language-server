@@ -11,6 +11,21 @@ jobs:
     - uses: actions/checkout@v2
       with:
         submodules: true
-    - run: |
+
+    - uses: krdlab/setup-haxe@v1
+      with:
+        haxe-version: latest
+
+    - name: Install dependencies
+      run: |
         npm ci
-        npx lix run formatter -s . --check
+        haxelib state load install.hxml
+
+    - name: Check dependencies
+      run: |
+        haxe -version
+        haxelib list
+
+    - name: Run formatter
+      run: |
+        haxelib run formatter -s shared -s src --check
