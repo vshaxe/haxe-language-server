@@ -1,0 +1,27 @@
+-lib hxnodejs
+-lib hxparse
+-lib haxeparser
+-lib tokentree
+-lib formatter
+-lib rename
+-lib json2object
+-lib language-server-protocol
+-lib vscode-json-rpc
+-lib safety
+-lib utest
+
+-cp src
+-cp shared
+-cp test
+
+--macro Safety.safeNavigation('haxeLanguageServer')
+
+-D analyzer-optimize
+-D js-unflatten
+-D js-es=6
+--dce full
+--debug
+
+-main TestMain
+-js bin/test.js
+-cmd node bin/test.js
