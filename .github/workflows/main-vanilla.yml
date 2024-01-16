@@ -17,9 +17,20 @@ jobs:
       with:
         haxe-version: ${{ matrix.haxe }}
 
-    - name: Install dependencies
+    - name: Cache haxelib
+      id: cache-haxelib
+      uses: actions/cache@v3.0.11
+      with:
+        path: .haxelib
+        key: ${{ hashFiles('./install.hxml') }}
+
+    - name: Install npm dependencies
       run: |
         npm ci
+
+    - name: Install haxelib dependencies
+      if: steps.cache-haxelib.outputs.cache-hit != 'true'
+      run: |
         haxelib newrepo
         haxelib state load install.hxml
 
