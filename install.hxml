@@ -1,0 +1,14 @@
+-lib formatter:1.15.0
+-lib haxeparser:git:https://github.com/HaxeCheckstyle/haxeparser#7e98c9aef901b8e26541cf3f8a6e1da0385b237a
+-lib hxjsonast:1.1.0
+-lib hxnodejs:git:https://github.com/HaxeFoundation/hxnodejs#504066dc1ba5ad543afa5f6c3ea019f06136a82b
+-lib hxparse:git:https://github.com/simn/hxparse#876070ec62a4869de60081f87763e23457a3bda8
+-lib json2object:git:https://github.com/elnabo/json2object#429986134031cbb1980f09d0d3d642b4b4cbcd6a
+-lib language-server-protocol:git:https://github.com/vshaxe/language-server-protocol-haxe#a6baa2ddcd792e99b19398048ef95aa00f0aa1f6
+-lib rename:2.2.2
+-lib safety:1.1.2
+-lib test-adapter:2.0.4
+-lib tokentree:1.2.10
+-lib uglifyjs:1.0.0
+-lib utest:git:https://github.com/haxe-utest/utest#a94f8812e8786f2b5fec52ce9f26927591d26327
+-lib vscode-json-rpc:git:https://github.com/vshaxe/vscode-json-rpc#0160f06bc9df1dd0547f2edf23753540db74ed5b

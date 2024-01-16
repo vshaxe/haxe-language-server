@@ -1,3 +1,0 @@
-# @install: lix --silent download "gh://github.com/simn/hxparse#876070ec62a4869de60081f87763e23457a3bda8" into hxparse/4.3.0/github/876070ec62a4869de60081f87763e23457a3bda8
--cp ${HAXE_LIBCACHE}/hxparse/4.3.0/github/876070ec62a4869de60081f87763e23457a3bda8/src
--D hxparse=4.3.0
