@@ -738,7 +738,7 @@ class CompletionFeature {
 				}
 			// do nothing for these, you might not want a space after
 			case Break | Cast | Continue | Default | Return | Package:
-			// assume a space is needed for all the rest
+				// assume a space is needed for all the rest
 			case _:
 				maybeAddSpace();
 		}

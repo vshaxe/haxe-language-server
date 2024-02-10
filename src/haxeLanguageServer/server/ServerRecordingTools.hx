@@ -110,8 +110,7 @@ function getSvnState(patchOutput:String, config:ServerRecordingConfig):VcsState 
 	if (!config.excludeUntracked) {
 		untracked = [
 			for (line in status.out.split('\n')) {
-				if (line.charCodeAt(0) != '?'.code)
-					continue;
+				if (line.charCodeAt(0) != '?'.code) continue;
 				var entry = line.substr(1).trim();
 
 				if (hasExcludes) {

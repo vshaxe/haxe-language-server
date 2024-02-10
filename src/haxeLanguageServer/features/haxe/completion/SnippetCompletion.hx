@@ -83,7 +83,6 @@ class SnippetCompletion {
 ${accessorPrefix}function get_$${1:name}():$${2:T} ${block(3)}
 
 ${accessorPrefix}function set_$${1:name}($${1:name}:$${2:T}):$${2:T} $body');
-
 		}
 		function addMain(explicitStatic:Bool) {
 			final main = (if (explicitStatic) "static " else "") + "function main()";
