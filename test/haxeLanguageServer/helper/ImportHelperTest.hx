@@ -169,7 +169,6 @@ import Test;
 
 @:jsRequire('WebSocket')
 extern class WebSocket {}",
-
 		});
 
 		// issue #414 https://github.com/vshaxe/vshaxe/issues/414
@@ -196,7 +195,6 @@ class Main {
         
     }
 }",
-
 		});
 	}
 }
