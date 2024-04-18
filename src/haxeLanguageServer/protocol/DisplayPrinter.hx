@@ -626,7 +626,8 @@ class DisplayPrinter {
 			case Flash: "Flash";
 			case Php: "PHP";
 			case Cpp: "C++";
-			case Cs: "C#";
+			// case Cs: "C#";
+			case cs if ('$cs' == "cs"): "C#";
 			case Java: "Java";
 			case Python: "Python";
 			case Hl: "HashLink";
