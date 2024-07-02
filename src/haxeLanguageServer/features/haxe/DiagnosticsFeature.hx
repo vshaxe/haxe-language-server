@@ -32,6 +32,9 @@ class DiagnosticsFeature {
 	final pendingRequests:Map<DocumentUri, CancellationTokenSource>;
 	final errorUri:DocumentUri;
 
+	final useJsonRpc:Bool;
+	final timerName:String;
+
 	var haxelibPath:Null<FsPath>;
 
 	public function new(context:Context) {
@@ -40,6 +43,9 @@ class DiagnosticsFeature {
 		pendingRequests = new Map();
 		errorUri = new FsPath(Path.join([context.workspacePath.toString(), "Error"])).toUri();
 
+		useJsonRpc = context.haxeServer.supports(DisplayMethods.Diagnostics);
+		timerName = useJsonRpc ? DisplayMethods.Diagnostics : "@diagnostics";
+
 		ChildProcess.exec(context.config.haxelib.executable + " config", (error, stdout, stderr) -> haxelibPath = new FsPath(stdout.trim()));
 
 		context.languageServerProtocol.onNotification(LanguageServerMethods.RunGlobalDiagnostics, onRunGlobalDiagnostics);
@@ -47,17 +53,43 @@ class DiagnosticsFeature {
 
 	function onRunGlobalDiagnostics(_) {
 		final stopProgress = context.startProgress("Collecting Diagnostics");
-		final onResolve = context.startTimer("display/diagnostics");
+		final onResolve = context.startTimer(timerName);
 
-		context.callHaxeMethod(DisplayMethods.Diagnostics, {}, null, result -> {
-			processDiagnosticsReply(null, onResolve, result);
-			context.languageServerProtocol.sendNotification(LanguageServerMethods.DidRunRunGlobalDiagnostics);
-			stopProgress();
-			return null;
-		}, function(error) {
-			processErrorReply(null, error);
-			stopProgress();
-		});
+		if (useJsonRpc) {
+			context.callHaxeMethod(DisplayMethods.Diagnostics, {}, null, result -> {
+				processDiagnosticsReply(null, onResolve, result);
+				context.languageServerProtocol.sendNotification(LanguageServerMethods.DidRunRunGlobalDiagnostics);
+				stopProgress();
+				return null;
+			}, function(error) {
+				processErrorReply(null, error);
+				stopProgress();
+			});
+		} else {
+			context.callDisplay("global diagnostics", ["diagnostics"], null, null, function(result) {
+				final data = parseLegacyDiagnostics(result);
+				if (data == null) clearDiagnosticsOnClient(errorUri);
+				else processDiagnosticsReply(null, onResolve, data);
+				context.languageServerProtocol.sendNotification(LanguageServerMethods.DidRunRunGlobalDiagnostics);
+				stopProgress();
+			}, function(error) {
+				processErrorReply(null, error);
+				stopProgress();
+			});
+		}
+	}
+
+	function parseLegacyDiagnostics(result:DisplayResult):Null<ReadOnlyArray<{ file : haxe.display.FsPath, diagnostics : ReadOnlyArray<haxe.display.Diagnostic<Any>> }>> {
+		return switch result {
+			case DResult(s):
+				try {
+					Json.parse(s);
+				} catch (e) {
+					trace("Error parsing diagnostics response: " + e);
+					null;
+				}
+			case DCancelled: null;
+		};
 	}
 
 	function processErrorReply(uri:Null<DocumentUri>, error:String) {
@@ -293,15 +325,27 @@ class DiagnosticsFeature {
 	function invokePendingRequest(uri:DocumentUri, token:CancellationToken) {
 		final doc:Null<HaxeDocument> = context.documents.getHaxe(uri);
 		if (doc != null) {
-			final onResolve = context.startTimer("display/diagnostics");
-			context.callHaxeMethod(DisplayMethods.Diagnostics, {file: doc.uri.toFsPath()}, token, result -> {
-				pendingRequests.remove(uri);
-				processDiagnosticsReply(uri, onResolve, result);
-				return null;
-			}, error -> {
-				pendingRequests.remove(uri);
-				processErrorReply(uri, error);
-			});
+			final onResolve = context.startTimer(timerName);
+			if (useJsonRpc) {
+				context.callHaxeMethod(DisplayMethods.Diagnostics, {file: doc.uri.toFsPath()}, token, result -> {
+					pendingRequests.remove(uri);
+					processDiagnosticsReply(uri, onResolve, result);
+					return null;
+				}, error -> {
+					pendingRequests.remove(uri);
+					processErrorReply(uri, error);
+				});
+			} else {
+				context.callDisplay("@diagnostics", [doc.uri.toFsPath() + "@0@diagnostics"], null, token, result -> {
+					pendingRequests.remove(uri);
+					final data = parseLegacyDiagnostics(result);
+					if (data == null) clearDiagnosticsOnClient(errorUri);
+					else processDiagnosticsReply(null, onResolve, data);
+				}, error -> {
+					pendingRequests.remove(uri);
+					processErrorReply(uri, error);
+				});
+			}
 		} else {
 			pendingRequests.remove(uri);
 		}
