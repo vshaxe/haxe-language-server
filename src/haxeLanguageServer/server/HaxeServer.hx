@@ -219,7 +219,7 @@ class HaxeServer {
 		startProgress("Building Cache");
 
 		// see vshaxe/haxe-language-server#44 for explanation
-		final leadingArgs = ["--no-output", "--each", "--no-output"];
+		final leadingArgs = ["--no-output", "--each", "--no-output", "-D", "message.no-color"];
 
 		process("cache build", leadingArgs.concat(context.config.displayArguments), null, true, null, Processed(function(_) {
 			stopProgress();
