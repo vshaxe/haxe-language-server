@@ -1,5 +1,6 @@
 package haxeLanguageServer.features.haxe.codeAction.diagnostics;
 
+import haxe.display.Diagnostic.MissingFieldCause;
 import haxe.display.JsonModuleTypes;
 import haxe.ds.Option;
 import haxe.io.Path;
