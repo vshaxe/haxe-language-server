@@ -205,7 +205,6 @@ class HaxeServer {
 		context.callHaxeMethod(ServerMethods.Configure, {
 			noModuleChecks: true,
 			print: context.config.displayServer.print,
-			populateCacheFromDisplay: context.config.user.populateCacheFromDisplay,
 			legacyCompletion: context.config.user.useLegacyCompletion
 		}, null, _ -> null, function(error) {
 			trace("Error during " + ServerMethods.Configure + " " + error);
