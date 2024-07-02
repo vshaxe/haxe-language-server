@@ -45,7 +45,7 @@ class DiagnosticsCodeActionFeature implements CodeActionContributor {
 				case DKUnusedImport: UnusedImportActions.createUnusedImportActions(context, params, diagnostic);
 				case DKUnresolvedIdentifier: UnresolvedIdentifierActions.createUnresolvedIdentifierActions(context, params, diagnostic);
 				case DKCompilerError: CompilerErrorActions.createCompilerErrorActions(context, params, diagnostic);
-				case ReplacableCode: ReplaceableCodeActions.createReplaceableCodeActions(context, params, diagnostic);
+				case ReplaceableCode: ReplaceableCodeActions.createReplaceableCodeActions(context, params, diagnostic);
 				case DKParserError: ParserErrorActions.createParserErrorActions(context, params, diagnostic);
 				case MissingFields: MissingFieldsActions.createMissingFieldsActions(context, params, diagnostic);
 				case _: [];

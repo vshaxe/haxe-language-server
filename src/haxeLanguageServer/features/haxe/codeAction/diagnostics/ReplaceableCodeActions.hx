@@ -5,7 +5,7 @@ class ReplaceableCodeActions {
 		if ((params.context.only != null) && (!params.context.only.contains(QuickFix))) {
 			return [];
 		}
-		final args = context.diagnostics.getArguments(params.textDocument.uri, ReplacableCode, diagnostic.range);
+		final args = context.diagnostics.getArguments(params.textDocument.uri, ReplaceableCode, diagnostic.range);
 		final range = args!.range;
 		final newText = args!.newCode;
 		if (range == null) {

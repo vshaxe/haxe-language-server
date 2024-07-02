@@ -219,7 +219,7 @@ class DiagnosticsFeature {
 						message: convertIndentation(rel.message, rel.depth)
 					})
 				}
-				if (kind == ReplacableCode || kind == DKUnusedImport || diag.message.contains("has no effect") || kind == InactiveBlock) {
+				if (kind == ReplaceableCode || kind == DKUnusedImport || diag.message.contains("has no effect") || kind == InactiveBlock) {
 					diag.severity = Hint;
 					diag.tags = [Unnecessary];
 				}
@@ -389,7 +389,7 @@ class DiagnosticKindHelper {
 				}
 				message;
 			case DKCompilerError: args.trim();
-			case ReplacableCode: args.description;
+			case ReplaceableCode: args.description;
 			case DKParserError: args;
 			case DeprecationWarning: args;
 			case InactiveBlock: "Inactive conditional compilation block";
