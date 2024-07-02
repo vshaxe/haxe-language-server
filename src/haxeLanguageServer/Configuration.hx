@@ -88,6 +88,7 @@ typedef UserConfig = {
 	var enableDiagnostics:Bool;
 	var enableServerView:Bool;
 	var enableSignatureHelpDocumentation:Bool;
+	var diagnosticsForAllOpenFiles:Bool;
 	var diagnosticsPathFilter:String;
 	var displayHost:String;
 	var displayPort:EitherType<Int, String>;
@@ -156,6 +157,7 @@ class Configuration {
 		enableDiagnostics: true,
 		enableServerView: false,
 		enableSignatureHelpDocumentation: true,
+		diagnosticsForAllOpenFiles: true,
 		diagnosticsPathFilter: "${workspaceRoot}",
 		displayHost: null,
 		displayPort: null,

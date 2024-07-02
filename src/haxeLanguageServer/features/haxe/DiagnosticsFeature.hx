@@ -1,8 +1,9 @@
 package haxeLanguageServer.features.haxe;
 
-import haxe.display.Diagnostic;
-import haxe.display.Display.DisplayMethods;
 import haxe.Json;
+import haxe.display.Diagnostic;
+import haxe.display.Display.DiagnosticsParams;
+import haxe.display.Display.DisplayMethods;
 import haxe.display.JsonModuleTypes;
 import haxe.ds.BalancedTree;
 import haxe.io.Path;
@@ -327,10 +328,23 @@ class DiagnosticsFeature {
 
 	function invokePendingRequest(uri:DocumentUri, token:CancellationToken) {
 		final doc:Null<HaxeDocument> = context.documents.getHaxe(uri);
+
 		if (doc != null) {
 			final onResolve = context.startTimer(timerName);
 			if (useJsonRpc) {
-				context.callHaxeMethod(DisplayMethods.Diagnostics, {file: doc.uri.toFsPath()}, token, result -> {
+				var params:DiagnosticsParams = {fileContents: []};
+
+				if (context.config.user.diagnosticsForAllOpenFiles) {
+					context.documents.iter(function(doc) {
+						final path = doc.uri.toFsPath();
+						if (doc.languageId == "haxe" && !isPathFiltered(path))
+							params.fileContents.sure().push({file: path, contents: null});
+					});
+				} else {
+					params.file = doc.uri.toFsPath();
+				}
+
+				context.callHaxeMethod(DisplayMethods.Diagnostics, params, token, result -> {
 					pendingRequests.remove(uri);
 					processDiagnosticsReply(uri, onResolve, result);
 					return null;
@@ -357,10 +371,16 @@ class DiagnosticsFeature {
 	}
 
 	function cancelPendingRequest(uri:DocumentUri) {
-		var tokenSource = pendingRequests[uri];
-		if (tokenSource != null) {
-			pendingRequests.remove(uri);
-			tokenSource.cancel();
+		if (useJsonRpc && context.config.user.diagnosticsForAllOpenFiles) {
+			for (tokenSource in pendingRequests)
+				tokenSource.cancel();
+			pendingRequests.clear();
+		} else {
+			var tokenSource = pendingRequests[uri];
+			if (tokenSource != null) {
+				pendingRequests.remove(uri);
+				tokenSource.cancel();
+			}
 		}
 	}
 
