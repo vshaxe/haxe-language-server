@@ -68,8 +68,10 @@ class DiagnosticsFeature {
 		} else {
 			context.callDisplay("global diagnostics", ["diagnostics"], null, null, function(result) {
 				final data = parseLegacyDiagnostics(result);
-				if (data == null) clearDiagnosticsOnClient(errorUri);
-				else processDiagnosticsReply(null, onResolve, data);
+				if (data == null)
+					clearDiagnosticsOnClient(errorUri);
+				else
+					processDiagnosticsReply(null, onResolve, data);
 				context.languageServerProtocol.sendNotification(LanguageServerMethods.DidRunRunGlobalDiagnostics);
 				stopProgress();
 			}, function(error) {
@@ -79,7 +81,7 @@ class DiagnosticsFeature {
 		}
 	}
 
-	function parseLegacyDiagnostics(result:DisplayResult):Null<ReadOnlyArray<{ file : haxe.display.FsPath, diagnostics : ReadOnlyArray<haxe.display.Diagnostic<Any>> }>> {
+	function parseLegacyDiagnostics(result:DisplayResult):Null<ReadOnlyArray<{file:haxe.display.FsPath, diagnostics:ReadOnlyArray<haxe.display.Diagnostic<Any>>}>> {
 		return switch result {
 			case DResult(s):
 				try {
@@ -170,7 +172,8 @@ class DiagnosticsFeature {
 		argumentsMap.set({code: DKCompilerError, range: diag.range}, error);
 	}
 
-	function processDiagnosticsReply(uri:Null<DocumentUri>, onResolve:(result:Dynamic, ?debugInfo:String) -> Void, data:ReadOnlyArray<{ file : haxe.display.FsPath, diagnostics : ReadOnlyArray<haxe.display.Diagnostic<Any>> }>) {
+	function processDiagnosticsReply(uri:Null<DocumentUri>, onResolve:(result:Dynamic, ?debugInfo:String) -> Void,
+			data:ReadOnlyArray<{file:haxe.display.FsPath, diagnostics:ReadOnlyArray<haxe.display.Diagnostic<Any>>}>) {
 		clearDiagnosticsOnClient(errorUri);
 		var count = 0;
 		final sent = new Map<DocumentUri, Bool>();
@@ -339,8 +342,10 @@ class DiagnosticsFeature {
 				context.callDisplay("@diagnostics", [doc.uri.toFsPath() + "@0@diagnostics"], null, token, result -> {
 					pendingRequests.remove(uri);
 					final data = parseLegacyDiagnostics(result);
-					if (data == null) clearDiagnosticsOnClient(errorUri);
-					else processDiagnosticsReply(null, onResolve, data);
+					if (data == null)
+						clearDiagnosticsOnClient(errorUri);
+					else
+						processDiagnosticsReply(null, onResolve, data);
 				}, error -> {
 					pendingRequests.remove(uri);
 					processErrorReply(uri, error);
@@ -371,7 +376,8 @@ class DiagnosticsFeature {
 }
 
 class DiagnosticKindHelper {
-	public static function make<T>(code:Int) return (code:DiagnosticKind<T>);
+	public static function make<T>(code:Int)
+		return (code : DiagnosticKind<T>);
 
 	public static function getMessage<T>(dk:DiagnosticKind<T>, doc:Null<HaxeDocument>, args:T, range:Range) {
 		return switch dk {
