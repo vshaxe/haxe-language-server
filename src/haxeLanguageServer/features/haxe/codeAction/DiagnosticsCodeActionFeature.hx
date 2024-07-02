@@ -1,5 +1,6 @@
 package haxeLanguageServer.features.haxe.codeAction;
 
+import haxe.display.Diagnostic.DiagnosticKind;
 import haxeLanguageServer.features.haxe.DiagnosticsFeature;
 import haxeLanguageServer.features.haxe.codeAction.CodeActionFeature;
 import haxeLanguageServer.features.haxe.codeAction.diagnostics.AddTypeHintActions;
@@ -39,13 +40,13 @@ class DiagnosticsCodeActionFeature implements CodeActionContributor {
 			if (kind == null || !(kind is Int)) { // our codes are int, so we don't handle other stuff
 				continue;
 			}
-			final code = new DiagnosticKind<T>(kind);
+			final code:DiagnosticKind<T> = DiagnosticKindHelper.make(kind);
 			actions = actions.concat(switch code {
-				case UnusedImport: UnusedImportActions.createUnusedImportActions(context, params, diagnostic);
-				case UnresolvedIdentifier: UnresolvedIdentifierActions.createUnresolvedIdentifierActions(context, params, diagnostic);
-				case CompilerError: CompilerErrorActions.createCompilerErrorActions(context, params, diagnostic);
+				case DKUnusedImport: UnusedImportActions.createUnusedImportActions(context, params, diagnostic);
+				case DKUnresolvedIdentifier: UnresolvedIdentifierActions.createUnresolvedIdentifierActions(context, params, diagnostic);
+				case DKCompilerError: CompilerErrorActions.createCompilerErrorActions(context, params, diagnostic);
 				case ReplaceableCode: ReplaceableCodeActions.createReplaceableCodeActions(context, params, diagnostic);
-				case ParserError: ParserErrorActions.createParserErrorActions(context, params, diagnostic);
+				case DKParserError: ParserErrorActions.createParserErrorActions(context, params, diagnostic);
 				case MissingFields: MissingFieldsActions.createMissingFieldsActions(context, params, diagnostic);
 				case _: [];
 			});

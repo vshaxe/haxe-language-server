@@ -8,7 +8,7 @@ class CompilerErrorActions {
 			return [];
 		}
 		final actions:Array<CodeAction> = [];
-		final arg = context.diagnostics.getArguments(params.textDocument.uri, CompilerError, diagnostic.range);
+		final arg = context.diagnostics.getArguments(params.textDocument.uri, DKCompilerError, diagnostic.range);
 		if (arg == null) {
 			return actions;
 		}

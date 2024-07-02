@@ -9,16 +9,16 @@ class UnresolvedIdentifierActions {
 		if ((params.context.only != null) && (!params.context.only.contains(QuickFix))) {
 			return [];
 		}
-		final args = context.diagnostics.getArguments(params.textDocument.uri, UnresolvedIdentifier, diagnostic.range);
+		final args = context.diagnostics.getArguments(params.textDocument.uri, DKUnresolvedIdentifier, diagnostic.range);
 		if (args == null) {
 			return [];
 		}
 		var actions:Array<CodeAction> = [];
-		final importCount = args.count(a -> a.kind == Import);
+		final importCount = args.count(a -> a.kind == UISImport);
 		for (arg in args) {
 			actions = actions.concat(switch arg.kind {
-				case Import: createUnresolvedImportActions(context, params, diagnostic, arg, importCount);
-				case Typo: createTypoActions(context, params, diagnostic, arg);
+				case UISImport: createUnresolvedImportActions(context, params, diagnostic, arg, importCount);
+				case UISTypo: createTypoActions(context, params, diagnostic, arg);
 			});
 		}
 		return actions;

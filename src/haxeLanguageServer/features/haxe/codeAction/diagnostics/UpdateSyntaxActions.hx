@@ -1,6 +1,6 @@
 package haxeLanguageServer.features.haxe.codeAction.diagnostics;
 
-import haxeLanguageServer.features.haxe.DiagnosticsFeature.DiagnosticKind;
+import haxe.display.Diagnostic.DiagnosticKind;
 import haxeLanguageServer.features.haxe.codeAction.CodeActionFeature;
 import haxeLanguageServer.helper.DocHelper;
 import haxeLanguageServer.helper.FormatterHelper;
