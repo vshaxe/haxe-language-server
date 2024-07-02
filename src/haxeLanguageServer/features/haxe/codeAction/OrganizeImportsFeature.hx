@@ -194,7 +194,8 @@ class OrganizeImportsFeature {
 			edits = edits.concat(organizeImportGroup(doc, context, group));
 		}
 
-		if (last != null) edits = edits.concat(organizeImportGroup(doc, context, last));
+		if (last != null)
+			edits = edits.concat(organizeImportGroup(doc, context, last));
 		return edits;
 	}
 
