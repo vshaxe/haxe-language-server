@@ -69,10 +69,11 @@ class DiagnosticsFeature {
 		} else {
 			context.callDisplay("global diagnostics", ["diagnostics"], null, null, function(result) {
 				final data = parseLegacyDiagnostics(result);
-				if (data == null)
+				if (data == null) {
 					clearDiagnosticsOnClient(errorUri);
-				else
+				} else {
 					processDiagnosticsReply(null, onResolve, data);
+				}
 				context.languageServerProtocol.sendNotification(LanguageServerMethods.DidRunRunGlobalDiagnostics);
 				stopProgress();
 			}, function(error) {
@@ -337,8 +338,9 @@ class DiagnosticsFeature {
 				if (context.config.user.diagnosticsForAllOpenFiles) {
 					context.documents.iter(function(doc) {
 						final path = doc.uri.toFsPath();
-						if (doc.languageId == "haxe" && !isPathFiltered(path))
+						if (doc.languageId == "haxe" && !isPathFiltered(path)) {
 							params.fileContents.sure().push({file: path, contents: null});
+						}
 					});
 				} else {
 					params.file = doc.uri.toFsPath();
@@ -356,10 +358,11 @@ class DiagnosticsFeature {
 				context.callDisplay("@diagnostics", [doc.uri.toFsPath() + "@0@diagnostics"], null, token, result -> {
 					pendingRequests.remove(uri);
 					final data = parseLegacyDiagnostics(result);
-					if (data == null)
+					if (data == null) {
 						clearDiagnosticsOnClient(errorUri);
-					else
+					} else {
 						processDiagnosticsReply(null, onResolve, data);
+					}
 				}, error -> {
 					pendingRequests.remove(uri);
 					processErrorReply(uri, error);
@@ -372,8 +375,9 @@ class DiagnosticsFeature {
 
 	function cancelPendingRequest(uri:DocumentUri) {
 		if (useJsonRpc && context.config.user.diagnosticsForAllOpenFiles) {
-			for (tokenSource in pendingRequests)
+			for (tokenSource in pendingRequests) {
 				tokenSource.cancel();
+			}
 			pendingRequests.clear();
 		} else {
 			var tokenSource = pendingRequests[uri];
