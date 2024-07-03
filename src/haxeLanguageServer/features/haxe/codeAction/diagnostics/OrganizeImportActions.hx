@@ -1,6 +1,6 @@
 package haxeLanguageServer.features.haxe.codeAction.diagnostics;
 
-import haxeLanguageServer.features.haxe.DiagnosticsFeature.DiagnosticKind;
+import haxe.display.Diagnostic.DiagnosticKind;
 import haxeLanguageServer.features.haxe.codeAction.CodeActionFeature;
 import haxeLanguageServer.features.haxe.codeAction.OrganizeImportsFeature;
 import haxeLanguageServer.helper.DocHelper;
@@ -29,7 +29,7 @@ class OrganizeImportActions {
 		final map = context.diagnostics.getArgumentsMap(uri);
 		final removeUnusedFixes = if (map == null) [] else [
 			for (key in map.keys()) {
-				if (key.code == DiagnosticKind.UnusedImport) {
+				if (key.code == DiagnosticKind.DKUnusedImport) {
 					WorkspaceEditHelper.removeText(DocHelper.untrimRange(doc, key.range));
 				}
 			}

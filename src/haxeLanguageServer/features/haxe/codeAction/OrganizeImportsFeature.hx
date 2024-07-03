@@ -187,9 +187,17 @@ class OrganizeImportsFeature {
 
 	static function organizeImportGroups(doc:HxTextDocument, context:Context, importGroups:Map<Int, ImportGroup>):Array<TextEdit> {
 		var edits:Array<TextEdit> = [];
+		var last = importGroups.get(-1);
+		importGroups.remove(-1);
+
 		for (group in importGroups) {
 			edits = edits.concat(organizeImportGroup(doc, context, group));
 		}
+
+		if (last != null) {
+			edits = edits.concat(organizeImportGroup(doc, context, last));
+		}
+
 		return edits;
 	}
 

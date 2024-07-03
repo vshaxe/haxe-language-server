@@ -88,13 +88,13 @@ typedef UserConfig = {
 	var enableDiagnostics:Bool;
 	var enableServerView:Bool;
 	var enableSignatureHelpDocumentation:Bool;
+	var diagnosticsForAllOpenFiles:Bool;
 	var diagnosticsPathFilter:String;
 	var displayHost:String;
 	var displayPort:EitherType<Int, String>;
 	var buildCompletionCache:Bool;
 	var enableCompletionCacheWarning:Bool;
 	var useLegacyCompletion:Bool;
-	var populateCacheFromDisplay:Bool;
 	var codeGeneration:CodeGenerationConfig;
 	var exclude:Array<String>;
 	var postfixCompletion:PostfixCompletionConfig;
@@ -157,12 +157,12 @@ class Configuration {
 		enableDiagnostics: true,
 		enableServerView: false,
 		enableSignatureHelpDocumentation: true,
+		diagnosticsForAllOpenFiles: true,
 		diagnosticsPathFilter: "${workspaceRoot}",
 		displayHost: null,
 		displayPort: null,
 		buildCompletionCache: true,
 		enableCompletionCacheWarning: true,
-		populateCacheFromDisplay: true,
 		useLegacyCompletion: false,
 		codeGeneration: {
 			functions: {

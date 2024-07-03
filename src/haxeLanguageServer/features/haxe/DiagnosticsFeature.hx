@@ -1,6 +1,9 @@
 package haxeLanguageServer.features.haxe;
 
 import haxe.Json;
+import haxe.display.Diagnostic;
+import haxe.display.Display.DiagnosticsParams;
+import haxe.display.Display.DisplayMethods;
 import haxe.display.JsonModuleTypes;
 import haxe.ds.BalancedTree;
 import haxe.io.Path;
@@ -13,10 +16,10 @@ import js.Node.setImmediate;
 import js.node.ChildProcess;
 import jsonrpc.CancellationToken;
 import languageServerProtocol.Types.Diagnostic;
-import languageServerProtocol.Types.DiagnosticSeverity;
 import languageServerProtocol.Types.Location;
 
 using Lambda;
+using haxeLanguageServer.features.haxe.DiagnosticsFeature;
 
 class DiagnosticsFeature {
 	public static inline final SortImportsUsingsTitle = "Sort imports/usings";
@@ -30,6 +33,9 @@ class DiagnosticsFeature {
 	final pendingRequests:Map<DocumentUri, CancellationTokenSource>;
 	final errorUri:DocumentUri;
 
+	final useJsonRpc:Bool;
+	final timerName:String;
+
 	var haxelibPath:Null<FsPath>;
 
 	public function new(context:Context) {
@@ -38,6 +44,9 @@ class DiagnosticsFeature {
 		pendingRequests = new Map();
 		errorUri = new FsPath(Path.join([context.workspacePath.toString(), "Error"])).toUri();
 
+		useJsonRpc = context.haxeServer.supports(DisplayMethods.Diagnostics);
+		timerName = useJsonRpc ? DisplayMethods.Diagnostics : "@diagnostics";
+
 		ChildProcess.exec(context.config.haxelib.executable + " config", (error, stdout, stderr) -> haxelibPath = new FsPath(stdout.trim()));
 
 		context.languageServerProtocol.onNotification(LanguageServerMethods.RunGlobalDiagnostics, onRunGlobalDiagnostics);
@@ -45,16 +54,46 @@ class DiagnosticsFeature {
 
 	function onRunGlobalDiagnostics(_) {
 		final stopProgress = context.startProgress("Collecting Diagnostics");
-		final onResolve = context.startTimer("@diagnostics");
+		final onResolve = context.startTimer(timerName);
 
-		context.callDisplay("global diagnostics", ["diagnostics"], null, null, function(result) {
-			processDiagnosticsReply(null, onResolve, result);
-			context.languageServerProtocol.sendNotification(LanguageServerMethods.DidRunRunGlobalDiagnostics);
-			stopProgress();
-		}, function(error) {
-			processErrorReply(null, error);
-			stopProgress();
-		});
+		if (useJsonRpc) {
+			context.callHaxeMethod(DisplayMethods.Diagnostics, {}, null, result -> {
+				processDiagnosticsReply(null, onResolve, result);
+				context.languageServerProtocol.sendNotification(LanguageServerMethods.DidRunRunGlobalDiagnostics);
+				stopProgress();
+				return null;
+			}, function(error) {
+				processErrorReply(null, error);
+				stopProgress();
+			});
+		} else {
+			context.callDisplay("global diagnostics", ["diagnostics"], null, null, function(result) {
+				final data = parseLegacyDiagnostics(result);
+				if (data == null) {
+					clearDiagnosticsOnClient(errorUri);
+				} else {
+					processDiagnosticsReply(null, onResolve, data);
+				}
+				context.languageServerProtocol.sendNotification(LanguageServerMethods.DidRunRunGlobalDiagnostics);
+				stopProgress();
+			}, function(error) {
+				processErrorReply(null, error);
+				stopProgress();
+			});
+		}
+	}
+
+	function parseLegacyDiagnostics(result:DisplayResult):Null<ReadOnlyArray<{file:haxe.display.FsPath, diagnostics:ReadOnlyArray<haxe.display.Diagnostic<Any>>}>> {
+		return switch result {
+			case DResult(s):
+				try {
+					Json.parse(s);
+				} catch (e) {
+					trace("Error parsing diagnostics response: " + e);
+					null;
+				}
+			case DCancelled: null;
+		};
 	}
 
 	function processErrorReply(uri:Null<DocumentUri>, error:String) {
@@ -108,7 +147,7 @@ class DiagnosticsFeature {
 
 		final diag = {
 			range: {start: position, end: endPosition},
-			severity: DiagnosticSeverity.Error,
+			severity: languageServerProtocol.Types.DiagnosticSeverity.Error,
 			message: problemMatcher.matched(7)
 		};
 		publishDiagnostic(targetUri, diag, error);
@@ -122,7 +161,7 @@ class DiagnosticsFeature {
 		}
 		final diag = {
 			range: {start: {line: 0, character: 0}, end: {line: 0, character: 0}},
-			severity: DiagnosticSeverity.Error,
+			severity: languageServerProtocol.Types.DiagnosticSeverity.Error,
 			message: problemMatcher.matched(2)
 		};
 		publishDiagnostic(errorUri, diag, error);
@@ -132,22 +171,12 @@ class DiagnosticsFeature {
 	function publishDiagnostic(uri:DocumentUri, diag:Diagnostic, error:String) {
 		context.languageServerProtocol.sendNotification(PublishDiagnosticsNotification.type, {uri: uri, diagnostics: [diag]});
 		final argumentsMap = diagnosticsArguments[uri] = new DiagnosticsMap();
-		argumentsMap.set({code: CompilerError, range: diag.range}, error);
+		argumentsMap.set({code: DKCompilerError, range: diag.range}, error);
 	}
 
-	function processDiagnosticsReply(uri:Null<DocumentUri>, onResolve:(result:Dynamic, ?debugInfo:String) -> Void, result:DisplayResult) {
+	function processDiagnosticsReply(uri:Null<DocumentUri>, onResolve:(result:Dynamic, ?debugInfo:String) -> Void,
+			data:ReadOnlyArray<{file:haxe.display.FsPath, diagnostics:ReadOnlyArray<haxe.display.Diagnostic<Any>>}>) {
 		clearDiagnosticsOnClient(errorUri);
-		final data:Array<HaxeDiagnosticResponse<Any>> = switch result {
-			case DResult(s):
-				try {
-					Json.parse(s);
-				} catch (e) {
-					trace("Error parsing diagnostics response: " + e);
-					return;
-				}
-			case DCancelled:
-				return;
-		}
 		var count = 0;
 		final sent = new Map<DocumentUri, Bool>();
 		for (data in data) {
@@ -181,7 +210,7 @@ class DiagnosticsFeature {
 				final diag:Diagnostic = {
 					range: range,
 					code: hxDiag.code,
-					severity: hxDiag.severity,
+					severity: cast hxDiag.severity,
 					message: hxDiag.kind.getMessage(doc, hxDiag.args, range),
 					data: {kind: hxDiag.kind},
 					relatedInformation: hxDiag.relatedInformation?.map(rel -> {
@@ -192,7 +221,7 @@ class DiagnosticsFeature {
 						message: convertIndentation(rel.message, rel.depth)
 					})
 				}
-				if (kind == ReplaceableCode || kind == UnusedImport || diag.message.contains("has no effect") || kind == InactiveBlock) {
+				if (kind == ReplaceableCode || kind == DKUnusedImport || diag.message.contains("has no effect") || kind == InactiveBlock) {
 					diag.severity = Hint;
 					diag.tags = [Unnecessary];
 				}
@@ -229,23 +258,23 @@ class DiagnosticsFeature {
 		return !PathHelper.matches(path, pathFilter);
 	}
 
-	function filterRelevantDiagnostics(diagnostics:Array<HaxeDiagnostic<Any>>):Array<HaxeDiagnostic<Any>> {
+	function filterRelevantDiagnostics(diagnostics:ReadOnlyArray<HaxeDiagnostic<Any>>):ReadOnlyArray<HaxeDiagnostic<Any>> {
 		// hide regular compiler errors while there's parser errors, they can be misleading
 		final hasProblematicParserErrors = diagnostics.find(d -> switch (d.kind : Int) {
-			case ParserError: d.args != "Missing ;"; // don't be too strict
+			case DKParserError: d.args != "Missing ;"; // don't be too strict
 			case _: false;
 		}) != null;
 		if (hasProblematicParserErrors) {
 			diagnostics = diagnostics.filter(d -> switch (d.kind : Int) {
-				case CompilerError, UnresolvedIdentifier: false;
+				case DKCompilerError, DKUnresolvedIdentifier: false;
 				case _: true;
 			});
 		}
 
 		// hide unused import warnings while there's compiler errors (to avoid false positives)
-		final hasCompilerErrors = diagnostics.find(d -> d.kind == cast CompilerError) != null;
+		final hasCompilerErrors = diagnostics.find(d -> d.kind == cast DKCompilerError) != null;
 		if (hasCompilerErrors) {
-			diagnostics = diagnostics.filter(d -> d.kind != cast UnusedImport);
+			diagnostics = diagnostics.filter(d -> d.kind != cast DKUnusedImport);
 		}
 
 		// hide inactive blocks that are contained within other inactive blocks
@@ -300,25 +329,62 @@ class DiagnosticsFeature {
 
 	function invokePendingRequest(uri:DocumentUri, token:CancellationToken) {
 		final doc:Null<HaxeDocument> = context.documents.getHaxe(uri);
+
 		if (doc != null) {
-			final onResolve = context.startTimer("@diagnostics");
-			context.callDisplay("@diagnostics", [doc.uri.toFsPath() + "@0@diagnostics"], null, token, result -> {
-				pendingRequests.remove(uri);
-				processDiagnosticsReply(uri, onResolve, result);
-			}, error -> {
-				pendingRequests.remove(uri);
-				processErrorReply(uri, error);
-			});
+			final onResolve = context.startTimer(timerName);
+			if (useJsonRpc) {
+				var params:DiagnosticsParams = {fileContents: []};
+
+				if (context.config.user.diagnosticsForAllOpenFiles) {
+					context.documents.iter(function(doc) {
+						final path = doc.uri.toFsPath();
+						if (doc.languageId == "haxe" && !isPathFiltered(path)) {
+							params.fileContents.sure().push({file: path, contents: null});
+						}
+					});
+				} else {
+					params.file = doc.uri.toFsPath();
+				}
+
+				context.callHaxeMethod(DisplayMethods.Diagnostics, params, token, result -> {
+					pendingRequests.remove(uri);
+					processDiagnosticsReply(uri, onResolve, result);
+					return null;
+				}, error -> {
+					pendingRequests.remove(uri);
+					processErrorReply(uri, error);
+				});
+			} else {
+				context.callDisplay("@diagnostics", [doc.uri.toFsPath() + "@0@diagnostics"], null, token, result -> {
+					pendingRequests.remove(uri);
+					final data = parseLegacyDiagnostics(result);
+					if (data == null) {
+						clearDiagnosticsOnClient(errorUri);
+					} else {
+						processDiagnosticsReply(null, onResolve, data);
+					}
+				}, error -> {
+					pendingRequests.remove(uri);
+					processErrorReply(uri, error);
+				});
+			}
 		} else {
 			pendingRequests.remove(uri);
 		}
 	}
 
 	function cancelPendingRequest(uri:DocumentUri) {
-		var tokenSource = pendingRequests[uri];
-		if (tokenSource != null) {
-			pendingRequests.remove(uri);
-			tokenSource.cancel();
+		if (useJsonRpc && context.config.user.diagnosticsForAllOpenFiles) {
+			for (tokenSource in pendingRequests) {
+				tokenSource.cancel();
+			}
+			pendingRequests.clear();
+		} else {
+			var tokenSource = pendingRequests[uri];
+			if (tokenSource != null) {
+				pendingRequests.remove(uri);
+				tokenSource.cancel();
+			}
 		}
 	}
 
@@ -333,79 +399,22 @@ class DiagnosticsFeature {
 	}
 }
 
-enum abstract UnresolvedIdentifierSuggestion(Int) {
-	final Import;
-	final Typo;
-}
+class DiagnosticKindHelper {
+	public static function make<T>(code:Int)
+		return (code : DiagnosticKind<T>);
 
-enum abstract MissingFieldCauseKind<T>(String) {
-	final AbstractParent:MissingFieldCauseKind<{parent:JsonTypePathWithParams}>;
-	final ImplementedInterface:MissingFieldCauseKind<{parent:JsonTypePathWithParams}>;
-	final PropertyAccessor:MissingFieldCauseKind<{property:JsonClassField, isGetter:Bool}>;
-	final FieldAccess:MissingFieldCauseKind<{}>;
-	final FinalFields:MissingFieldCauseKind<{fields:Array<JsonClassField>}>;
-}
-
-typedef MissingFieldCause<T> = {
-	var kind:MissingFieldCauseKind<T>;
-	var args:T;
-}
-
-typedef MissingField = {
-	var field:JsonClassField;
-	var type:JsonType<Dynamic>;
-
-	/**
-		When implementing multiple interfaces, there can be field duplicates among them. This flag is only
-		true for the first such occurrence of a field, so that the "Implement all" code action doesn't end
-		up implementing the same field multiple times.
-	**/
-	var unique:Bool;
-}
-
-typedef MissingFieldDiagnostic = {
-	var fields:Array<MissingField>;
-	var cause:MissingFieldCause<Dynamic>;
-}
-
-typedef MissingFieldDiagnostics = {
-	var moduleType:JsonModuleType<Dynamic>;
-	var moduleFile:String;
-	var entries:Array<MissingFieldDiagnostic>;
-}
-
-typedef ReplaceableCode = {
-	var description:String;
-	var range:Range;
-	var ?newCode:String;
-}
-
-enum abstract DiagnosticKind<T>(Int) from Int to Int {
-	final UnusedImport:DiagnosticKind<Void>;
-	final UnresolvedIdentifier:DiagnosticKind<Array<{kind:UnresolvedIdentifierSuggestion, name:String}>>;
-	final CompilerError:DiagnosticKind<String>;
-	final ReplaceableCode:DiagnosticKind<ReplaceableCode>;
-	final ParserError:DiagnosticKind<String>;
-	final DeprecationWarning:DiagnosticKind<String>;
-	final InactiveBlock:DiagnosticKind<Void>;
-	final MissingFields:DiagnosticKind<MissingFieldDiagnostics>;
-
-	public inline function new(i:Int) {
-		this = i;
-	}
-
-	public function getMessage(doc:Null<HaxeDocument>, args:T, range:Range) {
-		return switch (this : DiagnosticKind<T>) {
-			case UnusedImport: "Unused import/using";
-			case UnresolvedIdentifier:
+	public static function getMessage<T>(dk:DiagnosticKind<T>, doc:Null<HaxeDocument>, args:T, range:Range) {
+		return switch dk {
+			case DKUnusedImport: "Unused import/using";
+			case DKUnresolvedIdentifier:
 				var message = 'Unknown identifier';
 				if (doc != null) {
 					message += ' : ${doc.getText(range)}';
 				}
 				message;
-			case CompilerError: args.trim();
+			case DKCompilerError: args.trim();
 			case ReplaceableCode: args.description;
-			case ParserError: args;
+			case DKParserError: args;
 			case DeprecationWarning: args;
 			case InactiveBlock: "Inactive conditional compilation block";
 			case MissingFields:

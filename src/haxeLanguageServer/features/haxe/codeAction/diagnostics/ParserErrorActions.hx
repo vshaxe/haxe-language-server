@@ -9,7 +9,7 @@ class ParserErrorActions {
 			return [];
 		}
 		final actions:Array<CodeAction> = [];
-		final arg = context.diagnostics.getArguments(params.textDocument.uri, ParserError, diagnostic.range);
+		final arg = context.diagnostics.getArguments(params.textDocument.uri, DKParserError, diagnostic.range);
 		if (arg == null) {
 			return actions;
 		}
