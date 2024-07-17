@@ -105,7 +105,7 @@ class Context {
 				case DResult("") if (method == DisplayMethods.Diagnostics):
 					haxeDisplayProtocol.handleMessage(({
 						jsonrpc: Protocol.PROTOCOL_VERSION,
-						id: @:privateAccess haxeDisplayProtocol.nextRequestId - 1, // ew..
+						id: (cast message : RequestMessage).id,
 						result: {result: []}
 					} : ResponseMessage));
 				case DResult(msg):
