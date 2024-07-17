@@ -102,6 +102,12 @@ class Context {
 		final includeDisplayArguments = method.startsWith("display/") || method == ServerMethods.ReadClassPaths;
 		callDisplay(method, [Json.stringify(message)], token, function(result:DisplayResult) {
 			switch result {
+				case DResult("") if (method == DisplayMethods.Diagnostics):
+					haxeDisplayProtocol.handleMessage(({
+						jsonrpc: Protocol.PROTOCOL_VERSION,
+						id: @:privateAccess haxeDisplayProtocol.nextRequestId - 1, // ew..
+						result: {result: []}
+					} : ResponseMessage));
 				case DResult(msg):
 					haxeDisplayProtocol.handleMessage(Json.parse(msg));
 				case DCancelled:
