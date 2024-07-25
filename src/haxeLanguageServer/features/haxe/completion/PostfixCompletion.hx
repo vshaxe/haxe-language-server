@@ -55,6 +55,12 @@ class PostfixCompletion {
 		if (expr.startsWith("(") && expr.endsWith(")")) {
 			expr = expr.substring(1, expr.length - 1);
 		}
+		// `;` char in `foo.;` completion cases
+		final afterExprRange:Range = {
+			start: subject.range.end.translate(0, 1),
+			end: subject.range.end.translate(0, 2)
+		}
+		final afterExprChar = data.doc.getText(afterExprRange);
 
 		var replaceRange = data.replaceRange;
 		if (replaceRange == null) {
@@ -125,6 +131,7 @@ class PostfixCompletion {
 		}
 
 		if (level != Filtered) {
+			createTraceItem(expr, afterExprChar, add);
 			createNonFilteredItems(dotPath, expr, add);
 		}
 
@@ -139,6 +146,16 @@ class PostfixCompletion {
 		return result;
 	}
 
+	function createTraceItem(expr:String, afterExprChar:String, add:PostfixCompletionItem->Void):Void {
+		final endChar = afterExprChar == "\n" ? ";" : "";
+		add({
+			label: "trace",
+			detail: 'trace(expr)$endChar',
+			insertText: 'trace($${1:$expr})$endChar',
+			insertTextFormat: Snippet
+		});
+	}
+
 	function createNonFilteredItems(dotPath:Null<DotPath>, expr:String, add:PostfixCompletionItem->Void) {
 		if (dotPath != Std_String) {
 			add({
@@ -149,12 +166,6 @@ class PostfixCompletion {
 			});
 		}
 
-		add({
-			label: "trace",
-			detail: "trace(expr);",
-			insertText: 'trace($${1:$expr});',
-			insertTextFormat: Snippet
-		});
 		// TODO: check if we're on a sys target
 		add({
 			label: "print",
