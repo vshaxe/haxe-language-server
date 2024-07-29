@@ -151,7 +151,7 @@ class PostfixCompletion {
 
 		add({
 			label: "trace",
-			detail: 'trace(expr);',
+			detail: "trace(expr);",
 			insertText: 'trace($${1:$expr});',
 			insertTextFormat: Snippet,
 			eat: ";"
@@ -351,7 +351,7 @@ while (i-- > 0) {
 			final pos = replaceRange.end;
 			var nextChar = doc.characterAt(pos);
 			// if user writes `.l abel` too fast, detect it and check next char again
-			if (nextChar == data.label.charAt(0)) {
+			if (nextChar == data.label.charAt(0) && nextChar != data.eat) {
 				nextChar = doc.characterAt(pos.translate(0, 1));
 			}
 			if (nextChar == data.eat) {
