@@ -55,18 +55,15 @@ class PostfixCompletion {
 		if (expr.startsWith("(") && expr.endsWith(")")) {
 			expr = expr.substring(1, expr.length - 1);
 		}
-		// `;` char in `foo.;` completion cases
-		final afterExprRange:Range = {
-			start: subject.range.end.translate(0, 1),
-			end: subject.range.end.translate(0, 2)
-		}
-		final afterExprChar = data.doc.getText(afterExprRange);
 
 		var replaceRange = data.replaceRange;
 		if (replaceRange == null) {
 			replaceRange = data.params.position.toRange();
 		}
 		final removeRange:Range = {start: subject.range.start, end: replaceRange.start};
+
+		// `;` char in `foo.;` completion cases
+		final afterExprChar = data.doc.characterAt(replaceRange.end);
 
 		final result:Array<CompletionItem> = [];
 		function add(item:PostfixCompletionItem) {
@@ -147,7 +144,7 @@ class PostfixCompletion {
 	}
 
 	function createTraceItem(expr:String, afterExprChar:String, add:PostfixCompletionItem->Void):Void {
-		final endChar = afterExprChar == "\n" ? ";" : "";
+		final endChar = (afterExprChar == ";" || afterExprChar == ")") ? "" : ";";
 		add({
 			label: "trace",
 			detail: 'trace(expr)$endChar',
