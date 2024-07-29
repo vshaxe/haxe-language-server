@@ -62,9 +62,6 @@ class PostfixCompletion {
 		}
 		final removeRange:Range = {start: subject.range.start, end: replaceRange.start};
 
-		// `;` char in `foo.;` completion cases
-		final afterExprChar = data.doc.characterAt(replaceRange.end);
-
 		final result:Array<CompletionItem> = [];
 		function add(item:PostfixCompletionItem) {
 			result.push(createPostfixCompletionItem(item, data.doc, removeRange, replaceRange));
@@ -128,7 +125,6 @@ class PostfixCompletion {
 		}
 
 		if (level != Filtered) {
-			createTraceItem(expr, afterExprChar, add);
 			createNonFilteredItems(dotPath, expr, add);
 		}
 
@@ -143,16 +139,6 @@ class PostfixCompletion {
 		return result;
 	}
 
-	function createTraceItem(expr:String, afterExprChar:String, add:PostfixCompletionItem->Void):Void {
-		final endChar = (afterExprChar == ";" || afterExprChar == ")") ? "" : ";";
-		add({
-			label: "trace",
-			detail: 'trace(expr)$endChar',
-			insertText: 'trace($${1:$expr})$endChar',
-			insertTextFormat: Snippet
-		});
-	}
-
 	function createNonFilteredItems(dotPath:Null<DotPath>, expr:String, add:PostfixCompletionItem->Void) {
 		if (dotPath != Std_String) {
 			add({
@@ -163,6 +149,13 @@ class PostfixCompletion {
 			});
 		}
 
+		add({
+			label: "trace",
+			detail: 'trace(expr);',
+			insertText: 'trace($${1:$expr});',
+			insertTextFormat: Snippet,
+			eat: ";"
+		});
 		// TODO: check if we're on a sys target
 		add({
 			label: "print",
@@ -356,8 +349,12 @@ while (i-- > 0) {
 	function createPostfixCompletionItem(data:PostfixCompletionItem, doc:HxTextDocument, removeRange:Range, replaceRange:Range):CompletionItem {
 		if (data.eat != null) {
 			final pos = replaceRange.end;
-			final nextChar = doc.getText({start: pos, end: pos.translate(0, 1)});
-			if (data.eat == nextChar) {
+			var nextChar = doc.characterAt(pos);
+			// if user writes `.l abel` too fast, detect it and check next char again
+			if (nextChar == data.label.charAt(0)) {
+				nextChar = doc.characterAt(pos.translate(0, 1));
+			}
+			if (nextChar == data.eat) {
 				replaceRange = {start: replaceRange.start, end: pos.translate(0, 1)};
 			}
 		};
