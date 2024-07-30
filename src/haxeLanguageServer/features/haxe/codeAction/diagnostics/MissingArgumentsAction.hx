@@ -141,12 +141,12 @@ class MissingArgumentsAction {
 			case AnonymousStructure:
 				return "obj";
 			case ClassField:
-				return item.args!.field!.name ?? "arg";
+				return item.args?.field?.name ?? "arg";
 			case Expression:
 				if (item.type!.kind == TFun)
 					return "callback";
 			case _:
-				return item.args!.name ?? "arg";
+				return item.args?.name ?? "arg";
 		}
 		return genArgNameFromJsonType(item.type);
 	}

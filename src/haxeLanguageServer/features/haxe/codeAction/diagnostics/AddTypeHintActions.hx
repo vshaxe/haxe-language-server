@@ -155,7 +155,7 @@ class AddTypeHintActions {
 				return action;
 			final range = if (isFunName) {
 				// add return type hint
-				final pOpen = defToken.access().firstOf(POpen).token ?? return action;
+				final pOpen = defToken.access().firstOf(POpen)?.token ?? return action;
 				final pos = pOpen.getPos();
 				document.rangeAt(pos.max, pos.max, Utf8);
 			} else {
