@@ -153,7 +153,8 @@ class PostfixCompletion {
 			label: "trace",
 			detail: "trace(expr);",
 			insertText: 'trace($${1:$expr});',
-			insertTextFormat: Snippet
+			insertTextFormat: Snippet,
+			eat: ";"
 		});
 		// TODO: check if we're on a sys target
 		add({
@@ -348,8 +349,12 @@ while (i-- > 0) {
 	function createPostfixCompletionItem(data:PostfixCompletionItem, doc:HxTextDocument, removeRange:Range, replaceRange:Range):CompletionItem {
 		if (data.eat != null) {
 			final pos = replaceRange.end;
-			final nextChar = doc.getText({start: pos, end: pos.translate(0, 1)});
-			if (data.eat == nextChar) {
+			var nextChar = doc.characterAt(pos);
+			// if user writes `.l abel` too fast, detect it and check next char again
+			if (nextChar == data.label.charAt(0) && nextChar != data.eat) {
+				nextChar = doc.characterAt(pos.translate(0, 1));
+			}
+			if (nextChar == data.eat) {
 				replaceRange = {start: replaceRange.start, end: pos.translate(0, 1)};
 			}
 		};
