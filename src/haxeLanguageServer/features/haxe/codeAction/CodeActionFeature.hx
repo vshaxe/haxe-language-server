@@ -48,7 +48,7 @@ class CodeActionFeature {
 			],
 			resolveProvider: true
 		});
-		hasCommandResolveSupport = context.capabilities.textDocument!.codeAction!.resolveSupport!.properties!.contains("command") ?? false;
+		hasCommandResolveSupport = context.capabilities.textDocument?.codeAction?.resolveSupport?.properties?.contains("command") ?? false;
 		if (!hasCommandResolveSupport) {
 			hasCommandResolveSupport = context.experimental?.forceCommandResolveSupport ?? false;
 		}
@@ -78,9 +78,9 @@ class CodeActionFeature {
 
 	function onCodeActionResolve(action:CodeAction, token:CancellationToken, resolve:CodeAction->Void, reject:ResponseError<NoData>->Void) {
 		final data:Null<CodeActionResolveData> = action.data;
-		final type = data!.type;
-		final params = data!.params;
-		final diagnostic = data!.diagnostic;
+		final type = data?.type;
+		final params = data?.params;
+		final diagnostic = data?.diagnostic;
 		if (type == null || params == null) {
 			resolve(action);
 			return;

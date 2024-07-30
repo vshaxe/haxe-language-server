@@ -15,7 +15,7 @@ class AddTypeHintActions {
 		final uri = params.textDocument.uri;
 		final doc = context.documents.getHaxe(uri) ?? return [];
 		final actions:Array<CodeAction> = [];
-		final token = doc.tokens!.getTokenAtOffset(doc.offsetAt(params.range.end));
+		final token = doc.tokens?.getTokenAtOffset(doc.offsetAt(params.range.end));
 		if (token == null)
 			return [];
 
@@ -43,7 +43,7 @@ class AddTypeHintActions {
 			if (!token.tok.match(Kwd(KwdReturn)))
 				return actions;
 
-			final nameToken = token.parent!.parent ?? return actions;
+			final nameToken = token.parent?.parent ?? return actions;
 			// check return type hint
 			if (nameToken.access().firstOf(DblDot) != null)
 				return actions;
@@ -73,7 +73,7 @@ class AddTypeHintActions {
 			return null;
 		var tokenSource = new CancellationTokenSource();
 
-		final identToken = document.tokens!.getTokenAtOffset(document.offsetAt(params.range.end));
+		final identToken = document.tokens?.getTokenAtOffset(document.offsetAt(params.range.end));
 		if (identToken == null)
 			return null;
 
@@ -113,7 +113,7 @@ class AddTypeHintActions {
 			}
 				?? cast return null;
 			final locDoc = context.documents.getHaxe(location.uri) ?? cast return null;
-			final locToken = locDoc.tokens!.getTokenAtOffset(locDoc.offsetAt(location.range.end));
+			final locToken = locDoc.tokens?.getTokenAtOffset(locDoc.offsetAt(location.range.end));
 			if (locToken == null)
 				return null;
 			final child = locToken.getFirstChild();
@@ -135,7 +135,7 @@ class AddTypeHintActions {
 			final hover:HoverDisplayItemOccurence<Dynamic> = results[1];
 			final definition = definitions[0] ?? return action;
 			final defDoc = context.documents.getHaxe(definition.targetUri) ?? return action;
-			final defToken = defDoc.tokens!.getTokenAtOffset(defDoc.offsetAt(definition.targetSelectionRange.end));
+			final defToken = defDoc.tokens?.getTokenAtOffset(defDoc.offsetAt(definition.targetSelectionRange.end));
 			// check if definition already has typehint
 			if (defToken == null || !defToken.isCIdent())
 				return action;

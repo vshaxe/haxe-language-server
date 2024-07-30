@@ -56,7 +56,7 @@ class CompilerErrorActions {
 			final document = context.documents.getHaxe(params.textDocument.uri);
 			if (document.tokens != null) {
 				// Resolve parent token to add "override" before "function" instead of function name
-				final funPos = document.tokens!.getTokenAtOffset(document.offsetAt(diagnostic.range.start))!.parent!.pos!.min;
+				final funPos = document.tokens?.getTokenAtOffset(document.offsetAt(diagnostic.range.start))?.parent?.pos?.min;
 				if (funPos != null) {
 					pos = document.positionAt(funPos, Utf8);
 				}

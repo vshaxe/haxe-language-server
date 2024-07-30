@@ -18,7 +18,7 @@ class ParserErrorActions {
 			final document = context.documents.getHaxe(params.textDocument.uri);
 			final nextText = document.content.substr(document.offsetAt(diagnostic.range.end));
 			final isAuto = nextText.split("{").length == nextText.split("}").length;
-			final token = document!.tokens!.getTokenAtOffset(document.offsetAt(diagnostic.range.end));
+			final token = document?.tokens?.getTokenAtOffset(document.offsetAt(diagnostic.range.end));
 			var range = diagnostic.range;
 			if (token != null) {
 				for (sib in [token.previousSibling, token.nextSibling]) {
@@ -61,7 +61,7 @@ class ParserErrorActions {
 
 		if (arg.contains("Expected }")) {
 			final document = context.documents.getHaxe(params.textDocument.uri);
-			final token = document!.tokens!.getTokenAtOffset(document.offsetAt(diagnostic.range.end));
+			final token = document?.tokens?.getTokenAtOffset(document.offsetAt(diagnostic.range.end));
 			final prevToken = getPrevNonCommentSibling(token);
 			if (prevToken != null && token != null) {
 				final prevToken = getLastNonCommentToken(prevToken);
@@ -156,7 +156,7 @@ class ParserErrorActions {
 		final tokens = document.tokens;
 		if (tokens == null)
 			return null;
-		final errToken = tokens!.getTokenAtOffset(document.offsetAt(errPos));
+		final errToken = tokens?.getTokenAtOffset(document.offsetAt(errPos));
 		if (errToken == null)
 			return null;
 		final prev = getPrevNonCommentSibling(errToken);
@@ -170,8 +170,8 @@ class ParserErrorActions {
 
 	static function getPrevNonCommentSibling(token:Null<TokenTree>):Null<TokenTree> {
 		do {
-			token = token!.previousSibling;
-		} while (token!.isComment() == true);
+			token = token?.previousSibling;
+		} while (token?.isComment() == true);
 		return token;
 	}
 
@@ -194,7 +194,7 @@ class ParserErrorActions {
 		var i = children.length;
 		while (i-- > 0) {
 			final child = children[i];
-			if (child!.isComment() == false)
+			if (child?.isComment() == false)
 				return child;
 		}
 		return null;
@@ -203,9 +203,9 @@ class ParserErrorActions {
 	static function isAnonStructure(brToken:TokenTree):Bool {
 		if (brToken.tok == BrClose)
 			brToken = brToken.parent ?? return false;
-		final first = brToken!.getFirstChild() ?? return false;
+		final first = brToken?.getFirstChild() ?? return false;
 		final colon = first.getFirstChild() ?? return false;
-		if (colon.tok.match(DblDot) && !colon.nextSibling!.tok.match(Semicolon)) {
+		if (colon.tok.match(DblDot) && !colon.nextSibling?.tok.match(Semicolon)) {
 			return true;
 		}
 		return false;

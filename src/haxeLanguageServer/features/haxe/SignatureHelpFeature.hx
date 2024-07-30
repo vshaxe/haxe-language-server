@@ -25,7 +25,7 @@ class SignatureHelpFeature {
 
 	public function new(context:Context) {
 		this.context = context;
-		labelOffsetSupport = context.capabilities.textDocument!.signatureHelp!.signatureInformation!.parameterInformation!.labelOffsetSupport == true;
+		labelOffsetSupport = context.capabilities.textDocument?.signatureHelp?.signatureInformation?.parameterInformation?.labelOffsetSupport == true;
 		context.languageServerProtocol.onRequest(SignatureHelpRequest.type, onSignatureHelp);
 	}
 
@@ -43,7 +43,7 @@ class SignatureHelpFeature {
 			doc:HaxeDocument) {
 		var wasAutoTriggered = true;
 		if (context.haxeServer.haxeVersion >= new SemVer(4, 1, 0)) {
-			final triggerKind = params!.context!.triggerKind;
+			final triggerKind = params?.context?.triggerKind;
 			wasAutoTriggered = switch triggerKind {
 				case null: false; // err on the side of showing too often for LSP clients that don't support triggerKind
 				case TriggerCharacter: true;

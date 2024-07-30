@@ -27,7 +27,7 @@ function analyzeHxmlContext(line:String, pos:Position):HxmlContext {
 	line = line.substring(0, range.end);
 	final parts = ~/\s+/.replace(line.ltrim(), " ").split(" ");
 	function findFlag(word) {
-		return HxmlFlags.flatten().find(f -> f.name == word || f.shortName == word || f.deprecatedNames!.contains(word));
+		return HxmlFlags.flatten().find(f -> f.name == word || f.shortName == word || f.deprecatedNames?.contains(word));
 	}
 	return {
 		element: switch parts {
@@ -35,7 +35,7 @@ function analyzeHxmlContext(line:String, pos:Position):HxmlContext {
 			case [flag]: Flag(findFlag(flag));
 			case [flag, arg]:
 				final flag = findFlag(flag);
-				switch flag!.argument!.kind {
+				switch flag?.argument?.kind {
 					case null: Unknown;
 					case Enum(values): EnumValue(values.find(v -> v.name == arg), values);
 					case Define:
@@ -47,7 +47,7 @@ function analyzeHxmlContext(line:String, pos:Position):HxmlContext {
 							case [define]: Define(findDefine(define));
 							case [define, value]:
 								final define = findDefine(define);
-								final enumValues = define!.getEnumValues();
+								final enumValues = define?.getEnumValues();
 								if (enumValues != null) {
 									EnumValue(enumValues.find(v -> v.name == arg), enumValues);
 								} else {

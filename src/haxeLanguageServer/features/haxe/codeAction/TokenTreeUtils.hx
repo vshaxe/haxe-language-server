@@ -39,9 +39,9 @@ class TokenTreeUtils {
 	public static function isAnonStructure(brToken:TokenTree):Bool {
 		if (brToken.tok == BrClose)
 			brToken = brToken.parent ?? return false;
-		final first = brToken!.getFirstChild() ?? return false;
+		final first = brToken?.getFirstChild() ?? return false;
 		final colon = first.getFirstChild() ?? return false;
-		if (colon.tok.match(DblDot) && !colon.nextSibling!.tok.match(Semicolon)) {
+		if (colon.tok.match(DblDot) && !colon.nextSibling?.tok.match(Semicolon)) {
 			return true;
 		}
 		return false;

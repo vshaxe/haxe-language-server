@@ -58,7 +58,7 @@ class RenameFeature {
 		final usageContext:refactor.discover.UsageContext = makeUsageContext();
 		usageContext.fileName = filePath.toString();
 
-		var root:Null<TokenTree> = doc!.tokens!.tree;
+		var root:Null<TokenTree> = doc?.tokens?.tree;
 		if (root == null) {
 			usageContext.usageCollector.parseFile(ByteData.ofString(doc.content), usageContext);
 		} else {

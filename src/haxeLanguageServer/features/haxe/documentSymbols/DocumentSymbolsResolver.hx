@@ -67,7 +67,7 @@ class DocumentSymbolsResolver {
 
 			switch token.tok {
 				case Kwd(KwdClass):
-					var name = token.getNameToken()!.getName();
+					var name = token.getNameToken()?.getName();
 					if (name == null && token.isTypeMacroClass()) {
 						name = "<macro class>";
 					}

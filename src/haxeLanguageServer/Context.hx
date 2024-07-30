@@ -133,7 +133,7 @@ class Context {
 	}
 
 	public function startProgress(title:String):() -> Void {
-		if (capabilities.window!.workDoneProgress == false) {
+		if (capabilities.window?.workDoneProgress == false) {
 			return function() {};
 		}
 		final id = progressId++;
@@ -162,7 +162,7 @@ class Context {
 		}
 		capabilities = params.capabilities;
 		final initOptions:Null<InitOptions> = params.initializationOptions;
-		experimental = initOptions!.experimentalClientCapabilities ?? {};
+		experimental = initOptions?.experimentalClientCapabilities ?? {};
 		config.onInitialize(params);
 		serverRecording.onInitialize(this);
 
@@ -172,8 +172,8 @@ class Context {
 		new ColorProviderFeature(this);
 		new InlayHintFeature(this);
 
-		final textDocument = capabilities!.textDocument;
-		final workspace = capabilities!.workspace;
+		final textDocument = capabilities?.textDocument;
+		final workspace = capabilities?.workspace;
 		final registrations = new Array<Registration>();
 		function register<P, R, PR, E, RO>(method:ProtocolRequestType<P, R, PR, E, RO>, ?registerId:String, ?selector:DocumentSelector, ?registerOptions:RO) {
 			if (registerOptions == null) {
@@ -195,7 +195,7 @@ class Context {
 		};
 
 		final completionTriggerCharacters = [".", "@", ":", " ", ">", "$"];
-		if (textDocument!.completion!.dynamicRegistration == true) {
+		if (textDocument?.completion?.dynamicRegistration == true) {
 			register(CompletionRequest.type, "haxeDocument/completion", {
 				documentSelector: haxeSelector,
 				triggerCharacters: completionTriggerCharacters,
@@ -214,7 +214,7 @@ class Context {
 		}
 
 		final signatureHelpTriggerCharacters = ["(", ","];
-		if (textDocument!.signatureHelp!.dynamicRegistration == true) {
+		if (textDocument?.signatureHelp?.dynamicRegistration == true) {
 			register(SignatureHelpRequest.type, {
 				documentSelector: haxeSelector,
 				triggerCharacters: signatureHelpTriggerCharacters
@@ -225,53 +225,53 @@ class Context {
 			}
 		}
 
-		if (textDocument!.definition!.dynamicRegistration == true) {
+		if (textDocument?.definition?.dynamicRegistration == true) {
 			register(DefinitionRequest.type, haxeSelector);
 		} else {
 			capabilities.definitionProvider = true;
 		}
 
-		if (textDocument!.hover!.dynamicRegistration == true) {
+		if (textDocument?.hover?.dynamicRegistration == true) {
 			register(HoverRequest.type, "haxeDocument/hover", haxeSelector);
 			register(HoverRequest.type, "hxmlDocument/hover", hxmlSelector);
 		} else {
 			capabilities.hoverProvider = true;
 		}
 
-		if (textDocument!.references!.dynamicRegistration == true) {
+		if (textDocument?.references?.dynamicRegistration == true) {
 			register(ReferencesRequest.type, haxeSelector);
 		} else {
 			capabilities.referencesProvider = true;
 		}
 
-		if (textDocument!.documentSymbol!.dynamicRegistration == true) {
+		if (textDocument?.documentSymbol?.dynamicRegistration == true) {
 			register(DocumentSymbolRequest.type, haxeSelector);
 		} else {
 			capabilities.documentSymbolProvider = true;
 		}
 
-		if (workspace!.symbol!.dynamicRegistration == true) {
+		if (workspace?.symbol?.dynamicRegistration == true) {
 			register(WorkspaceSymbolRequest.type, haxeSelector);
 		} else {
 			capabilities.workspaceSymbolProvider = true;
 		}
 
-		if (textDocument!.formatting!.dynamicRegistration == true) {
+		if (textDocument?.formatting?.dynamicRegistration == true) {
 			register(DocumentFormattingRequest.type, haxeSelector);
 		} else {
 			capabilities.documentFormattingProvider = true;
 		}
 
-		if (textDocument!.rangeFormatting!.dynamicRegistration == true) {
+		if (textDocument?.rangeFormatting?.dynamicRegistration == true) {
 			register(DocumentRangeFormattingRequest.type, haxeSelector);
 		} else {
 			capabilities.documentRangeFormattingProvider = true;
 		}
 
-		if (textDocument!.rename!.dynamicRegistration == true) {
+		if (textDocument?.rename?.dynamicRegistration == true) {
 			register(RenameRequest.type, {documentSelector: haxeSelector, prepareProvider: true});
 		} else {
-			if (textDocument!.rename!.prepareSupport == true) {
+			if (textDocument?.rename?.prepareSupport == true) {
 				capabilities.renameProvider = {
 					prepareProvider: true
 				};
@@ -280,20 +280,20 @@ class Context {
 			}
 		}
 
-		if (textDocument!.foldingRange!.dynamicRegistration == true) {
+		if (textDocument?.foldingRange?.dynamicRegistration == true) {
 			register(FoldingRangeRequest.type, haxeSelector);
 		} else {
 			capabilities.foldingRangeProvider = true;
 		}
 
-		if (textDocument!.colorProvider!.dynamicRegistration == true) {
+		if (textDocument?.colorProvider?.dynamicRegistration == true) {
 			// this registration covers both documentColor and colorPresentation
 			register(DocumentColorRequest.type, haxeSelector);
 		} else {
 			capabilities.colorProvider = true;
 		}
 
-		if (textDocument!.inlayHint!.dynamicRegistration == true) {
+		if (textDocument?.inlayHint?.dynamicRegistration == true) {
 			register(InlayHintRequest.type, haxeSelector);
 		} else {
 			capabilities.inlayHintProvider = true;

@@ -22,7 +22,7 @@ class MissingArgumentsAction {
 			return null;
 		final tokenSource = new CancellationTokenSource();
 
-		final argToken = document.tokens!.getTokenAtOffset(document.offsetAt(diagnostic.range.start) + 1);
+		final argToken = document.tokens?.getTokenAtOffset(document.offsetAt(diagnostic.range.start) + 1);
 		if (argToken == null)
 			return null;
 		final funPos = getCallNamePos(document, argToken);
@@ -42,13 +42,13 @@ class MissingArgumentsAction {
 		if (isFunctionInArg(argToken)) {
 			if (isSingleArgArrowFunction(argToken)) {
 				// hover on `->` token
-				hoverPos = argToken.getFirstChild()!.pos!.min ?? hoverPos;
+				hoverPos = argToken.getFirstChild()?.pos?.min ?? hoverPos;
 			} else {
 				// hover on start of arg for better type hint
 				hoverPos = document.offsetAt(diagnostic.range.start);
 			}
 		} else if (argToken.matches(Kwd(KwdNew))) {
-			hoverPos = argToken.getFirstChild()!.pos!.min ?? hoverPos;
+			hoverPos = argToken.getFirstChild()?.pos?.min ?? hoverPos;
 		}
 		final hoverPromise = makeHoverRequest(context, fileName, hoverPos, tokenSource.token);
 
@@ -61,7 +61,7 @@ class MissingArgumentsAction {
 			final definitionDoc = context.documents.getHaxe(definition.targetUri);
 			if (definitionDoc == null)
 				return action;
-			final definitonFunToken = definitionDoc.tokens!.getTokenAtOffset(definitionDoc.offsetAt(definition.targetSelectionRange.start));
+			final definitonFunToken = definitionDoc.tokens?.getTokenAtOffset(definitionDoc.offsetAt(definition.targetSelectionRange.start));
 			final argRange = functionNewArgPos(definitionDoc, definitonFunToken) ?? return action;
 			final hadCommaAtEnd = functionArgsEndsWithComma(definitionDoc, definitonFunToken);
 			var argName = generateArgName(item);
@@ -132,7 +132,7 @@ class MissingArgumentsAction {
 	}
 
 	static function isSingleArgArrowFunction(argToken:TokenTree):Bool {
-		return argToken.isCIdent() && argToken.getFirstChild()!.tok == Arrow;
+		return argToken.isCIdent() && argToken.getFirstChild()?.tok == Arrow;
 	}
 
 	static function generateArgName(item:DisplayItem<Dynamic>):String {
@@ -143,7 +143,7 @@ class MissingArgumentsAction {
 			case ClassField:
 				return item.args?.field?.name ?? "arg";
 			case Expression:
-				if (item.type!.kind == TFun)
+				if (item.type?.kind == TFun)
 					return "callback";
 			case _:
 				return item.args?.name ?? "arg";
@@ -152,7 +152,7 @@ class MissingArgumentsAction {
 	}
 
 	public static function genArgNameFromJsonType(type:Null<JsonType<Dynamic>>):String {
-		final dotPath = type!.getDotPath() ?? return "arg";
+		final dotPath = type?.getDotPath() ?? return "arg";
 		return switch dotPath {
 			case Std_Bool: "bool";
 			case Std_Int, Std_UInt: "i";
@@ -229,14 +229,14 @@ class MissingArgumentsAction {
 		if (funIdent == null)
 			return null;
 		// Check for: var foo:()->Void = ...
-		final isFunction = switch (funIdent!.parent!.tok) {
+		final isFunction = switch (funIdent?.parent?.tok) {
 			case Kwd(KwdFunction): true;
 			case _: false;
 		}
 		if (!isFunction) {
 			funIdent = funIdent.getFirstChild() ?? return null;
 		}
-		final pOpen = funIdent.access().firstOf(POpen)!.token;
+		final pOpen = funIdent.access().firstOf(POpen)?.token;
 		return pOpen;
 	}
 
@@ -245,7 +245,7 @@ class MissingArgumentsAction {
 		if (pOpen == null) {
 			return null;
 		}
-		final pClose = pOpen.access().firstOf(PClose)!.token;
+		final pClose = pOpen.access().firstOf(PClose)?.token;
 		if (pClose == null) {
 			return null;
 		}
@@ -265,7 +265,7 @@ class MissingArgumentsAction {
 
 	static function functionArgsEndsWithComma(document:HaxeDocument, funIdent:Null<TokenTree>):Bool {
 		final pOpen = getFunctionPOpen(funIdent) ?? return false;
-		final maybeComma = pOpen.getLastChild()!.getLastChild();
+		final maybeComma = pOpen.getLastChild()?.getLastChild();
 		if (maybeComma == null) {
 			return false;
 		}
