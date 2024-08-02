@@ -61,9 +61,7 @@
 					"target": "js",
 					"path": "bin/test.js"
 				},
-				"macros": [
-					"Safety.safeNavigation('haxeLanguageServer')"
-				],
+				"macros": [],
 				"deadCodeElimination": "full",
 				"main": "TestMain",
 				"debug": true
