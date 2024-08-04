@@ -63,6 +63,10 @@ abstract SemVer(Version) from Version {
 		return isEqual(other) || isGreaterThan(other);
 	}
 
+	@:op(a < b) function isLessThan(other:SemVer):Bool {
+		return !isEqualOrGreaterThan(other);
+	}
+
 	@:op(a > b) function isGreaterThan(other:SemVer):Bool {
 		return (major > other.major)
 			|| (major == other.major && minor > other.minor)

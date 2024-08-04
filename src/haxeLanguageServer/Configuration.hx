@@ -95,6 +95,7 @@ typedef UserConfig = {
 	var buildCompletionCache:Bool;
 	var enableCompletionCacheWarning:Bool;
 	var useLegacyCompletion:Bool;
+	var useLegacyDiagnostics:Bool;
 	var codeGeneration:CodeGenerationConfig;
 	var exclude:Array<String>;
 	var postfixCompletion:PostfixCompletionConfig;
@@ -164,6 +165,7 @@ class Configuration {
 		buildCompletionCache: true,
 		enableCompletionCacheWarning: true,
 		useLegacyCompletion: false,
+		useLegacyDiagnostics: false,
 		codeGeneration: {
 			functions: {
 				anonymous: {

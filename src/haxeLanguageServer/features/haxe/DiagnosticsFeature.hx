@@ -9,6 +9,7 @@ import haxe.ds.BalancedTree;
 import haxe.io.Path;
 import haxeLanguageServer.LanguageServerMethods;
 import haxeLanguageServer.helper.PathHelper;
+import haxeLanguageServer.helper.SemVer;
 import haxeLanguageServer.protocol.DisplayPrinter;
 import haxeLanguageServer.server.DisplayResult;
 import js.Node.clearImmediate;
@@ -45,6 +46,9 @@ class DiagnosticsFeature {
 		errorUri = new FsPath(Path.join([context.workspacePath.toString(), "Error"])).toUri();
 
 		useJsonRpc = context.haxeServer.supports(DisplayMethods.Diagnostics);
+		if ((context.config.user.useLegacyDiagnostics) && context.haxeServer.haxeVersion < new SemVer(5, 0, 0)) {
+			useJsonRpc = false;
+		}
 		timerName = useJsonRpc ? DisplayMethods.Diagnostics : "@diagnostics";
 
 		ChildProcess.exec(context.config.haxelib.executable + " config", (error, stdout, stderr) -> haxelibPath = new FsPath(stdout.trim()));
