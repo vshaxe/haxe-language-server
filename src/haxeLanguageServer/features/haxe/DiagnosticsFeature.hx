@@ -46,7 +46,7 @@ class DiagnosticsFeature {
 		errorUri = new FsPath(Path.join([context.workspacePath.toString(), "Error"])).toUri();
 
 		useJsonRpc = context.haxeServer.supports(DisplayMethods.Diagnostics);
-		if (context.config.user.useLegacyDiagnostics && context.haxeServer.haxeVersion < new SemVer(5, 0, 0)) {
+		if (context.config.user.useLegacyDiagnostics) {
 			useJsonRpc = false;
 		}
 		timerName = useJsonRpc ? DisplayMethods.Diagnostics : "@diagnostics";
