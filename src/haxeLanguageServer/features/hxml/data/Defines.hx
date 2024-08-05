@@ -17,8 +17,8 @@ abstract Define(DefineData) from DefineData {
 			origin: cast this.origin
 		});
 		final info = DefineVersions[this.name];
-		final since = info!.since;
-		final until = info!.until;
+		final since = info?.since;
+		final until = info?.until;
 		function youAreUsing() {
 			return if (isAvailable(haxeVersion)) '' else ' (you are using $haxeVersion)';
 		}

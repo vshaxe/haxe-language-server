@@ -87,7 +87,7 @@ class PositionAnalyzer {
 		}
 
 		function getFieldKind():FieldKind {
-			return switch fieldToken!.tok {
+			return switch fieldToken?.tok {
 				case Kwd(KwdVar): Var;
 				case Kwd(KwdFinal): Final;
 				case Kwd(KwdFunction): Function;

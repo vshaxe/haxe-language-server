@@ -71,12 +71,12 @@ class CompletionFeature {
 	}
 
 	function checkCapabilities() {
-		final completion = context.capabilities.textDocument!.completion;
-		contextSupport = completion!.contextSupport == true;
-		markdownSupport = completion!.completionItem!.documentationFormat.let(kinds -> kinds.contains(MarkDown)) == true;
-		snippetSupport = completion!.completionItem!.snippetSupport == true;
-		commitCharactersSupport = completion!.completionItem!.commitCharactersSupport == true;
-		deprecatedSupport = completion!.completionItem!.tagSupport!.valueSet.let(tags -> tags.contains(Deprecated)) == true;
+		final completion = context.capabilities.textDocument?.completion;
+		contextSupport = completion?.contextSupport == true;
+		markdownSupport = completion?.completionItem?.documentationFormat.let(kinds -> kinds.contains(MarkDown)) == true;
+		snippetSupport = completion?.completionItem?.snippetSupport == true;
+		commitCharactersSupport = completion?.completionItem?.commitCharactersSupport == true;
+		deprecatedSupport = completion?.completionItem?.tagSupport?.valueSet.let(tags -> tags.contains(Deprecated)) == true;
 	}
 
 	public function onCompletion(params:CompletionParams, token:CancellationToken, resolve:Null<EitherType<Array<CompletionItem>, CompletionList>>->Void,
@@ -146,10 +146,10 @@ class CompletionFeature {
 		final data:Null<CompletionItemData> = item.data;
 		if (!context.haxeServer.supports(DisplayMethods.CompletionItemResolve)
 			|| previousCompletionData == null
-			|| data!.origin == Custom) {
+			|| data?.origin == Custom) {
 			return resolve(item);
 		}
-		final index = data!.index.sure();
+		final index = (data?.index).sure();
 		previousCompletionData.isResolve = true;
 		context.callHaxeMethod(DisplayMethods.CompletionItemResolve, {index: index}, token, function(result) {
 			final resolvedItem = createCompletionItem(index, result.item, previousCompletionData.sure());
@@ -192,7 +192,7 @@ class CompletionFeature {
 		};
 
 		function createCompletionWithoutHaxeResponse() {
-			final token:Null<TokenTree> = doc.tokens!.getTokenAtOffset(doc.offsetAt(replaceRange.start));
+			final token:Null<TokenTree> = doc.tokens?.getTokenAtOffset(doc.offsetAt(replaceRange.start));
 			// disable snippets/keywords completion in unwanted places
 			if (token != null && token.parent != null) {
 				switch token.parent.tok {

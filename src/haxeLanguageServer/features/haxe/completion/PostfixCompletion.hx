@@ -29,7 +29,7 @@ class PostfixCompletion {
 			return [];
 		}
 		final context = data.params.context;
-		if (context!.triggerKind == TriggerCharacter && context!.triggerCharacter != ".") {
+		if (context?.triggerKind == TriggerCharacter && context?.triggerCharacter != ".") {
 			return [];
 		}
 

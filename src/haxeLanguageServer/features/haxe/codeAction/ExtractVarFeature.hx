@@ -72,7 +72,7 @@ class ExtractVarFeature implements CodeActionContributor {
 		while (parent != null) {
 			switch parent.tok {
 				case DblDot: // not anon structure
-					return parent.parent!.parent!.tok != BrOpen;
+					return parent.parent?.parent?.tok != BrOpen;
 				default:
 			}
 			token = parent;
@@ -227,7 +227,7 @@ class ExtractVarFeature implements CodeActionContributor {
 			switch parent.tok {
 				case Dot, QuestionDot:
 					// skip to start of foo.bar.baz
-					if (parent.parent!.isCIdent() == true) {
+					if (parent.parent?.isCIdent() == true) {
 						parent = parent.parent ?? return [];
 					}
 				case DblDot, Binop(_), Kwd(_):
@@ -237,7 +237,7 @@ class ExtractVarFeature implements CodeActionContributor {
 						case _:
 							// end of a.b expr is inside of Dot
 							final first = token.getFirstChild();
-							final hasDot = first!.tok == Dot || first!.tok == QuestionDot;
+							final hasDot = first?.tok == Dot || first?.tok == QuestionDot;
 							final last = hasDot ? first : token;
 							return [token, getLastNonCommaToken(last)];
 					}
@@ -250,7 +250,7 @@ class ExtractVarFeature implements CodeActionContributor {
 					final tokens:Array<Null<TokenTree>> = [token];
 					final firstChild = token.getFirstChild();
 					// don't extract arrow function args
-					if (firstChild!.tok == Arrow || parent.access().firstOf(Arrow) != null)
+					if (firstChild?.tok == Arrow || parent.access().firstOf(Arrow) != null)
 						return [];
 					if (firstChild == null)
 						return tokens;

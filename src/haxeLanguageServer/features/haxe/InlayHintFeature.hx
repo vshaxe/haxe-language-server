@@ -58,7 +58,7 @@ class InlayHintFeature {
 		var endPos = doc.offsetAt(params.range.end);
 
 		var inlayHints:Array<InlayHint> = [];
-		var root:Null<TokenTree> = doc!.tokens!.tree;
+		var root:Null<TokenTree> = doc?.tokens?.tree;
 		if (root == null) {
 			return reject.noFittingDocument(uri);
 		}
@@ -292,7 +292,7 @@ class InlayHintFeature {
 		if (pOpen.access().parent().matches(Kwd(KwdNew)).exists()) {
 			return promises;
 		}
-		var pClose:Null<TokenTree> = pOpen.access().firstOf(PClose)!.token;
+		var pClose:Null<TokenTree> = pOpen.access().firstOf(PClose)?.token;
 		if (pClose == null) {
 			return promises;
 		}
@@ -564,11 +564,11 @@ class InlayHintFeature {
 	}
 
 	function buildParameterName<T>(hover:HoverDisplayItemOccurence<T>):Null<String> {
-		return hover.expected!.name!.name;
+		return hover.expected?.name?.name;
 	}
 
 	function buildTypeHint<T>(hover:HoverDisplayItemOccurence<T>):Null<String> {
-		var type = hover.item!.type;
+		var type = hover.item?.type;
 		if (type == null) {
 			return null;
 		}
@@ -576,7 +576,7 @@ class InlayHintFeature {
 	}
 
 	function buildReturnTypeHint<T>(hover:HoverDisplayItemOccurence<T>):Null<String> {
-		var type = hover.item.type!.args!.ret;
+		var type = hover.item.type?.args?.ret;
 		if (type == null) {
 			return null;
 		}

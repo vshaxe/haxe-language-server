@@ -51,7 +51,7 @@ class CompletionFeatureLegacy {
 	static final reCaseOrDefault = ~/\b(case|default)\b[^:]*:$/;
 
 	static function isInvalidCompletionPosition(context:Null<CompletionContext>, text:String):Bool {
-		return context!.triggerCharacter == ":" && reCaseOrDefault.match(text);
+		return context?.triggerCharacter == ":" && reCaseOrDefault.match(text);
 	}
 
 	static final reFieldPart = ~/(\.|@(:?))(\w*)$/;

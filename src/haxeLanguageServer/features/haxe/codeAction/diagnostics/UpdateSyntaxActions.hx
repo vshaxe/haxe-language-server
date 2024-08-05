@@ -15,7 +15,7 @@ class UpdateSyntaxActions {
 		final uri = params.textDocument.uri;
 		final doc = context.documents.getHaxe(uri) ?? return [];
 		final actions:Array<CodeAction> = [];
-		final token = doc.tokens!.getTokenAtOffset(doc.offsetAt(params.range.start));
+		final token = doc.tokens?.getTokenAtOffset(doc.offsetAt(params.range.start));
 		if (token == null)
 			return [];
 
@@ -68,11 +68,11 @@ class UpdateSyntaxActions {
 			if (ifVarName != varName)
 				return;
 		}
-		final valueRange = ranges!.value ?? getIfBodyDeadEndRange(doc, ifToken) ?? return;
+		final valueRange = ranges?.value ?? getIfBodyDeadEndRange(doc, ifToken) ?? return;
 		var value = doc.getText(valueRange);
 		if (!value.endsWith(";"))
 			value += ";";
-		final prevValueToken = varIdent.getFirstChild()!.getFirstChild() ?? return;
+		final prevValueToken = varIdent.getFirstChild()?.getFirstChild() ?? return;
 		final prevValueRange = doc.rangeAt(prevValueToken.getPos(), Utf8);
 		final prevValue = doc.getText(prevValueRange);
 		final replaceRange = prevValueRange.union(doc.rangeAt(ifToken.getPos(), Utf8));
@@ -238,7 +238,7 @@ class UpdateSyntaxActions {
 	}
 
 	static function getBlockReturn(brOpen:TokenTree):Null<TokenTree> {
-		final maybeReturn = brOpen.getLastChild()!.previousSibling ?? cast return null;
+		final maybeReturn = brOpen.getLastChild()?.previousSibling ?? cast return null;
 		if (!maybeReturn.tok.match(Kwd(KwdReturn | KwdThrow)))
 			return null;
 		return maybeReturn;
@@ -370,7 +370,7 @@ class UpdateSyntaxActions {
 	}
 
 	static function addTernaryNullCheckAction(context:Context, params:CodeActionParams, actions:Array<CodeAction>, doc:HaxeDocument, questionToken:TokenTree) {
-		final binopToken = questionToken.parent!.parent ?? return;
+		final binopToken = questionToken.parent?.parent ?? return;
 		final ifIdentEnd = binopToken.parent ?? return;
 		final ifIdentStart = preDotToken(ifIdentEnd);
 
@@ -455,7 +455,7 @@ class UpdateSyntaxActions {
 				if (kwdNull.matches(Kwd(KwdNull)) == false)
 					return null;
 				final questionToken = kwdNull.getFirstChild() ?? cast return null;
-				if (questionToken!.matches(Question) == false)
+				if (questionToken?.matches(Question) == false)
 					return null;
 				return questionToken;
 			}
@@ -509,7 +509,7 @@ class UpdateSyntaxActions {
 	}
 
 	static function getSingleLineIfBodyExpr(ifToken:TokenTree):Null<TokenTree> {
-		var ident = ifToken.access().child(1)!.token ?? cast return null;
+		var ident = ifToken.access().child(1)?.token ?? cast return null;
 		if (ident.matches(BrOpen)) {
 			final children = ident.children ?? cast return null;
 			if (children.length > 2) // expr and BrClose

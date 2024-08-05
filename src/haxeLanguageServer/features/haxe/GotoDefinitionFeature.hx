@@ -38,11 +38,11 @@ class GotoDefinitionFeature {
 				locations = [];
 			resolve(locations.map(location -> {
 				final document = getHaxeDocument(location.file.toUri());
-				final tokens = document!.tokens;
+				final tokens = document?.tokens;
 				var previewDeclarationRange = location.range;
 				if (document != null && tokens != null) {
-					final targetToken = tokens!.getTokenAtOffset(document.offsetAt(location.range.start));
-					final pos = targetToken!.parent!.getPos();
+					final targetToken = tokens?.getTokenAtOffset(document.offsetAt(location.range.start));
+					final pos = targetToken?.parent?.getPos();
 					if (pos != null)
 						previewDeclarationRange = document.rangeAt(pos.min, pos.max);
 				}

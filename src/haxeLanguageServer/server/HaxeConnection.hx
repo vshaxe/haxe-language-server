@@ -97,7 +97,7 @@ class SocketConnection extends HaxeConnection {
 	}
 
 	override function send(data:Buffer) {
-		socket!.write(data);
+		socket?.write(data);
 	}
 
 	override function kill() {

@@ -139,7 +139,7 @@ class MissingFieldsActions {
 					}
 				} else {
 					final signature = field.type.extractFunctionSignature();
-					final args = signature!.args;
+					final args = signature?.args;
 					if (args != null) {
 						final isSnippetArgs = isSnippet && snippetEditId == -1;
 						// hack to generate ${1:arg} snippet ranges for new function args
@@ -161,7 +161,7 @@ class MissingFieldsActions {
 						if (pos != null)
 							rangeFieldInsertion = pos.toRange();
 					} else {
-						final funToken = tokens!.getTokenAtOffset(document.offsetAt(diagnostic.range.start));
+						final funToken = tokens?.getTokenAtOffset(document.offsetAt(diagnostic.range.start));
 						if (funToken != null) {
 							final pos = getNewClassFunctionPos(document, classToken, funToken);
 							if (pos != null)
@@ -328,7 +328,7 @@ class MissingFieldsActions {
 	}
 
 	static function getNewVariablePos(document:HaxeDocument, classToken:TokenTree, fieldScope:JsonClassFieldScope):Null<Position> {
-		final brOpen = classToken.access().firstChild().firstOf(BrOpen)!.token;
+		final brOpen = classToken.access().firstChild().firstOf(BrOpen)?.token;
 		if (brOpen == null) {
 			return null;
 		}
@@ -338,7 +338,7 @@ class MissingFieldsActions {
 		}
 		// find place for field before first function in class
 		final firstFun = brOpen.access().firstOf(Kwd(KwdFunction));
-		var prev = firstFun!.token!.previousSibling;
+		var prev = firstFun?.token?.previousSibling;
 		while (prev != null && prev.isComment()) {
 			prev = prev.previousSibling;
 		}
@@ -351,7 +351,7 @@ class MissingFieldsActions {
 	}
 
 	static function getNewClassFunctionPos(document:HaxeDocument, classToken:TokenTree, callToken:TokenTree):Null<Position> {
-		final brOpen = classToken.access().firstChild().firstOf(BrOpen)!.token;
+		final brOpen = classToken.access().firstChild().firstOf(BrOpen)?.token;
 		if (brOpen == null) {
 			return null;
 		}

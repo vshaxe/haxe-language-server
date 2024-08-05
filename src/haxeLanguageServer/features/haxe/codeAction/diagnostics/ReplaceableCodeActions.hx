@@ -6,8 +6,8 @@ class ReplaceableCodeActions {
 			return [];
 		}
 		final args = context.diagnostics.getArguments(params.textDocument.uri, ReplaceableCode, diagnostic.range);
-		final range = args!.range;
-		final newText = args!.newCode;
+		final range = args?.range;
+		final newText = args?.newCode;
 		if (range == null) {
 			return [];
 		}

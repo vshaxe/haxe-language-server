@@ -15,7 +15,7 @@ class FoldingRangeResolver {
 
 	public function new(document:HaxeDocument, capabilities:Null<TextDocumentClientCapabilities>) {
 		this.document = document;
-		lineFoldingOnly = capabilities!.foldingRange!.lineFoldingOnly == true;
+		lineFoldingOnly = capabilities?.foldingRange?.lineFoldingOnly == true;
 	}
 
 	public function resolve():Array<FoldingRange> {
