@@ -51,7 +51,7 @@ class DiagnosticsFeature {
 		}
 		timerName = useJsonRpc ? DisplayMethods.Diagnostics : "@diagnostics";
 
-		ChildProcess.exec(context.config.haxelib.executable + " config", (error, stdout, stderr) -> haxelibPath = new FsPath(stdout.trim()));
+		ChildProcess.exec(context.config.haxelib.executable + " config", {shell: true}, (error, stdout, stderr) -> haxelibPath = new FsPath(stdout.trim()));
 
 		context.languageServerProtocol.onNotification(LanguageServerMethods.RunGlobalDiagnostics, onRunGlobalDiagnostics);
 	}
