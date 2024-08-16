@@ -2,14 +2,14 @@ package haxeLanguageServer.server;
 
 import haxe.Json;
 import haxe.io.Path;
-import jsonrpc.CancellationToken;
-import jsonrpc.ResponseError;
-import sys.io.File;
-import sys.io.FileOutput;
-import sys.FileSystem;
 import haxeLanguageServer.Configuration.ServerRecordingConfig;
 import haxeLanguageServer.helper.FsHelper;
 import haxeLanguageServer.server.ServerRecordingTools.getVcsState;
+import jsonrpc.CancellationToken;
+import jsonrpc.ResponseError;
+import sys.FileSystem;
+import sys.io.File;
+import sys.io.FileOutput;
 
 using StringTools;
 using haxeLanguageServer.helper.StringHelper;
@@ -170,6 +170,9 @@ class ServerRecording {
 	}
 
 	public function onFileEvent(event:FileEvent):Void {
+		if (!enabled)
+			return;
+
 		final kind = switch (event.type) {
 			case Changed: "fileChanged";
 			case Created: "fileCreated";
