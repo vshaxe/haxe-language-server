@@ -116,7 +116,7 @@ class HaxeServer {
 		mergeEnvs(js.Node.process.env, env);
 		mergeEnvs(config.env, env);
 
-		final spawnOptions = {env: env, cwd: context.workspacePath.toString()};
+		final spawnOptions = {env: env, cwd: context.workspacePath.toString(), shell: true};
 
 		if (!checkHaxeVersion(config.path, spawnOptions)) {
 			return;
