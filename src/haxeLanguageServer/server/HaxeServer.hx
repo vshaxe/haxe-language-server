@@ -6,6 +6,7 @@ import haxe.display.Protocol;
 import haxe.display.Server.ServerMethods;
 import haxe.io.Path;
 import haxeLanguageServer.LanguageServerMethods.ServerAddress;
+import haxeLanguageServer.ProcessUtil.shellEscapeCommand;
 import haxeLanguageServer.helper.SemVer;
 import haxeLanguageServer.server.HaxeConnection;
 import js.lib.Promise;
@@ -116,9 +117,10 @@ class HaxeServer {
 		mergeEnvs(js.Node.process.env, env);
 		mergeEnvs(config.env, env);
 
+		final haxeCmd = shellEscapeCommand(config.path);
 		final spawnOptions = {env: env, cwd: context.workspacePath.toString(), shell: true};
 
-		if (!checkHaxeVersion(config.path, spawnOptions)) {
+		if (!checkHaxeVersion(haxeCmd, spawnOptions)) {
 			return;
 		}
 		starting = true;
@@ -193,7 +195,7 @@ class HaxeServer {
 		final startConnection = if (useSocket) SocketConnection.start else StdioConnection.start;
 		trace("Haxe Path: " + config.path);
 		spawnOptions.env["HAXE_COMPLETION_SERVER"] = "1";
-		startConnection(config.path, config.arguments, spawnOptions, log, onMessage, onExit, onHaxeStarted);
+		startConnection(haxeCmd, config.arguments, spawnOptions, log, onMessage, onExit, onHaxeStarted);
 	}
 
 	function log(msg:String):Void {

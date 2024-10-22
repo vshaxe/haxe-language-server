@@ -8,6 +8,7 @@ import haxe.display.JsonModuleTypes;
 import haxe.ds.BalancedTree;
 import haxe.io.Path;
 import haxeLanguageServer.LanguageServerMethods;
+import haxeLanguageServer.ProcessUtil.shellEscapeCommand;
 import haxeLanguageServer.helper.PathHelper;
 import haxeLanguageServer.helper.SemVer;
 import haxeLanguageServer.protocol.DisplayPrinter;
@@ -51,7 +52,8 @@ class DiagnosticsFeature {
 		}
 		timerName = useJsonRpc ? DisplayMethods.Diagnostics : "@diagnostics";
 
-		ChildProcess.exec(context.config.haxelib.executable + " config", {shell: true}, (error, stdout, stderr) -> haxelibPath = new FsPath(stdout.trim()));
+		ChildProcess.exec(shellEscapeCommand(context.config.haxelib.executable) + " config", {shell: true},
+			(error, stdout, stderr) -> haxelibPath = new FsPath(stdout.trim()));
 
 		context.languageServerProtocol.onNotification(LanguageServerMethods.RunGlobalDiagnostics, onRunGlobalDiagnostics);
 	}
