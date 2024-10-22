@@ -203,10 +203,10 @@ class Configuration {
 		maxCompletionItems: 1000,
 		renameSourceFolders: ["src", "source", "Source", "test", "tests"],
 		inlayHints: {
-			variableTypes: true,
-			parameterNames: true,
+			variableTypes: false,
+			parameterNames: false,
 			parameterTypes: false,
-			functionReturnTypes: true,
+			functionReturnTypes: false,
 			conditionals: false
 		},
 		serverRecording: {

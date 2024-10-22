@@ -20,10 +20,10 @@ class InlayHintFeature {
 	final cache:InlayHintCache;
 	final hoverRequests:Array<HoverRequestContext<Any>> = [];
 
-	var inlayHintsVariableTypes:Bool = true;
-	var inlayHintsParameterNames:Bool = true;
+	var inlayHintsVariableTypes:Bool = false;
+	var inlayHintsParameterNames:Bool = false;
 	var inlayHintsParameterTypes:Bool = false;
-	var inlayHintsFunctionReturnTypes:Bool = true;
+	var inlayHintsFunctionReturnTypes:Bool = false;
 	var inlayHintsConditionls:Bool = false;
 
 	public function new(context:Context) {
@@ -67,11 +67,11 @@ class InlayHintFeature {
 		#end
 		removeCancelledRequests();
 
-		inlayHintsVariableTypes = context.config.user?.inlayHints?.variableTypes ?? true;
-		inlayHintsParameterNames = context.config.user?.inlayHints?.parameterNames ?? true;
+		inlayHintsVariableTypes = context.config.user?.inlayHints?.variableTypes ?? false;
+		inlayHintsParameterNames = context.config.user?.inlayHints?.parameterNames ?? false;
 		inlayHintsParameterTypes = context.config.user?.inlayHints?.parameterTypes ?? false;
-		inlayHintsFunctionReturnTypes = context.config.user?.inlayHints?.functionReturnTypes ?? true;
-		inlayHintsConditionls = context.config.user?.inlayHints?.conditionals ?? true;
+		inlayHintsFunctionReturnTypes = context.config.user?.inlayHints?.functionReturnTypes ?? false;
+		inlayHintsConditionls = context.config.user?.inlayHints?.conditionals ?? false;
 
 		if (!inlayHintsVariableTypes && !inlayHintsParameterNames && !inlayHintsParameterTypes && !inlayHintsFunctionReturnTypes && !inlayHintsConditionls) {
 			resolve([]);
