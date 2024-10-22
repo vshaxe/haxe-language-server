@@ -110,6 +110,14 @@ class CompletionFeature {
 		if (inComment) {
 			return false;
 		}
+		// disable completion after `#if` and `#end`
+		if (token.tok.match(Sharp("if")) || token.tok.match(Sharp("end"))) {
+			return false;
+		}
+		// disable completion after `#if foo`
+		if (token.parent?.tok.match(Sharp("if")) && token.previousSibling == null) {
+			return false;
+		}
 		if (params.context == null) {
 			return true;
 		}
