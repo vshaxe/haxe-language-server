@@ -1,5 +1,5 @@
 {
-	"name": "haxe-language-server",
+	"name": "@vshaxe/haxe-language-server",
 	"version": "2.32.2",
 	"devDependencies": {
 		"lix": "^15.12.0",
