@@ -4,7 +4,11 @@ import tokentree.TokenTree;
 
 class TokenTreeUtils {
 	public static function isInFunctionScope(token:TokenTree):Bool {
-		final brOpen = token.parent ?? return false;
+		final token = token.parent ?? return false;
+		return isFunctionBrOpen(token);
+	}
+
+	public static function isFunctionBrOpen(brOpen:TokenTree):Bool {
 		if (brOpen.tok != BrOpen)
 			return false;
 		final name = brOpen.parent ?? return false;
@@ -14,6 +18,13 @@ class TokenTreeUtils {
 		final fun = name.parent ?? return false;
 		// `function name() {}`
 		return fun.tok.match(Kwd(KwdFunction));
+	}
+
+	public static function isCallPOpen(pOpen:TokenTree):Bool {
+		if (pOpen.tok != POpen)
+			return false;
+		final name = pOpen.parent ?? return false;
+		return name.tok.match(Const(CIdent(_)));
 	}
 
 	public static function isFunctionArg(token:TokenTree):Bool {

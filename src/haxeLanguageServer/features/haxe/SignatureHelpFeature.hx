@@ -6,6 +6,7 @@ import haxe.display.Display.SignatureInformation as HaxeSignatureInformation;
 import haxe.display.Display.SignatureItem as HaxeSignatureItem;
 import haxe.display.JsonModuleTypes.JsonFunctionArgument;
 import haxe.extern.EitherType;
+import haxeLanguageServer.features.haxe.codeAction.TokenTreeUtils;
 import haxeLanguageServer.helper.DocHelper;
 import haxeLanguageServer.helper.IdentifierHelper.addNamesToSignatureType;
 import haxeLanguageServer.helper.SemVer;
@@ -39,8 +40,8 @@ class SignatureHelpFeature {
 		handle(params, token, resolve, reject, doc);
 	}
 
-	function handleJsonRpc(params:SignatureHelpParams, token:CancellationToken, resolve:Null<SignatureHelp>->Void, reject:ResponseError<NoData>->Void,
-			doc:HaxeDocument) {
+	function handleJsonRpc(params:SignatureHelpParams, cancellationToken:CancellationToken, resolve:Null<SignatureHelp>->Void,
+			reject:ResponseError<NoData>->Void, doc:HaxeDocument) {
 		var wasAutoTriggered = true;
 		if (context.haxeServer.haxeVersion >= new SemVer(4, 1, 0)) {
 			final triggerKind = params?.context?.triggerKind;
@@ -50,13 +51,33 @@ class SignatureHelpFeature {
 				case ContentChange | Invoked: false;
 			}
 		}
+
+		/**
+			close signature hint inside of callback argument scope:
+			```haxe
+			foo(0, |(name, age) -> {}|);
+			```
+		**/
+		var token = doc.tokens?.getTokenAtOffset(doc.offsetAt(params.position));
+		while (token != null) {
+			final isCall = TokenTreeUtils.isCallPOpen(token);
+			if (isCall) {
+				break;
+			}
+			final isInFuction = TokenTreeUtils.isFunctionBrOpen(token);
+			if (isInFuction) {
+				resolve(null);
+				return;
+			}
+			token = token.parent;
+		}
 		final params = {
 			file: doc.uri.toFsPath(),
 			contents: doc.content,
 			offset: context.displayOffsetConverter.characterOffsetToByteOffset(doc.content, doc.offsetAt(params.position)),
 			wasAutoTriggered: wasAutoTriggered
 		}
-		context.callHaxeMethod(DisplayMethods.SignatureHelp, params, token, function(result) {
+		context.callHaxeMethod(DisplayMethods.SignatureHelp, params, cancellationToken, function(result) {
 			if (result == null) {
 				resolve(null);
 			} else {
