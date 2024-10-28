@@ -20,6 +20,8 @@ import languageServerProtocol.Types.WorkspaceEdit;
 import refactor.CanRefactorResult;
 import refactor.ITypeList;
 import refactor.ITyper;
+import refactor.discover.FileContentType;
+import refactor.discover.TraverseSources.simpleFileReader;
 import refactor.rename.RenameHelper.TypeHintType;
 import tokentree.TokenTree;
 
@@ -167,6 +169,7 @@ class RenameFeature {
 
 	function makeUsageContext():refactor.discover.UsageContext {
 		return {
+			fileReader: readFile,
 			fileName: "",
 			file: null,
 			usageCollector: new refactor.discover.UsageCollector(),
@@ -176,6 +179,19 @@ class RenameFeature {
 			type: null,
 			cache: cache
 		};
+	}
+
+	function readFile(path:String):FileContentType {
+		var fsPath = new FsPath(path);
+		var doc:Null<HaxeDocument> = context.documents.getHaxe(fsPath.toUri());
+		if (doc == null) {
+			return simpleFileReader(path);
+		}
+		var root:Null<TokenTree> = doc?.tokens?.tree;
+		if (root != null) {
+			return Token(root);
+		}
+		return Text(doc.content);
 	}
 }
 
