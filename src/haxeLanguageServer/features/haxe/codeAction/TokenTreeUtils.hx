@@ -1,6 +1,7 @@
 package haxeLanguageServer.features.haxe.codeAction;
 
 import tokentree.TokenTree;
+import tokentree.utils.TokenTreeCheckUtils;
 
 class TokenTreeUtils {
 	public static function isInFunctionScope(token:TokenTree):Bool {
@@ -23,8 +24,7 @@ class TokenTreeUtils {
 	public static function isCallPOpen(pOpen:TokenTree):Bool {
 		if (pOpen.tok != POpen)
 			return false;
-		final name = pOpen.parent ?? return false;
-		return name.tok.match(Const(CIdent(_)));
+		return TokenTreeCheckUtils.getPOpenType(pOpen) == Call;
 	}
 
 	public static function isFunctionArg(token:TokenTree):Bool {
