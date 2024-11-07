@@ -62,7 +62,7 @@ class InlayHintFeature {
 		if (root == null) {
 			return reject.noFittingDocument(uri);
 		}
-		#if debug
+		#if debug_inlayhints
 		trace('[inlayHints] requesting inlay hints for $fileName lines ${params.range.start.line}-${params.range.end.line}');
 		#end
 		removeCancelledRequests();

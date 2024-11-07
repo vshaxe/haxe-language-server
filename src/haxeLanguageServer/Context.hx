@@ -22,12 +22,14 @@ import haxeLanguageServer.features.haxe.GotoDefinitionFeature;
 import haxeLanguageServer.features.haxe.GotoImplementationFeature;
 import haxeLanguageServer.features.haxe.GotoTypeDefinitionFeature;
 import haxeLanguageServer.features.haxe.InlayHintFeature;
+import haxeLanguageServer.features.haxe.RefactorFeature;
 import haxeLanguageServer.features.haxe.RenameFeature;
 import haxeLanguageServer.features.haxe.SignatureHelpFeature;
 import haxeLanguageServer.features.haxe.WorkspaceSymbolsFeature;
 import haxeLanguageServer.features.haxe.codeAction.CodeActionFeature;
 import haxeLanguageServer.features.haxe.documentSymbols.DocumentSymbolsFeature;
 import haxeLanguageServer.features.haxe.foldingRange.FoldingRangeFeature;
+import haxeLanguageServer.features.haxe.refactoring.RefactorCache;
 import haxeLanguageServer.server.DisplayResult;
 import haxeLanguageServer.server.HaxeServer;
 import haxeLanguageServer.server.ServerRecording;
@@ -64,6 +66,7 @@ class Context {
 	@:nullSafety(Off) public var findReferences(default, null):FindReferencesFeature;
 	@:nullSafety(Off) public var determinePackage(default, null):DeterminePackageFeature;
 	@:nullSafety(Off) public var diagnostics(default, null):DiagnosticsFeature;
+	@:nullSafety(Off) public var refactorCache(default, null):RefactorCache;
 	public var experimental(default, null):Null<ExperimentalCapabilities>;
 
 	var activeEditor:Null<DocumentUri>;
@@ -376,7 +379,8 @@ class Context {
 				new GotoTypeDefinitionFeature(this);
 				findReferences = new FindReferencesFeature(this);
 				determinePackage = new DeterminePackageFeature(this);
-				new RenameFeature(this);
+				refactorCache = new RefactorCache(this);
+				new RenameFeature(this, refactorCache);
 				diagnostics = new DiagnosticsFeature(this);
 				new CodeActionFeature(this);
 				new CodeLensFeature(this);
@@ -390,6 +394,7 @@ class Context {
 		} else {
 			haxeServer.restart(reason, function() {
 				onServerStarted();
+				refactorCache.initClassPaths();
 				if (activeEditor != null) {
 					publishDiagnostics(activeEditor);
 				}
@@ -416,6 +421,7 @@ class Context {
 			serverRecording.onDidChangeTextDocument(event);
 			invalidateFile(uri);
 			documents.onDidChangeTextDocument(event);
+			refactorCache.invalidateFile(uri.toFsPath().toString());
 		}
 	}
 
@@ -445,6 +451,7 @@ class Context {
 				case Deleted:
 					diagnostics.clearDiagnostics(change.uri);
 					invalidateFile(change.uri);
+					refactorCache.invalidateFile(change.uri.toFsPath().toString());
 				case _:
 			}
 		}
@@ -466,6 +473,9 @@ class Context {
 	}
 
 	function onDidChangeActiveTextEditor(params:{uri:DocumentUri}) {
+		if (!params.uri.isFile() || !params.uri.isHaxeFile()) {
+			return;
+		}
 		activeEditor = params.uri;
 		final document = documents.getHaxe(params.uri);
 		if (document == null) {
