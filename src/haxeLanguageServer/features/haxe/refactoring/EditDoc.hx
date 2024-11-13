@@ -1,6 +1,7 @@
 package haxeLanguageServer.features.haxe.refactoring;
 
 import haxe.extern.EitherType;
+import haxeLanguageServer.helper.FormatterHelper;
 import languageServerProtocol.Types.CreateFile;
 import languageServerProtocol.Types.CreateFileKind;
 import languageServerProtocol.Types.DeleteFile;
@@ -9,6 +10,7 @@ import languageServerProtocol.Types.RenameFile;
 import languageServerProtocol.Types.RenameFileKind;
 import refactor.edits.IEditableDocument;
 import sys.FileSystem;
+import tokentree.TokenTreeBuilder;
 
 using Lambda;
 using haxeLanguageServer.helper.PathHelper;
@@ -64,9 +66,15 @@ class EditDoc implements IEditableDocument {
 						ignoreIfNotExists: false
 					}
 				});
-			case ReplaceText(text, pos):
+			case ReplaceText(text, pos, format):
+				if (format) {
+					text = FormatterHelper.formatSnippet(filePath, text, TokenTreeEntryPoint.FieldLevel);
+				}
 				edits.push({range: posToRange(pos), newText: text});
-			case InsertText(text, pos):
+			case InsertText(text, pos, format):
+				if (format) {
+					text = FormatterHelper.formatSnippet(filePath, text, TokenTreeEntryPoint.FieldLevel);
+				}
 				edits.push({range: posToRange(pos), newText: text});
 			case RemoveText(pos):
 				edits.push({range: posToRange(pos), newText: ""});

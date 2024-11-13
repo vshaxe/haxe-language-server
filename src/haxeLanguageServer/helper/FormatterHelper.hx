@@ -23,4 +23,15 @@ class FormatterHelper {
 		}
 		return code;
 	}
+
+	public static function formatSnippet(path:FsPath, code:String, entryPoint:TokenTreeEntryPoint):String {
+		final config = Formatter.loadConfig(path.toString());
+		switch Formatter.format(Code(code, Snippet), config, null, entryPoint) {
+			case Success(formattedCode):
+				return formattedCode;
+			case Failure(_):
+			case Disabled:
+		}
+		return code;
+	}
 }
