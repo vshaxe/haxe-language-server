@@ -45,9 +45,13 @@ class RefactorFeature implements CodeActionContributor {
 		if (canRefactorContext == null) {
 			return actions;
 		}
+		var refactorInfo:Array<Null<RefactorInfo>> = [
+			getRefactorInfo(ExtractInterface),
+			getRefactorInfo(ExtractMethod),
+			getRefactorInfo(ExtractType),
+		];
 		refactorCache.updateSingleFileCache(canRefactorContext.what.fileName);
-		var refactorRunners:Array<Null<RefactorInfo>> = [getRefactorInfo(ExtractType), getRefactorInfo(ExtractInterface)];
-		for (refactor in refactorRunners) {
+		for (refactor in refactorInfo) {
 			if (refactor == null) {
 				continue;
 			}
@@ -65,14 +69,6 @@ class RefactorFeature implements CodeActionContributor {
 		switch (type) {
 			case MissingArg | ChangeFinalToVar | AddTypeHint:
 				return null;
-			case ExtractType:
-				return {
-					refactorType: RefactorExtractType,
-					type: type,
-					codeActionKind: RefactorExtract,
-					title: "extractType",
-					prefix: "[ExtractType]"
-				}
 			case ExtractInterface:
 				return {
 					refactorType: RefactorExtractInterface,
@@ -80,6 +76,22 @@ class RefactorFeature implements CodeActionContributor {
 					codeActionKind: RefactorExtract,
 					title: "extractInterface",
 					prefix: "[ExtractInterface]"
+				}
+			case ExtractMethod:
+				return {
+					refactorType: RefactorExtractMethod,
+					type: type,
+					codeActionKind: RefactorExtract,
+					title: "extractMethod",
+					prefix: "[ExtractMethod]"
+				}
+			case ExtractType:
+				return {
+					refactorType: RefactorExtractType,
+					type: type,
+					codeActionKind: RefactorExtract,
+					title: "extractType",
+					prefix: "[ExtractType]"
 				}
 		}
 	}
