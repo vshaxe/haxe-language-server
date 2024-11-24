@@ -1,3 +1,3 @@
-# @install: lix --silent download "gh://github.com/HaxeCheckstyle/haxe-rename#bcb4112911ca3d70bf847c951381282a272add18" into rename/2.3.1/github/bcb4112911ca3d70bf847c951381282a272add18
--cp ${HAXE_LIBCACHE}/rename/2.3.1/github/bcb4112911ca3d70bf847c951381282a272add18/src
+# @install: lix --silent download "gh://github.com/HaxeCheckstyle/haxe-rename#19b2667de5d5302e6f3a7e650efcb7771d11082d" into rename/2.3.1/github/19b2667de5d5302e6f3a7e650efcb7771d11082d
+-cp ${HAXE_LIBCACHE}/rename/2.3.1/github/19b2667de5d5302e6f3a7e650efcb7771d11082d/src
 -D rename=2.3.1

@@ -1,5 +1,6 @@
 package haxeLanguageServer.features.haxe.refactoring;
 
+import haxe.Exception;
 import haxe.PosInfos;
 import haxe.display.Server.ServerMethods;
 import haxe.io.Path;
@@ -103,8 +104,14 @@ class RefactorCache {
 		final workspacePath = context.workspacePath.normalize();
 		final srcFolders = classPaths.map(f -> Path.join([workspacePath.toString(), f]));
 
-		TraverseSources.traverseSources(srcFolders, usageContext);
-		usageContext.usageCollector.updateImportHx(usageContext);
+		try {
+			TraverseSources.traverseSources(srcFolders, usageContext);
+			usageContext.usageCollector.updateImportHx(usageContext);
+		} catch (e:Exception) {
+			#if debug
+			trace("failed to updateFileCache: " + e);
+			#end
+		}
 
 		endProgress();
 	}
@@ -116,7 +123,13 @@ class RefactorCache {
 	public function updateSingleFileCache(uri:String) {
 		final usageContext:UsageContext = makeUsageContext();
 		usageContext.fileName = uri;
-		TraverseSources.collectIdentifierData(usageContext);
+		try {
+			TraverseSources.collectIdentifierData(usageContext);
+		} catch (e:Exception) {
+			#if debug
+			trace("failed to updateSingleFileCache: " + e);
+			#end
+		}
 	}
 
 	public function invalidateFile(uri:String) {

@@ -5,9 +5,9 @@ import haxe.display.Display.HoverDisplayItemOccurence;
 import haxe.display.JsonModuleTypes.JsonType;
 import haxeLanguageServer.protocol.DisplayPrinter;
 import js.lib.Promise;
-import refactor.ITypeList;
-import refactor.ITyper;
-import refactor.TypingHelper.TypeHintType;
+import refactor.typing.ITypeList;
+import refactor.typing.ITyper;
+import refactor.typing.TypeHintType;
 
 using Lambda;
 using haxeLanguageServer.helper.PathHelper;

@@ -129,7 +129,7 @@ class CodeActionFeature {
 				refactorFeature.createCodeActionEdits(context, type, action, params).then(workspaceEdit -> {
 					action.edit = workspaceEdit;
 					resolve(action);
-				});
+				}).catchError((e) -> reject(e));
 		}
 	}
 }
