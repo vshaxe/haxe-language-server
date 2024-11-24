@@ -15,6 +15,8 @@ import refactor.discover.UsageCollector;
 import refactor.discover.UsageContext;
 import refactor.refactor.CanRefactorContext;
 import refactor.refactor.RefactorContext;
+import refactor.rename.CanRenameContext;
+import refactor.rename.RenameContext;
 import tokentree.TokenTree;
 
 using haxeLanguageServer.helper.PathHelper;
@@ -23,8 +25,8 @@ class RefactorCache {
 	final context:Context;
 
 	public final cache:IFileCache;
-	public final converter:Haxe3DisplayOffsetConverter;
 	public final typer:LanguageServerTyper;
+	public final converter:Haxe3DisplayOffsetConverter;
 	public final usageCollector:UsageCollector;
 	public final nameMap:NameMap;
 	public final fileList:FileList;
@@ -35,8 +37,8 @@ class RefactorCache {
 		this.context = context;
 
 		cache = new MemCache();
-		typer = new LanguageServerTyper(context);
 		converter = new Haxe3DisplayOffsetConverter();
+		typer = new LanguageServerTyper(context);
 		usageCollector = new UsageCollector();
 		nameMap = new NameMap();
 		fileList = new FileList();
@@ -148,6 +150,52 @@ class RefactorCache {
 			typeList: typeList,
 			type: null,
 			cache: cache
+		};
+	}
+
+	public function makeCanRenameContext(doc:HaxeDocument, filePath:FsPath, position:Position):CanRenameContext {
+		return {
+			nameMap: nameMap,
+			fileList: fileList,
+			typeList: typeList,
+			what: {
+				fileName: filePath.toString(),
+				toName: "",
+				pos: converter.characterOffsetToByteOffset(doc.content, doc.offsetAt(position))
+			},
+			verboseLog: function(text:String, ?pos:PosInfos) {
+				#if debug
+				trace('[canRename] $text');
+				#end
+			},
+
+			typer: typer,
+			fileReader: readFile,
+			converter: converter.byteOffsetToCharacterOffset,
+		};
+	}
+
+	public function makeRenameContext(doc:HaxeDocument, filePath:FsPath, position:Position, newName:String, editList:EditList):RenameContext {
+		return {
+			nameMap: nameMap,
+			fileList: fileList,
+			typeList: typeList,
+			what: {
+				fileName: filePath.toString(),
+				toName: newName,
+				pos: converter.characterOffsetToByteOffset(doc.content, doc.offsetAt(position))
+			},
+			forRealExecute: true,
+			docFactory: (filePath:String) -> new EditDoc(new FsPath(filePath), editList, context, converter),
+			verboseLog: function(text:String, ?pos:PosInfos) {
+				#if debug
+				trace('[rename] $text');
+				#end
+			},
+
+			typer: typer,
+			fileReader: readFile,
+			converter: converter.byteOffsetToCharacterOffset,
 		};
 	}
 

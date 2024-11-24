@@ -50,22 +50,7 @@ class RenameFeature {
 		refactorCache.updateSingleFileCache(filePath.toString());
 
 		final editList:EditList = new EditList();
-		refactor.Rename.canRename({
-			nameMap: usageContext.nameMap,
-			fileList: usageContext.fileList,
-			typeList: usageContext.typeList,
-			what: {
-				fileName: filePath.toString(),
-				toName: "",
-				pos: refactorCache.converter.characterOffsetToByteOffset(doc.content, doc.offsetAt(params.position))
-			},
-			verboseLog: function(text:String, ?pos:PosInfos) {
-				#if debug
-				trace('[canRename] $text');
-				#end
-			},
-			typer: refactorCache.typer
-		}).then((result:CanRenameResult) -> {
+		refactor.Rename.canRename(refactorCache.makeCanRenameContext(doc, filePath, params.position)).then((result:CanRenameResult) -> {
 			if (result == null) {
 				reject(ResponseError.internalError("cannot rename identifier"));
 			}
@@ -95,24 +80,7 @@ class RenameFeature {
 		refactorCache.updateFileCache();
 
 		final editList:EditList = new EditList();
-		refactor.Rename.rename({
-			nameMap: refactorCache.nameMap,
-			fileList: refactorCache.fileList,
-			typeList: refactorCache.typeList,
-			what: {
-				fileName: filePath.toString(),
-				toName: params.newName,
-				pos: refactorCache.converter.characterOffsetToByteOffset(doc.content, doc.offsetAt(params.position))
-			},
-			forRealExecute: true,
-			docFactory: (filePath:String) -> new EditDoc(new FsPath(filePath), editList, context, refactorCache.converter),
-			verboseLog: function(text:String, ?pos:PosInfos) {
-				#if debug
-				trace('[rename] $text');
-				#end
-			},
-			typer: refactorCache.typer
-		}).then((result:RefactorResult) -> {
+		refactor.Rename.rename(refactorCache.makeRenameContext(doc, filePath, params.position, params.newName, editList)).then((result:RefactorResult) -> {
 			endProgress();
 			switch (result) {
 				case NoChange:
