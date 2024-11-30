@@ -66,19 +66,47 @@ class EditDoc implements IEditableDocument {
 						ignoreIfNotExists: false
 					}
 				});
-			case ReplaceText(text, pos, format):
-				if (format) {
-					text = FormatterHelper.formatSnippet(filePath, text, TokenTreeEntryPoint.FieldLevel);
-				}
-				edits.push({range: posToRange(pos), newText: text});
-			case InsertText(text, pos, format):
-				if (format) {
-					text = FormatterHelper.formatSnippet(filePath, text, TokenTreeEntryPoint.FieldLevel);
-				}
+			case ReplaceText(text, pos, f):
+				final range = posToRange(pos);
+				text = correctFirstLineIndent(f, text, range);
+				edits.push({range: range, newText: text});
+			case InsertText(text, pos, f):
+				final range = posToRange(pos);
+				text = correctFirstLineIndent(f, text, range);
 				edits.push({range: posToRange(pos), newText: text});
 			case RemoveText(pos):
 				edits.push({range: posToRange(pos), newText: ""});
 		}
+	}
+
+	function correctFirstLineIndent(f:refactor.edits.FormatType, text:String, range:Range):String {
+		switch (f) {
+			case NoFormat:
+			case Format(indentOffset):
+				text = FormatterHelper.formatSnippet(filePath, text, TokenTreeEntryPoint.FieldLevel, indentOffset);
+				if (range.start.character != 0) {
+					var doc:Null<HaxeDocument> = context.documents.getHaxe(filePath.toUri());
+					if (doc != null) {
+						final beforeRange:Range = {
+							start: {
+								line: range.start.line,
+								character: 0
+							},
+							end: {
+								line: range.start.line,
+								character: range.start.character
+							}
+						};
+						var beforeText = doc.getText(beforeRange);
+						if (beforeText.trim().length == 0) {
+							range.start.character = 0;
+						} else {
+							text = text.ltrim();
+						}
+					}
+				}
+		}
+		return text;
 	}
 
 	public function posToRange(pos:refactor.discover.IdentifierPos):Range {

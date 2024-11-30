@@ -24,9 +24,9 @@ class FormatterHelper {
 		return code;
 	}
 
-	public static function formatSnippet(path:FsPath, code:String, entryPoint:TokenTreeEntryPoint):String {
+	public static function formatSnippet(path:FsPath, code:String, entryPoint:TokenTreeEntryPoint, ?indentOffset:Int):String {
 		final config = Formatter.loadConfig(path.toString());
-		switch Formatter.format(Code(code, Snippet), config, null, entryPoint) {
+		switch Formatter.format(Code(code, Snippet), config, null, entryPoint, indentOffset) {
 			case Success(formattedCode):
 				return formattedCode;
 			case Failure(_):
