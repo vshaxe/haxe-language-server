@@ -57,7 +57,11 @@ class LanguageServerTyper implements ITyper {
 			case TInst | TEnum | TType | TAbstract:
 				final path = jsonType.args;
 				final name = printer.printPath(path.path);
-				final fullPath = fullPrinter.printPath(path.path);
+				var fullPath = fullPrinter.printPath(path.path);
+				final typeName = path.path?.typeName;
+				if (typeName != null && typeName.startsWith("Abstract<")) {
+					fullPath = typeName.substring(9, typeName.length - 1);
+				}
 				final type = typeList?.getType(fullPath);
 				final params:Array<TypeHintType> = [];
 				if (path.params.length > 0) {
