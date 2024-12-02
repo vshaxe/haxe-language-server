@@ -49,6 +49,7 @@ class RefactorFeature implements CodeActionContributor {
 			getRefactorInfo(ExtractInterface),
 			getRefactorInfo(ExtractMethod),
 			getRefactorInfo(ExtractType),
+			getRefactorInfo(ExtractConstructorParams),
 		];
 		refactorCache.updateSingleFileCache(canRefactorContext.what.fileName);
 		for (refactor in refactorInfo) {
@@ -92,6 +93,14 @@ class RefactorFeature implements CodeActionContributor {
 					codeActionKind: RefactorExtract,
 					title: "extractType",
 					prefix: "[ExtractType]"
+				}
+			case ExtractConstructorParams:
+				return {
+					refactorType: RefactorExtractConstructorParams,
+					type: type,
+					codeActionKind: RefactorExtract,
+					title: "extractConstructorParams",
+					prefix: "[ExtractConstructorParams]"
 				}
 		}
 	}

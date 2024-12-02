@@ -20,6 +20,7 @@ enum CodeActionResolveType {
 	ExtractInterface;
 	ExtractMethod;
 	ExtractType;
+	ExtractConstructorParams;
 }
 
 typedef CodeActionResolveData = {
@@ -98,7 +99,7 @@ class CodeActionFeature {
 					return;
 				}
 			case AddTypeHint:
-			case ExtractInterface | ExtractMethod | ExtractType:
+			case ExtractInterface | ExtractMethod | ExtractType | ExtractConstructorParams:
 		}
 		switch (type) {
 			case MissingArg, ChangeFinalToVar, AddTypeHint:
@@ -125,7 +126,7 @@ class CodeActionFeature {
 						arguments: command.arguments ?? []
 					});
 				}).catchError((e) -> reject(e));
-			case ExtractInterface | ExtractMethod | ExtractType:
+			case ExtractInterface | ExtractMethod | ExtractType | ExtractConstructorParams:
 				refactorFeature.createCodeActionEdits(context, type, action, params).then(workspaceEdit -> {
 					action.edit = workspaceEdit;
 					resolve(action);
