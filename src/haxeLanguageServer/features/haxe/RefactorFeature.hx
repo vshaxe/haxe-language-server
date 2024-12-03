@@ -25,32 +25,35 @@ class RefactorFeature implements CodeActionContributor {
 	public function createCodeActions(params:CodeActionParams):Array<CodeAction> {
 		var actions:Array<CodeAction> = [];
 		if (params.context.only != null) {
-			if (params.context.only.contains(Refactor)) {}
-			if (params.context.only.contains(RefactorExtract)) {
-				actions = actions.concat(extractRefactors(params));
-			}
-			if (params.context.only.contains(RefactorRewrite)) {}
-			// if (params.context.only.contains(RefactorMove)) {} // upcoming LSP 3.18.0
-			if (params.context.only.contains(RefactorInline)) {}
+			actions = actions.concat(extractRefactors(params, i -> {
+				if (i == null) {
+					return false;
+				}
+				return params.context.only.contains(i.codeActionKind);
+			}));
 		} else {
-			actions = actions.concat(extractRefactors(params));
+			actions = actions.concat(extractRefactors(params, i -> true));
 		}
 
 		return actions;
 	}
 
-	function extractRefactors(params:CodeActionParams):Array<CodeAction> {
+	function extractRefactors(params:CodeActionParams, filterType:FilterRefactorModuleCB):Array<CodeAction> {
 		var actions:Array<CodeAction> = [];
 		final canRefactorContext = refactorCache.makeCanRefactorContext(context.documents.getHaxe(params.textDocument.uri), params.range);
 		if (canRefactorContext == null) {
 			return actions;
 		}
-		var refactorInfo:Array<Null<RefactorInfo>> = [
+		var allRefactorInfos:Array<Null<RefactorInfo>> = [
 			getRefactorInfo(ExtractInterface),
 			getRefactorInfo(ExtractMethod),
 			getRefactorInfo(ExtractType),
-			getRefactorInfo(ExtractConstructorParams),
+			getRefactorInfo(ExtractConstructorParamsAsVars),
+			getRefactorInfo(ExtractConstructorParamsAsFinals),
+			getRefactorInfo(RewriteVarsToFinals),
+			getRefactorInfo(RewriteFinalsToVars),
 		];
+		final refactorInfo = allRefactorInfos.filter(filterType);
 		refactorCache.updateSingleFileCache(canRefactorContext.what.fileName);
 		for (refactor in refactorInfo) {
 			if (refactor == null) {
@@ -62,7 +65,6 @@ class RefactorFeature implements CodeActionContributor {
 					actions.push(makeEmptyCodeAction(title, refactor.codeActionKind, params, refactor.type));
 			}
 		}
-
 		return actions;
 	}
 
@@ -94,13 +96,37 @@ class RefactorFeature implements CodeActionContributor {
 					title: "extractType",
 					prefix: "[ExtractType]"
 				}
-			case ExtractConstructorParams:
+			case ExtractConstructorParamsAsVars:
 				return {
-					refactorType: RefactorExtractConstructorParams,
+					refactorType: RefactorExtractConstructorParams(false),
 					type: type,
 					codeActionKind: RefactorExtract,
-					title: "extractConstructorParams",
-					prefix: "[ExtractConstructorParams]"
+					title: "extractConstructorParamsAsVars",
+					prefix: "[ExtractConstructorParams as Vars]"
+				}
+			case ExtractConstructorParamsAsFinals:
+				return {
+					refactorType: RefactorExtractConstructorParams(true),
+					type: type,
+					codeActionKind: RefactorExtract,
+					title: "extractConstructorParamsAsFinals",
+					prefix: "[ExtractConstructorParams as Finals]"
+				}
+			case RewriteVarsToFinals:
+				return {
+					refactorType: RefactorRewriteVarsToFinals(true),
+					type: type,
+					codeActionKind: RefactorRewrite,
+					title: "refactorRewriteVarsToFinals",
+					prefix: "[RefactorRewriteVarsToFinals]"
+				}
+			case RewriteFinalsToVars:
+				return {
+					refactorType: RefactorRewriteVarsToFinals(false),
+					type: type,
+					codeActionKind: RefactorRewrite,
+					title: "refactorRewriteFinalsToVars",
+					prefix: "[RefactorRewriteFinalsToVars]"
 				}
 		}
 	}
@@ -115,7 +141,6 @@ class RefactorFeature implements CodeActionContributor {
 
 	public function createCodeActionEdits(context:Context, type:CodeActionResolveType, action:CodeAction, params:CodeActionParams):Promise<WorkspaceEdit> {
 		var endProgress = context.startProgress("Performing Refactor Operation…");
-
 		var actions:Array<CodeAction> = [];
 		final editList:EditList = new EditList();
 		final refactorContext = refactorCache.makeRefactorContext(context.documents.getHaxe(params.textDocument.uri), params.range, editList);
@@ -127,7 +152,6 @@ class RefactorFeature implements CodeActionContributor {
 			return Promise.reject("failed to make refactor context");
 		}
 		final onResolve:(?result:Null<Dynamic>, ?debugInfo:Null<String>) -> Void = context.startTimer("refactor/" + info.title);
-		refactorCache.updateFileCache();
 		return Refactoring.doRefactor(info.refactorType, refactorContext).then((result:RefactorResult) -> {
 			var promise = switch (result) {
 				case NoChange:
@@ -166,3 +190,5 @@ typedef RefactorInfo = {
 	var title:String;
 	var prefix:String;
 }
+
+typedef FilterRefactorModuleCB = (info:Null<RefactorInfo>) -> Bool;

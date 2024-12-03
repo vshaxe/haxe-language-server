@@ -137,6 +137,7 @@ class RefactorCache {
 	public function invalidateFile(uri:String) {
 		cache.invalidateFile(uri, nameMap, typeList);
 		fileList.removeFile(uri);
+		updateSingleFileCache(uri);
 	}
 
 	public function makeUsageContext():UsageContext {

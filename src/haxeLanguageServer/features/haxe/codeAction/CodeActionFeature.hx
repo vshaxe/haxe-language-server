@@ -20,7 +20,10 @@ enum CodeActionResolveType {
 	ExtractInterface;
 	ExtractMethod;
 	ExtractType;
-	ExtractConstructorParams;
+	ExtractConstructorParamsAsVars;
+	ExtractConstructorParamsAsFinals;
+	RewriteVarsToFinals;
+	RewriteFinalsToVars;
 }
 
 typedef CodeActionResolveData = {
@@ -65,9 +68,6 @@ class CodeActionFeature {
 		registerContributor(new ExtractConstantFeature(context));
 		registerContributor(new DiagnosticsCodeActionFeature(context));
 		registerContributor(refactorFeature);
-		#if debug
-		// registerContributor(new ExtractFunctionFeature(context));
-		#end
 	}
 
 	public function registerContributor(contributor:CodeActionContributor) {
@@ -99,7 +99,8 @@ class CodeActionFeature {
 					return;
 				}
 			case AddTypeHint:
-			case ExtractInterface | ExtractMethod | ExtractType | ExtractConstructorParams:
+			case ExtractInterface | ExtractMethod | ExtractType | ExtractConstructorParamsAsVars | ExtractConstructorParamsAsFinals | RewriteVarsToFinals |
+				RewriteFinalsToVars:
 		}
 		switch (type) {
 			case MissingArg, ChangeFinalToVar, AddTypeHint:
@@ -126,7 +127,8 @@ class CodeActionFeature {
 						arguments: command.arguments ?? []
 					});
 				}).catchError((e) -> reject(e));
-			case ExtractInterface | ExtractMethod | ExtractType | ExtractConstructorParams:
+			case ExtractInterface | ExtractMethod | ExtractType | ExtractConstructorParamsAsVars | ExtractConstructorParamsAsFinals | RewriteVarsToFinals |
+				RewriteFinalsToVars:
 				refactorFeature.createCodeActionEdits(context, type, action, params).then(workspaceEdit -> {
 					action.edit = workspaceEdit;
 					resolve(action);

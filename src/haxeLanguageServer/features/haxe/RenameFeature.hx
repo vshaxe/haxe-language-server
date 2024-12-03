@@ -77,7 +77,6 @@ class RenameFeature {
 		var endProgress = context.startProgress("Performing Rename Operation…");
 
 		final filePath:FsPath = uri.toFsPath();
-		refactorCache.updateFileCache();
 
 		final editList:EditList = new EditList();
 		refactor.Rename.rename(refactorCache.makeRenameContext(doc, filePath, params.position, params.newName, editList)).then((result:RefactorResult) -> {

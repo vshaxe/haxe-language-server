@@ -82,8 +82,11 @@ class EditDoc implements IEditableDocument {
 	function correctFirstLineIndent(f:refactor.edits.FormatType, text:String, range:Range):String {
 		switch (f) {
 			case NoFormat:
-			case Format(indentOffset):
+			case Format(indentOffset, trimRight):
 				text = FormatterHelper.formatSnippet(filePath, text, TokenTreeEntryPoint.FieldLevel, indentOffset);
+				if (trimRight) {
+					text = text.rtrim();
+				}
 				if (range.start.character != 0) {
 					var doc:Null<HaxeDocument> = context.documents.getHaxe(filePath.toUri());
 					if (doc != null) {
