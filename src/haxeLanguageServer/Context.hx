@@ -451,8 +451,10 @@ class Context {
 				case Deleted:
 					diagnostics.clearDiagnostics(change.uri);
 					invalidateFile(change.uri);
-					refactorCache.invalidateFile(change.uri.toFsPath().toString());
 				case _:
+			}
+			if (change.uri.isHaxeFile()) {
+				refactorCache.invalidateFile(change.uri.toFsPath().toString());
 			}
 		}
 	}
