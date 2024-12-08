@@ -42,7 +42,11 @@ class LanguageServerTyper implements ITyper {
 					#end
 					resolve(null);
 				} else {
-					resolve(buildTypeHint(hover, '$filePath@$pos'));
+					final typeHint:Null<TypeHintType> = buildTypeHint(hover, '$filePath@$pos');
+					#if debug
+					trace('[refactor] received type info for $filePath@$pos: ${refactor.PrintHelper.typeHintToString(typeHint)}');
+					#end
+					resolve(typeHint);
 				}
 				return null;
 			}, reject.handler());
@@ -59,8 +63,14 @@ class LanguageServerTyper implements ITyper {
 				final name = printer.printPath(path.path);
 				var fullPath = fullPrinter.printPath(path.path);
 				final typeName = path.path?.typeName;
-				if (typeName != null && typeName.startsWith("Abstract<")) {
-					fullPath = typeName.substring(9, typeName.length - 1);
+
+				if (typeName != null) {
+					if (typeName.startsWith("Abstract<")) {
+						fullPath = typeName.substring(9, typeName.length - 1);
+					}
+					if (typeName.startsWith("Class<")) {
+						fullPath = typeName.substring(6, typeName.length - 1);
+					}
 				}
 				final type = typeList?.getType(fullPath);
 				final params:Array<TypeHintType> = [];
