@@ -24,6 +24,7 @@ enum CodeActionResolveType {
 	ExtractConstructorParamsAsFinals;
 	RewriteVarsToFinals;
 	RewriteFinalsToVars;
+	RewriteWrapWithTryCatch;
 }
 
 typedef CodeActionResolveData = {
@@ -100,7 +101,7 @@ class CodeActionFeature {
 				}
 			case AddTypeHint:
 			case ExtractInterface | ExtractMethod | ExtractType | ExtractConstructorParamsAsVars | ExtractConstructorParamsAsFinals | RewriteVarsToFinals |
-				RewriteFinalsToVars:
+				RewriteFinalsToVars | RewriteWrapWithTryCatch:
 		}
 		switch (type) {
 			case MissingArg, ChangeFinalToVar, AddTypeHint:
@@ -128,7 +129,7 @@ class CodeActionFeature {
 					});
 				}).catchError((e) -> reject(e));
 			case ExtractInterface | ExtractMethod | ExtractType | ExtractConstructorParamsAsVars | ExtractConstructorParamsAsFinals | RewriteVarsToFinals |
-				RewriteFinalsToVars:
+				RewriteFinalsToVars | RewriteWrapWithTryCatch:
 				refactorFeature.createCodeActionEdits(context, type, action, params).then(workspaceEdit -> {
 					action.edit = workspaceEdit;
 					resolve(action);

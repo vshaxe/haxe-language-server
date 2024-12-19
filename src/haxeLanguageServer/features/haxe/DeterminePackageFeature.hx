@@ -20,6 +20,10 @@ class DeterminePackageFeature {
 
 	function handleJsonRpc(path:FsPath, token:Null<CancellationToken>, resolve:{pack:String}->Void, reject:ResponseError<NoData>->Void) {
 		context.callHaxeMethod(DisplayMethods.DeterminePackage, {file: path}, token, function(result) {
+			if (result == null) {
+				reject(ResponseError.internalError("unable to determine package of module"));
+				return null;
+			}
 			resolve({pack: result.join(".")});
 			return null;
 		}, reject.handler());

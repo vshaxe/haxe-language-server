@@ -55,11 +55,15 @@ class RefactorCache {
 	}
 
 	public function initClassPaths() {
+		if (context.config.user.disableRefactorCache) {
+			return;
+		}
 		clearCache();
 		if (!context.haxeServer.supports(ServerMethods.Contexts)) {
 			initFromSetting();
 			return;
 		}
+		final currentWorkingDir = Path.removeTrailingSlashes(Sys.getCwd());
 		context.callHaxeMethod(ServerMethods.Contexts, null, null, function(contexts) {
 			classPaths = [];
 			for (ctx in contexts) {
@@ -69,7 +73,9 @@ class RefactorCache {
 							continue;
 						}
 						if (Path.isAbsolute(path)) {
-							continue;
+							if (!path.startsWith(currentWorkingDir)) {
+								continue;
+							}
 						}
 						classPaths.push(path);
 					}
@@ -98,6 +104,11 @@ class RefactorCache {
 	}
 
 	function init() {
+		if (context.config.user.disableRefactorCache) {
+			return;
+		}
+		final onResolve:(?result:Null<Dynamic>, ?debugInfo:Null<String>) -> Void = context.startTimer("refactor/cache/init");
+
 		var endProgress = context.startProgress("Building Refactoring Cache…");
 
 		final usageContext:UsageContext = makeUsageContext();
@@ -116,6 +127,7 @@ class RefactorCache {
 		}
 
 		endProgress();
+		onResolve();
 	}
 
 	public function updateFileCache() {
@@ -123,6 +135,11 @@ class RefactorCache {
 	}
 
 	public function updateSingleFileCache(uri:String) {
+		if (context.config.user.disableRefactorCache) {
+			return;
+		}
+		final onResolve:(?result:Null<Dynamic>, ?debugInfo:Null<String>) -> Void = context.startTimer("refactor/cache/updateFile");
+
 		final usageContext:UsageContext = makeUsageContext();
 		usageContext.fileName = uri;
 		try {
@@ -132,12 +149,19 @@ class RefactorCache {
 			trace("failed to updateSingleFileCache: " + e);
 			#end
 		}
+		onResolve();
 	}
 
 	public function invalidateFile(uri:String) {
+		if (context.config.user.disableRefactorCache) {
+			return;
+		}
+		final onResolve:(?result:Null<Dynamic>, ?debugInfo:Null<String>) -> Void = context.startTimer("refactor/cache/invalidateFile");
+
 		cache.invalidateFile(uri, nameMap, typeList);
 		fileList.removeFile(uri);
 		updateSingleFileCache(uri);
+		onResolve();
 	}
 
 	public function makeUsageContext():UsageContext {

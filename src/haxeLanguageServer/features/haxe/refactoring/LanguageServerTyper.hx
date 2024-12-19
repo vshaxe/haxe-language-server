@@ -103,7 +103,7 @@ class LanguageServerTyper implements ITyper {
 				for (field in path.fields) {
 					final fieldType = buildType(field.type);
 					if (fieldType != null) {
-						fields.push(fieldType);
+						fields.push(NamedType(field.name, fieldType));
 					}
 				}
 				return StructType(fields);

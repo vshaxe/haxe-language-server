@@ -35,6 +35,10 @@ class RenameFeature {
 	}
 
 	function onPrepareRename(params:PrepareRenameParams, token:CancellationToken, resolve:PrepareRenameResult->Void, reject:ResponseError<NoData>->Void) {
+		if (context.config.user.disableRefactorCache) {
+			return reject.handler()("rename feature disabled");
+		}
+
 		final onResolve:(?result:Null<Dynamic>, ?debugInfo:Null<String>) -> Void = context.startTimer("textDocument/prepareRename");
 		final uri = params.textDocument.uri;
 		final doc:Null<HaxeDocument> = context.documents.getHaxe(uri);

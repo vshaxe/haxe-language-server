@@ -11,7 +11,9 @@ import languageServerProtocol.Types.CodeActionKind;
 import languageServerProtocol.Types.WorkspaceEdit;
 import refactor.RefactorResult;
 import refactor.Refactoring;
+import refactor.refactor.RefactorHelper;
 import refactor.refactor.RefactorType;
+import refactor.refactor.RewriteWrapWithTryCatch;
 
 class RefactorFeature implements CodeActionContributor {
 	final context:Context;
@@ -23,43 +25,52 @@ class RefactorFeature implements CodeActionContributor {
 	}
 
 	public function createCodeActions(params:CodeActionParams):Array<CodeAction> {
+		if (context.config.user.disableRefactorCache) {
+			return [];
+		}
+
 		var actions:Array<CodeAction> = [];
 		if (params.context.only != null) {
-			actions = actions.concat(extractRefactors(params, i -> {
+			actions = actions.concat(findMatchingRefactors(params, i -> {
 				if (i == null) {
 					return false;
 				}
 				return params.context.only.contains(i.codeActionKind);
 			}));
 		} else {
-			actions = actions.concat(extractRefactors(params, i -> true));
+			actions = actions.concat(findMatchingRefactors(params, i -> true));
 		}
 
 		return actions;
 	}
 
-	function extractRefactors(params:CodeActionParams, filterType:FilterRefactorModuleCB):Array<CodeAction> {
+	function findMatchingRefactors(params:CodeActionParams, filterType:FilterRefactorModuleCB):Array<CodeAction> {
 		var actions:Array<CodeAction> = [];
 		final canRefactorContext = refactorCache.makeCanRefactorContext(context.documents.getHaxe(params.textDocument.uri), params.range);
 		if (canRefactorContext == null) {
 			return actions;
 		}
 		var allRefactorInfos:Array<Null<RefactorInfo>> = [
+			getRefactorInfo(ExtractConstructorParamsAsFinals),
+			getRefactorInfo(ExtractConstructorParamsAsVars),
 			getRefactorInfo(ExtractInterface),
 			getRefactorInfo(ExtractMethod),
 			getRefactorInfo(ExtractType),
-			getRefactorInfo(ExtractConstructorParamsAsVars),
-			getRefactorInfo(ExtractConstructorParamsAsFinals),
-			getRefactorInfo(RewriteVarsToFinals),
 			getRefactorInfo(RewriteFinalsToVars),
+			getRefactorInfo(RewriteVarsToFinals),
+			getRefactorInfo(RewriteWrapWithTryCatch),
 		];
 		final refactorInfo = allRefactorInfos.filter(filterType);
+		if (refactorInfo.length <= 0) {
+			return actions;
+		}
+		final isRangeSameScope = RefactorHelper.rangeInSameScope(canRefactorContext);
 		refactorCache.updateSingleFileCache(canRefactorContext.what.fileName);
 		for (refactor in refactorInfo) {
 			if (refactor == null) {
 				continue;
 			}
-			switch (Refactoring.canRefactor(refactor.refactorType, canRefactorContext)) {
+			switch (Refactoring.canRefactor(refactor.refactorType, canRefactorContext, isRangeSameScope)) {
 				case Unsupported:
 				case Supported(title):
 					actions.push(makeEmptyCodeAction(title, refactor.codeActionKind, params, refactor.type));
@@ -117,7 +128,7 @@ class RefactorFeature implements CodeActionContributor {
 					refactorType: RefactorRewriteVarsToFinals(true),
 					type: type,
 					codeActionKind: RefactorRewrite,
-					title: "refactorRewriteVarsToFinals",
+					title: "rewriteVarsToFinals",
 					prefix: "[RefactorRewriteVarsToFinals]"
 				}
 			case RewriteFinalsToVars:
@@ -125,8 +136,16 @@ class RefactorFeature implements CodeActionContributor {
 					refactorType: RefactorRewriteVarsToFinals(false),
 					type: type,
 					codeActionKind: RefactorRewrite,
-					title: "refactorRewriteFinalsToVars",
-					prefix: "[RefactorRewriteFinalsToVars]"
+					title: "rewriteFinalsToVars",
+					prefix: "[RewriteFinalsToVars]"
+				}
+			case RewriteWrapWithTryCatch:
+				return {
+					refactorType: RefactorRewriteWrapWithTryCatch,
+					type: type,
+					codeActionKind: RefactorRewrite,
+					title: "rewriteWrapInException",
+					prefix: "[RewriteWrapInException]"
 				}
 		}
 	}
