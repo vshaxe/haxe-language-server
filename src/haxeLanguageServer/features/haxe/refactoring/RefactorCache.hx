@@ -17,6 +17,7 @@ import refactor.refactor.CanRefactorContext;
 import refactor.refactor.RefactorContext;
 import refactor.rename.CanRenameContext;
 import refactor.rename.RenameContext;
+import sys.FileSystem;
 import tokentree.TokenTree;
 
 using haxeLanguageServer.helper.PathHelper;
@@ -160,7 +161,25 @@ class RefactorCache {
 
 		cache.invalidateFile(uri, nameMap, typeList);
 		fileList.removeFile(uri);
-		updateSingleFileCache(uri);
+
+		if (fileList.wasRecentlyRenamed(uri)) {
+			// delay for (potentially) recently renamed files, because vscode sends us
+			// a notifcation of edits in that file but not when it gets renamed.
+			// so in case of a type rename we don't want to end up having the renamed type twice:
+			// once for `pack.NewtypeName` and once for `pack.OldTypeName.NewTypeName`
+			// (helps solve renaming FlxSprite -> FlxCola -> FlxSprite)
+			haxe.Timer.delay(() -> {
+				if (FileSystem.exists(uri)) {
+					updateSingleFileCache(uri);
+				}
+			}, 250);
+			onResolve();
+			return;
+		}
+
+		if (FileSystem.exists(uri)) {
+			updateSingleFileCache(uri);
+		}
 		onResolve();
 	}
 

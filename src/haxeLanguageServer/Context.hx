@@ -438,6 +438,7 @@ class Context {
 		if (isUriSupported(uri)) {
 			publishDiagnostics(uri);
 			invalidated.remove(uri.toString());
+			refactorCache.invalidateFile(uri.toFsPath().toString());
 		}
 	}
 
