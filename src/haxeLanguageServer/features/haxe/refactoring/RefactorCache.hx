@@ -87,9 +87,7 @@ class RefactorCache {
 				initFromSetting();
 				return "";
 			}
-			#if debug
 			trace("[RefactorCache] detected classpaths: " + classPaths);
-			#end
 
 			init();
 			return "";
