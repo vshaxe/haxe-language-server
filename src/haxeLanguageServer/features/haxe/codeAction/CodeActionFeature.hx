@@ -17,6 +17,14 @@ enum CodeActionResolveType {
 	MissingArg;
 	ChangeFinalToVar;
 	AddTypeHint;
+	ExtractInterface;
+	ExtractMethod;
+	ExtractType;
+	ExtractConstructorParamsAsVars;
+	ExtractConstructorParamsAsFinals;
+	RewriteVarsToFinals;
+	RewriteFinalsToVars;
+	RewriteWrapWithTryCatch;
 }
 
 typedef CodeActionResolveData = {
@@ -32,9 +40,11 @@ class CodeActionFeature {
 	final context:Context;
 	final contributors:Array<CodeActionContributor> = [];
 	final hasCommandResolveSupport:Bool;
+	final refactorFeature:RefactorFeature;
 
 	public function new(context) {
 		this.context = context;
+		refactorFeature = new RefactorFeature(context);
 
 		context.registerCapability(CodeActionRequest.type, {
 			documentSelector: Context.haxeSelector,
@@ -58,10 +68,7 @@ class CodeActionFeature {
 		registerContributor(new ExtractVarFeature(context));
 		registerContributor(new ExtractConstantFeature(context));
 		registerContributor(new DiagnosticsCodeActionFeature(context));
-		#if debug
-		registerContributor(new ExtractTypeFeature(context));
-		registerContributor(new ExtractFunctionFeature(context));
-		#end
+		registerContributor(refactorFeature);
 	}
 
 	public function registerContributor(contributor:CodeActionContributor) {
@@ -93,6 +100,8 @@ class CodeActionFeature {
 					return;
 				}
 			case AddTypeHint:
+			case ExtractInterface | ExtractMethod | ExtractType | ExtractConstructorParamsAsVars | ExtractConstructorParamsAsFinals | RewriteVarsToFinals |
+				RewriteFinalsToVars | RewriteWrapWithTryCatch:
 		}
 		switch (type) {
 			case MissingArg, ChangeFinalToVar, AddTypeHint:
@@ -118,6 +127,12 @@ class CodeActionFeature {
 						command: command.command,
 						arguments: command.arguments ?? []
 					});
+				}).catchError((e) -> reject(e));
+			case ExtractInterface | ExtractMethod | ExtractType | ExtractConstructorParamsAsVars | ExtractConstructorParamsAsFinals | RewriteVarsToFinals |
+				RewriteFinalsToVars | RewriteWrapWithTryCatch:
+				refactorFeature.createCodeActionEdits(context, type, action, params).then(workspaceEdit -> {
+					action.edit = workspaceEdit;
+					resolve(action);
 				}).catchError((e) -> reject(e));
 		}
 	}

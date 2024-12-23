@@ -43,7 +43,7 @@ class IdentifierHelperTest extends Test {
 		function assert(expected, original, ?posInfos)
 			Assert.equals(expected, addNamesToSignatureType(original), posInfos);
 
-		function assertUnchanged(expectedAndOriginal, ?posInfos)
+		function assertUnchanged(expectedAndOriginal:Any, ?posInfos)
 			assert(expectedAndOriginal, expectedAndOriginal, posInfos);
 
 		assertUnchanged("String");

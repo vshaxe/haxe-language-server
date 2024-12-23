@@ -13,4 +13,5 @@ jobs:
         submodules: true
     - run: |
         npm ci
+        npx lix install haxelib:formatter
         npx lix run formatter -s . --check

@@ -102,6 +102,7 @@ typedef UserConfig = {
 	var importsSortOrder:ImportsSortOrderConfig;
 	var maxCompletionItems:Int;
 	var renameSourceFolders:Array<String>;
+	var disableRefactorCache:Bool;
 	var inlayHints:InlayHintConfig;
 	var serverRecording:ServerRecordingConfig;
 }
@@ -202,6 +203,7 @@ class Configuration {
 		importsSortOrder: AllAlphabetical,
 		maxCompletionItems: 1000,
 		renameSourceFolders: ["src", "source", "Source", "test", "tests"],
+		disableRefactorCache: false,
 		inlayHints: {
 			variableTypes: false,
 			parameterNames: false,
