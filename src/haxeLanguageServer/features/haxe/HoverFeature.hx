@@ -33,7 +33,7 @@ class HoverFeature {
 	function handleJsonRpc(params:TextDocumentPositionParams, token:CancellationToken, resolve:Null<Hover>->Void, reject:ResponseError<NoData>->Void,
 			doc:HxTextDocument, offset:Int) {
 		context.callHaxeMethod(DisplayMethods.Hover, {file: doc.uri.toFsPath(), contents: doc.content, offset: offset}, token, function(hover) {
-			if (hover == null) {
+			if (hover == null || hover.range == null) {
 				resolve(null);
 			} else {
 				final range = context.displayOffsetConverter.byteRangeToCharacterRange(hover.range, doc);
