@@ -13,7 +13,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - uses: krdlab/setup-haxe@v1
+    - uses: krdlab/setup-haxe@master
       with:
         haxe-version: ${{ matrix.haxe }}
 
