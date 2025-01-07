@@ -1,4 +1,4 @@
-name: CI
+name: CI - Vanilla
 
 on: [push, pull_request]
 
