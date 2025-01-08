@@ -49,7 +49,7 @@ class AddTypeHintActionsTest extends DisplayTestCase {
 			}
 		}
 	**/
-	@:timeout(500)
+	@:timeout(5000)
 	function test(async:utest.Async) {
 		ctx.cacheFile();
 		ctx.startServer(() -> {

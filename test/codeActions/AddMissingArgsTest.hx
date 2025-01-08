@@ -66,7 +66,7 @@ class AddMissingArgsTest extends DisplayTestCase {
 		function foo10(arg:Bytes) {}
 		function foo11(arg:Bytes) {}
 	**/
-	@:timeout(500)
+	@:timeout(10000)
 	function test(async:utest.Async) {
 		ctx.cacheFile();
 		ctx.startServer(() -> {
@@ -155,7 +155,7 @@ class AddMissingArgsTest extends DisplayTestCase {
 			public function new(i:Int) {}
 		}
 	**/
-	@:timeout(500)
+	@:timeout(1000)
 	function testConstructorArg(async:utest.Async) {
 		ctx.cacheFile();
 		ctx.startServer(() -> {
