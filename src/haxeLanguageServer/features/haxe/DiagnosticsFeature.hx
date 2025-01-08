@@ -220,10 +220,10 @@ class DiagnosticsFeature {
 					message: hxDiag.kind.getMessage(doc, hxDiag.args, range),
 					data: {kind: hxDiag.kind},
 					relatedInformation: hxDiag.relatedInformation?.map(rel -> {
-						location: {
-							uri: rel.location.file.toUri(),
-							range: rel.location.range,
-						},
+						location: Safety.let(rel.location, location -> {
+							uri: location.file.toUri(),
+							range: location.range,
+						}),
 						message: convertIndentation(rel.message, rel.depth)
 					})
 				}
