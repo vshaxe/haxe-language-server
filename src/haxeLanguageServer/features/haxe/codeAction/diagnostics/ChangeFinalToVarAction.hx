@@ -12,7 +12,7 @@ class ChangeFinalToVarAction {
 			return null;
 		}
 		final document = context.documents.getHaxe(params.textDocument.uri);
-		if (document == null)
+		if (document == null || diagnostic.range == null)
 			return null;
 		var tokenSource = new CancellationTokenSource();
 

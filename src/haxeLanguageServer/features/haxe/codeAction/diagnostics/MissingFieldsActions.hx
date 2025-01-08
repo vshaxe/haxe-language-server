@@ -160,7 +160,7 @@ class MissingFieldsActions {
 						final pos = getNewVariablePos(document, classToken, field.field.scope);
 						if (pos != null)
 							rangeFieldInsertion = pos.toRange();
-					} else {
+					} else if (diagnostic.range != null) {
 						final funToken = tokens?.getTokenAtOffset(document.offsetAt(diagnostic.range.start));
 						if (funToken != null) {
 							final pos = getNewClassFunctionPos(document, classToken, funToken);

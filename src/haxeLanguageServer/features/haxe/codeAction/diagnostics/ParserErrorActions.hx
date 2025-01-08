@@ -14,12 +14,12 @@ class ParserErrorActions {
 			return actions;
 		}
 
-		if (arg.contains("modifier is not supported for module-level fields")) {
+		if (arg.contains("modifier is not supported for module-level fields") && diagnostic.range != null) {
 			final document = context.documents.getHaxe(params.textDocument.uri);
 			final nextText = document.content.substr(document.offsetAt(diagnostic.range.end));
 			final isAuto = nextText.split("{").length == nextText.split("}").length;
 			final token = document?.tokens?.getTokenAtOffset(document.offsetAt(diagnostic.range.end));
-			var range = diagnostic.range;
+			var range = diagnostic.range.sure();
 			if (token != null) {
 				for (sib in [token.previousSibling, token.nextSibling]) {
 					if (sib == null)
@@ -44,12 +44,12 @@ class ParserErrorActions {
 			});
 		}
 
-		if (arg.contains("`final var` is not supported, use `final` instead")) {
+		if (arg.contains("`final var` is not supported, use `final` instead") && diagnostic.range != null) {
 			final document = context.documents.getHaxe(params.textDocument.uri);
 			actions.push({
 				title: "Change to final",
 				kind: CodeActionKind.QuickFix + ".auto",
-				edit: WorkspaceEditHelper.create(context, params, [{range: diagnostic.range, newText: "final"}]),
+				edit: WorkspaceEditHelper.create(context, params, [{range: diagnostic.range.sure(), newText: "final"}]),
 				diagnostics: [diagnostic],
 				isPreferred: true
 			});
@@ -59,7 +59,7 @@ class ParserErrorActions {
 			createMissingSemicolonAction(context, params, diagnostic, actions);
 		}
 
-		if (arg.contains("Expected }")) {
+		if (arg.contains("Expected }") && diagnostic.range != null) {
 			final document = context.documents.getHaxe(params.textDocument.uri);
 			final token = document?.tokens?.getTokenAtOffset(document.offsetAt(diagnostic.range.end));
 			final prevToken = getPrevNonCommentSibling(token);
@@ -70,7 +70,7 @@ class ParserErrorActions {
 						actions.push({
 							title: "Remove redundant ;",
 							kind: CodeActionKind.QuickFix + ".auto",
-							edit: WorkspaceEditHelper.create(context, params, [{range: diagnostic.range, newText: ""}]),
+							edit: WorkspaceEditHelper.create(context, params, [{range: diagnostic.range.sure(), newText: ""}]),
 							diagnostics: [diagnostic],
 							isPreferred: true
 						});
@@ -78,7 +78,7 @@ class ParserErrorActions {
 						actions.push({
 							title: "Remove redundant ,",
 							kind: CodeActionKind.QuickFix + ".auto",
-							edit: WorkspaceEditHelper.create(context, params, [{range: diagnostic.range, newText: ""}]),
+							edit: WorkspaceEditHelper.create(context, params, [{range: diagnostic.range.sure(), newText: ""}]),
 							diagnostics: [diagnostic],
 							isPreferred: true
 						});
@@ -91,7 +91,7 @@ class ParserErrorActions {
 							actions.push({
 								title: "Replace ; with ,",
 								kind: CodeActionKind.QuickFix + ".auto",
-								edit: WorkspaceEditHelper.create(context, params, [{range: diagnostic.range, newText: ","}]),
+								edit: WorkspaceEditHelper.create(context, params, [{range: diagnostic.range.sure(), newText: ","}]),
 								diagnostics: [diagnostic],
 								isPreferred: true
 							});
@@ -113,7 +113,7 @@ class ParserErrorActions {
 			}
 		}
 
-		if (arg.contains("Expected , or ]")) {
+		if (arg.contains("Expected , or ]") && diagnostic.range != null) {
 			final document = context.documents.getHaxe(params.textDocument.uri);
 			final errRange:Null<Range> = getMissingSemicolonPos(document, diagnostic.range.start);
 			if (errRange != null) {
@@ -136,7 +136,7 @@ class ParserErrorActions {
 
 	static function createMissingSemicolonAction(context:Context, params:CodeActionParams, diagnostic:Diagnostic, actions:Array<CodeAction>):Void {
 		final document = context.documents.getHaxe(params.textDocument.uri);
-		final errRange = getMissingSemicolonPos(document, diagnostic.range.start.translate(0, 1));
+		final errRange = Safety.let(diagnostic.range, range -> getMissingSemicolonPos(document, range.start.translate(0, 1)));
 		if (errRange == null)
 			return;
 		final errRange:Range = errRange;

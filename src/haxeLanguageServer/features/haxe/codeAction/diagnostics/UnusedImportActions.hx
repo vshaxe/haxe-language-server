@@ -9,7 +9,7 @@ class UnusedImportActions {
 			return [];
 		}
 		final doc = context.documents.getHaxe(params.textDocument.uri);
-		if (doc == null) {
+		if (doc == null || diagnostic.range == null) {
 			return [];
 		}
 		return [
@@ -18,7 +18,7 @@ class UnusedImportActions {
 				kind: QuickFix,
 				edit: WorkspaceEditHelper.create(context, params, [
 					{
-						range: DocHelper.untrimRange(doc, diagnostic.range),
+						range: DocHelper.untrimRange(doc, diagnostic.range.sure()),
 						newText: ""
 					}
 				]),
