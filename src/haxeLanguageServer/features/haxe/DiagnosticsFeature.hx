@@ -220,7 +220,7 @@ class DiagnosticsFeature {
 					message: hxDiag.kind.getMessage(doc, hxDiag.args, range),
 					data: {kind: hxDiag.kind},
 					relatedInformation: hxDiag.relatedInformation?.map(rel -> {
-						location: {
+						location: rel.location == null ? null : {
 							uri: rel.location.file.toUri(),
 							range: rel.location.range,
 						},
