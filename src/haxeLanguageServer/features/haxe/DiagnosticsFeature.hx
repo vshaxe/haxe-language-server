@@ -464,10 +464,14 @@ private typedef DiagnosticsMapKey = {code:Int, ?range:Range};
 
 private class DiagnosticsMap<T> extends BalancedTree<DiagnosticsMapKey, T> {
 	override function compare(k1:DiagnosticsMapKey, k2:DiagnosticsMapKey) {
-		if (k1.code != k2.code) return k1.code - k2.code;
-		if (k1.range == null && k2.range == null) return 0;
-		if (k1.range == null) return -1;
-		if (k2.range == null) return 1;
+		if (k1.code != k2.code)
+			return k1.code - k2.code;
+		if (k1.range == null && k2.range == null)
+			return 0;
+		if (k1.range == null)
+			return -1;
+		if (k2.range == null)
+			return 1;
 
 		final start1 = k1.range.start;
 		final start2 = k2.range.start;

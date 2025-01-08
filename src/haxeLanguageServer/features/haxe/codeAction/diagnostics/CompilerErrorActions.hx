@@ -51,8 +51,7 @@ class CompilerErrorActions {
 		}
 
 		if (context.haxeServer.haxeVersion.major >= 4 // unsuitable error range before Haxe 4
-			&& diagnostic.range != null
-			&& arg.contains("should be declared with 'override' since it is inherited from superclass")) {
+			&& diagnostic.range != null && arg.contains("should be declared with 'override' since it is inherited from superclass")) {
 			var pos = diagnostic.range.start;
 			final document = context.documents.getHaxe(params.textDocument.uri);
 			if (document.tokens != null) {

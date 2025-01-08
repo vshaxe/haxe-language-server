@@ -66,7 +66,8 @@ class UnresolvedIdentifierActions {
 	}
 
 	static function createTypoActions(context:Context, params:CodeActionParams, diagnostic:Diagnostic, arg):Array<CodeAction> {
-		if (diagnostic.range == null) return [];
+		if (diagnostic.range == null)
+			return [];
 
 		return [
 			{
