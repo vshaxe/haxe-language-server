@@ -29,7 +29,7 @@ class OrganizeImportActions {
 		final map = context.diagnostics.getArgumentsMap(uri);
 		final removeUnusedFixes = if (map == null) [] else [
 			for (key in map.keys()) {
-				if (key.code == DiagnosticKind.DKUnusedImport) {
+				if (key.code == DiagnosticKind.DKUnusedImport && key.range != null) {
 					WorkspaceEditHelper.removeText(DocHelper.untrimRange(doc, key.range));
 				}
 			}

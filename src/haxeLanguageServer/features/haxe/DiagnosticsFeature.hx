@@ -394,7 +394,7 @@ class DiagnosticsFeature {
 		}
 	}
 
-	public function getArguments<T>(uri:DocumentUri, kind:DiagnosticKind<T>, range:Range):Null<T> {
+	public function getArguments<T>(uri:DocumentUri, kind:DiagnosticKind<T>, range:Null<Range>):Null<T> {
 		final map = diagnosticsArguments[uri];
 		@:nullSafety(Off) // ?
 		return if (map == null) null else map.get({code: kind, range: range});
@@ -460,10 +460,19 @@ private typedef HaxeDiagnosticResponse<T> = {
 	final diagnostics:Array<HaxeDiagnostic<T>>;
 }
 
-private typedef DiagnosticsMapKey = {code:Int, range:Range};
+private typedef DiagnosticsMapKey = {code:Int, ?range:Range};
 
 private class DiagnosticsMap<T> extends BalancedTree<DiagnosticsMapKey, T> {
 	override function compare(k1:DiagnosticsMapKey, k2:DiagnosticsMapKey) {
+		if (k1.code != k2.code)
+			return k1.code - k2.code;
+		if (k1.range == null && k2.range == null)
+			return 0;
+		if (k1.range == null)
+			return -1;
+		if (k2.range == null)
+			return 1;
+
 		final start1 = k1.range.start;
 		final start2 = k2.range.start;
 		final end1 = k1.range.end;
@@ -471,8 +480,7 @@ private class DiagnosticsMap<T> extends BalancedTree<DiagnosticsMapKey, T> {
 		inline function compare(i1, i2, e) {
 			return i1 < i2 ? -1 : i1 > i2 ? 1 : e;
 		}
-		return compare(k1.code, k2.code,
-			compare(start1.line, start2.line,
-				compare(start1.character, start2.character, compare(end1.line, end2.line, compare(end1.character, end2.character, 0)))));
+		return compare(start1.line, start2.line,
+			compare(start1.character, start2.character, compare(end1.line, end2.line, compare(end1.character, end2.character, 0))));
 	}
 }

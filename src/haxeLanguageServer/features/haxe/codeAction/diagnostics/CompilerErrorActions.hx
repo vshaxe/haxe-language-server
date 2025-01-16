@@ -13,10 +13,10 @@ class CompilerErrorActions {
 			return actions;
 		}
 		final suggestionsRe = ~/\(Suggestions?: (.*)\)/;
-		if (suggestionsRe.match(arg)) {
+		if (suggestionsRe.match(arg) && diagnostic.range != null) {
 			final suggestions = suggestionsRe.matched(1).split(",");
 			// Haxe reports the entire expression, not just the field position, so we have to be a bit creative here.
-			final range = diagnostic.range;
+			final range = diagnostic.range.sure();
 			final fieldRe = ~/has no field ([^ ]+) /;
 			if (fieldRe.match(arg)) {
 				range.start.character = range.end.character - fieldRe.matched(1).length;
@@ -34,7 +34,7 @@ class CompilerErrorActions {
 		}
 
 		final invalidPackageRe = ~/Invalid package : ([\w.]*) should be ([\w.]*)/;
-		if (invalidPackageRe.match(arg)) {
+		if (invalidPackageRe.match(arg) && diagnostic.range != null) {
 			final is = invalidPackageRe.matched(1);
 			final shouldBe = invalidPackageRe.matched(2);
 			final document = context.documents.getHaxe(params.textDocument.uri);
@@ -43,7 +43,7 @@ class CompilerErrorActions {
 				actions.push({
 					title: "Change to " + replacement,
 					kind: CodeActionKind.QuickFix + ".auto",
-					edit: WorkspaceEditHelper.create(context, params, [{range: diagnostic.range, newText: replacement}]),
+					edit: WorkspaceEditHelper.create(context, params, [{range: diagnostic.range.sure(), newText: replacement}]),
 					diagnostics: [diagnostic],
 					isPreferred: true
 				});
@@ -51,7 +51,7 @@ class CompilerErrorActions {
 		}
 
 		if (context.haxeServer.haxeVersion.major >= 4 // unsuitable error range before Haxe 4
-			&& arg.contains("should be declared with 'override' since it is inherited from superclass")) {
+			&& diagnostic.range != null && arg.contains("should be declared with 'override' since it is inherited from superclass")) {
 			var pos = diagnostic.range.start;
 			final document = context.documents.getHaxe(params.textDocument.uri);
 			if (document.tokens != null) {

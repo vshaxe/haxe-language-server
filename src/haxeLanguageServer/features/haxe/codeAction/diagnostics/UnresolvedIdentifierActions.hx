@@ -26,7 +26,7 @@ class UnresolvedIdentifierActions {
 
 	static function createUnresolvedImportActions(context:Context, params:CodeActionParams, diagnostic:Diagnostic, arg, importCount:Int):Array<CodeAction> {
 		final doc = context.documents.getHaxe(params.textDocument.uri);
-		if (doc == null) {
+		if (doc == null || diagnostic.range == null) {
 			return [];
 		}
 		final preferredStyle = context.config.user.codeGeneration.imports.style;
@@ -55,7 +55,7 @@ class UnresolvedIdentifierActions {
 			kind: QuickFix,
 			edit: WorkspaceEditHelper.create(context, params, [
 				{
-					range: diagnostic.range,
+					range: diagnostic.range.sure(),
 					newText: arg.name
 				}
 			]),
@@ -66,11 +66,14 @@ class UnresolvedIdentifierActions {
 	}
 
 	static function createTypoActions(context:Context, params:CodeActionParams, diagnostic:Diagnostic, arg):Array<CodeAction> {
+		if (diagnostic.range == null)
+			return [];
+
 		return [
 			{
 				title: "Change to " + arg.name,
 				kind: QuickFix,
-				edit: WorkspaceEditHelper.create(context, params, [{range: diagnostic.range, newText: arg.name}]),
+				edit: WorkspaceEditHelper.create(context, params, [{range: diagnostic.range.sure(), newText: arg.name}]),
 				diagnostics: [diagnostic]
 			}
 		];

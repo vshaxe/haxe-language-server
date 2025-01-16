@@ -46,7 +46,7 @@ class PostfixCompletion {
 		}
 
 		final type = subject.item.type;
-		if (type == null) {
+		if (type == null || subject.range == null) {
 			return [];
 		}
 		final type = type.removeNulls().type;
