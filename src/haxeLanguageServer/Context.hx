@@ -22,6 +22,7 @@ import haxeLanguageServer.features.haxe.GotoDefinitionFeature;
 import haxeLanguageServer.features.haxe.GotoImplementationFeature;
 import haxeLanguageServer.features.haxe.GotoTypeDefinitionFeature;
 import haxeLanguageServer.features.haxe.InlayHintFeature;
+import haxeLanguageServer.features.haxe.InlineValueFeature;
 import haxeLanguageServer.features.haxe.RefactorFeature;
 import haxeLanguageServer.features.haxe.RenameFeature;
 import haxeLanguageServer.features.haxe.SignatureHelpFeature;
@@ -42,6 +43,7 @@ import languageServerProtocol.protocol.ColorProvider.DocumentColorRequest;
 import languageServerProtocol.protocol.FoldingRange.FoldingRangeRequest;
 import languageServerProtocol.protocol.Implementation;
 import languageServerProtocol.protocol.InlayHints;
+import languageServerProtocol.protocol.InlineValue.InlineValueRequest;
 import languageServerProtocol.protocol.Messages.ProtocolRequestType;
 import languageServerProtocol.protocol.Progress;
 import languageServerProtocol.protocol.TypeDefinition.TypeDefinitionRequest;
@@ -302,6 +304,12 @@ class Context {
 			capabilities.inlayHintProvider = true;
 		}
 
+		if (textDocument?.inlineValue?.dynamicRegistration == true) {
+			register(InlineValueRequest.type, haxeSelector);
+		} else {
+			capabilities.inlineValueProvider = true;
+		}
+
 		resolve({capabilities: capabilities});
 		languageServerProtocol.sendRequest(RegistrationRequest.type, {registrations: registrations}, null, _ -> {}, error -> trace(error));
 	}
@@ -385,6 +393,7 @@ class Context {
 				new CodeActionFeature(this);
 				new CodeLensFeature(this);
 				new WorkspaceSymbolsFeature(this);
+				new InlineValueFeature(this, refactorCache);
 
 				for (doc in documents) {
 					publishDiagnostics(doc.uri);
