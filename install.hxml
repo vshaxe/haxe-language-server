@@ -6,10 +6,10 @@
 -lib test-adapter:3.0.0
 -lib utest:git:https://github.com/haxe-utest/utest#bdb5fec4b8e77d9a3c079d9cfb108f29f153721a
 -lib hxnodejs:git:https://github.com/HaxeFoundation/hxnodejs#504066d
--lib tokentree:1.2.17
+-lib tokentree:1.2.18
 -lib language-server-protocol:git:https://github.com/vshaxe/language-server-protocol-haxe#deec0e4e2b1ca334a4ce4c43a4fb47e819f43729
 -lib hxjsonast:1.1.0
 -lib vscode-json-rpc:git:https://github.com/vshaxe/vscode-json-rpc#0160f06bc9df1dd0547f2edf23753540db74ed5b
--lib rename:3.0.0
+-lib rename:3.0.1
 -lib vshaxe-build:git:https://github.com/vshaxe/vshaxe-build#39ab9c6315ae76080e5399391c8fa561daec6d55
 -lib safety:1.1.2
