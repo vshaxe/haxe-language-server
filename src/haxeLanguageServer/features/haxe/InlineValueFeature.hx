@@ -9,6 +9,7 @@ import jsonrpc.Types.NoData;
 import languageServerProtocol.Types.InlineValue;
 import languageServerProtocol.protocol.InlineValue;
 import refactor.discover.Identifier;
+import refactor.discover.IdentifierPos;
 
 class InlineValueFeature {
 	final context:Context;
@@ -40,13 +41,48 @@ class InlineValueFeature {
 		var editDoc = new EditDoc(params.textDocument.uri.toFsPath(), new EditList(), context, converter);
 
 		var localScopedNames:Array<String> = [];
+		var outOfScope:Array<Identifier> = [];
+		var functionStartLine:Int = params.context.stoppedLocation.start.line;
 
 		function matchLocalScoped(identifier:Identifier):Bool {
+			switch (identifier.name) {
+				case "this" | "super":
+					return false;
+				default:
+			}
 			return switch (identifier.type) {
 				case ScopedLocal(scopeStart, scopeEnd, scopeType):
+					var pos:IdentifierPos = {
+						fileName: identifier.pos.fileName,
+						start: scopeStart,
+						end: scopeEnd
+					};
+					var range = editDoc.posToRange(pos);
+					if (!range.contains(params.context.stoppedLocation)) {
+						outOfScope.push(identifier);
+						return false;
+					}
 					localScopedNames.push(identifier.name);
 					true;
-				case Access: true;
+				case Access:
+					for (scoped in outOfScope) {
+						switch (scoped.type) {
+							case ScopedLocal(scopeStart, scopeEnd, scopeType):
+								if ((scoped.name == identifier.name) || identifier.name.startsWith('${scoped.name}.')) {
+									if (scopeStart <= identifier.pos.start && scopeEnd >= identifier.pos.end) {
+										return false;
+									}
+								}
+							default:
+						}
+					}
+					true;
+				case Method(_):
+					var functionRange:Range = editDoc.posToRange(identifier.pos);
+					if (functionRange.start.line <= params.context.stoppedLocation.start.line) {
+						functionStartLine = functionRange.start.line;
+					}
+					false;
 				default: false;
 			}
 		}
@@ -54,7 +90,13 @@ class InlineValueFeature {
 		final inlineValueVars:Array<InlineValue> = [];
 		for (identifier in identifiers) {
 			var identifierRange = editDoc.posToRange(identifier.pos);
+			if (identifierRange.start.line < functionStartLine) {
+				continue;
+			}
 			if (!params.range.contains(identifierRange)) {
+				continue;
+			}
+			if (params.context.stoppedLocation.end.line < identifierRange.start.line) {
 				continue;
 			}
 			var needsExpression:Bool = identifier.name.contains(".");
