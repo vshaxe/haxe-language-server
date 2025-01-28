@@ -10,6 +10,8 @@ import languageServerProtocol.Types.InlineValue;
 import languageServerProtocol.protocol.InlineValue;
 import refactor.discover.Identifier;
 import refactor.discover.IdentifierPos;
+import refactor.discover.Type;
+import tokentree.utils.TokenTreeCheckUtils;
 
 class InlineValueFeature {
 	final context:Context;
@@ -99,7 +101,15 @@ class InlineValueFeature {
 			if (params.context.stoppedLocation.end.line < identifierRange.start.line) {
 				continue;
 			}
+			if (isSharpCondition(params, identifier)) {
+				continue;
+			}
 			var needsExpression:Bool = identifier.name.contains(".");
+			if (!needsExpression) {
+				if (skipIdentifier(identifier)) {
+					continue;
+				}
+			}
 			if ((identifier.type == Access) && !localScopedNames.contains(identifier.name)) {
 				needsExpression = true;
 			}
@@ -119,5 +129,61 @@ class InlineValueFeature {
 		}
 
 		resolve(inlineValueVars);
+	}
+
+	function isSharpCondition(params:InlineValueParams, identifier:Identifier):Bool {
+		final doc:Null<HaxeDocument> = context.documents.getHaxe(params.textDocument.uri);
+		final token = doc?.tokens?.getTokenAtOffset(identifier.pos.start);
+
+		if (token == null) {
+			return false;
+		}
+		var parent = token.parent;
+		while (parent != null) {
+			switch (parent.tok) {
+				case Dot:
+				case Const(CIdent(_)):
+				case POpen:
+					switch (TokenTreeCheckUtils.getPOpenType(parent)) {
+						case SwitchCondition:
+							return true;
+						default:
+							return false;
+					}
+				case Unop(_):
+				case Sharp("if") | Sharp("elseif"):
+					return true;
+				default:
+					return false;
+			}
+			parent = parent.parent;
+		}
+
+		return false;
+	}
+
+	function skipIdentifier(identifier:Identifier):Bool {
+		var types:Array<Type> = refactorCache.typeList.findTypeName(identifier.name);
+		if (identifier.defineType == null) {
+			return false;
+		}
+		final containerType = identifier.defineType;
+		for (type in types) {
+			switch (containerType.file.importsModule(type.file.getPackage(), type.file.getMainModulName(), identifier.name)) {
+				case None:
+				case ImportedWithAlias(_):
+				case Global | ParentPackage | SamePackage | Imported | StarImported:
+					return true;
+			}
+		}
+		var allUses:Array<Identifier> = refactorCache.nameMap.getIdentifiers(identifier.name);
+		for (use in allUses) {
+			switch (use.type) {
+				case EnumField(_):
+					return true;
+				default:
+			}
+		}
+		return false;
 	}
 }
