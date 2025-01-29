@@ -107,28 +107,16 @@ class InlineValueFeature {
 			if (isSharpCondition(params, identifier)) {
 				continue;
 			}
-			var needsExpression:Bool = identifier.name.contains(".");
-			if (!needsExpression) {
+			var hasDot:Bool = identifier.name.contains(".");
+			if (!hasDot) {
 				if (skipIdentifier(identifier)) {
 					continue;
 				}
 			}
-			if ((identifier.type == Access) && !localScopedNames.contains(identifier.name)) {
-				needsExpression = true;
-			}
-
-			if (needsExpression) {
-				inlineValueVars.push({
-					range: identifierRange,
-					expression: identifier.name
-				});
-			} else {
-				inlineValueVars.push({
-					range: identifierRange,
-					variableName: identifier.name,
-					caseSensitiveLookup: true
-				});
-			}
+			inlineValueVars.push({
+				range: identifierRange,
+				expression: identifier.name
+			});
 		}
 
 		resolve(inlineValueVars);
@@ -162,18 +150,8 @@ class InlineValueFeature {
 	}
 
 	function skipIdentifier(identifier:Identifier):Bool {
-		var types:Array<Type> = refactorCache.typeList.findTypeName(identifier.name);
-		if (identifier.defineType == null) {
-			return false;
-		}
-		final containerType = identifier.defineType;
-		for (type in types) {
-			switch (containerType.file.importsModule(type.file.getPackage(), type.file.getMainModulName(), identifier.name)) {
-				case None:
-				case ImportedWithAlias(_):
-				case Global | ParentPackage | SamePackage | Imported | StarImported:
-					return true;
-			}
+		if (isTypeUsed(identifier.defineType, identifier.name)) {
+			return true;
 		}
 		var allUses:Array<Identifier> = refactorCache.nameMap.getIdentifiers(identifier.name);
 		for (use in allUses) {
@@ -181,6 +159,22 @@ class InlineValueFeature {
 				case EnumField(_):
 					return true;
 				default:
+			}
+		}
+		return false;
+	}
+
+	function isTypeUsed(containerType:Null<Type>, name:String):Bool {
+		if (containerType == null) {
+			return false;
+		}
+		final types:Array<Type> = refactorCache.typeList.findTypeName(name);
+		for (type in types) {
+			switch (containerType.file.importsModule(type.file.getPackage(), type.file.getMainModulName(), name)) {
+				case None:
+				case ImportedWithAlias(_):
+				case Global | ParentPackage | SamePackage | Imported | StarImported:
+					return true;
 			}
 		}
 		return false;
