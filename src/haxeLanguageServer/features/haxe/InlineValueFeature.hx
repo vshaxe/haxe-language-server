@@ -29,14 +29,17 @@ class InlineValueFeature {
 	}
 
 	function onInlineValue(params:InlineValueParams, token:CancellationToken, resolve:Array<InlineValue>->Void, reject:ResponseError<NoData>->Void) {
+		final onResolve = context.startTimer("textDocument/inlineValue");
 		if (context.config.user.disableRefactorCache || context.config.user.disableInlineValue) {
 			resolve([]);
+			onResolve();
 			return;
 		}
 
 		var file = refactorCache.fileList.getFile(params.textDocument.uri.toFsPath().toString());
 		if (file == null) {
 			reject.handler()("file not found");
+			onResolve();
 			return;
 		}
 
@@ -129,6 +132,7 @@ class InlineValueFeature {
 		}
 
 		resolve(inlineValueVars);
+		onResolve();
 	}
 
 	function isSharpCondition(params:InlineValueParams, identifier:Identifier):Bool {
@@ -144,13 +148,8 @@ class InlineValueFeature {
 				case Dot:
 				case Const(CIdent(_)):
 				case POpen:
-					switch (TokenTreeCheckUtils.getPOpenType(parent)) {
-						case SwitchCondition:
-							return true;
-						default:
-							return false;
-					}
-				case Unop(_):
+				case Unop(OpNot):
+				case Binop(OpBoolAnd) | Binop(OpBoolOr):
 				case Sharp("if") | Sharp("elseif"):
 					return true;
 				default:
