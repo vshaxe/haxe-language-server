@@ -13,6 +13,8 @@ import refactor.discover.IdentifierPos;
 import refactor.discover.Type;
 import tokentree.utils.TokenTreeCheckUtils;
 
+using tokentree.TokenTreeAccessHelper;
+
 class InlineValueFeature {
 	final context:Context;
 	final refactorCache:RefactorCache;
@@ -107,6 +109,12 @@ class InlineValueFeature {
 			if (isSharpCondition(params, identifier)) {
 				continue;
 			}
+			if (isTypeParam(params, identifier)) {
+				continue;
+			}
+			if (isLocalFunctionName(params, identifier)) {
+				continue;
+			}
 			var hasDot:Bool = identifier.name.contains(".");
 			if (!hasDot) {
 				if (skipIdentifier(identifier)) {
@@ -140,6 +148,49 @@ class InlineValueFeature {
 				case Binop(OpBoolAnd) | Binop(OpBoolOr):
 				case Sharp("if") | Sharp("elseif"):
 					return true;
+				default:
+					return false;
+			}
+			parent = parent.parent;
+		}
+
+		return false;
+	}
+
+	function isLocalFunctionName(params:InlineValueParams, identifier:Identifier):Bool {
+		final doc:Null<HaxeDocument> = context.documents.getHaxe(params.textDocument.uri);
+		final token = doc?.tokens?.getTokenAtOffset(identifier.pos.start);
+
+		if (token == null) {
+			return false;
+		}
+		switch (token.parent?.tok) {
+			case Kwd(KwdFunction):
+				return true;
+			default:
+				return false;
+		}
+	}
+
+	function isTypeParam(params:InlineValueParams, identifier:Identifier):Bool {
+		final doc:Null<HaxeDocument> = context.documents.getHaxe(params.textDocument.uri);
+		final token = doc?.tokens?.getTokenAtOffset(identifier.pos.end);
+
+		if (token == null) {
+			return false;
+		}
+		var parent = token.parent;
+		while (parent != null) {
+			switch (parent.tok) {
+				case Dot:
+				case DblDot:
+				case BrOpen:
+				case Const(CIdent(_)):
+				case Binop(OpAssign):
+				case Sharp(_):
+					return true;
+				case Binop(OpLt):
+					return parent.access().firstOf(Binop(OpGt)).exists();
 				default:
 					return false;
 			}
