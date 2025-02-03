@@ -205,7 +205,7 @@ class Configuration {
 		maxCompletionItems: 1000,
 		renameSourceFolders: ["src", "source", "Source", "test", "tests"],
 		disableRefactorCache: false,
-		disableInlineValue: false,
+		disableInlineValue: true,
 		inlayHints: {
 			variableTypes: false,
 			parameterNames: false,
