@@ -252,7 +252,17 @@ class CompletionFeature {
 			switch (mode) {
 				// the replaceRanges sent by Haxe are only trustworthy in some cases (https://github.com/HaxeFoundation/haxe/issues/8669)
 				case Metadata | Toplevel if (result.replaceRange != null):
-					replaceRange = result.replaceRange;
+					if (result.replaceRange.start.isEqual(result.replaceRange.end)) {
+						final word = wordPattern.matched(0);
+						// prevent `do<tab>` to complete into `dodownload` field
+						switch word {
+							case "in", "do", "new", "for", "try", "if", "else", "case", "cast", "enum":
+							case _:
+								replaceRange = result.replaceRange;
+						}
+					} else {
+						replaceRange = result.replaceRange;
+					}
 
 				case New | Toplevel | Implements | Extends | TypeHint | TypeRelation:
 					final pathPattern = ~/\w+(\.\w+)*$/;
