@@ -68,9 +68,15 @@ class HoverFeature {
 			case Local:
 				final languageId = if (item.args.origin == Argument) HaxeArgument else Haxe;
 				final local = printer.printLocalDefinition(hover.item.args, getType());
-				{
-					definition: printCodeBlock(local, languageId),
-					origin: printer.printLocalOrigin(item.args.origin)
+				if (item.args.origin == null) {
+					{
+						definition: printCodeBlock(local, languageId),
+					}
+				} else {
+					{
+						definition: printCodeBlock(local, languageId),
+						origin: printer.printLocalOrigin(item.args.origin)
+					}
 				}
 			case ClassField | EnumAbstractField:
 				final field = printer.printClassFieldDefinition(item.args, getType(), item.kind == EnumAbstractField);
@@ -144,8 +150,8 @@ class HoverFeature {
 								case DTValue(type):
 									if (type == null) "unknown" else type;
 							};
-							final documentation = xml.get("d");
-							final pos = HaxePosition.parse(xml.get("p"), doc, null, context.displayOffsetConverter);
+							final documentation = xml.get("d") ?? "";
+							final pos = HaxePosition.parse(documentation, doc, null, context.displayOffsetConverter);
 							var range:Null<Range> = null;
 							if (pos != null)
 								range = pos.range;

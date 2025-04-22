@@ -16,7 +16,7 @@ class HaxePosition {
 		var s = positionRe.matched(3);
 		if (s != null) { // line span
 			final startLine = Std.parseInt(s).sure();
-			final endLine = Std.parseInt(positionRe.matched(4));
+			final endLine = Std.parseInt(positionRe.matched(4)).sure();
 			return {
 				uri: if (file == doc.uri.toFsPath()) doc.uri else file.toUri(),
 				range: {

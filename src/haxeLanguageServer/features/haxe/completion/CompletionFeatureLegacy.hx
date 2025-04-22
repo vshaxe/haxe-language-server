@@ -74,8 +74,10 @@ class CompletionFeatureLegacy {
 		final result = [];
 		final timers = [];
 		for (el in x.elements()) {
-			final kind = el.get("k");
-			final type = el.get("t");
+			@:nullSafety(Off)
+			final kind:String = el.get("k");
+			@:nullSafety(Off)
+			final type:String = el.get("t");
 			final name = el.firstChild().nodeValue;
 
 			if (kind == "local" && name == "_") {
@@ -98,6 +100,7 @@ class CompletionFeatureLegacy {
 			if (kind == "global")
 				fullName = el.get("p") + "." + name;
 			else if (kind == "type")
+				@:nullSafety(Off)
 				fullName = el.get("p");
 
 			if (type != null || fullName != name) {
@@ -143,9 +146,11 @@ class CompletionFeatureLegacy {
 		final timers = [];
 		final methods = new Map<String, {item:CompletionItem, overloads:Int}>();
 		for (el in x.elements()) {
-			final rawKind = el.get("k");
+			@:nullSafety(Off)
+			final rawKind:String = el.get("k");
 			final kind = fieldKindToCompletionItemKind(rawKind);
-			var name = el.get("n");
+			@:nullSafety(Off)
+			var name:String = el.get("n");
 			if (kind == Method) {
 				final method = methods[name];
 				if (method != null) {

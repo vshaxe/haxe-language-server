@@ -42,6 +42,7 @@ abstract SymbolStack(Array<{level:SymbolLevel, symbol:DocumentSymbol}>) {
 		return this[0].symbol;
 
 	public function new() {
+		@:nullSafety(Off)
 		this = [
 			{
 				level: Root,

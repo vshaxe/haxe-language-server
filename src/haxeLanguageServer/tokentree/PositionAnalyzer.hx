@@ -96,6 +96,7 @@ class PositionAnalyzer {
 		}
 
 		if (typeToken != null) {
+			@:nullSafety(Off)
 			return Type({
 				kind: if (typeToken != null) {
 					switch typeToken.tok {
