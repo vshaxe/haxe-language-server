@@ -90,8 +90,8 @@ typedef UserConfig = {
 	var enableSignatureHelpDocumentation:Bool;
 	var diagnosticsForAllOpenFiles:Bool;
 	var diagnosticsPathFilter:String;
-	var displayHost:String;
-	var displayPort:EitherType<Int, String>;
+	var displayHost:Null<String>;
+	var displayPort:Null<EitherType<Int, String>>;
 	var buildCompletionCache:Bool;
 	var enableCompletionCacheWarning:Bool;
 	var useLegacyCompletion:Bool;

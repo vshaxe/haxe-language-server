@@ -41,9 +41,9 @@ abstract SemVer(Version) from Version {
 		if (!reVersion.match(s)) {
 			return null;
 		}
-		final major = Std.parseInt(reVersion.matched(1));
-		final minor = Std.parseInt(reVersion.matched(2));
-		final patch = Std.parseInt(reVersion.matched(3));
+		final major = Std.parseInt(reVersion.matched(1)).sure();
+		final minor = Std.parseInt(reVersion.matched(2)).sure();
+		final patch = Std.parseInt(reVersion.matched(3)).sure();
 		final pre = reVersion.matched(4);
 		final build = reVersion.matched(5);
 		return new SemVer(major, minor, patch, pre, build);

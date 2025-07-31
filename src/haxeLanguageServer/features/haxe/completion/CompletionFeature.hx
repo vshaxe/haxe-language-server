@@ -764,8 +764,11 @@ class CompletionFeature {
 			kind: if (local.origin == LocalFunction) Method else Variable,
 			detail: {
 				final type = printer.printLocalDefinition(local, item.type);
-				final origin = printer.printLocalOrigin(local.origin);
-				'$type \n($origin)';
+				final origin = local.origin != null ? printer.printLocalOrigin(local.origin) : "";
+				if (origin.length == 0)
+					type;
+				else
+					'$type \n($origin)';
 			}
 		};
 	}
