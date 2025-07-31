@@ -572,16 +572,18 @@ class Context {
 			errback:(error:String) -> Void, includeDisplayArguments:Bool = true) {
 		var actualArgs = [];
 		if (includeDisplayArguments) {
-			actualArgs = actualArgs.concat([
-				"--cwd",
-				workspacePath.toString(),
-				"-D",
-				"display-details", // get more details in completion results,
-				"--no-output", // prevent any generation
+			actualArgs = actualArgs.concat(["--cwd", workspacePath.toString(), "--no-output", // prevent any generation
 			]);
+			if (haxeServer.haxeVersion.major < 5) {
+				actualArgs = actualArgs.concat(["-D", "display-details"]); // get more details in completion results,
+			}
 		}
 		if (haxeServer.supports(HaxeMethods.Initialize) && config.user.enableServerView) {
-			actualArgs = actualArgs.concat(["--times", "-D", "macro-times"]);
+			actualArgs = actualArgs.concat([
+				"--times",
+				"-D",
+				haxeServer.haxeVersion.major < 5 ? "macro-times" : "times.macro"
+			]);
 		}
 
 		// this must be the final argument before --display to avoid issues with --next
