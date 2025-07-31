@@ -365,6 +365,9 @@ class DisplayPrinter {
 			case AccNo: "null";
 			case AccNever: "never";
 			case AccResolve: null;
+			#if (haxe_ver >= 5)
+			case AccPrivateCall: "private " + if (isRead) "get" else "set";
+			#end
 			case AccCall: if (isRead) "get" else "set";
 			case AccInline: null;
 			case AccRequire: null;
