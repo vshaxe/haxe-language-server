@@ -58,7 +58,7 @@ class TypeHelper {
 			result.addChar(")".code);
 		if (shouldPrintReturnType(ret, formatting.returnTypeHint) && !formatting.useArrowSyntax) {
 			result.addChar(":".code);
-			result.add(getTypeWithoutPackage(ret));
+			result.add(getTypeWithoutPackage(ret.sure()));
 		}
 		return result.toString();
 	}
