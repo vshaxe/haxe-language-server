@@ -21,7 +21,7 @@ jobs:
 
     - name: Cache haxelib
       id: cache-haxelib
-      uses: actions/cache@v3.0.11
+      uses: actions/cache@v3
       with:
         path: .haxelib
         key: ${{ hashFiles('./install.hxml') }}
