@@ -635,6 +635,7 @@ class DisplayPrinter {
 			case Python: "Python";
 			case Hl: "HashLink";
 			case Eval: "Eval";
+			default: '$platform'; // without default, C# is not detected correctly
 		}
 	}
 
