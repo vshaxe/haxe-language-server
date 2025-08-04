@@ -142,7 +142,9 @@ class RefactorCache {
 		final usageContext:UsageContext = makeUsageContext();
 		usageContext.fileName = uri;
 		try {
-			TraverseSources.collectIdentifierData(usageContext);
+			if (StringTools.endsWith(uri, ".hx")) {
+				TraverseSources.collectIdentifierData(usageContext);
+			}
 		} catch (e:Exception) {
 			#if debug
 			trace("failed to updateSingleFileCache: " + e);
