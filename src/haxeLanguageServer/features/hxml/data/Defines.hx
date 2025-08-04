@@ -172,6 +172,7 @@ function setDefines(defines:Array<haxe.display.Display.Define>) {
 			platforms: [for (pl in d.platforms) '$pl'],
 			params: d.parameters.length == 0 ? null : d.parameters,
 			links: d.links,
+			reserved: d.reserved.or(false),
 			origin: d.origin,
 		});
 	}
