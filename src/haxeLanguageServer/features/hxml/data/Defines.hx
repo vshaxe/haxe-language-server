@@ -153,9 +153,13 @@ private final DefineEnums:Map<String, EnumValues> = [
 	]
 ];
 
-var allDefines:Null<Array<DefineData>>;
+private var allDefines:Null<Array<DefineData>>;
 
-function setDefines(defines:Array<haxe.display.Display.Define>) {
+function setDefines(defines:Null<Array<haxe.display.Display.Define>>) {
+	if (defines == null) {
+		allDefines = null;
+		return;
+	}
 	function defToName(define:String) {
 		var parts = define.replace("-", "_").split("_");
 		for (i in 0...parts.length) {

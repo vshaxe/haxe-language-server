@@ -333,6 +333,7 @@ class Context {
 		displayOffsetConverter = DisplayOffsetConverter.create(haxeServer.haxeVersion);
 		handleRegistration(DisplayMethods.GotoTypeDefinition, TypeDefinitionRequest.type, {documentSelector: haxeSelector});
 		handleRegistration(DisplayMethods.GotoImplementation, ImplementationRequest.type, {documentSelector: haxeSelector});
+		haxeLanguageServer.features.hxml.data.Defines.setDefines(null);
 		if (haxeServer.haxeVersion.major >= 5) {
 			callHaxeMethod(DisplayMethods.Defines, {compiler: true, user: true}, null, function(defines) {
 				haxeLanguageServer.features.hxml.data.Defines.setDefines(defines);
