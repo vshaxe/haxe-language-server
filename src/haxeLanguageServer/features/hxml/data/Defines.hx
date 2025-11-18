@@ -346,8 +346,38 @@ private final DefineEnums:Map<String, EnumValues> = [
 	"MessageLogFormat" => [{name: "classic"}, {name: "pretty"}, {name: "indent"}],
 ];
 
+private var allDefines:Null<Array<DefineData>>;
+
+function setDefines(defines:Null<Array<haxe.display.Display.Define>>) {
+	if (defines == null) {
+		allDefines = null;
+		return;
+	}
+	function defToName(define:String) {
+		var parts = define.replace("-", "_").split("_");
+		for (i in 0...parts.length) {
+			parts[i] = parts[i].capitalize();
+		}
+		return parts.join("");
+	}
+	allDefines = [];
+	for (d in defines) {
+		allDefines.push({
+			name: defToName(d.name),
+			define: d.name,
+			doc: d.doc.or(""),
+			platforms: [for (pl in d.platforms) '$pl'],
+			params: d.parameters.length == 0 ? null : d.parameters,
+			links: d.links,
+			reserved: d.reserved,
+			origin: d.origin,
+		});
+	}
+}
+
 function getDefines(includeReserved:Bool):ReadOnlyArray<Define> {
-	final allDefines = Defines.concat(RemovedDefines.copy());
+	if (allDefines == null)
+		allDefines = Defines.concat(RemovedDefines.copy());
 	return if (includeReserved) allDefines else allDefines.filter(define -> define.reserved != true);
 }
 
