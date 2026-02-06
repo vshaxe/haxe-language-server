@@ -431,6 +431,8 @@ class Context {
 		if (isUriSupported(uri)) {
 			activeEditor = uri;
 			documents.onDidOpenTextDocument(event);
+			if (config.user.diagnosticsOnFileOpen)
+				publishDiagnostics(uri);
 		}
 	}
 
@@ -502,6 +504,12 @@ class Context {
 		final document = documents.getHaxe(params.uri);
 		if (document == null) {
 			return;
+		}
+		// avoid running diagnostics twice when the document is initially opened (open + activate event)
+		final timeSinceOpened = haxe.Timer.stamp() - document.openTimestamp;
+		if (config.user.diagnosticsOnFileOpen && timeSinceOpened > 0.1) {
+			publishDiagnostics(params.uri);
+			invalidated.remove(activeEditor.toString());
 		}
 		updateActiveEditorPackage(activeEditor);
 	}
