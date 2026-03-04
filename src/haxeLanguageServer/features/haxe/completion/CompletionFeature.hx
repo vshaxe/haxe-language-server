@@ -67,7 +67,7 @@ class CompletionFeature {
 			explicitNull: true
 		});
 
-		legacy = new CompletionFeatureLegacy(context, contextSupport, formatDocumentation);
+		legacy = new CompletionFeatureLegacy(context, contextSupport, @:nullSafety(Off) formatDocumentation);
 	}
 
 	function checkCapabilities() {
