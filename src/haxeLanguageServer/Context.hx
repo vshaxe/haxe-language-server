@@ -83,7 +83,7 @@ class Context {
 		haxeDisplayProtocol = new Protocol(@:nullSafety(Off) writeMessage);
 		haxeServer = @:nullSafety(Off) new HaxeServer(this);
 		documents = new TextDocuments();
-		config = new Configuration(languageServerProtocol, kind -> restartServer('$kind configuration was changed'));
+		config = new Configuration(languageServerProtocol, kind -> @:nullSafety(Off) restartServer('$kind configuration was changed'));
 
 		languageServerProtocol.onRequest(InitializeRequest.type, onInitialize);
 		languageServerProtocol.onRequest(ShutdownRequest.type, onShutdown);
@@ -105,7 +105,7 @@ class Context {
 			return; // don't send cancel notifications, not supported by Haxe
 		}
 		final includeDisplayArguments = method.startsWith("display/") || method == ServerMethods.ReadClassPaths;
-		callDisplay(method, [Json.stringify(message)], token, function(result:DisplayResult) {
+		callDisplay(method, [Json.stringify(message)], null, token, function(result:DisplayResult) {
 			switch result {
 				case DResult("") if (method == DisplayMethods.Diagnostics):
 					haxeDisplayProtocol.handleMessage(({
@@ -122,15 +122,14 @@ class Context {
 				Json.parse(error);
 			} catch (_:Any) {
 				// pretend we got a proper JSON (HaxeFoundation/haxe#7955)
+				final errData:HaxeResponseErrorData = {
+					severity: Error,
+					message: error
+				}
 				final message:ResponseMessage = {
 					jsonrpc: Protocol.PROTOCOL_VERSION,
 					id: @:privateAccess haxeDisplayProtocol.nextRequestId - 1, // ew..
-					error: new ResponseError(ResponseError.InternalError, "Compiler error", ([
-						{
-							severity: Error,
-							message: error
-						}
-					] : HaxeResponseErrorData))
+					error: new ResponseError(ResponseError.InternalError, "Compiler error", [errData])
 				}
 				message;
 			});

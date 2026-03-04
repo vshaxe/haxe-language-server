@@ -46,9 +46,8 @@ class EditTestCaseMacro {
 	}
 
 	static function collectAllFileNames(path:String):Array<String> {
-		#if display
-		return [];
-		#end
+		if (Context.defined("display"))
+			return [];
 		final items:Array<String> = FileSystem.readDirectory(path);
 		var files:Array<String> = [];
 		for (item in items) {
