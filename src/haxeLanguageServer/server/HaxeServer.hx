@@ -188,7 +188,9 @@ class HaxeServer {
 		if (haxeVersion.major == 4 && haxeVersion.minor == 0 && haxeVersion.pre != null) {
 			useSocket = false;
 		}
-		if (FileSystem.exists(Path.join([context.workspacePath.toString(), ".haxerc"]))) {
+		if (haxeVersion.major >= 5) {
+			useSocket = true;
+		} else if (FileSystem.exists(Path.join([context.workspacePath.toString(), ".haxerc"]))) {
 			useSocket = false; // waiting on lix-pm/haxeshim#49
 		}
 
