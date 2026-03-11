@@ -22,7 +22,6 @@
 --debug
 
 --macro haxeLanguageServer.Init.run()
---macro Safety.safeNavigation('haxeLanguageServer')
 --macro nullSafety('haxeLanguageServer')
 
 -js bin/server.js

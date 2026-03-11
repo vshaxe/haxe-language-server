@@ -5,7 +5,7 @@
 -lib json2object:git:https://github.com/elnabo/json2object#a75859de1e966c09e73591b6c9186086c143fe60
 -lib test-adapter:3.0.0
 -lib utest:git:https://github.com/haxe-utest/utest#a055e05e2e872ae12a32b53d0200612345059c38
--lib hxnodejs:git:https://github.com/HaxeFoundation/hxnodejs#504066d
+-lib hxnodejs:git:https://github.com/HaxeFoundation/hxnodejs#ba7d9a566a79b3b36b4e1f58bc8e66306983e9e4
 -lib tokentree:1.2.18
 -lib language-server-protocol:git:https://github.com/vshaxe/language-server-protocol-haxe#20a7f976bc83ec6623cc25144c88f4c15a799586
 -lib hxjsonast:1.1.0

@@ -14,8 +14,6 @@
 -cp shared
 -cp test
 
---macro Safety.safeNavigation('haxeLanguageServer')
-
 -D analyzer-optimize
 -D js-unflatten
 -D js-es=6
