@@ -41,12 +41,12 @@ class MissingFieldsActions {
 				if (classToken == null) {
 					moduleLevelField = true;
 					final lastPos = document.content.length - 1;
-					rangeFieldInsertion = document.rangeAt(lastPos, lastPos, Utf8);
+					rangeFieldInsertion = document.rangeAt(lastPos, lastPos);
 				} else {
 					final pos = tokens.getPos(classToken);
-					rangeClass = document.rangeAt(pos.min, pos.min, Utf8);
+					rangeClass = document.rangeAt(pos.min, pos.min);
 					final pos = tokens.getTreePos(classToken);
-					rangeFieldInsertion = document.rangeAt(pos.max - 1, pos.max - 1, Utf8);
+					rangeFieldInsertion = document.rangeAt(pos.max - 1, pos.max - 1);
 				}
 			case _:
 				return [];
