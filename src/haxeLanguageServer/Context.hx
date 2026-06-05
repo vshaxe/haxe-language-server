@@ -73,6 +73,7 @@ class Context {
 
 	var activeEditor:Null<DocumentUri>;
 	var initialized = false;
+	var isInitializing = false;
 	var progressId = 0;
 
 	var invalidated = new Map<String, Bool>();
@@ -384,6 +385,9 @@ class Context {
 		serverRecording.restartServer(reason, this);
 
 		if (!initialized) {
+			if (isInitializing)
+				return;
+			isInitializing = true;
 			haxeServer.start(function() {
 				onServerStarted();
 
@@ -407,6 +411,7 @@ class Context {
 					publishDiagnostics(doc.uri);
 				}
 				initialized = true;
+				isInitializing = false;
 			});
 		} else {
 			haxeServer.restart(reason, function() {
