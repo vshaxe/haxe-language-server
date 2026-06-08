@@ -19,15 +19,26 @@ class TokenTreeManager {
 	}
 
 	static function createTokens(bytes:Bytes):Array<Token> {
+		final tokens = [];
 		try {
-			final tokens = [];
 			final lexer = new HaxeLexer(ByteData.ofBytes(bytes));
-			var t:Token = lexer.token(haxeparser.HaxeLexer.tok);
+			var t:Token = lexer.token(HaxeLexer.tok);
 			while (t.tok != Eof) {
 				tokens.push(t);
-				t = lexer.token(haxeparser.HaxeLexer.tok);
+				t = lexer.token(HaxeLexer.tok);
 			}
 			return tokens;
+		} catch (e:LexerError) {
+			// generate block comment from unclosed block comment to detect it in completion
+			switch e.msg {
+				case UnclosedComment:
+					final start = e.pos.min;
+					final text = bytes.getString(start + 2, bytes.length - (start + 2));
+					tokens.push(new Token(Comment(text), {file: e.pos.file, min: start, max: bytes.length}));
+					return tokens;
+				case _:
+					throw 'failed to create tokens: $e';
+			}
 		} catch (e) {
 			throw 'failed to create tokens: $e';
 		}
