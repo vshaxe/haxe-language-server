@@ -2,7 +2,7 @@
 	"name": "@vshaxe/haxe-language-server",
 	"version": "2.34.2",
 	"devDependencies": {
-		"lix": "^15.12.4",
+		"lix": "^17.0.0",
 		"terser": "^5.15.0"
 	},
 	"scripts": {
