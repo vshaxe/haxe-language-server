@@ -103,7 +103,6 @@ class ExpectedTypeCompletion {
 					case _:
 				}
 			case TAnonymous:
-				// TODO: support @:structInit
 				final anon = concreteType.args;
 				final singleLine = data.mode.kind == Pattern;
 				final allFields = printer.printObjectLiteral(anon, singleLine, false, true);
