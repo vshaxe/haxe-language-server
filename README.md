@@ -53,12 +53,12 @@ There's a large amount of language client plugins for (Neo)vim, but the best cho
 
 ### Usage with Kate
 
-Go to configure Kate (`Ctrl+Shift+,`) » `LSP Client` » `User Server Settings` » Add the following snippet to the JSON config within the `servers` object. Don't forget to change the path to the LSP server.
+Go to configure Kate (`Ctrl+Shift+,`) » `LSP Client` » `User Server Settings` » Add the following snippet to the JSON config within the `servers` object. Don't forget to change the path to the LSP server and hxml file name.
 
 ```json
 "haxe": {
     "command": ["node", "<path-to-server.js>"],
-    "rootIndicationFileNames": ["*.hx", "*.hxml"],
+    "rootIndicationFilePatterns": ["*.hxml"],
     "url": "https://github.com/vshaxe/haxe-language-server",
     "initializationOptions": {"displayArguments": ["build.hxml"]},
     "settings": {"haxe": {"buildCompletionCache": true}},
