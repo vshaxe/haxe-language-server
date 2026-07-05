@@ -407,8 +407,10 @@ class Context {
 				new WorkspaceSymbolsFeature(this);
 				new InlineValueFeature(this, refactorCache);
 
-				for (doc in documents) {
-					publishDiagnostics(doc.uri);
+				if (!config.user.buildCompletionCache) {
+					for (doc in documents) {
+						publishDiagnostics(doc.uri);
+					}
 				}
 				initialized = true;
 				isInitializing = false;
@@ -417,7 +419,7 @@ class Context {
 			haxeServer.restart(reason, function() {
 				onServerStarted();
 				refactorCache.initClassPaths();
-				if (activeEditor != null) {
+				if (!config.user.buildCompletionCache && activeEditor != null) {
 					publishDiagnostics(activeEditor);
 				}
 			});
@@ -433,7 +435,8 @@ class Context {
 		if (isUriSupported(uri)) {
 			activeEditor = uri;
 			documents.onDidOpenTextDocument(event);
-			publishDiagnostics(uri);
+			if (config.user.diagnosticsOnFileOpen)
+				publishDiagnostics(uri);
 		}
 	}
 
@@ -508,7 +511,7 @@ class Context {
 		}
 		// avoid running diagnostics twice when the document is initially opened (open + activate event)
 		final timeSinceOpened = haxe.Timer.stamp() - document.openTimestamp;
-		if (timeSinceOpened > 0.1) {
+		if (config.user.diagnosticsOnFileOpen && timeSinceOpened > 0.1) {
 			publishDiagnostics(params.uri);
 			invalidated.remove(activeEditor.toString());
 		}
