@@ -18,7 +18,7 @@ class IdentifierHelperTest extends Test {
 		Assert.equals("inline_", quoteFieldName("inline_"));
 	}
 
-		function testGuessName() {
+	function testGuessName() {
 		function assert(expected, original, ?posInfos)
 			Assert.equals(expected, guessName(original), posInfos);
 
