@@ -11,7 +11,14 @@ class IdentifierHelperTest extends Test {
 		check(["b1", "b2"], ["b", "b"]);
 	}
 
-	function testGuessName() {
+	function testQuoteFieldName() {
+		Assert.equals('"inline"', quoteFieldName("inline"));
+		Assert.equals('"class"', quoteFieldName("class"));
+		Assert.equals("block", quoteFieldName("block"));
+		Assert.equals("inline_", quoteFieldName("inline_"));
+	}
+
+		function testGuessName() {
 		function assert(expected, original, ?posInfos)
 			Assert.equals(expected, guessName(original), posInfos);
 
