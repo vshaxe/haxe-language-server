@@ -11,6 +11,7 @@ class TestMain {
 	static function main() {
 		final cases = [
 			new ArrayHelperTest(),
+			new haxeLanguageServer.features.CompletionFeatureTest(),
 			new IdentifierHelperTest(),
 			new ImportHelperTest(),
 			new PathHelperTest(),

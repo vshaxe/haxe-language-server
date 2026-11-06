@@ -4,6 +4,59 @@ import String.fromCharCode;
 import haxeLanguageServer.helper.TypeHelper.DisplayFunctionArgument;
 
 class IdentifierHelper {
+	static final keywords = [
+		"abstract",
+		"break",
+		"case",
+		"cast",
+		"catch",
+		"class",
+		"continue",
+		"default",
+		"do",
+		"dynamic",
+		"else",
+		"enum",
+		"extends",
+		"extern",
+		"false",
+		"final",
+		"for",
+		"function",
+		"if",
+		"implements",
+		"import",
+		"in",
+		"inline",
+		"interface",
+		"macro",
+		"new",
+		"null",
+		"operator",
+		"overload",
+		"override",
+		"package",
+		"private",
+		"public",
+		"return",
+		"static",
+		"switch",
+		"this",
+		"throw",
+		"true",
+		"try",
+		"typedef",
+		"untyped",
+		"using",
+		"var",
+		"while"
+	];
+
+	/** Structure fields named like Haxe keywords must be written in their quoted form (`o."inline"`). **/
+	public static function quoteFieldName(name:String):String {
+		return keywords.contains(name) ? '"$name"' : name;
+	}
+
 	public static function guessNames(args:Array<DisplayFunctionArgument>):Array<String> {
 		return avoidDuplicates([for (arg in args) if (arg.name != null) arg.name else guessName(arg.type)]);
 	}

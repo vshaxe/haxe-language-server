@@ -5,6 +5,7 @@ import haxe.display.Display;
 import haxe.display.JsonModuleTypes;
 import haxe.extern.EitherType;
 import haxeLanguageServer.helper.DocHelper;
+import haxeLanguageServer.helper.IdentifierHelper;
 import haxeLanguageServer.helper.ImportHelper;
 import haxeLanguageServer.helper.SemVer;
 import haxeLanguageServer.helper.Set;
@@ -451,16 +452,20 @@ class CompletionFeature {
 			textEdit: {
 				newText: {
 					final qualifier = if (resolution.isQualified) "" else resolution.qualifier + ".";
+					final name = IdentifierHelper.quoteFieldName(field.name);
 					qualifier + switch data.mode.kind {
-						case StructureField: maybeInsert(field.name, ": ", data.lineAfter);
-						case Pattern: maybeInsert(field.name, ":", data.lineAfter);
-						case _: field.name;
+						case StructureField: maybeInsert(name, ": ", data.lineAfter);
+						case Pattern: maybeInsert(name, ":", data.lineAfter);
+						case _: name;
 					}
 				},
 				range: data.replaceRange
 			}
 		}
 
+		if (IdentifierHelper.quoteFieldName(field.name) != field.name) {
+			item.filterText = field.name;
+		}
 		switch data.mode.kind {
 			case StructureField:
 				if (field.meta.hasMeta(Optional)) {
